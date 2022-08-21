@@ -1,0 +1,3 @@
+keystore: dacosys
+apk key alias: dacosys_key
+password: dacosys

@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:theme="@style/Theme.AppCompat.Light">
+
+    <TextView
+        android:id="@+id/warehouseTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="2dp"
+        android:layout_marginTop="2dp"
+        android:text="@string/warehouse"
+        android:textColor="@color/darkslategray"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/descriptionAutoResizeTextView" />
+
+    <TextView
+        android:id="@+id/warehouseAreaTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="1dp"
+        android:layout_marginTop="2dp"
+        android:text="@string/area"
+        android:textColor="@color/darkslategray"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/guideline500"
+        app:layout_constraintTop_toBottomOf="@+id/descriptionAutoResizeTextView" />
+
+    <TextView
+        android:id="@+id/categoryTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="2dp"
+        android:layout_marginTop="2dp"
+        android:text="@string/category"
+        android:textColor="@color/darkslategray"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/dividerInternal1" />
+
+    <TextView
+        android:id="@+id/serialNumberTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="2dp"
+        android:layout_marginTop="2dp"
+        android:text="@string/serial_number"
+        android:textColor="@color/darkslategray"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/categoryAutoResizeTextView" />
+
+    <TextView
+        android:id="@+id/eanTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="2dp"
+        android:layout_marginTop="2dp"
+        android:text="@string/ean"
+        android:textColor="@color/darkslategray"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/guideline500"
+        app:layout_constraintTop_toBottomOf="@+id/categoryAutoResizeTextView" />
+
+    <TextView
+        android:id="@+id/manufacturerTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="2dp"
+        android:layout_marginTop="2dp"
+        android:text="@string/manufacturer"
+        android:textColor="@color/darkslategray"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/eanAutoResizeTextView" />
+
+    <TextView
+        android:id="@+id/modelTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="2dp"
+        android:layout_marginTop="2dp"
+        android:text="@string/model"
+        android:textColor="@color/darkslategray"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/guideline500"
+        app:layout_constraintTop_toBottomOf="@+id/eanAutoResizeTextView" />
+
+    <View
+        android:id="@+id/dividerInternal1"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginStart="1dp"
+        android:layout_marginEnd="1dp"
+        android:background="?android:attr/listDivider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/warehouseAutoResizeTextView" />
+
+    <View
+        android:id="@+id/dividerInternal2"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginStart="1dp"
+        android:layout_marginEnd="1dp"
+        android:background="?android:attr/listDivider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/serialNumberAutoResizeTextView" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline500"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.5" />
+
+    <com.dacosys.assetControl.views.commons.views.AutoResizeTextView
+        android:id="@+id/statusAutoResizeTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="1dp"
+        android:layout_marginEnd="2dp"
+        android:fontFamily="sans-serif-condensed"
+        android:gravity="center"
+        android:text="@string/status"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@+id/codeAutoResizeTextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/guideline500"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.dacosys.assetControl.views.commons.views.AutoResizeTextView
+        android:id="@+id/codeAutoResizeTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="2dp"
+        android:layout_marginTop="2dp"
+        android:maxLines="1"
+        android:minLines="1"
+        android:text="@string/code"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        app:autoSizeMaxTextSize="30sp"
+        app:autoSizeMinTextSize="18dp"
+        app:autoSizeStepGranularity="1sp"
+        app:autoSizeTextType="uniform"
+        app:layout_constraintEnd_toStartOf="@+id/guideline500"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.dacosys.assetControl.views.commons.views.AutoResizeTextView
+        android:id="@+id/descriptionAutoResizeTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="2dp"
+        android:maxLines="2"
+        android:minLines="1"
+        android:text="@string/description"
+        android:textSize="24sp"
+        app:autoSizeMaxTextSize="24sp"
+        app:autoSizeMinTextSize="16dp"
+        app:autoSizeStepGranularity="1sp"
+        app:autoSizeTextType="uniform"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/codeAutoResizeTextView" />
+
+    <com.dacosys.assetControl.views.commons.views.AutoResizeTextView
+        android:id="@+id/warehouseAutoResizeTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="2dp"
+        android:layout_marginEnd="1dp"
+        android:text="@string/warehouse"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toStartOf="@+id/guideline500"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/warehouseTextView" />
+
+    <com.dacosys.assetControl.views.commons.views.AutoResizeTextView
+        android:id="@+id/warehouseAreaAutoResizeTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="1dp"
+        android:layout_marginEnd="2dp"
+        android:text="@string/area"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/guideline500"
+        app:layout_constraintTop_toBottomOf="@+id/warehouseAreaTextView" />
+
+    <com.dacosys.assetControl.views.commons.views.AutoResizeTextView
+        android:id="@+id/categoryAutoResizeTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="2dp"
+        android:layout_marginEnd="2dp"
+        android:text="@string/category"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/categoryTextView" />
+
+    <com.dacosys.assetControl.views.commons.views.AutoResizeTextView
+        android:id="@+id/serialNumberAutoResizeTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="2dp"
+        android:text="@string/serial_number"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toStartOf="@+id/guideline500"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/serialNumberTextView" />
+
+    <com.dacosys.assetControl.views.commons.views.AutoResizeTextView
+        android:id="@+id/eanAutoResizeTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="2dp"
+        android:layout_marginEnd="2dp"
+        android:text="@string/ean"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/guideline500"
+        app:layout_constraintTop_toBottomOf="@+id/eanTextView" />
+
+    <com.dacosys.assetControl.views.commons.views.AutoResizeTextView
+        android:id="@+id/manufacturerAutoResizeTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="2dp"
+        android:text="@string/manufacturer"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toStartOf="@+id/guideline500"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/manufacturerTextView" />
+
+    <com.dacosys.assetControl.views.commons.views.AutoResizeTextView
+        android:id="@+id/modelAutoResizeTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="2dp"
+        android:layout_marginEnd="2dp"
+        android:text="@string/model"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="@+id/guideline500"
+        app:layout_constraintTop_toBottomOf="@+id/modelTextView" />
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,989 @@
+package com.dacosys.assetControl.views.main
+
+import android.Manifest
+import android.annotation.SuppressLint
+import android.content.Context
+import android.content.DialogInterface
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.content.res.ColorStateList
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.StateListDrawable
+import android.os.Build
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.text.InputType
+import android.util.Log
+import android.view.*
+import android.view.View.GONE
+import android.view.View.TEXT_ALIGNMENT_VIEW_START
+import android.view.inputmethod.EditorInfo
+import android.widget.Button
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.content.res.AppCompatResources
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.BlendModeColorFilterCompat
+import androidx.core.graphics.BlendModeCompat
+import androidx.core.splashscreen.SplashScreen
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.dacosys.assetControl.R
+import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.Statics.Companion.OFFLINE_MODE
+import com.dacosys.assetControl.utils.Statics.Companion.beginDataBaseHelper
+import com.dacosys.assetControl.utils.Statics.Companion.prefsGetString
+import com.dacosys.assetControl.databinding.HomeActivityBinding
+import com.dacosys.assetControl.utils.configuration.Preference
+import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.mainButton.MainButton
+import com.dacosys.assetControl.utils.scannedCode.ScannedCode
+import com.dacosys.assetControl.utils.scanners.JotterListener
+import com.dacosys.assetControl.utils.scanners.Scanner
+import com.dacosys.assetControl.model.assets.asset.dbHelper.AssetDbHelper
+import com.dacosys.assetControl.model.locations.warehouseArea.`object`.WarehouseArea
+import com.dacosys.assetControl.model.permissions.PermissionEntry
+import com.dacosys.assetControl.model.reviews.assetReview.`object`.AssetReview
+import com.dacosys.assetControl.model.users.user.`object`.User
+import com.dacosys.assetControl.sync.functions.ProgressStatus
+import com.dacosys.assetControl.sync.functions.Sync
+import com.dacosys.assetControl.sync.functions.SyncDownload
+import com.dacosys.assetControl.sync.functions.SyncRegistryType
+import com.dacosys.assetControl.views.assets.assetManteinance.activities.AssetManteinanceSelectActivity
+import com.dacosys.assetControl.views.codeCheck.CodeCheckActivity
+import com.dacosys.assetControl.views.commons.activities.CRUDActivity
+import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
+import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
+import com.dacosys.assetControl.views.movements.activities.WarehouseMovementContentActivity
+import com.dacosys.assetControl.views.print.activities.PrintLabelActivity
+import com.dacosys.assetControl.views.reviews.activities.AssetReviewContentActivity
+import com.dacosys.assetControl.views.reviews.activities.AssetReviewSelectActivity
+import com.dacosys.assetControl.views.routes.activities.DataCollectionRuleTargetActivity
+import com.dacosys.assetControl.views.routes.activities.RouteSelectActivity
+import com.dacosys.assetControl.views.sync.activities.SyncActivity
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
+import me.weishu.reflection.Reflection
+import org.parceler.Parcels
+import java.lang.ref.WeakReference
+import java.lang.reflect.Field
+import kotlin.concurrent.thread
+import kotlin.math.ceil
+
+
+class HomeActivity :
+    AppCompatActivity(),
+    Scanner.ScannerListener,
+    Sync.Companion.SyncTaskProgress,
+    Statics.SessionCreated {
+    override fun attachBaseContext(base: Context) {
+        super.attachBaseContext(base)
+        Reflection.unseal(base)
+    }
+
+    override fun onSessionCreated(result: Boolean) {
+        if (!result) {
+            makeText(binding.root, getString(R.string.offline_mode), SnackbarType.INFO)
+        }
+    }
+
+    override fun onDestroy() {
+        destroyLocals()
+        super.onDestroy()
+    }
+
+    private fun destroyLocals() {
+        Sync.stopTimer()
+        if (isTaskRoot && isFinishing) {
+            finishAfterTransition()
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray,
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (permissions.contains(Manifest.permission.BLUETOOTH_CONNECT))
+            JotterListener.onRequestPermissionsResult(this, requestCode, permissions, grantResults)
+    }
+
+    override fun scannerCompleted(scanCode: String) {
+        JotterListener.lockScanner(this, true)
+        JotterListener.hideWindow(this)
+
+        try {
+            // Nada que hacer, volver
+            if (scanCode.trim().isEmpty()) {
+                val res = getString(R.string.invalid_code)
+                makeText(binding.root, res, SnackbarType.ERROR)
+                ErrorLog.writeLog(this, this::class.java.simpleName, res)
+                return
+            }
+
+            val sc = ScannedCode(this).getFromCode(
+                code = scanCode,
+                searchWarehouseAreaId = true,
+                searchAssetCode = false,
+                searchAssetSerial = false,
+                validateId = true
+            )
+
+            val warehouseArea = if (sc.warehouseArea != null) {
+                sc.warehouseArea
+            } else {
+                val res = getString(R.string.invalid_warehouse_area_code)
+                makeText(binding.root, res, SnackbarType.ERROR)
+                null
+            }
+
+            if (warehouseArea != null) {
+                beginAssetReview(warehouseArea)
+            }
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+            makeText(binding.root, ex.message.toString(), SnackbarType.ERROR)
+            ErrorLog.writeLog(this, this::class.java.simpleName, ex)
+        } finally {
+            // Unless is blocked, unlock the partial
+            JotterListener.lockScanner(this, false)
+        }
+    }
+
+    private var rejectNewInstances = false
+    private var isReturnedFromSettings = false
+
+    override fun onResume() {
+        super.onResume()
+
+        thread { Sync.startTimer(WeakReference(this), WeakReference(this)) }
+
+        JotterListener.lockScanner(this, false)
+        rejectNewInstances = false
+
+        // Parece que las actividades de tipo Setting no devuelven resultados
+        // así que de esta manera puedo volver a llenar el fragmento de usuarios
+        if (isReturnedFromSettings) {
+            isReturnedFromSettings = false
+
+            // Vamos a reconstruir el scanner por si cambió la configuración
+            JotterListener.autodetectDeviceModel(this)
+
+            Statics.setupImageControl()
+
+            // Todavía no está loggeado
+            if (Statics.currentUserId == null) {
+                login()
+            }
+        }
+    }
+
+    @SuppressLint("SetTextI18n")
+    @Throws(PackageManager.NameNotFoundException::class)
+    private fun initActivity() {
+        setupHeaderPanel()
+        setupSyncPanel()
+        setupButtons()
+    }
+
+    override fun onBackPressed() {
+        Statics.currentUserId = null
+
+        if (isTaskRoot
+            && supportFragmentManager.primaryNavigationFragment
+                ?.childFragmentManager?.backStackEntryCount == 0
+            && supportFragmentManager.backStackEntryCount == 0
+        ) {
+            finishAfterTransition()
+        } else {
+            super.onBackPressed()
+        }
+    }
+
+    public override fun onPause() {
+        super.onPause()
+        Sync.stopTimer()
+    }
+
+    private fun clickButton(clickedButton: Button) {
+        when (MainButton.getById(clickedButton.tag.toString().toLong())) {
+            MainButton.AssetReview -> {
+                if (!Statics.deviceDateIsValid(binding.root)) {
+                    return
+                }
+                if (!User.hasPermission(PermissionEntry.AddAssetReview)) {
+                    makeText(
+                        binding.root,
+                        getString(R.string.you_do_not_have_permission_to_make_revisions),
+                        SnackbarType.ERROR
+                    )
+                    return
+                }
+
+                if (!rejectNewInstances) {
+                    rejectNewInstances = true
+
+                    val intent = Intent(baseContext, AssetReviewSelectActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    startActivity(intent)
+                }
+            }
+            MainButton.SendAndDownload -> {
+                if (!Statics.deviceDateIsValid(binding.root)) {
+                    return
+                }
+                if (!rejectNewInstances) {
+                    rejectNewInstances = true
+
+                    val intent = Intent(baseContext, SyncActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    startActivity(intent)
+                }
+            }
+            MainButton.AssetMovement -> {
+                if (!Statics.deviceDateIsValid(binding.root)) {
+                    return
+                }
+                if (!User.hasPermission(PermissionEntry.AddWarehouseMovement)) {
+                    makeText(
+                        binding.root,
+                        getString(R.string.you_do_not_have_permission_to_move_assets),
+                        SnackbarType.ERROR
+                    )
+                    return
+                }
+
+                if (!rejectNewInstances) {
+                    rejectNewInstances = true
+
+                    val intent = Intent(baseContext, WarehouseMovementContentActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    startActivity(intent)
+                }
+            }
+            MainButton.CheckCode -> {
+                if (!Statics.deviceDateIsValid(binding.root)) {
+                    return
+                }
+                if (!rejectNewInstances) {
+                    rejectNewInstances = true
+
+                    val intent = Intent(baseContext, CodeCheckActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    startActivity(intent)
+                }
+            }
+            MainButton.PrintLabel -> {
+                if (!Statics.deviceDateIsValid(binding.root)) {
+                    return
+                }
+                if (!User.hasPermission(PermissionEntry.PrintLabel)) {
+                    makeText(
+                        binding.root,
+                        getString(R.string.you_do_not_have_permission_to_print_labels),
+                        SnackbarType.ERROR
+                    )
+                    return
+                }
+
+                if (!rejectNewInstances) {
+                    rejectNewInstances = true
+
+                    val intent = Intent(baseContext, PrintLabelActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    startActivity(intent)
+                }
+            }
+            MainButton.CRUD -> {
+                if (!Statics.deviceDateIsValid(binding.root)) {
+                    return
+                }
+                if (!rejectNewInstances) {
+                    rejectNewInstances = true
+
+                    val intent = Intent(baseContext, CRUDActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    startActivity(intent)
+                }
+            }
+            MainButton.AssetManteinance -> {
+                if (!Statics.deviceDateIsValid(binding.root)) {
+                    return
+                }
+                if (!rejectNewInstances) {
+                    rejectNewInstances = true
+
+                    val intent = Intent(baseContext, AssetManteinanceSelectActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    startActivity(intent)
+                }
+            }
+            MainButton.Route -> {
+                if (!Statics.deviceDateIsValid(binding.root)) {
+                    return
+                }
+
+                if (!rejectNewInstances) {
+                    rejectNewInstances = true
+
+                    val intent = Intent(baseContext, RouteSelectActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    startActivity(intent)
+                }
+            }
+            MainButton.DataCollection -> {
+                if (!Statics.deviceDateIsValid(binding.root)) {
+                    return
+                }
+                if (!rejectNewInstances) {
+                    rejectNewInstances = true
+
+                    val intent = Intent(baseContext, DataCollectionRuleTargetActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    startActivity(intent)
+                }
+            }
+            MainButton.Configuration -> {
+                configApp()
+            }
+        }
+    }
+
+    private fun configApp() {
+        val realPass = prefsGetString(Preference.confPassword)
+        if (realPass.isEmpty()) {
+            attemptEnterConfig(realPass)
+            return
+        }
+
+        var alertDialog: AlertDialog? = null
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle(getString(R.string.enter_password))
+
+        val inputLayout = TextInputLayout(this)
+        inputLayout.endIconMode = TextInputLayout.END_ICON_PASSWORD_TOGGLE
+
+        val input = TextInputEditText(this)
+        input.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+        input.isFocusable = true
+        input.isFocusableInTouchMode = true
+        input.setOnKeyListener { _, keyCode, keyEvent ->
+            if (keyCode == EditorInfo.IME_ACTION_DONE ||
+                (keyEvent.action == KeyEvent.ACTION_UP &&
+                        (keyCode == KeyEvent.KEYCODE_ENTER ||
+                                keyCode == KeyEvent.KEYCODE_DPAD_CENTER))
+            ) {
+                if (alertDialog != null) {
+                    alertDialog!!.getButton(DialogInterface.BUTTON_POSITIVE).performClick()
+                }
+            }
+            false
+        }
+
+        inputLayout.addView(input)
+        builder.setView(inputLayout)
+        builder.setPositiveButton(R.string.accept) { _, _ ->
+            attemptEnterConfig(input.text.toString())
+        }
+        builder.setNegativeButton(R.string.cancel, null)
+        alertDialog = builder.create()
+
+        alertDialog.window?.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
+        alertDialog.window?.clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
+        alertDialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
+        alertDialog.show()
+        input.requestFocus()
+    }
+
+    private fun attemptEnterConfig(password: String) {
+        val realPass = prefsGetString(Preference.confPassword)
+        if (password == realPass) {
+            Statics.setDebugConfigValues()
+
+            if (!rejectNewInstances) {
+                rejectNewInstances = true
+
+                val intent = Intent(baseContext, SettingsActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+                startActivity(intent)
+            }
+            isReturnedFromSettings = true
+        } else {
+            makeText(
+                binding.root,
+                getString(R.string.invalid_password),
+                SnackbarType.ERROR
+            )
+        }
+    }
+
+    private lateinit var splashScreen: SplashScreen
+    private lateinit var binding: HomeActivityBinding
+
+    private fun createSplashScreen() {
+        // Set up 'core-splashscreen' to handle the splash screen in a backward compatible manner.
+        splashScreen = installSplashScreen()
+        return
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        createSplashScreen()
+        super.onCreate(savedInstanceState)
+        Statics.setScreenRotation(this)
+        binding = HomeActivityBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        beginDataBaseHelper()
+
+        initActivity()
+
+        if (Statics.wsUrl.isEmpty() || Statics.wsNamespace.isEmpty()) {
+            makeText(
+                binding.root,
+                getString(R.string.webservice_is_not_configured),
+                SnackbarType.ERROR
+            )
+            setupInitConfig()
+        } else {
+            // ¿Ya está loggeado?
+            // Evitar hacer un nuevo login cuando se hace la rotación de la pantalla
+            if (Statics.currentUserId == null) {
+                login()
+            }
+        }
+    }
+
+    private fun setupInitConfig() {
+        if (!rejectNewInstances) {
+            rejectNewInstances = true
+
+            val intent = Intent(this, InitConfigActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+            resultForInitConfig.launch(intent)
+        }
+    }
+
+    private val resultForInitConfig =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            try {
+                if (Statics.wsUrl.isEmpty() || Statics.wsNamespace.isEmpty()) {
+                    makeText(
+                        binding.root,
+                        getString(R.string.webservice_is_not_configured),
+                        SnackbarType.ERROR
+                    )
+                    setupInitConfig()
+                } else {
+                    login()
+                }
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+                ErrorLog.writeLog(this, this::class.java.simpleName, ex)
+            } finally {
+                rejectNewInstances = false
+                JotterListener.lockScanner(this, false)
+            }
+        }
+
+    private fun login() {
+        ///////////// LOGIN /////////////
+        if (!rejectNewInstances) {
+            rejectNewInstances = true
+
+            val intent = Intent(this, LoginActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+            resultForLogin.launch(intent)
+        }
+    }
+
+    private val resultForLogin =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            try {
+                initActivity()
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+                ErrorLog.writeLog(this, this::class.java.simpleName, ex)
+            } finally {
+                rejectNewInstances = false
+                JotterListener.lockScanner(this, false)
+            }
+        }
+    //region HEADER PANELS
+
+    private fun setupHeaderPanel() {
+        /// USUARIO
+        if (Statics.currentUserId != null) {
+            val user = User(Statics.currentUserId ?: return, false)
+            binding.userTextView.text = user.name
+        }
+
+        /// VERSION
+        val pInfo = packageManager.getPackageInfo(packageName, 0)
+        binding.versionTextView.text =
+            String.format("%s %s", getString(R.string.app_milestone), pInfo.versionName)
+        binding.installationCodeTextView.text = Statics.installationCode
+        binding.packageTextView.text = Statics.clientPackage
+        when {
+            Statics.clientPackage.isEmpty() -> binding.packageTextView.visibility = GONE
+            else -> binding.packageTextView.visibility = View.VISIBLE
+        }
+
+        /// IMAGEN DE CABECERA
+        binding.imageView2.setImageResource(0)
+
+        var draw = ContextCompat.getDrawable(this, R.drawable.ac)
+        draw = resize(draw ?: return)
+        binding.imageView2.setImageDrawable(draw)
+    }
+
+    private fun resize(image: Drawable): Drawable {
+        val bitmap = (image as BitmapDrawable).bitmap
+        val bitmapResized = Bitmap.createScaledBitmap(
+            bitmap,
+            (bitmap.width * 0.5).toInt(), (bitmap.height * 0.5).toInt(), false
+        )
+        return BitmapDrawable(resources, bitmapResized)
+    }
+    //endregion
+
+    //region SYNC PANELS
+
+    override fun onSyncTaskProgress(
+        totalTask: Int,
+        completedTask: Int,
+        msg: String,
+        registryType: SyncRegistryType?,
+        progressStatus: ProgressStatus,
+    ) {
+        when (progressStatus) {
+            ProgressStatus.bigStarting,
+            ProgressStatus.starting,
+            ProgressStatus.running,
+            -> runOnUiThread {
+                setSyncTextView(msg)
+            }
+            ProgressStatus.bigCrashed,
+            ProgressStatus.bigFinished,
+            ProgressStatus.canceled,
+            -> {
+                Handler(Looper.getMainLooper()).postDelayed({
+                    run {
+                        setSyncStatusBarVisibility(View.INVISIBLE)
+                    }
+                }, 500)
+            }
+        }
+    }
+
+    private var textSyncing = false
+    private fun setSyncTextView(msg: String) {
+        if (msg.isEmpty() || textSyncing) return
+        textSyncing = true
+        Log.i(this::class.java.simpleName, msg)
+        runOnUiThread {
+            binding.syncTextView.text = msg
+            setSyncStatusBarVisibility(View.VISIBLE)
+        }
+        textSyncing = false
+    }
+
+    private var statusBarVisibilityChanging = false
+    private fun setSyncStatusBarVisibility(visibility: Int) {
+        if (statusBarVisibilityChanging) return
+        statusBarVisibilityChanging = true
+
+        runOnUiThread {
+            if (binding.syncStatusLayout.visibility != visibility) {
+                binding.syncStatusLayout.visibility = visibility
+
+                binding.syncStatusLayout.invalidate()
+                binding.syncStatusLayout.requestLayout()
+            }
+        }
+
+        statusBarVisibilityChanging = false
+    }
+
+    private fun setupSyncPanel() {
+        binding.syncStatusLayout.visibility = GONE
+    }
+    //endregion
+
+    //region BOTONES
+
+    @SuppressLint("ClickableViewAccessibility")
+    private fun setupButton(button: Button) {
+        button.setOnClickListener {
+            try {
+                clickButton(button)
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+                makeText(
+                    binding.root,
+                    "${getString(R.string.exception_error)}: " + ex.message,
+                    SnackbarType.ERROR
+                )
+            }
+        }
+        button.setOnTouchListener(View.OnTouchListener { view, motionEvent ->
+            touchButton(motionEvent, view as Button)
+            return@OnTouchListener true
+        })
+    }
+
+    private fun touchButton(motionEvent: MotionEvent, button: Button) {
+        when (motionEvent.action) {
+            MotionEvent.ACTION_UP -> {
+                button.isPressed = false
+                button.performClick()
+            }
+            MotionEvent.ACTION_DOWN -> {
+                button.isPressed = true
+            }
+        }
+    }
+
+    @SuppressLint("DiscouragedPrivateApi") /// El campo mGradientState no es parte de la SDK
+    private fun setupButtons() {
+        val rowCollection: ArrayList<ConstraintLayout> = ArrayList()
+        rowCollection.add(binding.rowButton1)
+        rowCollection.add(binding.rowButton2)
+        rowCollection.add(binding.rowButton3)
+        rowCollection.add(binding.rowButton4)
+        rowCollection.add(binding.rowButton5)
+        rowCollection.add(binding.rowButton6)
+        rowCollection.add(binding.rowButton7)
+
+        val buttonCollection: ArrayList<Button> = ArrayList()
+        buttonCollection.add(binding.mainButton1)
+        buttonCollection.add(binding.mainButton2)
+        buttonCollection.add(binding.mainButton3)
+        buttonCollection.add(binding.mainButton4)
+        buttonCollection.add(binding.mainButton5)
+        buttonCollection.add(binding.mainButton6)
+        buttonCollection.add(binding.mainButton7)
+        buttonCollection.add(binding.mainButton8)
+        buttonCollection.add(binding.mainButton9)
+        buttonCollection.add(binding.mainButton10)
+        buttonCollection.add(binding.mainButton11)
+        buttonCollection.add(binding.mainButton12)
+        buttonCollection.add(binding.mainButton13)
+
+        val t = MainButton.getAllMain()
+        val allButtonMain: ArrayList<MainButton> = ArrayList()
+
+        for (b in t) {
+            // Omitir el botón de mantenimientos
+            if (b.mainButtonId == MainButton.AssetManteinance.mainButtonId && !Statics.prefsGetBoolean(
+                    Preference.useAssetControlManteinance
+                )
+            ) {
+                continue
+            }
+
+            if (User.hasPermission(b.permissionEntry ?: return)) {
+                allButtonMain.add(b)
+            }
+        }
+
+        for (i in buttonCollection.indices) {
+            val b = buttonCollection[i]
+            if (i < allButtonMain.count()) {
+                val backColor: Int =
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                        ((b.background as StateListDrawable).current as GradientDrawable).color?.defaultColor
+                            ?: R.color.white
+                    } else {
+                        // Use reflection below API level 23
+                        try {
+                            val drawable =
+                                (b.background as StateListDrawable).current as GradientDrawable
+                            var field: Field =
+                                drawable.javaClass.getDeclaredField("mGradientState")
+                            field.isAccessible = true
+                            val myObj = field.get(drawable)
+                            if (myObj == null)
+                                R.color.white
+                            else {
+                                field = myObj.javaClass.getDeclaredField("mSolidColors")
+                                field.isAccessible = true
+                                (field.get(myObj) as ColorStateList).defaultColor
+                            }
+                        } catch (e: NoSuchFieldException) {
+                            e.printStackTrace()
+                            R.color.white
+                        } catch (e: IllegalAccessException) {
+                            e.printStackTrace()
+                            R.color.white
+                        }
+                    }
+
+                val textColor =
+                    Statics.getBestContrastColor("#" + Integer.toHexString(backColor))
+
+                b.setTextColor(textColor)
+                b.visibility = View.VISIBLE
+                b.tag = allButtonMain[i].mainButtonId
+                b.text = allButtonMain[i].description
+                b.textAlignment = TEXT_ALIGNMENT_VIEW_START
+
+                if (allButtonMain[i].iconResource != null) {
+                    b.setCompoundDrawablesWithIntrinsicBounds(
+                        AppCompatResources.getDrawable(
+                            this,
+                            allButtonMain[i].iconResource!!
+                        ),
+                        null,
+                        null,
+                        null
+                    )
+                    b.compoundDrawables
+                        .filterNotNull()
+                        .forEach {
+                            it.colorFilter =
+                                BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
+                                    ResourcesCompat.getColor(
+                                        Statics.AssetControl.getContext().resources,
+                                        R.color.white,
+                                        null
+                                    ),
+                                    BlendModeCompat.SRC_IN
+                                )
+                        }
+                }
+                b.compoundDrawablePadding = 25
+            } else {
+                b.visibility = GONE
+            }
+        }
+
+        val visibleRows = ceil((allButtonMain.size / 2).toDouble()).toInt()
+        for (i in rowCollection.indices) {
+            if (i < visibleRows) {
+                rowCollection[i].visibility = View.VISIBLE
+            } else {
+                rowCollection[i].visibility = GONE
+            }
+        }
+
+        val backColor: Int =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                ((binding.mainButton13.background as StateListDrawable).current as GradientDrawable).color?.defaultColor
+                    ?: R.color.white
+            } else {
+                // Use reflection below API level 23
+                try {
+                    val drawable =
+                        (binding.mainButton13.background as StateListDrawable).current as GradientDrawable
+                    var field: Field =
+                        drawable.javaClass.getDeclaredField("mGradientState")
+                    field.isAccessible = true
+                    val myObj = field.get(drawable)
+                    if (myObj == null)
+                        R.color.white
+                    else {
+                        field = myObj.javaClass.getDeclaredField("mSolidColors")
+                        field.isAccessible = true
+                        (field.get(myObj) as ColorStateList).defaultColor
+                    }
+                } catch (e: NoSuchFieldException) {
+                    e.printStackTrace()
+                    R.color.white
+                } catch (e: IllegalAccessException) {
+                    e.printStackTrace()
+                    R.color.white
+                }
+            }
+
+        val textColor = Statics.getBestContrastColor("#" + Integer.toHexString(backColor))
+
+        binding.mainButton13.tag = MainButton.Configuration.mainButtonId
+        binding.mainButton13.text = MainButton.Configuration.description
+        binding.mainButton13.textAlignment = TEXT_ALIGNMENT_VIEW_START
+        binding.mainButton13.setTextColor(textColor)
+        binding.mainButton13.setCompoundDrawablesWithIntrinsicBounds(
+            AppCompatResources.getDrawable(this, MainButton.Configuration.iconResource!!),
+            null,
+            null,
+            null
+        )
+        binding.mainButton13.compoundDrawablePadding = 25
+        binding.mainButton13.visibility = View.VISIBLE
+        binding.mainButton13.isEnabled =
+            User.hasPermission(MainButton.Configuration.permissionEntry ?: return)
+
+        for (a in buttonCollection) {
+            setupButton(a)
+        }
+    }
+    //endregion
+
+    private fun beginAssetReview(warehouseArea: WarehouseArea) {
+        makeText(binding.root, warehouseArea.description, SnackbarType.INFO)
+
+        // Contar la cantidad activos del área
+        // Si es mayor a 1000, pedir que divida el área para poder hacer revisiones
+        val qty = AssetDbHelper().countAssets(warehouseArea.warehouseAreaId)
+        if (qty > 1000) {
+            makeText(
+                binding.root,
+                getString(
+                    R.string.there_are_x_assets_in_the_selected_area_divide_the_area_into_units_of_up_to_1000_assets_to_be_able_to_make_revisions,
+                    qty.toString()
+                ),
+                SnackbarType.ERROR
+            )
+        } else {
+            // Agregar un AssetReview del área
+            val ar = AssetReview.add(warehouseArea)
+            if (ar != null) {
+                if (!rejectNewInstances) {
+                    rejectNewInstances = true
+
+                    val intent = Intent(baseContext, AssetReviewContentActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    intent.putExtra("isNew", true)
+                    intent.putExtra("assetReview", Parcels.wrap(ar))
+                    resultForReviewSuccess.launch(intent)
+                }
+            }
+        }
+    }
+
+    private val resultForReviewSuccess =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            rejectNewInstances = false
+        }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        menuInflater.inflate(R.menu.menu_main, menu)
+
+        if (!Statics.prefsGetBoolean(Preference.showConfButton)) {
+            menu.removeItem(menu.findItem(R.id.action_settings).itemId)
+        }
+
+        if (!Statics.isRfidRequired()) {
+            menu.removeItem(menu.findItem(R.id.action_rfid_connect).itemId)
+        }
+
+        return true
+    }
+
+    private fun syncDownload() {
+        try {
+            if (OFFLINE_MODE || !Statics.isOnline()) {
+                makeText(
+                    binding.root,
+                    getString(R.string.offline_mode),
+                    SnackbarType.INFO
+                )
+                return
+            }
+
+            thread {
+                val syncDownload = SyncDownload()
+                syncDownload.addParams(WeakReference(this), WeakReference(this))
+                syncDownload.execute()
+            }
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+            makeText(
+                binding.root,
+                "${
+                    Statics.AssetControl.getContext().getString(R.string.error)
+                }: ${ex.message}",
+                SnackbarType.ERROR
+            )
+            ErrorLog.writeLog(this, this::class.java.simpleName, ex)
+        }
+    }
+
+    private fun forceSync() {
+        try {
+            if (SyncDownload.resetSyncDates()) {
+                syncDownload()
+            } else {
+                makeText(
+                    binding.root,
+                    Statics.AssetControl.getContext()
+                        .getString(R.string.error_restarting_sync_dates),
+                    SnackbarType.ERROR
+                )
+            }
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+            makeText(
+                binding.root,
+                "${
+                    Statics.AssetControl.getContext().getString(R.string.error)
+                }: ${ex.message}",
+                SnackbarType.ERROR
+            )
+            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
+        }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+
+        when (item.itemId) {
+            R.id.home, android.R.id.home -> {
+                onBackPressed()
+                return true
+            }
+            R.id.action_settings -> {
+                if (User.hasPermission(MainButton.Configuration.permissionEntry!!)) {
+                    configApp()
+                } else {
+                    makeText(
+                        binding.root,
+                        getString(R.string.you_do_not_have_access_to_the_configuration),
+                        SnackbarType.ERROR
+                    )
+                }
+                return true
+            }
+            R.id.action_sync_now -> {
+                syncDownload()
+                return true
+            }
+            R.id.action_initial_sync -> {
+                forceSync()
+                return true
+            }
+            R.id.action_rfid_connect -> {
+                JotterListener.rfidStart(this)
+                return super.onOptionsItemSelected(item)
+            }
+            R.id.action_trigger_scan -> {
+                JotterListener.trigger(this)
+                return super.onOptionsItemSelected(item)
+            }
+            R.id.action_read_barcode -> {
+                JotterListener.toggleCameraFloatingWindowVisibility(this)
+                return super.onOptionsItemSelected(item)
+            }
+            else -> {
+                return super.onOptionsItemSelected(item)
+            }
+        }
+    }
+
+    companion object {
+        fun equals(a: Any?, b: Any): Boolean {
+            return a != null && a == b
+        }
+    }
+}

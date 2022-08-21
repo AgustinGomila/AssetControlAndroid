@@ -1,0 +1,114 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:key="pref_asset_control_mant"
+    android:title="@string/pref_header_asset_control_mant_conf">
+    <SwitchPreference
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:defaultValue="false"
+        android:icon="@drawable/ic_assetmaintenance"
+        android:key="use_asset_control_maintenance"
+        android:summary="@string/use_asset_control_maintenance_summary"
+        android:title="@string/use_asset_control_maintenance" />
+    <PreferenceCategory android:title="@string/connection">
+        <Preference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:icon="@drawable/ic_network_check"
+            android:key="ac_mant_test"
+            android:title="@string/test" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Webservice de AssetControl Maintenance">
+        <EditTextPreference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:icon="@drawable/ic_server"
+            android:inputType="textVisiblePassword"
+            android:key="ac_mant_ws_server"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/server" />
+        <EditTextPreference
+            android:icon="@drawable/ic_namespace"
+            android:inputType="textVisiblePassword"
+            android:key="ac_mant_ws_namespace"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/namespace" />
+        <EditTextPreference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:icon="@drawable/ic_user_ac_mant"
+            android:inputType="textVisiblePassword"
+            android:key="ac_mant_ws_user"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/webservice_user" />
+        <EditTextPreference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:icon="@drawable/ic_password"
+            android:inputType="textVisiblePassword"
+            android:key="ac_mant_ws_pass"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/webservice_password" />
+        <EditTextPreference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:icon="@drawable/ic_user_ac"
+            android:inputType="textVisiblePassword"
+            android:key="ac_mant_user"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/user" />
+        <EditTextPreference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:icon="@drawable/ic_password"
+            android:inputType="textVisiblePassword"
+            android:key="ac_mant_pass"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/password" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/proxy">
+        <SwitchPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_proxy"
+            android:key="ac_mant_ws_use_proxy"
+            android:title="@string/use_proxy" />
+        <EditTextPreference
+            android:icon="@drawable/ic_cloud"
+            android:inputType="textVisiblePassword"
+            android:key="ac_mant_ws_proxy"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/proxy" />
+        <EditTextPreference
+            android:icon="@drawable/ic_port"
+            android:inputType="number"
+            android:key="ac_mant_ws_proxy_port"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/port" />
+        <EditTextPreference
+            android:icon="@drawable/ic_user"
+            android:inputType="textVisiblePassword"
+            android:key="ac_mant_ws_proxy_user"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/user" />
+        <EditTextPreference
+            android:icon="@drawable/ic_password"
+            android:inputType="number"
+            android:key="ac_mant_ws_proxy_pass"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/password" />
+    </PreferenceCategory>
+</PreferenceScreen>

@@ -1,0 +1,81 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:key="pref_general"
+    android:title="@string/general_configuration">
+    <PreferenceCategory android:title="@string/auto_configuration">
+        <Preference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:icon="@drawable/ic_qrcode"
+            android:key="ac_qr_code"
+            android:title="@string/generate_configuration_qr_code" />
+        <Preference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:icon="@drawable/ic_qrcode_scan"
+            android:key="scan_config_code"
+            android:summary="@string/if_you_have_a_configuration_barcode_you_can_capture_it_here"
+            android:title="@string/capture_configuration_barcode" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/error_registry">
+        <SwitchPreference
+            android:defaultValue="true"
+            android:icon="@drawable/ic_error"
+            android:key="conf_general_registry_error"
+            android:summary="@string/save_occurred_errors_in_a_file"
+            android:title="@string/error_registry" />
+        <Preference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:icon="@drawable/ic_delete"
+            android:key="remove_log_files"
+            android:title="@string/remove_old_error_registries" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/program_options">
+        <SwitchPreference
+            android:layout_height="wrap_content"
+            android:defaultValue="true"
+            android:icon="@drawable/ic_screen_lock_rotation"
+            android:key="allow_screen_rotation"
+            android:summary="@string/change_the_screen_orientation_when_rotating_the_device"
+            android:title="@string/allow_screen_rotation" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/reviews">
+        <SwitchPreference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:defaultValue="false"
+            android:icon="@drawable/ic_quick_reviews"
+            android:key="conf_general_quick_review"
+            android:summary="@string/allows_to_mark_assets_in_a_revision_by_clicking_on_the_list"
+            android:title="@string/allow_quick_reviews" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_sign"
+            android:key="conf_general_sign_rev_mov"
+            android:title="@string/sign_reviews_and_movements" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/data_collection">
+        <EditTextPreference
+            android:icon="@drawable/ic_filter_route"
+            android:key="filter_route_description"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/filter_routes_by_description" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/access_to_configuration">
+        <SwitchPreference
+            android:defaultValue="true"
+            android:icon="@drawable/ic_visibility"
+            android:key="conf_general_show_conf_button"
+            android:summary="@string/show_configuration_button_summary"
+            android:title="@string/show_configuration_button" />
+        <EditTextPreference
+            android:defaultValue="9876"
+            android:icon="@drawable/ic_password"
+            android:key="conf_password"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:summary="@string/access_password_to_the_application_configuration"
+            android:title="@string/configuration_password" />
+    </PreferenceCategory>
+</PreferenceScreen>
