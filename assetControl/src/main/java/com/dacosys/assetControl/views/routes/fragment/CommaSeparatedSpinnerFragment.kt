@@ -8,8 +8,8 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R.layout.custom_spinner_comma_separated_item
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.databinding.FragmentSpinnerBinding
+import com.dacosys.assetControl.utils.Statics
 
 /**
  * A simple [Fragment] subclass.
@@ -104,6 +104,9 @@ class CommaSeparatedSpinnerFragment : Fragment() {
     private fun setValues() {
         commaSeparatedOptions = _tempCommaSeparatedOptions
         isEnabled = _tempIsEnabled
+
+        // Llenar el binding.fragmentSpinner
+        fillAdapter()
     }
 
     private fun destroyLocals() {
@@ -114,9 +117,6 @@ class CommaSeparatedSpinnerFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-
-        // Llenar el binding.fragmentSpinner
-        fillAdapter()
 
         if (activity is OnItemSelectedListener) {
             itemSelectedListener = activity as OnItemSelectedListener

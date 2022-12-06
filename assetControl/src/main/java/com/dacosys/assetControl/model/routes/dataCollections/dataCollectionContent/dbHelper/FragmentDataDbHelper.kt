@@ -4,13 +4,13 @@ import android.database.Cursor
 import android.database.SQLException
 import android.util.Log
 import com.dacosys.assetControl.dataBase.StaticDbHelper
-import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.splitList
 import com.dacosys.assetControl.model.routes.dataCollections.dataCollectionContent.dbHelper.FragmentDataContract.FragmentDataEntry.Companion.ATTRIBUTE_COMPOSITION_TYPE_ID
 import com.dacosys.assetControl.model.routes.dataCollections.dataCollectionContent.dbHelper.FragmentDataContract.FragmentDataEntry.Companion.DATA_COLLECTION_RULE_CONTENT_ID
 import com.dacosys.assetControl.model.routes.dataCollections.dataCollectionContent.dbHelper.FragmentDataContract.FragmentDataEntry.Companion.IS_ENABLED
 import com.dacosys.assetControl.model.routes.dataCollections.dataCollectionContent.dbHelper.FragmentDataContract.FragmentDataEntry.Companion.TABLE_NAME
 import com.dacosys.assetControl.model.routes.dataCollections.dataCollectionContent.dbHelper.FragmentDataContract.FragmentDataEntry.Companion.VALUE_STR
+import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.splitList
 import com.dacosys.assetControl.views.routes.fragment.GeneralFragment
 
 class FragmentDataDbHelper {

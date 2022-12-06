@@ -8,10 +8,10 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R.layout.custom_spinner_dropdown_item
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.databinding.FragmentSpinnerBinding
 import com.dacosys.assetControl.model.assets.units.unitType.UnitType
 import com.dacosys.assetControl.model.assets.units.unitTypeCategory.UnitTypeCategory
+import com.dacosys.assetControl.utils.Statics
 import org.parceler.Parcels
 
 /**
@@ -111,13 +111,13 @@ class UnitTypeSpinnerFragment : Fragment() {
 
     private fun setValues() {
         isEnabled = _tempIsEnabled
+
+        // Llenar el binding.fragmentSpinner
+        fillAdapter()
     }
 
     override fun onStart() {
         super.onStart()
-
-        // Llenar el binding.fragmentSpinner
-        fillAdapter()
 
         if (activity is OnItemSelectedListener) {
             itemSelectedListener = activity as OnItemSelectedListener

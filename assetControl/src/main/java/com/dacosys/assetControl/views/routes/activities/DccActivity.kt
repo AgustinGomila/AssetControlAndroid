@@ -25,15 +25,7 @@ import androidx.transition.ChangeBounds
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.databinding.DataCollectionContentActivityBinding
-import com.dacosys.assetControl.utils.UTCDataTime
-import com.dacosys.assetControl.utils.configuration.Preference
-import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.scanners.JotterListener
-import com.dacosys.assetControl.utils.scanners.Scanner
-import com.dacosys.assetControl.utils.scanners.nfc.Nfc
-import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.model.assets.asset.`object`.Asset
 import com.dacosys.assetControl.model.assets.attributes.attributeComposition.`object`.AttributeComposition
 import com.dacosys.assetControl.model.assets.attributes.attributeComposition.dbHelper.AttributeCompositionDbHelper
@@ -56,6 +48,14 @@ import com.dacosys.assetControl.model.routes.routeProcess.`object`.RouteProcess
 import com.dacosys.assetControl.model.routes.routeProcessContent.`object`.RouteProcessContent
 import com.dacosys.assetControl.model.table.Table
 import com.dacosys.assetControl.model.users.user.`object`.User
+import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.UTCDataTime
+import com.dacosys.assetControl.utils.configuration.Preference
+import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.scanners.JotterListener
+import com.dacosys.assetControl.utils.scanners.Scanner
+import com.dacosys.assetControl.utils.scanners.nfc.Nfc
+import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
 import com.dacosys.assetControl.views.routes.fragment.*
@@ -520,8 +520,6 @@ class DccActivity : AppCompatActivity(),
                         AttributeCompositionType.getById(tempAttrCompTypeId) ?: continue
 
                     y.attributeCompositionType = attrCompType
-                    y.lastValue =
-                        GeneralFragment.convertStringToTypedAttr(attrCompType, fd.valueStr)
                     y.valueStr = fd.valueStr
                 }
                 y.isEnabled = fd.isEnabled
@@ -556,8 +554,6 @@ class DccActivity : AppCompatActivity(),
                     val attrCompType = attrComp.attributeCompositionType ?: continue
 
                     y.attributeCompositionType = attrCompType
-                    y.lastValue = GeneralFragment.convertStringToTypedAttr(attrCompType,
-                        attrComp.defaultValue)
                     y.valueStr = attrComp.defaultValue
                 }
                 y.isEnabled = true
@@ -1588,11 +1584,6 @@ class DccActivity : AppCompatActivity(),
         }
 
         fillControl(level = currentLevel, position = currentPos)
-
-        // El Listener del currentFragment se destruye luego
-        // del cambio de orientación de la pantalla y necesitamos
-        // volver a activar/desactivar el fragmento.
-        currentFragment?.setFragmentEnables(currentFragment?.isEnabled ?: false)
 
         setImageControlFragment()
     }
