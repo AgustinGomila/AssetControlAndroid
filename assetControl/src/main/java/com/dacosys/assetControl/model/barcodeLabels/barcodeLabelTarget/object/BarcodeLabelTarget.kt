@@ -3,8 +3,8 @@ package com.dacosys.assetControl.model.barcodeLabels.barcodeLabelTarget.`object`
 import android.content.ContentValues
 import android.os.Parcel
 import android.os.Parcelable
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.model.barcodeLabels.barcodeLabelTarget.dbHelper.BarcodeLabelTargetContract
 import java.util.*
 
@@ -61,11 +61,11 @@ class BarcodeLabelTarget : Parcelable {
             return arrayOfNulls(size)
         }
 
-        var None = BarcodeLabelTarget(0, Statics.AssetControl.getContext().getString(R.string.none))
+        var None = BarcodeLabelTarget(0, getContext().getString(R.string.none))
         var Asset =
-            BarcodeLabelTarget(1, Statics.AssetControl.getContext().getString(R.string.asset))
+            BarcodeLabelTarget(1, getContext().getString(R.string.asset))
         var WarehouseArea =
-            BarcodeLabelTarget(2, Statics.AssetControl.getContext().getString(R.string.area))
+            BarcodeLabelTarget(2, getContext().getString(R.string.area))
 
         fun getAll(): ArrayList<BarcodeLabelTarget> {
             val allSections = ArrayList<BarcodeLabelTarget>()

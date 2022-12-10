@@ -27,16 +27,9 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.transition.ChangeBounds
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.databinding.AssetReviewSelectActivityBinding
-import com.dacosys.assetControl.utils.configuration.Preference
-import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.scannedCode.ScannedCode
-import com.dacosys.assetControl.utils.scanners.JotterListener
-import com.dacosys.assetControl.utils.scanners.Scanner
-import com.dacosys.assetControl.utils.scanners.nfc.Nfc
-import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.model.assets.asset.dbHelper.AssetDbHelper
 import com.dacosys.assetControl.model.locations.warehouseArea.`object`.WarehouseArea
 import com.dacosys.assetControl.model.locations.warehouseArea.dbHelper.WarehouseAreaDbHelper
@@ -46,9 +39,17 @@ import com.dacosys.assetControl.model.reviews.assetReview.dbHelper.AssetReviewDb
 import com.dacosys.assetControl.model.reviews.assetReviewContent.dbHelper.AssetReviewContentDbHelper
 import com.dacosys.assetControl.model.reviews.assetReviewStatus.`object`.AssetReviewStatus
 import com.dacosys.assetControl.model.table.Table
+import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.configuration.Preference
+import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.scanners.JotterListener
+import com.dacosys.assetControl.utils.scanners.ScannedCode
+import com.dacosys.assetControl.utils.scanners.Scanner
+import com.dacosys.assetControl.utils.scanners.nfc.Nfc
+import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType.CREATOR.ERROR
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType.CREATOR.ERROR
 import com.dacosys.assetControl.views.locations.locationSelect.LocationSelectActivity
 import com.dacosys.assetControl.views.locations.warehouseArea.fragments.WarehouseAreaSelectFilterFragment
 import com.dacosys.imageControl.dbHelper.DbCommands.Companion.deleteDocument
@@ -385,7 +386,7 @@ class AssetReviewSelectActivity : AppCompatActivity(),
                 makeText(
                     binding.root,
                     getString(R.string.the_selected_revision_has_already_been_completed_and_can_not_be_deleted),
-                    SnackbarType.INFO
+                    SnackBarType.INFO
                 )
                 return
             }
@@ -551,7 +552,7 @@ class AssetReviewSelectActivity : AppCompatActivity(),
     }
 
     private fun beginAssetReview(warehouseArea: WarehouseArea) {
-        makeText(binding.assetReviewSelect, warehouseArea.description, SnackbarType.INFO)
+        makeText(binding.assetReviewSelect, warehouseArea.description, SnackBarType.INFO)
 
         // Contar la cantidad activos del área
         // Si es mayor a 1000, pedir que divida el área para poder hacer revisiones
@@ -610,7 +611,7 @@ class AssetReviewSelectActivity : AppCompatActivity(),
         }
 
         val drawable =
-            ContextCompat.getDrawable(Statics.AssetControl.getContext(), R.drawable.ic_visibility)
+            ContextCompat.getDrawable(getContext(), R.drawable.ic_visibility)
         val toolbar = findViewById<Toolbar>(R.id.action_bar)
         toolbar.overflowIcon = drawable
 
@@ -652,7 +653,7 @@ class AssetReviewSelectActivity : AppCompatActivity(),
 
         for (i in 0 until allStatus.size) {
             val icon = ResourcesCompat.getDrawable(
-                Statics.AssetControl.getContext().resources,
+                getContext().resources,
                 R.drawable.ic_lens,
                 null
             )

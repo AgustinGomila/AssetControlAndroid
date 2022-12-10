@@ -28,6 +28,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.transition.ChangeBounds
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.databinding.AssetPrintLabelActivityTopPanelCollapsedBinding
 import com.dacosys.assetControl.model.assets.asset.`object`.Asset
@@ -40,27 +41,29 @@ import com.dacosys.assetControl.model.barcodeLabels.barcodeLabelCustom.`object`.
 import com.dacosys.assetControl.model.barcodeLabels.barcodeLabelCustom.dbHelper.BarcodeLabelCustomDbHelper
 import com.dacosys.assetControl.model.barcodeLabels.barcodeLabelTarget.`object`.BarcodeLabelTarget
 import com.dacosys.assetControl.model.locations.warehouseArea.`object`.WarehouseArea
-import com.dacosys.assetControl.sync.functions.ProgressStatus
+import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.Statics.Companion.isRfidRequired
 import com.dacosys.assetControl.utils.configuration.Preference
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.scannedCode.ScannedCode
+import com.dacosys.assetControl.utils.misc.ParcelLong
+import com.dacosys.assetControl.utils.misc.UTCDataTime
 import com.dacosys.assetControl.utils.scanners.JotterListener
+import com.dacosys.assetControl.utils.scanners.ScannedCode
 import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.utils.scanners.nfc.Nfc
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.views.assets.asset.fragments.AssetSelectFilterFragment
 import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
 import com.dacosys.assetControl.views.print.fragments.PrinterFragment
 import com.dacosys.imageControl.`object`.Images
 import com.dacosys.imageControl.`object`.StatusObject
 import com.dacosys.imageControl.activities.ImageControlCameraActivity
 import com.dacosys.imageControl.activities.ImageControlGridActivity
 import com.dacosys.imageControl.dbHelper.DbCommands
-import com.dacosys.imageControl.main.DownloadTask
 import com.dacosys.imageControl.main.GetImagesTask
+import com.dacosys.imageControl.main.ImagesTask
 import com.dacosys.imageControl.wsObject.DocumentContentObject
 import com.dacosys.imageControl.wsObject.DocumentContentRequestResultObject
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
@@ -81,9 +84,7 @@ class AssetPrintLabelActivity :
     AssetAdapter.DataSetChangedListener,
     AssetAdapter.Companion.AddPhotoRequiredListener,
     AssetAdapter.Companion.AlbumViewRequiredListener,
-    AssetAdapter.Companion.EditAssetRequiredListener,
-    GetImagesTask.GetImagesTask,
-    DownloadTask.DownloadTaskListener {
+    AssetAdapter.Companion.EditAssetRequiredListener {
     override fun onDestroy() {
         destroyLocals()
         super.onDestroy()
@@ -350,13 +351,13 @@ class AssetPrintLabelActivity :
             if (!multiSelect && asset != null) {
                 data.putParcelableArrayListExtra(
                     "ids",
-                    arrayListOf(Statics.ParcelLong(asset.assetId))
+                    arrayListOf(ParcelLong(asset.assetId))
                 )
                 setResult(RESULT_OK, data)
             } else if (multiSelect && assetIdArray != null && assetIdArray.size > 0) {
-                val parcelIdArray: ArrayList<Statics.ParcelLong> = ArrayList()
+                val parcelIdArray: ArrayList<ParcelLong> = ArrayList()
                 for (it in assetIdArray) {
-                    parcelIdArray.add(Statics.ParcelLong(it))
+                    parcelIdArray.add(ParcelLong(it))
                 }
                 data.putParcelableArrayListExtra("ids", parcelIdArray)
                 setResult(RESULT_OK, data)
@@ -673,7 +674,7 @@ class AssetPrintLabelActivity :
             // Nada que hacer, volver
             if (scanCode.trim().isEmpty()) {
                 val res = getString(R.string.invalid_code)
-                makeText(binding.root, res, SnackbarType.ERROR)
+                makeText(binding.root, res, SnackBarType.ERROR)
                 ErrorLog.writeLog(this, this::class.java.simpleName, res)
                 return
             }
@@ -690,7 +691,7 @@ class AssetPrintLabelActivity :
                 sc.asset
             } else {
                 val res = this.getString(R.string.invalid_asset_code)
-                makeText(binding.root, res, SnackbarType.ERROR)
+                makeText(binding.root, res, SnackBarType.ERROR)
                 null
             }
 
@@ -700,7 +701,7 @@ class AssetPrintLabelActivity :
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
-            makeText(binding.root, ex.message.toString(), SnackbarType.ERROR)
+            makeText(binding.root, ex.message.toString(), SnackBarType.ERROR)
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         } finally {
             // Unless is blocked, unlock the partial
@@ -729,7 +730,7 @@ class AssetPrintLabelActivity :
         }
 
         val drawable =
-            ContextCompat.getDrawable(Statics.AssetControl.getContext(), R.drawable.ic_visibility)
+            ContextCompat.getDrawable(getContext(), R.drawable.ic_visibility)
         val toolbar = findViewById<Toolbar>(R.id.action_bar)
         toolbar.overflowIcon = drawable
 
@@ -763,7 +764,7 @@ class AssetPrintLabelActivity :
 
         for (i in AssetStatus.getAll()) {
             val icon = ResourcesCompat.getDrawable(
-                Statics.AssetControl.getContext().resources,
+                getContext().resources,
                 R.drawable.ic_lens,
                 null
             )
@@ -894,7 +895,7 @@ class AssetPrintLabelActivity :
             }
             ProgressStatus.crashed -> {
                 showProgressBar(false)
-                makeText(binding.root, msg, SnackbarType.ERROR)
+                makeText(binding.root, msg, SnackBarType.ERROR)
             }
             ProgressStatus.finished -> {
                 showProgressBar(false)
@@ -984,15 +985,14 @@ class AssetPrintLabelActivity :
                 // Localmente no hay imágenes vamos a buscar en el servidor
                 val getDocs = GetImagesTask()
                 getDocs.addParams(
-                    callBack = this,
-                    callBack2 = this,
                     programId = Statics.INTERNAL_IMAGE_CONTROL_APP_ID,
                     programObjectId = tempTableId,
                     objId1 = tempObjectId,
-                    objId2 = ""
+                    objId2 = "",
+                    onImagesProgress = { onGetImages(it) }
                 )
                 getDocs.downloadFiles(false)
-                getDocs.start()
+                getDocs.execute()
             }
         }
     }
@@ -1011,7 +1011,7 @@ class AssetPrintLabelActivity :
             x.filename_original = i.filenameOriginal
             x.status_object_id = StatusObject.Waiting.statusObjectId.toInt()
             x.status_str = StatusObject.Waiting.description
-            x.status_date = com.dacosys.assetControl.utils.UTCDataTime.getUTCDateTimeAsString()
+            x.status_date = UTCDataTime.getUTCDateTimeAsString()
 
             x.user_id = Statics.currentUser()?.userId ?: 0
             x.user_str = Statics.currentUser()?.name ?: ""
@@ -1039,14 +1039,16 @@ class AssetPrintLabelActivity :
     private var tempObjectId = ""
     private var tempTableId = 0
 
-    override fun onGetImagesTaskListener(
-        status: com.dacosys.imageControl.misc.ProgressStatus,
-        msg: String,
-        docContReqResObj: DocumentContentRequestResultObject?,
-    ) {
-        if (status == com.dacosys.imageControl.misc.ProgressStatus.finished) {
+    private fun onGetImages(it: ImagesTask) {
+        if (isDestroyed || isFinishing) return
+
+        val status: ProgressStatus = ProgressStatus.getById(it.status.id) ?: ProgressStatus.unknown
+        val docContReqResObj: DocumentContentRequestResultObject? = it.docContReqResObj
+        val msg = it.msg
+
+        if (status == ProgressStatus.finished) {
             if (docContReqResObj == null) {
-                makeText(binding.root, msg, SnackbarType.INFO)
+                makeText(binding.root, msg, SnackBarType.INFO)
                 rejectNewInstances = false
                 return
             }
@@ -1054,7 +1056,7 @@ class AssetPrintLabelActivity :
             if (docContReqResObj.documentContentArray == null ||
                 (docContReqResObj.documentContentArray ?: arrayOf()).isEmpty()
             ) {
-                makeText(binding.root, getString(R.string.no_images), SnackbarType.INFO)
+                makeText(binding.root, getString(R.string.no_images), SnackBarType.INFO)
                 rejectNewInstances = false
                 return
             }
@@ -1066,7 +1068,7 @@ class AssetPrintLabelActivity :
                 makeText(
                     binding.root,
                     getString(R.string.images_not_yet_processed),
-                    SnackbarType.INFO
+                    SnackBarType.INFO
                 )
                 rejectNewInstances = false
                 return
@@ -1074,21 +1076,6 @@ class AssetPrintLabelActivity :
 
             showPhotoAlbum()
         }
-    }
-
-    override fun onDownloadTaskResult(
-        docContObj: DocumentContentObject?,
-        destination: String,
-        target: Int,
-    ) {
-    }
-
-    override fun onDownloadProgressChanged(
-        status: com.dacosys.imageControl.misc.ProgressStatus,
-        msg: String,
-        value: Int,
-        total: Int,
-    ) {
     }
 
     override fun onFilterChanged(printer: String, template: BarcodeLabelCustom?, qty: Int?) {}

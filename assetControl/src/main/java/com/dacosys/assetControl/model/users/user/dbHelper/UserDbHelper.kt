@@ -3,10 +3,10 @@ package com.dacosys.assetControl.model.users.user.dbHelper
 import android.database.Cursor
 import android.database.SQLException
 import android.util.Log
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.dataBase.StaticDbHelper
-import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.getReadableDb
+import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.getWritableDb
 import com.dacosys.assetControl.model.permissions.PermissionEntry
 import com.dacosys.assetControl.model.users.user.`object`.User
 import com.dacosys.assetControl.model.users.user.dbHelper.UserContract.UserEntry.Companion.ACTIVE
@@ -19,9 +19,10 @@ import com.dacosys.assetControl.model.users.user.dbHelper.UserContract.UserEntry
 import com.dacosys.assetControl.model.users.user.dbHelper.UserContract.getAllColumns
 import com.dacosys.assetControl.model.users.user.wsObject.UserObject
 import com.dacosys.assetControl.model.users.userPermission.dbHelper.UserPermissionContract.UserPermissionEntry.Companion.PERMISSION_ID
-import com.dacosys.assetControl.sync.functions.ProgressStatus
-import com.dacosys.assetControl.sync.functions.Sync.Companion.SyncTaskProgress
-import com.dacosys.assetControl.sync.functions.SyncRegistryType
+import com.dacosys.assetControl.network.sync.SyncProgress
+import com.dacosys.assetControl.network.sync.SyncRegistryType
+import com.dacosys.assetControl.network.utils.ProgressStatus
+import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.model.users.userPermission.dbHelper.UserPermissionContract.UserPermissionEntry.Companion.TABLE_NAME as UP_TABLE_NAME
 import com.dacosys.assetControl.model.users.userPermission.dbHelper.UserPermissionContract.UserPermissionEntry.Companion.USER_ID as UP_USER_ID
 
@@ -49,28 +50,23 @@ class UserDbHelper {
             password
         )
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.insert(
+            return sqLiteDatabase.insert(
                 TABLE_NAME,
                 null,
                 newUser.toContentValues()
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
     fun sync(
         objArray: Array<UserObject>,
-        callback: SyncTaskProgress?,
+        onSyncTaskProgress: (SyncProgress) -> Unit = {},
         currentCount: Int,
         countTotal: Int,
     ): Boolean {
@@ -91,7 +87,7 @@ class UserDbHelper {
 
         Log.d(this::class.java.simpleName, query)
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
+        val sqLiteDatabase = getWritableDb()
         sqLiteDatabase.beginTransaction()
         try {
             sqLiteDatabase.execSQL(query)
@@ -112,13 +108,13 @@ class UserDbHelper {
                     String.format(": SQLite -> insert: id:%s", obj.user_id)
                 )
                 count++
-                callback?.onSyncTaskProgress(
+                onSyncTaskProgress.invoke(SyncProgress(
                     totalTask = countTotal,
                     completedTask = currentCount + count,
-                    msg = Statics.AssetControl.getContext().getString(R.string.synchronizing_users),
+                    msg = getContext().getString(R.string.synchronizing_users),
                     registryType = SyncRegistryType.User,
                     progressStatus = ProgressStatus.running
-                )
+                ))
 
                 val values = "(${obj.user_id}," +
                         "'${obj.name.replace("'", "''")}'," +
@@ -149,10 +145,9 @@ class UserDbHelper {
     fun insert(user: User): Long {
         Log.i(this::class.java.simpleName, ": SQLite -> insert")
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = if (sqLiteDatabase.insert(
+            return if (sqLiteDatabase.insert(
                     TABLE_NAME,
                     null,
                     user.toContentValues()
@@ -162,14 +157,10 @@ class UserDbHelper {
             } else {
                 0
             }
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             0
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -179,23 +170,18 @@ class UserDbHelper {
         val selection = "$USER_ID = ?" // WHERE code LIKE ?
         val selectionArgs = arrayOf(user.userId.toString())
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.update(
+            return sqLiteDatabase.update(
                 TABLE_NAME,
                 user.toContentValues(),
                 selection,
                 selectionArgs
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -209,44 +195,34 @@ class UserDbHelper {
         val selection = "$USER_ID = ?" // WHERE code LIKE ?
         val selectionArgs = arrayOf(id.toString())
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.delete(
+            return sqLiteDatabase.delete(
                 TABLE_NAME,
                 selection,
                 selectionArgs
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
     fun deleteAll(): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> deleteAll")
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.delete(
+            return sqLiteDatabase.delete(
                 TABLE_NAME,
                 null,
                 null
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -256,7 +232,7 @@ class UserDbHelper {
         val columns = getAllColumns()
         val order = NAME
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
+        val sqLiteDatabase = getReadableDb()
         sqLiteDatabase.beginTransaction()
         try {
             val c = sqLiteDatabase.query(
@@ -295,18 +271,14 @@ class UserDbHelper {
                 " WHERE ([" + TABLE_NAME + "]." + ACTIVE + " = 1 AND " +
                 UP_TABLE_NAME + "." + PERMISSION_ID + " = " + PermissionEntry.UseCollectorProgram.id + ")"
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getReadableDb()
         return try {
             val c = sqLiteDatabase.rawQuery(basicSelect, null)
-            sqLiteDatabase.setTransactionSuccessful()
             fromCursor(c)
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             ArrayList()
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -316,7 +288,7 @@ class UserDbHelper {
         val selectionArgs = arrayOf(userId.toString())
         val order = NAME
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
+        val sqLiteDatabase = getReadableDb()
         sqLiteDatabase.beginTransaction()
         try {
             val c = sqLiteDatabase.query(
@@ -349,7 +321,7 @@ class UserDbHelper {
         val selectionArgs = arrayOf(nameOrEmail)
         val order = NAME
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
+        val sqLiteDatabase = getReadableDb()
         sqLiteDatabase.beginTransaction()
         try {
             val c = sqLiteDatabase.query(

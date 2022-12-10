@@ -3,8 +3,8 @@ package com.dacosys.assetControl.model.assets.attributes.attributeComposition.db
 import android.database.Cursor
 import android.database.SQLException
 import android.util.Log
-import com.dacosys.assetControl.dataBase.StaticDbHelper
-import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.getReadableDb
+import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.getWritableDb
 import com.dacosys.assetControl.model.assets.attributes.attributeComposition.`object`.AttributeComposition
 import com.dacosys.assetControl.model.assets.attributes.attributeComposition.dbHelper.AttributeCompositionContract.AttributeCompositionEntry.Companion.ATTRIBUTE_COMPOSITION_ID
 import com.dacosys.assetControl.model.assets.attributes.attributeComposition.dbHelper.AttributeCompositionContract.AttributeCompositionEntry.Companion.ATTRIBUTE_COMPOSITION_TYPE_ID
@@ -17,6 +17,7 @@ import com.dacosys.assetControl.model.assets.attributes.attributeComposition.dbH
 import com.dacosys.assetControl.model.assets.attributes.attributeComposition.dbHelper.AttributeCompositionContract.AttributeCompositionEntry.Companion.TABLE_NAME
 import com.dacosys.assetControl.model.assets.attributes.attributeComposition.dbHelper.AttributeCompositionContract.AttributeCompositionEntry.Companion.USED
 import com.dacosys.assetControl.model.assets.attributes.attributeComposition.dbHelper.AttributeCompositionContract.getAllColumns
+import com.dacosys.assetControl.utils.errorLog.ErrorLog
 
 /**
  * Created by Agustin on 28/12/2016.
@@ -48,21 +49,16 @@ class AttributeCompositionDbHelper {
             defaultValue
         )
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.insert(
+            return sqLiteDatabase.insert(
                 TABLE_NAME, null,
                 newAttributeComposition.toContentValues()
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: Exception) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -104,7 +100,7 @@ class AttributeCompositionDbHelper {
 
         Log.d(this::class.java.simpleName, query)
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
+        val sqLiteDatabase = getWritableDb()
         sqLiteDatabase.beginTransaction()
         return try {
             sqLiteDatabase.execSQL(query)
@@ -122,21 +118,16 @@ class AttributeCompositionDbHelper {
     fun insert(attributeComposition: AttributeComposition): Long {
         Log.i(this::class.java.simpleName, ": SQLite -> insert")
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.insert(
+            return sqLiteDatabase.insert(
                 TABLE_NAME, null,
                 attributeComposition.toContentValues()
             )
-            sqLiteDatabase.setTransactionSuccessful()
-            return r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             0
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -146,23 +137,18 @@ class AttributeCompositionDbHelper {
         val selection = "$ATTRIBUTE_COMPOSITION_ID = ?" // WHERE code LIKE ?
         val selectionArgs = arrayOf(attributeComposition.attributeCompositionId.toString())
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.update(
+            return sqLiteDatabase.update(
                 TABLE_NAME,
                 attributeComposition.toContentValues(),
                 selection,
                 selectionArgs
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: Exception) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -185,7 +171,7 @@ class AttributeCompositionDbHelper {
 
         Log.d(this::class.java.simpleName, query)
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
+        val sqLiteDatabase = getWritableDb()
         sqLiteDatabase.beginTransaction()
         try {
             sqLiteDatabase.execSQL(query)
@@ -204,22 +190,17 @@ class AttributeCompositionDbHelper {
         val selection = "$ATTRIBUTE_ID = ?" // WHERE code LIKE ?
         val selectionArgs = arrayOf(id.toString())
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.delete(
+            return sqLiteDatabase.delete(
                 TABLE_NAME,
                 selection,
                 selectionArgs
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: Exception) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -229,44 +210,34 @@ class AttributeCompositionDbHelper {
         val selection = "$ATTRIBUTE_COMPOSITION_ID = ?" // WHERE code LIKE ?
         val selectionArgs = arrayOf(id.toString())
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.delete(
+            return sqLiteDatabase.delete(
                 TABLE_NAME,
                 selection,
                 selectionArgs
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: Exception) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
     fun deleteAll(): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> deleteAll")
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.delete(
+            return sqLiteDatabase.delete(
                 TABLE_NAME,
                 null,
                 null
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -276,8 +247,7 @@ class AttributeCompositionDbHelper {
         val columns = getAllColumns()
         val order = DESCRIPTION
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getReadableDb()
         try {
             val c = sqLiteDatabase.query(
                 TABLE_NAME, // Nombre de la tabla
@@ -288,14 +258,11 @@ class AttributeCompositionDbHelper {
                 null, // Condición HAVING para GROUP BY
                 order  // Cláusula ORDER BY
             )
-            sqLiteDatabase.setTransactionSuccessful()
             return fromCursor(c)
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             return ArrayList()
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -307,8 +274,7 @@ class AttributeCompositionDbHelper {
         val selectionArgs = arrayOf(id.toString())
         val order = DESCRIPTION
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getReadableDb()
         try {
             val c = sqLiteDatabase.query(
                 TABLE_NAME, // Nombre de la tabla
@@ -319,7 +285,6 @@ class AttributeCompositionDbHelper {
                 null, // Condición HAVING para GROUP BY
                 order  // Cláusula ORDER BY
             )
-            sqLiteDatabase.setTransactionSuccessful()
             val result = fromCursor(c)
             return when {
                 result.size > 0 -> result[0]
@@ -329,8 +294,6 @@ class AttributeCompositionDbHelper {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             return null
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -342,7 +305,7 @@ class AttributeCompositionDbHelper {
         val selectionArgs = arrayOf(id.toString())
         val order = ATTRIBUTE_COMPOSITION_ID
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
+        val sqLiteDatabase = getReadableDb()
         sqLiteDatabase.beginTransaction()
         try {
             val c = sqLiteDatabase.query(
@@ -373,7 +336,7 @@ class AttributeCompositionDbHelper {
         val selectionArgs = arrayOf("%$description%")
         val order = DESCRIPTION
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
+        val sqLiteDatabase = getReadableDb()
         sqLiteDatabase.beginTransaction()
         try {
             val c = sqLiteDatabase.query(

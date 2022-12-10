@@ -12,8 +12,8 @@ import android.os.IBinder
 import android.os.Parcel
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics.AssetControl.Companion.getContext
 import com.dacosys.assetControl.views.assets.asset.activities.AssetCRUDActivity
 import com.dacosys.assetControl.views.assets.asset.activities.AssetPrintLabelActivity
 import com.dacosys.assetControl.views.codeCheck.CodeCheckActivity

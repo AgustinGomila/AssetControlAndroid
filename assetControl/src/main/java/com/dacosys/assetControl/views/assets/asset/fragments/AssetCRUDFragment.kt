@@ -12,7 +12,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.databinding.AssetCrudFragmentBinding
-import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.model.assets.asset.`object`.Asset
 import com.dacosys.assetControl.model.assets.asset.`object`.AssetCRUD
 import com.dacosys.assetControl.model.assets.asset.dbHelper.AssetDbHelper
@@ -28,13 +27,13 @@ import com.dacosys.assetControl.model.locations.warehouseArea.`object`.Warehouse
 import com.dacosys.assetControl.model.locations.warehouseArea.dbHelper.WarehouseAreaDbHelper
 import com.dacosys.assetControl.model.permissions.PermissionEntry
 import com.dacosys.assetControl.model.users.user.`object`.User
+import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.views.assets.assetStatus.fragment.AssetStatusSpinnerFragment
 import com.dacosys.assetControl.views.assets.itemCategory.activities.ItemCategorySelectActivity
 import com.dacosys.assetControl.views.commons.snackbar.MakeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
 import com.dacosys.assetControl.views.locations.locationSelect.LocationSelectActivity
 import org.parceler.Parcels
-import kotlin.concurrent.thread
 
 class AssetCRUDFragment : Fragment() {
     private var rejectNewInstances = false
@@ -364,7 +363,7 @@ class AssetCRUDFragment : Fragment() {
             MakeText.makeText(
                 binding.root,
                 getString(R.string.you_must_enter_a_description_for_the_asset),
-                SnackbarType.INFO
+                SnackBarType.INFO
             )
             binding.descriptionEditText.requestFocus()
             return false
@@ -374,7 +373,7 @@ class AssetCRUDFragment : Fragment() {
             MakeText.makeText(
                 binding.root,
                 getString(R.string.you_must_enter_a_code_for_the_asset),
-                SnackbarType.INFO
+                SnackBarType.INFO
             )
             binding.codeEditText.requestFocus()
             return false
@@ -394,7 +393,7 @@ class AssetCRUDFragment : Fragment() {
             MakeText.makeText(
                 binding.root,
                 getString(R.string.the_code_entered_already_exists_for_another_asset),
-                SnackbarType.ERROR
+                SnackBarType.ERROR
             )
             binding.codeEditText.requestFocus()
             return false
@@ -404,7 +403,7 @@ class AssetCRUDFragment : Fragment() {
             MakeText.makeText(
                 binding.root,
                 getString(R.string.you_must_select_a_category_for_the_asset),
-                SnackbarType.INFO
+                SnackBarType.INFO
             )
             return false
         }
@@ -413,7 +412,7 @@ class AssetCRUDFragment : Fragment() {
             MakeText.makeText(
                 binding.root,
                 getString(R.string.you_must_select_an_original_area_for_the_asset),
-                SnackbarType.INFO
+                SnackBarType.INFO
             )
             return false
         }
@@ -422,7 +421,7 @@ class AssetCRUDFragment : Fragment() {
             MakeText.makeText(
                 binding.root,
                 getString(R.string.you_must_select_a_current_area_for_the_asset),
-                SnackbarType.INFO
+                SnackBarType.INFO
             )
             return false
         }
@@ -432,7 +431,7 @@ class AssetCRUDFragment : Fragment() {
             MakeText.makeText(
                 binding.root,
                 getString(R.string.you_must_select_a_status_for_the_asset),
-                SnackbarType.INFO
+                SnackBarType.INFO
             )
             return false
         }
@@ -453,25 +452,23 @@ class AssetCRUDFragment : Fragment() {
                 MakeText.makeText(
                     binding.root,
                     getString(R.string.you_do_not_have_permission_to_add_assets),
-                    SnackbarType.ERROR
+                    SnackBarType.ERROR
                 )
                 return
             }
 
             val tempAsset = createWsAsset()
             if (tempAsset != null) {
-                thread {
-                    val assetAdd = AssetCRUD.AssetAdd()
-                    assetAdd.addParams(callback, tempAsset)
-                    assetAdd.execute()
-                }
+                val assetAdd = AssetCRUD.AssetAdd()
+                assetAdd.addParams(callback, tempAsset)
+                assetAdd.execute()
             }
         } else {
             if (!User.hasPermission(PermissionEntry.ModifyAsset)) {
                 MakeText.makeText(
                     binding.root,
                     getString(R.string.you_do_not_have_permission_to_modify_assets),
-                    SnackbarType.ERROR
+                    SnackBarType.ERROR
                 )
                 return
             }
@@ -479,11 +476,9 @@ class AssetCRUDFragment : Fragment() {
             updateAsset()
             if (asset != null) {
                 val tempAsset = AssetCollectorObject(asset ?: return)
-                thread {
-                    val updateAsset = AssetCRUD.AssetUpdate()
-                    updateAsset.addParams(callback, tempAsset)
-                    updateAsset.execute()
-                }
+                val updateAsset = AssetCRUD.AssetUpdate()
+                updateAsset.addParams(callback, tempAsset)
+                updateAsset.execute()
             }
         }
     }
@@ -578,7 +573,7 @@ class AssetCRUDFragment : Fragment() {
             MakeText.makeText(
                 binding.root,
                 getString(R.string.error_creating_the_asset),
-                SnackbarType.ERROR
+                SnackBarType.ERROR
             )
             return null
         }

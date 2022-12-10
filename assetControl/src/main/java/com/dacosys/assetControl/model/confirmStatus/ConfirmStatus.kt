@@ -2,8 +2,8 @@ package com.dacosys.assetControl.model.confirmStatus
 
 import android.os.Parcel
 import android.os.Parcelable
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
 import java.util.*
 
 class ConfirmStatus : Parcelable {
@@ -52,10 +52,10 @@ class ConfirmStatus : Parcelable {
             return arrayOfNulls(size)
         }
 
-        var cancel = ConfirmStatus(0, Statics.AssetControl.getContext().getString(R.string.cancel))
-        var modify = ConfirmStatus(1, Statics.AssetControl.getContext().getString(R.string.modify))
+        var cancel = ConfirmStatus(0, getContext().getString(R.string.cancel))
+        var modify = ConfirmStatus(1, getContext().getString(R.string.modify))
         var confirm =
-            ConfirmStatus(2, Statics.AssetControl.getContext().getString(R.string.confirm))
+            ConfirmStatus(2, getContext().getString(R.string.confirm))
 
         fun getAll(): ArrayList<ConfirmStatus> {
             val allSections = ArrayList<ConfirmStatus>()

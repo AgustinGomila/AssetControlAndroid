@@ -1,13 +1,12 @@
 package com.dacosys.assetControl.model.assets.asset.`object`
 
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.model.assets.asset.dbHelper.AssetDbHelper
 import com.dacosys.assetControl.model.assets.asset.wsObject.AssetCollectorObject
 import com.dacosys.assetControl.model.assets.asset.wsObject.AssetObject
-import com.dacosys.assetControl.sync.functions.SyncRegistryType
-import com.dacosys.assetControl.sync.functions.SyncUpload
+import com.dacosys.assetControl.network.sync.SyncRegistryType
+import com.dacosys.assetControl.network.sync.SyncUpload
+import com.dacosys.assetControl.utils.Statics
 import kotlinx.coroutines.*
-import kotlin.concurrent.thread
 
 /**
  * Create, Read, Update and Delete
@@ -42,16 +41,19 @@ class AssetCRUD {
             this.mCallback = callback
         }
 
-        fun execute() {
-            doInBackground()
+        private val scope = CoroutineScope(Job() + Dispatchers.IO)
+
+        fun cancel() {
+            scope.cancel()
         }
 
-        private var job: Job? = null
+        fun execute() {
+            scope.launch { doInBackground() }
+        }
 
-        private fun doInBackground() {
-            runBlocking {
-                job = launch { suspendFunction() }
-                job?.join()
+        private suspend fun doInBackground() {
+            coroutineScope {
+                suspendFunction()
                 mCallback?.onTaskCompleted(assetCRUDResult)
             }
         }
@@ -61,11 +63,7 @@ class AssetCRUD {
                 val aObj = assetObject!!
                 if (addAsset(aObj).resultCode == RC_INSERT_OK) {
                     if (Statics.autoSend()) {
-                        thread {
-                            val sync = SyncUpload()
-                            sync.addRegistryToSync(SyncRegistryType.Asset)
-                            sync.execute()
-                        }
+                        SyncUpload(SyncRegistryType.Asset)
                     }
                 } else {
                     assetCRUDResult.resultCode = RC_ERROR_INSERT
@@ -151,16 +149,19 @@ class AssetCRUD {
             this.mCallback = callback
         }
 
-        fun execute() {
-            doInBackground()
+        private val scope = CoroutineScope(Job() + Dispatchers.IO)
+
+        fun cancel() {
+            scope.cancel()
         }
 
-        private var job: Job? = null
+        fun execute() {
+            scope.launch { doInBackground() }
+        }
 
-        private fun doInBackground() {
-            runBlocking {
-                job = launch { suspendFunction() }
-                job?.join()
+        private suspend fun doInBackground() {
+            coroutineScope {
+                suspendFunction()
                 mCallback?.onTaskCompleted(assetCRUDResult)
             }
         }
@@ -170,11 +171,7 @@ class AssetCRUD {
                 val aObj = assetObject!!
                 if (updateAsset(aObj).resultCode == RC_UPDATE_OK) {
                     if (Statics.autoSend()) {
-                        thread {
-                            val sync = SyncUpload()
-                            sync.addRegistryToSync(SyncRegistryType.Asset)
-                            sync.execute()
-                        }
+                        SyncUpload(SyncRegistryType.Asset)
                     }
                 }
             } else {

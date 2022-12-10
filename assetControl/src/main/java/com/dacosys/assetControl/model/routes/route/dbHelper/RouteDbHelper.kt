@@ -3,11 +3,10 @@ package com.dacosys.assetControl.model.routes.route.dbHelper
 import android.database.Cursor
 import android.database.SQLException
 import android.util.Log
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.dataBase.StaticDbHelper
-import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.splitList
+import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.getReadableDb
+import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.getWritableDb
 import com.dacosys.assetControl.model.routes.route.`object`.Route
 import com.dacosys.assetControl.model.routes.route.dbHelper.RouteContract.RouteEntry.Companion.ACTIVE
 import com.dacosys.assetControl.model.routes.route.dbHelper.RouteContract.RouteEntry.Companion.DESCRIPTION
@@ -15,9 +14,11 @@ import com.dacosys.assetControl.model.routes.route.dbHelper.RouteContract.RouteE
 import com.dacosys.assetControl.model.routes.route.dbHelper.RouteContract.RouteEntry.Companion.TABLE_NAME
 import com.dacosys.assetControl.model.routes.route.dbHelper.RouteContract.getAllColumns
 import com.dacosys.assetControl.model.routes.route.wsObject.RouteObject
-import com.dacosys.assetControl.sync.functions.ProgressStatus
-import com.dacosys.assetControl.sync.functions.Sync.Companion.SyncTaskProgress
-import com.dacosys.assetControl.sync.functions.SyncRegistryType
+import com.dacosys.assetControl.network.sync.SyncProgress
+import com.dacosys.assetControl.network.sync.SyncRegistryType
+import com.dacosys.assetControl.network.utils.ProgressStatus
+import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.misc.splitList
 
 /**
  * Created by Agustin on 28/12/2016.
@@ -26,7 +27,7 @@ import com.dacosys.assetControl.sync.functions.SyncRegistryType
 class RouteDbHelper {
     fun sync(
         objArray: Array<RouteObject>,
-        callback: SyncTaskProgress,
+        onSyncProgress: (SyncProgress) -> Unit = {},
         currentCount: Int,
         countTotal: Int,
     ): Boolean {
@@ -47,7 +48,7 @@ class RouteDbHelper {
 
         Log.d(this::class.java.simpleName, query)
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
+        val sqLiteDatabase = getWritableDb()
         sqLiteDatabase.beginTransaction()
         try {
             sqLiteDatabase.execSQL(query)
@@ -65,14 +66,14 @@ class RouteDbHelper {
                     String.format(": SQLite -> insert: id:%s", obj.route_id)
                 )
                 count++
-                callback.onSyncTaskProgress(
+                onSyncProgress.invoke(SyncProgress(
                     totalTask = countTotal,
                     completedTask = currentCount + count,
-                    msg = Statics.AssetControl.getContext()
+                    msg = getContext()
                         .getString(R.string.synchronizing_routes),
                     registryType = SyncRegistryType.Route,
                     progressStatus = ProgressStatus.running
-                )
+                ))
 
                 val values = "(" +
                         obj.route_id + "," +
@@ -112,42 +113,32 @@ class RouteDbHelper {
             active
         )
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.insert(
+            return sqLiteDatabase.insert(
                 TABLE_NAME, null,
                 newRoute.toContentValues()
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            return r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
     fun insert(route: Route): Long {
         Log.i(this::class.java.simpleName, ": SQLite -> insert")
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.insert(
+            return sqLiteDatabase.insert(
                 TABLE_NAME, null,
                 route.toContentValues()
             )
-            sqLiteDatabase.setTransactionSuccessful()
-            return r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             0
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -157,23 +148,18 @@ class RouteDbHelper {
         val selection = "$ROUTE_ID = ?" // WHERE code LIKE ?
         val selectionArgs = arrayOf(route.routeId.toString())
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.update(
+            return sqLiteDatabase.update(
                 TABLE_NAME,
                 route.toContentValues(),
                 selection,
                 selectionArgs
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -187,7 +173,7 @@ class RouteDbHelper {
         }
         val order = DESCRIPTION
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
+        val sqLiteDatabase = getReadableDb()
         sqLiteDatabase.beginTransaction()
         try {
             val c = sqLiteDatabase.query(
@@ -218,7 +204,7 @@ class RouteDbHelper {
         val selectionArgs = arrayOf(id.toString())
         val order = DESCRIPTION
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
+        val sqLiteDatabase = getReadableDb()
         sqLiteDatabase.beginTransaction()
         try {
             val c = sqLiteDatabase.query(
@@ -268,18 +254,14 @@ class RouteDbHelper {
                 where +
                 " ORDER BY " + TABLE_NAME + "." + DESCRIPTION
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getReadableDb()
         return try {
             val c = sqLiteDatabase.rawQuery(rawQuery, null)
-            sqLiteDatabase.setTransactionSuccessful()
             fromCursor(c)
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             ArrayList()
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -311,10 +293,16 @@ class RouteDbHelper {
         val allCommands: ArrayList<String> = ArrayList()
         allCommands.add(CREATE_TEMP_TABLE)
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        for (sql in allCommands) {
-            println("$sql;")
-            sqLiteDatabase.execSQL(sql)
+        val sqLiteDatabase = getWritableDb()
+        sqLiteDatabase.beginTransaction()
+        try {
+            for (sql in allCommands) {
+                println("$sql;")
+                sqLiteDatabase.execSQL(sql)
+            }
+            sqLiteDatabase.setTransactionSuccessful()
+        } finally {
+            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -330,18 +318,14 @@ class RouteDbHelper {
                 where +
                 " ORDER BY " + TABLE_NAME + "." + ROUTE_ID
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getReadableDb()
         return try {
             val c = sqLiteDatabase.rawQuery(rawQuery, null)
-            sqLiteDatabase.setTransactionSuccessful()
             fromCursor(c)
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             ArrayList()
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -352,11 +336,18 @@ class RouteDbHelper {
 
         val splitList = splitList(arrayId.toTypedArray(), 100)
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
+
         try {
             sqLiteDatabase.delete("${temp}${TABLE_NAME}", null, null)
+        } catch (ex: SQLException) {
+            ex.printStackTrace()
+            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
+            return false
+        }
 
+        try {
+            sqLiteDatabase.beginTransaction()
             for (part in splitList) {
                 var insertQ =
                     "INSERT INTO " + temp + TABLE_NAME + " (" + temp + ROUTE_ID + ") VALUES "

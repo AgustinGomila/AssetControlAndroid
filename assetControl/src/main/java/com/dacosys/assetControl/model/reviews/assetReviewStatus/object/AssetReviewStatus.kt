@@ -3,8 +3,8 @@ package com.dacosys.assetControl.model.reviews.assetReviewStatus.`object`
 import android.content.ContentValues
 import android.os.Parcel
 import android.os.Parcelable
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.model.reviews.assetReviewStatus.dbHelper.AssetReviewStatusContract
 import java.util.*
 
@@ -63,19 +63,19 @@ class AssetReviewStatus : Parcelable {
 
         var unknown = AssetReviewStatus(
             0,
-            Statics.AssetControl.getContext().getString(R.string.review_status_unknown)
+            getContext().getString(R.string.review_status_unknown)
         )
         var onProcess = AssetReviewStatus(
             1,
-            Statics.AssetControl.getContext().getString(R.string.review_status_on_process)
+            getContext().getString(R.string.review_status_on_process)
         )
         var completed = AssetReviewStatus(
             2,
-            Statics.AssetControl.getContext().getString(R.string.review_status_completed)
+            getContext().getString(R.string.review_status_completed)
         )
         var transferred = AssetReviewStatus(
             3,
-            Statics.AssetControl.getContext().getString(R.string.review_status_transferred)
+            getContext().getString(R.string.review_status_transferred)
         )
 
         fun getAll(): ArrayList<AssetReviewStatus> {

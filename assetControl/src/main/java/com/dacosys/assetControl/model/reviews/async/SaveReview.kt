@@ -1,221 +1,225 @@
 package com.dacosys.assetControl.model.reviews.async
 
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.dataBase.DataBaseHelper
 import com.dacosys.assetControl.model.assets.asset.dbHelper.AssetDbHelper
+import com.dacosys.assetControl.model.commons.SaveProgress
+import com.dacosys.assetControl.model.movements.warehouseMovement.dbHelper.WarehouseMovementDbHelper
+import com.dacosys.assetControl.model.movements.warehouseMovementContent.dbHelper.WarehouseMovementContentDbHelper
 import com.dacosys.assetControl.model.reviews.assetReview.`object`.AssetReview
 import com.dacosys.assetControl.model.reviews.assetReviewContent.`object`.AssetReviewContent
 import com.dacosys.assetControl.model.reviews.assetReviewContent.dbHelper.AssetReviewContentDbHelper
-import com.dacosys.assetControl.model.reviews.assetReviewContent.dbHelper.AssetReviewContentDbHelper.OnInsertListener
-import com.dacosys.assetControl.model.reviews.assetReviewContentStatus.AssetReviewContentStatus
-import com.dacosys.assetControl.sync.functions.ProgressStatus
+import com.dacosys.assetControl.model.reviews.assetReviewStatus.`object`.AssetReviewStatus
+import com.dacosys.assetControl.network.sync.SyncProgress
+import com.dacosys.assetControl.network.sync.SyncRegistryType
+import com.dacosys.assetControl.network.sync.SyncUpload
+import com.dacosys.assetControl.network.utils.ProgressStatus
+import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.misc.UTCDataTime
 import kotlinx.coroutines.*
-import java.lang.ref.WeakReference
 
 class SaveReview {
-    interface SaveReviewListener {
-        // Define data you like to return from AysncTask
-        fun onSaveReviewProgress(
-            msg: String,
-            taskStatus: Int,
-            assetReview: AssetReview?,
-            arContArray: ArrayList<AssetReviewContent>,
-            progress: Int? = null,
-            total: Int? = null,
-        )
-    }
-
-    private var weakRef: WeakReference<SaveReviewListener>? = null
-    private var saveReviewListener: SaveReviewListener?
-        get() {
-            return weakRef?.get()
-        }
-        set(value) {
-            weakRef = if (value != null) WeakReference(value) else null
-        }
-
-    private var weakRef2: WeakReference<OnInsertListener>? = null
-    private var insertListener: OnInsertListener?
-        get() {
-            return weakRef2?.get()
-        }
-        set(value) {
-            weakRef2 = if (value != null) WeakReference(value) else null
-        }
-
-    private var assetReview: AssetReview? = null
-    private var isNew = false
-    private var lastId = 0L
-
-    private var arcArray: ArrayList<AssetReviewContent> = ArrayList()
-    private var msg = "Ok"
+    private lateinit var tempReview: AssetReview
+    private var assetExternalList: ArrayList<AssetReviewContent> = ArrayList()
+    private var allAssetList: ArrayList<AssetReviewContent> = ArrayList()
+    private var assetNotInReviewList: ArrayList<AssetReviewContent> = ArrayList()
+    private var assetOnInventory: ArrayList<AssetReviewContent> = ArrayList()
+    private var onSaveProgress: (SaveProgress) -> Unit = {}
+    private var onSyncProgress: (SyncProgress) -> Unit = {}
 
     fun addParams(
-        saveReviewListener: SaveReviewListener,
-        onInsertListener: OnInsertListener,
         assetReview: AssetReview,
-        isNew: Boolean,
-        lastCollectorId: Long,
+        allAssetList: ArrayList<AssetReviewContent>,
+        assetOnInventory: ArrayList<AssetReviewContent>,
+        assetNotInReviewList: ArrayList<AssetReviewContent>,
+        assetExternalList: ArrayList<AssetReviewContent>,
+        onSaveProgress: (SaveProgress) -> Unit = {},
+        onSyncProgress: (SyncProgress) -> Unit = {},
     ) {
-        // list all the parameters like in normal class define
-        this.saveReviewListener = saveReviewListener
-        this.insertListener = onInsertListener
-        this.assetReview = assetReview
-        this.isNew = isNew
-        lastId = lastCollectorId
+        this.tempReview = assetReview
+        this.assetExternalList = assetExternalList
+        this.allAssetList = allAssetList
+        this.assetNotInReviewList = assetNotInReviewList
+        this.assetOnInventory = assetOnInventory
+        this.onSaveProgress = onSaveProgress
+        this.onSyncProgress = onSyncProgress
+    }
+
+    private val scope = CoroutineScope(Job() + Dispatchers.IO)
+
+    fun cancel() {
+        scope.cancel()
     }
 
     fun execute() {
-        doInBackground()
+        scope.launch { doInBackground() }
     }
 
-    private var job: Job? = null
+    private var deferred: Deferred<Boolean>? = null
+    private suspend fun doInBackground() {
+        var result = false
+        coroutineScope {
+            deferred = async { suspendFunction() }
+            result = deferred?.await() ?: false
+        }
 
-    private fun doInBackground() {
-        runBlocking {
-            var result = false
-            job = launch { result = suspendFunction() }
-            job?.join()
-
-            if (result) {
-                saveReviewListener?.onSaveReviewProgress(
-                    msg = msg,
-                    taskStatus = ProgressStatus.finished.id,
-                    assetReview = assetReview,
-                    arContArray = arcArray,
-                    progress = 0,
-                    total = 0
-                )
-            } else {
-                saveReviewListener?.onSaveReviewProgress(
-                    msg = msg,
-                    taskStatus = ProgressStatus.crashed.id,
-                    assetReview = assetReview,
-                    arContArray = arcArray,
-                    progress = 0,
-                    total = 0
-                )
-            }
+        if (result && Statics.autoSend()) {
+            SyncUpload(
+                registryType = SyncRegistryType.AssetReview,
+                onSyncTaskProgress = { onSyncProgress.invoke(it) })
+        } else {
+            onSyncProgress.invoke(SyncProgress(progressStatus = ProgressStatus.bigFinished))
         }
     }
 
     private suspend fun suspendFunction(): Boolean = withContext(Dispatchers.IO) {
-        var error = false
+        ///////////////////////////////////
+        // Para controlar la transacción //
+        val db = DataBaseHelper.getWritableDb()
 
-        try {
-            saveReviewListener?.onSaveReviewProgress(
-                msg = Statics.AssetControl.getContext().getString(R.string.getting_asset_in_area),
-                taskStatus = ProgressStatus.starting.id,
-                assetReview = assetReview,
-                arContArray = arcArray,
-                progress = 0,
-                total = 0
-            )
+        // Hacer los movimientos y los cambios de estados de los activos sólo
+        // cuando la revisión está completada
+        if (tempReview.statusId == AssetReviewStatus.completed.id) {
+            //////////// MOVEMENTS ////////////
+            // Create a Array List with the differents
+            // Origin Warehouse Areas to select the number of movements to do
+            val waIdList = java.util.ArrayList<Long>()
 
-            if (isNew) {
-                val allAsset = AssetDbHelper()
-                    .selectByWarehouseAreaIdActiveNotRemoved(assetReview!!.warehouseAreaId)
-
-                if (allAsset.size > 0) {
-                    val total = allAsset.size
-                    for ((p, asset) in allAsset.withIndex()) {
-                        saveReviewListener?.onSaveReviewProgress(
-                            msg = String.format(
-                                Statics.AssetControl.getContext()
-                                    .getString(R.string.loading_asset_), asset.code
-                            ),
-                            taskStatus = ProgressStatus.running.id,
-                            assetReview = assetReview,
-                            arContArray = arcArray,
-                            progress = p,
-                            total = total
-                        )
-
-                        lastId--
-
-                        val newArCont = AssetReviewContent()
-
-                        newArCont.assetId = asset.assetId
-                        newArCont.contentStatusId = AssetReviewContentStatus.notInReview.id
-                        newArCont.code = asset.code
-                        newArCont.collectorContentId = lastId
-                        newArCont.description = asset.description
-                        newArCont.assetStatusId = asset.assetStatusId
-                        newArCont.warehouseAreaId = asset.warehouseAreaId
-                        newArCont.labelNumber = asset.labelNumber ?: 0
-                        newArCont.parentId = asset.parentAssetId ?: 0
-                        newArCont.warehouseAreaStr = asset.warehouseAreaStr
-                        newArCont.warehouseStr = asset.warehouseStr
-                        newArCont.itemCategoryId = asset.itemCategoryId
-                        newArCont.itemCategoryStr = asset.itemCategoryStr
-                        newArCont.ownershipStatusId = asset.ownershipStatusId
-                        newArCont.manufacturer = asset.manufacturer ?: ""
-                        newArCont.model = asset.model ?: ""
-                        newArCont.serialNumber = asset.serialNumber ?: ""
-                        newArCont.ean = asset.ean ?: ""
-
-                        newArCont.setDataRead()
-                        arcArray.add(newArCont)
-                    }
-
-                    AssetReviewContentDbHelper().insert(
-                        insertListener!!,
-                        assetReview!!,
-                        arcArray.toTypedArray()
-                    )
+            // Traer todos los orígenes únicos
+            var total = assetExternalList.size
+            for ((p, tempAsset) in assetExternalList.withIndex()) {
+                if (!waIdList.contains(tempAsset.originWarehouseAreaId)) {
+                    waIdList.add(tempAsset.originWarehouseAreaId)
                 }
-            } else {
-                val oldCont = assetReview!!.contents
-                if (oldCont.size > 0) {
-                    val total = oldCont.size
-                    for ((p, asset) in oldCont.withIndex()) {
-                        saveReviewListener?.onSaveReviewProgress(
-                            msg = String.format(
-                                Statics.AssetControl.getContext()
-                                    .getString(R.string.loading_asset_), asset.code
-                            ),
-                            taskStatus = ProgressStatus.running.id,
-                            assetReview = assetReview,
-                            arContArray = arcArray,
-                            progress = p,
-                            total = total
-                        )
 
-                        lastId--
-                        val newArCont = AssetReviewContent()
-
-                        newArCont.assetId = asset.assetId
-                        newArCont.assetStatusId = asset.assetStatusId
-                        newArCont.labelNumber = asset.labelNumber
-                        newArCont.contentStatusId = asset.contentStatusId
-                        newArCont.code = asset.code
-                        newArCont.collectorContentId = lastId
-                        newArCont.description = asset.description
-                        newArCont.warehouseAreaId = asset.originWarehouseAreaId
-                        newArCont.parentId = asset.parentId
-                        newArCont.warehouseAreaStr = asset.warehouseAreaStr
-                        newArCont.warehouseStr = asset.warehouseStr
-                        newArCont.itemCategoryId = asset.itemCategoryId
-                        newArCont.itemCategoryStr = asset.itemCategoryStr
-                        newArCont.ownershipStatusId = asset.ownershipStatusId
-                        newArCont.manufacturer = asset.manufacturer
-                        newArCont.model = asset.model
-                        newArCont.serialNumber = asset.serialNumber
-                        newArCont.ean = asset.ean
-
-                        newArCont.setDataRead()
-                        arcArray.add(newArCont)
-                    }
-                }
+                onSaveProgress.invoke(SaveProgress(
+                    msg = "${getContext().getString(R.string.processing_external_asset)} ${tempAsset.code}",
+                    taskStatus = ProgressStatus.running.id,
+                    progress = p,
+                    total = total
+                ))
             }
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
-            error = true
-            msg = ex.message.toString()
+
+            val wmDbHelper = WarehouseMovementDbHelper()
+            val wmContDbHelper = WarehouseMovementContentDbHelper()
+
+            ///// Comienzo de una transacción /////
+            db.beginTransaction()
+
+            try {
+                // Create Warehouse Movements Content by each Origin Warehouse Area
+                total = waIdList.size
+                for ((p, origWaId) in waIdList.withIndex()) {
+                    val newWm =
+                        wmDbHelper.insert(origWaId, tempReview.warehouseAreaId, tempReview.obs)
+
+                    onSaveProgress.invoke(SaveProgress(
+                        msg = getContext().getString(R.string.making_movement),
+                        taskStatus = ProgressStatus.running.id,
+                        progress = p,
+                        total = total
+                    ))
+
+                    if (newWm != null) {
+                        val l: java.util.ArrayList<AssetReviewContent> = java.util.ArrayList()
+                        for (x in assetExternalList) {
+                            if (x.warehouseAreaId == origWaId) {
+                                l.add(x)
+                            }
+                        }
+
+                        wmContDbHelper.insertAr(newWm, l)
+                        val date = UTCDataTime.getUTCDateTimeAsString()
+
+                        newWm.completed = true
+                        newWm.obs =
+                            "${getContext().getString(R.string.automatic_movement_during_the_revision_on_date)}: $date"
+                        newWm.saveChanges()
+                    }
+                }
+
+                db.setTransactionSuccessful()
+
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+                onSaveProgress.invoke(SaveProgress(
+                    msg = "${getContext().getString(R.string.error_making_movements)}: ${ex.message}",
+                    taskStatus = ProgressStatus.crashed.id,
+                    progress = 0,
+                    total = 0
+                ))
+                return@withContext false
+            } finally {
+                db.endTransaction()
+            }
+
+            //////////// ASSET STATUS ////////////
+            val assetDbHelper = AssetDbHelper()
+
+            ///// Comienzo de una transacción /////
+            db.beginTransaction()
+
+            try {
+                // Activos que no están en la revisión cambian de estado a Extraviados
+                // Activos en la revisión o aparecidos en el área revisada cambian a En Inventario.
+
+                assetDbHelper.setMissing(assetNotInReviewList)
+                assetDbHelper.setOnInventoryFromArCont(tempReview, assetOnInventory)
+
+                db.setTransactionSuccessful()
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+                onSaveProgress.invoke(SaveProgress(
+                    msg = "${getContext().getString(R.string.error_updating_asset_status)}: ${ex.message}",
+                    taskStatus = ProgressStatus.crashed.id,
+                    progress = 0,
+                    total = 0))
+                return@withContext false
+            } finally {
+                db.endTransaction()
+            }
         }
 
-        return@withContext !error
+        ///// Comienzo de una transacción /////
+        db.beginTransaction()
+
+        val arContDbHelper = AssetReviewContentDbHelper()
+        try {
+            if (tempReview.saveChanges()) {
+                // Limpiar el contenido de la revisión ANTIGUA
+
+                arContDbHelper.deleteByAssetReviewId(tempReview.collectorAssetReviewId)
+
+                // Agregar el contenido de la revisión
+                // Se agregan todos los activos, el sincronizador se encarga después
+                // de NO enviar aquellos que no fueron revisados
+                arContDbHelper.insert(ar = tempReview,
+                    arCont = allAssetList.toTypedArray(),
+                    onSaveProgress = { onSaveProgress.invoke(it) })
+            } else {
+                // No es necesario settear error = true, termina acá.
+                onSaveProgress.invoke(SaveProgress(
+                    msg = getContext().getString(R.string.failed_to_save_the_revision),
+                    taskStatus = ProgressStatus.crashed.id,
+                    progress = 0,
+                    total = 0))
+                return@withContext false
+            }
+
+            db.setTransactionSuccessful()
+
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+            onSaveProgress.invoke(SaveProgress(
+                msg = "${getContext().getString(R.string.failed_to_do_the_review)}: ${ex.message}",
+                taskStatus = ProgressStatus.crashed.id,
+                progress = 0,
+                total = 0))
+            return@withContext false
+        } finally {
+            db.endTransaction()
+        }
+        return@withContext true
     }
 }

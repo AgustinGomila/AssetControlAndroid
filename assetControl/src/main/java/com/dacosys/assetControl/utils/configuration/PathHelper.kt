@@ -6,13 +6,13 @@ import android.net.Uri
 import android.os.Environment
 import android.provider.DocumentsContract
 import android.provider.MediaStore
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 
 object PathHelper {
     fun getPath(uri: Uri): String? {
         // DocumentProvider
         if (DocumentsContract.isDocumentUri(
-                Statics.AssetControl.getContext(),
+                getContext(),
                 uri
             )
         ) { // ExternalStorageProvider
@@ -21,7 +21,7 @@ object PathHelper {
                 val split = docId.split(":").toTypedArray()
                 val type = split[0]
                 if ("primary".equals(type, ignoreCase = true)) {
-                    return Statics.AssetControl.getContext()
+                    return getContext()
                         .getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
                         .toString() + "/" + split[1]
                 }
@@ -72,7 +72,7 @@ object PathHelper {
         val column = "_data"
         val projection = arrayOf(column)
         try {
-            cursor = Statics.AssetControl.getContext().contentResolver.query(
+            cursor = getContext().contentResolver.query(
                 uri,
                 projection,
                 selection,

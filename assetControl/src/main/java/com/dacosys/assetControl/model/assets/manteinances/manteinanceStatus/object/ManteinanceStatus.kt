@@ -3,8 +3,8 @@ package com.dacosys.assetControl.model.assets.manteinances.manteinanceStatus.`ob
 import android.content.ContentValues
 import android.os.Parcel
 import android.os.Parcelable
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.model.assets.manteinances.manteinanceStatus.dbHelper.ManteinanceStatusContract
 import java.util.*
 
@@ -63,48 +63,48 @@ class ManteinanceStatus : Parcelable {
 
         var repair = ManteinanceStatus(
             1,
-            Statics.AssetControl.getContext().getString(R.string.maintenance_status_repair)
+            getContext().getString(R.string.maintenance_status_repair)
         )
         var income = ManteinanceStatus(
             2,
-            Statics.AssetControl.getContext().getString(R.string.maintenance_status_income)
+            getContext().getString(R.string.maintenance_status_income)
         )
         var underDiagnosis =
             ManteinanceStatus(
                 3,
-                Statics.AssetControl.getContext()
+                getContext()
                     .getString(R.string.maintenance_status_under_diagnosis)
             )
         var diagnosed = ManteinanceStatus(
             4,
-            Statics.AssetControl.getContext().getString(R.string.maintenance_status_diagnosed)
+            getContext().getString(R.string.maintenance_status_diagnosed)
         )
         var cost = ManteinanceStatus(
             5,
-            Statics.AssetControl.getContext().getString(R.string.maintenance_status_cost)
+            getContext().getString(R.string.maintenance_status_cost)
         )
         var approvedCost =
             ManteinanceStatus(
                 6,
-                Statics.AssetControl.getContext()
+                getContext()
                     .getString(R.string.maintenance_status_approved_cost)
             )
         var underRepair = ManteinanceStatus(
             7,
-            Statics.AssetControl.getContext().getString(R.string.maintenance_status_under_repair)
+            getContext().getString(R.string.maintenance_status_under_repair)
         )
         var repaired = ManteinanceStatus(
             8,
-            Statics.AssetControl.getContext().getString(R.string.maintenance_status_repaired)
+            getContext().getString(R.string.maintenance_status_repaired)
         )
         var finished = ManteinanceStatus(
             9,
-            Statics.AssetControl.getContext().getString(R.string.maintenance_status_finished)
+            getContext().getString(R.string.maintenance_status_finished)
         )
         var repairImposible =
             ManteinanceStatus(
                 10,
-                Statics.AssetControl.getContext()
+                getContext()
                     .getString(R.string.maintenance_status_repair_imposible)
             )
 

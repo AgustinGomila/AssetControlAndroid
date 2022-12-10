@@ -3,8 +3,8 @@ package com.dacosys.assetControl.model.assets.manteinances.manteinanceType.dbHel
 import android.database.Cursor
 import android.database.SQLException
 import android.util.Log
-import com.dacosys.assetControl.dataBase.StaticDbHelper
-import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.getReadableDb
+import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.getWritableDb
 import com.dacosys.assetControl.model.assets.manteinances.manteinanceType.`object`.ManteinanceType
 import com.dacosys.assetControl.model.assets.manteinances.manteinanceType.dbHelper.ManteinanceTypeContract.ManteinanceTypeEntry.Companion.ACTIVE
 import com.dacosys.assetControl.model.assets.manteinances.manteinanceType.dbHelper.ManteinanceTypeContract.ManteinanceTypeEntry.Companion.DESCRIPTION
@@ -12,6 +12,7 @@ import com.dacosys.assetControl.model.assets.manteinances.manteinanceType.dbHelp
 import com.dacosys.assetControl.model.assets.manteinances.manteinanceType.dbHelper.ManteinanceTypeContract.ManteinanceTypeEntry.Companion.MANTEINANCE_TYPE_ID
 import com.dacosys.assetControl.model.assets.manteinances.manteinanceType.dbHelper.ManteinanceTypeContract.ManteinanceTypeEntry.Companion.TABLE_NAME
 import com.dacosys.assetControl.model.assets.manteinances.manteinanceType.dbHelper.ManteinanceTypeContract.getAllColumns
+import com.dacosys.assetControl.utils.errorLog.ErrorLog
 
 /**
  * Created by Agustin on 28/12/2016.
@@ -33,47 +34,37 @@ class ManteinanceTypeDbHelper {
             parentId
         )
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.insert(
+            return sqLiteDatabase.insert(
                 TABLE_NAME, null,
                 newManteinanceType.toContentValues()
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            return r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
     fun insert(manteinanceType: ManteinanceType): Long {
         Log.i(this::class.java.simpleName, ": SQLite -> insert")
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.insert(
+            return sqLiteDatabase.insert(
                 TABLE_NAME, null,
                 manteinanceType.toContentValues()
             )
-            sqLiteDatabase.setTransactionSuccessful()
-            return r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             0
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
     private fun getChangesCount(): Long {
-        val db = StaticDbHelper.getReadableDb()
+        val db = getReadableDb()
         val statement = db.compileStatement("SELECT changes()")
         return statement.simpleQueryForLong()
     }
@@ -84,23 +75,18 @@ class ManteinanceTypeDbHelper {
         val selection = "$MANTEINANCE_TYPE_ID = ?" // WHERE code LIKE ?
         val selectionArgs = arrayOf(manteinanceType.manteinanceTypeId.toString())
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.update(
+            return sqLiteDatabase.update(
                 TABLE_NAME,
                 manteinanceType.toContentValues(),
                 selection,
                 selectionArgs
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -114,44 +100,34 @@ class ManteinanceTypeDbHelper {
         val selection = "$MANTEINANCE_TYPE_ID = ?" // WHERE code LIKE ?
         val selectionArgs = arrayOf(id.toString())
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.delete(
+            return sqLiteDatabase.delete(
                 TABLE_NAME,
                 selection,
                 selectionArgs
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
     fun deleteAll(): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> deleteAll")
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.delete(
+            return sqLiteDatabase.delete(
                 TABLE_NAME,
                 null,
                 null
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -161,7 +137,7 @@ class ManteinanceTypeDbHelper {
         val columns = getAllColumns()
         val order = DESCRIPTION
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
+        val sqLiteDatabase = getReadableDb()
         sqLiteDatabase.beginTransaction()
         try {
             val c = sqLiteDatabase.query(
@@ -192,7 +168,7 @@ class ManteinanceTypeDbHelper {
         val selectionArgs = arrayOf(id.toString())
         val order = DESCRIPTION
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
+        val sqLiteDatabase = getReadableDb()
         sqLiteDatabase.beginTransaction()
         try {
             val c = sqLiteDatabase.query(
@@ -227,7 +203,7 @@ class ManteinanceTypeDbHelper {
         val selectionArgs = arrayOf(wId.toString())
         val order = DESCRIPTION
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
+        val sqLiteDatabase = getReadableDb()
         sqLiteDatabase.beginTransaction()
         try {
             val c = sqLiteDatabase.query(
@@ -258,7 +234,7 @@ class ManteinanceTypeDbHelper {
         val selectionArgs = arrayOf("%$description%")
         val order = DESCRIPTION
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
+        val sqLiteDatabase = getReadableDb()
         sqLiteDatabase.beginTransaction()
         try {
             val c = sqLiteDatabase.query(
@@ -296,7 +272,7 @@ class ManteinanceTypeDbHelper {
         val selectionArgs = arrayOf("%$description%", manteinanceTypeGroupId.toString())
         val order = DESCRIPTION
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
+        val sqLiteDatabase = getReadableDb()
         sqLiteDatabase.beginTransaction()
         try {
             val c = sqLiteDatabase.query(

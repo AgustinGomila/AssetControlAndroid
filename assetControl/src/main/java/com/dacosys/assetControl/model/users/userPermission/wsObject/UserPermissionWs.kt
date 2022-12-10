@@ -1,7 +1,7 @@
 package com.dacosys.assetControl.model.users.userPermission.wsObject
 
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.model.users.user.wsObject.UserObject
+import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.wsGeneral.WsParam
 import org.ksoap2.serialization.SoapObject
 import java.util.*

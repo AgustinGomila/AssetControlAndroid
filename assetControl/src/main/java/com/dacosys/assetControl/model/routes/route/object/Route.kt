@@ -2,14 +2,14 @@ package com.dacosys.assetControl.model.routes.route.`object`
 
 import android.content.ContentValues
 import android.os.Parcelable
-import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.configuration.Preference
 import com.dacosys.assetControl.model.routes.route.dbHelper.RouteContract.RouteEntry.Companion.ACTIVE
 import com.dacosys.assetControl.model.routes.route.dbHelper.RouteContract.RouteEntry.Companion.DESCRIPTION
 import com.dacosys.assetControl.model.routes.route.dbHelper.RouteContract.RouteEntry.Companion.ROUTE_ID
 import com.dacosys.assetControl.model.routes.route.dbHelper.RouteDbHelper
 import com.dacosys.assetControl.model.routes.routeComposition.`object`.RouteComposition
 import com.dacosys.assetControl.model.routes.routeComposition.dbHelper.RouteCompositionDbHelper
+import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.configuration.Preference
 
 class Route : Parcelable {
     var routeId: Long = 0

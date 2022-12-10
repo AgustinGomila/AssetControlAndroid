@@ -4,12 +4,12 @@ import android.content.ContentValues
 import android.database.Cursor
 import android.database.SQLException
 import android.util.Log
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.dataBase.StaticDbHelper
-import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.splitList
+import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.getReadableDb
+import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.getWritableDb
 import com.dacosys.assetControl.model.assets.asset.`object`.Asset
+import com.dacosys.assetControl.model.commons.SaveProgress
 import com.dacosys.assetControl.model.reviews.assetReview.`object`.AssetReview
 import com.dacosys.assetControl.model.reviews.assetReviewContent.`object`.AssetReviewContent
 import com.dacosys.assetControl.model.reviews.assetReviewContent.dbHelper.AssetReviewContentContract.AssetReviewContentEntry.Companion.ASSET_ID
@@ -22,38 +22,25 @@ import com.dacosys.assetControl.model.reviews.assetReviewContent.dbHelper.AssetR
 import com.dacosys.assetControl.model.reviews.assetReviewContent.dbHelper.AssetReviewContentContract.AssetReviewContentEntry.Companion.QTY
 import com.dacosys.assetControl.model.reviews.assetReviewContent.dbHelper.AssetReviewContentContract.AssetReviewContentEntry.Companion.TABLE_NAME
 import com.dacosys.assetControl.model.reviews.assetReviewContent.dbHelper.AssetReviewContentContract.getAllColumns
-import com.dacosys.assetControl.sync.functions.ProgressStatus
+import com.dacosys.assetControl.network.utils.ProgressStatus
+import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.misc.splitList
 
 /**
  * Created by Agustin on 28/12/2016.
  */
 
 class AssetReviewContentDbHelper {
-    /**
-     * Classes that wish to be notified when the swipe gesture correctly
-     * triggers a refresh should implement this interface.
-     */
-    interface OnInsertListener {
-        fun onInsert(
-            msg: String,
-            taskStatus: Int,
-            progress: Int? = null,
-            total: Int? = null,
-        )
-    }
-
     private val lastId: Long
         get() {
             Log.i(this::class.java.simpleName, ": SQLite -> lastId")
 
-            val sqLiteDatabase = StaticDbHelper.getReadableDb()
-            sqLiteDatabase.beginTransaction()
+            val sqLiteDatabase = getReadableDb()
             return try {
                 val mCount = sqLiteDatabase.rawQuery(
                     "SELECT MAX($ASSET_REVIEW_CONTENT_ID) FROM $TABLE_NAME",
                     null
                 )
-                sqLiteDatabase.setTransactionSuccessful()
                 mCount.moveToFirst()
                 val count = mCount.getLong(0)
                 mCount.close()
@@ -62,8 +49,6 @@ class AssetReviewContentDbHelper {
                 ex.printStackTrace()
                 ErrorLog.writeLog(null, this::class.java.simpleName, ex)
                 0
-            } finally {
-                sqLiteDatabase.endTransaction()
             }
         }
 
@@ -90,61 +75,52 @@ class AssetReviewContentDbHelper {
             originWarehouseAreaId
         )
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.insert(
+            return sqLiteDatabase.insert(
                 TABLE_NAME, null,
                 newAssetReviewContent.toContentValues()
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            return r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
     fun insert(
-        listener: OnInsertListener,
         ar: AssetReview,
         arCont: Array<AssetReviewContent>,
+        onSaveProgress: (SaveProgress) -> Unit = {},
     ): Boolean {
         if (arCont.isEmpty()) {
             return false
         }
 
-        listener.onInsert(
-            msg = Statics.AssetControl.getContext()
+        onSaveProgress.invoke(SaveProgress(
+            msg = getContext()
                 .getString(R.string.adding_content_to_the_review),
             taskStatus = ProgressStatus.starting.id,
             progress = 0,
             total = 0
-        )
+        ))
 
         Log.i(this::class.java.simpleName, ": SQLite -> insert")
         val splitList = splitList(arCont, 50)
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getReadableDb()
         var lastId = try {
             val mCount =
                 sqLiteDatabase.rawQuery(
                     "SELECT MAX($ASSET_REVIEW_CONTENT_ID) FROM $TABLE_NAME",
                     null
                 )
-            sqLiteDatabase.setTransactionSuccessful()
             mCount.moveToFirst()
             val count = mCount.getLong(0)
             mCount.close()
             count
         } catch (ex: Exception) {
             0
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
 
         val arId = ar.collectorAssetReviewId
@@ -179,15 +155,15 @@ class AssetReviewContentDbHelper {
 
                 for (asset in part) {
                     p++
-                    listener.onInsert(
+                    onSaveProgress.invoke(SaveProgress(
                         msg = String.format(
-                            Statics.AssetControl.getContext().getString(R.string.adding_asset_),
+                            getContext().getString(R.string.adding_asset_),
                             asset.code
                         ),
                         taskStatus = ProgressStatus.running.id,
                         progress = p,
                         total = t
-                    )
+                    ))
 
                     Log.d(this::class.java.simpleName, "SQLITE-QUERY-INSERT-->" + asset.assetId)
 
@@ -225,20 +201,20 @@ class AssetReviewContentDbHelper {
         }
 
         if (error) {
-            listener.onInsert(
-                msg = Statics.AssetControl.getContext()
+            onSaveProgress.invoke(SaveProgress(
+                msg = getContext()
                     .getString(R.string.error_inserting_assets_to_review),
                 taskStatus = ProgressStatus.crashed.id,
                 progress = 0,
                 total = 0
-            )
+            ))
         } else {
-            listener.onInsert(
-                msg = Statics.AssetControl.getContext().getString(R.string.insert_ok),
+            onSaveProgress.invoke(SaveProgress(
+                msg = getContext().getString(R.string.insert_ok),
                 taskStatus = ProgressStatus.finished.id,
                 progress = 0,
                 total = 0
-            )
+            ))
         }
         return !error
     }
@@ -246,21 +222,16 @@ class AssetReviewContentDbHelper {
     fun insert(assetReviewContent: AssetReviewContent): Long {
         Log.i(this::class.java.simpleName, ": SQLite -> insert")
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.insert(
+            return sqLiteDatabase.insert(
                 TABLE_NAME, null,
                 assetReviewContent.toContentValues()
             )
-            sqLiteDatabase.setTransactionSuccessful()
-            return r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             0
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -273,23 +244,18 @@ class AssetReviewContentDbHelper {
         values.put(ASSET_ID, newAsset.assetId)
         values.put(DESCRIPTION, newAsset.description)
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.update(
+            return sqLiteDatabase.update(
                 TABLE_NAME,
                 values,
                 selection,
                 selectionArgs
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -299,23 +265,18 @@ class AssetReviewContentDbHelper {
         val selection = "$ASSET_REVIEW_CONTENT_ID = ?" // WHERE code LIKE ?
         val selectionArgs = arrayOf(assetReviewContent.assetReviewContentId.toString())
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.update(
+            return sqLiteDatabase.update(
                 TABLE_NAME,
                 assetReviewContent.toContentValues(),
                 selection,
                 selectionArgs
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -329,22 +290,17 @@ class AssetReviewContentDbHelper {
         val selection = "$ASSET_REVIEW_ID = ?" // WHERE code LIKE ?
         val selectionArgs = arrayOf(id.toString())
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.delete(
+            return sqLiteDatabase.delete(
                 TABLE_NAME,
                 selection,
                 selectionArgs
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -354,44 +310,34 @@ class AssetReviewContentDbHelper {
         val selection = "$ASSET_REVIEW_CONTENT_ID = ?" // WHERE code LIKE ?
         val selectionArgs = arrayOf(id.toString())
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.delete(
+            return sqLiteDatabase.delete(
                 TABLE_NAME,
                 selection,
                 selectionArgs
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
     fun deleteAll(): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> deleteAll")
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.delete(
+            return sqLiteDatabase.delete(
                 TABLE_NAME,
                 null,
                 null
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -401,7 +347,7 @@ class AssetReviewContentDbHelper {
         val columns = getAllColumns()
         val order = DESCRIPTION
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
+        val sqLiteDatabase = getReadableDb()
         sqLiteDatabase.beginTransaction()
         try {
             val c = sqLiteDatabase.query(
@@ -432,7 +378,7 @@ class AssetReviewContentDbHelper {
         val selectionArgs = arrayOf(id.toString())
         val order = DESCRIPTION
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
+        val sqLiteDatabase = getReadableDb()
         sqLiteDatabase.beginTransaction()
         try {
             val c = sqLiteDatabase.query(
@@ -467,7 +413,7 @@ class AssetReviewContentDbHelper {
         val selectionArgs = arrayOf(id.toString())
         val order = CODE
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
+        val sqLiteDatabase = getReadableDb()
         sqLiteDatabase.beginTransaction()
         try {
             val c = sqLiteDatabase.query(
@@ -498,7 +444,7 @@ class AssetReviewContentDbHelper {
         val selectionArgs = arrayOf("%$description%")
         val order = DESCRIPTION
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
+        val sqLiteDatabase = getReadableDb()
         sqLiteDatabase.beginTransaction()
         try {
             val c = sqLiteDatabase.query(

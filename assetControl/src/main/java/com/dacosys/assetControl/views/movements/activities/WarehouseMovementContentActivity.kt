@@ -15,6 +15,7 @@ import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.Switch
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
@@ -24,23 +25,15 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.transition.ChangeBounds
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.Statics.AssetControl.Companion.getContext
-import com.dacosys.assetControl.utils.Statics.Companion.isRfidRequired
 import com.dacosys.assetControl.databinding.ProgressBarDialogBinding
 import com.dacosys.assetControl.databinding.WarehouseMovementContentBottomPanelCollapsedBinding
-import com.dacosys.assetControl.utils.UTCDataTime.Companion.getUTCDateTimeAsString
-import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.scannedCode.ScannedCode
-import com.dacosys.assetControl.utils.scanners.JotterListener
-import com.dacosys.assetControl.utils.scanners.Scanner
-import com.dacosys.assetControl.utils.scanners.nfc.Nfc
-import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.model.assets.asset.`object`.Asset
 import com.dacosys.assetControl.model.assets.asset.dbHelper.AssetAdapter
 import com.dacosys.assetControl.model.assets.asset.dbHelper.AssetDbHelper
 import com.dacosys.assetControl.model.assets.assetStatus.AssetStatus
+import com.dacosys.assetControl.model.commons.SaveProgress
 import com.dacosys.assetControl.model.confirmStatus.ConfirmStatus
 import com.dacosys.assetControl.model.confirmStatus.ConfirmStatus.CREATOR.cancel
 import com.dacosys.assetControl.model.confirmStatus.ConfirmStatus.CREATOR.confirm
@@ -51,20 +44,31 @@ import com.dacosys.assetControl.model.movements.async.SaveMovement
 import com.dacosys.assetControl.model.movements.warehouseMovementContent.`object`.WarehouseMovementContent
 import com.dacosys.assetControl.model.movements.warehouseMovementContent.dbHelper.WarehouseMovementContentAdapter
 import com.dacosys.assetControl.model.movements.warehouseMovementContentStatus.WarehouseMovementContentStatus
-import com.dacosys.assetControl.sync.functions.ProgressStatus
+import com.dacosys.assetControl.network.utils.ProgressStatus
+import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.Statics.Companion.isRfidRequired
+import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.misc.ParcelLong
+import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.getUTCDateTimeAsString
+import com.dacosys.assetControl.utils.scanners.JotterListener
+import com.dacosys.assetControl.utils.scanners.ScannedCode
+import com.dacosys.assetControl.utils.scanners.Scanner
+import com.dacosys.assetControl.utils.scanners.nfc.Nfc
+import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.views.assets.asset.activities.AssetCRUDActivity
 import com.dacosys.assetControl.views.assets.asset.activities.AssetDetailActivity
 import com.dacosys.assetControl.views.assets.asset.activities.AssetPrintLabelActivity
 import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
 import com.dacosys.assetControl.views.movements.fragments.LocationHeaderFragment
+import com.dacosys.assetControl.views.reviews.viewModels.SaveReviewViewModel
 import com.dacosys.imageControl.`object`.Images
 import com.dacosys.imageControl.`object`.StatusObject
 import com.dacosys.imageControl.activities.ImageControlCameraActivity
 import com.dacosys.imageControl.activities.ImageControlGridActivity
 import com.dacosys.imageControl.dbHelper.DbCommands
-import com.dacosys.imageControl.main.DownloadTask
 import com.dacosys.imageControl.main.GetImagesTask
+import com.dacosys.imageControl.main.ImagesTask
 import com.dacosys.imageControl.wsObject.DocumentContentObject
 import com.dacosys.imageControl.wsObject.DocumentContentRequestResultObject
 import org.parceler.Parcels
@@ -76,14 +80,11 @@ class WarehouseMovementContentActivity :
     Rfid.RfidDeviceListener,
     SwipeRefreshLayout.OnRefreshListener,
     LocationHeaderFragment.LocationChangedListener,
-    SaveMovement.SaveMovementListener,
     WarehouseMovementContentAdapter.CheckedChangedListener,
     WarehouseMovementContentAdapter.DataSetChangedListener,
     AssetAdapter.Companion.EditAssetRequiredListener,
     AssetAdapter.Companion.AddPhotoRequiredListener,
-    AssetAdapter.Companion.AlbumViewRequiredListener,
-    GetImagesTask.GetImagesTask,
-    DownloadTask.DownloadTaskListener {
+    AssetAdapter.Companion.AlbumViewRequiredListener {
     override fun onDestroy() {
         destroyLocals()
         super.onDestroy()
@@ -210,6 +211,7 @@ class WarehouseMovementContentActivity :
     }
 
     private lateinit var binding: WarehouseMovementContentBottomPanelCollapsedBinding
+    private val saveViewModel: SaveReviewViewModel by viewModels()
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -220,10 +222,10 @@ class WarehouseMovementContentActivity :
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
+        saveViewModel.saveProgress.observe(this) { if (it != null) onSaveProgress(it) }
+
         headerFragment =
             supportFragmentManager.findFragmentById(binding.headerFragment.id) as LocationHeaderFragment?
-
-
 
         if (savedInstanceState != null) {
             loadBundleValues(savedInstanceState)
@@ -256,7 +258,7 @@ class WarehouseMovementContentActivity :
                     makeText(
                         binding.root,
                         getContext().getString(R.string.you_must_add_at_least_one_asset),
-                        SnackbarType.ERROR
+                        SnackBarType.ERROR
                     )
                 } else {
                     allowClicks = false
@@ -693,7 +695,7 @@ class WarehouseMovementContentActivity :
             val data = it?.data
             try {
                 if (it?.resultCode == RESULT_OK && data != null) {
-                    val idParcel = data.getParcelableArrayListExtra<Statics.ParcelLong>("ids")
+                    val idParcel = data.getParcelableArrayListExtra<ParcelLong>("ids")
                         ?: return@registerForActivityResult
 
                     val ids: java.util.ArrayList<Long?> = java.util.ArrayList()
@@ -713,7 +715,7 @@ class WarehouseMovementContentActivity :
                     } catch (ex: Exception) {
                         val res =
                             getContext().getString(R.string.an_error_occurred_while_trying_to_add_the_item)
-                        makeText(binding.root, res, SnackbarType.ERROR)
+                        makeText(binding.root, res, SnackBarType.ERROR)
                         Log.d(this::class.java.simpleName, res)
                     }
                 }
@@ -732,7 +734,7 @@ class WarehouseMovementContentActivity :
             makeText(
                 binding.root,
                 getContext().getString(R.string.you_must_select_a_destination_for_assets),
-                SnackbarType.ERROR
+                SnackBarType.ERROR
             )
 
             allowClicks = true
@@ -796,14 +798,19 @@ class WarehouseMovementContentActivity :
             allWmc.add(wmc)
         }
 
+        saveMovement(destWaId, allWmc)
+    }
+
+    private fun saveMovement(destWaId: Long, allWmc: ArrayList<WarehouseMovementContent>) {
         JotterListener.lockScanner(this, true)
+
         thread {
             val saveMovement = SaveMovement()
             saveMovement.addParams(
-                callback = this,
                 destWarehouseAreaId = destWaId,
                 obs = obs,
-                allMovementContent = allWmc
+                allMovementContent = allWmc,
+                onProgress = { saveViewModel.setSaveProgress(it) }
             )
             saveMovement.execute()
         }
@@ -819,7 +826,7 @@ class WarehouseMovementContentActivity :
             )
         } catch (ex: Exception) {
             ex.printStackTrace()
-            makeText(binding.root, ex.message.toString(), SnackbarType.ERROR)
+            makeText(binding.root, ex.message.toString(), SnackBarType.ERROR)
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         } finally {
             // Unless is blocked, unlock the partial
@@ -850,7 +857,7 @@ class WarehouseMovementContentActivity :
                 // Nada que hacer, volver
                 if (scannedCode.isEmpty()) {
                     val res = getString(R.string.invalid_code)
-                    makeText(binding.root, res, SnackbarType.ERROR)
+                    makeText(binding.root, res, SnackBarType.ERROR)
                     Log.d(this::class.java.simpleName, res)
                     continue
                 }
@@ -870,7 +877,7 @@ class WarehouseMovementContentActivity :
                         makeText(
                             binding.root,
                             getContext().getString(R.string.destination_changed),
-                            SnackbarType.INFO
+                            SnackBarType.INFO
                         )
                         headerFragment?.fill(sc.warehouseArea ?: return)
                     }
@@ -879,7 +886,7 @@ class WarehouseMovementContentActivity :
 
                 if (sc.codeFound && sc.asset != null && sc.labelNbr == 0) {
                     val res = getString(R.string.report_code)
-                    makeText(binding.root, res, SnackbarType.ERROR)
+                    makeText(binding.root, res, SnackBarType.ERROR)
                     Log.d(this::class.java.simpleName, res)
                     continue
                 }
@@ -888,7 +895,7 @@ class WarehouseMovementContentActivity :
                         ?: return).labelNumber == null)
                 ) {
                     val res = getString(R.string.no_printed_label)
-                    makeText(binding.root, res, SnackbarType.ERROR)
+                    makeText(binding.root, res, SnackBarType.ERROR)
                     Log.d(this::class.java.simpleName, res)
                     continue
                 }
@@ -899,7 +906,7 @@ class WarehouseMovementContentActivity :
                             && !manuallyAdded)
                 ) {
                     val res = getString(R.string.invalid_code)
-                    makeText(binding.root, res, SnackbarType.ERROR)
+                    makeText(binding.root, res, SnackBarType.ERROR)
                     Log.d(this::class.java.simpleName, res)
                     continue
                 }
@@ -923,7 +930,7 @@ class WarehouseMovementContentActivity :
                         }.forEach {
                             val res =
                                 "${(it ?: return@forEach).code} ${getString(R.string.already_registered)}"
-                            makeText(binding.root, res, SnackbarType.INFO)
+                            makeText(binding.root, res, SnackBarType.INFO)
                             Log.d(this::class.java.simpleName, res)
 
                             alreadyRegistered = true
@@ -936,7 +943,7 @@ class WarehouseMovementContentActivity :
 
                 if (sc.asset == null) {
                     val res = getString(R.string.unknown_code)
-                    makeText(binding.root, res, SnackbarType.ERROR)
+                    makeText(binding.root, res, SnackBarType.ERROR)
                     Log.d(this::class.java.simpleName, res)
                     continue
                 }
@@ -955,7 +962,7 @@ class WarehouseMovementContentActivity :
                             contStatus = WarehouseMovementContentStatus.noNeedToMove
 
                             val res = getString(R.string.is_already_in_the_area)
-                            makeText(binding.root, res, SnackbarType.INFO)
+                            makeText(binding.root, res, SnackBarType.INFO)
                         }
                     }
 
@@ -973,7 +980,7 @@ class WarehouseMovementContentActivity :
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
-            makeText(binding.root, ex.message.toString(), SnackbarType.ERROR)
+            makeText(binding.root, ex.message.toString(), SnackBarType.ERROR)
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
             return
         }
@@ -1033,14 +1040,19 @@ class WarehouseMovementContentActivity :
         }
     }
 
-    override fun onSaveMovementProgress(msg: String, taskStatus: Int, progress: Int?, total: Int?) {
-        showProgressDialog(
-            getContext().getString(R.string.saving_warehouse_movement),
+    private fun onSaveProgress(it: SaveProgress) {
+        if (isDestroyed || isFinishing) return
+
+        val msg: String = it.msg
+        val taskStatus: Int = it.taskStatus
+        val progress: Int = it.progress
+        val total: Int = it.total
+
+        showProgressDialog(getContext().getString(R.string.saving_route_process),
             msg,
             taskStatus,
             progress,
-            total
-        )
+            total)
 
         if (ProgressStatus.isFinishStatus(taskStatus)) {
             JotterListener.lockScanner(this, false)
@@ -1048,19 +1060,17 @@ class WarehouseMovementContentActivity :
 
         if (taskStatus == ProgressStatus.finished.id) {
             Statics.closeKeyboard(this)
-
             makeText(
                 binding.root,
                 getContext().getString(R.string.movement_performed_correctly),
-                SnackbarType.SUCCESS
+                SnackBarType.SUCCESS
             )
-
             setResult(RESULT_OK)
             finish()
         } else if (taskStatus == ProgressStatus.canceled.id ||
             taskStatus == ProgressStatus.crashed.id
         ) {
-            makeText(binding.root, msg, SnackbarType.ERROR)
+            makeText(binding.root, msg, SnackBarType.ERROR)
         }
     }
 
@@ -1289,15 +1299,14 @@ class WarehouseMovementContentActivity :
                 // Localmente no hay imágenes vamos a buscar en el servidor
                 val getDocs = GetImagesTask()
                 getDocs.addParams(
-                    callBack = this,
-                    callBack2 = this,
                     programId = Statics.INTERNAL_IMAGE_CONTROL_APP_ID,
                     programObjectId = tempTableId,
                     objId1 = tempObjectId,
-                    objId2 = ""
+                    objId2 = "",
+                    onImagesProgress = { onGetImages(it) }
                 )
                 getDocs.downloadFiles(false)
-                getDocs.start()
+                getDocs.execute()
             }
         }
     }
@@ -1344,14 +1353,16 @@ class WarehouseMovementContentActivity :
     private var tempObjectId = ""
     private var tempTableId = 0
 
-    override fun onGetImagesTaskListener(
-        status: com.dacosys.imageControl.misc.ProgressStatus,
-        msg: String,
-        docContReqResObj: DocumentContentRequestResultObject?,
-    ) {
-        if (status == com.dacosys.imageControl.misc.ProgressStatus.finished) {
+    private fun onGetImages(it: ImagesTask) {
+        if (isDestroyed || isFinishing) return
+
+        val status: ProgressStatus = ProgressStatus.getById(it.status.id) ?: ProgressStatus.unknown
+        val docContReqResObj: DocumentContentRequestResultObject? = it.docContReqResObj
+        val msg = it.msg
+
+        if (status == ProgressStatus.finished) {
             if (docContReqResObj == null) {
-                makeText(binding.root, msg, SnackbarType.INFO)
+                makeText(binding.root, msg, SnackBarType.INFO)
                 rejectNewInstances = false
                 return
             }
@@ -1359,7 +1370,7 @@ class WarehouseMovementContentActivity :
             if (docContReqResObj.documentContentArray == null ||
                 (docContReqResObj.documentContentArray ?: return).isEmpty()
             ) {
-                makeText(binding.root, getString(R.string.no_images), SnackbarType.INFO)
+                makeText(binding.root, getString(R.string.no_images), SnackBarType.INFO)
                 rejectNewInstances = false
                 return
             }
@@ -1371,7 +1382,7 @@ class WarehouseMovementContentActivity :
                 makeText(
                     binding.root,
                     getContext().getString(R.string.images_not_yet_processed),
-                    SnackbarType.INFO
+                    SnackBarType.INFO
                 )
                 rejectNewInstances = false
                 return
@@ -1379,21 +1390,6 @@ class WarehouseMovementContentActivity :
 
             showPhotoAlbum()
         }
-    }
-
-    override fun onDownloadTaskResult(
-        docContObj: DocumentContentObject?,
-        destination: String,
-        target: Int,
-    ) {
-    }
-
-    override fun onDownloadProgressChanged(
-        status: com.dacosys.imageControl.misc.ProgressStatus,
-        msg: String,
-        value: Int,
-        total: Int,
-    ) {
     }
 
     override fun onAddPhotoRequired(tableId: Int, itemId: Long, description: String) {

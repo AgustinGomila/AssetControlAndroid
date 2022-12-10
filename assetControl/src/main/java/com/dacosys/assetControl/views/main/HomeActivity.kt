@@ -24,6 +24,7 @@ import android.view.View.TEXT_ALIGNMENT_VIEW_START
 import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
@@ -34,32 +35,32 @@ import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat
 import androidx.core.splashscreen.SplashScreen
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.Statics.Companion.OFFLINE_MODE
-import com.dacosys.assetControl.utils.Statics.Companion.beginDataBaseHelper
-import com.dacosys.assetControl.utils.Statics.Companion.prefsGetString
 import com.dacosys.assetControl.databinding.HomeActivityBinding
-import com.dacosys.assetControl.utils.configuration.Preference
-import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.mainButton.MainButton
-import com.dacosys.assetControl.utils.scannedCode.ScannedCode
-import com.dacosys.assetControl.utils.scanners.JotterListener
-import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.model.assets.asset.dbHelper.AssetDbHelper
 import com.dacosys.assetControl.model.locations.warehouseArea.`object`.WarehouseArea
 import com.dacosys.assetControl.model.permissions.PermissionEntry
 import com.dacosys.assetControl.model.reviews.assetReview.`object`.AssetReview
 import com.dacosys.assetControl.model.users.user.`object`.User
-import com.dacosys.assetControl.sync.functions.ProgressStatus
-import com.dacosys.assetControl.sync.functions.Sync
-import com.dacosys.assetControl.sync.functions.SyncDownload
-import com.dacosys.assetControl.sync.functions.SyncRegistryType
+import com.dacosys.assetControl.network.sync.Sync
+import com.dacosys.assetControl.network.sync.SyncDownload
+import com.dacosys.assetControl.network.sync.SyncProgress
+import com.dacosys.assetControl.network.utils.ProgressStatus
+import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.Statics.Companion.OFFLINE_MODE
+import com.dacosys.assetControl.utils.Statics.Companion.prefsGetString
+import com.dacosys.assetControl.utils.configuration.Preference
+import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.mainButton.MainButton
+import com.dacosys.assetControl.utils.scanners.JotterListener
+import com.dacosys.assetControl.utils.scanners.ScannedCode
+import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.views.assets.assetManteinance.activities.AssetManteinanceSelectActivity
 import com.dacosys.assetControl.views.codeCheck.CodeCheckActivity
 import com.dacosys.assetControl.views.commons.activities.CRUDActivity
 import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
 import com.dacosys.assetControl.views.movements.activities.WarehouseMovementContentActivity
 import com.dacosys.assetControl.views.print.activities.PrintLabelActivity
 import com.dacosys.assetControl.views.reviews.activities.AssetReviewContentActivity
@@ -67,11 +68,11 @@ import com.dacosys.assetControl.views.reviews.activities.AssetReviewSelectActivi
 import com.dacosys.assetControl.views.routes.activities.DataCollectionRuleTargetActivity
 import com.dacosys.assetControl.views.routes.activities.RouteSelectActivity
 import com.dacosys.assetControl.views.sync.activities.SyncActivity
+import com.dacosys.assetControl.views.sync.viewModels.SyncViewModel
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import me.weishu.reflection.Reflection
 import org.parceler.Parcels
-import java.lang.ref.WeakReference
 import java.lang.reflect.Field
 import kotlin.concurrent.thread
 import kotlin.math.ceil
@@ -79,18 +80,10 @@ import kotlin.math.ceil
 
 class HomeActivity :
     AppCompatActivity(),
-    Scanner.ScannerListener,
-    Sync.Companion.SyncTaskProgress,
-    Statics.SessionCreated {
+    Scanner.ScannerListener {
     override fun attachBaseContext(base: Context) {
         super.attachBaseContext(base)
         Reflection.unseal(base)
-    }
-
-    override fun onSessionCreated(result: Boolean) {
-        if (!result) {
-            makeText(binding.root, getString(R.string.offline_mode), SnackbarType.INFO)
-        }
     }
 
     override fun onDestroy() {
@@ -123,7 +116,7 @@ class HomeActivity :
             // Nada que hacer, volver
             if (scanCode.trim().isEmpty()) {
                 val res = getString(R.string.invalid_code)
-                makeText(binding.root, res, SnackbarType.ERROR)
+                makeText(binding.root, res, SnackBarType.ERROR)
                 ErrorLog.writeLog(this, this::class.java.simpleName, res)
                 return
             }
@@ -140,7 +133,7 @@ class HomeActivity :
                 sc.warehouseArea
             } else {
                 val res = getString(R.string.invalid_warehouse_area_code)
-                makeText(binding.root, res, SnackbarType.ERROR)
+                makeText(binding.root, res, SnackBarType.ERROR)
                 null
             }
 
@@ -149,7 +142,7 @@ class HomeActivity :
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
-            makeText(binding.root, ex.message.toString(), SnackbarType.ERROR)
+            makeText(binding.root, ex.message.toString(), SnackBarType.ERROR)
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         } finally {
             // Unless is blocked, unlock the partial
@@ -163,7 +156,12 @@ class HomeActivity :
     override fun onResume() {
         super.onResume()
 
-        thread { Sync.startTimer(WeakReference(this), WeakReference(this)) }
+        // Inicia el hilo de sincronización
+        thread {
+            Sync.startTimer(
+                onSyncProgress = { syncViewModel.setSyncDownloadProgress(it) },
+                onSessionCreated = { syncViewModel.setSessionCreated(it) })
+        }
 
         JotterListener.lockScanner(this, false)
         rejectNewInstances = false
@@ -187,7 +185,7 @@ class HomeActivity :
 
     @SuppressLint("SetTextI18n")
     @Throws(PackageManager.NameNotFoundException::class)
-    private fun initActivity() {
+    private fun initLayoutActivity() {
         setupHeaderPanel()
         setupSyncPanel()
         setupButtons()
@@ -222,7 +220,7 @@ class HomeActivity :
                     makeText(
                         binding.root,
                         getString(R.string.you_do_not_have_permission_to_make_revisions),
-                        SnackbarType.ERROR
+                        SnackBarType.ERROR
                     )
                     return
                 }
@@ -255,7 +253,7 @@ class HomeActivity :
                     makeText(
                         binding.root,
                         getString(R.string.you_do_not_have_permission_to_move_assets),
-                        SnackbarType.ERROR
+                        SnackBarType.ERROR
                     )
                     return
                 }
@@ -288,7 +286,7 @@ class HomeActivity :
                     makeText(
                         binding.root,
                         getString(R.string.you_do_not_have_permission_to_print_labels),
-                        SnackbarType.ERROR
+                        SnackBarType.ERROR
                     )
                     return
                 }
@@ -419,13 +417,14 @@ class HomeActivity :
             makeText(
                 binding.root,
                 getString(R.string.invalid_password),
-                SnackbarType.ERROR
+                SnackBarType.ERROR
             )
         }
     }
 
     private lateinit var splashScreen: SplashScreen
     private lateinit var binding: HomeActivityBinding
+    private val syncViewModel: SyncViewModel by viewModels()
 
     private fun createSplashScreen() {
         // Set up 'core-splashscreen' to handle the splash screen in a backward compatible manner.
@@ -442,15 +441,16 @@ class HomeActivity :
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        beginDataBaseHelper()
+        initLayoutActivity()
 
-        initActivity()
+        syncViewModel.syncDownloadProgress.observe(this) { if (it != null) onSyncTaskProgress(it) }
+        syncViewModel.sessionCreated.observe(this) { if (it != null) onSessionCreated(it) }
 
         if (Statics.wsUrl.isEmpty() || Statics.wsNamespace.isEmpty()) {
             makeText(
                 binding.root,
                 getString(R.string.webservice_is_not_configured),
-                SnackbarType.ERROR
+                SnackBarType.ERROR
             )
             setupInitConfig()
         } else {
@@ -479,7 +479,7 @@ class HomeActivity :
                     makeText(
                         binding.root,
                         getString(R.string.webservice_is_not_configured),
-                        SnackbarType.ERROR
+                        SnackBarType.ERROR
                     )
                     setupInitConfig()
                 } else {
@@ -508,7 +508,7 @@ class HomeActivity :
     private val resultForLogin =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             try {
-                initActivity()
+                initLayoutActivity()
             } catch (ex: Exception) {
                 ex.printStackTrace()
                 ErrorLog.writeLog(this, this::class.java.simpleName, ex)
@@ -557,19 +557,21 @@ class HomeActivity :
 
     //region SYNC PANELS
 
-    override fun onSyncTaskProgress(
-        totalTask: Int,
-        completedTask: Int,
-        msg: String,
-        registryType: SyncRegistryType?,
-        progressStatus: ProgressStatus,
-    ) {
-        when (progressStatus) {
+    private fun onSessionCreated(result: Boolean) {
+        if (!result) {
+            makeText(binding.root, getString(R.string.offline_mode), SnackBarType.INFO)
+        }
+    }
+
+    private fun onSyncTaskProgress(it: SyncProgress) {
+        if (isDestroyed || isFinishing) return
+
+        when (it.progressStatus) {
             ProgressStatus.bigStarting,
             ProgressStatus.starting,
             ProgressStatus.running,
             -> runOnUiThread {
-                setSyncTextView(msg)
+                setSyncTextView(it.msg)
             }
             ProgressStatus.bigCrashed,
             ProgressStatus.bigFinished,
@@ -630,7 +632,7 @@ class HomeActivity :
                 makeText(
                     binding.root,
                     "${getString(R.string.exception_error)}: " + ex.message,
-                    SnackbarType.ERROR
+                    SnackBarType.ERROR
                 )
             }
         }
@@ -752,7 +754,7 @@ class HomeActivity :
                             it.colorFilter =
                                 BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
                                     ResourcesCompat.getColor(
-                                        Statics.AssetControl.getContext().resources,
+                                        getContext().resources,
                                         R.color.white,
                                         null
                                     ),
@@ -828,7 +830,7 @@ class HomeActivity :
     //endregion
 
     private fun beginAssetReview(warehouseArea: WarehouseArea) {
-        makeText(binding.root, warehouseArea.description, SnackbarType.INFO)
+        makeText(binding.root, warehouseArea.description, SnackBarType.INFO)
 
         // Contar la cantidad activos del área
         // Si es mayor a 1000, pedir que divida el área para poder hacer revisiones
@@ -840,7 +842,7 @@ class HomeActivity :
                     R.string.there_are_x_assets_in_the_selected_area_divide_the_area_into_units_of_up_to_1000_assets_to_be_able_to_make_revisions,
                     qty.toString()
                 ),
-                SnackbarType.ERROR
+                SnackBarType.ERROR
             )
         } else {
             // Agregar un AssetReview del área
@@ -882,28 +884,19 @@ class HomeActivity :
     private fun syncDownload() {
         try {
             if (OFFLINE_MODE || !Statics.isOnline()) {
-                makeText(
-                    binding.root,
-                    getString(R.string.offline_mode),
-                    SnackbarType.INFO
-                )
+                makeText(binding.root, getString(R.string.offline_mode), SnackBarType.INFO)
                 return
             }
-
             thread {
-                val syncDownload = SyncDownload()
-                syncDownload.addParams(WeakReference(this), WeakReference(this))
-                syncDownload.execute()
+                SyncDownload(
+                    onSyncTaskProgress = { syncViewModel.setSyncDownloadProgress(it) },
+                    onSessionCreated = { syncViewModel.setSessionCreated(it) })
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
-            makeText(
-                binding.root,
-                "${
-                    Statics.AssetControl.getContext().getString(R.string.error)
-                }: ${ex.message}",
-                SnackbarType.ERROR
-            )
+            makeText(binding.root,
+                "${getContext().getString(R.string.error)}: ${ex.message}",
+                SnackBarType.ERROR)
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         }
     }
@@ -915,9 +908,9 @@ class HomeActivity :
             } else {
                 makeText(
                     binding.root,
-                    Statics.AssetControl.getContext()
+                    getContext()
                         .getString(R.string.error_restarting_sync_dates),
-                    SnackbarType.ERROR
+                    SnackBarType.ERROR
                 )
             }
         } catch (ex: Exception) {
@@ -925,9 +918,9 @@ class HomeActivity :
             makeText(
                 binding.root,
                 "${
-                    Statics.AssetControl.getContext().getString(R.string.error)
+                    getContext().getString(R.string.error)
                 }: ${ex.message}",
-                SnackbarType.ERROR
+                SnackBarType.ERROR
             )
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
         }
@@ -950,7 +943,7 @@ class HomeActivity :
                     makeText(
                         binding.root,
                         getString(R.string.you_do_not_have_access_to_the_configuration),
-                        SnackbarType.ERROR
+                        SnackBarType.ERROR
                     )
                 }
                 return true

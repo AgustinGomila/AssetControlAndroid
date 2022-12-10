@@ -3,7 +3,6 @@ package com.dacosys.assetControl.model.users.user.`object`
 import android.content.ContentValues
 import android.os.Parcel
 import android.os.Parcelable
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.model.permissions.PermissionEntry
 import com.dacosys.assetControl.model.users.user.dbHelper.UserContract.UserEntry.Companion.ACTIVE
 import com.dacosys.assetControl.model.users.user.dbHelper.UserContract.UserEntry.Companion.EMAIL
@@ -13,6 +12,7 @@ import com.dacosys.assetControl.model.users.user.dbHelper.UserContract.UserEntry
 import com.dacosys.assetControl.model.users.user.dbHelper.UserContract.UserEntry.Companion.USER_ID
 import com.dacosys.assetControl.model.users.user.dbHelper.UserDbHelper
 import com.dacosys.assetControl.model.users.userPermission.dbHelper.UserPermissionDbHelper
+import com.dacosys.assetControl.utils.Statics
 
 class User : Parcelable {
     // setters

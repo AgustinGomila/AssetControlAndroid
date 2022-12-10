@@ -7,6 +7,7 @@ import android.provider.ContactsContract
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.configuration.Preference
 import com.dacosys.assetControl.utils.scanners.Scanner
@@ -142,7 +143,7 @@ class Zebra(private val activity: AppCompatActivity) : Scanner() {
 
         // Create APP_LIST bundle to associate app with profile
         val appConfig = Bundle()
-        appConfig.putString("PACKAGE_NAME", Statics.AssetControl.getContext().packageName)
+        appConfig.putString("PACKAGE_NAME", getContext().packageName)
         appConfig.putStringArray("ACTIVITY_LIST", arrayOf("*"))
         profileConfig.putParcelableArray("APP_LIST", arrayOf(appConfig))
         sendDataWedgeIntentWithExtra(EXTRA_SET_CONFIG, profileConfig)
@@ -150,7 +151,7 @@ class Zebra(private val activity: AppCompatActivity) : Scanner() {
         // Register for status change notification
         // Use REGISTER_FOR_NOTIFICATION: http://techdocs.zebra.com/datawedge/latest/guide/api/registerfornotification/
         val b = Bundle()
-        b.putString(EXTRA_KEY_APPLICATION_NAME, Statics.AssetControl.getContext().packageName)
+        b.putString(EXTRA_KEY_APPLICATION_NAME, getContext().packageName)
         b.putString(
             EXTRA_KEY_NOTIFICATION_TYPE,
             "SCANNER_STATUS"
@@ -193,7 +194,7 @@ class Zebra(private val activity: AppCompatActivity) : Scanner() {
 
         // Associate profile with this app
         val appConfig = Bundle()
-        appConfig.putString("PACKAGE_NAME", Statics.AssetControl.getContext().packageName)
+        appConfig.putString("PACKAGE_NAME", getContext().packageName)
         appConfig.putStringArray("ACTIVITY_LIST", arrayOf("*"))
         profileConfig.putParcelableArray("APP_LIST", arrayOf(appConfig))
         profileConfig.remove("PLUGIN_CONFIG")
@@ -246,7 +247,7 @@ class Zebra(private val activity: AppCompatActivity) : Scanner() {
     private fun unRegisterScannerStatus() {
         Log.v(javaClass.simpleName, "unRegisterScannerStatus() on $activityName")
         val b = Bundle()
-        b.putString(EXTRA_KEY_APPLICATION_NAME, Statics.AssetControl.getContext().packageName)
+        b.putString(EXTRA_KEY_APPLICATION_NAME, getContext().packageName)
         b.putString(EXTRA_KEY_NOTIFICATION_TYPE, EXTRA_KEY_VALUE_SCANNER_STATUS)
         val i = Intent()
         i.action = ContactsContract.Intents.Insert.ACTION

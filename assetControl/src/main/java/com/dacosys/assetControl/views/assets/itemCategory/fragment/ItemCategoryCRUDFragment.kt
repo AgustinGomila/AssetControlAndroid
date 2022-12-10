@@ -12,18 +12,17 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.databinding.ItemCategoryCrudFragmentBinding
-import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.model.assets.itemCategory.`object`.ItemCategory
 import com.dacosys.assetControl.model.assets.itemCategory.`object`.ItemCategoryCRUD
 import com.dacosys.assetControl.model.assets.itemCategory.dbHelper.ItemCategoryDbHelper
 import com.dacosys.assetControl.model.assets.itemCategory.wsObject.ItemCategoryObject
 import com.dacosys.assetControl.model.permissions.PermissionEntry
 import com.dacosys.assetControl.model.users.user.`object`.User
+import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.views.assets.itemCategory.activities.ItemCategorySelectActivity
 import com.dacosys.assetControl.views.commons.snackbar.MakeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
 import org.parceler.Parcels
-import kotlin.concurrent.thread
 
 class ItemCategoryCRUDFragment : Fragment() {
     private var rejectNewInstances = false
@@ -183,7 +182,7 @@ class ItemCategoryCRUDFragment : Fragment() {
             MakeText.makeText(
                 binding.root,
                 getString(R.string.you_must_enter_a_description_for_the_category),
-                SnackbarType.INFO
+                SnackBarType.INFO
             )
             binding.descriptionEditText.requestFocus()
             return false
@@ -205,25 +204,23 @@ class ItemCategoryCRUDFragment : Fragment() {
                 MakeText.makeText(
                     binding.root,
                     getString(R.string.you_do_not_have_permission_to_add_categories),
-                    SnackbarType.ERROR
+                    SnackBarType.ERROR
                 )
                 return false
             }
 
             val tempItemCategory = createWsItemCategory()
             if (tempItemCategory != null) {
-                thread {
-                    val itemCategoryAdd = ItemCategoryCRUD.ItemCategoryAdd()
-                    itemCategoryAdd.addParams(callback, tempItemCategory)
-                    itemCategoryAdd.execute()
-                }
+                val itemCategoryAdd = ItemCategoryCRUD.ItemCategoryAdd()
+                itemCategoryAdd.addParams(callback, tempItemCategory)
+                itemCategoryAdd.execute()
             }
         } else {
             if (!User.hasPermission(PermissionEntry.ModifyItemCategory)) {
                 MakeText.makeText(
                     binding.root,
                     getString(R.string.you_do_not_have_permission_to_modify_categories),
-                    SnackbarType.ERROR
+                    SnackBarType.ERROR
                 )
                 return false
             }
@@ -231,11 +228,10 @@ class ItemCategoryCRUDFragment : Fragment() {
             updateItemCategory()
             if (itemCategory != null) {
                 val tempItemCategory = ItemCategoryObject(itemCategory!!)
-                thread {
-                    val updateItemCategory = ItemCategoryCRUD.ItemCategoryUpdate()
-                    updateItemCategory.addParams(callback, tempItemCategory)
-                    updateItemCategory.execute()
-                }
+
+                val updateItemCategory = ItemCategoryCRUD.ItemCategoryUpdate()
+                updateItemCategory.addParams(callback, tempItemCategory)
+                updateItemCategory.execute()
             }
         }
         return false
@@ -268,7 +264,7 @@ class ItemCategoryCRUDFragment : Fragment() {
             MakeText.makeText(
                 binding.root,
                 getString(R.string.error_creating_the_category),
-                SnackbarType.ERROR
+                SnackBarType.ERROR
             )
             return null
         }

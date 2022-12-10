@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import android.widget.Button
 import android.widget.CheckBox
@@ -20,17 +19,7 @@ import androidx.transition.ChangeBounds
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.Statics.Companion.isRfidRequired
 import com.dacosys.assetControl.databinding.AssetCrudActivityBinding
-import com.dacosys.assetControl.utils.configuration.Preference
-import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.scannedCode.ScannedCode
-import com.dacosys.assetControl.utils.scanners.JotterListener
-import com.dacosys.assetControl.utils.scanners.Scanner
-import com.dacosys.assetControl.utils.scanners.nfc.Nfc
-import com.dacosys.assetControl.utils.scanners.rfid.Rfid
-import com.dacosys.assetControl.utils.scanners.vh75.Vh75Bt
 import com.dacosys.assetControl.model.assets.asset.`object`.Asset
 import com.dacosys.assetControl.model.assets.asset.`object`.AssetCRUD
 import com.dacosys.assetControl.model.assets.asset.`object`.AssetCRUD.Companion.RC_ERROR_INSERT
@@ -41,13 +30,21 @@ import com.dacosys.assetControl.model.assets.asset.`object`.AssetCRUD.Companion.
 import com.dacosys.assetControl.model.assets.asset.dbHelper.AssetDbHelper
 import com.dacosys.assetControl.model.assets.assetStatus.AssetStatus
 import com.dacosys.assetControl.model.table.Table
-import com.dacosys.assetControl.sync.functions.ProgressStatus
-import com.dacosys.assetControl.sync.functions.Sync.Companion.SyncTaskProgress
-import com.dacosys.assetControl.sync.functions.SyncRegistryType
+import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.Statics.Companion.isRfidRequired
+import com.dacosys.assetControl.utils.configuration.Preference
+import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.misc.ParcelLong
+import com.dacosys.assetControl.utils.scanners.JotterListener
+import com.dacosys.assetControl.utils.scanners.ScannedCode
+import com.dacosys.assetControl.utils.scanners.Scanner
+import com.dacosys.assetControl.utils.scanners.nfc.Nfc
+import com.dacosys.assetControl.utils.scanners.rfid.Rfid
+import com.dacosys.assetControl.utils.scanners.vh75.Vh75Bt
 import com.dacosys.assetControl.views.assets.asset.fragments.AssetCRUDFragment
 import com.dacosys.assetControl.views.assets.assetStatus.fragment.AssetStatusSpinnerFragment
 import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
 import com.dacosys.imageControl.fragments.ImageControlButtonsFragment
 import org.parceler.Parcels
 
@@ -55,7 +52,6 @@ class AssetCRUDActivity : AppCompatActivity(),
     Scanner.ScannerListener,
     AssetStatusSpinnerFragment.OnItemSelectedListener,
     AssetCRUD.Companion.TaskCompleted,
-    SyncTaskProgress,
     Rfid.RfidDeviceListener,
     ImageControlButtonsFragment.DescriptionRequired {
     override fun onDestroy() {
@@ -68,41 +64,19 @@ class AssetCRUDActivity : AppCompatActivity(),
         imageControlFragment = null
     }
 
-    override fun onSyncTaskProgress(
-        totalTask: Int,
-        completedTask: Int,
-        msg: String,
-        registryType: SyncRegistryType?,
-        progressStatus: ProgressStatus,
-    ) {
-        val progressStatusDesc = progressStatus.description
-        var registryDesc = getString(R.string.all_tasks)
-
-        if (registryType != null) {
-            registryDesc = registryType.description
-        }
-
-        Log.d(
-            this::class.java.simpleName, "$progressStatusDesc: $registryDesc, $msg ${
-                Statics.getPercentage(
-                    completedTask,
-                    totalTask
-                )
-            }"
-        )
-    }
-
     /**
      * Interface que recibe los resultados del alta/modificación
      * del activo
      */
     override fun onTaskCompleted(result: AssetCRUD.Companion.AssetCRUDResult) {
+        if (isDestroyed || isFinishing) return
+
         when (result.resultCode) {
             RC_UPDATE_OK -> {
                 makeText(
                     binding.root,
                     getString(R.string.asset_modified_correctly),
-                    SnackbarType.SUCCESS
+                    SnackBarType.SUCCESS
                 )
                 if (imageControlFragment != null && result.asset != null) {
                     imageControlFragment?.saveImages(true)
@@ -123,7 +97,7 @@ class AssetCRUDActivity : AppCompatActivity(),
                 makeText(
                     binding.root,
                     getString(R.string.asset_added_correctly),
-                    SnackbarType.SUCCESS
+                    SnackBarType.SUCCESS
                 )
                 if (imageControlFragment != null && result.asset != null) {
                     imageControlFragment?.updateObjectId1(
@@ -146,17 +120,17 @@ class AssetCRUDActivity : AppCompatActivity(),
             RC_ERROR_OBJECT_NULL -> makeText(
                 binding.root,
                 getString(R.string.error_null_object),
-                SnackbarType.ERROR
+                SnackBarType.ERROR
             )
             RC_ERROR_UPDATE -> makeText(
                 binding.root,
                 getString(R.string.error_updating_asset),
-                SnackbarType.ERROR
+                SnackBarType.ERROR
             )
             RC_ERROR_INSERT -> makeText(
                 binding.root,
                 getString(R.string.error_adding_asset),
-                SnackbarType.ERROR
+                SnackBarType.ERROR
             )
         }
     }
@@ -415,7 +389,7 @@ class AssetCRUDActivity : AppCompatActivity(),
             val intent = Intent(baseContext, AssetPrintLabelActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
             intent.putExtra("multiSelect", false)
-            intent.putExtra("onlyActive", false)
+            intent.putExtra("onlyActive", true)
             resultForAssetSelect.launch(intent)
         }
     }
@@ -426,7 +400,7 @@ class AssetCRUDActivity : AppCompatActivity(),
             try {
                 if (it?.resultCode == RESULT_OK && data != null) {
                     val idParcel =
-                        data.getParcelableArrayListExtra<Statics.ParcelLong>("ids")
+                        data.getParcelableArrayListExtra<ParcelLong>("ids")
                             ?: return@registerForActivityResult
 
                     val ids: java.util.ArrayList<Long?> = java.util.ArrayList()
@@ -443,7 +417,7 @@ class AssetCRUDActivity : AppCompatActivity(),
                         makeText(
                             binding.root,
                             getString(R.string.an_error_occurred_while_trying_to_add_the_item),
-                            SnackbarType.ERROR
+                            SnackBarType.ERROR
                         )
                         ErrorLog.writeLog(this, this::class.java.simpleName, ex)
                     }
@@ -658,7 +632,7 @@ class AssetCRUDActivity : AppCompatActivity(),
             makeText(
                 binding.root,
                 getString(R.string.there_is_no_rfid_device_connected),
-                SnackbarType.ERROR
+                SnackBarType.ERROR
             )
             return
         }
@@ -668,7 +642,7 @@ class AssetCRUDActivity : AppCompatActivity(),
                 makeText(
                     binding.root,
                     getString(R.string.failed_rfid_writing),
-                    SnackbarType.ERROR
+                    SnackBarType.ERROR
                 )
             }
         }
@@ -741,13 +715,13 @@ class AssetCRUDActivity : AppCompatActivity(),
             makeText(
                 binding.root,
                 getString(R.string.rfid_writing_ok),
-                SnackbarType.SUCCESS
+                SnackBarType.SUCCESS
             )
         } else {
             makeText(
                 binding.root,
                 getString(R.string.failed_rfid_writing),
-                SnackbarType.ERROR
+                SnackBarType.ERROR
             )
         }
     }

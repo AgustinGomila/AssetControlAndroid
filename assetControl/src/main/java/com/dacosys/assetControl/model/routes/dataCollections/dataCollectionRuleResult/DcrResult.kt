@@ -2,8 +2,8 @@ package com.dacosys.assetControl.model.routes.dataCollections.dataCollectionRule
 
 import android.os.Parcel
 import android.os.Parcelable
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
 import java.util.*
 
 class DcrResult : Parcelable {
@@ -52,12 +52,12 @@ class DcrResult : Parcelable {
             return arrayOfNulls(size)
         }
 
-        var cont = DcrResult(0, Statics.AssetControl.getContext().getString(R.string._continue))
-        var back = DcrResult(-1, Statics.AssetControl.getContext().getString(R.string.back))
-        var end = DcrResult(-2, Statics.AssetControl.getContext().getString(R.string.end))
+        var cont = DcrResult(0, getContext().getString(R.string._continue))
+        var back = DcrResult(-1, getContext().getString(R.string.back))
+        var end = DcrResult(-2, getContext().getString(R.string.end))
         var noContinue =
-            DcrResult(-3, Statics.AssetControl.getContext().getString(R.string.no_continue))
-        var levelX = DcrResult(-4, Statics.AssetControl.getContext().getString(R.string.level_x))
+            DcrResult(-3, getContext().getString(R.string.no_continue))
+        var levelX = DcrResult(-4, getContext().getString(R.string.level_x))
 
         fun getAll(): ArrayList<DcrResult> {
             val allSections = ArrayList<DcrResult>()

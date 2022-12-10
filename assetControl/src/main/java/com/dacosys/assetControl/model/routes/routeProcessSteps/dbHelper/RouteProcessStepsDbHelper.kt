@@ -3,8 +3,8 @@ package com.dacosys.assetControl.model.routes.routeProcessSteps.dbHelper
 import android.database.Cursor
 import android.database.SQLException
 import android.util.Log
-import com.dacosys.assetControl.dataBase.StaticDbHelper
-import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.getReadableDb
+import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.getWritableDb
 import com.dacosys.assetControl.model.routes.routeProcess.dbHelper.RouteProcessContract
 import com.dacosys.assetControl.model.routes.routeProcessSteps.`object`.RouteProcessSteps
 import com.dacosys.assetControl.model.routes.routeProcessSteps.dbHelper.RouteProcessStepsContract.RouteProcessStepsEntry.Companion.DATA_COLLECTION_ID
@@ -15,6 +15,7 @@ import com.dacosys.assetControl.model.routes.routeProcessSteps.dbHelper.RoutePro
 import com.dacosys.assetControl.model.routes.routeProcessSteps.dbHelper.RouteProcessStepsContract.RouteProcessStepsEntry.Companion.STEP
 import com.dacosys.assetControl.model.routes.routeProcessSteps.dbHelper.RouteProcessStepsContract.RouteProcessStepsEntry.Companion.TABLE_NAME
 import com.dacosys.assetControl.model.routes.routeProcessSteps.dbHelper.RouteProcessStepsContract.getAllColumns
+import com.dacosys.assetControl.utils.errorLog.ErrorLog
 
 /**
  * Created by Agustin on 28/12/2016.
@@ -55,7 +56,7 @@ class RouteProcessStepsDbHelper {
         WHERE (route_process_id = @route_process_id)
          */
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
+        val sqLiteDatabase = getReadableDb()
         try {
             val mCount = sqLiteDatabase.rawQuery(
                 "SELECT MAX(" + STEP + ")" +
@@ -77,21 +78,16 @@ class RouteProcessStepsDbHelper {
     private fun insert(routeProcessSteps: RouteProcessSteps): Long {
         Log.i(this::class.java.simpleName, ": SQLite -> insert")
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.insert(
+            return sqLiteDatabase.insert(
                 TABLE_NAME, null,
                 routeProcessSteps.toStepsValues()
             )
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: Exception) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             0
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -101,22 +97,17 @@ class RouteProcessStepsDbHelper {
         val selection = "$ROUTE_PROCESS_ID = ?" // WHERE code LIKE ?
         val selectionArgs = arrayOf(id.toString())
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.delete(
+            return sqLiteDatabase.delete(
                 TABLE_NAME,
                 selection,
                 selectionArgs
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: Exception) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -126,22 +117,17 @@ class RouteProcessStepsDbHelper {
         val selection = "$ROUTE_PROCESS_ID = ? AND $STEP = ?" // WHERE code LIKE ?
         val selectionArgs = arrayOf(id.toString(), step.toString())
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.delete(
+            return sqLiteDatabase.delete(
                 TABLE_NAME,
                 selection,
                 selectionArgs
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: Exception) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -151,22 +137,17 @@ class RouteProcessStepsDbHelper {
         val selection = "$DATA_COLLECTION_ID = ?" // WHERE code LIKE ?
         val selectionArgs = arrayOf(id.toString())
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.delete(
+            return sqLiteDatabase.delete(
                 TABLE_NAME,
                 selection,
                 selectionArgs
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: Exception) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -197,7 +178,7 @@ class RouteProcessStepsDbHelper {
                 "(" + RouteProcessContract.RouteProcessEntry.TRANSFERED_DATE + " IS NOT NULL) AND " +
                 "(" + RouteProcessContract.RouteProcessEntry.ROUTE_ID + " = " + routeId + ")))"
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
+        val sqLiteDatabase = getWritableDb()
         sqLiteDatabase.beginTransaction()
         try {
             sqLiteDatabase.execSQL(deleteQ)
@@ -213,22 +194,17 @@ class RouteProcessStepsDbHelper {
     fun deleteAll(): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> deleteAll")
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.delete(
+            return sqLiteDatabase.delete(
                 TABLE_NAME,
                 null,
                 null
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -238,7 +214,7 @@ class RouteProcessStepsDbHelper {
         val columns = getAllColumns()
         val order = LEVEL
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
+        val sqLiteDatabase = getReadableDb()
         sqLiteDatabase.beginTransaction()
         try {
             val c = sqLiteDatabase.query(
@@ -269,8 +245,7 @@ class RouteProcessStepsDbHelper {
         val selectionArgs = arrayOf(routeProcessId.toString())
         val order = LEVEL
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getReadableDb()
         try {
             val c = sqLiteDatabase.query(
                 TABLE_NAME, // Nombre de la tabla
@@ -281,19 +256,16 @@ class RouteProcessStepsDbHelper {
                 null, // Condición HAVING para GROUP BY
                 order  // Cláusula ORDER BY
             )
-            sqLiteDatabase.setTransactionSuccessful()
             return fromCursor(c)
         } catch (ex: Exception) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             return ArrayList()
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
     private fun getChangesCount(): Long {
-        val db = StaticDbHelper.getReadableDb()
+        val db = getReadableDb()
         val statement = db.compileStatement("SELECT changes()")
         return statement.simpleQueryForLong()
     }
@@ -323,21 +295,18 @@ class RouteProcessStepsDbHelper {
                     POSITION + " = " + routeProcessSteps.position + " AND " +
                     STEP + " = " + routeProcessSteps.step + " )"
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
-        return try {
+        val sqLiteDatabase = getWritableDb()
+        val result: Boolean = try {
             val c = sqLiteDatabase.rawQuery(updateQ, null)
             c.moveToFirst()
             c.close()
-            sqLiteDatabase.setTransactionSuccessful()
             getChangesCount() > 0
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
+        return result
     }
 
     fun selectByCollectorRouteProcessContentId(id: Long): ArrayList<RouteProcessSteps> {
@@ -351,7 +320,7 @@ class RouteProcessStepsDbHelper {
         val selectionArgs = arrayOf(id.toString())
         val order = LEVEL
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
+        val sqLiteDatabase = getReadableDb()
         sqLiteDatabase.beginTransaction()
         try {
             val c = sqLiteDatabase.query(

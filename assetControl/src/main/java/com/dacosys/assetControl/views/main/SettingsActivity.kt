@@ -25,21 +25,25 @@ import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.preference.*
 import androidx.preference.Preference.OnPreferenceClickListener
+import com.dacosys.assetControl.AssetControlApp
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
+import com.dacosys.assetControl.dataBase.DataBaseHelper
+import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.copyDataBase
+import com.dacosys.assetControl.databinding.SettingsActivityBinding
+import com.dacosys.assetControl.network.checkConn.CheckWsConnection
+import com.dacosys.assetControl.network.checkConn.ImageControlCheckUser
+import com.dacosys.assetControl.network.clientPackages.ClientPackagesProgress
+import com.dacosys.assetControl.network.sync.SyncDownload
+import com.dacosys.assetControl.network.utils.*
 import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.Statics.AssetControl.Companion.getContext
 import com.dacosys.assetControl.utils.Statics.Companion.DATABASE_NAME
 import com.dacosys.assetControl.utils.Statics.Companion.OFFLINE_MODE
 import com.dacosys.assetControl.utils.Statics.Companion.generateQrCode
 import com.dacosys.assetControl.utils.Statics.Companion.getBarcodeForConfig
 import com.dacosys.assetControl.utils.Statics.Companion.getConfigFromScannedCode
 import com.dacosys.assetControl.utils.Statics.Companion.prefsGetString
-import com.dacosys.assetControl.utils.Statics.Companion.wsTestNamespace
-import com.dacosys.assetControl.utils.Statics.Companion.wsTestUrl
-import com.dacosys.assetControl.dataBase.DataBaseHelper
-import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.copyDataBase
-import com.dacosys.assetControl.databinding.SettingsActivityBinding
 import com.dacosys.assetControl.utils.configuration.DownloadController
 import com.dacosys.assetControl.utils.configuration.PathHelper
 import com.dacosys.assetControl.utils.configuration.QRConfigType
@@ -59,15 +63,10 @@ import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.utils.scanners.rfid.RfidType
 import com.dacosys.assetControl.utils.scanners.vh75.Vh75Bt
 import com.dacosys.assetControl.utils.scanners.vh75.Vh75Bt.Companion.STATE_CONNECTED
-import com.dacosys.assetControl.sync.functions.GetClientPackages
-import com.dacosys.assetControl.sync.functions.GetMySqlDate
-import com.dacosys.assetControl.sync.functions.ProgressStatus
-import com.dacosys.assetControl.sync.functions.SyncDownload
 import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType.CREATOR.ERROR
-import com.dacosys.assetControl.wsGeneral.Webservice
-import com.dacosys.imageControl.wsObject.UserAuthResultObject
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarEventData
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType.CREATOR.ERROR
 import com.google.android.gms.common.api.CommonStatusCodes
 import kotlinx.coroutines.*
 import org.json.JSONObject
@@ -77,6 +76,7 @@ import java.util.*
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 import kotlin.concurrent.thread
+import com.dacosys.assetControl.utils.configuration.Preference.Companion as PreferencesApp
 
 
 /**
@@ -96,7 +96,6 @@ class SettingsActivity :
     PreferenceFragmentCompat.OnPreferenceStartFragmentCallback,
     Scanner.ScannerListener,
     Statics.TaskConfigEnded,
-    GetClientPackages.TaskGetPackagesEnded,
     Statics.Companion.TaskConfigPanelEnded {
     class HeaderFragment : PreferenceFragmentCompat() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
@@ -108,7 +107,7 @@ class SettingsActivity :
         //region CAMERA SCAN
         var currentQRConfigType = QRConfigApp
 
-        fun okDoShit(qrConfigType: QRConfigType) {
+        fun doScanWork(qrConfigType: QRConfigType) {
             currentQRConfigType = qrConfigType
             // TODO: JotterListener.toggleCameraFloatingWindowVisibility(null)
         }
@@ -274,51 +273,51 @@ class SettingsActivity :
             proxyPass: String,
         ) {
             if (url.isEmpty() || namespace.isEmpty()) {
-                makeText(
-                    parentView,
-                    getContext()
-                        .getString(R.string.invalid_webservice_data),
-                    SnackbarType.INFO
-                )
+                showSnackBar(parentView, SnackBarEventData(getContext()
+                    .getString(R.string.invalid_webservice_data), SnackBarType.INFO))
                 return
             }
 
-            thread {
-                val x = CheckWsConnection()
-                x.addParams(parentView, url, namespace)
-                if (useProxy) {
-                    x.addProxyParams(
-                        useProxy,
-                        proxyUrl,
-                        proxyPort,
-                        proxyUser,
-                        proxyPass
-                    )
-                }
-                x.execute()
+            val x = CheckWsConnection(
+                url = url,
+                namespace = namespace,
+                onSnackBarEvent = { showSnackBar(parentView, it) },
+            )
+            if (useProxy) {
+                x.addProxyParams(
+                    useProxy = true,
+                    proxyUrl = proxyUrl,
+                    proxyPort = proxyPort,
+                    proxyUser = proxyUser,
+                    proxyPass = proxyPass
+                )
             }
+            x.execute()
         }
 
+        private fun showSnackBar(view: View, it: SnackBarEventData) {
+            makeText(view, it.text, it.snackBarType)
+        }
 
         /**
          * Limpia la información relacionada con la cuenta del usuario
          * ya que está configurando el webservice de manera manual
          */
         private fun cleanPanelWebData() {
-            Statics.prefsPutString(com.dacosys.assetControl.utils.configuration.Preference.urlPanel.key,
+            Statics.prefsPutString(PreferencesApp.urlPanel.key,
                 "")
             Statics.prefsPutString(
-                com.dacosys.assetControl.utils.configuration.Preference.installationCode.key,
+                PreferencesApp.installationCode.key,
                 ""
             )
             Statics.prefsPutString(
-                com.dacosys.assetControl.utils.configuration.Preference.clientPackage.key,
+                PreferencesApp.clientPackage.key,
                 ""
             )
-            Statics.prefsPutString(com.dacosys.assetControl.utils.configuration.Preference.clientEmail.key,
+            Statics.prefsPutString(PreferencesApp.clientEmail.key,
                 "")
             Statics.prefsPutString(
-                com.dacosys.assetControl.utils.configuration.Preference.clientPassword.key,
+                PreferencesApp.clientPassword.key,
                 ""
             )
         }
@@ -396,7 +395,7 @@ class SettingsActivity :
                         true
                     }
                     R.id.action_read_barcode -> {
-                        okDoShit(QRConfigApp)
+                        doScanWork(QRConfigApp)
                         true
                     }
                     else -> {
@@ -430,7 +429,7 @@ class SettingsActivity :
             makeText(
                 binding.settings,
                 getString(R.string.configuration_applied),
-                SnackbarType.INFO
+                SnackBarType.INFO
             )
             Statics.removeDataBases()
             onBackPressed()
@@ -443,13 +442,15 @@ class SettingsActivity :
         }
     }
 
-    override fun onTaskGetPackagesEnded(
-        status: ProgressStatus,
-        result: ArrayList<JSONObject>,
-        clientEmail: String,
-        clientPassword: String,
-        msg: String,
-    ) {
+    private fun onTaskGetPackagesEnded(it: ClientPackagesProgress) {
+        if (isDestroyed || isFinishing) return
+
+        val status: ProgressStatus = it.status
+        val result: ArrayList<JSONObject> = it.result
+        val clientEmail: String = it.clientEmail
+        val clientPassword: String = it.clientPassword
+        val msg: String = it.msg
+
         if (status == ProgressStatus.finished) {
             if (result.size > 0) {
                 runOnUiThread {
@@ -463,10 +464,10 @@ class SettingsActivity :
                     )
                 }
             } else {
-                makeText(binding.settings, msg, SnackbarType.INFO)
+                makeText(binding.settings, msg, SnackBarType.INFO)
             }
         } else if (status == ProgressStatus.success) {
-            makeText(binding.settings, msg, SnackbarType.SUCCESS)
+            makeText(binding.settings, msg, SnackBarType.SUCCESS)
         } else if (status == ProgressStatus.crashed ||
             status == ProgressStatus.canceled
         ) {
@@ -476,7 +477,7 @@ class SettingsActivity :
 
     override fun onTaskConfigEnded(result: Boolean, msg: String) {
         if (result) {
-            makeText(binding.settings, msg, SnackbarType.SUCCESS)
+            makeText(binding.settings, msg, SnackBarType.SUCCESS)
         } else {
             makeText(binding.settings, msg, ERROR)
         }
@@ -506,10 +507,9 @@ class SettingsActivity :
             }
 
             getConfigFromScannedCode(
-                callback = this,
                 scanCode = scanCode,
                 mode = currentQRConfigType
-            )
+            ) { onTaskGetPackagesEnded(it) }
         } catch (ex: Exception) {
             ex.printStackTrace()
             makeText(
@@ -557,13 +557,13 @@ class SettingsActivity :
             // updated to reflect the new value, per the Android Design
             // guidelines.
             bindPreferenceSummaryToValue(this,
-                com.dacosys.assetControl.utils.configuration.Preference.acFilterRouteDescription)
+                PreferencesApp.acFilterRouteDescription)
 
-            findPreference<Preference>(com.dacosys.assetControl.utils.configuration.Preference.registryError.key) as Preference
-            findPreference<Preference>(com.dacosys.assetControl.utils.configuration.Preference.showConfButton.key) as Preference
+            findPreference<Preference>(PreferencesApp.registryError.key) as Preference
+            findPreference<Preference>(PreferencesApp.showConfButton.key) as Preference
             if (BuildConfig.DEBUG) {
                 bindPreferenceSummaryToValue(this,
-                    com.dacosys.assetControl.utils.configuration.Preference.confPassword)
+                    PreferencesApp.confPassword)
             }
         }
 
@@ -581,7 +581,7 @@ class SettingsActivity :
             val scanConfigCode = findPreference<Preference>("scan_config_code")
             scanConfigCode?.onPreferenceClickListener = OnPreferenceClickListener {
                 try {
-                    okDoShit(QRConfigApp)
+                    doScanWork(QRConfigApp)
                     true
                 } catch (ex: Exception) {
                     ex.printStackTrace()
@@ -600,7 +600,7 @@ class SettingsActivity :
                 generateQrCode(
                     WeakReference(requireActivity()),
                     getBarcodeForConfig(
-                        com.dacosys.assetControl.utils.configuration.Preference.getAppConf(),
+                        PreferencesApp.getAppConf(),
                         Statics.appName
                     )
                 )
@@ -639,7 +639,6 @@ class SettingsActivity :
     }
 
     class AccountPreferenceFragment : PreferenceFragmentCompat(),
-        GetClientPackages.TaskGetPackagesEnded,
         Statics.Companion.TaskConfigPanelEnded {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             var key = rootKey
@@ -673,9 +672,9 @@ class SettingsActivity :
 
             if (BuildConfig.DEBUG) {
                 bindPreferenceSummaryToValue(this,
-                    com.dacosys.assetControl.utils.configuration.Preference.clientEmail)
+                    PreferencesApp.clientEmail)
                 bindPreferenceSummaryToValue(this,
-                    com.dacosys.assetControl.utils.configuration.Preference.clientPassword)
+                    PreferencesApp.clientPassword)
             }
         }
 
@@ -683,7 +682,7 @@ class SettingsActivity :
             super.onViewCreated(view, savedInstanceState)
 
             val emailEditText =
-                findPreference<Preference>(com.dacosys.assetControl.utils.configuration.Preference.clientEmail.key)
+                findPreference<Preference>(PreferencesApp.clientEmail.key)
             emailEditText?.setOnPreferenceChangeListener { preference, newValue ->
                 if (!alreadyAnsweredYes) {
                     val diaBox = askForDownloadDbRequired(
@@ -699,7 +698,7 @@ class SettingsActivity :
             }
 
             val passwordEditText =
-                findPreference<Preference>(com.dacosys.assetControl.utils.configuration.Preference.clientPassword.key)
+                findPreference<Preference>(PreferencesApp.clientPassword.key)
             passwordEditText?.setOnPreferenceChangeListener { preference, newValue ->
                 if (!alreadyAnsweredYes) {
                     val diaBox = askForDownloadDbRequired(
@@ -718,9 +717,9 @@ class SettingsActivity :
             selectPackageButton?.onPreferenceClickListener = OnPreferenceClickListener {
                 if (emailEditText != null && passwordEditText != null) {
                     val email =
-                        prefsGetString(com.dacosys.assetControl.utils.configuration.Preference.clientEmail)
+                        prefsGetString(PreferencesApp.clientEmail)
                     val password =
-                        prefsGetString(com.dacosys.assetControl.utils.configuration.Preference.clientPassword)
+                        prefsGetString(PreferencesApp.clientPassword)
 
                     if (!alreadyAnsweredYes) {
                         val diaBox = askForDownloadDbRequired2(
@@ -731,11 +730,10 @@ class SettingsActivity :
                     } else {
                         if (email.isNotEmpty() && password.isNotEmpty()) {
                             Statics.getConfig(
-                                callback = this,
                                 email = email,
                                 password = password,
                                 installationCode = ""
-                            )
+                            ) { onTaskGetPackagesEnded(it) }
                         }
                     }
                 }
@@ -745,7 +743,7 @@ class SettingsActivity :
             val scanConfigCode = findPreference<Preference>("scan_config_code")
             scanConfigCode?.onPreferenceClickListener = OnPreferenceClickListener {
                 try {
-                    okDoShit(QRConfigClientAccount)
+                    doScanWork(QRConfigClientAccount)
                     true
                 } catch (ex: Exception) {
                     ex.printStackTrace()
@@ -762,20 +760,20 @@ class SettingsActivity :
             val qrCodeButton = findPreference<Preference>("ac_qr_code")
             qrCodeButton?.onPreferenceClickListener = OnPreferenceClickListener {
                 val urlPanel =
-                    prefsGetString(com.dacosys.assetControl.utils.configuration.Preference.urlPanel)
+                    prefsGetString(PreferencesApp.urlPanel)
                 val installationCode =
-                    prefsGetString(com.dacosys.assetControl.utils.configuration.Preference.installationCode)
+                    prefsGetString(PreferencesApp.installationCode)
                 val clientEmail =
-                    prefsGetString(com.dacosys.assetControl.utils.configuration.Preference.clientEmail)
+                    prefsGetString(PreferencesApp.clientEmail)
                 val clientPassword =
-                    prefsGetString(com.dacosys.assetControl.utils.configuration.Preference.clientPassword)
+                    prefsGetString(PreferencesApp.clientPassword)
                 val clientPackage =
-                    prefsGetString(com.dacosys.assetControl.utils.configuration.Preference.clientPackage)
+                    prefsGetString(PreferencesApp.clientPackage)
 
                 if (urlPanel.isEmpty() || installationCode.isEmpty() || clientPackage.isEmpty() || clientEmail.isEmpty() || clientPassword.isEmpty()) {
                     makeText(
                         requireView(),
-                        Statics.AssetControl.getContext()
+                        AssetControlApp.getContext()
                             .getString(R.string.invalid_client_data), ERROR
                     )
                     return@OnPreferenceClickListener false
@@ -784,7 +782,7 @@ class SettingsActivity :
                 generateQrCode(
                     WeakReference(requireActivity()),
                     getBarcodeForConfig(
-                        com.dacosys.assetControl.utils.configuration.Preference.getClient(),
+                        PreferencesApp.getClient(),
                         "config"
                     )
                 )
@@ -877,11 +875,10 @@ class SettingsActivity :
 
                     if (email.isNotEmpty() && password.isNotEmpty()) {
                         Statics.getConfig(
-                            callback = this,
                             email = email,
                             password = password,
                             installationCode = ""
-                        )
+                        ) { onTaskGetPackagesEnded(it) }
                     }
                     dialog.dismiss()
                 }
@@ -1028,13 +1025,15 @@ class SettingsActivity :
             }
         }
 
-        override fun onTaskGetPackagesEnded(
-            status: ProgressStatus,
-            result: ArrayList<JSONObject>,
-            clientEmail: String,
-            clientPassword: String,
-            msg: String,
-        ) {
+        private fun onTaskGetPackagesEnded(it: ClientPackagesProgress) {
+            if (requireActivity().isDestroyed || requireActivity().isFinishing) return
+
+            val status: ProgressStatus = it.status
+            val result: ArrayList<JSONObject> = it.result
+            val clientEmail: String = it.clientEmail
+            val clientPassword: String = it.clientPassword
+            val msg: String = it.msg
+
             if (status == ProgressStatus.finished) {
                 if (result.size > 0) {
                     requireActivity().runOnUiThread {
@@ -1052,42 +1051,44 @@ class SettingsActivity :
                         makeText(
                             requireView(),
                             msg,
-                            SnackbarType.INFO
+                            SnackBarType.INFO
                         )
                 }
             } else if (status == ProgressStatus.success) {
-                if (view != null) makeText(
-                    requireView(),
+                if (view != null) showSnackBar(SnackBarEventData(
                     msg,
-                    SnackbarType.SUCCESS
-                )
+                    SnackBarType.SUCCESS
+                ))
             } else if (status == ProgressStatus.crashed ||
                 status == ProgressStatus.canceled
             ) {
-                if (view != null) makeText(
-                    requireView(),
+                if (view != null) showSnackBar(SnackBarEventData(
                     msg,
                     ERROR
-                )
+                ))
             }
         }
 
         override fun onTaskConfigPanelEnded(status: ProgressStatus) {
             if (status == ProgressStatus.finished) {
-                if (view != null) makeText(
-                    requireView(),
+                if (view != null) showSnackBar(SnackBarEventData(
                     getString(R.string.configuration_applied),
-                    SnackbarType.INFO
-                )
+                    SnackBarType.INFO
+                ))
                 Statics.removeDataBases()
                 requireActivity().onBackPressed()
             } else if (status == ProgressStatus.crashed) {
-                if (view != null) makeText(
-                    requireView(),
+                if (view != null) showSnackBar(SnackBarEventData(
                     getString(R.string.error_setting_user_panel),
                     ERROR
-                )
+                ))
             }
+        }
+
+        private fun showSnackBar(it: SnackBarEventData) {
+            if (requireActivity().isDestroyed || requireActivity().isFinishing) return
+
+            makeText(requireView(), it.text, it.snackBarType)
         }
     }
 
@@ -1157,7 +1158,7 @@ class SettingsActivity :
                 }
             } catch (ex: Exception) {
                 ex.printStackTrace()
-                makeText(v, getString(R.string.rfid_reader_not_initialized), SnackbarType.INFO)
+                makeText(v, getString(R.string.rfid_reader_not_initialized), SnackBarType.INFO)
                 ErrorLog.writeLog(activity, this::class.java.simpleName, ex)
             }
         }
@@ -1171,11 +1172,11 @@ class SettingsActivity :
         private fun setCollectorPref() {
             ////////////////// COLECTOR //////////////////
             bindPreferenceSummaryToValue(this,
-                com.dacosys.assetControl.utils.configuration.Preference.collectorType)
+                PreferencesApp.collectorType)
 
             // PERMITE ACTUALIZAR EN PANTALLA EL ITEM SELECCIONADO EN EL SUMMARY DEL CONTROL
             val collectorTypeListPreference =
-                findPreference<Preference>(com.dacosys.assetControl.utils.configuration.Preference.collectorType.key) as CollectorTypePreference
+                findPreference<Preference>(PreferencesApp.collectorType.key) as CollectorTypePreference
             if (collectorTypeListPreference.value == null) {
                 // to ensure we don't selectByItemId a null value
                 // set first value by default
@@ -1246,7 +1247,7 @@ class SettingsActivity :
 
             //region //// DEVICE LIST
             val deviceListPreference =
-                findPreference<Preference>(com.dacosys.assetControl.utils.configuration.Preference.printerBtAddress.key) as DevicePreference
+                findPreference<Preference>(PreferencesApp.printerBtAddress.key) as DevicePreference
             if (deviceListPreference.value == null) {
                 // to ensure we don't selectByItemId a null value
                 // set first value by default
@@ -1269,11 +1270,11 @@ class SettingsActivity :
 
             //region //// PRINTER IP / PORT
             val portNetPrinterPref =
-                findPreference<Preference>(com.dacosys.assetControl.utils.configuration.Preference.portNetPrinter.key) as EditTextPreference
+                findPreference<Preference>(PreferencesApp.portNetPrinter.key) as EditTextPreference
             portNetPrinterPref.summary = portNetPrinterPref.text
 
             val ipNetPrinterPref =
-                findPreference<Preference>(com.dacosys.assetControl.utils.configuration.Preference.ipNetPrinter.key) as EditTextPreference
+                findPreference<Preference>(PreferencesApp.ipNetPrinter.key) as EditTextPreference
             ipNetPrinterPref.summary = ipNetPrinterPref.text
 
             ipNetPrinterPref.setOnBindEditTextListener {
@@ -1304,11 +1305,11 @@ class SettingsActivity :
 
             //region //// USE BLUETOOTH / NET PRINTER
             val swPrefBtPrinter =
-                findPreference<Preference>(com.dacosys.assetControl.utils.configuration.Preference.useBtPrinter.key) as SwitchPreference
+                findPreference<Preference>(PreferencesApp.useBtPrinter.key) as SwitchPreference
             useBtPrinter = swPrefBtPrinter.isChecked
 
             val swPrefNetPrinter =
-                findPreference<Preference>(com.dacosys.assetControl.utils.configuration.Preference.useNetPrinter.key) as SwitchPreference
+                findPreference<Preference>(PreferencesApp.useNetPrinter.key) as SwitchPreference
             useNetPrinter = swPrefNetPrinter.isChecked
 
             swPrefBtPrinter.setOnPreferenceChangeListener { _, newValue ->
@@ -1334,7 +1335,7 @@ class SettingsActivity :
             //region //// POTENCIA Y VELOCIDAD
             val maxPower = 23
             val printerPowerPref =
-                findPreference<Preference>(com.dacosys.assetControl.utils.configuration.Preference.printerPower.key) as EditTextPreference
+                findPreference<Preference>(PreferencesApp.printerPower.key) as EditTextPreference
             printerPowerPref.summary = printerPowerPref.text
             printerPowerPref.setOnBindEditTextListener {
                 val filters = arrayOf(
@@ -1351,7 +1352,7 @@ class SettingsActivity :
 
             val maxSpeed = 10
             val printerSpeedPref =
-                findPreference<Preference>(com.dacosys.assetControl.utils.configuration.Preference.printerSpeed.key) as EditTextPreference
+                findPreference<Preference>(PreferencesApp.printerSpeed.key) as EditTextPreference
             printerSpeedPref.summary = printerSpeedPref.text
             printerSpeedPref.setOnBindEditTextListener {
                 val filters = arrayOf(
@@ -1374,13 +1375,13 @@ class SettingsActivity :
                 findPreference<Preference>("conf_printer_new_line_char_cr") as SwitchPreference
 
             val lineSeparator =
-                prefsGetString(com.dacosys.assetControl.utils.configuration.Preference.lineSeparator)
+                prefsGetString(PreferencesApp.lineSeparator)
             if (lineSeparator == Char(10).toString()) swPrefCharLF.isChecked
             else if (lineSeparator == Char(13).toString()) swPrefCharCR.isChecked
 
             swPrefCharLF.setOnPreferenceChangeListener { _, newValue ->
                 if (newValue == true) {
-                    Statics.prefsPutString(com.dacosys.assetControl.utils.configuration.Preference.lineSeparator.key,
+                    Statics.prefsPutString(PreferencesApp.lineSeparator.key,
                         Char(10).toString())
                     swPrefCharCR.isChecked = false
                 }
@@ -1389,7 +1390,7 @@ class SettingsActivity :
 
             swPrefCharCR.setOnPreferenceChangeListener { _, newValue ->
                 if (newValue == true) {
-                    Statics.prefsPutString(com.dacosys.assetControl.utils.configuration.Preference.lineSeparator.key,
+                    Statics.prefsPutString(PreferencesApp.lineSeparator.key,
                         Char(13).toString())
                     swPrefCharLF.isChecked = false
                 }
@@ -1424,7 +1425,7 @@ class SettingsActivity :
                 if (!isGranted) {
                     makeText(
                         v,
-                        Statics.AssetControl.getContext()
+                        AssetControlApp.getContext()
                             .getString(R.string.app_dont_have_necessary_permissions),
                         ERROR
                     )
@@ -1443,7 +1444,7 @@ class SettingsActivity :
 
             //region //// USE RFID
             val swPrefBtRfid =
-                findPreference<Preference>(com.dacosys.assetControl.utils.configuration.Preference.useBtRfid.key) as SwitchPreference
+                findPreference<Preference>(PreferencesApp.useBtRfid.key) as SwitchPreference
             useRfid = swPrefBtRfid.isChecked
 
             swPrefBtRfid.setOnPreferenceChangeListener { _, newValue ->
@@ -1487,7 +1488,7 @@ class SettingsActivity :
 
             //region //// DEVICE LIST PREFERENCE
             val deviceListPreference =
-                findPreference<Preference>(com.dacosys.assetControl.utils.configuration.Preference.rfidBtAddress.key) as DevicePreference
+                findPreference<Preference>(PreferencesApp.rfidBtAddress.key) as DevicePreference
             if (deviceListPreference.value == null) {
                 // to ensure we don't selectByItemId a null value
                 // set first value by default
@@ -1516,13 +1517,13 @@ class SettingsActivity :
 
             //region //// RFID POWER
             val rfidReadPower =
-                findPreference<Preference>(com.dacosys.assetControl.utils.configuration.Preference.rfidReadPower.key) as SeekBarPreference
+                findPreference<Preference>(PreferencesApp.rfidReadPower.key) as SeekBarPreference
             rfidReadPower.setOnPreferenceChangeListener { _, newValue ->
                 rfidReadPower.summary = "$newValue dB"
                 true
             }
             rfidReadPower.summary =
-                "${Statics.prefsGetInt(com.dacosys.assetControl.utils.configuration.Preference.rfidReadPower)} dB"
+                "${Statics.prefsGetInt(PreferencesApp.rfidReadPower)} dB"
             //endregion //// RFID POWER
 
             //region //// RESET TO FACTORY
@@ -1556,15 +1557,12 @@ class SettingsActivity :
         private fun connectToRfidDevice() {
             if (!useRfid) return
 
-            val bluetoothManager = Statics.AssetControl.getContext()
+            val bluetoothManager = AssetControlApp.getContext()
                 .getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
             val mBluetoothAdapter = bluetoothManager.adapter
             if (mBluetoothAdapter == null) {
-                makeText(
-                    v,
-                    getString(R.string.there_are_no_bluetooth_devices),
-                    SnackbarType.INFO
-                )
+                showSnackBar(SnackBarEventData(getString(R.string.there_are_no_bluetooth_devices),
+                    SnackBarType.INFO))
             } else {
                 if (!mBluetoothAdapter.isEnabled) {
                     val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
@@ -1610,7 +1608,7 @@ class SettingsActivity :
                 if (!isGranted) {
                     makeText(
                         v,
-                        Statics.AssetControl.getContext()
+                        AssetControlApp.getContext()
                             .getString(R.string.app_dont_have_necessary_permissions),
                         ERROR
                     )
@@ -1622,12 +1620,12 @@ class SettingsActivity :
             var s = summary
 
             if (address != null) {
-                val bluetoothManager = Statics.AssetControl.getContext()
+                val bluetoothManager = AssetControlApp.getContext()
                     .getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
                 val mBluetoothAdapter = bluetoothManager.adapter
 
                 if (ActivityCompat.checkSelfPermission(
-                        Statics.AssetControl.getContext(),
+                        AssetControlApp.getContext(),
                         Manifest.permission.BLUETOOTH_CONNECT
                     ) != PackageManager.PERMISSION_GRANTED
                 ) {
@@ -1650,6 +1648,12 @@ class SettingsActivity :
 
             return s
         }
+
+        private fun showSnackBar(it: SnackBarEventData) {
+            if (requireActivity().isDestroyed || requireActivity().isFinishing) return
+
+            makeText(requireView(), it.text, it.snackBarType)
+        }
     }
 
     /**
@@ -1657,7 +1661,6 @@ class SettingsActivity :
      * activity is showing a two-pane settings UI.
      */
     class ImageControlPreferenceFragment : PreferenceFragmentCompat(),
-        GetClientPackages.TaskGetPackagesEnded,
         Statics.Companion.TaskConfigPanelEnded {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             var key = rootKey
@@ -1684,29 +1687,29 @@ class SettingsActivity :
             super.onCreate(savedInstanceState)
 
             bindPreferenceSummaryToValue(this,
-                com.dacosys.assetControl.utils.configuration.Preference.icPhotoMaxHeightOrWidth)
+                PreferencesApp.icPhotoMaxHeightOrWidth)
 
             bindPreferenceSummaryToValue(this,
-                com.dacosys.assetControl.utils.configuration.Preference.icWsServer)
+                PreferencesApp.icWsServer)
             bindPreferenceSummaryToValue(this,
-                com.dacosys.assetControl.utils.configuration.Preference.icWsNamespace)
+                PreferencesApp.icWsNamespace)
 
             if (BuildConfig.DEBUG) {
                 bindPreferenceSummaryToValue(this,
-                    com.dacosys.assetControl.utils.configuration.Preference.icWsUser)
+                    PreferencesApp.icWsUser)
                 bindPreferenceSummaryToValue(this,
-                    com.dacosys.assetControl.utils.configuration.Preference.icWsPass)
+                    PreferencesApp.icWsPass)
                 bindPreferenceSummaryToValue(this,
-                    com.dacosys.assetControl.utils.configuration.Preference.icUser)
+                    PreferencesApp.icUser)
                 bindPreferenceSummaryToValue(this,
-                    com.dacosys.assetControl.utils.configuration.Preference.icPass)
+                    PreferencesApp.icPass)
             }
 
-            findPreference<Preference>(com.dacosys.assetControl.utils.configuration.Preference.icWsUseProxy.key)
+            findPreference<Preference>(PreferencesApp.icWsUseProxy.key)
             bindPreferenceSummaryToValue(this,
-                com.dacosys.assetControl.utils.configuration.Preference.icWsProxy)
+                PreferencesApp.icWsProxy)
             bindPreferenceSummaryToValue(this,
-                com.dacosys.assetControl.utils.configuration.Preference.icWsProxyPort)
+                PreferencesApp.icWsProxyPort)
 
             /*
             val proxyUrlEditText = findPreference<Preference>(P.icWsProxy.key)
@@ -1721,13 +1724,13 @@ class SettingsActivity :
             super.onViewCreated(view, savedInstanceState)
 
             val urlEditText =
-                findPreference<Preference>(com.dacosys.assetControl.utils.configuration.Preference.icWsServer.key)
+                findPreference<Preference>(PreferencesApp.icWsServer.key)
             val namespaceEditText =
-                findPreference<Preference>(com.dacosys.assetControl.utils.configuration.Preference.icWsNamespace.key)
+                findPreference<Preference>(PreferencesApp.icWsNamespace.key)
             val userEditText =
-                findPreference<Preference>(com.dacosys.assetControl.utils.configuration.Preference.icUser.key)
+                findPreference<Preference>(PreferencesApp.icUser.key)
             val passEditText =
-                findPreference<Preference>(com.dacosys.assetControl.utils.configuration.Preference.icPass.key)
+                findPreference<Preference>(PreferencesApp.icPass.key)
 
             val button = findPreference<Preference>("ic_test")
             button?.onPreferenceClickListener = OnPreferenceClickListener {
@@ -1737,9 +1740,9 @@ class SettingsActivity :
                     passEditText != null
                 ) {
                     val url =
-                        prefsGetString(com.dacosys.assetControl.utils.configuration.Preference.icWsServer)
+                        prefsGetString(PreferencesApp.icWsServer)
                     val namespace =
-                        prefsGetString(com.dacosys.assetControl.utils.configuration.Preference.icWsNamespace)
+                        prefsGetString(PreferencesApp.icWsNamespace)
 
                     testImageControlConnection(
                         url = url,
@@ -1761,20 +1764,20 @@ class SettingsActivity :
             val qrCodeButton = findPreference<Preference>("ic_qr_code")
             qrCodeButton?.onPreferenceClickListener = OnPreferenceClickListener {
                 val icUrl =
-                    prefsGetString(com.dacosys.assetControl.utils.configuration.Preference.icWsServer)
+                    prefsGetString(PreferencesApp.icWsServer)
                 val icNamespace =
-                    prefsGetString(com.dacosys.assetControl.utils.configuration.Preference.icWsNamespace)
+                    prefsGetString(PreferencesApp.icWsNamespace)
                 val icUserWs =
-                    prefsGetString(com.dacosys.assetControl.utils.configuration.Preference.icWsUser)
+                    prefsGetString(PreferencesApp.icWsUser)
                 val icPasswordWs =
-                    prefsGetString(com.dacosys.assetControl.utils.configuration.Preference.icWsPass)
+                    prefsGetString(PreferencesApp.icWsPass)
                 //val icUser = prefsGetString(P.icUser)
                 //val icPassword = prefsGetString(P.icPass)
 
                 if (icUrl.isEmpty() || icNamespace.isEmpty() || icUserWs.isEmpty() || icPasswordWs.isEmpty()) {
                     makeText(
                         requireView(),
-                        Statics.AssetControl.getContext()
+                        AssetControlApp.getContext()
                             .getString(R.string.invalid_webservice_data),
                         ERROR
                     )
@@ -1784,7 +1787,7 @@ class SettingsActivity :
                 generateQrCode(
                     WeakReference(requireActivity()),
                     getBarcodeForConfig(
-                        com.dacosys.assetControl.utils.configuration.Preference.getImageControl(),
+                        PreferencesApp.getImageControl(),
                         Statics.appName
                     )
                 )
@@ -1794,7 +1797,7 @@ class SettingsActivity :
             val scanConfigCode = findPreference<Preference>("scan_config_code")
             scanConfigCode?.onPreferenceClickListener = OnPreferenceClickListener {
                 try {
-                    okDoShit(QRConfigImageControl)
+                    doScanWork(QRConfigImageControl)
                     true
                 } catch (ex: Exception) {
                     ex.printStackTrace()
@@ -1819,7 +1822,7 @@ class SettingsActivity :
                 ) { dialog, _ ->
                     //your deleting code
                     val albumFolder = File(
-                        Statics.AssetControl.getContext().getExternalFilesDir(
+                        AssetControlApp.getContext().getExternalFilesDir(
                             Environment.DIRECTORY_PICTURES
                         ),
                         "ImageControl"
@@ -1848,82 +1851,36 @@ class SettingsActivity :
             namespace: String,
         ) {
             if (url.isEmpty() || namespace.isEmpty()) {
-                if (view != null) makeText(
-                    requireView(),
-                    Statics.AssetControl.getContext()
+                if (view != null) showSnackBar(SnackBarEventData(
+                    AssetControlApp.getContext()
                         .getString(R.string.invalid_webservice_data),
-                    SnackbarType.INFO
-                )
+                    SnackBarType.INFO
+                ))
                 return
             }
-
-            thread {
-                val x = ImageControlCheckUser()
-                x.addParams(requireView())
-                x.execute()
-            }
-        }
-
-        override fun onTaskGetPackagesEnded(
-            status: ProgressStatus,
-            result: ArrayList<JSONObject>,
-            clientEmail: String,
-            clientPassword: String,
-            msg: String,
-        ) {
-            if (status == ProgressStatus.finished) {
-                if (result.size > 0) {
-                    requireActivity().runOnUiThread {
-                        Statics.selectClientPackage(
-                            parentView = requireView(),
-                            callback = this,
-                            weakAct = WeakReference(requireActivity()),
-                            allPackage = result,
-                            email = clientEmail,
-                            password = clientPassword
-                        )
-                    }
-                } else {
-                    if (view != null)
-                        makeText(
-                            requireView(),
-                            msg,
-                            SnackbarType.INFO
-                        )
-                }
-            } else if (status == ProgressStatus.success) {
-                if (view != null) makeText(
-                    requireView(),
-                    msg,
-                    SnackbarType.SUCCESS
-                )
-            } else if (status == ProgressStatus.crashed ||
-                status == ProgressStatus.canceled
-            ) {
-                if (view != null) makeText(
-                    requireView(),
-                    msg,
-                    ERROR
-                )
-            }
+            ImageControlCheckUser { showSnackBar(it) }.execute()
         }
 
         override fun onTaskConfigPanelEnded(status: ProgressStatus) {
             if (status == ProgressStatus.finished) {
-                if (view != null) makeText(
-                    requireView(),
+                if (view != null) showSnackBar(SnackBarEventData(
                     getString(R.string.configuration_applied),
-                    SnackbarType.INFO
-                )
+                    SnackBarType.INFO
+                ))
                 Statics.removeDataBases()
                 requireActivity().onBackPressed()
             } else if (status == ProgressStatus.crashed) {
-                if (view != null) makeText(
-                    requireView(),
+                if (view != null) showSnackBar(SnackBarEventData(
                     getString(R.string.error_setting_user_panel),
                     ERROR
-                )
+                ))
             }
+        }
+
+        private fun showSnackBar(it: SnackBarEventData) {
+            if (requireActivity().isDestroyed || requireActivity().isFinishing) return
+
+            makeText(requireView(), it.text, it.snackBarType)
         }
     }
 
@@ -1958,25 +1915,25 @@ class SettingsActivity :
             super.onCreate(savedInstanceState)
 
             bindPreferenceSummaryToValue(this,
-                com.dacosys.assetControl.utils.configuration.Preference.acWsServer)
+                PreferencesApp.acWsServer)
             bindPreferenceSummaryToValue(this,
-                com.dacosys.assetControl.utils.configuration.Preference.acWsNamespace)
+                PreferencesApp.acWsNamespace)
 
             if (BuildConfig.DEBUG) {
                 bindPreferenceSummaryToValue(this,
-                    com.dacosys.assetControl.utils.configuration.Preference.acWsUser)
+                    PreferencesApp.acWsUser)
                 bindPreferenceSummaryToValue(this,
-                    com.dacosys.assetControl.utils.configuration.Preference.acWsPass)
+                    PreferencesApp.acWsPass)
                 bindPreferenceSummaryToValue(this,
-                    com.dacosys.assetControl.utils.configuration.Preference.acUser)
+                    PreferencesApp.acUser)
                 bindPreferenceSummaryToValue(this,
-                    com.dacosys.assetControl.utils.configuration.Preference.acPass)
+                    PreferencesApp.acPass)
             }
 
             bindPreferenceSummaryToValue(this,
-                com.dacosys.assetControl.utils.configuration.Preference.acWsProxy)
+                PreferencesApp.acWsProxy)
             bindPreferenceSummaryToValue(this,
-                com.dacosys.assetControl.utils.configuration.Preference.acWsProxyPort)
+                PreferencesApp.acWsProxyPort)
         }
 
         override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -1991,36 +1948,36 @@ class SettingsActivity :
             */
 
             val urlEditText =
-                findPreference<Preference>(com.dacosys.assetControl.utils.configuration.Preference.acWsServer.key)
+                findPreference<Preference>(PreferencesApp.acWsServer.key)
             val namespaceEditText =
-                findPreference<Preference>(com.dacosys.assetControl.utils.configuration.Preference.acWsNamespace.key)
+                findPreference<Preference>(PreferencesApp.acWsNamespace.key)
             val userWsEditText =
-                findPreference<Preference>(com.dacosys.assetControl.utils.configuration.Preference.acWsUser.key)
+                findPreference<Preference>(PreferencesApp.acWsUser.key)
             val passWsEditText =
-                findPreference<Preference>(com.dacosys.assetControl.utils.configuration.Preference.acWsPass.key)
+                findPreference<Preference>(PreferencesApp.acWsPass.key)
             val userEditText =
-                findPreference<Preference>(com.dacosys.assetControl.utils.configuration.Preference.acUser.key)
+                findPreference<Preference>(PreferencesApp.acUser.key)
             val passEditText =
-                findPreference<Preference>(com.dacosys.assetControl.utils.configuration.Preference.acPass.key)
+                findPreference<Preference>(PreferencesApp.acPass.key)
 
             val testButton = findPreference<Preference>("ac_test")
             testButton?.onPreferenceClickListener =
                 OnPreferenceClickListener {
                     if (urlEditText != null && namespaceEditText != null) {
                         val url =
-                            prefsGetString(com.dacosys.assetControl.utils.configuration.Preference.acWsServer)
+                            prefsGetString(PreferencesApp.acWsServer)
                         val namespace =
-                            prefsGetString(com.dacosys.assetControl.utils.configuration.Preference.acWsNamespace)
+                            prefsGetString(PreferencesApp.acWsNamespace)
                         val urlProxy =
-                            prefsGetString(com.dacosys.assetControl.utils.configuration.Preference.acWsProxy)
+                            prefsGetString(PreferencesApp.acWsProxy)
                         val proxyPort =
-                            Statics.prefsGetInt(com.dacosys.assetControl.utils.configuration.Preference.acWsProxyPort)
+                            Statics.prefsGetInt(PreferencesApp.acWsProxyPort)
                         val useProxy =
-                            Statics.prefsGetBoolean(com.dacosys.assetControl.utils.configuration.Preference.acWsUseProxy)
+                            Statics.prefsGetBoolean(PreferencesApp.acWsUseProxy)
                         val proxyUser =
-                            prefsGetString(com.dacosys.assetControl.utils.configuration.Preference.acWsProxyUser)
+                            prefsGetString(PreferencesApp.acWsProxyUser)
                         val proxyPass =
-                            prefsGetString(com.dacosys.assetControl.utils.configuration.Preference.acWsProxyPass)
+                            prefsGetString(PreferencesApp.acWsProxyPass)
 
                         testWsConnection(
                             parentView = requireView(),
@@ -2039,7 +1996,7 @@ class SettingsActivity :
             val scanConfigCode = findPreference<Preference>("scan_config_code")
             scanConfigCode?.onPreferenceClickListener = OnPreferenceClickListener {
                 try {
-                    okDoShit(QRConfigWebservice)
+                    doScanWork(QRConfigWebservice)
                     true
                 } catch (ex: Exception) {
                     ex.printStackTrace()
@@ -2056,18 +2013,18 @@ class SettingsActivity :
             val qrCodeButton = findPreference<Preference>("ac_qr_code")
             qrCodeButton?.onPreferenceClickListener = OnPreferenceClickListener {
                 val url =
-                    prefsGetString(com.dacosys.assetControl.utils.configuration.Preference.acWsServer)
+                    prefsGetString(PreferencesApp.acWsServer)
                 val namespace =
-                    prefsGetString(com.dacosys.assetControl.utils.configuration.Preference.acWsNamespace)
+                    prefsGetString(PreferencesApp.acWsNamespace)
                 val userWs =
-                    prefsGetString(com.dacosys.assetControl.utils.configuration.Preference.acWsUser)
+                    prefsGetString(PreferencesApp.acWsUser)
                 val passwordWs =
-                    prefsGetString(com.dacosys.assetControl.utils.configuration.Preference.acWsPass)
+                    prefsGetString(PreferencesApp.acWsPass)
 
                 if (url.isEmpty() || namespace.isEmpty() || userWs.isEmpty() || passwordWs.isEmpty()) {
                     makeText(
                         requireView(),
-                        Statics.AssetControl.getContext()
+                        AssetControlApp.getContext()
                             .getString(R.string.invalid_webservice_data),
                         ERROR
                     )
@@ -2077,7 +2034,7 @@ class SettingsActivity :
                 generateQrCode(
                     WeakReference(requireActivity()),
                     getBarcodeForConfig(
-                        com.dacosys.assetControl.utils.configuration.Preference.getAcWebserivce(),
+                        PreferencesApp.getAcWebserivce(),
                         Statics.appName
                     )
                 )
@@ -2206,26 +2163,26 @@ class SettingsActivity :
             super.onCreate(savedInstanceState)
 
             bindPreferenceSummaryToValue(this,
-                com.dacosys.assetControl.utils.configuration.Preference.acMantWsServer)
+                PreferencesApp.acMantWsServer)
             bindPreferenceSummaryToValue(this,
-                com.dacosys.assetControl.utils.configuration.Preference.acMantWsNamespace)
+                PreferencesApp.acMantWsNamespace)
 
             if (BuildConfig.DEBUG) {
                 bindPreferenceSummaryToValue(this,
-                    com.dacosys.assetControl.utils.configuration.Preference.acMantWsUser)
+                    PreferencesApp.acMantWsUser)
                 bindPreferenceSummaryToValue(this,
-                    com.dacosys.assetControl.utils.configuration.Preference.acMantWsPass)
+                    PreferencesApp.acMantWsPass)
                 bindPreferenceSummaryToValue(this,
-                    com.dacosys.assetControl.utils.configuration.Preference.acMantUser)
+                    PreferencesApp.acMantUser)
                 bindPreferenceSummaryToValue(this,
-                    com.dacosys.assetControl.utils.configuration.Preference.acMantPass)
+                    PreferencesApp.acMantPass)
             }
 
-            findPreference<Preference>(com.dacosys.assetControl.utils.configuration.Preference.acMantWsUseProxy.key)
+            findPreference<Preference>(PreferencesApp.acMantWsUseProxy.key)
             bindPreferenceSummaryToValue(this,
-                com.dacosys.assetControl.utils.configuration.Preference.acMantWsProxy)
+                PreferencesApp.acMantWsProxy)
             bindPreferenceSummaryToValue(this,
-                com.dacosys.assetControl.utils.configuration.Preference.acMantWsProxyPort)
+                PreferencesApp.acMantWsProxyPort)
 
             /*
             val proxyUrlEditText = findPreference<Preference>(P.acMantWsProxy.key)
@@ -2238,25 +2195,25 @@ class SettingsActivity :
             val button = findPreference<Preference>("ac_mant_test")
             button?.onPreferenceClickListener = OnPreferenceClickListener {
                 val urlEditText =
-                    findPreference<Preference>(com.dacosys.assetControl.utils.configuration.Preference.acMantWsServer.key)
+                    findPreference<Preference>(PreferencesApp.acMantWsServer.key)
                 val namespaceEditText =
-                    findPreference<Preference>(com.dacosys.assetControl.utils.configuration.Preference.acMantWsNamespace.key)
+                    findPreference<Preference>(PreferencesApp.acMantWsNamespace.key)
 
                 if (urlEditText != null && namespaceEditText != null) {
                     val url =
-                        prefsGetString(com.dacosys.assetControl.utils.configuration.Preference.acMantWsServer)
+                        prefsGetString(PreferencesApp.acMantWsServer)
                     val namespace =
-                        prefsGetString(com.dacosys.assetControl.utils.configuration.Preference.acMantWsNamespace)
+                        prefsGetString(PreferencesApp.acMantWsNamespace)
                     val urlProxy =
-                        prefsGetString(com.dacosys.assetControl.utils.configuration.Preference.acMantWsProxy)
+                        prefsGetString(PreferencesApp.acMantWsProxy)
                     val proxyPort =
-                        Statics.prefsGetInt(com.dacosys.assetControl.utils.configuration.Preference.acMantWsProxyPort)
+                        Statics.prefsGetInt(PreferencesApp.acMantWsProxyPort)
                     val useProxy =
-                        Statics.prefsGetBoolean(com.dacosys.assetControl.utils.configuration.Preference.acMantWsUseProxy)
+                        Statics.prefsGetBoolean(PreferencesApp.acMantWsUseProxy)
                     val proxyUser =
-                        prefsGetString(com.dacosys.assetControl.utils.configuration.Preference.acMantWsProxyUser)
+                        prefsGetString(PreferencesApp.acMantWsProxyUser)
                     val proxyPass =
-                        prefsGetString(com.dacosys.assetControl.utils.configuration.Preference.acMantWsProxyPass)
+                        prefsGetString(PreferencesApp.acMantWsProxyPass)
 
                     testWsConnection(
                         parentView = requireView(),
@@ -2323,7 +2280,7 @@ class SettingsActivity :
             bindPreferenceSummaryToValue(this, ConfEntry.acSyncQtyRegistry)
             bindPreferenceSummaryToValue(
                 this,
-                com.dacosys.assetControl.utils.configuration.Preference.acSyncInterval
+                PreferencesApp.acSyncInterval
             )
 
             val downloadDbButton = findPreference<Preference>("download_db_data")
@@ -2337,7 +2294,7 @@ class SettingsActivity :
                         makeText(
                             requireView(),
                             "${
-                                Statics.AssetControl.getContext().getString(R.string.error)
+                                AssetControlApp.getContext().getString(R.string.error)
                             }: ${ex.message}",
                             ERROR
                         )
@@ -2354,14 +2311,14 @@ class SettingsActivity :
                         if (SyncDownload.resetSyncDates()) {
                             if (view != null) makeText(
                                 requireView(),
-                                Statics.AssetControl.getContext()
+                                AssetControlApp.getContext()
                                     .getString(R.string.synchronization_dates_restarted_successfully),
-                                SnackbarType.SUCCESS
+                                SnackBarType.SUCCESS
                             )
                         } else {
                             if (view != null) makeText(
                                 requireView(),
-                                Statics.AssetControl.getContext()
+                                AssetControlApp.getContext()
                                     .getString(R.string.error_restarting_sync_dates),
                                 ERROR
                             )
@@ -2372,7 +2329,7 @@ class SettingsActivity :
                             makeText(
                                 requireView(),
                                 "${
-                                    Statics.AssetControl.getContext().getString(R.string.error)
+                                    AssetControlApp.getContext().getString(R.string.error)
                                 }: ${ex.message}",
                                 ERROR
                             )
@@ -2400,7 +2357,7 @@ class SettingsActivity :
                         if (view != null)
                             makeText(
                                 requireView(), "${
-                                    Statics.AssetControl.getContext().getString(R.string.error)
+                                    AssetControlApp.getContext().getString(R.string.error)
                                 }: ${ex.message}", ERROR
                             )
                         ErrorLog.writeLog(null, this::class.java.simpleName, ex)
@@ -2420,7 +2377,7 @@ class SettingsActivity :
                             makeText(
                                 requireView(),
                                 "${
-                                    Statics.AssetControl.getContext().getString(R.string.error)
+                                    AssetControlApp.getContext().getString(R.string.error)
                                 }: ${ex.message}",
                                 ERROR
                             )
@@ -2448,7 +2405,7 @@ class SettingsActivity :
                         makeText(
                             requireView(),
                             "${
-                                Statics.AssetControl.getContext().getString(R.string.error)
+                                AssetControlApp.getContext().getString(R.string.error)
                             }: ${ex.message}",
                             ERROR
                         )
@@ -2476,7 +2433,7 @@ class SettingsActivity :
                         makeText(
                             requireView(),
                             "${
-                                Statics.AssetControl.getContext().getString(R.string.error)
+                                AssetControlApp.getContext().getString(R.string.error)
                             }: ${ex.message}",
                             ERROR
                         )
@@ -2509,11 +2466,10 @@ class SettingsActivity :
                 )
             } catch (ex: Exception) {
                 ex.printStackTrace()
-                if (view != null) makeText(
-                    requireView(),
+                if (view != null) showSnackBar(SnackBarEventData(
                     getString(R.string.error_sending_email),
                     ERROR
-                )
+                ))
             }
         }
 
@@ -2618,7 +2574,7 @@ class SettingsActivity :
             try {
                 // Base de datos
                 val dbFile = File(
-                    Statics.AssetControl.getContext().getDatabasePath(DATABASE_NAME).toString()
+                    AssetControlApp.getContext().getDatabasePath(DATABASE_NAME).toString()
                 )
                 if (!dbFile.exists()) {
                     if (view != null)
@@ -2644,8 +2600,8 @@ class SettingsActivity :
                 }
 
                 val dbFilePath = FileProvider.getUriForFile(
-                    Statics.AssetControl.getContext(),
-                    Statics.AssetControl.getContext().applicationContext.packageName + ".provider",
+                    AssetControlApp.getContext(),
+                    AssetControlApp.getContext().applicationContext.packageName + ".provider",
                     outFile
                 )
                 if (dbFilePath == null) {
@@ -2664,8 +2620,8 @@ class SettingsActivity :
                 if (lastErrorLog != null) {
                     lastErrorLogPath =
                         FileProvider.getUriForFile(
-                            Statics.AssetControl.getContext(),
-                            Statics.AssetControl.getContext().applicationContext.packageName + ".provider",
+                            AssetControlApp.getContext(),
+                            AssetControlApp.getContext().applicationContext.packageName + ".provider",
                             lastErrorLog
                         )
                 }
@@ -2696,8 +2652,8 @@ class SettingsActivity :
 
                 // Mensaje
                 val pInfo =
-                    Statics.AssetControl.getContext().applicationContext.packageManager.getPackageInfo(
-                        Statics.AssetControl.getContext().packageName,
+                    AssetControlApp.getContext().applicationContext.packageManager.getPackageInfo(
+                        AssetControlApp.getContext().packageName,
                         0
                     )
 
@@ -2733,11 +2689,10 @@ class SettingsActivity :
                 )
             } catch (ex: Exception) {
                 ex.printStackTrace()
-                if (view != null) makeText(
-                    requireView(),
+                if (view != null) showSnackBar(SnackBarEventData(
                     getString(R.string.error_sending_email),
                     ERROR
-                )
+                ))
             }
         }
 
@@ -2761,7 +2716,7 @@ class SettingsActivity :
         private fun deleteTempDbFiles() {
             var anyDeleted = false
             val path =
-                Statics.AssetControl.getContext().getDatabasePath(DATABASE_NAME).parent
+                AssetControlApp.getContext().getDatabasePath(DATABASE_NAME).parent
                     ?: return
 
             val dir = File(path)
@@ -2777,17 +2732,15 @@ class SettingsActivity :
             }
 
             if (anyDeleted) {
-                if (view != null) makeText(
-                    requireView(),
+                if (view != null) showSnackBar(SnackBarEventData(
                     getString(R.string.temporary_databases_deleted),
-                    SnackbarType.SUCCESS
-                )
+                    SnackBarType.SUCCESS
+                ))
             } else {
-                if (view != null) makeText(
-                    requireView(),
+                if (view != null) showSnackBar(SnackBarEventData(
                     getString(R.string.no_temporary_bases_found),
-                    SnackbarType.INFO
-                )
+                    SnackBarType.INFO
+                ))
             }
         }
 
@@ -2796,15 +2749,14 @@ class SettingsActivity :
         private fun copyDbToDocuments() {
             try {
                 DataBaseHelper.copyDbToDocuments()
-                if (view != null) makeText(
-                    requireView(),
+                if (view != null) showSnackBar(SnackBarEventData(
                     String.format(
                         "%s: %s",
                         getString(R.string.database_changed),
                         DATABASE_NAME
                     ),
-                    SnackbarType.INFO
-                )
+                    SnackBarType.INFO
+                ))
             } catch (ex: java.lang.Exception) {
                 ex.printStackTrace()
             }
@@ -2821,7 +2773,7 @@ class SettingsActivity :
                             "%s: %s",
                             getString(R.string.database_changed),
                             DATABASE_NAME
-                        ), SnackbarType.INFO
+                        ), SnackBarType.INFO
                     )
             } catch (ex: java.lang.Exception) {
                 ex.printStackTrace()
@@ -2842,7 +2794,7 @@ class SettingsActivity :
                         makeText(
                             requireView(),
                             getString(R.string.the_database_will_be_downloaded_when_you_return_to_the_login_screen),
-                            SnackbarType.INFO
+                            SnackBarType.INFO
                         )
                     dialog.dismiss()
                 }
@@ -2850,160 +2802,11 @@ class SettingsActivity :
                     R.string.no
                 ) { dialog, _ -> dialog.dismiss() }.create()
         }
-    }
 
-    class CheckWsConnection {
-        private var url: String = ""
-        private var namespace: String = ""
+        private fun showSnackBar(it: SnackBarEventData) {
+            if (requireActivity().isDestroyed || requireActivity().isFinishing) return
 
-        private var weakRefView: WeakReference<View>? = null
-        private var parentView: View?
-            get() {
-                return weakRefView?.get()
-            }
-            set(value) {
-                weakRefView = if (value != null) WeakReference(value) else null
-            }
-
-        fun addParams(
-            parentView: View,
-            url: String,
-            namespace: String,
-        ) {
-            this.parentView = parentView
-            this.url = url
-            this.namespace = namespace
-        }
-
-        private var useProxy: Boolean = false
-        private var proxyUrl: String = ""
-        private var proxyPort: Int = 0
-        private var proxyUser: String = ""
-        private var proxyPass: String = ""
-
-        fun addProxyParams(
-            useProxy: Boolean,
-            proxyUrl: String,
-            proxyPort: Int,
-            proxyUser: String,
-            proxyPass: String,
-        ) {
-            this.useProxy = useProxy
-            this.proxyUrl = proxyUrl
-            this.proxyPort = proxyPort
-            this.proxyUser = proxyUser
-            this.proxyPass = proxyPass
-        }
-
-        fun execute() {
-            wsTestUrl = url
-            wsTestNamespace = namespace
-            Statics.wsTestUseProxy = useProxy
-            Statics.wsTestProxyUrl = proxyUrl
-            Statics.wsTestProxyPort = proxyPort
-            Statics.wsTestProxyUser = proxyUser
-            Statics.wsTestProxyPass = proxyPass
-
-            if (wsTestUrl.isEmpty() || wsTestNamespace.isEmpty()) {
-                return
-            }
-
-            checkConnection()
-        }
-
-        private fun checkConnection() {
-            thread {
-                val getMySqlDate = GetMySqlDate()
-                val r = getMySqlDate.execute(Webservice(Webservice.WebServiceType.Test))
-
-                if (parentView == null) return@thread
-
-                when (r.status) {
-                    ProgressStatus.crashed -> {
-                        makeText(parentView!!, r.msg, ERROR)
-                    }
-                    ProgressStatus.canceled -> {
-                        makeText(parentView!!, r.msg, SnackbarType.INFO)
-                    }
-                    ProgressStatus.finished -> {
-                        makeText(
-                            parentView!!,
-                            getContext().getString(R.string.ok),
-                            SnackbarType.SUCCESS
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    class ImageControlCheckUser {
-        private var weakRefView: WeakReference<View>? = null
-        private var parentView: View?
-            get() {
-                return weakRefView?.get()
-            }
-            set(value) {
-                weakRefView = if (value != null) WeakReference(value) else null
-            }
-
-        fun addParams(parentView: View) {
-            this.parentView = parentView
-        }
-
-        private fun postExecute(result: UserAuthResultObject?): UserAuthResultObject? {
-            var fReturn = false
-            var fError = false
-
-            when (result) {
-                null -> fError = true
-                else -> fReturn = result.access
-            }
-
-            if (parentView != null) {
-                makeText(
-                    parentView!!,
-                    when {
-                        fError -> getContext()
-                            .getString(R.string.connection_error)
-                        !fReturn -> getContext()
-                            .getString(R.string.incorrect_username_password_combination)
-                        else -> getContext().getString(R.string.ok)
-                    },
-                    when {
-                        fError -> ERROR
-                        !fReturn -> ERROR
-                        else -> SnackbarType.SUCCESS
-                    }
-                )
-            }
-            return result
-        }
-
-        fun execute(): UserAuthResultObject? {
-            val result = doInBackground()
-            return postExecute(result)
-        }
-
-        private var deferred: Deferred<UserAuthResultObject?>? = null
-        private fun doInBackground(): UserAuthResultObject? {
-            var result: UserAuthResultObject? = null
-            runBlocking {
-                deferred = async { suspendFunction() }
-                result = deferred?.await()
-            }
-            return result
-        }
-
-        private suspend fun suspendFunction(): UserAuthResultObject? = withContext(Dispatchers.IO) {
-            return@withContext try {
-                Statics.setupImageControl()
-                com.dacosys.imageControl.Statics.getWebservice().imageControlUserCheck()
-            } catch (ex: Exception) {
-                ex.printStackTrace()
-                ErrorLog.writeLog(null, this::class.java.simpleName, ex)
-                null
-            }
+            makeText(requireView(), it.text, it.snackBarType)
         }
     }
 }

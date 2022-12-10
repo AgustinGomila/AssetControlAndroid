@@ -14,9 +14,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.Statics.AssetControl.Companion.getContext
 import com.dacosys.assetControl.utils.configuration.Preference
 import com.dacosys.assetControl.utils.configuration.collectorType.CollectorType
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
@@ -27,7 +27,7 @@ import com.dacosys.assetControl.utils.scanners.nfc.Nfc.enableNfcForegroundDispat
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.utils.scanners.rfid.RfidType
 import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
 import com.google.android.gms.common.api.CommonStatusCodes
 import id.pahlevikun.jotter.Jotter
 
@@ -178,7 +178,7 @@ object JotterListener : Jotter.Listener {
                     makeText(
                         activity.window.decorView,
                         activity.getString(R.string.app_dont_have_necessary_permissions),
-                        SnackbarType.ERROR
+                        SnackBarType.ERROR
                     )
                 } else {
                     rfidSetListener(activity)
@@ -220,7 +220,7 @@ object JotterListener : Jotter.Listener {
                 makeText(
                     activity.window.decorView,
                     "${getContext().getString(R.string.device)}: $manufacturer $model",
-                    SnackbarType.INFO
+                    SnackBarType.INFO
                 )
                 Statics.collectorTypeChanged = true
             }
@@ -290,7 +290,7 @@ object JotterListener : Jotter.Listener {
             makeText(
                 activity.window.decorView,
                 activity.getString(R.string.there_are_no_bluetooth_devices),
-                SnackbarType.INFO
+                SnackBarType.INFO
             )
         } else {
             if (!mBluetoothAdapter.isEnabled) {
@@ -331,7 +331,7 @@ object JotterListener : Jotter.Listener {
             makeText(
                 activity.window.decorView,
                 activity.getString(R.string.barcode_reader_not_initialized),
-                SnackbarType.ERROR
+                SnackBarType.ERROR
             )
             ErrorLog.writeLog(activity, javaClass.simpleName, ex)
         }
@@ -345,7 +345,7 @@ object JotterListener : Jotter.Listener {
             makeText(
                 activity.window.decorView,
                 activity.getString(R.string.rfid_reader_not_initialized),
-                SnackbarType.ERROR
+                SnackBarType.ERROR
             )
             ErrorLog.writeLog(activity, javaClass.simpleName, ex)
         }

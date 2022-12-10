@@ -7,11 +7,11 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
+import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.R.layout.custom_spinner_dropdown_item
 import com.dacosys.assetControl.databinding.FragmentSpinnerBinding
 import com.dacosys.assetControl.model.assets.units.unitType.UnitType
 import com.dacosys.assetControl.model.assets.units.unitTypeCategory.UnitTypeCategory
-import com.dacosys.assetControl.utils.Statics
 import org.parceler.Parcels
 
 /**
@@ -138,7 +138,7 @@ class UnitTypeSpinnerFragment : Fragment() {
         allUnitType.sortedWith(compareBy { it.description })
 
         val spinnerArrayAdapter = ArrayAdapter(
-            Statics.AssetControl.getContext(),
+            AssetControlApp.getContext(),
             custom_spinner_dropdown_item,
             allUnitType
         )

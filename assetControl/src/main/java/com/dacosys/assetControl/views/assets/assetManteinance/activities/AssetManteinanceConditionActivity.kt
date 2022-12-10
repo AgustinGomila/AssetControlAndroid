@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.databinding.AssetManteinanceConditionActivityBinding
 import com.dacosys.assetControl.model.assets.asset.`object`.Asset
 import com.dacosys.assetControl.model.assets.assetCondition.AssetCondition
@@ -16,10 +15,11 @@ import com.dacosys.assetControl.model.assets.manteinances.assetMainteinance.`obj
 import com.dacosys.assetControl.model.assets.manteinances.assetMainteinance.dbHelper.AssetManteinanceDbHelper
 import com.dacosys.assetControl.model.assets.manteinances.manteinanceStatus.`object`.ManteinanceStatus
 import com.dacosys.assetControl.model.assets.manteinances.manteinanceType.`object`.ManteinanceType
+import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.views.assets.assetCondition.fragment.AssetConditionSpinnerFragment
 import com.dacosys.assetControl.views.assets.assetManteinance.fragment.ManteinanceTypeSpinnerFragment
 import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
 
 
 class AssetManteinanceConditionActivity : AppCompatActivity(),
@@ -157,7 +157,7 @@ class AssetManteinanceConditionActivity : AppCompatActivity(),
                 makeText(
                     binding.root,
                     getString(R.string.you_must_select_a_type_of_maintenance_task),
-                    SnackbarType.INFO
+                    SnackBarType.INFO
                 )
                 return
 
@@ -190,14 +190,14 @@ class AssetManteinanceConditionActivity : AppCompatActivity(),
                 makeText(
                     binding.root,
                     getString(R.string.maintenance_saved_correctly),
-                    SnackbarType.SUCCESS
+                    SnackBarType.SUCCESS
                 )
                 finish()
             } else {
                 makeText(
                     binding.root,
                     getString(R.string.failed_to_save_maintenance),
-                    SnackbarType.ERROR
+                    SnackBarType.ERROR
                 )
             }
         }

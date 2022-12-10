@@ -24,9 +24,7 @@ import androidx.transition.ChangeBounds
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.databinding.RouteSelectActivityBinding
-import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.model.routes.route.`object`.Route
 import com.dacosys.assetControl.model.routes.route.`object`.Route.CREATOR.getAvailableRoutes
 import com.dacosys.assetControl.model.routes.route.dbHelper.RouteAdapter
@@ -35,8 +33,10 @@ import com.dacosys.assetControl.model.routes.routeProcess.`object`.RouteProcess
 import com.dacosys.assetControl.model.routes.routeProcess.dbHelper.RouteProcessDbHelper
 import com.dacosys.assetControl.model.routes.routeProcessContent.dbHelper.RouteProcessContentDbHelper
 import com.dacosys.assetControl.model.routes.routeProcessSteps.dbHelper.RouteProcessStepsDbHelper
+import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
 import com.dacosys.assetControl.views.routes.fragment.RouteSelectFilterFragment
 import org.parceler.Parcels
 
@@ -317,7 +317,7 @@ class RouteSelectActivity : AppCompatActivity(),
             if (it?.resultCode == RESULT_CANCELED) {
                 val msg = data?.getStringExtra("error_msg")
                 if (!msg.isNullOrEmpty()) {
-                    makeText(binding.root, msg, SnackbarType.ERROR)
+                    makeText(binding.root, msg, SnackBarType.ERROR)
                 }
             }
             fillListView()
@@ -333,7 +333,7 @@ class RouteSelectActivity : AppCompatActivity(),
                 makeText(
                     binding.root,
                     getString(R.string.no_processes_started),
-                    SnackbarType.INFO
+                    SnackBarType.INFO
                 )
                 return
             }

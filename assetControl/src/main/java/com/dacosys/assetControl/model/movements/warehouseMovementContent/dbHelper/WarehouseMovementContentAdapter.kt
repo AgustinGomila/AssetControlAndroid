@@ -16,10 +16,8 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat
+import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.Statics.Companion.getColorWithAlpha
-import com.dacosys.assetControl.utils.Statics.Companion.manipulateColor
 import com.dacosys.assetControl.model.assets.asset.`object`.Asset
 import com.dacosys.assetControl.model.assets.asset.dbHelper.AssetAdapter.*
 import com.dacosys.assetControl.model.assets.asset.dbHelper.AssetAdapter.Companion.AddPhotoRequiredListener
@@ -31,8 +29,11 @@ import com.dacosys.assetControl.model.assets.ownershipStatus.OwnershipStatus
 import com.dacosys.assetControl.model.movements.warehouseMovementContent.`object`.WarehouseMovementContent
 import com.dacosys.assetControl.model.movements.warehouseMovementContentStatus.WarehouseMovementContentStatus
 import com.dacosys.assetControl.model.table.Table
+import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.Statics.Companion.getColorWithAlpha
+import com.dacosys.assetControl.utils.Statics.Companion.manipulateColor
 import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
 import com.dacosys.assetControl.views.commons.views.AutoResizeTextView
 import java.lang.ref.WeakReference
 import java.util.*
@@ -143,7 +144,7 @@ class WarehouseMovementContentAdapter :
         checkedIdArray: ArrayList<Long>,
         visibleStatus: ArrayList<WarehouseMovementContentStatus>,
 
-        ) : super(Statics.AssetControl.getContext(), resource, suggestedList) {
+        ) : super(AssetControlApp.getContext(), resource, suggestedList) {
         this.activity = activity
         this.resource = resource
         this.visibleStatus = visibleStatus
@@ -379,10 +380,10 @@ class WarehouseMovementContentAdapter :
 
         res += ": " +
                 if (wmContArray.size > 1)
-                    Statics.AssetControl.getContext().getString(R.string.added_plural) else
-                    Statics.AssetControl.getContext().getString(R.string.added)
+                    AssetControlApp.getContext().getString(R.string.added_plural) else
+                    AssetControlApp.getContext().getString(R.string.added)
 
-        makeText(activity, res, SnackbarType.ADD)
+        makeText(activity, res, SnackBarType.ADD)
         Log.d(this::class.java.simpleName, res)
     }
 
@@ -408,10 +409,10 @@ class WarehouseMovementContentAdapter :
 
         res += ": " +
                 if (wmContArray.size > 1)
-                    " ${Statics.AssetControl.getContext().getString(R.string.removed_plural)}" else
-                    " ${Statics.AssetControl.getContext().getString(R.string.removed)}"
+                    " ${AssetControlApp.getContext().getString(R.string.removed_plural)}" else
+                    " ${AssetControlApp.getContext().getString(R.string.removed)}"
 
-        makeText(activity, res, SnackbarType.REMOVE)
+        makeText(activity, res, SnackBarType.REMOVE)
         Log.d(this::class.java.simpleName, res)
     }
 
@@ -1071,17 +1072,17 @@ class WarehouseMovementContentAdapter :
 
                 // Background layouts
                 val layoutToMove = ResourcesCompat.getDrawable(
-                    Statics.AssetControl.getContext().resources,
+                    AssetControlApp.getContext().resources,
                     R.drawable.layout_thin_border_green,
                     null
                 )
                 val layoutNoNeedToMove = ResourcesCompat.getDrawable(
-                    Statics.AssetControl.getContext().resources,
+                    AssetControlApp.getContext().resources,
                     R.drawable.layout_thin_border_yellow,
                     null
                 )
                 val layoutDefault = ResourcesCompat.getDrawable(
-                    Statics.AssetControl.getContext().resources,
+                    AssetControlApp.getContext().resources,
                     R.drawable.layout_thin_border,
                     null
                 )
@@ -1089,13 +1090,13 @@ class WarehouseMovementContentAdapter :
                 // Font colors
                 val white =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.text_light,
                         null
                     )
                 val black =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.text_dark,
                         null
                     )
@@ -1276,17 +1277,17 @@ class WarehouseMovementContentAdapter :
                 }
 
                 val layoutToMove = ResourcesCompat.getDrawable(
-                    Statics.AssetControl.getContext().resources,
+                    AssetControlApp.getContext().resources,
                     R.drawable.layout_thin_border_green,
                     null
                 )
                 val layoutNoNeedToMove = ResourcesCompat.getDrawable(
-                    Statics.AssetControl.getContext().resources,
+                    AssetControlApp.getContext().resources,
                     R.drawable.layout_thin_border_yellow,
                     null
                 )
                 val layoutDefault = ResourcesCompat.getDrawable(
-                    Statics.AssetControl.getContext().resources,
+                    AssetControlApp.getContext().resources,
                     R.drawable.layout_thin_border,
                     null
                 )
@@ -1294,13 +1295,13 @@ class WarehouseMovementContentAdapter :
                 // Font colors
                 val white =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.text_light,
                         null
                     )
                 val black =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.text_dark,
                         null
                     )

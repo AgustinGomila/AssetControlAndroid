@@ -4,8 +4,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics.AssetControl.Companion.getContext
 
 @Suppress("ConvertSecondaryConstructorToPrimary", "unused")
 class HoneywellBroadcastReceiver : BroadcastReceiver {

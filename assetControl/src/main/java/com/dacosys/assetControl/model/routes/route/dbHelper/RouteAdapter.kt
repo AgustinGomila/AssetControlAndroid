@@ -14,12 +14,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat
+import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.R
+import com.dacosys.assetControl.model.routes.route.`object`.Route
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.Statics.Companion.getColorWithAlpha
-import com.dacosys.assetControl.model.routes.route.`object`.Route
 import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
 import java.lang.ref.WeakReference
 import java.util.*
 
@@ -56,7 +57,7 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
         checkedIdArray: ArrayList<Long>,
         checkedChangedListener: CheckedChangedListener?,
         dataSetChangedListener: DataSetChangedListener?,
-    ) : super(Statics.AssetControl.getContext(), resource, routes) {
+    ) : super(AssetControlApp.getContext(), resource, routes) {
         this.activity = activity
         this.resource = resource
         this.multiSelect = multiSelect
@@ -77,7 +78,7 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
         resource: Int,
         routes: ArrayList<Route>,
         suggestedList: ArrayList<Route>,
-    ) : super(Statics.AssetControl.getContext(), resource, suggestedList) {
+    ) : super(AssetControlApp.getContext(), resource, suggestedList) {
         this.activity = activity
         this.resource = resource
         this.routeArray = routes
@@ -320,10 +321,10 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
 
         res += ": " +
                 if (routeArray.size > 1)
-                    " ${Statics.AssetControl.getContext().getString(R.string.added_plural)}" else
-                    " ${Statics.AssetControl.getContext().getString(R.string.added)}"
+                    " ${AssetControlApp.getContext().getString(R.string.added_plural)}" else
+                    " ${AssetControlApp.getContext().getString(R.string.added)}"
 
-        makeText(activity, res, SnackbarType.ADD)
+        makeText(activity, res, SnackBarType.ADD)
         Log.d(this::class.java.simpleName, res)
     }
 
@@ -351,10 +352,10 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
 
         res += ": " +
                 if (routeArray.size > 1)
-                    " ${Statics.AssetControl.getContext().getString(R.string.removed_plural)}" else
-                    " ${Statics.AssetControl.getContext().getString(R.string.removed)}"
+                    " ${AssetControlApp.getContext().getString(R.string.removed_plural)}" else
+                    " ${AssetControlApp.getContext().getString(R.string.removed)}"
 
-        makeText(activity, res, SnackbarType.REMOVE)
+        makeText(activity, res, SnackBarType.REMOVE)
         Log.d(this::class.java.simpleName, res)
     }
 
@@ -627,14 +628,14 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
 
                 // Background layouts
                 val layoutOnProcess = ResourcesCompat.getDrawable(
-                    Statics.AssetControl.getContext().resources,
+                    AssetControlApp.getContext().resources,
                     R.drawable.layout_thin_border_blue,
                     null
                 )
 
                 // Background layouts
                 val layoutToSend = ResourcesCompat.getDrawable(
-                    Statics.AssetControl.getContext().resources,
+                    AssetControlApp.getContext().resources,
                     R.drawable.layout_thin_border_yellow,
                     null
                 )
@@ -642,13 +643,13 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
                 // Font colors
                 val white =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.text_light,
                         null
                     )
                 val black =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.text_dark,
                         null
                     )
@@ -656,19 +657,19 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
                 // CheckBox color
                 val darkslategray =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.darkslategray,
                         null
                     )
                 val lightgray =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.lightgray,
                         null
                     )
                 val whitesmoke =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.whitesmoke,
                         null
                     )
@@ -808,13 +809,13 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
                     // Background colors
                     val lightgray =
                         ResourcesCompat.getColor(
-                            Statics.AssetControl.getContext().resources,
+                            AssetControlApp.getContext().resources,
                             R.color.lightgray,
                             null
                         )
                     val whitesmoke =
                         ResourcesCompat.getColor(
-                            Statics.AssetControl.getContext().resources,
+                            AssetControlApp.getContext().resources,
                             R.color.whitesmoke,
                             null
                         )
@@ -822,13 +823,13 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
                     // Font colors
                     val black =
                         ResourcesCompat.getColor(
-                            Statics.AssetControl.getContext().resources,
+                            AssetControlApp.getContext().resources,
                             R.color.text_dark,
                             null
                         )
                     val dimgray =
                         ResourcesCompat.getColor(
-                            Statics.AssetControl.getContext().resources,
+                            AssetControlApp.getContext().resources,
                             R.color.dimgray,
                             null
                         )
@@ -848,14 +849,14 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
                 } else {
                     // Background layouts
                     val layoutOnProcess = ResourcesCompat.getDrawable(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.drawable.layout_thin_border_blue,
                         null
                     )
 
                     // Background layouts
                     val layoutToSend = ResourcesCompat.getDrawable(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.drawable.layout_thin_border_yellow,
                         null
                     )
@@ -863,13 +864,13 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
                     // Font colors
                     val white =
                         ResourcesCompat.getColor(
-                            Statics.AssetControl.getContext().resources,
+                            AssetControlApp.getContext().resources,
                             R.color.text_light,
                             null
                         )
                     val black =
                         ResourcesCompat.getColor(
-                            Statics.AssetControl.getContext().resources,
+                            AssetControlApp.getContext().resources,
                             R.color.text_dark,
                             null
                         )
@@ -877,19 +878,19 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
                     // CheckBox color
                     val darkslategray =
                         ResourcesCompat.getColor(
-                            Statics.AssetControl.getContext().resources,
+                            AssetControlApp.getContext().resources,
                             R.color.darkslategray,
                             null
                         )
                     val lightgray =
                         ResourcesCompat.getColor(
-                            Statics.AssetControl.getContext().resources,
+                            AssetControlApp.getContext().resources,
                             R.color.lightgray,
                             null
                         )
                     val whitesmoke =
                         ResourcesCompat.getColor(
-                            Statics.AssetControl.getContext().resources,
+                            AssetControlApp.getContext().resources,
                             R.color.whitesmoke,
                             null
                         )

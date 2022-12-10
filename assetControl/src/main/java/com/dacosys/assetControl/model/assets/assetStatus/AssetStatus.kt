@@ -2,8 +2,8 @@ package com.dacosys.assetControl.model.assets.assetStatus
 
 import android.os.Parcel
 import android.os.Parcelable
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
 import java.util.*
 
 class AssetStatus : Parcelable {
@@ -54,19 +54,19 @@ class AssetStatus : Parcelable {
 
         var unknown = AssetStatus(
             0,
-            Statics.AssetControl.getContext().getString(R.string.asset_status_unknown)
+            getContext().getString(R.string.asset_status_unknown)
         )
         var onInventory = AssetStatus(
             1,
-            Statics.AssetControl.getContext().getString(R.string.asset_status_on_inventory)
+            getContext().getString(R.string.asset_status_on_inventory)
         )
         var removed = AssetStatus(
             2,
-            Statics.AssetControl.getContext().getString(R.string.asset_status_removed)
+            getContext().getString(R.string.asset_status_removed)
         )
         var missing = AssetStatus(
             3,
-            Statics.AssetControl.getContext().getString(R.string.asset_status_missing)
+            getContext().getString(R.string.asset_status_missing)
         )
 
         fun getAll(): ArrayList<AssetStatus> {

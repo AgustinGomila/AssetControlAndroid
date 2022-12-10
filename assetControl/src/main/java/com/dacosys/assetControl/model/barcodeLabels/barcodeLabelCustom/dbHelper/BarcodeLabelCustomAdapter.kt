@@ -10,9 +10,11 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
+import com.dacosys.assetControl.AssetControlApp
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.model.barcodeLabels.barcodeLabelCustom.`object`.BarcodeLabelCustom
+import com.dacosys.assetControl.utils.Statics
 import java.util.*
 
 /**
@@ -24,7 +26,7 @@ class BarcodeLabelCustomAdapter(
     private var resource: Int,
     private var barcodeLabelCustomList: ArrayList<BarcodeLabelCustom>,
     private var suggestedList: ArrayList<BarcodeLabelCustom>,
-) : ArrayAdapter<BarcodeLabelCustom>(Statics.AssetControl.getContext(), resource, suggestedList),
+) : ArrayAdapter<BarcodeLabelCustom>(getContext(), resource, suggestedList),
     Filterable {
 
     private var checkedChangedListener: CheckedChangedListener? = null
@@ -160,7 +162,7 @@ class BarcodeLabelCustomAdapter(
         var alreadyExists = true
 
         if (v == null || v.tag == null) {
-            val vi = LayoutInflater.from(Statics.AssetControl.getContext())
+            val vi = LayoutInflater.from(AssetControlApp.getContext())
             v = vi.inflate(this.resource, parent, false)
 
             alreadyExists = false
@@ -189,7 +191,7 @@ class BarcodeLabelCustomAdapter(
             if (barcodeLabelCustom != null) {
                 if (barcodeLabelCustom.description.isEmpty()) {
                     holder.descriptionTextView?.text =
-                        Statics.AssetControl.getContext().getString(R.string.no_description)
+                        AssetControlApp.getContext().getString(R.string.no_description)
                 } else {
                     holder.descriptionTextView?.text = barcodeLabelCustom.description
                 }
@@ -241,26 +243,26 @@ class BarcodeLabelCustomAdapter(
                 // Background colors
                 val lightgray =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.lightgray,
                         null
                     )
                 val whitesmoke =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.whitesmoke,
                         null
                     )
 
                 // Font colors
                 val black = ResourcesCompat.getColor(
-                    Statics.AssetControl.getContext().resources,
+                    AssetControlApp.getContext().resources,
                     R.color.black,
                     null
                 )
                 val dimgray =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.dimgray,
                         null
                     )

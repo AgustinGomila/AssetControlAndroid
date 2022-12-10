@@ -1,12 +1,11 @@
 package com.dacosys.assetControl.model.assets.itemCategory.`object`
 
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.model.assets.itemCategory.dbHelper.ItemCategoryDbHelper
 import com.dacosys.assetControl.model.assets.itemCategory.wsObject.ItemCategoryObject
-import com.dacosys.assetControl.sync.functions.SyncRegistryType
-import com.dacosys.assetControl.sync.functions.SyncUpload
+import com.dacosys.assetControl.network.sync.SyncRegistryType
+import com.dacosys.assetControl.network.sync.SyncUpload
+import com.dacosys.assetControl.utils.Statics
 import kotlinx.coroutines.*
-import kotlin.concurrent.thread
 
 /**
  * Create, Read, Update and Delete
@@ -41,16 +40,19 @@ class ItemCategoryCRUD {
             this.mCallback = callback
         }
 
-        fun execute() {
-            doInBackground()
+        private val scope = CoroutineScope(Job() + Dispatchers.IO)
+
+        fun cancel() {
+            scope.cancel()
         }
 
-        private var job: Job? = null
+        fun execute() {
+            scope.launch { doInBackground() }
+        }
 
-        private fun doInBackground() {
-            runBlocking {
-                job = launch { suspendFunction() }
-                job?.join()
+        private suspend fun doInBackground() {
+            coroutineScope {
+                suspendFunction()
                 mCallback?.onTaskCompleted(icCRUDResult)
             }
         }
@@ -60,11 +62,7 @@ class ItemCategoryCRUD {
                 val icObj = itemCategoryObject!!
                 if (addItemCategory(icObj).resultCode == RC_INSERT_OK) {
                     if (Statics.autoSend()) {
-                        thread {
-                            val sync = SyncUpload()
-                            sync.addRegistryToSync(SyncRegistryType.ItemCategory)
-                            sync.execute()
-                        }
+                        SyncUpload(SyncRegistryType.ItemCategory)
                     }
                 } else {
                     icCRUDResult.resultCode = RC_ERROR_INSERT
@@ -113,16 +111,19 @@ class ItemCategoryCRUD {
             this.mCallback = callback
         }
 
-        fun execute() {
-            doInBackground()
+        private val scope = CoroutineScope(Job() + Dispatchers.IO)
+
+        fun cancel() {
+            scope.cancel()
         }
 
-        private var job: Job? = null
+        fun execute() {
+            scope.launch { doInBackground() }
+        }
 
-        private fun doInBackground() {
-            runBlocking {
-                job = launch { suspendFunction() }
-                job?.join()
+        private suspend fun doInBackground() {
+            coroutineScope {
+                suspendFunction()
                 mCallback?.onTaskCompleted(icCRUDResult)
             }
         }
@@ -132,11 +133,7 @@ class ItemCategoryCRUD {
                 val icObj = itemCategoryObject!!
                 if (updateItemCategory(icObj).resultCode == RC_UPDATE_OK) {
                     if (Statics.autoSend()) {
-                        thread {
-                            val sync = SyncUpload()
-                            sync.addRegistryToSync(SyncRegistryType.ItemCategory)
-                            sync.execute()
-                        }
+                        SyncUpload(SyncRegistryType.ItemCategory)
                     }
                 }
             } else {

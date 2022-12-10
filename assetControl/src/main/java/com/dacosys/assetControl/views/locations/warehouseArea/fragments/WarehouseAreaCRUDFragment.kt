@@ -12,7 +12,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.databinding.WarehouseAreaCrudFragmentBinding
-import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.model.locations.warehouse.`object`.Warehouse
 import com.dacosys.assetControl.model.locations.warehouse.dbHelper.WarehouseDbHelper
 import com.dacosys.assetControl.model.locations.warehouseArea.`object`.WarehouseArea
@@ -20,11 +19,11 @@ import com.dacosys.assetControl.model.locations.warehouseArea.`object`.Warehouse
 import com.dacosys.assetControl.model.locations.warehouseArea.wsObject.WarehouseAreaObject
 import com.dacosys.assetControl.model.permissions.PermissionEntry
 import com.dacosys.assetControl.model.users.user.`object`.User
+import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
 import com.dacosys.assetControl.views.locations.locationSelect.LocationSelectActivity
 import org.parceler.Parcels
-import kotlin.concurrent.thread
 
 class WarehouseAreaCRUDFragment : Fragment() {
     private var rejectNewInstances = false
@@ -186,7 +185,7 @@ class WarehouseAreaCRUDFragment : Fragment() {
             makeText(
                 binding.root,
                 getString(R.string.you_must_enter_a_description_for_the_warehouse_area),
-                SnackbarType.INFO
+                SnackBarType.INFO
             )
             binding.descriptionEditText.requestFocus()
             return false
@@ -196,7 +195,7 @@ class WarehouseAreaCRUDFragment : Fragment() {
             makeText(
                 binding.root,
                 getString(R.string.you_must_select_a_warehouse_for_the_area),
-                SnackbarType.INFO
+                SnackBarType.INFO
             )
             return false
         }
@@ -217,25 +216,24 @@ class WarehouseAreaCRUDFragment : Fragment() {
                 makeText(
                     binding.root,
                     getString(R.string.you_do_not_have_permission_to_add_warehouse_areas),
-                    SnackbarType.ERROR
+                    SnackBarType.ERROR
                 )
                 return false
             }
 
             val tempWarehouseArea = createWsWarehouseArea()
             if (tempWarehouseArea != null) {
-                thread {
-                    val warehouseAreaAdd = WarehouseAreaCRUD.WarehouseAreaAdd()
-                    warehouseAreaAdd.addParams(callback, tempWarehouseArea)
-                    warehouseAreaAdd.execute()
-                }
+                val warehouseAreaAdd = WarehouseAreaCRUD.WarehouseAreaAdd()
+                warehouseAreaAdd.addParams(callback, tempWarehouseArea)
+                warehouseAreaAdd.execute()
+
             }
         } else {
             if (!User.hasPermission(PermissionEntry.ModifyWarehouse)) {
                 makeText(
                     binding.root,
                     getString(R.string.you_do_not_have_permission_to_modify_warehouse_areas),
-                    SnackbarType.ERROR
+                    SnackBarType.ERROR
                 )
                 return false
             }
@@ -243,11 +241,10 @@ class WarehouseAreaCRUDFragment : Fragment() {
             updateWarehouseArea()
             if (warehouseArea != null) {
                 val tempWarehouseArea = WarehouseAreaObject(warehouseArea!!)
-                thread {
-                    val updateWarehouseArea = WarehouseAreaCRUD.WarehouseAreaUpdate()
-                    updateWarehouseArea.addParams(callback, tempWarehouseArea)
-                    updateWarehouseArea.execute()
-                }
+
+                val updateWarehouseArea = WarehouseAreaCRUD.WarehouseAreaUpdate()
+                updateWarehouseArea.addParams(callback, tempWarehouseArea)
+                updateWarehouseArea.execute()
             }
         }
         return false
@@ -280,7 +277,7 @@ class WarehouseAreaCRUDFragment : Fragment() {
             makeText(
                 binding.root,
                 getString(R.string.error_creating_the_warehouse_area),
-                SnackbarType.ERROR
+                SnackBarType.ERROR
             )
             return null
         }

@@ -3,10 +3,10 @@ package com.dacosys.assetControl.model.assets.attributes.attributeCategory.dbHel
 import android.database.Cursor
 import android.database.SQLException
 import android.util.Log
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.dataBase.StaticDbHelper
-import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.getReadableDb
+import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.getWritableDb
 import com.dacosys.assetControl.model.assets.attributes.attributeCategory.`object`.AttributeCategory
 import com.dacosys.assetControl.model.assets.attributes.attributeCategory.dbHelper.AttributeCategoryContract.AttributeCategoryEntry.Companion.ACTIVE
 import com.dacosys.assetControl.model.assets.attributes.attributeCategory.dbHelper.AttributeCategoryContract.AttributeCategoryEntry.Companion.ATTRIBUTE_CATEGORY_ID
@@ -15,9 +15,10 @@ import com.dacosys.assetControl.model.assets.attributes.attributeCategory.dbHelp
 import com.dacosys.assetControl.model.assets.attributes.attributeCategory.dbHelper.AttributeCategoryContract.AttributeCategoryEntry.Companion.TABLE_NAME
 import com.dacosys.assetControl.model.assets.attributes.attributeCategory.dbHelper.AttributeCategoryContract.getAllColumns
 import com.dacosys.assetControl.model.assets.attributes.attributeCategory.wsObject.AttributeCategoryObject
-import com.dacosys.assetControl.sync.functions.ProgressStatus
-import com.dacosys.assetControl.sync.functions.Sync.Companion.SyncTaskProgress
-import com.dacosys.assetControl.sync.functions.SyncRegistryType
+import com.dacosys.assetControl.network.sync.SyncProgress
+import com.dacosys.assetControl.network.sync.SyncRegistryType
+import com.dacosys.assetControl.network.utils.ProgressStatus
+import com.dacosys.assetControl.utils.errorLog.ErrorLog
 
 /**
  * Created by Agustin on 28/12/2016.
@@ -26,7 +27,7 @@ import com.dacosys.assetControl.sync.functions.SyncRegistryType
 class AttributeCategoryDbHelper {
     fun sync(
         objArray: Array<AttributeCategoryObject>,
-        callback: SyncTaskProgress,
+        onSyncProgress: (SyncProgress) -> Unit = {},
         currentCount: Int,
         countTotal: Int,
     ): Boolean {
@@ -47,7 +48,7 @@ class AttributeCategoryDbHelper {
 
         Log.d(this::class.java.simpleName, query)
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
+        val sqLiteDatabase = getWritableDb()
         sqLiteDatabase.beginTransaction()
         try {
             sqLiteDatabase.execSQL(query)
@@ -66,14 +67,14 @@ class AttributeCategoryDbHelper {
                     String.format(": SQLite -> insert: id:%s", obj.attributeCategoryId)
                 )
                 count++
-                callback.onSyncTaskProgress(
+                onSyncProgress.invoke(SyncProgress(
                     totalTask = countTotal,
                     completedTask = currentCount + count,
-                    msg = Statics.AssetControl.getContext()
+                    msg = getContext()
                         .getString(R.string.synchronizing_attribute_categories),
                     registryType = SyncRegistryType.AttributeCategory,
                     progressStatus = ProgressStatus.running
-                )
+                ))
 
                 val values = "(" +
                         obj.attributeCategoryId + "," +
@@ -116,43 +117,33 @@ class AttributeCategoryDbHelper {
             parentId
         )
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.insert(
+            return sqLiteDatabase.insert(
                 TABLE_NAME, null,
                 newAttributeCategory.toContentValues()
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: Exception) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
     fun insert(attributeCategory: AttributeCategory): Long {
         Log.i(this::class.java.simpleName, ": SQLite -> insert")
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.insert(
+            return sqLiteDatabase.insert(
                 TABLE_NAME,
                 null,
                 attributeCategory.toContentValues()
             )
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: Exception) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             0
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -162,23 +153,18 @@ class AttributeCategoryDbHelper {
         val selection = "$ATTRIBUTE_CATEGORY_ID = ?" // WHERE code LIKE ?
         val selectionArgs = arrayOf(attributeCategory.attributeCategoryId.toString())
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.update(
+            return sqLiteDatabase.update(
                 TABLE_NAME,
                 attributeCategory.toContentValues(),
                 selection,
                 selectionArgs
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: Exception) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -192,44 +178,34 @@ class AttributeCategoryDbHelper {
         val selection = "$ATTRIBUTE_CATEGORY_ID = ?" // WHERE code LIKE ?
         val selectionArgs = arrayOf(id.toString())
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.delete(
+            return sqLiteDatabase.delete(
                 TABLE_NAME,
                 selection,
                 selectionArgs
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: Exception) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
     fun deleteAll(): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> deleteAll")
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.delete(
+            return sqLiteDatabase.delete(
                 TABLE_NAME,
                 null,
                 null
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -239,7 +215,7 @@ class AttributeCategoryDbHelper {
         val columns = getAllColumns()
         val order = DESCRIPTION
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
+        val sqLiteDatabase = getReadableDb()
         sqLiteDatabase.beginTransaction()
         try {
             val c = sqLiteDatabase.query(
@@ -270,7 +246,7 @@ class AttributeCategoryDbHelper {
         val selectionArgs = arrayOf(id.toString())
         val order = DESCRIPTION
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
+        val sqLiteDatabase = getReadableDb()
         sqLiteDatabase.beginTransaction()
         try {
             val c = sqLiteDatabase.query(
@@ -305,7 +281,7 @@ class AttributeCategoryDbHelper {
         val selectionArgs = arrayOf("%$description%")
         val order = DESCRIPTION
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
+        val sqLiteDatabase = getReadableDb()
         sqLiteDatabase.beginTransaction()
         try {
             val c = sqLiteDatabase.query(

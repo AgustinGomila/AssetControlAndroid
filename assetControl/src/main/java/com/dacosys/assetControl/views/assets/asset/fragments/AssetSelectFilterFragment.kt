@@ -10,13 +10,13 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.databinding.AssetSelectFilterFragmentBinding
-import com.dacosys.assetControl.utils.configuration.Preference
-import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.model.assets.assetStatus.AssetStatus
 import com.dacosys.assetControl.model.assets.itemCategory.`object`.ItemCategory
 import com.dacosys.assetControl.model.locations.warehouseArea.`object`.WarehouseArea
+import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.configuration.Preference
+import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.views.assets.asset.activities.CodeSelectDialogActivity
 import com.dacosys.assetControl.views.assets.itemCategory.activities.ItemCategorySelectActivity
 import com.dacosys.assetControl.views.locations.locationSelect.LocationSelectActivity

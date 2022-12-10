@@ -1,7 +1,7 @@
 package com.dacosys.assetControl.model.reviews.assetReview.wsObject
 
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.model.reviews.assetReviewContent.wsObject.AssetReviewContentObject
+import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.wsGeneral.WsParam
 import org.ksoap2.serialization.SoapObject
 import java.util.*

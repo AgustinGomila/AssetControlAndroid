@@ -14,8 +14,7 @@ import com.dacosys.assetControl.model.locations.warehouse.wsObject.WarehouseObje
 import com.dacosys.assetControl.model.permissions.PermissionEntry
 import com.dacosys.assetControl.model.users.user.`object`.User
 import com.dacosys.assetControl.views.commons.snackbar.MakeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
-import kotlin.concurrent.thread
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
 
 class WarehouseCRUDFragment : Fragment() {
     private var warehouse: Warehouse? = null
@@ -113,7 +112,7 @@ class WarehouseCRUDFragment : Fragment() {
             MakeText.makeText(
                 binding.root,
                 getString(R.string.you_must_enter_a_description_for_the_category),
-                SnackbarType.INFO
+                SnackBarType.INFO
             )
             binding.descriptionEditText.requestFocus()
             return false
@@ -135,25 +134,23 @@ class WarehouseCRUDFragment : Fragment() {
                 MakeText.makeText(
                     binding.root,
                     getString(R.string.you_do_not_have_permission_to_add_warehouses),
-                    SnackbarType.ERROR
+                    SnackBarType.ERROR
                 )
                 return false
             }
 
             val tempWarehouse = createWsWarehouse()
             if (tempWarehouse != null) {
-                thread {
-                    val warehouseAdd = WarehouseCRUD.WarehouseAdd()
-                    warehouseAdd.addParams(callback, tempWarehouse)
-                    warehouseAdd.execute()
-                }
+                val warehouseAdd = WarehouseCRUD.WarehouseAdd()
+                warehouseAdd.addParams(callback, tempWarehouse)
+                warehouseAdd.execute()
             }
         } else {
             if (!User.hasPermission(PermissionEntry.ModifyWarehouse)) {
                 MakeText.makeText(
                     binding.root,
                     getString(R.string.you_do_not_have_permission_to_modify_warehouses),
-                    SnackbarType.ERROR
+                    SnackBarType.ERROR
                 )
                 return false
             }
@@ -161,11 +158,10 @@ class WarehouseCRUDFragment : Fragment() {
             updateWarehouse()
             if (warehouse != null) {
                 val tempWarehouse = WarehouseObject(warehouse!!)
-                thread {
-                    val updateWarehouse = WarehouseCRUD.WarehouseUpdate()
-                    updateWarehouse.addParams(callback, tempWarehouse)
-                    updateWarehouse.execute()
-                }
+
+                val updateWarehouse = WarehouseCRUD.WarehouseUpdate()
+                updateWarehouse.addParams(callback, tempWarehouse)
+                updateWarehouse.execute()
             }
         }
         return false
@@ -196,7 +192,7 @@ class WarehouseCRUDFragment : Fragment() {
             MakeText.makeText(
                 binding.root,
                 getString(R.string.error_creating_the_category),
-                SnackbarType.ERROR
+                SnackBarType.ERROR
             )
             return null
         }

@@ -2,8 +2,8 @@ package com.dacosys.assetControl.model.assets.units.unitType
 
 import android.os.Parcel
 import android.os.Parcelable
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.model.assets.units.unitTypeCategory.UnitTypeCategory
 import java.util.*
 
@@ -64,210 +64,210 @@ class UnitType : Parcelable {
         // temperature units
         var Celsius = UnitType(
             1,
-            Statics.AssetControl.getContext().getString(R.string.unit_type_celsius),
+            getContext().getString(R.string.unit_type_celsius),
             UnitTypeCategory.temperature
         )
         private var Fahrenheit = UnitType(
             2,
-            Statics.AssetControl.getContext().getString(R.string.unit_type_fahrenheit),
+            getContext().getString(R.string.unit_type_fahrenheit),
             UnitTypeCategory.temperature
         )
         private var Kelvin = UnitType(
             3,
-            Statics.AssetControl.getContext().getString(R.string.unit_type_kelvin),
+            getContext().getString(R.string.unit_type_kelvin),
             UnitTypeCategory.temperature
         )
         private var Reaumur = UnitType(
             4,
-            Statics.AssetControl.getContext().getString(R.string.unit_type_reaumur),
+            getContext().getString(R.string.unit_type_reaumur),
             UnitTypeCategory.temperature
         )
         private var Rankine = UnitType(
             5,
-            Statics.AssetControl.getContext().getString(R.string.unit_type_rankine),
+            getContext().getString(R.string.unit_type_rankine),
             UnitTypeCategory.temperature
         )
 
         //weight units //weight units
         var Kilogram = UnitType(
             101,
-            Statics.AssetControl.getContext().getString(R.string.unit_type_kilogram),
+            getContext().getString(R.string.unit_type_kilogram),
             UnitTypeCategory.weight
         )
         private var Pound = UnitType(
             102,
-            Statics.AssetControl.getContext().getString(R.string.unit_type_pound),
+            getContext().getString(R.string.unit_type_pound),
             UnitTypeCategory.weight
         )
         private var Grams = UnitType(
             103,
-            Statics.AssetControl.getContext().getString(R.string.unit_type_grams),
+            getContext().getString(R.string.unit_type_grams),
             UnitTypeCategory.weight
         )
         private var Milligrams = UnitType(
             104,
-            Statics.AssetControl.getContext().getString(R.string.unit_type_milligrams),
+            getContext().getString(R.string.unit_type_milligrams),
             UnitTypeCategory.weight
         )
 
         //lenght units //lenght units
         var Meter = UnitType(
             201,
-            Statics.AssetControl.getContext().getString(R.string.unit_type_meter),
+            getContext().getString(R.string.unit_type_meter),
             UnitTypeCategory.lenght
         )
         private var Yard = UnitType(
             202,
-            Statics.AssetControl.getContext().getString(R.string.unit_type_yard),
+            getContext().getString(R.string.unit_type_yard),
             UnitTypeCategory.lenght
         )
         private var Foot = UnitType(
             203,
-            Statics.AssetControl.getContext().getString(R.string.unit_type_foot),
+            getContext().getString(R.string.unit_type_foot),
             UnitTypeCategory.lenght
         )
         private var Inch = UnitType(
             204,
-            Statics.AssetControl.getContext().getString(R.string.unit_type_inch),
+            getContext().getString(R.string.unit_type_inch),
             UnitTypeCategory.lenght
         )
         private var Centimeter = UnitType(
             205,
-            Statics.AssetControl.getContext().getString(R.string.unit_type_centimeter),
+            getContext().getString(R.string.unit_type_centimeter),
             UnitTypeCategory.lenght
         )
         private var Mile = UnitType(
             206,
-            Statics.AssetControl.getContext().getString(R.string.unit_type_mile),
+            getContext().getString(R.string.unit_type_mile),
             UnitTypeCategory.lenght
         )
 
         //volume units //volume units
         var Litre = UnitType(
             301,
-            Statics.AssetControl.getContext().getString(R.string.unit_type_litre),
+            getContext().getString(R.string.unit_type_litre),
             UnitTypeCategory.volume
         )
         private var Millilitre = UnitType(
             302,
-            Statics.AssetControl.getContext().getString(R.string.unit_type_millilitre),
+            getContext().getString(R.string.unit_type_millilitre),
             UnitTypeCategory.volume
         )
         private var Gallon = UnitType(
             303,
-            Statics.AssetControl.getContext().getString(R.string.unit_type_gallon),
+            getContext().getString(R.string.unit_type_gallon),
             UnitTypeCategory.volume
         )
         private var Pint = UnitType(
             304,
-            Statics.AssetControl.getContext().getString(R.string.unit_type_pint),
+            getContext().getString(R.string.unit_type_pint),
             UnitTypeCategory.volume
         )
         private var CubicInches = UnitType(
             305,
-            Statics.AssetControl.getContext().getString(R.string.unit_type_cubicinches),
+            getContext().getString(R.string.unit_type_cubicinches),
             UnitTypeCategory.volume
         )
 
         //quantity units //quantity units
         private var Cake = UnitType(
             401,
-            Statics.AssetControl.getContext().getString(R.string.unit_type_cake),
+            getContext().getString(R.string.unit_type_cake),
             UnitTypeCategory.quantity
         )
         private var Strip = UnitType(
             402,
-            Statics.AssetControl.getContext().getString(R.string.unit_type_strip),
+            getContext().getString(R.string.unit_type_strip),
             UnitTypeCategory.quantity
         )
         private var Unit = UnitType(
             403,
-            Statics.AssetControl.getContext().getString(R.string.unit_type_unit),
+            getContext().getString(R.string.unit_type_unit),
             UnitTypeCategory.quantity
         )
 
         //area units //area units
         private var Acre = UnitType(
             501,
-            Statics.AssetControl.getContext().getString(R.string.unit_type_acre),
+            getContext().getString(R.string.unit_type_acre),
             UnitTypeCategory.area
         )
         private var Hectare = UnitType(
             502,
-            Statics.AssetControl.getContext().getString(R.string.unit_type_hectare),
+            getContext().getString(R.string.unit_type_hectare),
             UnitTypeCategory.area
         )
         var SquareMeter = UnitType(
             503,
-            Statics.AssetControl.getContext().getString(R.string.unit_type_square_meter),
+            getContext().getString(R.string.unit_type_square_meter),
             UnitTypeCategory.area
         )
         private var SquareKilometer = UnitType(
             504,
-            Statics.AssetControl.getContext().getString(R.string.unit_type_square_kilometer),
+            getContext().getString(R.string.unit_type_square_kilometer),
             UnitTypeCategory.area
         )
         private var SquareCentimeter = UnitType(
             505,
-            Statics.AssetControl.getContext().getString(R.string.unit_type_square_centimeter),
+            getContext().getString(R.string.unit_type_square_centimeter),
             UnitTypeCategory.area
         )
         private var SquareFoot = UnitType(
             506,
-            Statics.AssetControl.getContext().getString(R.string.unit_type_square_foot),
+            getContext().getString(R.string.unit_type_square_foot),
             UnitTypeCategory.area
         )
         private var SquareYard = UnitType(
             507,
-            Statics.AssetControl.getContext().getString(R.string.unit_type_square_yard),
+            getContext().getString(R.string.unit_type_square_yard),
             UnitTypeCategory.area
         )
         private var SquareInch = UnitType(
             508,
-            Statics.AssetControl.getContext().getString(R.string.unit_type_square_inch),
+            getContext().getString(R.string.unit_type_square_inch),
             UnitTypeCategory.area
         )
 
         //pressure units //pressure units
         private var KilopondSquareCentimeter = UnitType(
             601,
-            Statics.AssetControl.getContext()
+            getContext()
                 .getString(R.string.unit_type_kilopond_square_centimeter),
             UnitTypeCategory.pressure
         ) //"Kilogramo fuerza por centímetro cuadradro"
         var Pascal = UnitType(
             602,
-            Statics.AssetControl.getContext().getString(R.string.unit_type_pascal),
+            getContext().getString(R.string.unit_type_pascal),
             UnitTypeCategory.pressure
         ) // Pascal
         private var Bar = UnitType(
             603,
-            Statics.AssetControl.getContext().getString(R.string.unit_type_bar),
+            getContext().getString(R.string.unit_type_bar),
             UnitTypeCategory.pressure
         )
         private var TechnicalAtmosphere = UnitType(
             604,
-            Statics.AssetControl.getContext().getString(R.string.unit_type_technical_atmosphere),
+            getContext().getString(R.string.unit_type_technical_atmosphere),
             UnitTypeCategory.pressure
         ) //Atmósfera técnica
         private var StandardAtmosphere = UnitType(
             605,
-            Statics.AssetControl.getContext().getString(R.string.unit_type_standard_atmosphere),
+            getContext().getString(R.string.unit_type_standard_atmosphere),
             UnitTypeCategory.pressure
         ) //Atmósfera estándar
         private var Torr = UnitType(
             606,
-            Statics.AssetControl.getContext().getString(R.string.unit_type_torr),
+            getContext().getString(R.string.unit_type_torr),
             UnitTypeCategory.pressure
         ) //Torr
         private var NewtonSquareMilimeter = UnitType(
             607,
-            Statics.AssetControl.getContext().getString(R.string.unit_type_newton_square_milimeter),
+            getContext().getString(R.string.unit_type_newton_square_milimeter),
             UnitTypeCategory.pressure
         ) //"Newton por milímetro cuadrado"
         private var KilopondSquareMeter = UnitType(
             608,
-            Statics.AssetControl.getContext().getString(R.string.unit_type_kilopond_square_meter),
+            getContext().getString(R.string.unit_type_kilopond_square_meter),
             UnitTypeCategory.pressure
         ) //Kilogramo fuerza por metro cuadradro"
 

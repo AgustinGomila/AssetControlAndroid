@@ -1,137 +1,135 @@
 package com.dacosys.assetControl.model.routes.commons
 
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.dataBase.DataBaseHelper
+import com.dacosys.assetControl.model.commons.SaveProgress
+import com.dacosys.assetControl.model.routes.routeProcess.`object`.RouteProcess
 import com.dacosys.assetControl.model.routes.routeProcessContent.`object`.RouteProcessContent
 import com.dacosys.assetControl.model.routes.routeProcessContent.dbHelper.RouteProcessContentDbHelper
 import com.dacosys.assetControl.model.routes.routeProcessStatus.`object`.RouteProcessStatus
-import com.dacosys.assetControl.sync.functions.ProgressStatus
+import com.dacosys.assetControl.network.sync.SyncProgress
+import com.dacosys.assetControl.network.sync.SyncRegistryType
+import com.dacosys.assetControl.network.sync.SyncUpload
+import com.dacosys.assetControl.network.utils.ProgressStatus
+import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import kotlinx.coroutines.*
-import java.lang.ref.WeakReference
 
 class SaveRouteProcess {
-    interface SaveRouteProcessListener {
-        // Define data you like to return from AysncTask
-        fun onSaveRouteProcessProgress(
-            msg: String,
-            taskStatus: Int,
-            progress: Int? = null,
-            total: Int? = null,
-        )
-    }
-
-    private var weakRef: WeakReference<SaveRouteProcessListener>? = null
-    private var listener: SaveRouteProcessListener?
-        get() {
-            return weakRef?.get()
-        }
-        set(value) {
-            weakRef = if (value != null) WeakReference(value) else null
-        }
-
     private var allRouteProcessContent: ArrayList<RouteProcessContent> = ArrayList()
-    private var collectorRouteProcessId: Long? = null
-
-    private fun preExecute() {
-        // TODO: JotterListener.lockScanner(this, true)
-    }
-
-    private fun postExecute(result: Boolean): Boolean {
-        // TODO: JotterListener.lockScanner(this, false)
-        return result
-    }
+    private lateinit var routeProcess: RouteProcess
+    private var onSaveProgress: (SaveProgress) -> Unit = {}
+    private var onSyncProgress: (SyncProgress) -> Unit = {}
 
     fun addParams(
-        callback: SaveRouteProcessListener,
-        collectorRouteProcessId: Long,
+        routeProcess: RouteProcess,
         allRouteProcessContent: ArrayList<RouteProcessContent>,
+        onSaveProgress: (SaveProgress) -> Unit = {},
+        onSyncProgress: (SyncProgress) -> Unit = {},
     ) {
-        this.listener = callback
+        this.routeProcess = routeProcess
         this.allRouteProcessContent = allRouteProcessContent
-        this.collectorRouteProcessId = collectorRouteProcessId
+        this.onSaveProgress = onSaveProgress
+        this.onSyncProgress = onSyncProgress
     }
 
-    fun execute(): Boolean {
-        preExecute()
-        val result = doInBackground()
-        return postExecute(result)
+    private val scope = CoroutineScope(Job() + Dispatchers.IO)
+
+    fun cancel() {
+        scope.cancel()
+    }
+
+    fun execute() {
+        scope.launch { doInBackground() }
     }
 
     private var deferred: Deferred<Boolean>? = null
-
-    private fun doInBackground(): Boolean {
+    private suspend fun doInBackground() {
         var result = false
-        runBlocking {
+        coroutineScope {
             deferred = async { suspendFunction() }
             result = deferred?.await() ?: false
         }
-        return result
+
+        if (result) {
+            routeProcess.completed = true
+            if (routeProcess.saveChanges()) {
+                if (Statics.autoSend()) {
+                    SyncUpload(registryType = SyncRegistryType.RouteProcess,
+                        onSyncTaskProgress = { onSyncProgress.invoke(it) })
+                } else {
+                    onSyncProgress.invoke(SyncProgress(progressStatus = ProgressStatus.bigFinished))
+                }
+            } else {
+                onSaveProgress.invoke(SaveProgress(msg = getContext().getString(R.string.error_saving_route),
+                    taskStatus = ProgressStatus.crashed.id,
+                    progress = 0,
+                    total = 0))
+            }
+        }
     }
 
     private suspend fun suspendFunction(): Boolean = withContext(Dispatchers.IO) {
+        ///////////////////////////////////
+        // Para controlar la transacción //
+        val db = DataBaseHelper.getWritableDb()
+
         try {
             val total = allRouteProcessContent.size
 
+            onSaveProgress.invoke(SaveProgress(msg = getContext().getString(R.string.saving_route_process),
+                taskStatus = ProgressStatus.starting.id,
+                progress = 0,
+                total = total))
+
             val rpcDbHelper = RouteProcessContentDbHelper()
 
-            if (listener != null)
-                listener!!.onSaveRouteProcessProgress(
-                    msg = Statics.AssetControl.getContext()
-                        .getString(R.string.saving_route_process),
-                    taskStatus = ProgressStatus.starting.id,
-                    progress = 0,
-                    total = total
-                )
+            ///// Comienzo de una transacción /////
+            db.beginTransaction()
 
             for ((index, rpc) in allRouteProcessContent.withIndex()) {
-                if (listener != null) {
-                    listener!!.onSaveRouteProcessProgress(
-                        msg = Statics.AssetControl.getContext().getString(R.string.saving_),
-                        taskStatus = ProgressStatus.running.id,
-                        progress = index,
-                        total = total
-                    )
-                }
+                onSaveProgress.invoke(SaveProgress(msg = getContext().getString(R.string.saving_),
+                    taskStatus = ProgressStatus.running.id,
+                    progress = index,
+                    total = total))
 
                 var statusId = rpc.routeProcessStatusId
                 if (rpc.routeProcessStatusId == RouteProcessStatus.unknown.id) {
                     statusId = RouteProcessStatus.notProcessed.id
                 }
 
-                if (rpc.routeProcessId == collectorRouteProcessId) {
+                if (rpc.routeProcessId == routeProcess.collectorRouteProcessId) {
                     rpc.routeProcessStatusId = statusId
                     rpcDbHelper.updateStatus(rpc)
                 } else {
-                    rpcDbHelper.insert(
-                        collectorRouteProcessId!!,
+                    rpcDbHelper.insert(routeProcess.collectorRouteProcessId,
                         rpc.dataCollectionRuleId,
                         rpc.level,
                         rpc.position,
                         statusId,
                         null,
-                        true
-                    )
+                        true)
                 }
             }
 
-            listener?.onSaveRouteProcessProgress(
-                msg = "",
+            db.setTransactionSuccessful()
+
+            onSaveProgress.invoke(SaveProgress(msg = "",
                 taskStatus = ProgressStatus.finished.id,
                 progress = 0,
-                total = 0
-            )
+                total = 0))
             return@withContext true
         } catch (ex: Exception) {
             ex.printStackTrace()
-            listener?.onSaveRouteProcessProgress(
-                msg = ex.message.toString(),
+            onSaveProgress.invoke(SaveProgress(msg = ex.message.toString(),
                 taskStatus = ProgressStatus.crashed.id,
                 progress = 0,
-                total = 0
-            )
+                total = 0))
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             return@withContext false
+        } finally {
+            db.endTransaction()
         }
     }
 }

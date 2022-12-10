@@ -22,6 +22,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.menu.MenuBuilder
@@ -33,81 +34,74 @@ import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.Statics.AssetControl.Companion.getContext
-import com.dacosys.assetControl.utils.Statics.Companion.isRfidRequired
 import com.dacosys.assetControl.databinding.AssetReviewContentBottomPanelCollapsedBinding
 import com.dacosys.assetControl.databinding.ProgressBarDialogBinding
-import com.dacosys.assetControl.utils.UTCDataTime
-import com.dacosys.assetControl.utils.configuration.Preference
-import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.scannedCode.ScannedCode
-import com.dacosys.assetControl.utils.scanners.JotterListener
-import com.dacosys.assetControl.utils.scanners.Scanner
-import com.dacosys.assetControl.utils.scanners.nfc.Nfc
-import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.model.assets.asset.`object`.Asset
 import com.dacosys.assetControl.model.assets.asset.dbHelper.AssetAdapter
 import com.dacosys.assetControl.model.assets.asset.dbHelper.AssetDbHelper
 import com.dacosys.assetControl.model.assets.assetCondition.AssetCondition
 import com.dacosys.assetControl.model.assets.assetStatus.AssetStatus
 import com.dacosys.assetControl.model.assets.ownershipStatus.OwnershipStatus
+import com.dacosys.assetControl.model.commons.SaveProgress
 import com.dacosys.assetControl.model.confirmStatus.ConfirmStatus
 import com.dacosys.assetControl.model.confirmStatus.ConfirmStatus.CREATOR.confirm
 import com.dacosys.assetControl.model.confirmStatus.ConfirmStatus.CREATOR.modify
-import com.dacosys.assetControl.model.movements.warehouseMovement.dbHelper.WarehouseMovementDbHelper
-import com.dacosys.assetControl.model.movements.warehouseMovementContent.dbHelper.WarehouseMovementContentDbHelper
 import com.dacosys.assetControl.model.reviews.assetReview.`object`.AssetReview
 import com.dacosys.assetControl.model.reviews.assetReviewContent.`object`.AssetReviewContent
 import com.dacosys.assetControl.model.reviews.assetReviewContent.dbHelper.AssetReviewContentAdapter
-import com.dacosys.assetControl.model.reviews.assetReviewContent.dbHelper.AssetReviewContentDbHelper
-import com.dacosys.assetControl.model.reviews.async.SaveReview
 import com.dacosys.assetControl.model.reviews.assetReviewContentStatus.AssetReviewContentStatus
 import com.dacosys.assetControl.model.reviews.assetReviewStatus.`object`.AssetReviewStatus
-import com.dacosys.assetControl.sync.functions.ProgressStatus
-import com.dacosys.assetControl.sync.functions.Sync.Companion.SyncTaskProgress
-import com.dacosys.assetControl.sync.functions.SyncRegistryType
-import com.dacosys.assetControl.sync.functions.SyncUpload
+import com.dacosys.assetControl.model.reviews.async.SaveReview
+import com.dacosys.assetControl.model.reviews.async.StartReview
+import com.dacosys.assetControl.model.reviews.async.StartReviewProgress
+import com.dacosys.assetControl.network.sync.SyncProgress
+import com.dacosys.assetControl.network.sync.SyncRegistryType
+import com.dacosys.assetControl.network.utils.*
+import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.Statics.Companion.isRfidRequired
+import com.dacosys.assetControl.utils.configuration.Preference
+import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.misc.ParcelLong
+import com.dacosys.assetControl.utils.misc.UTCDataTime
+import com.dacosys.assetControl.utils.scanners.JotterListener
+import com.dacosys.assetControl.utils.scanners.ScannedCode
+import com.dacosys.assetControl.utils.scanners.Scanner
+import com.dacosys.assetControl.utils.scanners.nfc.Nfc
+import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.views.assets.asset.activities.AssetCRUDActivity
 import com.dacosys.assetControl.views.assets.asset.activities.AssetDetailActivity
 import com.dacosys.assetControl.views.assets.asset.activities.AssetPrintLabelActivity
 import com.dacosys.assetControl.views.assets.assetManteinance.activities.AssetManteinanceConditionActivity
 import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType.CREATOR.ERROR
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarEventData
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType.CREATOR.ERROR
 import com.dacosys.assetControl.views.movements.fragments.LocationHeaderFragment
+import com.dacosys.assetControl.views.reviews.viewModels.SaveReviewViewModel
+import com.dacosys.assetControl.views.sync.viewModels.SyncViewModel
 import com.dacosys.imageControl.`object`.Images
 import com.dacosys.imageControl.`object`.StatusObject
 import com.dacosys.imageControl.activities.ImageControlCameraActivity
 import com.dacosys.imageControl.activities.ImageControlGridActivity
 import com.dacosys.imageControl.dbHelper.DbCommands
-import com.dacosys.imageControl.main.DownloadTask
 import com.dacosys.imageControl.main.GetImagesTask
+import com.dacosys.imageControl.main.ImagesTask
 import com.dacosys.imageControl.wsObject.DocumentContentObject
 import com.dacosys.imageControl.wsObject.DocumentContentRequestResultObject
 import org.parceler.Parcels
-import java.lang.ref.WeakReference
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.concurrent.thread
 
 @Suppress("UNCHECKED_CAST")
-class AssetReviewContentActivity :
-    AppCompatActivity(),
-    Scanner.ScannerListener,
-    Rfid.RfidDeviceListener,
-    SyncTaskProgress,
-    AssetReviewContentAdapter.CheckedChangedListener,
-    AssetReviewContentAdapter.DataSetChangedListener,
-    SwipeRefreshLayout.OnRefreshListener,
-    AssetReviewContentDbHelper.OnInsertListener,
-    SaveReview.SaveReviewListener,
+class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
+    Rfid.RfidDeviceListener, AssetReviewContentAdapter.CheckedChangedListener,
+    AssetReviewContentAdapter.DataSetChangedListener, SwipeRefreshLayout.OnRefreshListener,
     AssetAdapter.Companion.EditAssetRequiredListener,
     AssetAdapter.Companion.AlbumViewRequiredListener,
-    AssetAdapter.Companion.AddPhotoRequiredListener,
-    GetImagesTask.GetImagesTask,
-    DownloadTask.DownloadTaskListener {
+    AssetAdapter.Companion.AddPhotoRequiredListener {
     override fun onDestroy() {
         saveSharedPreferences()
         destroyLocals()
@@ -115,14 +109,10 @@ class AssetReviewContentActivity :
     }
 
     private fun saveSharedPreferences() {
-        Statics.prefsPutBoolean(
-            Preference.assetReviewAddUnknownAssets.key,
-            binding.addUnknownAssetsSwitch.isChecked
-        )
-        Statics.prefsPutBoolean(
-            Preference.assetReviewAllowUnknownCodes.key,
-            binding.allowUnknownCodesSwitch.isChecked
-        )
+        Statics.prefsPutBoolean(Preference.assetReviewAddUnknownAssets.key,
+            binding.addUnknownAssetsSwitch.isChecked)
+        Statics.prefsPutBoolean(Preference.assetReviewAllowUnknownCodes.key,
+            binding.allowUnknownCodesSwitch.isChecked)
         val set = HashSet<String>()
         for (i in visibleStatusArray) set.add(i.id.toString())
         Statics.prefsPutStringSet(Preference.assetReviewContentVisibleStatus.key, set)
@@ -141,13 +131,11 @@ class AssetReviewContentActivity :
         if (arc != null) {
             if (isChecked) {
                 runOnUiThread {
-                    arContAdapter?.updateContent(
-                        arc = arc,
+                    arContAdapter?.updateContent(arc = arc,
                         assetReviewContentStatusId = AssetReviewContentStatus.revised.id,
                         assetStatusId = AssetStatus.onInventory.id,
                         selectItem = false,
-                        changeCheckedState = false
-                    )
+                        changeCheckedState = false)
                 }
                 setupTextView()
             } else {
@@ -172,13 +160,15 @@ class AssetReviewContentActivity :
 
     private var currentInventory: ArrayList<String>? = null
 
-    override fun onSyncTaskProgress(
-        totalTask: Int,
-        completedTask: Int,
-        msg: String,
-        registryType: SyncRegistryType?,
-        progressStatus: ProgressStatus,
-    ) {
+    private fun onSyncUploadProgress(it: SyncProgress) {
+        if (isDestroyed || isFinishing) return
+
+        val totalTask: Int = it.totalTask
+        val completedTask: Int = it.completedTask
+        val msg: String = it.msg
+        val registryType: SyncRegistryType? = it.registryType
+        val progressStatus: ProgressStatus = it.progressStatus
+
         val progressStatusDesc = progressStatus.description
         var registryDesc = getString(R.string.all_tasks)
         if (registryType != null) {
@@ -190,13 +180,11 @@ class AssetReviewContentActivity :
             ProgressStatus.starting,
             ProgressStatus.running,
             -> {
-                showProgressDialog(
-                    title = getString(R.string.synchronizing_),
+                showProgressDialog(title = getString(R.string.synchronizing_),
                     msg = msg,
                     status = progressStatus.id,
                     progress = completedTask,
-                    total = totalTask
-                )
+                    total = totalTask)
             }
             ProgressStatus.bigFinished -> {
                 Statics.closeKeyboard(this)
@@ -208,34 +196,26 @@ class AssetReviewContentActivity :
             -> {
                 Statics.closeKeyboard(this)
                 makeText(binding.root, msg, ERROR)
-                ErrorLog.writeLog(
-                    this,
+                ErrorLog.writeLog(this,
                     this::class.java.simpleName,
                     "$progressStatusDesc: $registryDesc ${
-                        Statics.getPercentage(
-                            completedTask,
-                            totalTask
-                        )
-                    }, $msg"
-                )
+                        Statics.getPercentage(completedTask, totalTask)
+                    }, $msg")
                 setResult(RESULT_OK)
                 finish()
             }
             else -> {
-                Log.d(
-                    this::class.java.simpleName, "$progressStatusDesc: $registryDesc ${
-                        Statics.getPercentage(
-                            completedTask,
-                            totalTask
-                        )
-                    }, $msg"
-                )
+                Log.d(this::class.java.simpleName, "$progressStatusDesc: $registryDesc ${
+                    Statics.getPercentage(completedTask, totalTask)
+                }, $msg")
             }
         }
     }
 
     private var tempTitle = ""
     private var isNew: Boolean = false
+
+    private var saving: Boolean = false
 
     // Flag que se utiliza la primera vez que se muestra la actividad
     private var _startReview = true
@@ -273,6 +253,8 @@ class AssetReviewContentActivity :
         b.putParcelable("assetReview", Parcels.wrap(assetReview))
         b.putBoolean("isNew", isNew)
 
+        b.putBoolean("saving", saving)
+
         b.putStringArrayList("currentInventory", currentInventory)
 
         b.putBoolean("allowUnknownCodes", binding.allowUnknownCodesSwitch.isChecked)
@@ -283,10 +265,7 @@ class AssetReviewContentActivity :
         if (arContAdapter != null) {
             b.putParcelable("lastSelected", arContAdapter?.currentArCont())
             b.putInt("firstVisiblePos", arContAdapter?.firstVisiblePos() ?: 0)
-            b.putParcelableArrayList(
-                "visibleStatusArray",
-                arContAdapter?.getVisibleStatus()
-            )
+            b.putParcelableArrayList("visibleStatusArray", arContAdapter?.getVisibleStatus())
             b.putLongArray("checkedIdArray", arContAdapter?.getAllChecked()?.toLongArray())
             b.putParcelableArrayList("arContArray", arContAdapter?.getAll())
         }
@@ -309,6 +288,8 @@ class AssetReviewContentActivity :
 
         assetReview = Parcels.unwrap<AssetReview>(b.getParcelable("assetReview"))
         isNew = b.getBoolean("isNew")
+
+        saving = b.getBoolean("saving")
 
         if (b.containsKey("allowUnknownCodes")) {
             binding.allowUnknownCodesSwitch.isChecked = b.getBoolean("allowUnknownCodes")
@@ -364,10 +345,8 @@ class AssetReviewContentActivity :
 
     private fun loadDefaultVisibleStatus() {
         visibleStatusArray.clear()
-        var set = Statics.prefsGetStringSet(
-            Preference.assetReviewContentVisibleStatus.key,
-            Preference.assetReviewContentVisibleStatus.defaultValue as ArrayList<String>
-        )
+        var set = Statics.prefsGetStringSet(Preference.assetReviewContentVisibleStatus.key,
+            Preference.assetReviewContentVisibleStatus.defaultValue as ArrayList<String>)
         if (set == null) set = AssetReviewContentStatus.getAllIdAsString().toSet()
 
         for (i in set) {
@@ -379,6 +358,8 @@ class AssetReviewContentActivity :
     }
 
     private lateinit var binding: AssetReviewContentBottomPanelCollapsedBinding
+    private val saveViewModel: SaveReviewViewModel by viewModels()
+    private val syncViewModel: SyncViewModel by viewModels()
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -388,6 +369,10 @@ class AssetReviewContentActivity :
         setContentView(binding.root)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        saveViewModel.saveProgress.observe(this) { if (it != null) onSaveProgress(it) }
+        saveViewModel.startReviewProgress.observe(this) { if (it != null) onStartReviewProgress(it) }
+        syncViewModel.syncUploadProgress.observe(this) { if (it != null) onSyncUploadProgress(it) }
 
         headerFragment =
             supportFragmentManager.findFragmentById(binding.headerFragment.id) as LocationHeaderFragment?
@@ -402,12 +387,10 @@ class AssetReviewContentActivity :
         title = tempTitle
 
         binding.swipeRefresh.setOnRefreshListener(this)
-        binding.swipeRefresh.setColorSchemeResources(
-            android.R.color.holo_blue_bright,
+        binding.swipeRefresh.setColorSchemeResources(android.R.color.holo_blue_bright,
             android.R.color.holo_green_light,
             android.R.color.holo_orange_light,
-            android.R.color.holo_red_light
-        )
+            android.R.color.holo_red_light)
 
         // Para expandir y colapsar el panel inferior
         setBottomPanelAnimation()
@@ -443,8 +426,7 @@ class AssetReviewContentActivity :
 
         binding.allowUnknownCodesSwitch.setOnCheckedChangeListener { _, isChecked ->
             if (!isChecked) {
-                binding.addUnknownAssetsSwitch.isChecked =
-                    false
+                binding.addUnknownAssetsSwitch.isChecked = false
             }
         }
         binding.allowUnknownCodesSwitch.isChecked =
@@ -452,8 +434,7 @@ class AssetReviewContentActivity :
 
         binding.addUnknownAssetsSwitch.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                binding.allowUnknownCodesSwitch.isChecked =
-                    true
+                binding.allowUnknownCodesSwitch.isChecked = true
             }
         }
         binding.addUnknownAssetsSwitch.isChecked =
@@ -482,9 +463,7 @@ class AssetReviewContentActivity :
 
         if (assetReview != null && headerFragment != null) {
             runOnUiThread {
-                headerFragment?.fill(
-                    (assetReview ?: return@runOnUiThread).warehouseAreaId
-                )
+                headerFragment?.fill((assetReview ?: return@runOnUiThread).warehouseAreaId)
             }
         }
     }
@@ -499,22 +478,13 @@ class AssetReviewContentActivity :
             if (panelTopIsExpanded) {
                 currentLayout.load(this, R.layout.asset_review_content_activity)
             } else {
-                currentLayout.load(
-                    this,
-                    R.layout.asset_review_content_top_panel_collapsed
-                )
+                currentLayout.load(this, R.layout.asset_review_content_top_panel_collapsed)
             }
         } else {
             if (panelTopIsExpanded) {
-                currentLayout.load(
-                    this,
-                    R.layout.asset_review_content_bottom_panel_collapsed
-                )
+                currentLayout.load(this, R.layout.asset_review_content_bottom_panel_collapsed)
             } else {
-                currentLayout.load(
-                    this,
-                    R.layout.asset_review_content_both_panels_collapsed
-                )
+                currentLayout.load(this, R.layout.asset_review_content_both_panels_collapsed)
             }
         }
 
@@ -559,24 +529,15 @@ class AssetReviewContentActivity :
             val nextLayout = ConstraintSet()
             if (panelBottomIsExpanded) {
                 if (panelTopIsExpanded) {
-                    nextLayout.load(
-                        this,
-                        R.layout.asset_review_content_bottom_panel_collapsed
-                    )
+                    nextLayout.load(this, R.layout.asset_review_content_bottom_panel_collapsed)
                 } else {
-                    nextLayout.load(
-                        this,
-                        R.layout.asset_review_content_both_panels_collapsed
-                    )
+                    nextLayout.load(this, R.layout.asset_review_content_both_panels_collapsed)
                 }
             } else {
                 if (panelTopIsExpanded) {
                     nextLayout.load(this, R.layout.asset_review_content_activity)
                 } else {
-                    nextLayout.load(
-                        this,
-                        R.layout.asset_review_content_top_panel_collapsed
-                    )
+                    nextLayout.load(this, R.layout.asset_review_content_top_panel_collapsed)
                 }
             }
 
@@ -595,8 +556,7 @@ class AssetReviewContentActivity :
             nextLayout.applyTo(binding.assetReviewContent)
 
             if (panelBottomIsExpanded) (binding.expandBottomPanelButton
-                ?: return@setOnClickListener).text =
-                getContext().getString(R.string.collapse_panel)
+                ?: return@setOnClickListener).text = getContext().getString(R.string.collapse_panel)
             else binding.expandBottomPanelButton?.text =
                 getContext().getString(R.string.more_options)
         }
@@ -610,16 +570,12 @@ class AssetReviewContentActivity :
         binding.expandTopPanelButton?.setOnClickListener {
             val nextLayout = ConstraintSet()
             if (panelBottomIsExpanded) {
-                if (panelTopIsExpanded) nextLayout.load(
-                    this,
-                    R.layout.asset_review_content_top_panel_collapsed
-                )
+                if (panelTopIsExpanded) nextLayout.load(this,
+                    R.layout.asset_review_content_top_panel_collapsed)
                 else nextLayout.load(this, R.layout.asset_review_content_activity)
             } else {
-                if (panelTopIsExpanded) nextLayout.load(
-                    this,
-                    R.layout.asset_review_content_both_panels_collapsed
-                )
+                if (panelTopIsExpanded) nextLayout.load(this,
+                    R.layout.asset_review_content_both_panels_collapsed)
                 else nextLayout.load(this, R.layout.asset_review_content_bottom_panel_collapsed)
             }
 
@@ -639,8 +595,7 @@ class AssetReviewContentActivity :
             nextLayout.applyTo(binding.assetReviewContent)
 
             if (panelTopIsExpanded) (binding.expandTopPanelButton
-                ?: return@setOnClickListener).text =
-                getContext().getString(R.string.collapse_panel)
+                ?: return@setOnClickListener).text = getContext().getString(R.string.collapse_panel)
             else binding.expandTopPanelButton?.text =
                 getContext().getString(R.string.area_in_review)
         }
@@ -717,8 +672,7 @@ class AssetReviewContentActivity :
         if (tempAssetId < 0) {
             // El activo es desconocido
             // Crear un activo temporal para mostrar los detalles
-            tempAsset = Asset(
-                assetId = arc.assetId,
+            tempAsset = Asset(assetId = arc.assetId,
                 code = arc.code,
                 description = arc.description,
                 warehouse_id = tempReview.warehouseId,
@@ -738,8 +692,7 @@ class AssetReviewContentActivity :
                 condition = AssetCondition.unknown.id,
                 parent_id = 0,
                 ean = "",
-                last_asset_review_date = null
-            )
+                last_asset_review_date = null)
         } else {
             tempAsset = Asset(tempAssetId, false)
         }
@@ -767,12 +720,8 @@ class AssetReviewContentActivity :
         try {
             val adb = AlertDialog.Builder(this)
             adb.setTitle(R.string.remove_item)
-            adb.setMessage(
-                String.format(
-                    getContext().getString(R.string.do_you_want_to_remove_the_item),
-                    arc.code
-                )
-            )
+            adb.setMessage(String.format(getContext().getString(R.string.do_you_want_to_remove_the_item),
+                arc.code))
             adb.setNegativeButton(R.string.cancel, null)
             adb.setPositiveButton(R.string.accept) { _, _ ->
                 removeFromAdapter(arc)
@@ -796,13 +745,11 @@ class AssetReviewContentActivity :
             AssetReviewContentStatus.newAsset.id,
             -> {
                 runOnUiThread {
-                    arContAdapter?.updateContent(
-                        arc = arCont,
+                    arContAdapter?.updateContent(arc = arCont,
                         assetReviewContentStatusId = AssetReviewContentStatus.notInReview.id,
                         assetStatusId = arCont.assetStatusId,
                         selectItem = false,
-                        changeCheckedState = true
-                    )
+                        changeCheckedState = true)
                 }
             }
             AssetReviewContentStatus.external.id,
@@ -837,10 +784,8 @@ class AssetReviewContentActivity :
             val data = it?.data
             try {
                 if (it?.resultCode == RESULT_OK && data != null) {
-                    val idParcel =
-                        data.getParcelableArrayListExtra<Statics.ParcelLong>(
-                            "ids"
-                        ) ?: return@registerForActivityResult
+                    val idParcel = data.getParcelableArrayListExtra<ParcelLong>("ids")
+                        ?: return@registerForActivityResult
 
                     val ids: ArrayList<Long?> = ArrayList()
                     for (i in idParcel) {
@@ -877,10 +822,8 @@ class AssetReviewContentActivity :
             val intent = Intent(this, AssetReviewContentConfirmActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
             intent.putExtra("assetReview", Parcels.wrap<AssetReview>(assetReview))
-            intent.putParcelableArrayListExtra(
-                "arContArray",
-                arContAdapter?.getAll() ?: ArrayList<AssetReviewContent>()
-            )
+            intent.putParcelableArrayListExtra("arContArray",
+                arContAdapter?.getAll() ?: ArrayList<AssetReviewContent>())
             resultForFinishReview.launch(intent)
         }
     }
@@ -890,9 +833,7 @@ class AssetReviewContentActivity :
             val data = it?.data
             try {
                 if (it?.resultCode == RESULT_OK && data != null) {
-                    when (Parcels.unwrap<ConfirmStatus>(
-                        data.getParcelableExtra("confirmStatus")
-                    )) {
+                    when (Parcels.unwrap<ConfirmStatus>(data.getParcelableExtra("confirmStatus"))) {
                         modify -> {
                             (assetReview ?: return@registerForActivityResult).obs =
                                 data.getStringExtra("obs") ?: ""
@@ -916,6 +857,9 @@ class AssetReviewContentActivity :
 
     private fun processAssetReview() {
         val tempReview = assetReview ?: return
+        val all = arContAdapter?.getAll() ?: ArrayList()
+
+        saving = true
 
         // Lista de activos que provienen de otra área
         val assetExternalList: ArrayList<AssetReviewContent> = ArrayList()
@@ -932,7 +876,7 @@ class AssetReviewContentActivity :
         // Lista de activos desconocidos que no están la base de datos
         val assetUnknownList: ArrayList<AssetReviewContent> = ArrayList()
 
-        for (arCont in arContAdapter?.getAll() ?: ArrayList()) {
+        for (arCont in all) {
             var msg = ""
 
             allAssetList.add(arCont)
@@ -970,149 +914,34 @@ class AssetReviewContentActivity :
             Log.d(this::class.java.simpleName, msg)
         }
 
-        // Hacer los movimientos y los cambios de estados de los activos sólo
-        // cuando la revisión está completada
-        if (tempReview.statusId == AssetReviewStatus.completed.id) {
-            //////////// MOVEMENTS ////////////
-            // Create a Array List with the differents
-            // Origin Warehouse Areas to select the number of movements to do
-            val waIdList = ArrayList<Long>()
-
-            // Traer todos los orígenes únicos
-            for (tempAsset in assetExternalList) {
-                if (!waIdList.contains(tempAsset.originWarehouseAreaId)) {
-                    waIdList.add(tempAsset.originWarehouseAreaId)
-                }
-
-                makeText(
-                    binding.root,
-                    "${getString(R.string.processing_external_asset)} ${tempAsset.code}",
-                    SnackbarType.RUNNING
-                )
-            }
-
-            val wmDbHelper = WarehouseMovementDbHelper()
-            val wmContDbHelper = WarehouseMovementContentDbHelper()
-            try {
-                // Create Warehouse Movements Content by each Origin Warehouse Area
-                for (origWaId in waIdList) {
-                    val newWm = wmDbHelper.insert(
-                        origWaId,
-                        tempReview.warehouseAreaId,
-                        tempReview.obs
-                    )
-
-                    makeText(
-                        binding.root,
-                        getContext().getString(R.string.making_movement),
-                        SnackbarType.RUNNING
-                    )
-
-                    if (newWm != null) {
-                        val l: ArrayList<AssetReviewContent> = ArrayList()
-                        for (x in assetExternalList) {
-                            if (x.warehouseAreaId == origWaId) {
-                                l.add(x)
-                            }
-                        }
-
-                        wmContDbHelper.insertAr(newWm, l)
-                        val date = UTCDataTime.getUTCDateTimeAsString()
-
-                        newWm.completed = true
-                        newWm.obs =
-                            "${getString(R.string.automatic_movement_during_the_revision_on_date)}: $date"
-                        newWm.saveChanges()
-                    }
-                }
-            } catch (ex: Exception) {
-                ex.printStackTrace()
-                makeText(
-                    binding.root,
-                    "${getString(R.string.error_making_movements)}: ${ex.message}",
-                    ERROR
-                )
-                return
-            }
-
-            //////////// ASSET STATUS ////////////
-            val assetDbHelper = AssetDbHelper()
-            try {
-                // Activos que no están en la revisión cambian de estado a Extraviados
-                // Activos en la revisión o aparecidos en el área revisada cambian a En Inventario.
-
-                assetDbHelper.setMissing(assetNotInReviewList)
-                assetDbHelper.setOnInventoryFromArCont(tempReview, assetOnInventory)
-            } catch (ex: Exception) {
-                ex.printStackTrace()
-                makeText(
-                    binding.root,
-                    "${getString(R.string.error_updating_asset_status)}: ${ex.message}",
-                    ERROR
-                )
-                return
-            }
+        thread {
+            val sr = SaveReview()
+            sr.addParams(
+                assetReview = tempReview,
+                allAssetList = allAssetList,
+                assetOnInventory = assetOnInventory,
+                assetNotInReviewList = assetNotInReviewList,
+                assetExternalList = assetExternalList,
+                onSaveProgress = { saveViewModel.setSaveProgress(it) },
+                onSyncProgress = { syncViewModel.setSyncUploadProgress(it) })
+            sr.execute()
         }
+    }
 
-        var error = false
-        val arContDbHelper = AssetReviewContentDbHelper()
-        try {
-            if (tempReview.saveChanges()) {
-                // Limpiar el contenido de la revisión ANTIGUA
+    @Suppress("unused")
+    private fun showSnackBar(it: SnackBarEventData) {
+        if (isDestroyed || isFinishing) return
 
-                arContDbHelper.deleteByAssetReviewId(tempReview.collectorAssetReviewId)
-
-                // Agregar el contenido de la revisión
-                // Se agregan todos los activos, el sincronizador se encarga después
-                // de NO enviar aquellos que no fueron revisados
-                arContDbHelper.insert(
-                    listener = this,
-                    ar = tempReview,
-                    arCont = allAssetList.toTypedArray()
-                )
-            } else {
-                error = true
-                makeText(
-                    binding.root,
-                    getContext().getString(R.string.failed_to_save_the_revision),
-                    ERROR
-                )
-            }
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-            error = true
-            makeText(
-                binding.root,
-                "${getString(R.string.failed_to_do_the_review)}: ${ex.message}",
-                ERROR
-            )
-        } finally {
-            if (!error) {
-                if (Statics.autoSend()) {
-                    thread {
-                        val sync = SyncUpload()
-                        sync.addParams(WeakReference(this))
-                        sync.addRegistryToSync(SyncRegistryType.AssetReview)
-                        sync.execute()
-                    }
-                } else {
-                    Statics.closeKeyboard(this)
-                    setResult(RESULT_OK)
-                    finish()
-                }
-            }
-        }
+        makeText(binding.root, it.text, it.snackBarType)
     }
 
     private fun scannerHandleScanCompleted(scannedCode: String, manuallyAdded: Boolean) {
         JotterListener.lockScanner(this, true)
 
         try {
-            checkCode(
-                scannedCode = scannedCode,
+            checkCode(scannedCode = scannedCode,
                 manuallyAdded = manuallyAdded,
-                allowUnknownCodes = binding.allowUnknownCodesSwitch.isChecked
-            )
+                allowUnknownCodes = binding.allowUnknownCodesSwitch.isChecked)
         } catch (ex: Exception) {
             ex.printStackTrace()
             makeText(binding.root, ex.message.toString(), ERROR)
@@ -1123,8 +952,9 @@ class AssetReviewContentActivity :
         }
 
         if (Statics.demoMode) {
-            val margin = ThreadLocalRandom.current().nextInt(0, 6) *
-                    if (ThreadLocalRandom.current().nextInt(0, 2) == 0) -1 else 1
+            val margin = ThreadLocalRandom.current().nextInt(0, 6) * if (ThreadLocalRandom.current()
+                    .nextInt(0, 2) == 0
+            ) -1 else 1
             if ((arContAdapter?.assetsRevised ?: 0) + margin > allCodesInLocation.size) {
                 val obs = getString(R.string.test_review)
                 val completed = true
@@ -1155,11 +985,7 @@ class AssetReviewContentActivity :
             titleTextView.setText(title, TextView.BufferType.EDITABLE)
 
             descriptionEditText.setOnKeyListener { _, keyCode, keyEvent ->
-                if (keyCode == EditorInfo.IME_ACTION_DONE ||
-                    (keyEvent.action == KeyEvent.ACTION_UP &&
-                            (keyCode == KeyEvent.KEYCODE_ENTER ||
-                                    keyCode == KeyEvent.KEYCODE_DPAD_CENTER))
-                ) {
+                if (keyCode == EditorInfo.IME_ACTION_DONE || (keyEvent.action == KeyEvent.ACTION_UP && (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_DPAD_CENTER))) {
                     okButton.performClick()
                 }
                 false
@@ -1232,11 +1058,8 @@ class AssetReviewContentActivity :
                 createProgressDialog()
             }
 
-            val appColor = ResourcesCompat.getColor(
-                getContext().resources,
-                R.color.assetControl,
-                null
-            )
+            val appColor =
+                ResourcesCompat.getColor(getContext().resources, R.color.assetControl, null)
 
             when (status) {
                 ProgressStatus.starting.id -> {
@@ -1247,14 +1070,11 @@ class AssetReviewContentActivity :
                     alertBinding.progressBarHor.max = 0
                     alertBinding.progressBarHor.visibility = View.GONE
                     alertBinding.progressTextView.visibility = View.GONE
-                    alertBinding.progressBarHor.progressTintList =
-                        ColorStateList.valueOf(appColor)
+                    alertBinding.progressBarHor.progressTintList = ColorStateList.valueOf(appColor)
                     alertBinding.progressBar.visibility = View.VISIBLE
-                    alertBinding.progressBar.progressTintList =
-                        ColorStateList.valueOf(appColor)
+                    alertBinding.progressBar.progressTintList = ColorStateList.valueOf(appColor)
 
-                    progressDialog?.setButton(
-                        DialogInterface.BUTTON_NEGATIVE,
+                    progressDialog?.setButton(DialogInterface.BUTTON_NEGATIVE,
                         getContext().getString(R.string.cancel),
                         DialogInterface.OnClickListener { _, _ ->
                             return@OnClickListener
@@ -1277,8 +1097,8 @@ class AssetReviewContentActivity :
                             alertBinding.progressTextView.visibility = View.VISIBLE
                         }
 
-                        if (alertBinding.progressBar.visibility == View.VISIBLE)
-                            alertBinding.progressBar.visibility = View.GONE
+                        if (alertBinding.progressBar.visibility == View.VISIBLE) alertBinding.progressBar.visibility =
+                            View.GONE
                     } else {
                         alertBinding.progressBar.progress = 0
                         alertBinding.progressBar.max = 0
@@ -1288,12 +1108,11 @@ class AssetReviewContentActivity :
                             alertBinding.progressBarHor.visibility = View.GONE
                             alertBinding.progressTextView.visibility = View.GONE
                         }
-                        if (alertBinding.progressBar.visibility == View.GONE)
-                            alertBinding.progressBar.visibility = View.VISIBLE
+                        if (alertBinding.progressBar.visibility == View.GONE) alertBinding.progressBar.visibility =
+                            View.VISIBLE
                     }
 
-                    progressDialog?.setButton(
-                        DialogInterface.BUTTON_NEGATIVE,
+                    progressDialog?.setButton(DialogInterface.BUTTON_NEGATIVE,
                         getContext().getString(R.string.cancel),
                         DialogInterface.OnClickListener { _, _ ->
                             return@OnClickListener
@@ -1311,28 +1130,29 @@ class AssetReviewContentActivity :
     // endregion
 
     private fun fillListView() {
-        if (_startReview) {
+        if (!saving && _startReview) {
             startReview()
             return
         }
 
-        if (_fillAdapter)
+        if (_fillAdapter) {
             fillAdapter(arContArray)
+        }
 
         showProgressBar(false)
     }
 
     private fun startReview() {
+        val ar = assetReview ?: return
+
         thread {
-            val saveReview = SaveReview()
-            saveReview.addParams(
-                saveReviewListener = this,
-                onInsertListener = this,
-                assetReview = assetReview ?: return@thread,
+            val startReview = StartReview()
+            startReview.addParams(assetReview = ar,
                 isNew = isNew,
-                lastCollectorId = collectorContentId
-            )
-            saveReview.execute()
+                lastCollectorId = collectorContentId,
+                onProgress = { saveViewModel.setStartReviewProgress(it) },
+                onSaveProgress = { saveViewModel.setSaveProgress(it) })
+            startReview.execute()
         }
     }
 
@@ -1346,31 +1166,30 @@ class AssetReviewContentActivity :
                     firstVisiblePos = arContAdapter?.firstVisiblePos()
                 }
 
-                arContAdapter = AssetReviewContentAdapter(
-                    activity = this,
+                arContAdapter = AssetReviewContentAdapter(activity = this,
                     resource = R.layout.asset_row,
                     assetReviewContArray = items,
                     suggestedList = items,
                     listView = binding.assetReviewContentListView,
                     multiSelect = Statics.prefsGetBoolean(Preference.quickReviews),
                     checkedIdArray = checkedIdArray,
-                    visibleStatus = visibleStatusArray
-                )
+                    visibleStatus = visibleStatusArray)
                 refreshAdapterListeners()
 
                 while (binding.assetReviewContentListView.adapter == null) {
                     // Horrible wait for full load
                 }
 
-                arContAdapter?.selectItem(
-                    arc = lastSelected,
+                arContAdapter?.selectItem(arc = lastSelected,
                     scrollPos = firstVisiblePos ?: 0,
-                    smoothScroll = true
-                )
+                    smoothScroll = true)
 
                 setupTextView()
 
-                if (Statics.demoMode) Handler(Looper.getMainLooper()).postDelayed({ demo() }, 300)
+                if (!saving) {
+                    if (Statics.demoMode) Handler(Looper.getMainLooper()).postDelayed({ demo() },
+                        300)
+                }
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
@@ -1386,17 +1205,12 @@ class AssetReviewContentActivity :
         // las variables de esta actividad pueden
         // tener valores antiguos en del adaptador.
 
-        arContAdapter?.refreshListeners(
-            checkedChangedListener = this,
+        arContAdapter?.refreshListeners(checkedChangedListener = this,
             dataSetChangedListener = this,
-            editAssetRequiredListener = this
-        )
+            editAssetRequiredListener = this)
 
         if (Statics.useImageControl) {
-            arContAdapter?.refreshImageControlListeners(
-                this,
-                this
-            )
+            arContAdapter?.refreshImageControlListeners(this, this)
         }
     }
 
@@ -1412,13 +1226,11 @@ class AssetReviewContentActivity :
         var finalArc: AssetReviewContent? = null
 
         try {
-            val sc = ScannedCode(this).getFromCode(
-                code = scannedCode,
+            val sc = ScannedCode(this).getFromCode(code = scannedCode,
                 searchWarehouseAreaId = true,
                 searchAssetCode = true,
                 searchAssetSerial = true,
-                validateId = true
-            )
+                validateId = true)
 
             if (sc.warehouseArea != null) {
                 val res = getString(R.string.area_label)
@@ -1444,9 +1256,8 @@ class AssetReviewContentActivity :
                 return
             }
 
-            if (sc.codeFound && (sc.asset != null
-                        && ((sc.asset ?: return).labelNumber != sc.labelNbr && sc.labelNbr != null)
-                        && !manuallyAdded)
+            if (sc.codeFound && (sc.asset != null && ((sc.asset
+                    ?: return).labelNumber != sc.labelNbr && sc.labelNbr != null) && !manuallyAdded)
             ) {
                 val res = getString(R.string.invalid_code)
 
@@ -1465,48 +1276,43 @@ class AssetReviewContentActivity :
 
             if (arContAdapter != null && !arContAdapter!!.isEmpty) {
                 // Buscar primero en el adaptador de la lista
-                (0 until arContAdapter!!.count)
-                    .map { arContAdapter!!.getItem(it) }
-                    .filter {
-                        it != null && it.code == tempCode
-                    }
-                    .forEach {
-                        if (it != null) {
-                            /*
-                            * 1 = Asset revised
-                            * 2 = Added a asset from the another warehouse
-                            * 3 = Added a asset does not exist in the database
-                            * 4 = Added a asset that was missing from the current warehouse
-                            * 0 = Not in the review
-                            */
+                (0 until arContAdapter!!.count).map { arContAdapter!!.getItem(it) }.filter {
+                    it != null && it.code == tempCode
+                }.forEach {
+                    if (it != null) {
+                        /*
+                        * 1 = Asset revised
+                        * 2 = Added a asset from the another warehouse
+                        * 3 = Added a asset does not exist in the database
+                        * 4 = Added a asset that was missing from the current warehouse
+                        * 0 = Not in the review
+                        */
 
-                            // Process the ROW
-                            if (it.contentStatusId == AssetReviewContentStatus.notInReview.id) {
-                                runOnUiThread {
-                                    arContAdapter?.updateContent(
-                                        arc = it,
-                                        assetReviewContentStatusId = AssetReviewContentStatus.revised.id,
-                                        assetStatusId = sc.asset?.assetStatusId ?: 0,
-                                        selectItem = true,
-                                        changeCheckedState = true
-                                    )
-                                }
-
-                                val res = "$scannedCode: ${getString(R.string.ok)}"
-                                makeText(binding.root, res, SnackbarType.SUCCESS)
-                                Log.d(this::class.java.simpleName, res)
-                            } else {
-                                val res = "$scannedCode: ${getString(R.string.already_registered)}"
-                                makeText(binding.root, res, SnackbarType.INFO)
-                                Log.d(this::class.java.simpleName, res)
-
-                                runOnUiThread {
-                                    arContAdapter?.forceSelectItem(it)
-                                }
+                        // Process the ROW
+                        if (it.contentStatusId == AssetReviewContentStatus.notInReview.id) {
+                            runOnUiThread {
+                                arContAdapter?.updateContent(arc = it,
+                                    assetReviewContentStatusId = AssetReviewContentStatus.revised.id,
+                                    assetStatusId = sc.asset?.assetStatusId ?: 0,
+                                    selectItem = true,
+                                    changeCheckedState = true)
                             }
-                            return
+
+                            val res = "$scannedCode: ${getString(R.string.ok)}"
+                            makeText(binding.root, res, SnackBarType.SUCCESS)
+                            Log.d(this::class.java.simpleName, res)
+                        } else {
+                            val res = "$scannedCode: ${getString(R.string.already_registered)}"
+                            makeText(binding.root, res, SnackBarType.INFO)
+                            Log.d(this::class.java.simpleName, res)
+
+                            runOnUiThread {
+                                arContAdapter?.forceSelectItem(it)
+                            }
                         }
+                        return
                     }
+                }
             }
 
             if (sc.asset == null && !allowUnknownCodes) {
@@ -1521,8 +1327,8 @@ class AssetReviewContentActivity :
             //    El código no se encuentra en la base de datos
             //    O
             //    El activo existe pero está desactivado
-            if (allowUnknownCodes &&
-                (!sc.codeFound || (sc.asset != null && !(sc.asset ?: return).active))
+            if (allowUnknownCodes && (!sc.codeFound || (sc.asset != null && !(sc.asset
+                    ?: return).active))
             ) {
                 val tempReview = assetReview ?: return
 
@@ -1536,16 +1342,14 @@ class AssetReviewContentActivity :
 
                 collectorContentId--
 
-                finalArc = AssetReviewContent(
-                    assetReviewId = tempReview.collectorAssetReviewId,
+                finalArc = AssetReviewContent(assetReviewId = tempReview.collectorAssetReviewId,
                     assetReviewContentId = collectorContentId,
                     assetId = unknownAssetId,
                     code = tempCode.uppercase(Locale.ROOT),
                     description = getString(R.string.NO_DATA),
                     qty = 1F,
                     contentStatusId = AssetReviewContentStatus.unknown.id,
-                    originWarehouseAreaId = 0L
-                )
+                    originWarehouseAreaId = 0L)
 
                 finalArc.assetStatusId = AssetStatus.unknown.id
                 finalArc.collectorContentId = collectorContentId
@@ -1583,16 +1387,14 @@ class AssetReviewContentActivity :
 
                 collectorContentId--
 
-                finalArc = AssetReviewContent(
-                    assetReviewId = tempReview.collectorAssetReviewId,
+                finalArc = AssetReviewContent(assetReviewId = tempReview.collectorAssetReviewId,
                     assetReviewContentId = collectorContentId,
                     assetId = (sc.asset ?: return).assetId,
                     code = (sc.asset ?: return).code,
                     description = (sc.asset ?: return).description,
                     qty = 1F,
                     contentStatusId = contentStatusId,
-                    originWarehouseAreaId = (sc.asset ?: return).warehouseAreaId
-                )
+                    originWarehouseAreaId = (sc.asset ?: return).warehouseAreaId)
 
                 finalArc.assetStatusId = sc.asset?.assetStatusId ?: 0
                 finalArc.collectorContentId = collectorContentId
@@ -1622,16 +1424,12 @@ class AssetReviewContentActivity :
 
         if (finalArc != null) {
             runOnUiThread {
-                arContAdapter?.selectItem(
-                    arc = finalArc,
-                    smoothScroll = true
-                )
+                arContAdapter?.selectItem(arc = finalArc, smoothScroll = true)
             }
 
             try {
                 if (finalArc.contentStatusId == AssetReviewContentStatus.unknown.id) {
-                    if (!Statics.demoMode && binding.addUnknownAssetsSwitch.isChecked
-                    ) {
+                    if (!Statics.demoMode && binding.addUnknownAssetsSwitch.isChecked) {
                         // Dar de alta el activo
                         assetCrud(finalArc)
                         return
@@ -1686,9 +1484,8 @@ class AssetReviewContentActivity :
             val data = it?.data
             try {
                 if (it?.resultCode == RESULT_OK && data != null) {
-                    val asset =
-                        Parcels.unwrap<Asset>(data.getParcelableExtra("asset"))
-                            ?: return@registerForActivityResult
+                    val asset = Parcels.unwrap<Asset>(data.getParcelableExtra("asset"))
+                        ?: return@registerForActivityResult
 
                     val arc = arContAdapter?.currentArCont()
                     if (arc != null) {
@@ -1730,21 +1527,14 @@ class AssetReviewContentActivity :
             menu.removeItem(menu.findItem(R.id.action_rfid_connect).itemId)
         }
 
-        val drawable =
-            ContextCompat.getDrawable(getContext(), R.drawable.ic_visibility)
+        val drawable = ContextCompat.getDrawable(getContext(), R.drawable.ic_visibility)
         val toolbar = findViewById<Toolbar>(R.id.action_bar)
         toolbar.overflowIcon = drawable
 
         // Opciones de visibilidad del menú
         for (i in AssetReviewContentStatus.getAll()) {
-            menu.add(
-                0,
-                i.id,
-                i.id,
-                i.description
-            )
-                .setChecked(visibleStatusArray.contains(i))
-                .isCheckable = true
+            menu.add(0, i.id, i.id, i.description)
+                .setChecked(visibleStatusArray.contains(i)).isCheckable = true
         }
 
         //region Icon colors
@@ -1765,16 +1555,10 @@ class AssetReviewContentActivity :
         //endregion Icon colors
 
         for (i in AssetReviewContentStatus.getAll()) {
-            val icon = ResourcesCompat.getDrawable(
-                getContext().resources,
-                R.drawable.ic_lens,
-                null
-            )
+            val icon = ResourcesCompat.getDrawable(getContext().resources, R.drawable.ic_lens, null)
             icon?.mutate()?.colorFilter =
-                BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-                    colors[i.id],
-                    BlendModeCompat.SRC_IN
-                )
+                BlendModeColorFilterCompat.createBlendModeColorFilterCompat(colors[i.id],
+                    BlendModeCompat.SRC_IN)
 
             val item = menu.findItem(i.id)
             item.icon = icon
@@ -1782,8 +1566,7 @@ class AssetReviewContentActivity :
             // Keep the popup menu open
             item.setShowAsAction(MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW)
             item.actionView = View(this)
-            item.setOnActionExpandListener(object :
-                MenuItem.OnActionExpandListener {
+            item.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
                 override fun onMenuItemActionExpand(item: MenuItem): Boolean {
                     return false
                 }
@@ -1837,42 +1620,48 @@ class AssetReviewContentActivity :
         item.isChecked = !item.isChecked
 
         when (item.itemId) {
-            AssetReviewContentStatus.notInReview.id ->
-                if (item.isChecked && !visibleStatus.contains(AssetReviewContentStatus.notInReview)) {
-                    arContAdapter!!.addVisibleStatus(AssetReviewContentStatus.notInReview)
-                } else if (!item.isChecked && visibleStatus.contains(AssetReviewContentStatus.notInReview)) {
-                    arContAdapter!!.removeVisibleStatus(AssetReviewContentStatus.notInReview)
-                }
-            AssetReviewContentStatus.revised.id ->
-                if (item.isChecked && !visibleStatus.contains(AssetReviewContentStatus.revised)) {
-                    arContAdapter!!.addVisibleStatus(AssetReviewContentStatus.revised)
-                } else if (!item.isChecked && visibleStatus.contains(AssetReviewContentStatus.revised)) {
-                    arContAdapter!!.removeVisibleStatus(AssetReviewContentStatus.revised)
-                }
-            AssetReviewContentStatus.external.id ->
-                if (item.isChecked && !visibleStatus.contains(AssetReviewContentStatus.external)) {
-                    arContAdapter!!.addVisibleStatus(AssetReviewContentStatus.external)
-                } else if (!item.isChecked && visibleStatus.contains(AssetReviewContentStatus.external)) {
-                    arContAdapter!!.removeVisibleStatus(AssetReviewContentStatus.external)
-                }
-            AssetReviewContentStatus.unknown.id ->
-                if (item.isChecked && !visibleStatus.contains(AssetReviewContentStatus.unknown)) {
-                    arContAdapter!!.addVisibleStatus(AssetReviewContentStatus.unknown)
-                } else if (!item.isChecked && visibleStatus.contains(AssetReviewContentStatus.unknown)) {
-                    arContAdapter!!.removeVisibleStatus(AssetReviewContentStatus.unknown)
-                }
-            AssetReviewContentStatus.appeared.id ->
-                if (item.isChecked && !visibleStatus.contains(AssetReviewContentStatus.appeared)) {
-                    arContAdapter!!.addVisibleStatus(AssetReviewContentStatus.appeared)
-                } else if (!item.isChecked && visibleStatus.contains(AssetReviewContentStatus.appeared)) {
-                    arContAdapter!!.removeVisibleStatus(AssetReviewContentStatus.appeared)
-                }
-            AssetReviewContentStatus.newAsset.id ->
-                if (item.isChecked && !visibleStatus.contains(AssetReviewContentStatus.newAsset)) {
-                    arContAdapter!!.addVisibleStatus(AssetReviewContentStatus.newAsset)
-                } else if (!item.isChecked && visibleStatus.contains(AssetReviewContentStatus.newAsset)) {
-                    arContAdapter!!.removeVisibleStatus(AssetReviewContentStatus.newAsset)
-                }
+            AssetReviewContentStatus.notInReview.id -> if (item.isChecked && !visibleStatus.contains(
+                    AssetReviewContentStatus.notInReview)
+            ) {
+                arContAdapter!!.addVisibleStatus(AssetReviewContentStatus.notInReview)
+            } else if (!item.isChecked && visibleStatus.contains(AssetReviewContentStatus.notInReview)) {
+                arContAdapter!!.removeVisibleStatus(AssetReviewContentStatus.notInReview)
+            }
+            AssetReviewContentStatus.revised.id -> if (item.isChecked && !visibleStatus.contains(
+                    AssetReviewContentStatus.revised)
+            ) {
+                arContAdapter!!.addVisibleStatus(AssetReviewContentStatus.revised)
+            } else if (!item.isChecked && visibleStatus.contains(AssetReviewContentStatus.revised)) {
+                arContAdapter!!.removeVisibleStatus(AssetReviewContentStatus.revised)
+            }
+            AssetReviewContentStatus.external.id -> if (item.isChecked && !visibleStatus.contains(
+                    AssetReviewContentStatus.external)
+            ) {
+                arContAdapter!!.addVisibleStatus(AssetReviewContentStatus.external)
+            } else if (!item.isChecked && visibleStatus.contains(AssetReviewContentStatus.external)) {
+                arContAdapter!!.removeVisibleStatus(AssetReviewContentStatus.external)
+            }
+            AssetReviewContentStatus.unknown.id -> if (item.isChecked && !visibleStatus.contains(
+                    AssetReviewContentStatus.unknown)
+            ) {
+                arContAdapter!!.addVisibleStatus(AssetReviewContentStatus.unknown)
+            } else if (!item.isChecked && visibleStatus.contains(AssetReviewContentStatus.unknown)) {
+                arContAdapter!!.removeVisibleStatus(AssetReviewContentStatus.unknown)
+            }
+            AssetReviewContentStatus.appeared.id -> if (item.isChecked && !visibleStatus.contains(
+                    AssetReviewContentStatus.appeared)
+            ) {
+                arContAdapter!!.addVisibleStatus(AssetReviewContentStatus.appeared)
+            } else if (!item.isChecked && visibleStatus.contains(AssetReviewContentStatus.appeared)) {
+                arContAdapter!!.removeVisibleStatus(AssetReviewContentStatus.appeared)
+            }
+            AssetReviewContentStatus.newAsset.id -> if (item.isChecked && !visibleStatus.contains(
+                    AssetReviewContentStatus.newAsset)
+            ) {
+                arContAdapter!!.addVisibleStatus(AssetReviewContentStatus.newAsset)
+            } else if (!item.isChecked && visibleStatus.contains(AssetReviewContentStatus.newAsset)) {
+                arContAdapter!!.removeVisibleStatus(AssetReviewContentStatus.newAsset)
+            }
             else -> return super.onOptionsItemSelected(item)
         }
 
@@ -1902,14 +1691,10 @@ class AssetReviewContentActivity :
                             val alert = AlertDialog.Builder(this)
                             alert.setTitle(getContext().getString(R.string.added_assets))
                             alert.setMessage(getContext().getString(R.string.there_are_assets_in_this_revision_that_belonged_to_another_area_do_you_want_to_make_the_movements_of_these_assets_to_the_current_area_question))
-                            alert.setNegativeButton(
-                                getContext().getString(R.string.no)
-                            ) { _, _ ->
+                            alert.setNegativeButton(getContext().getString(R.string.no)) { _, _ ->
                                 return@setNegativeButton
                             }
-                            alert.setPositiveButton(
-                                getContext().getString(R.string.yes)
-                            ) { _, _ ->
+                            alert.setPositiveButton(getContext().getString(R.string.yes)) { _, _ ->
                                 processAssetReview()
                             }
                             alert.show()
@@ -1934,34 +1719,38 @@ class AssetReviewContentActivity :
         }
     }
 
-    override fun onInsert(msg: String, taskStatus: Int, progress: Int?, total: Int?) {
-        showProgressDialog(
-            getContext().getString(R.string.saving_review),
+    private fun onSaveProgress(it: SaveProgress) {
+        if (isDestroyed || isFinishing) return
+
+        val msg: String = it.msg
+        val taskStatus: Int = it.taskStatus
+        val progress: Int = it.progress
+        val total: Int = it.total
+
+        showProgressDialog(getContext().getString(R.string.saving_review),
             msg,
             taskStatus,
             progress,
-            total
-        )
+            total)
     }
 
-    override fun onSaveReviewProgress(
-        msg: String,
-        taskStatus: Int,
-        assetReview: AssetReview?,
-        arContArray: ArrayList<AssetReviewContent>,
-        progress: Int?,
-        total: Int?,
-    ) {
-        showProgressDialog(
-            getContext().getString(R.string.loanding_review_),
+    private fun onStartReviewProgress(it: StartReviewProgress) {
+        if (isDestroyed || isFinishing) return
+
+        val msg: String = it.msg
+        val taskStatus: Int = it.taskStatus
+        val arContArray: ArrayList<AssetReviewContent> = it.arContArray
+        val progress: Int? = it.progress
+        val total: Int? = it.total
+
+        showProgressDialog(getContext().getString(R.string.loanding_review_),
             msg,
             taskStatus,
             progress,
-            total
-        )
+            total)
 
         if (taskStatus == ProgressStatus.finished.id) {
-            // Revisión incializada
+            // Revisión inicializada
             _startReview = false
 
             progressDialog?.dismiss()
@@ -1969,9 +1758,7 @@ class AssetReviewContentActivity :
 
             checkedIdArray.clear()
             for (arc in arContArray) {
-                if (arc.contentStatusId != AssetReviewContentStatus.notInReview.id &&
-                    arc.contentStatusId != AssetReviewContentStatus.unknown.id
-                ) {
+                if (arc.contentStatusId != AssetReviewContentStatus.notInReview.id && arc.contentStatusId != AssetReviewContentStatus.unknown.id) {
                     checkedIdArray.add(arc.assetId)
                 }
             }
@@ -2016,23 +1803,20 @@ class AssetReviewContentActivity :
         }
 
         if (allCodesInLocation.size <= 0) {
-            allCodesInLocation = AssetDbHelper().selectAllCodesByWarehouseAreaId(
-                headerFragment?.warehouseArea?.warehouseAreaId ?: 0L
-            )
+            allCodesInLocation =
+                AssetDbHelper().selectAllCodesByWarehouseAreaId(headerFragment?.warehouseArea?.warehouseAreaId
+                    ?: 0L)
         }
 
         var code = if (allCodesInLocation.any()) allCodesInLocation[ThreadLocalRandom.current()
             .nextInt(0, allCodesInLocation.size)] else ""
         if (ThreadLocalRandom.current().nextInt(0, 30) == 0) {
-            code =
-                if (allCodesInLocation.any())
-                    allCodes[ThreadLocalRandom.current().nextInt(0, allCodes.size)] else ""
+            code = if (allCodesInLocation.any()) allCodes[ThreadLocalRandom.current()
+                .nextInt(0, allCodes.size)] else ""
         }
         if (ThreadLocalRandom.current().nextInt(0, 70) == 0) {
-            code = (1..8)
-                .map { ThreadLocalRandom.current().nextInt(0, charPool.size) }
-                .map(charPool::get)
-                .joinToString("")
+            code = (1..8).map { ThreadLocalRandom.current().nextInt(0, charPool.size) }
+                .map(charPool::get).joinToString("")
         }
 
         if (code.isNotEmpty()) scannerCompleted(code)
@@ -2060,15 +1844,10 @@ class AssetReviewContentActivity :
     override fun onWriteCompleted(isOk: Boolean) {}
 
     override fun onReadCompleted(scanCode: String) {
-        if (currentInventory == null)
-            currentInventory = ArrayList()
-        if (currentInventory?.contains(scanCode) == false)
-            currentInventory?.add(scanCode)
+        if (currentInventory == null) currentInventory = ArrayList()
+        if (currentInventory?.contains(scanCode) == false) currentInventory?.add(scanCode)
 
-        scannerHandleScanCompleted(
-            scannedCode = scanCode,
-            manuallyAdded = false
-        )
+        scannerHandleScanCompleted(scannedCode = scanCode, manuallyAdded = false)
     }
 
     //endregion READERS Reception
@@ -2118,11 +1897,8 @@ class AssetReviewContentActivity :
             tempObjectId = itemId.toString()
             tempTableId = tableId
 
-            val localImages = DbCommands.selectByProgramObjectObj1Obj2(
-                tempTableId.toString(),
-                tempObjectId,
-                ""
-            )
+            val localImages =
+                DbCommands.selectByProgramObjectObj1Obj2(tempTableId.toString(), tempObjectId, "")
             val allLocal = toDocumentContentObjectList(tempObjectId, localImages)
             if (allLocal.isNotEmpty()) {
                 showPhotoAlbum(allLocal)
@@ -2130,15 +1906,13 @@ class AssetReviewContentActivity :
                 // Localmente no hay imágenes vamos a buscar en el servidor
                 val getDocs = GetImagesTask()
                 getDocs.addParams(
-                    callBack = this,
-                    callBack2 = this,
                     programId = Statics.INTERNAL_IMAGE_CONTROL_APP_ID,
                     programObjectId = tempTableId,
                     objId1 = tempObjectId,
-                    objId2 = ""
-                )
+                    objId2 = "",
+                    onImagesProgress = { onGetImages(it) })
                 getDocs.downloadFiles(false)
-                getDocs.start()
+                getDocs.execute()
             }
         }
     }
@@ -2185,22 +1959,24 @@ class AssetReviewContentActivity :
     private var tempObjectId = ""
     private var tempTableId = 0
 
-    override fun onGetImagesTaskListener(
-        status: com.dacosys.imageControl.misc.ProgressStatus,
-        msg: String,
-        docContReqResObj: DocumentContentRequestResultObject?,
-    ) {
-        if (status == com.dacosys.imageControl.misc.ProgressStatus.finished) {
+    private fun onGetImages(it: ImagesTask) {
+        if (isDestroyed || isFinishing) return
+
+        val status: ProgressStatus = ProgressStatus.getById(it.status.id) ?: ProgressStatus.unknown
+        val docContReqResObj: DocumentContentRequestResultObject? = it.docContReqResObj
+        val msg = it.msg
+
+        if (status == ProgressStatus.finished) {
             if (docContReqResObj == null) {
-                makeText(binding.root, msg, SnackbarType.INFO)
+                makeText(binding.root, msg, SnackBarType.INFO)
                 rejectNewInstances = false
                 return
             }
 
-            if (docContReqResObj.documentContentArray == null ||
-                (docContReqResObj.documentContentArray ?: return).isEmpty()
+            if (docContReqResObj.documentContentArray == null || (docContReqResObj.documentContentArray
+                    ?: return).isEmpty()
             ) {
-                makeText(binding.root, getString(R.string.no_images), SnackbarType.INFO)
+                makeText(binding.root, getString(R.string.no_images), SnackBarType.INFO)
                 rejectNewInstances = false
                 return
             }
@@ -2209,32 +1985,15 @@ class AssetReviewContentActivity :
                 (docContReqResObj.documentContentArray ?: arrayOf()).any { it.available }
 
             if (!anyAvailable) {
-                makeText(
-                    binding.root,
+                makeText(binding.root,
                     getContext().getString(R.string.images_not_yet_processed),
-                    SnackbarType.INFO
-                )
+                    SnackBarType.INFO)
                 rejectNewInstances = false
                 return
             }
 
             showPhotoAlbum()
         }
-    }
-
-    override fun onDownloadTaskResult(
-        docContObj: DocumentContentObject?,
-        destination: String,
-        target: Int,
-    ) {
-    }
-
-    override fun onDownloadProgressChanged(
-        status: com.dacosys.imageControl.misc.ProgressStatus,
-        msg: String,
-        value: Int,
-        total: Int,
-    ) {
     }
 
     override fun onAddPhotoRequired(tableId: Int, itemId: Long, description: String) {

@@ -1,7 +1,7 @@
 package com.dacosys.assetControl.model.movements.warehouseMovement.wsObject
 
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.model.movements.warehouseMovementContent.wsObject.WarehouseMovementContentObject
+import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.wsGeneral.WsParam
 import org.ksoap2.serialization.SoapObject
 import java.util.*

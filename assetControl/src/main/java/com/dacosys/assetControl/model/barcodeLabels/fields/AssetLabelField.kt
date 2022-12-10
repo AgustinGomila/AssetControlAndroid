@@ -1,8 +1,8 @@
 package com.dacosys.assetControl.model.barcodeLabels.fields
 
+import com.dacosys.assetControl.model.assets.asset.`object`.Asset
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.configuration.entries.ConfEntry
-import com.dacosys.assetControl.model.assets.asset.`object`.Asset
 import java.util.*
 
 class AssetLabelField(asset: Asset, forReport: Boolean) {

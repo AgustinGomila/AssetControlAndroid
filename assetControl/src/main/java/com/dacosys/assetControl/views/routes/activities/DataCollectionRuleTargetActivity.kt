@@ -1,9 +1,7 @@
 package com.dacosys.assetControl.views.routes.activities
 
 import android.annotation.SuppressLint
-import android.content.DialogInterface
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
@@ -16,104 +14,25 @@ import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.Switch
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.res.ResourcesCompat
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.databinding.DataCollectionRuleTargetActivityBinding
-import com.dacosys.assetControl.databinding.ProgressBarDialogBinding
-import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.model.assets.asset.`object`.Asset
 import com.dacosys.assetControl.model.assets.asset.dbHelper.AssetDbHelper
 import com.dacosys.assetControl.model.assets.itemCategory.`object`.ItemCategory
 import com.dacosys.assetControl.model.locations.warehouseArea.`object`.WarehouseArea
 import com.dacosys.assetControl.model.routes.dataCollections.dataCollectionRule.`object`.DataCollectionRule
-import com.dacosys.assetControl.sync.functions.ProgressStatus
-import com.dacosys.assetControl.sync.functions.Sync.Companion.SyncTaskProgress
-import com.dacosys.assetControl.sync.functions.SyncRegistryType
-import com.dacosys.assetControl.sync.functions.SyncUpload
+import com.dacosys.assetControl.network.utils.*
+import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.misc.ParcelLong
 import com.dacosys.assetControl.views.assets.asset.activities.AssetPrintLabelActivity
 import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
 import com.dacosys.assetControl.views.locations.locationSelect.LocationSelectActivity
 import org.parceler.Parcels
-import java.lang.ref.WeakReference
-import kotlin.concurrent.thread
 
-class DataCollectionRuleTargetActivity : AppCompatActivity(), SyncTaskProgress {
-    override fun onDestroy() {
-        destroyLocals()
-        super.onDestroy()
-    }
-
-    private fun destroyLocals() {
-        progressDialog?.dismiss()
-        progressDialog = null
-    }
-
-    override fun onSyncTaskProgress(
-        totalTask: Int,
-        completedTask: Int,
-        msg: String,
-        registryType: SyncRegistryType?,
-        progressStatus: ProgressStatus,
-    ) {
-        val progressStatusDesc = progressStatus.description
-        var registryDesc = getString(R.string.all_tasks)
-        if (registryType != null) {
-            registryDesc = registryType.description
-        }
-
-        when (progressStatus) {
-            ProgressStatus.bigStarting,
-            ProgressStatus.starting,
-            ProgressStatus.running,
-            -> {
-                showProgressDialog(
-                    title = getString(R.string.synchronizing_),
-                    msg = msg,
-                    status = progressStatus.id,
-                    progress = completedTask,
-                    total = totalTask
-                )
-            }
-            ProgressStatus.bigFinished -> {
-                Statics.closeKeyboard(this)
-                setResult(RESULT_OK)
-                finish()
-            }
-            ProgressStatus.bigCrashed,
-            ProgressStatus.canceled,
-            -> {
-                Statics.closeKeyboard(this)
-                makeText(binding.root, msg, SnackbarType.ERROR)
-                ErrorLog.writeLog(
-                    this,
-                    this::class.java.simpleName,
-                    "$progressStatusDesc: $registryDesc ${
-                        Statics.getPercentage(
-                            completedTask,
-                            totalTask
-                        )
-                    }, $msg"
-                )
-                setResult(RESULT_OK)
-                finish()
-            }
-            else -> {
-                Log.d(
-                    this::class.java.simpleName, "$progressStatusDesc: $registryDesc ${
-                        Statics.getPercentage(
-                            completedTask,
-                            totalTask
-                        )
-                    }, $msg"
-                )
-            }
-        }
-    }
-
+class DataCollectionRuleTargetActivity : AppCompatActivity() {
     private var rejectNewInstances = false
 
     @SuppressLint("ClickableViewAccessibility")
@@ -196,7 +115,7 @@ class DataCollectionRuleTargetActivity : AppCompatActivity(), SyncTaskProgress {
             val data = it?.data
             try {
                 if (it?.resultCode == RESULT_OK && data != null) {
-                    val idParcel = data.getParcelableArrayListExtra<Statics.ParcelLong>("ids")
+                    val idParcel = data.getParcelableArrayListExtra<ParcelLong>("ids")
                         ?: return@registerForActivityResult
 
                     val ids: ArrayList<Long?> = ArrayList()
@@ -221,7 +140,7 @@ class DataCollectionRuleTargetActivity : AppCompatActivity(), SyncTaskProgress {
                         makeText(
                             binding.root,
                             res,
-                            SnackbarType.ERROR
+                            SnackBarType.ERROR
                         )
                         Log.d(this::class.java.simpleName, res)
                     }
@@ -314,18 +233,9 @@ class DataCollectionRuleTargetActivity : AppCompatActivity(), SyncTaskProgress {
             val data = it?.data
             try {
                 if (it?.resultCode == RESULT_OK && data != null) {
-                    if (Statics.autoSend()) {
-                        thread {
-                            val sync = SyncUpload()
-                            sync.addParams(WeakReference(this))
-                            sync.addRegistryToSync(SyncRegistryType.DataCollection)
-                            sync.execute()
-                        }
-                    } else {
-                        Statics.closeKeyboard(this)
-                        setResult(RESULT_OK)
-                        finish()
-                    }
+                    Statics.closeKeyboard(this)
+                    setResult(RESULT_OK)
+                    finish()
                 }
             } catch (ex: Exception) {
                 ex.printStackTrace()
@@ -348,115 +258,10 @@ class DataCollectionRuleTargetActivity : AppCompatActivity(), SyncTaskProgress {
     }
 
     companion object {
-
         fun equals(a: Any?, b: Any?): Boolean {
             return a != null && a == b
         }
     }
-
-    // region ProgressBar
-    // Aparece mientras se realizan operaciones sobre las bases de datos remota y local
-    private var progressDialog: AlertDialog? = null
-    private lateinit var alertBinding: ProgressBarDialogBinding
-    private fun createProgressDialog() {
-        alertBinding = ProgressBarDialogBinding.inflate(layoutInflater)
-        val builder = AlertDialog.Builder(this)
-        //builder.setCancelable(false) // if you want user to wait for some process to finish
-        builder.setView(alertBinding.root)
-        progressDialog = builder.create()
-    }
-
-    private fun showProgressDialog(
-        title: String,
-        msg: String,
-        status: Int,
-        progress: Int? = null,
-        total: Int? = null,
-    ) {
-        if (isFinishing || isDestroyed) return
-
-        runOnUiThread {
-            if (progressDialog == null) {
-                createProgressDialog()
-            }
-
-            val appColor = ResourcesCompat.getColor(
-                Statics.AssetControl.getContext().resources,
-                R.color.assetControl,
-                null
-            )
-
-            when (status) {
-                ProgressStatus.starting.id -> {
-                    progressDialog?.setTitle(title)
-                    //dialog?.setMessage(msg)
-                    alertBinding.messageTextView.text = msg
-                    alertBinding.progressBarHor.progress = 0
-                    alertBinding.progressBarHor.max = 0
-                    alertBinding.progressBarHor.visibility = View.GONE
-                    alertBinding.progressTextView.visibility = View.GONE
-                    alertBinding.progressBarHor.progressTintList =
-                        ColorStateList.valueOf(appColor)
-                    alertBinding.progressBar.visibility = View.VISIBLE
-                    alertBinding.progressBar.progressTintList =
-                        ColorStateList.valueOf(appColor)
-
-                    progressDialog?.setButton(
-                        DialogInterface.BUTTON_NEGATIVE,
-                        getString(R.string.cancel),
-                        DialogInterface.OnClickListener { _, _ ->
-                            return@OnClickListener
-                        })
-
-                    if (!isFinishing) progressDialog?.show()
-                }
-                ProgressStatus.running.id -> {
-                    //dialog?.setMessage(msg)
-                    if (msg != "") alertBinding.messageTextView.text = msg
-                    if (progress != null && total != null && total > 0) {
-                        alertBinding.progressBarHor.max = total
-                        alertBinding.progressBarHor.progress = progress
-                        alertBinding.progressBarHor.isIndeterminate = false
-                        val t = "$progress / $total"
-                        alertBinding.progressTextView.text = t
-
-                        if (alertBinding.progressBarHor.visibility == View.GONE) {
-                            alertBinding.progressBarHor.visibility = View.VISIBLE
-                            alertBinding.progressTextView.visibility = View.VISIBLE
-                        }
-
-                        if (alertBinding.progressBar.visibility == View.VISIBLE)
-                            alertBinding.progressBar.visibility = View.GONE
-                    } else {
-                        alertBinding.progressBar.progress = 0
-                        alertBinding.progressBar.max = 0
-                        alertBinding.progressBar.isIndeterminate = true
-
-                        if (alertBinding.progressBarHor.visibility == View.VISIBLE) {
-                            alertBinding.progressBarHor.visibility = View.GONE
-                            alertBinding.progressTextView.visibility = View.GONE
-                        }
-                        if (alertBinding.progressBar.visibility == View.GONE)
-                            alertBinding.progressBar.visibility = View.VISIBLE
-                    }
-
-                    progressDialog?.setButton(
-                        DialogInterface.BUTTON_NEGATIVE,
-                        getString(R.string.cancel),
-                        DialogInterface.OnClickListener { _, _ ->
-                            return@OnClickListener
-                        })
-
-                    if (!isFinishing) progressDialog?.show()
-                }
-                ProgressStatus.finished.id, ProgressStatus.canceled.id, ProgressStatus.crashed.id -> {
-                    progressDialog?.dismiss()
-                    progressDialog = null
-                }
-            }
-        }
-    }
-    // endregion
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         // Handle action bar item clicks here. The action bar will

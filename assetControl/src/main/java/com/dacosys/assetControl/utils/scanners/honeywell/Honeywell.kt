@@ -9,6 +9,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.configuration.Preference
 import com.dacosys.assetControl.utils.scanners.Scanner
@@ -381,7 +382,7 @@ class Honeywell(private val activity: AppCompatActivity) : Scanner() {
     }
 
     private fun sendImplicitBroadcast(i: Intent) {
-        val appContext = Statics.AssetControl.getContext()
+        val appContext = getContext()
         val pm: PackageManager = appContext.packageManager
         val matches = pm.queryBroadcastReceivers(i, 0)
         if (matches.size > 0) {

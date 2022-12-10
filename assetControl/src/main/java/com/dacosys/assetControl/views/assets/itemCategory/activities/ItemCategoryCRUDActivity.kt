@@ -3,7 +3,6 @@ package com.dacosys.assetControl.views.assets.itemCategory.activities
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
@@ -17,10 +16,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.databinding.ItemCategoryCrudActivityBinding
-import com.dacosys.assetControl.utils.configuration.Preference
-import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.model.assets.itemCategory.`object`.ItemCategory
 import com.dacosys.assetControl.model.assets.itemCategory.`object`.ItemCategoryCRUD
 import com.dacosys.assetControl.model.assets.itemCategory.`object`.ItemCategoryCRUD.Companion.RC_ERROR_INSERT
@@ -29,18 +25,17 @@ import com.dacosys.assetControl.model.assets.itemCategory.`object`.ItemCategoryC
 import com.dacosys.assetControl.model.assets.itemCategory.`object`.ItemCategoryCRUD.Companion.RC_INSERT_OK
 import com.dacosys.assetControl.model.assets.itemCategory.`object`.ItemCategoryCRUD.Companion.RC_UPDATE_OK
 import com.dacosys.assetControl.model.table.Table
-import com.dacosys.assetControl.sync.functions.ProgressStatus
-import com.dacosys.assetControl.sync.functions.Sync.Companion.SyncTaskProgress
-import com.dacosys.assetControl.sync.functions.SyncRegistryType
+import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.configuration.Preference
+import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.views.assets.itemCategory.fragment.ItemCategoryCRUDFragment
 import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
 import com.dacosys.imageControl.fragments.ImageControlButtonsFragment
 import org.parceler.Parcels
 
 class ItemCategoryCRUDActivity : AppCompatActivity(),
     ItemCategoryCRUD.Companion.TaskCompleted,
-    SyncTaskProgress,
     ImageControlButtonsFragment.DescriptionRequired {
     override fun onDestroy() {
         destroyLocals()
@@ -52,41 +47,19 @@ class ItemCategoryCRUDActivity : AppCompatActivity(),
         imageControlFragment = null
     }
 
-    override fun onSyncTaskProgress(
-        totalTask: Int,
-        completedTask: Int,
-        msg: String,
-        registryType: SyncRegistryType?,
-        progressStatus: ProgressStatus,
-    ) {
-        val progressStatusDesc = progressStatus.description
-        var registryDesc = getString(R.string.all_tasks)
-
-        if (registryType != null) {
-            registryDesc = registryType.description
-        }
-
-        Log.d(
-            this::class.java.simpleName, "$progressStatusDesc: $registryDesc, $msg ${
-                Statics.getPercentage(
-                    completedTask,
-                    totalTask
-                )
-            }"
-        )
-    }
-
     /**
      * Interface que recibe los resultados del alta/modificación
      * de la categoría
      */
     override fun onTaskCompleted(result: ItemCategoryCRUD.Companion.ItemCategoryCRUDResult) {
+        if (isDestroyed || isFinishing) return
+
         when (result.resultCode) {
             RC_UPDATE_OK -> {
                 makeText(
                     binding.root,
                     getString(R.string.category_modified_correctly),
-                    SnackbarType.SUCCESS
+                    SnackBarType.SUCCESS
                 )
                 if (imageControlFragment != null && result.itemCategory != null) {
                     imageControlFragment?.saveImages(true)
@@ -107,7 +80,7 @@ class ItemCategoryCRUDActivity : AppCompatActivity(),
                 makeText(
                     binding.root,
                     getString(R.string.category_added_correctly),
-                    SnackbarType.SUCCESS
+                    SnackBarType.SUCCESS
                 )
                 if (imageControlFragment != null && result.itemCategory != null) {
                     imageControlFragment?.updateObjectId1(result.itemCategory!!.itemCategoryId)
@@ -128,17 +101,17 @@ class ItemCategoryCRUDActivity : AppCompatActivity(),
             RC_ERROR_OBJECT_NULL -> makeText(
                 binding.root,
                 getString(R.string.error_null_object),
-                SnackbarType.ERROR
+                SnackBarType.ERROR
             )
             RC_ERROR_UPDATE -> makeText(
                 binding.root,
                 getString(R.string.error_updating_category),
-                SnackbarType.ERROR
+                SnackBarType.ERROR
             )
             RC_ERROR_INSERT -> makeText(
                 binding.root,
                 getString(R.string.error_adding_category),
-                SnackbarType.ERROR
+                SnackBarType.ERROR
             )
         }
     }
@@ -408,7 +381,7 @@ class ItemCategoryCRUDActivity : AppCompatActivity(),
             val intent = Intent(baseContext, ItemCategorySelectActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
             intent.putExtra("title", getString(R.string.select_category))
-            intent.putExtra("onlyActive", false)
+            intent.putExtra("onlyActive", true)
             resultForCategorySelect.launch(intent)
         }
     }
@@ -428,7 +401,7 @@ class ItemCategoryCRUDActivity : AppCompatActivity(),
                         makeText(
                             binding.root,
                             getString(R.string.error_trying_to_add_category),
-                            SnackbarType.ERROR
+                            SnackBarType.ERROR
                         )
                         ErrorLog.writeLog(this, this::class.java.simpleName, ex)
                     }

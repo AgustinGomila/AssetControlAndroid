@@ -3,7 +3,7 @@ package com.dacosys.assetControl.utils.configuration
 import com.dacosys.assetControl.model.assets.assetStatus.AssetStatus
 import com.dacosys.assetControl.model.reviews.assetReviewContentStatus.AssetReviewContentStatus
 import com.dacosys.assetControl.model.reviews.assetReviewStatus.`object`.AssetReviewStatus
-import com.dacosys.assetControl.sync.functions.SyncRegistryType
+import com.dacosys.assetControl.network.sync.SyncRegistryType
 import java.util.*
 
 @Suppress("MemberVisibilityCanBePrivate", "unused")

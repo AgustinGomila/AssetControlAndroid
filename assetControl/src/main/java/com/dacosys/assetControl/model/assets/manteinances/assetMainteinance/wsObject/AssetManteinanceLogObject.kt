@@ -2,8 +2,8 @@ package com.dacosys.assetControl.model.assets.manteinances.assetMainteinance.wsO
 
 import android.os.Parcel
 import android.os.Parcelable
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.model.assets.manteinances.assetMainteinance.`object`.AssetManteinance
+import com.dacosys.assetControl.utils.Statics
 import org.ksoap2.serialization.SoapObject
 
 class AssetManteinanceLogObject() : Parcelable {

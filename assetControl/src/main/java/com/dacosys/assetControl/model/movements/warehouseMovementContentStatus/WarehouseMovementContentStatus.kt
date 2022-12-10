@@ -2,8 +2,8 @@ package com.dacosys.assetControl.model.movements.warehouseMovementContentStatus
 
 import android.os.Parcel
 import android.os.Parcelable
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
 import java.util.*
 
 class WarehouseMovementContentStatus : Parcelable {
@@ -54,11 +54,11 @@ class WarehouseMovementContentStatus : Parcelable {
 
         var toMove = WarehouseMovementContentStatus(
             wmContStatusId = 0,
-            description = Statics.AssetControl.getContext().getString(R.string.to_move)
+            description = getContext().getString(R.string.to_move)
         )
         var noNeedToMove = WarehouseMovementContentStatus(
             wmContStatusId = 3,
-            description = Statics.AssetControl.getContext().getString(R.string.no_need_to_move)
+            description = getContext().getString(R.string.no_need_to_move)
         )
 
         fun getAll(): ArrayList<WarehouseMovementContentStatus> {

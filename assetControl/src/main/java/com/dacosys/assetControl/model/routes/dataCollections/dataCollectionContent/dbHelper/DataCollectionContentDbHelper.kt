@@ -3,8 +3,8 @@ package com.dacosys.assetControl.model.routes.dataCollections.dataCollectionCont
 import android.database.Cursor
 import android.database.SQLException
 import android.util.Log
-import com.dacosys.assetControl.dataBase.StaticDbHelper
-import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.getReadableDb
+import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.getWritableDb
 import com.dacosys.assetControl.model.assets.attributes.attributeComposition.dbHelper.AttributeCompositionContract
 import com.dacosys.assetControl.model.routes.dataCollections.dataCollectionContent.`object`.DataCollectionContent
 import com.dacosys.assetControl.model.routes.dataCollections.dataCollectionContent.dbHelper.DataCollectionContentContract.DataCollectionContentEntry.Companion.ATTRIBUTE_COMPOSITION_ID
@@ -20,6 +20,7 @@ import com.dacosys.assetControl.model.routes.dataCollections.dataCollectionConte
 import com.dacosys.assetControl.model.routes.dataCollections.dataCollectionContent.dbHelper.DataCollectionContentContract.DataCollectionContentEntry.Companion.TABLE_NAME
 import com.dacosys.assetControl.model.routes.dataCollections.dataCollectionContent.dbHelper.DataCollectionContentContract.DataCollectionContentEntry.Companion.VALUE_STR
 import com.dacosys.assetControl.model.routes.dataCollections.dataCollectionContent.dbHelper.DataCollectionContentContract.getAllColumns
+import com.dacosys.assetControl.utils.errorLog.ErrorLog
 
 /**
  * Created by Agustin on 28/12/2016.
@@ -30,14 +31,12 @@ class DataCollectionContentDbHelper {
         get() {
             Log.i(this::class.java.simpleName, ": SQLite -> lastId")
 
-            val sqLiteDatabase = StaticDbHelper.getReadableDb()
-            sqLiteDatabase.beginTransaction()
+            val sqLiteDatabase = getReadableDb()
             return try {
                 val mCount = sqLiteDatabase.rawQuery(
                     "SELECT MAX($COLLECTOR_DATA_COLLECTION_CONTENT_ID) FROM $TABLE_NAME",
                     null
                 )
-                sqLiteDatabase.setTransactionSuccessful()
                 mCount.moveToFirst()
                 val count = mCount.getLong(0)
                 mCount.close()
@@ -46,8 +45,6 @@ class DataCollectionContentDbHelper {
                 ex.printStackTrace()
                 ErrorLog.writeLog(null, this::class.java.simpleName, ex)
                 0
-            } finally {
-                sqLiteDatabase.endTransaction()
             }
         }
 
@@ -80,10 +77,9 @@ class DataCollectionContentDbHelper {
             dataCollectionRuleContentId
         )
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = if (sqLiteDatabase.insertOrThrow(
+            return if (sqLiteDatabase.insertOrThrow(
                     TABLE_NAME,
                     null,
                     newDataCollectionContent.toContentValues()
@@ -93,14 +89,10 @@ class DataCollectionContentDbHelper {
             } else {
                 0
             }
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             0
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -156,7 +148,7 @@ class DataCollectionContentDbHelper {
                 newId + ", " +
                 dcc.dataCollectionRuleContentId + ")"
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
+        val sqLiteDatabase = getWritableDb()
         sqLiteDatabase.beginTransaction()
         return try {
             sqLiteDatabase.execSQL(insertQ)
@@ -177,23 +169,18 @@ class DataCollectionContentDbHelper {
         val selection = "$DATA_COLLECTION_CONTENT_ID = ?" // WHERE code LIKE ?
         val selectionArgs = arrayOf(dataCollectionContent.dataCollectionContentId.toString())
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.update(
+            return sqLiteDatabase.update(
                 TABLE_NAME,
                 dataCollectionContent.toContentValues(),
                 selection,
                 selectionArgs
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -203,22 +190,17 @@ class DataCollectionContentDbHelper {
         val selection = "$DATA_COLLECTION_ID = ?" // WHERE code LIKE ?
         val selectionArgs = arrayOf(id.toString())
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.delete(
+            return sqLiteDatabase.delete(
                 TABLE_NAME,
                 selection,
                 selectionArgs
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -228,22 +210,17 @@ class DataCollectionContentDbHelper {
         val selection = "$DATA_COLLECTION_CONTENT_ID = ?" // WHERE code LIKE ?
         val selectionArgs = arrayOf(id.toString())
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.delete(
+            return sqLiteDatabase.delete(
                 TABLE_NAME,
                 selection,
                 selectionArgs
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -264,7 +241,7 @@ class DataCollectionContentDbHelper {
                 com.dacosys.assetControl.model.routes.dataCollections.dataCollection.dbHelper.DataCollectionContract.DataCollectionEntry.COLLECTOR_DATA_COLLECTION_ID + " FROM " +
                 com.dacosys.assetControl.model.routes.dataCollections.dataCollection.dbHelper.DataCollectionContract.DataCollectionEntry.TABLE_NAME + "))"
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
+        val sqLiteDatabase = getWritableDb()
         sqLiteDatabase.beginTransaction()
         try {
             sqLiteDatabase.execSQL(deleteQ)
@@ -280,22 +257,17 @@ class DataCollectionContentDbHelper {
     fun deleteAll(): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> deleteAll")
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.delete(
+            return sqLiteDatabase.delete(
                 TABLE_NAME,
                 null,
                 null
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -305,7 +277,7 @@ class DataCollectionContentDbHelper {
         val columns = getAllColumns()
         val order = LEVEL
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
+        val sqLiteDatabase = getReadableDb()
         sqLiteDatabase.beginTransaction()
         try {
             val c = sqLiteDatabase.query(
@@ -336,7 +308,7 @@ class DataCollectionContentDbHelper {
         val selectionArgs = arrayOf(id.toString())
         val order = LEVEL
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
+        val sqLiteDatabase = getReadableDb()
         sqLiteDatabase.beginTransaction()
         try {
             val c = sqLiteDatabase.query(
@@ -426,18 +398,14 @@ class DataCollectionContentDbHelper {
                 " WHERE (" + TABLE_NAME + "." + DATA_COLLECTION_RULE_CONTENT_ID + " = " + dcrContId + ") AND " +
                 "(" + dc.TABLE_NAME + "." + dc.ASSET_ID + " = " + assetId + ")"
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getReadableDb()
         return try {
             val c = sqLiteDatabase.rawQuery(basicSelect, null)
-            sqLiteDatabase.setTransactionSuccessful()
             fromCursor(c)
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             ArrayList()
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -504,18 +472,14 @@ class DataCollectionContentDbHelper {
                 " WHERE (" + TABLE_NAME + "." + DATA_COLLECTION_RULE_CONTENT_ID + " = " + dcrContId + ") AND " +
                 "(" + dc.TABLE_NAME + "." + dc.WAREHOUSE_ID + " = " + warehouseId + ")"
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getReadableDb()
         return try {
             val c = sqLiteDatabase.rawQuery(basicSelect, null)
-            sqLiteDatabase.setTransactionSuccessful()
             fromCursor(c)
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             ArrayList()
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -582,18 +546,14 @@ class DataCollectionContentDbHelper {
                 " WHERE (" + TABLE_NAME + "." + DATA_COLLECTION_RULE_CONTENT_ID + " = " + dcrContId + ") AND " +
                 "(" + dc.TABLE_NAME + "." + dc.WAREHOUSE_AREA_ID + " = " + warehouseAreaId + ")"
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getReadableDb()
         return try {
             val c = sqLiteDatabase.rawQuery(basicSelect, null)
-            sqLiteDatabase.setTransactionSuccessful()
             fromCursor(c)
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             ArrayList()
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -650,18 +610,14 @@ class DataCollectionContentDbHelper {
                 TABLE_NAME + "." + DATA_COLLECTION_ID +
                 " WHERE (" + dc.TABLE_NAME + "." + dc.COLLECTOR_ROUTE_PROCESS_ID + " = " + crpId + ")"
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getReadableDb()
         return try {
             val c = sqLiteDatabase.rawQuery(basicSelect, null)
-            sqLiteDatabase.setTransactionSuccessful()
             fromCursor(c)
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             ArrayList()
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -673,7 +629,7 @@ class DataCollectionContentDbHelper {
         val selectionArgs = arrayOf(id.toString())
         val order = LEVEL
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
+        val sqLiteDatabase = getReadableDb()
         sqLiteDatabase.beginTransaction()
         try {
             val c = sqLiteDatabase.query(

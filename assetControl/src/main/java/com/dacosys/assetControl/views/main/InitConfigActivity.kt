@@ -19,22 +19,22 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.dacosys.assetControl.R
+import com.dacosys.assetControl.databinding.InitConfigActivityBinding
+import com.dacosys.assetControl.network.clientPackages.ClientPackagesProgress
+import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.Statics.Companion.closeKeyboard
 import com.dacosys.assetControl.utils.Statics.Companion.getConfig
 import com.dacosys.assetControl.utils.Statics.Companion.setupProxy
-import com.dacosys.assetControl.databinding.InitConfigActivityBinding
 import com.dacosys.assetControl.utils.configuration.Preference
 import com.dacosys.assetControl.utils.configuration.QRConfigType.CREATOR.QRConfigClientAccount
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.Scanner
-import com.dacosys.assetControl.sync.functions.GetClientPackages
-import com.dacosys.assetControl.sync.functions.ProgressStatus
 import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType.CREATOR.ERROR
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType.CREATOR.INFO
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType.CREATOR.ERROR
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType.CREATOR.INFO
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import org.json.JSONObject
@@ -43,7 +43,6 @@ import java.lang.ref.WeakReference
 class InitConfigActivity :
     AppCompatActivity(),
     Scanner.ScannerListener,
-    GetClientPackages.TaskGetPackagesEnded,
     Statics.Companion.TaskSetupProxyEnded,
     Statics.Companion.TaskConfigPanelEnded {
     override fun onTaskConfigPanelEnded(status: ProgressStatus) {
@@ -52,20 +51,22 @@ class InitConfigActivity :
             makeText(
                 binding.root,
                 getString(R.string.configuration_applied),
-                SnackbarType.SUCCESS
+                SnackBarType.SUCCESS
             )
             Statics.removeDataBases()
             finish()
         }
     }
 
-    override fun onTaskGetPackagesEnded(
-        status: ProgressStatus,
-        result: ArrayList<JSONObject>,
-        clientEmail: String,
-        clientPassword: String,
-        msg: String,
-    ) {
+    private fun onTaskGetPackagesEnded(it: ClientPackagesProgress) {
+        if (isDestroyed || isFinishing) return
+
+        val status: ProgressStatus = it.status
+        val result: ArrayList<JSONObject> = it.result
+        val clientEmail: String = it.clientEmail
+        val clientPassword: String = it.clientPassword
+        val msg: String = it.msg
+
         if (status == ProgressStatus.finished) {
             if (result.size > 0) {
                 runOnUiThread {
@@ -84,7 +85,7 @@ class InitConfigActivity :
             }
         } else if (status == ProgressStatus.success) {
             isConfiguring = false
-            makeText(binding.root, msg, SnackbarType.SUCCESS)
+            makeText(binding.root, msg, SnackBarType.SUCCESS)
             finish()
         } else if (status == ProgressStatus.crashed ||
             status == ProgressStatus.canceled
@@ -102,11 +103,10 @@ class InitConfigActivity :
     ) {
         if (status == ProgressStatus.finished) {
             getConfig(
-                callback = this,
                 email = email,
                 password = password,
                 installationCode = installationCode
-            )
+            ) { onTaskGetPackagesEnded(it) }
         }
     }
 
@@ -346,11 +346,10 @@ class InitConfigActivity :
         if (email.trim().isNotEmpty() && password.trim().isNotEmpty()) {
             if (!binding.proxyCheckBox.isChecked) {
                 getConfig(
-                    callback = this,
                     email = email,
                     password = password,
                     installationCode = ""
-                )
+                ) { onTaskGetPackagesEnded(it) }
             } else {
                 setupProxy(
                     callback = this,
@@ -389,10 +388,9 @@ class InitConfigActivity :
 
         try {
             Statics.getConfigFromScannedCode(
-                callback = this,
                 scanCode = scanCode,
                 mode = QRConfigClientAccount
-            )
+            ) { onTaskGetPackagesEnded(it) }
         } catch (ex: Exception) {
             ex.printStackTrace()
             makeText(binding.root, ex.message.toString(), ERROR)

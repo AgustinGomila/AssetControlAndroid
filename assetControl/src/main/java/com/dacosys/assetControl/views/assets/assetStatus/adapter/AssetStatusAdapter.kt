@@ -8,10 +8,10 @@ import android.widget.ArrayAdapter
 import android.widget.Spinner
 import android.widget.TextView
 import androidx.core.content.res.ResourcesCompat
+import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.R.id.descriptionTextView
 import com.dacosys.assetControl.R.layout.custom_spinner_dropdown_item
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.model.assets.assetStatus.AssetStatus
 
 /**
@@ -21,7 +21,7 @@ import com.dacosys.assetControl.model.assets.assetStatus.AssetStatus
 class AssetStatusAdapter : ArrayAdapter<AssetStatus> {
 
     constructor(CheckedTextViewResourceId: Int) : super(
-        Statics.AssetControl.getContext(),
+        AssetControlApp.getContext(),
         CheckedTextViewResourceId
     )
 
@@ -29,7 +29,7 @@ class AssetStatusAdapter : ArrayAdapter<AssetStatus> {
         resource: Int,
         assetStatus: List<AssetStatus>,
         spinner: Spinner?,
-    ) : super(Statics.AssetControl.getContext(), resource, assetStatus) {
+    ) : super(AssetControlApp.getContext(), resource, assetStatus) {
         this.spinner = spinner
         this.resource = resource
     }
@@ -52,13 +52,13 @@ class AssetStatusAdapter : ArrayAdapter<AssetStatus> {
                 // Font colors
                 val dimgray =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.dimgray,
                         null
                     )
                 val black =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.text_dark,
                         null
                     )

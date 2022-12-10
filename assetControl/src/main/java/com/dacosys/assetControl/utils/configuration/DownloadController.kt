@@ -7,12 +7,12 @@ import android.os.Build
 import android.os.Environment
 import android.view.View
 import androidx.core.content.FileProvider
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType.CREATOR.ERROR
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType.CREATOR.INFO
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType.CREATOR.ERROR
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType.CREATOR.INFO
 import java.io.File
 
 class DownloadController(private val view: View) {
@@ -28,7 +28,7 @@ class DownloadController(private val view: View) {
     }
 
     fun enqueueDownload() {
-        val context = Statics.AssetControl.getContext()
+        val context = getContext()
 
         var destination =
             context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString() + "/"

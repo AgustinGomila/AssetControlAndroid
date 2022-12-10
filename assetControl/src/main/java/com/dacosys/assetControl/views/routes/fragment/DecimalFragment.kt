@@ -9,8 +9,8 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.databinding.FragmentDecimalBinding
+import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.views.commons.views.filters.DecimalDigitsInputFilter
 
 

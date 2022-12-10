@@ -3,14 +3,15 @@ package com.dacosys.assetControl.model.routes.dataCollections.dataCollectionCont
 import android.database.Cursor
 import android.database.SQLException
 import android.util.Log
-import com.dacosys.assetControl.dataBase.StaticDbHelper
+import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.getReadableDb
+import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.getWritableDb
 import com.dacosys.assetControl.model.routes.dataCollections.dataCollectionContent.dbHelper.FragmentDataContract.FragmentDataEntry.Companion.ATTRIBUTE_COMPOSITION_TYPE_ID
 import com.dacosys.assetControl.model.routes.dataCollections.dataCollectionContent.dbHelper.FragmentDataContract.FragmentDataEntry.Companion.DATA_COLLECTION_RULE_CONTENT_ID
 import com.dacosys.assetControl.model.routes.dataCollections.dataCollectionContent.dbHelper.FragmentDataContract.FragmentDataEntry.Companion.IS_ENABLED
 import com.dacosys.assetControl.model.routes.dataCollections.dataCollectionContent.dbHelper.FragmentDataContract.FragmentDataEntry.Companion.TABLE_NAME
 import com.dacosys.assetControl.model.routes.dataCollections.dataCollectionContent.dbHelper.FragmentDataContract.FragmentDataEntry.Companion.VALUE_STR
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.splitList
+import com.dacosys.assetControl.utils.misc.splitList
 import com.dacosys.assetControl.views.routes.fragment.GeneralFragment
 
 class FragmentDataDbHelper {
@@ -20,7 +21,7 @@ class FragmentDataDbHelper {
         // Las tablas temporales y los índices se crearán sólo si no existen
         createTempTable()
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
+        val sqLiteDatabase = getWritableDb()
         try {
             sqLiteDatabase.delete(TABLE_NAME, null, null)
             result = insertTemp(itemArray)
@@ -36,7 +37,7 @@ class FragmentDataDbHelper {
     // cuando se pasa un objeto demasiado grande
 
     private fun tempTableExists(): Boolean {
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
+        val sqLiteDatabase = getReadableDb()
         val query =
             "SELECT DISTINCT tbl_name FROM sqlite_master WHERE tbl_name = '${TABLE_NAME}'"
         sqLiteDatabase.rawQuery(query, null).use { cursor ->
@@ -46,16 +47,22 @@ class FragmentDataDbHelper {
 
     private fun createTempTable() {
         if (!tempTableExists()) {
-            val comm: ArrayList<String> = ArrayList()
-            comm.add(CREATE_TEMP_TABLE)
+            val allCommands: ArrayList<String> = ArrayList()
+            allCommands.add(CREATE_TEMP_TABLE)
             for (sql in getTempIndex()) {
-                comm.add(sql)
+                allCommands.add(sql)
             }
 
-            val sqLiteDatabase = StaticDbHelper.getWritableDb()
-            for (sql in comm) {
-                println("$sql;")
-                sqLiteDatabase.execSQL(sql)
+            val sqLiteDatabase = getWritableDb()
+            sqLiteDatabase.beginTransaction()
+            try {
+                for (sql in allCommands) {
+                    println("$sql;")
+                    sqLiteDatabase.execSQL(sql)
+                }
+                sqLiteDatabase.setTransactionSuccessful()
+            } finally {
+                sqLiteDatabase.endTransaction()
             }
         }
     }
@@ -65,7 +72,7 @@ class FragmentDataDbHelper {
             return false
         }
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
+        val sqLiteDatabase = getWritableDb()
 
         val splitList = splitList(itemArray, 20)
         var error = false
@@ -112,29 +119,25 @@ class FragmentDataDbHelper {
     }
 
     fun tempTableSelect(): ArrayList<GeneralFragment.FragmentData> {
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
-
         Log.d(
             this::class.java.simpleName,
             "SQLITE-SELECT"
         )
+
         val rawQuery = getTempBasicSelect()
-        sqLiteDatabase.beginTransaction()
+
+        val sqLiteDatabase = getReadableDb()
         return try {
             val c = sqLiteDatabase.rawQuery(rawQuery, null)
-            val r = fromTempCursor(c)
-            sqLiteDatabase.setTransactionSuccessful()
-            r
+            return fromCursor(c)
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             ArrayList()
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
-    private fun fromTempCursor(c: Cursor?): ArrayList<GeneralFragment.FragmentData> {
+    private fun fromCursor(c: Cursor?): ArrayList<GeneralFragment.FragmentData> {
         val res = ArrayList<GeneralFragment.FragmentData>()
         c.use {
             if (it != null) {

@@ -7,9 +7,9 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
+import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.R.layout.custom_spinner_comma_separated_item
 import com.dacosys.assetControl.databinding.FragmentSpinnerBinding
-import com.dacosys.assetControl.utils.Statics
 
 /**
  * A simple [Fragment] subclass.
@@ -137,7 +137,7 @@ class CommaSeparatedSpinnerFragment : Fragment() {
         val allOptions = ArrayList(composition.split(optionSeparator)).sorted()
 
         val spinnerArrayAdapter = ArrayAdapter(
-            Statics.AssetControl.getContext(),
+            AssetControlApp.getContext(),
             custom_spinner_comma_separated_item,
             allOptions
         )

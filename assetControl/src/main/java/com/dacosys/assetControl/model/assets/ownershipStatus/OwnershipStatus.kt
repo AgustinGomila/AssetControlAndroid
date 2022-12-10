@@ -2,8 +2,8 @@ package com.dacosys.assetControl.model.assets.ownershipStatus
 
 import android.os.Parcel
 import android.os.Parcelable
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
 import java.util.*
 
 class OwnershipStatus : Parcelable {
@@ -54,23 +54,23 @@ class OwnershipStatus : Parcelable {
 
         var unknown = OwnershipStatus(
             0,
-            Statics.AssetControl.getContext().getString(R.string.ownership_status_unknown)
+            getContext().getString(R.string.ownership_status_unknown)
         )
         var owned = OwnershipStatus(
             1,
-            Statics.AssetControl.getContext().getString(R.string.ownership_status_owned)
+            getContext().getString(R.string.ownership_status_owned)
         )
         private var rented = OwnershipStatus(
             2,
-            Statics.AssetControl.getContext().getString(R.string.ownership_status_rented)
+            getContext().getString(R.string.ownership_status_rented)
         )
         private var leased = OwnershipStatus(
             3,
-            Statics.AssetControl.getContext().getString(R.string.ownership_status_leased)
+            getContext().getString(R.string.ownership_status_leased)
         )
         private var someoneElse = OwnershipStatus(
             4,
-            Statics.AssetControl.getContext().getString(R.string.ownership_status_someone_else)
+            getContext().getString(R.string.ownership_status_someone_else)
         )
 
         fun getAll(): ArrayList<OwnershipStatus> {

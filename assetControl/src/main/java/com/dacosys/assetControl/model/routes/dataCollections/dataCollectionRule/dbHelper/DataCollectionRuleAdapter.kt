@@ -14,10 +14,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat
+import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.Statics.Companion.getColorWithAlpha
 import com.dacosys.assetControl.model.routes.dataCollections.dataCollectionRule.`object`.DataCollectionRule
+import com.dacosys.assetControl.utils.Statics.Companion.getColorWithAlpha
 import java.lang.ref.WeakReference
 
 /**
@@ -40,7 +40,7 @@ class DataCollectionRuleAdapter : ArrayAdapter<DataCollectionRule> {
         listView: ListView?,
         multiSelect: Boolean,
         listener: CustomCheckedChangeListener?,
-    ) : super(Statics.AssetControl.getContext(), resource, dcRules) {
+    ) : super(AssetControlApp.getContext(), resource, dcRules) {
         this.activity = activity
         this.listView = listView
         this.resource = resource
@@ -283,13 +283,13 @@ class DataCollectionRuleAdapter : ArrayAdapter<DataCollectionRule> {
                 // Background colors
                 val lightgray =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.lightgray,
                         null
                     )
                 val whitesmoke =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.whitesmoke,
                         null
                     )
@@ -297,13 +297,13 @@ class DataCollectionRuleAdapter : ArrayAdapter<DataCollectionRule> {
                 // Font colors
                 val black =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.text_dark,
                         null
                     )
                 val dimgray =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.dimgray,
                         null
                     )

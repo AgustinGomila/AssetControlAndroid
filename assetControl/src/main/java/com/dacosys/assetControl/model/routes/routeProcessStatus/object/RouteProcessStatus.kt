@@ -3,8 +3,8 @@ package com.dacosys.assetControl.model.routes.routeProcessStatus.`object`
 import android.content.ContentValues
 import android.os.Parcel
 import android.os.Parcelable
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.model.routes.routeProcessStatus.dbHelper.RouteProcessStatusContract
 import java.util.*
 
@@ -63,19 +63,19 @@ class RouteProcessStatus : Parcelable {
 
         var unknown = RouteProcessStatus(
             0,
-            Statics.AssetControl.getContext().getString(R.string.route_process_status_unknown)
+            getContext().getString(R.string.route_process_status_unknown)
         )
         var processed = RouteProcessStatus(
             1,
-            Statics.AssetControl.getContext().getString(R.string.route_process_status_processed)
+            getContext().getString(R.string.route_process_status_processed)
         )
         var skipped = RouteProcessStatus(
             2,
-            Statics.AssetControl.getContext().getString(R.string.route_process_status_skipped)
+            getContext().getString(R.string.route_process_status_skipped)
         )
         var notProcessed = RouteProcessStatus(
             3,
-            Statics.AssetControl.getContext().getString(R.string.route_process_status_not_processed)
+            getContext().getString(R.string.route_process_status_not_processed)
         )
 
         fun getAll(): ArrayList<RouteProcessStatus> {

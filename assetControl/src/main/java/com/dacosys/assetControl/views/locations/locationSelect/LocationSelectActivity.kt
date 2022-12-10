@@ -18,14 +18,7 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.databinding.LocationSelectActivityBinding
-import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.scannedCode.ScannedCode
-import com.dacosys.assetControl.utils.scanners.JotterListener
-import com.dacosys.assetControl.utils.scanners.Scanner
-import com.dacosys.assetControl.utils.scanners.nfc.Nfc
-import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.model.locations.async.WarehouseAreaChangedObserver
 import com.dacosys.assetControl.model.locations.async.WarehouseChangedObserver
 import com.dacosys.assetControl.model.locations.warehouse.`object`.Warehouse
@@ -34,8 +27,15 @@ import com.dacosys.assetControl.model.locations.warehouse.dbHelper.WarehouseDbHe
 import com.dacosys.assetControl.model.locations.warehouseArea.`object`.WarehouseArea
 import com.dacosys.assetControl.model.locations.warehouseArea.dbHelper.WarehouseAreaAdapter
 import com.dacosys.assetControl.model.locations.warehouseArea.dbHelper.WarehouseAreaDbHelper
+import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.scanners.JotterListener
+import com.dacosys.assetControl.utils.scanners.ScannedCode
+import com.dacosys.assetControl.utils.scanners.Scanner
+import com.dacosys.assetControl.utils.scanners.nfc.Nfc
+import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
 import com.dacosys.assetControl.views.commons.views.ContractsAutoCompleteTextView
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent.registerEventListener
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener
@@ -83,7 +83,7 @@ class LocationSelectActivity : AppCompatActivity(),
                 makeText(
                     binding.root,
                     getString(R.string.code_read_does_not_correspond_to_a_location),
-                    SnackbarType.ERROR
+                    SnackBarType.ERROR
                 )
             }
 
@@ -96,7 +96,7 @@ class LocationSelectActivity : AppCompatActivity(),
             makeText(
                 binding.root,
                 ex.message.toString(),
-                SnackbarType.ERROR
+                SnackBarType.ERROR
             )
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         }

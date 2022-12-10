@@ -11,18 +11,18 @@ import android.widget.EditText
 import android.widget.Switch
 import androidx.appcompat.app.AppCompatActivity
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.databinding.DataCollectionRuleSelectActivityBinding
-import com.dacosys.assetControl.utils.configuration.Preference
-import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.model.assets.asset.`object`.Asset
 import com.dacosys.assetControl.model.assets.itemCategory.`object`.ItemCategory
 import com.dacosys.assetControl.model.locations.warehouseArea.`object`.WarehouseArea
 import com.dacosys.assetControl.model.routes.dataCollections.dataCollectionRule.`object`.DataCollectionRule
 import com.dacosys.assetControl.model.routes.dataCollections.dataCollectionRule.dbHelper.DataCollectionRuleAdapter
 import com.dacosys.assetControl.model.routes.dataCollections.dataCollectionRule.dbHelper.DataCollectionRuleDbHelper
+import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.configuration.Preference
+import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
 import org.parceler.Parcels
 
 
@@ -152,17 +152,17 @@ class DataCollectionRuleSelectActivity : AppCompatActivity() {
             warehouseArea != null -> makeText(
                 binding.root,
                 (warehouseArea ?: return).description,
-                SnackbarType.INFO
+                SnackBarType.INFO
             )
             itemCategory != null -> makeText(
                 binding.root,
                 (itemCategory ?: return).description,
-                SnackbarType.INFO
+                SnackBarType.INFO
             )
             asset != null -> makeText(
                 binding.root,
                 (asset ?: return).description,
-                SnackbarType.INFO
+                SnackBarType.INFO
             )
         }
 

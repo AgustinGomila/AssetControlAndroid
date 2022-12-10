@@ -24,19 +24,19 @@ import androidx.transition.ChangeBounds
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.databinding.AssetReviewContentConfirmBottomPanelCollapsedBinding
-import com.dacosys.assetControl.utils.configuration.Preference
-import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.model.confirmStatus.ConfirmStatus
 import com.dacosys.assetControl.model.reviews.assetReview.`object`.AssetReview
 import com.dacosys.assetControl.model.reviews.assetReviewContent.`object`.AssetReviewContent
 import com.dacosys.assetControl.model.reviews.assetReviewContent.dbHelper.AssetReviewContentAdapter
 import com.dacosys.assetControl.model.reviews.assetReviewContentStatus.AssetReviewContentStatus
 import com.dacosys.assetControl.model.table.Table
+import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.configuration.Preference
+import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.views.commons.activities.ObservationsActivity
 import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
 import com.dacosys.assetControl.views.movements.fragments.LocationHeaderFragment
 import com.dacosys.imageControl.fragments.ImageControlButtonsFragment
 import org.parceler.Parcels
@@ -596,7 +596,7 @@ class AssetReviewContentConfirmActivity : AppCompatActivity(),
             makeText(
                 binding.root,
                 getString(R.string.mandatory_sign),
-                SnackbarType.ERROR
+                SnackBarType.ERROR
             )
         } else {
             ///////////////////////////////////////////

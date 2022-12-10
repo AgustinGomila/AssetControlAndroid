@@ -10,18 +10,18 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.dacosys.assetControl.R
+import com.dacosys.assetControl.databinding.CodeCheckActivityBinding
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.Statics.Companion.isRfidRequired
-import com.dacosys.assetControl.databinding.CodeCheckActivityBinding
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.scannedCode.ScannedCode
 import com.dacosys.assetControl.utils.scanners.JotterListener
+import com.dacosys.assetControl.utils.scanners.ScannedCode
 import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.utils.scanners.nfc.Nfc
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.views.assets.asset.fragments.AssetDetailFragment
 import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
 import com.dacosys.assetControl.views.locations.warehouseArea.fragments.WarehouseAreaDetailFragment
 import java.util.*
 
@@ -134,7 +134,7 @@ class CodeCheckActivity : AppCompatActivity(),
         if (oldFragment != null) {
             try {
                 if (!isFinishing) fragmentTransaction.remove(oldFragment).commitAllowingStateLoss()
-            } catch (ex: java.lang.Exception) {
+            } catch (ignored: java.lang.Exception) {
             }
         }
 
@@ -160,7 +160,7 @@ class CodeCheckActivity : AppCompatActivity(),
                         newFragment
                     )
                         .commitAllowingStateLoss()
-                } catch (ex: java.lang.Exception) {
+                } catch (ignored: java.lang.Exception) {
                 }
             }
         }
@@ -235,7 +235,7 @@ class CodeCheckActivity : AppCompatActivity(),
         // Nada que hacer, volver
         if (scannedCode.isEmpty()) {
             val res = getString(R.string.invalid_code)
-            makeText(binding.root, res, SnackbarType.ERROR)
+            makeText(binding.root, res, SnackBarType.ERROR)
             Log.d(this::class.java.simpleName, res)
             return
         }
@@ -286,7 +286,7 @@ class CodeCheckActivity : AppCompatActivity(),
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
-            makeText(binding.root, ex.message.toString(), SnackbarType.ERROR)
+            makeText(binding.root, ex.message.toString(), SnackBarType.ERROR)
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         } finally {
             JotterListener.lockScanner(this, false)
