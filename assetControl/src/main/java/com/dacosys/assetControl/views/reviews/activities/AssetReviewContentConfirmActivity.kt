@@ -152,6 +152,7 @@ class AssetReviewContentConfirmActivity : AppCompatActivity(),
         binding = AssetReviewContentConfirmBottomPanelCollapsedBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         title = getString(R.string.confirm_asset_review)

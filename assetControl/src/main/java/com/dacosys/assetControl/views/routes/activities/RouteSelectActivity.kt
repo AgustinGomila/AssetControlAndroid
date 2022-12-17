@@ -149,6 +149,7 @@ class RouteSelectActivity : AppCompatActivity(),
         binding = RouteSelectActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         routeSelectFilterFragment =

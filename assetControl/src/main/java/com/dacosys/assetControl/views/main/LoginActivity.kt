@@ -451,6 +451,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         binding = LoginActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         syncViewModel.syncDownloadProgress.observe(this) { if (it != null) onSyncTaskProgress(it) }

@@ -10,6 +10,17 @@
     tools:layout_editor_absoluteX="0dp"
     tools:layout_editor_absoluteY="25dp">
 
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/top_appbar"
+        style="@style/MyActionBar"
+        android:layout_width="match_parent"
+        android:layout_height="?android:attr/actionBarSize"
+        android:elevation="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:title="@string/print_labels" />
+
     <Button
         android:id="@+id/assetButton"
         style="?android:textAppearanceSmall"
@@ -37,7 +48,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/top_appbar" />
 
     <Button
         android:id="@+id/warehouseAreaButton"

@@ -189,6 +189,7 @@ class WarehouseAreaPrintLabelActivity :
         binding = WarehouseAreaPrintLabelActivityTopPanelCollapsedBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         KeyboardVisibilityEvent.registerEventListener(this, this)
@@ -197,7 +198,6 @@ class WarehouseAreaPrintLabelActivity :
             supportFragmentManager.findFragmentById(binding.filterFragment.id) as WarehouseAreaSelectFilterFragment
         printerFragment =
             supportFragmentManager.findFragmentById(binding.printFragment.id) as PrinterFragment
-
 
 
         if (savedInstanceState != null) {

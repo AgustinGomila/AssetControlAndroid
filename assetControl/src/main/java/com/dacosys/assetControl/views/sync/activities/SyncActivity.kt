@@ -13,14 +13,12 @@ import android.widget.*
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.menu.MenuBuilder
-import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat
 import androidx.core.view.ViewCompat
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.R.id
 import com.dacosys.assetControl.R.layout
@@ -363,6 +361,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
         binding = SyncActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         if (savedInstanceState != null) {
@@ -885,9 +884,8 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
             menu.setOptionalIconsVisible(true)
         }
 
-        val drawable = ContextCompat.getDrawable(getContext(), R.drawable.ic_visibility)
-        val toolbar = findViewById<Toolbar>(id.action_bar)
-        toolbar.overflowIcon = drawable
+        val drawable = ContextCompat.getDrawable(this, R.drawable.ic_visibility)
+        binding.topAppbar.overflowIcon = drawable
 
         // Opciones de visibilidad del menú
         for (i in SyncRegistryType.getSyncUpload()) {
@@ -896,7 +894,8 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
         }
 
         //region Icon colors
-        val asset = ResourcesCompat.getColor(resources, R.color.sync_element_asset, null)
+        val asset =
+            ResourcesCompat.getColor(resources, R.color.sync_element_asset, null)
         val assetManteinance =
             ResourcesCompat.getColor(resources, R.color.sync_element_asset_maintenance, null)
         val assetReview =
@@ -907,7 +906,8 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
             ResourcesCompat.getColor(resources, R.color.sync_element_item_category, null)
         val routeProcess =
             ResourcesCompat.getColor(resources, R.color.sync_element_route_process, null)
-        val warehouse = ResourcesCompat.getColor(resources, R.color.sync_element_warehouse, null)
+        val warehouse =
+            ResourcesCompat.getColor(resources, R.color.sync_element_warehouse, null)
         val warehouseArea =
             ResourcesCompat.getColor(resources, R.color.sync_element_warehouse_area, null)
         val warehouseMovement =
@@ -938,10 +938,10 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
         colors.add(routeProcess)
         //endregion Icon colors
 
-        for ((c, i) in SyncRegistryType.getSyncUpload().withIndex()) {
-            val icon = ResourcesCompat.getDrawable(getContext().resources, R.drawable.ic_lens, null)
+        for ((index, i) in SyncRegistryType.getSyncUpload().withIndex()) {
+            val icon = ResourcesCompat.getDrawable(resources, R.drawable.ic_lens, null)
             icon?.mutate()?.colorFilter =
-                BlendModeColorFilterCompat.createBlendModeColorFilterCompat(colors[c],
+                BlendModeColorFilterCompat.createBlendModeColorFilterCompat(colors[index],
                     BlendModeCompat.SRC_IN)
             val item = menu.findItem(i.id)
             item.icon = icon

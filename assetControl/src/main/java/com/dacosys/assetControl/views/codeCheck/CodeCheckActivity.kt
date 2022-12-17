@@ -82,6 +82,7 @@ class CodeCheckActivity : AppCompatActivity(),
         binding = CodeCheckActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         if (savedInstanceState != null) {

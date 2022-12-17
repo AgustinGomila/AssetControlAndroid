@@ -73,6 +73,7 @@ class ObservationsActivity : AppCompatActivity(), Scanner.ScannerListener {
         binding = ObservationsActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         title = getString(R.string.observations)

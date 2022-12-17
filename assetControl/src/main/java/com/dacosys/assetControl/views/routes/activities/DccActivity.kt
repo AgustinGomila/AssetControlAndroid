@@ -224,6 +224,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         binding = DataCollectionContentActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         title = getString(R.string.data_collection)

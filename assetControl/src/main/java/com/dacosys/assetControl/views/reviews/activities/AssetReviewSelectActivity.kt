@@ -16,7 +16,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.menu.MenuBuilder
-import androidx.appcompat.widget.Toolbar
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
@@ -27,7 +26,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.transition.ChangeBounds
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
-import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.databinding.AssetReviewSelectActivityBinding
 import com.dacosys.assetControl.model.assets.asset.dbHelper.AssetDbHelper
@@ -205,6 +203,7 @@ class AssetReviewSelectActivity : AppCompatActivity(),
         binding = AssetReviewSelectActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         waSelectFilterFragment =
@@ -610,23 +609,15 @@ class AssetReviewSelectActivity : AppCompatActivity(),
             menu.setOptionalIconsVisible(true)
         }
 
-        val drawable =
-            ContextCompat.getDrawable(getContext(), R.drawable.ic_visibility)
-        val toolbar = findViewById<Toolbar>(R.id.action_bar)
-        toolbar.overflowIcon = drawable
+        val drawable = ContextCompat.getDrawable(this, R.drawable.ic_visibility)
+        binding.topAppbar.overflowIcon = drawable
 
         val allStatus = AssetReviewStatus.getAll()
 
         // Opciones de visibilidad del menú
         for (i in 0 until allStatus.size) {
-            menu.add(
-                0,
-                allStatus[i].id,
-                i,
-                allStatus[i].description
-            )
-                .setChecked(visibleStatusArray.contains(allStatus[i]))
-                .isCheckable = true
+            menu.add(0, allStatus[i].id, i, allStatus[i].description)
+                .setChecked(visibleStatusArray.contains(allStatus[i])).isCheckable = true
         }
 
         //region Icon colors
@@ -651,26 +642,18 @@ class AssetReviewSelectActivity : AppCompatActivity(),
 
         //endregion Icon colors
 
-        for (i in 0 until allStatus.size) {
-            val icon = ResourcesCompat.getDrawable(
-                getContext().resources,
-                R.drawable.ic_lens,
-                null
-            )
+        for ((index, i) in allStatus.withIndex()) {
+            val icon = ResourcesCompat.getDrawable(resources, R.drawable.ic_lens, null)
             icon?.mutate()?.colorFilter =
-                BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-                    colors[i],
-                    BlendModeCompat.SRC_IN
-                )
-
-            val item = menu.getItem(i)
+                BlendModeColorFilterCompat.createBlendModeColorFilterCompat(colors[index],
+                    BlendModeCompat.SRC_IN)
+            val item = menu.getItem(i.id)
             item.icon = icon
 
             // Keep the popup menu open
             item.setShowAsAction(MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW)
             item.actionView = View(this)
-            item.setOnActionExpandListener(object :
-                MenuItem.OnActionExpandListener {
+            item.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
                 override fun onMenuItemActionExpand(item: MenuItem): Boolean {
                     return false
                 }

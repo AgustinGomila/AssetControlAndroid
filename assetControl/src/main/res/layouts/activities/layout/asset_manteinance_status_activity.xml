@@ -4,44 +4,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/asset_manteinance_status"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    tools:context="com.dacosys.assetControl.views.assets.assetManteinance.activities.AssetManteinanceStatusActivity">
 
-    <Button
-        android:id="@+id/okButton"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="2dp"
-        android:layout_marginEnd="2dp"
-        android:layout_marginBottom="2dp"
-        android:background="@drawable/rounded_corner_button_seagreen"
-        android:clickable="true"
-        android:elevation="1dp"
-        android:focusable="true"
-        android:stateListAnimator="@null"
-        android:text="@string/confirm"
-        android:textColor="@color/white"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <EditText
-        android:id="@+id/obsEditText"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="0dp"
-        android:layout_marginTop="0dp"
-        android:layout_marginEnd="0dp"
-        android:layout_marginBottom="0dp"
-        android:ems="10"
-        android:gravity="start"
-        android:hint="@string/observations"
-        android:importantForAutofill="no"
-        android:inputType="textMultiLine"
-        app:layout_constraintBottom_toTopOf="@+id/okButton"
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/top_appbar"
+        style="@style/MyActionBar"
+        android:layout_width="match_parent"
+        android:layout_height="?android:attr/actionBarSize"
+        android:elevation="4dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/manteinanceTypeFragment" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:title="@string/new_maintenance_task" />
 
     <TextView
         android:id="@+id/descriptionTextView"
@@ -54,7 +29,7 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/top_appbar" />
 
     <TextView
         android:id="@+id/codeTextView"
@@ -78,15 +53,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/manteinanceStatusFragment" />
 
-    <TextView
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="2dp"
-        android:text="@string/task"
-        app:layout_constraintBottom_toBottomOf="@+id/manteinanceTypeFragment"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/manteinanceTypeFragment" />
-
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/manteinanceStatusFragment"
         android:name="com.dacosys.assetControl.views.assets.assetManteinance.fragment.ManteinanceStatusSpinnerFragment"
@@ -99,6 +65,15 @@
         app:layout_constraintTop_toBottomOf="@+id/codeTextView"
         tools:layout="@layout/fragment_spinner" />
 
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="2dp"
+        android:text="@string/task"
+        app:layout_constraintBottom_toBottomOf="@+id/manteinanceTypeFragment"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/manteinanceTypeFragment" />
+
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/manteinanceTypeFragment"
         android:name="com.dacosys.assetControl.views.assets.assetManteinance.fragment.ManteinanceTypeSpinnerFragment"
@@ -109,5 +84,38 @@
         app:layout_constraintStart_toStartOf="@+id/manteinanceStatusFragment"
         app:layout_constraintTop_toBottomOf="@+id/manteinanceStatusFragment"
         tools:layout="@layout/fragment_spinner" />
+
+    <EditText
+        android:id="@+id/obsEditText"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:ems="10"
+        android:gravity="start"
+        android:hint="@string/observations"
+        android:importantForAutofill="no"
+        android:inputType="textMultiLine"
+        app:layout_constraintBottom_toTopOf="@+id/okButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/manteinanceTypeFragment" />
+
+    <Button
+        android:id="@+id/okButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="2dp"
+        android:layout_marginEnd="2dp"
+        android:layout_marginBottom="2dp"
+        android:background="@drawable/rounded_corner_button_seagreen"
+        android:clickable="true"
+        android:elevation="1dp"
+        android:focusable="true"
+        android:stateListAnimator="@null"
+        android:text="@string/confirm"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

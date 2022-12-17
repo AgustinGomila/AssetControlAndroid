@@ -71,6 +71,7 @@ class PrintLabelActivity : AppCompatActivity() {
         binding = PrintLabelActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         title = getString(R.string.print_labels)

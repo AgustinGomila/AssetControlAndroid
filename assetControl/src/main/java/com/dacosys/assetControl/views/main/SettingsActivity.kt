@@ -353,7 +353,10 @@ class SettingsActivity :
         binding = SettingsActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Creamos un MenuProvider.
         createOptionsMenu()
+
+        setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         titleTag = getString(R.string.settings)

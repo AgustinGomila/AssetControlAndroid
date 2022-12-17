@@ -198,12 +198,13 @@ class AssetCRUDActivity : AppCompatActivity(),
         binding = AssetCrudActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         // Permitir escanear códigos dentro de la actividad
         // Si ya está cargado un activo preguntar si descartar cambios
 
-        title = getString(R.string.assets_registration_modification)
+        title = getString(R.string.edit_asset)
 
         assetCRUDFragment =
             supportFragmentManager.findFragmentById(binding.crudFragment.id) as AssetCRUDFragment

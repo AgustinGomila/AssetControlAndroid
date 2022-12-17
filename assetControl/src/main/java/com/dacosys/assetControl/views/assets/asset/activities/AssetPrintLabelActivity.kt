@@ -17,7 +17,6 @@ import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.menu.MenuBuilder
-import androidx.appcompat.widget.Toolbar
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
@@ -28,7 +27,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.transition.ChangeBounds
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
-import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.databinding.AssetPrintLabelActivityTopPanelCollapsedBinding
 import com.dacosys.assetControl.model.assets.asset.`object`.Asset
@@ -237,6 +235,7 @@ class AssetPrintLabelActivity :
         binding = AssetPrintLabelActivityTopPanelCollapsedBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         KeyboardVisibilityEvent.registerEventListener(this, this)
@@ -729,24 +728,13 @@ class AssetPrintLabelActivity :
             menu.removeItem(menu.findItem(R.id.action_rfid_connect).itemId)
         }
 
-        val drawable =
-            ContextCompat.getDrawable(getContext(), R.drawable.ic_visibility)
-        val toolbar = findViewById<Toolbar>(R.id.action_bar)
-        toolbar.overflowIcon = drawable
+        val drawable = ContextCompat.getDrawable(this, R.drawable.ic_visibility)
+        binding.topAppbar.overflowIcon = drawable
 
         // Opciones de visibilidad del menú
+        val s = assetSelectFilterFragment?.visibleStatusArray ?: AssetStatus.getAll()
         for (i in AssetStatus.getAll()) {
-            menu.add(
-                0,
-                i.id,
-                i.id,
-                i.description
-            )
-                .setChecked(
-                    (assetSelectFilterFragment?.visibleStatusArray
-                        ?: AssetStatus.getAll()).contains(i)
-                )
-                .isCheckable = true
+            menu.add(0, i.id, i.id, i.description).setChecked(s.contains(i)).isCheckable = true
         }
 
         //region Icon colors
@@ -762,27 +750,18 @@ class AssetPrintLabelActivity :
         colors.add(firebrick)     // missing
         //endregion Icon colors
 
-        for (i in AssetStatus.getAll()) {
-            val icon = ResourcesCompat.getDrawable(
-                getContext().resources,
-                R.drawable.ic_lens,
-                null
-            )
-
+        for ((index, i) in AssetStatus.getAll().withIndex()) {
+            val icon = ResourcesCompat.getDrawable(resources, R.drawable.ic_lens, null)
             icon?.mutate()?.colorFilter =
-                BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-                    colors[i.id],
-                    BlendModeCompat.SRC_IN
-                )
-
+                BlendModeColorFilterCompat.createBlendModeColorFilterCompat(colors[index],
+                    BlendModeCompat.SRC_IN)
             val item = menu.findItem(i.id)
             item.icon = icon
 
             // Keep the popup menu open
             item.setShowAsAction(MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW)
             item.actionView = View(this)
-            item.setOnActionExpandListener(object :
-                MenuItem.OnActionExpandListener {
+            item.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
                 override fun onMenuItemActionExpand(item: MenuItem): Boolean {
                     return false
                 }

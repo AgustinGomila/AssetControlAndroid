@@ -60,6 +60,7 @@ class AssetManteinanceStatusActivity : AppCompatActivity(),
         binding = AssetManteinanceStatusActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         title = getString(R.string.maintenance_status)

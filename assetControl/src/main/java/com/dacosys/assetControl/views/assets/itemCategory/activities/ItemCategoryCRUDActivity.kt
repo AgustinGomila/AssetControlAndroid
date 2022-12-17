@@ -175,12 +175,13 @@ class ItemCategoryCRUDActivity : AppCompatActivity(),
         binding = ItemCategoryCrudActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         // Permitir escanear códigos dentro de la actividad
         // Si ya está cargado un categoría preguntar si descartar cambios
 
-        title = getString(R.string.categories_registration_modification)
+        title = getString(R.string.edit_category)
 
         itemCategoryCRUDFragment =
             supportFragmentManager.findFragmentById(binding.crudFragment.id) as ItemCategoryCRUDFragment

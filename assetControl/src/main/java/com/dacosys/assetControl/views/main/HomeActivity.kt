@@ -439,6 +439,7 @@ class HomeActivity :
         binding = HomeActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         initLayoutActivity()

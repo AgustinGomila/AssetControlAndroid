@@ -73,6 +73,7 @@ class DataCollectionRuleTargetActivity : AppCompatActivity() {
         binding = DataCollectionRuleTargetActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         title = getString(R.string.data_collection_target)

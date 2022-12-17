@@ -26,7 +26,6 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.menu.MenuBuilder
-import androidx.appcompat.widget.Toolbar
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
@@ -368,6 +367,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
         binding = AssetReviewContentBottomPanelCollapsedBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         saveViewModel.saveProgress.observe(this) { if (it != null) onSaveProgress(it) }
@@ -1527,9 +1527,8 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
             menu.removeItem(menu.findItem(R.id.action_rfid_connect).itemId)
         }
 
-        val drawable = ContextCompat.getDrawable(getContext(), R.drawable.ic_visibility)
-        val toolbar = findViewById<Toolbar>(R.id.action_bar)
-        toolbar.overflowIcon = drawable
+        val drawable = ContextCompat.getDrawable(this, R.drawable.ic_visibility)
+        binding.topAppbar.overflowIcon = drawable
 
         // Opciones de visibilidad del menú
         for (i in AssetReviewContentStatus.getAll()) {
@@ -1554,12 +1553,11 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
         colors.add(gold)          // _new
         //endregion Icon colors
 
-        for (i in AssetReviewContentStatus.getAll()) {
-            val icon = ResourcesCompat.getDrawable(getContext().resources, R.drawable.ic_lens, null)
+        for ((index, i) in AssetReviewContentStatus.getAll().withIndex()) {
+            val icon = ResourcesCompat.getDrawable(resources, R.drawable.ic_lens, null)
             icon?.mutate()?.colorFilter =
-                BlendModeColorFilterCompat.createBlendModeColorFilterCompat(colors[i.id],
+                BlendModeColorFilterCompat.createBlendModeColorFilterCompat(colors[index],
                     BlendModeCompat.SRC_IN)
-
             val item = menu.findItem(i.id)
             item.icon = icon
 

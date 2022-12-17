@@ -175,12 +175,13 @@ class WarehouseCRUDActivity : AppCompatActivity(),
         binding = WarehouseCrudActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         // Permitir escanear códigos dentro de la actividad
         // Si ya está cargado un área preguntar si descartar cambios
 
-        title = getString(R.string.warehouses_registration_modification)
+        title = getString(R.string.edit_warehouse)
 
         warehouseCRUDFragment =
             supportFragmentManager.findFragmentById(binding.crudFragment.id) as WarehouseCRUDFragment

@@ -139,6 +139,7 @@ class AssetManteinanceSelectActivity : AppCompatActivity(),
         binding = AssetManteinanceSelectActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         if (savedInstanceState != null) {

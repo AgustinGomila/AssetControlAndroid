@@ -241,7 +241,7 @@
     <string name="you_must_select_a_type_of_maintenance_task">Debe seleccionar un tipo de tarea de mantenimiento</string>
     <string name="maintenance_saved_correctly">Mantenimiento guardado correctamente</string>
     <string name="failed_to_save_maintenance">Error al guardar el mantenimiento</string>
-    <string name="select_asset_maintenance">Seleccionar mantenimiento de activo</string>
+    <string name="select_asset_maintenance">Seleccionar mantenimiento</string>
     <string name="no_maintenance_to_show">No hay mantenimientos a mostrar</string>
     <string name="maintenance_status">Estado de mantenimiento</string>
     <string name="you_must_select_a_state">Debe seleccionar un estado</string>
@@ -441,7 +441,7 @@
     <string name="area_information">Información del área</string>
     <string name="the_selected_warehouse_area_was_not_uploaded_to_the_server_and_does_not_have_a_definitive_id">El área seleccionada aún no fue subida al servidor y no tiene un identificador definitivo</string>
     <string name="select_warehouse_area">Seleccionar área</string>
-    <string name="assets_movement">Movimiento de activos</string>
+    <string name="assets_movement">Movimiento</string>
     <string name="cancel_movement">Cancelar movimiento</string>
     <string name="processing_asset_to_move">Procesando activo a mover</string>
     <string name="processing_asset">Procesando activo</string>
@@ -947,4 +947,9 @@
     <string name="rss_expanded">RSS Expanded</string>
     <string name="upc_e">UPC E</string>
     <string name="upc_ean_extension">UPC/EAN extension</string>
+    <string name="camera_scan">Escanear con cámara</string>
+    <string name="edit_asset">Editar activo</string>
+    <string name="edit_category">Editar categoría</string>
+    <string name="edit_area">Editar área</string>
+    <string name="edit_warehouse">Editar depósito</string>
 </resources>

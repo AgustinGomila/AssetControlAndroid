@@ -136,6 +136,7 @@ class WarehouseMovementContentConfirmActivity :
         )
         setContentView(binding.root)
 
+        setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         title = getString(R.string.confirm_movement)

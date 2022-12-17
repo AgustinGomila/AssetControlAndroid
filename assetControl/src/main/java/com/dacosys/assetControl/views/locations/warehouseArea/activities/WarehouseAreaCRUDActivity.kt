@@ -186,9 +186,10 @@ class WarehouseAreaCRUDActivity : AppCompatActivity(),
         binding = WarehouseAreaCrudActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        title = getString(R.string.add_modify_area)
+        title = getString(R.string.edit_area)
 
         warehouseAreaCRUDFragment =
             supportFragmentManager.findFragmentById(binding.crudFragment.id) as WarehouseAreaCRUDFragment

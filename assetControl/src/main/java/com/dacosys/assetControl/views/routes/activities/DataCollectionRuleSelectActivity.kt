@@ -103,7 +103,7 @@ class DataCollectionRuleSelectActivity : AppCompatActivity() {
         // region Recuperar el título de la ventana
         val t1 = b.getString("title")
         tempTitle =
-            if (t1 != null && t1.isNotEmpty()) t1 else getString(R.string.select_asset_review)
+            if (t1 != null && t1.isNotEmpty()) t1 else getString(R.string.select_rule)
         // endregion
 
         binding.onlyActiveSwitch.isChecked = b.getBoolean("onlyActive")
@@ -133,6 +133,7 @@ class DataCollectionRuleSelectActivity : AppCompatActivity() {
         binding = DataCollectionRuleSelectActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         if (savedInstanceState != null) {

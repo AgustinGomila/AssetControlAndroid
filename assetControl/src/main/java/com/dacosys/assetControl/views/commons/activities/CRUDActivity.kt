@@ -73,6 +73,7 @@ class CRUDActivity : AppCompatActivity() {
         binding = CrudActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         title = getString(R.string.register_modification)

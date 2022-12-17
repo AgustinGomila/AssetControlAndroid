@@ -220,6 +220,7 @@ class WarehouseMovementContentActivity :
         binding = WarehouseMovementContentBottomPanelCollapsedBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         saveViewModel.saveProgress.observe(this) { if (it != null) onSaveProgress(it) }

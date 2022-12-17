@@ -12,7 +12,8 @@
     android:clickable="true"
     android:excludeFromRecents="true"
     android:focusable="true"
-    android:focusableInTouchMode="true">
+    android:focusableInTouchMode="true"
+    tools:context=".views.locations.locationSelect.LocationSelectActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/gralLayout"
