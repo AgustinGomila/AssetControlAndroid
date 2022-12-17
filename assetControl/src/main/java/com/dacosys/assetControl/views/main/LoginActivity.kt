@@ -10,6 +10,8 @@ import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
@@ -292,9 +294,9 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
             isReturnedFromSettings = false
             attemptSync = false
             attemptRunning = false
-        }
 
-        initialSetup()
+            initialSetup()
+        }
     }
 
     private fun refreshUsers() {
@@ -307,16 +309,6 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
             attemptSync = false
             return
         }
-
-        /////////////// BASE DE DATOS SQLITE /////////////////
-        // Acá arranca la base de datos, si no existe se crea.
-        DataBaseHelper.beginDataBase()
-
-        // Acá arranca la base de datos de ImageControl, si no existe se crea.
-        if (Statics.useImageControl) {
-            ImageControlDbHelper.beginDataBase()
-        }
-        ///////////// FIN INICIALIZACIÓN SQLITE //////////////
 
         try {
             runOnUiThread {
@@ -525,7 +517,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         refreshTitle()
         showProgressBar(false)
 
-        initialSetup()
+        Handler(Looper.getMainLooper()).postDelayed({ initialSetup() }, 350)
 
         // ESTO SIRVE PARA OCULTAR EL TECLADO EN PANTALLA CUANDO PIERDEN EL FOCO LOS CONTROLES QUE LO NECESITAN
         setupUI(binding.root)
@@ -595,6 +587,24 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
     }
 
     private fun initSync() {
+        try {
+            /////////////// BASE DE DATOS SQLITE /////////////////
+            // Acá arranca la base de datos, si no existe se crea.
+            DataBaseHelper.beginDataBase()
+
+            // Acá arranca la base de datos de ImageControl, si no existe se crea.
+            if (Statics.useImageControl) {
+                ImageControlDbHelper.beginDataBase()
+            }
+            ///////////// FIN INICIALIZACIÓN SQLITE //////////////
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+            ErrorLog.writeLog(this, this::class.java.simpleName, ex)
+
+            attemptSync = false
+            return
+        }
+
         try {
             if (OFFLINE_MODE) {
                 refreshTitle()
