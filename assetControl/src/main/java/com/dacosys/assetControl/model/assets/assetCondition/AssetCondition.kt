@@ -2,8 +2,8 @@ package com.dacosys.assetControl.model.assets.assetCondition
 
 import android.os.Parcel
 import android.os.Parcelable
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
 import java.util.*
 
 class AssetCondition : Parcelable {
@@ -54,31 +54,31 @@ class AssetCondition : Parcelable {
 
         var unknown = AssetCondition(
             0,
-            Statics.AssetControl.getContext().getString(R.string.asset_condition_unknown)
+            getContext().getString(R.string.asset_condition_unknown)
         )
         var excellent = AssetCondition(
             1,
-            Statics.AssetControl.getContext().getString(R.string.asset_condition_excellent)
+            getContext().getString(R.string.asset_condition_excellent)
         )
         var veryGood = AssetCondition(
             2,
-            Statics.AssetControl.getContext().getString(R.string.asset_condition_very_good)
+            getContext().getString(R.string.asset_condition_very_good)
         )
         var good = AssetCondition(
             3,
-            Statics.AssetControl.getContext().getString(R.string.asset_condition_good)
+            getContext().getString(R.string.asset_condition_good)
         )
         var regular = AssetCondition(
             4,
-            Statics.AssetControl.getContext().getString(R.string.asset_condition_regular)
+            getContext().getString(R.string.asset_condition_regular)
         )
         var bad = AssetCondition(
             5,
-            Statics.AssetControl.getContext().getString(R.string.asset_condition_bad)
+            getContext().getString(R.string.asset_condition_bad)
         )
         var varyBad = AssetCondition(
             6,
-            Statics.AssetControl.getContext().getString(R.string.asset_condition_very_bad)
+            getContext().getString(R.string.asset_condition_very_bad)
         )
 
         fun getAll(): ArrayList<AssetCondition> {

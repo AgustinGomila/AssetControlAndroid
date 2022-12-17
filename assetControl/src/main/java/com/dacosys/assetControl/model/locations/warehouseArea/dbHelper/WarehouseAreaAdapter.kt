@@ -13,12 +13,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat
+import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.R
+import com.dacosys.assetControl.model.locations.warehouseArea.`object`.WarehouseArea
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.Statics.Companion.getColorWithAlpha
-import com.dacosys.assetControl.model.locations.warehouseArea.`object`.WarehouseArea
 import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
 import java.lang.ref.WeakReference
 import java.util.*
 
@@ -50,7 +51,7 @@ class WarehouseAreaAdapter : ArrayAdapter<WarehouseArea>, Filterable {
         multiSelect: Boolean,
         checkedChangedListener: CheckedChangedListener?,
         dataSetChangedListener: DataSetChangedListener?,
-    ) : super(Statics.AssetControl.getContext(), resource, warehouseAreas) {
+    ) : super(AssetControlApp.getContext(), resource, warehouseAreas) {
         this.activity = activity
         this.resource = resource
         this.multiSelect = multiSelect
@@ -66,7 +67,7 @@ class WarehouseAreaAdapter : ArrayAdapter<WarehouseArea>, Filterable {
         resource: Int,
         warehouseAreas: ArrayList<WarehouseArea>,
         suggestedList: ArrayList<WarehouseArea>,
-    ) : super(Statics.AssetControl.getContext(), resource, suggestedList) {
+    ) : super(AssetControlApp.getContext(), resource, suggestedList) {
         this.activity = activity
         this.resource = resource
         this.waArray = warehouseAreas
@@ -245,10 +246,10 @@ class WarehouseAreaAdapter : ArrayAdapter<WarehouseArea>, Filterable {
 
         res += ": " +
                 if (warehouseAreaArray.size > 1)
-                    " ${Statics.AssetControl.getContext().getString(R.string.added_plural)}" else
-                    " ${Statics.AssetControl.getContext().getString(R.string.added)}"
+                    " ${AssetControlApp.getContext().getString(R.string.added_plural)}" else
+                    " ${AssetControlApp.getContext().getString(R.string.added)}"
 
-        makeText(activity, res, SnackbarType.ADD)
+        makeText(activity, res, SnackBarType.ADD)
         Log.d(this::class.java.simpleName, res)
     }
 
@@ -276,10 +277,10 @@ class WarehouseAreaAdapter : ArrayAdapter<WarehouseArea>, Filterable {
 
         res += ": " +
                 if (warehouseAreaArray.size > 1)
-                    " ${Statics.AssetControl.getContext().getString(R.string.removed_plural)}" else
-                    " ${Statics.AssetControl.getContext().getString(R.string.removed)}"
+                    " ${AssetControlApp.getContext().getString(R.string.removed_plural)}" else
+                    " ${AssetControlApp.getContext().getString(R.string.removed)}"
 
-        makeText(activity, res, SnackbarType.REMOVE)
+        makeText(activity, res, SnackBarType.REMOVE)
         Log.d(this::class.java.simpleName, res)
     }
 
@@ -528,13 +529,13 @@ class WarehouseAreaAdapter : ArrayAdapter<WarehouseArea>, Filterable {
                 // Font colors
                 val white =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.text_light,
                         null
                     )
                 val black =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.text_dark,
                         null
                     )
@@ -542,19 +543,19 @@ class WarehouseAreaAdapter : ArrayAdapter<WarehouseArea>, Filterable {
                 // CheckBox color
                 val darkslategray =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.darkslategray,
                         null
                     )
                 val lightgray =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.lightgray,
                         null
                     )
                 val whitesmoke =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.whitesmoke,
                         null
                     )

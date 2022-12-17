@@ -14,6 +14,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.Button
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
@@ -23,37 +24,27 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.transition.ChangeBounds
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.Statics.AssetControl.Companion.getContext
-import com.dacosys.assetControl.utils.Statics.Companion.isRfidRequired
+import com.dacosys.assetControl.dataBase.DataBaseHelper
 import com.dacosys.assetControl.databinding.ProgressBarDialogBinding
 import com.dacosys.assetControl.databinding.RouteProcessContentActivityBinding
-import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.scannedCode.ScannedCode
-import com.dacosys.assetControl.utils.scanners.JotterListener
-import com.dacosys.assetControl.utils.scanners.Scanner
-import com.dacosys.assetControl.utils.scanners.nfc.Nfc
-import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.model.assets.asset.dbHelper.AssetDbHelper
 import com.dacosys.assetControl.model.assets.attributes.attributeComposition.dbHelper.AttributeCompositionDbHelper
 import com.dacosys.assetControl.model.assets.attributes.attributeCompositionType.AttributeCompositionType
+import com.dacosys.assetControl.model.commons.SaveProgress
 import com.dacosys.assetControl.model.locations.warehouseArea.dbHelper.WarehouseAreaDbHelper
 import com.dacosys.assetControl.model.permissions.PermissionEntry
 import com.dacosys.assetControl.model.routes.*
-import com.dacosys.assetControl.model.routes.commons.ExprResultIntString
-import com.dacosys.assetControl.model.routes.commons.Parameter
-import com.dacosys.assetControl.model.routes.commons.SaveRouteProcess
-import com.dacosys.assetControl.model.routes.commons.SkipAll
+import com.dacosys.assetControl.model.routes.commons.*
 import com.dacosys.assetControl.model.routes.dataCollections.dataCollection.`object`.DataCollection
+import com.dacosys.assetControl.model.routes.dataCollections.dataCollection.dbHelper.DataCollectionDbHelper
 import com.dacosys.assetControl.model.routes.dataCollections.dataCollectionContent.dbHelper.DataCollectionContentDbHelper
-import com.dacosys.assetControl.model.routes.dataCollections.dataCollectionRuleContent.dbHelper.DataCollectionRuleContentDbHelper
 import com.dacosys.assetControl.model.routes.dataCollections.dataCollectionRuleResult.DcrResult
 import com.dacosys.assetControl.model.routes.route.`object`.Route
 import com.dacosys.assetControl.model.routes.routeComposition.`object`.RouteComposition
 import com.dacosys.assetControl.model.routes.routeComposition.dbHelper.RouteCompositionDbHelper
 import com.dacosys.assetControl.model.routes.routeProcess.`object`.RouteProcess
-import com.dacosys.assetControl.model.routes.routeProcess.dbHelper.RouteProcessDbHelper
 import com.dacosys.assetControl.model.routes.routeProcessContent.`object`.RouteProcessContent
 import com.dacosys.assetControl.model.routes.routeProcessContent.dbHelper.RouteProcessContentAdapter
 import com.dacosys.assetControl.model.routes.routeProcessContent.dbHelper.RouteProcessContentDbHelper
@@ -61,29 +52,31 @@ import com.dacosys.assetControl.model.routes.routeProcessStatus.`object`.RoutePr
 import com.dacosys.assetControl.model.routes.routeProcessSteps.`object`.RouteProcessSteps
 import com.dacosys.assetControl.model.routes.routeProcessSteps.dbHelper.RouteProcessStepsDbHelper
 import com.dacosys.assetControl.model.users.user.`object`.User
-import com.dacosys.assetControl.sync.functions.ProgressStatus
-import com.dacosys.assetControl.sync.functions.Sync.Companion.SyncTaskProgress
-import com.dacosys.assetControl.sync.functions.SyncRegistryType
-import com.dacosys.assetControl.sync.functions.SyncUpload
+import com.dacosys.assetControl.network.sync.SyncProgress
+import com.dacosys.assetControl.network.sync.SyncRegistryType
+import com.dacosys.assetControl.network.utils.*
+import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.Statics.Companion.isRfidRequired
+import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.scanners.JotterListener
+import com.dacosys.assetControl.utils.scanners.ScannedCode
+import com.dacosys.assetControl.utils.scanners.Scanner
+import com.dacosys.assetControl.utils.scanners.nfc.Nfc
+import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.views.assets.asset.activities.AssetDetailActivity
 import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
 import com.dacosys.assetControl.views.locations.warehouseArea.activities.WarehouseAreaDetailActivity
+import com.dacosys.assetControl.views.routes.viewModels.*
+import com.dacosys.assetControl.views.sync.viewModels.SyncViewModel
 import com.dacosys.imageControl.wsObject.DocumentContentObject
 import com.udojava.evalex.Expression
 import org.parceler.Parcels
-import java.lang.ref.WeakReference
 import java.util.regex.Pattern
 import kotlin.concurrent.thread
 
-class RouteProcessContentActivity :
-    AppCompatActivity(),
-    Scanner.ScannerListener,
-    Rfid.RfidDeviceListener,
-    SyncTaskProgress,
-    SwipeRefreshLayout.OnRefreshListener,
-    SkipAll.SkipAllListener,
-    SaveRouteProcess.SaveRouteProcessListener {
+class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener,
+    Rfid.RfidDeviceListener, SwipeRefreshLayout.OnRefreshListener {
     override fun onDestroy() {
         destroyLocals()
         super.onDestroy()
@@ -95,62 +88,43 @@ class RouteProcessContentActivity :
         progressDialog = null
     }
 
-    override fun onSaveRouteProcessProgress(
-        msg: String,
-        taskStatus: Int,
-        progress: Int?,
-        total: Int?,
-    ) {
-        showProgressDialog(
-            getContext().getString(R.string.saving_route_process),
+    private fun onSaveProgress(it: SaveProgress) {
+        if (isDestroyed || isFinishing) return
+
+        val msg: String = it.msg
+        val taskStatus: Int = it.taskStatus
+        val progress: Int = it.progress
+        val total: Int = it.total
+
+        showProgressDialog(getContext().getString(R.string.saving_route_process),
             msg,
             taskStatus,
             progress,
-            total
-        )
+            total)
 
         if (ProgressStatus.isFinishStatus(taskStatus)) {
             JotterListener.lockScanner(this, false)
         }
 
-        if (taskStatus == ProgressStatus.finished.id) {
-            (routeProcess ?: return).completed = true
-
-            if ((routeProcess ?: return).saveChanges()) {
-                if (Statics.autoSend()) {
-                    thread {
-                        val sync = SyncUpload()
-                        sync.addParams(WeakReference(this))
-                        sync.addRegistryToSync(SyncRegistryType.RouteProcess)
-                        sync.execute()
-                    }
-                } else {
-                    Statics.closeKeyboard(this)
-                    setResult(RESULT_OK)
-                    finish()
-                }
-            } else {
-                makeText(
-                    binding.root,
-                    getContext().getString(R.string.error_saving_route),
-                    SnackbarType.ERROR
-                )
-            }
-        } else if (taskStatus == ProgressStatus.crashed.id ||
-            taskStatus == ProgressStatus.canceled.id
-        ) {
-            makeText(binding.root, msg, SnackbarType.ERROR)
+        if (taskStatus == ProgressStatus.crashed.id || taskStatus == ProgressStatus.canceled.id) {
+            saving = false
+            makeText(binding.root, msg, SnackBarType.ERROR)
         }
     }
 
-    override fun onSkipAllProgress(msg: String, taskStatus: Int, progress: Int?, total: Int?) {
-        showProgressDialog(
-            getContext().getString(R.string.saving_route_process),
+    private fun onSkipAllProgress(it: SaveProgress) {
+        if (isDestroyed || isFinishing) return
+
+        val msg: String = it.msg
+        val taskStatus: Int = it.taskStatus
+        val progress: Int = it.progress
+        val total: Int = it.total
+
+        showProgressDialog(getContext().getString(R.string.saving_route_process),
             msg,
             taskStatus,
             progress,
-            total
-        )
+            total)
 
         if (ProgressStatus.isFinishStatus(taskStatus)) {
             JotterListener.lockScanner(this, false)
@@ -168,10 +142,8 @@ class RouteProcessContentActivity :
             }
 
             next()
-        } else if (taskStatus == ProgressStatus.crashed.id ||
-            taskStatus == ProgressStatus.canceled.id
-        ) {
-            makeText(binding.root, msg, SnackbarType.ERROR)
+        } else if (taskStatus == ProgressStatus.crashed.id || taskStatus == ProgressStatus.canceled.id) {
+            makeText(binding.root, msg, SnackBarType.ERROR)
         }
     }
 
@@ -183,19 +155,23 @@ class RouteProcessContentActivity :
         }, 1000)
     }
 
+    @Suppress("unused")
     private fun showProgressBar(show: Boolean) {
+        if (isDestroyed || isFinishing) return
         runOnUiThread {
             binding.swipeRefresh.isRefreshing = show
         }
     }
 
-    override fun onSyncTaskProgress(
-        totalTask: Int,
-        completedTask: Int,
-        msg: String,
-        registryType: SyncRegistryType?,
-        progressStatus: ProgressStatus,
-    ) {
+    fun onSyncTaskProgress(it: SyncProgress) {
+        if (isDestroyed || isFinishing) return
+
+        val totalTask: Int = it.totalTask
+        val completedTask: Int = it.completedTask
+        val msg: String = it.msg
+        val registryType: SyncRegistryType? = it.registryType
+        val progressStatus: ProgressStatus = it.progressStatus
+
         val progressStatusDesc = progressStatus.description
         var registryDesc = getString(R.string.all_tasks)
         if (registryType != null) {
@@ -207,13 +183,11 @@ class RouteProcessContentActivity :
             ProgressStatus.starting,
             ProgressStatus.running,
             -> {
-                showProgressDialog(
-                    title = getString(R.string.synchronizing_),
+                showProgressDialog(title = getString(R.string.synchronizing_),
                     msg = msg,
                     status = progressStatus.id,
                     progress = completedTask,
-                    total = totalTask
-                )
+                    total = totalTask)
             }
             ProgressStatus.bigFinished -> {
                 Statics.closeKeyboard(this)
@@ -224,34 +198,25 @@ class RouteProcessContentActivity :
             ProgressStatus.canceled,
             -> {
                 Statics.closeKeyboard(this)
-                makeText(binding.root, msg, SnackbarType.ERROR)
-                ErrorLog.writeLog(
-                    this,
+                makeText(binding.root, msg, SnackBarType.ERROR)
+                ErrorLog.writeLog(this,
                     this::class.java.simpleName,
                     "$progressStatusDesc: $registryDesc ${
-                        Statics.getPercentage(
-                            completedTask,
-                            totalTask
-                        )
-                    }, $msg"
-                )
-                setResult(RESULT_OK)
-                finish()
+                        Statics.getPercentage(completedTask, totalTask)
+                    }, $msg")
+                saving = false
             }
             else -> {
-                Log.d(
-                    this::class.java.simpleName, "$progressStatusDesc: $registryDesc ${
-                        Statics.getPercentage(
-                            completedTask,
-                            totalTask
-                        )
-                    }, $msg"
-                )
+                Log.d(this::class.java.simpleName, "$progressStatusDesc: $registryDesc ${
+                    Statics.getPercentage(completedTask, totalTask)
+                }, $msg")
             }
         }
     }
 
     private var tempTitle = ""
+
+    private var saving: Boolean = false
 
     private var routeProcess: RouteProcess? = null
     private var rpContArray: ArrayList<RouteProcessContent> = ArrayList()
@@ -289,6 +254,8 @@ class RouteProcessContentActivity :
     }
 
     private fun saveBundleValues(b: Bundle) {
+        b.putBoolean("saving", saving)
+
         b.putString("title", tempTitle)
         b.putParcelable("route", Parcels.wrap(route))
         b.putParcelableArrayList("documentContentObject", docContObjArrayList)
@@ -303,6 +270,8 @@ class RouteProcessContentActivity :
     }
 
     private fun loadBundleValues(b: Bundle) {
+        saving = b.getBoolean("saving")
+
         // region Recuperar el título de la ventana
         val t0 = b.getString("title")
         tempTitle = if (t0 != null && t0.isNotEmpty()) t0 else getString(R.string.route_process)
@@ -314,8 +283,8 @@ class RouteProcessContentActivity :
 
         // Panels
         route = Parcels.unwrap<Route>(b.getParcelable("route"))
-        if (b.containsKey("panelBottomIsExpanded"))
-            panelBottomIsExpanded = b.getBoolean("panelBottomIsExpanded")
+        if (b.containsKey("panelBottomIsExpanded")) panelBottomIsExpanded =
+            b.getBoolean("panelBottomIsExpanded")
 
         // Adapter
         lastSelected = b.getParcelable("lastSelected")
@@ -333,6 +302,8 @@ class RouteProcessContentActivity :
     }
 
     private lateinit var binding: RouteProcessContentActivityBinding
+    private val saveViewModel: SaveRouteProcessViewModel by viewModels()
+    private val syncViewModel: SyncViewModel by viewModels()
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -341,7 +312,11 @@ class RouteProcessContentActivity :
         binding = RouteProcessContentActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        saveViewModel.saveProgress.observe(this) { if (it != null) onSaveProgress(it) }
+        syncViewModel.syncUploadProgress.observe(this) { if (it != null) onSyncTaskProgress(it) }
 
         if (savedInstanceState != null) {
             loadBundleValues(savedInstanceState)
@@ -353,92 +328,16 @@ class RouteProcessContentActivity :
         title = tempTitle
 
         binding.swipeRefresh.setOnRefreshListener(this)
-        binding.swipeRefresh.setColorSchemeResources(
-            android.R.color.holo_blue_bright,
+        binding.swipeRefresh.setColorSchemeResources(android.R.color.holo_blue_bright,
             android.R.color.holo_green_light,
             android.R.color.holo_orange_light,
-            android.R.color.holo_red_light
-        )
+            android.R.color.holo_red_light)
 
         binding.routeStrTextView.text = (route ?: return).description
 
-        binding.reentryButton.setOnClickListener {
-            if (User.hasPermission(PermissionEntry.ReentryRouteProcessContent)) {
-                val rpc = rpContAdapter?.currentRouteProcessContent()
-
-                if (rpc != null) {
-                    if (rpc.routeProcessStatusId != RouteProcessStatus.processed.id) {
-                        makeText(
-                            binding.root,
-                            getContext().getString(R.string.not_processed),
-                            SnackbarType.INFO
-                        )
-                    } else {
-                        JotterListener.pauseReaderDevices(this)
-                        try {
-                            val alert = AlertDialog.Builder(this)
-                            alert.setTitle(getContext().getString(R.string.enter_record_again))
-                            alert.setMessage(getContext().getString(R.string.are_you_sure_to_enter_this_record_again_question))
-                            alert.setNegativeButton(R.string.cancel, null)
-                            alert.setPositiveButton(R.string.accept) { _, _ ->
-                                reentry()
-                            }
-
-                            alert.show()
-                        } catch (ex: java.lang.Exception) {
-                            ex.printStackTrace()
-                            ErrorLog.writeLog(this, this::class.java.simpleName, ex)
-                        } finally {
-                            JotterListener.resumeReaderDevices(this)
-                        }
-                    }
-                }
-            } else {
-                makeText(
-                    binding.root,
-                    getContext().getString(R.string.you_do_not_have_permission_to_enter_collected_data_again),
-                    SnackbarType.ERROR
-                )
-            }
-        }
-
-        binding.skipButton.setOnClickListener {
-            val rpc = rpContAdapter?.currentRouteProcessContent()
-
-            if (rpc != null && rpc.routeProcessStatusId == RouteProcessStatus.processed.id) {
-                makeText(
-                    binding.root,
-                    getContext().getString(R.string.already_processed),
-                    SnackbarType.INFO
-                )
-            } else {
-                skip()
-            }
-        }
-
-        binding.skipAllButton.setOnClickListener {
-            if ((rpContAdapter?.count ?: 0) > 0) {
-                JotterListener.pauseReaderDevices(this)
-                try {
-                    val alert = AlertDialog.Builder(this)
-                    alert.setTitle(getContext().getString(R.string.skip_remaining))
-                    alert.setMessage(getContext().getString(R.string.do_you_want_to_skip_the_remaining_steps_question))
-                    alert.setNegativeButton(R.string.cancel, null)
-                    alert.setPositiveButton(R.string.accept) { dialog, _ ->
-                        dialog.dismiss()
-                        skipAll()
-                    }
-
-                    alert.show()
-                } catch (ex: java.lang.Exception) {
-                    ex.printStackTrace()
-                    ErrorLog.writeLog(this, this::class.java.simpleName, ex)
-                } finally {
-                    JotterListener.resumeReaderDevices(this)
-                }
-            }
-        }
-
+        binding.reentryButton.setOnClickListener { reentry() }
+        binding.skipButton.setOnClickListener { skip() }
+        binding.skipAllButton.setOnClickListener { skipAll() }
         binding.beginProcessButton.setOnClickListener { beginProcess() }
         binding.detailButton.setOnClickListener { detail() }
         binding.confirmButton.setOnClickListener { confirmLevel(true) }
@@ -453,7 +352,7 @@ class RouteProcessContentActivity :
         // Para expandir y colapsar el panel inferior
         setBottomPanelAnimation()
 
-        setupItemListView()
+        initRoute()
     }
 
     private fun setBottomPanelAnimation() {
@@ -463,10 +362,8 @@ class RouteProcessContentActivity :
 
         binding.expandButton?.setOnClickListener {
             val nextLayout = ConstraintSet()
-            if (panelBottomIsExpanded) nextLayout.load(
-                this,
-                R.layout.route_process_content_activity_bottom_panel_collapsed
-            )
+            if (panelBottomIsExpanded) nextLayout.load(this,
+                R.layout.route_process_content_activity_bottom_panel_collapsed)
             else nextLayout.load(this, R.layout.route_process_content_activity)
 
             panelBottomIsExpanded = !panelBottomIsExpanded
@@ -485,195 +382,185 @@ class RouteProcessContentActivity :
 
             if (panelBottomIsExpanded) binding.expandButton?.text =
                 getContext().getString(R.string.collapse_panel)
-            else binding.expandButton?.text =
-                getContext().getString(R.string.more_options)
+            else binding.expandButton?.text = getContext().getString(R.string.more_options)
         }
     }
 
-    private fun setupItemListView() {
-        if (!checkAttributeComposition()) {
+    private fun onGetRouteProcess(it: RouteProcessResult) {
+        if (isDestroyed || isFinishing) return
+
+        val error = it.error
+        if (error != null) {
             Statics.closeKeyboard(this)
 
             val data = Intent()
-            data.putExtra(
-                "error_msg",
-                getContext().getString(R.string.some_of_the_attributes_required_for_the_route_are_not_found_in_the_collector_database_and_require_synchronization)
-            )
+            data.putExtra("error_msg", error.errorMessage)
             setResult(RESULT_CANCELED, data)
             finish()
             return
         }
 
-        val rpDbH = RouteProcessDbHelper()
+        val routeProcess = it.routeProcess ?: return
+        this.routeProcess = routeProcess
 
-        val rpArray = rpDbH.selectByRouteIdNoCompleted((route ?: return).routeId)
-
-        // Si no hay procesos abiertos para esa ruta, abro uno nuevo
-        // Si no utilizo el existente
-        if (rpArray.size <= 0) {
+        if (it.newProcess) {
             // NUEVO PROCESO DE RUTA
-            val rpCollId = rpDbH.insert(route ?: return)
-            routeProcess = rpDbH.selectById(rpCollId)
-
             fill(1)
         } else {
-            // Comprobar que la composición de la ruta del proceso abierto
-            // coincida con la composición de la ruta en la base de datos
-            // ya que si se actualizó la ruta, el proceso es inválido
-            routeProcess = rpArray[0]
-            val rpcArray = (routeProcess ?: return).contents
-            val rcArray = (route ?: return).composition
-
-            if (rcArray.size <= 0) {
-                Statics.closeKeyboard(this)
-
-                val data = Intent()
-                data.putExtra(
-                    "error_msg",
-                    getContext().getString(R.string.empty_route)
-                )
-                setResult(RESULT_CANCELED, data)
-                finish()
-                return
-            }
-
-            var error = false
-            for (rpc in rpcArray) {
-                if (!rcArray.any { it.level == rpc.level && it.position == rpc.position }) {
-                    error = true
-                    break
-                }
-            }
-
-            if (!error) {
-                for (rc in rcArray) {
-                    if (!rpcArray.any { it.level == rc.level && it.position == rc.position }) {
-                        error = true
-                        break
-                    }
-                }
-            }
-
-            if (error) {
-                Statics.closeKeyboard(this)
-
-                val data = Intent()
-                data.putExtra(
-                    "error_msg",
-                    getContext().getString(R.string.the_composition_of_the_route_process_that_you_want_to_continue_is_different_from_the_current_composition_of_the_route_this_process_can_not_be_continued_and_must_be_canceled)
-                )
-                setResult(RESULT_CANCELED, data)
-                finish()
-                return
-            }
-
             // CONTINUAR PROCESO DE RUTA
-            continueRouteProcess(routeProcess ?: return)
+            continueRouteProcess(routeProcess)
         }
     }
 
-    private fun continueRouteProcess(rp: RouteProcess) {
-        routeComposition = ArrayList(
-            RouteCompositionDbHelper()
-                .selectByRouteId(rp.routeId)
-                .sortedWith(compareBy({ it.level }, { it.position }))
-        )
+    private fun onGetContentProcess(it: GetRouteProcessContentResult) {
+        if (isDestroyed || isFinishing) return
 
-        Log.d(this::class.java.simpleName, getString(R.string.getting_processed_content))
+        // Contenidos del nivel solicitado
+        val rpContLevel = it.currentRouteProcessContent
+        val level = it.level
 
-        // No necesita llamarse al GetByRouteProcessComplete porque ya fueron insertados
-        // los registros aún no recolectados de la ruta
-        rpContArray = ArrayList(
-            RouteProcessContentDbHelper()
-                .selectByRouteProcessId(rp.collectorRouteProcessId)
-                .sortedWith(compareBy({ it.level }, { it.position }))
-        )
+        runOnUiThread {
+            if (rpContAdapter != null) {
+                lastSelected = rpContAdapter?.currentRouteProcessContent()
+                firstVisiblePos = rpContAdapter?.firstVisiblePos()
+            }
 
-        Log.d(this::class.java.simpleName, getString(R.string.obtaining_collected_data))
+            rpContAdapter = RouteProcessContentAdapter(activity = this,
+                resource = R.layout.route_process_content_row,
+                routeProcessContents = rpContLevel,
+                listView = binding.routeProcessContentListView,
+                multiSelect = false,
+                checkedIdArray = checkedIdArray,
+                visibleStatus = RouteProcessStatus.getAll(),
+                checkedChangedListener = null,
+                dataSetChangedListener = null)
 
-        val tempDccArray = ArrayList(
-            DataCollectionContentDbHelper()
-                .selectByCollectorRouteProcessId(rp.collectorRouteProcessId)
-                .sortedWith(compareBy({ it.level }, { it.position }))
-        )
+            while (binding.routeProcessContentListView.adapter == null) {
+                // Horrible wait for full load
+            }
 
-        Log.d(this::class.java.simpleName, getString(R.string.getting_previous_steps))
+            rpContAdapter?.setSelectItemAndScrollPos(lastSelected, firstVisiblePos)
 
-        val allSteps = ArrayList(
-            RouteProcessStepsDbHelper()
-                .selectByRouteProcessId(rp.collectorRouteProcessId)
-                .sortedWith(compareBy { it.step })
-        )
-
-        // Recorrer la ruta en busca del lugar donde quedó el operador.
-        // Ir agregando los pasos a una colección de pasos.
-        allParameters.clear()
-
-        // RECORRER COMPOSICIÓN DE LA RUTA PARA CREAR LOS PARÁMETROS
-        if (rpContArray.size > 0 && tempDccArray.size > 0) {
-            var x1 = 0
-            val x2 = rpContArray.size
-
-            for (rpc in rpContArray) {
-                x1++
-                Log.d(
-                    this::class.java.simpleName,
-                    "${getString(R.string.processing_route)} ($x1/$x2)…"
-                )
-
-                var z1 = 0
-                val z2 = tempDccArray.size
-
-                for (dcc in tempDccArray) {
-                    if (rpc.dataCollectionId == null || dcc.dataCollectionId == null) {
-                        continue
-                    }
-
-                    val dc = DataCollection(rpc.dataCollectionId ?: return, false)
-                    if (dc.collectorDataCollectionId == dcc.dataCollectionId) {
-                        z1++
-                        Log.d(
-                            this::class.java.simpleName,
-                            "${getString(R.string.processing_data)} ($z1/$z2)…"
-                        )
-
-                        // Agrego los parámetros y sus valores
-                        val param =
-                            rpc.level.toString() + separator +
-                                    rpc.position + separator +
-                                    dcc.level + separator +
-                                    dcc.position + separator +
-                                    dcc.attributeCompositionId
-
-                        Log.d(
-                            this::class.java.simpleName,
-                            "${getString(R.string.adding_parameter)}: $param…"
-                        )
-
-                        allParameters.add(Parameter(param, dcc.valueStr))
-                    }
+            if ((rpContAdapter?.count() ?: 0) > 0) {
+                // Si no hay nada seleccionado seleccionamos el primero no procesado
+                if (rpContAdapter?.currentPos() == -1) {
+                    rpContAdapter?.selectFirstNotProcessed()
                 }
             }
         }
 
-        // Agrego el nivel 1 a la colección de niveles
-        backLevelSteps.add(1)
+        // Agrego el paso que estoy procesando
+        backLevelSteps.add(level)
 
-        var y1 = 0
-        val y2 = allSteps.size
+        // Activo o no el botón de confirmar si el nivel está completado
+        runOnUiThread {
+            binding.confirmButton.isEnabled = isCurrentLevelCompleted()
+        }
+    }
 
-        for (step in allSteps) {
-            y1++
-            Log.d(this::class.java.simpleName, "${getString(R.string.analyzing_steps)} ($y1/$y2)…")
+    private fun initRoute() {
+        val r = route ?: return
 
-            val rc =
-                (routeComposition
+        GetRouteProcess(route = r, onProgress = { onGetRouteProcess(it) })
+    }
+
+    private fun continueRouteProcess(rp: RouteProcess) {
+        routeComposition = ArrayList(RouteCompositionDbHelper().selectByRouteId(rp.routeId)
+            .sortedWith(compareBy({ it.level }, { it.position })))
+
+        Log.d(this::class.java.simpleName, getString(R.string.getting_processed_content))
+
+        ///////////////////////////////////
+        // Para controlar la transacción //
+        val db = DataBaseHelper.getWritableDb()
+        try {
+            db.beginTransaction()
+
+            // Traemos la ruta para continuarla si aún no lo hemos hecho.
+            if (!rpContArray.any()) {
+                rpContArray =
+                    ArrayList(RouteProcessContentDbHelper().selectByRouteProcessId(rp.collectorRouteProcessId)
+                        .sortedWith(compareBy({ it.level }, { it.position })))
+            }
+
+            Log.d(this::class.java.simpleName, getString(R.string.obtaining_collected_data))
+
+            val tempDccArray =
+                ArrayList(DataCollectionContentDbHelper().selectByCollectorRouteProcessId(rp.collectorRouteProcessId)
+                    .sortedWith(compareBy({ it.level }, { it.position })))
+
+            Log.d(this::class.java.simpleName, getString(R.string.getting_previous_steps))
+
+            val allSteps =
+                ArrayList(RouteProcessStepsDbHelper().selectByRouteProcessId(rp.collectorRouteProcessId)
+                    .sortedWith(compareBy { it.step }))
+
+            db.setTransactionSuccessful()
+
+            // Recorrer la ruta en busca del lugar donde quedó el operador.
+            // Ir agregando los pasos a una colección de pasos.
+            allParameters.clear()
+
+            // RECORRER COMPOSICIÓN DE LA RUTA PARA CREAR LOS PARÁMETROS
+            if (rpContArray.size > 0 && tempDccArray.size > 0) {
+                var x1 = 0
+                val x2 = rpContArray.size
+
+                for (rpc in rpContArray) {
+                    x1++
+                    Log.d(this::class.java.simpleName,
+                        "${getString(R.string.processing_route)} ($x1/$x2)…")
+
+                    var z1 = 0
+                    val z2 = tempDccArray.size
+
+                    for (dcc in tempDccArray) {
+                        if (rpc.dataCollectionId == null || dcc.dataCollectionId == null) {
+                            continue
+                        }
+
+                        val dc = DataCollection(rpc.dataCollectionId ?: return, false)
+                        if (dc.collectorDataCollectionId == dcc.dataCollectionId) {
+                            z1++
+                            Log.d(this::class.java.simpleName,
+                                "${getString(R.string.processing_data)} ($z1/$z2)…")
+
+                            // Agrego los parámetros y sus valores
+                            val param =
+                                rpc.level.toString() + separator + rpc.position + separator + dcc.level + separator + dcc.position + separator + dcc.attributeCompositionId
+
+                            Log.d(this::class.java.simpleName,
+                                "${getString(R.string.adding_parameter)}: $param…")
+
+                            allParameters.add(Parameter(param, dcc.valueStr))
+                        }
+                    }
+                }
+            }
+
+            // Agrego el nivel 1 a la colección de niveles
+            backLevelSteps.add(1)
+
+            var y1 = 0
+            val y2 = allSteps.size
+
+            for (step in allSteps) {
+                y1++
+                Log.d(this::class.java.simpleName,
+                    "${getString(R.string.analyzing_steps)} ($y1/$y2)…")
+
+                val rc = (routeComposition
                     ?: return).first { it.level == step.level && it.position == step.position }
 
-            analizeStep(step, rc)
-        }
+                analizeStep(step, rc)
+            }
 
-        Log.d(this::class.java.simpleName, getString(R.string.finished_analysis))
+            Log.d(this::class.java.simpleName, getString(R.string.finished_analysis))
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+        } finally {
+            db.endTransaction()
+        }
 
         fill(backLevelSteps.last())
         backLevelSteps.remove(backLevelSteps.last())
@@ -688,10 +575,7 @@ class RouteProcessContentActivity :
             val e = formatExpression(rc.expression ?: return null, parameters)
             return try {
                 val res = e.eval().toInt()
-                tempResult
-                    .firstOrNull { it.key == res }
-                    ?.value
-                    ?: res
+                tempResult.firstOrNull { it.key == res }?.value ?: res
             } catch (ex: Exception) {
                 ex.printStackTrace()
                 ErrorLog.writeLog(this, this::class.java.simpleName, ex)
@@ -713,48 +597,61 @@ class RouteProcessContentActivity :
         var expression = exp
         val parameters: ArrayList<Parameter> = ArrayList()
 
+        ///////////////////////////////////
+        // Para controlar la transacción //
+        val db = DataBaseHelper.getReadableDb()
+
         val attrCompDbHelper = AttributeCompositionDbHelper()
 
-        for (p in par) {
-            var nextLetter = charValue.toChar().toString()
-            charValue++
-
-            var secBrake = 0
-            while (!nextLetter.matches(Regex("\\p{L}+"))) {
-                nextLetter = charValue.toChar().toString()
+        db.beginTransaction()
+        try {
+            for (p in par) {
+                var nextLetter = charValue.toChar().toString()
                 charValue++
-                secBrake++
-                if (secBrake >= 1000) {
-                    break
+
+                var secBrake = 0
+                while (!nextLetter.matches(Regex("\\p{L}+"))) {
+                    nextLetter = charValue.toChar().toString()
+                    charValue++
+                    secBrake++
+                    if (secBrake >= 1000) {
+                        break
+                    }
                 }
+
+                // Reemplazar los valores de texto por valores númericos que puedan ser comparados
+                // a partir del AttributeCompositionId del ParamName
+                val attrCompId = p.paramName.split('.').last().toLong()
+                val attrComp = attrCompDbHelper.selectById(attrCompId)
+                var pValue: Int
+
+                if (attrComp!!.attributeCompositionTypeId == AttributeCompositionType.TypeOptions.id) {
+                    var composition = ""
+                    if (attrComp.composition != null) {
+                        composition = attrComp.composition!!.trim().trimEnd(';')
+                    }
+
+                    val allOptions = ArrayList(composition.split(';')).sorted()
+
+                    // Reemplazo los valores en Texto por un Id a fin de poder compararlos
+                    for (a in allOptions) {
+                        pValue = allOptions.indexOf(a)
+                        expression = expression.replace("'$a'", pValue.toString())
+                    }
+
+                    pValue = allOptions.indexOf(p.paramValue)
+                    parameters.add(Parameter(nextLetter, pValue))
+                } else {
+                    parameters.add(Parameter(nextLetter, p.paramValue))
+                }
+                expression = expression.replace("[" + p.paramName + "]", nextLetter)
             }
 
-            // Reemplazar los valores de texto por valores númericos que puedan ser comparados
-            // a partir del AttributeCompositionId del ParamName
-            val attrCompId = p.paramName.split('.').last().toLong()
-            val attrComp = attrCompDbHelper.selectById(attrCompId)
-            var pValue: Int
-
-            if (attrComp!!.attributeCompositionTypeId == AttributeCompositionType.TypeOptions.id) {
-                var composition = ""
-                if (attrComp.composition != null) {
-                    composition = attrComp.composition!!.trim().trimEnd(';')
-                }
-
-                val allOptions = ArrayList(composition.split(';')).sorted()
-
-                // Reemplazo los valores en Texto por un Id a fin de poder compararlos
-                for (a in allOptions) {
-                    pValue = allOptions.indexOf(a)
-                    expression = expression.replace("'$a'", pValue.toString())
-                }
-
-                pValue = allOptions.indexOf(p.paramValue)
-                parameters.add(Parameter(nextLetter, pValue))
-            } else {
-                parameters.add(Parameter(nextLetter, p.paramValue))
-            }
-            expression = expression.replace("[" + p.paramName + "]", nextLetter)
+            db.setTransactionSuccessful()
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+        } finally {
+            db.endTransaction()
         }
 
         // Reemplazar los resultados de tipo secuencia de niveles (ej: '3,4')
@@ -799,8 +696,8 @@ class RouteProcessContentActivity :
 
         // Evalúo la expresión
         val result = evaluate(rc, param)
-        if ((result == null && rc.trueResult != DcrResult.cont.id) ||
-            (result == null && rc.falseResult != DcrResult.cont.id)
+        if (result == null && rc.trueResult != DcrResult.cont.id ||
+            result == null && rc.falseResult != DcrResult.cont.id
         ) {
             return
         }
@@ -985,10 +882,7 @@ class RouteProcessContentActivity :
 
         // -1 - VOLVER
         ///////////////////
-        if (result != null &&
-            (rc.trueResult == DcrResult.back.id && result == true ||
-                    rc.falseResult == DcrResult.back.id && result == false)
-        ) {
+        if (result != null && (rc.trueResult == DcrResult.back.id && result == true || rc.falseResult == DcrResult.back.id && result == false)) {
             if (levelsToNavigate.size > 0) {
                 // Elimino el último paso ejecutado así el último paso es el previo
                 backLevelSteps.remove(backLevelSteps.last())
@@ -1004,120 +898,31 @@ class RouteProcessContentActivity :
     private fun fill(level: Int) {
         // Sólo si todavía no fueron cargados.
         // Si accede a una nueva ruta no estarán cargados todavía
+        val routeId = route?.routeId ?: return
+
         if (routeComposition == null) {
             Log.d(this::class.java.simpleName, getString(R.string.obtaining_route_composition))
-            routeComposition = RouteCompositionDbHelper().selectByRouteId((route ?: return).routeId)
+            routeComposition = RouteCompositionDbHelper().selectByRouteId(routeId)
         }
 
-        if ((routeComposition ?: return).size <= 0) {
+        if ((routeComposition?.size ?: 0) <= 0) {
             Statics.closeKeyboard(this)
 
             val data = Intent()
-            data.putExtra(
-                "error_msg",
-                getContext().getString(R.string.empty_route)
-            )
+            data.putExtra("error_msg", getContext().getString(R.string.empty_route))
             setResult(RESULT_CANCELED, data)
             finish()
             return
         }
 
-        val routeId = (route ?: return).routeId
-        val routeProcessId = (routeProcess ?: return).collectorRouteProcessId
+        val routeProcessId = routeProcess?.collectorRouteProcessId ?: return
 
         try {
-            // Me quedo con el contenido del nivel que estamos registrando
-            var thisLevelRpCont: ArrayList<RouteProcessContent> = ArrayList()
-
-            if (rpContArray.size < 1) {
-                Log.d(
-                    this::class.java.simpleName,
-                    this.getString(R.string.getting_processed_content)
-                )
-
-                // Necesita llamarse al GetByRouteProcessComplete para que se inserten
-                // los registros aún no recolectados de la ruta
-                val tempRpCont = RouteProcessContentDbHelper().selectByRouteProcessComplete(
-                    routeId,
-                    routeProcessId,
-                    null
-                )
-
-                for (rpCont in tempRpCont) {
-                    rpContArray.add(rpCont)
-
-                    if (rpCont.routeProcessId == routeProcessId && rpCont.level == level) {
-                        thisLevelRpCont.add(rpCont)
-                    }
-                }
-
-                thisLevelRpCont = ArrayList(
-                    thisLevelRpCont.sortedWith(
-                        compareBy({ it.level },
-                            { it.position })
-                    )
-                )
-            } else {
-                for (rpCont in rpContArray) {
-                    if (rpCont.routeProcessId == routeProcessId && rpCont.level == level) {
-                        thisLevelRpCont.add(rpCont)
-                    }
-                }
-
-                thisLevelRpCont =
-                    ArrayList(thisLevelRpCont.sortedWith(compareBy({ it.level }, { it.position })))
-            }
-
-            runOnUiThread {
-                if (rpContAdapter != null) {
-                    lastSelected = rpContAdapter?.currentRouteProcessContent()
-                    firstVisiblePos = rpContAdapter?.firstVisiblePos()
-                }
-
-                rpContAdapter = RouteProcessContentAdapter(
-                    activity = this,
-                    resource = R.layout.route_process_content_row,
-                    routeProcessContents = thisLevelRpCont,
-                    listView = binding.routeProcessContentListView,
-                    multiSelect = false,
-                    checkedIdArray = checkedIdArray,
-                    visibleStatus = RouteProcessStatus.getAll(),
-                    checkedChangedListener = null,
-                    dataSetChangedListener = null
-                )
-
-                while (binding.routeProcessContentListView.adapter == null) {
-                    // Horrible wait for full load
-                }
-
-                rpContAdapter?.setSelectItemAndScrollPos(lastSelected, firstVisiblePos)
-            }
-
-            if ((rpContAdapter?.count() ?: 0) > 0) {
-                // Si no hay nada seleccionado seleccionamos el primero
-                if (rpContAdapter?.currentPos() == -1) {
-                    rpContAdapter?.selectItem(0)
-                }
-
-                val rpc = rpContAdapter?.currentRouteProcessContent()
-                if (rpc != null) {
-                    // Si está procesado u omitido, saltamos al siguiente.
-                    if (rpc.routeProcessStatusId == RouteProcessStatus.processed.id ||
-                        rpc.routeProcessStatusId == RouteProcessStatus.skipped.id
-                    ) {
-                        next()
-                    }
-                }
-            }
-
-            // Agrego el paso que estoy procesando
-            backLevelSteps.add(level)
-
-            // Activo o no el botón de confirmar si el nivel está completado
-            runOnUiThread {
-                binding.confirmButton.isEnabled =
-                    isCurrentLevelCompleted()
-            }
+            GetRouteProcessContent(routeId = routeId,
+                routeProcessId = routeProcessId,
+                level = level,
+                rpContArray = rpContArray
+            ) { onGetContentProcess(it) }
         } catch (ex: Exception) {
             ex.printStackTrace()
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
@@ -1125,37 +930,56 @@ class RouteProcessContentActivity :
     }
 
     private fun skip() {
-        val rpc = rpContAdapter?.currentRouteProcessContent()
+        val rpc = rpContAdapter?.currentRouteProcessContent() ?: return
 
-        if (rpc != null) {
-            updateStatus(
-                rpc = rpc,
-                s = RouteProcessStatus.skipped,
-                dc = null
-            )
-
-            // El nivel al que volví está completo
-            if (isCurrentLevelCompleted()) {
-                runOnUiThread {
-                    binding.confirmButton.isEnabled = true
-                }
-                return
-            }
-
-            next()
+        if (rpc.routeProcessStatusId == RouteProcessStatus.processed.id) {
+            makeText(binding.root,
+                getContext().getString(R.string.already_processed),
+                SnackBarType.INFO)
+            return
         }
+
+        updateStatus(rpc = rpc, s = RouteProcessStatus.skipped, dc = null)
+
+        // El nivel al que volví está completo
+        if (isCurrentLevelCompleted()) {
+            runOnUiThread {
+                binding.confirmButton.isEnabled = true
+            }
+            return
+        }
+
+        next()
     }
 
     private fun skipAll() {
-        JotterListener.lockScanner(this, true)
-        thread {
-            val skipAllTask = SkipAll()
-            skipAllTask.addParams(
-                callback = this,
-                allRouteProcessContent = rpContAdapter?.getAll() ?: ArrayList()
-            )
-            skipAllTask.execute()
+        if ((rpContAdapter?.count ?: 0) > 0) {
+            JotterListener.pauseReaderDevices(this)
+            try {
+                val alert = AlertDialog.Builder(this)
+                alert.setTitle(getContext().getString(R.string.skip_remaining))
+                alert.setMessage(getContext().getString(R.string.do_you_want_to_skip_the_remaining_steps_question))
+                alert.setNegativeButton(R.string.cancel, null)
+                alert.setPositiveButton(R.string.accept) { dialog, _ ->
+                    dialog.dismiss()
+                    positiveSkipAll()
+                }
+
+                alert.show()
+            } catch (ex: java.lang.Exception) {
+                ex.printStackTrace()
+                ErrorLog.writeLog(this, this::class.java.simpleName, ex)
+            } finally {
+                JotterListener.resumeReaderDevices(this)
+            }
         }
+    }
+
+    private fun positiveSkipAll() {
+        JotterListener.lockScanner(this, true)
+
+        SkipAll(allRouteProcessContent = rpContAdapter?.getAll() ?: ArrayList(),
+            onProgress = { onSkipAllProgress(it) })
     }
 
     private fun updateStatus(
@@ -1174,11 +998,9 @@ class RouteProcessContentActivity :
 
         // Actualizar la base de datos
         if (!rpc.saveChanges()) {
-            makeText(
-                binding.root,
+            makeText(binding.root,
                 getContext().getString(R.string.error_updating_registered_data),
-                SnackbarType.ERROR
-            )
+                SnackBarType.ERROR)
         }
 
         if (!refreshLater) {
@@ -1193,24 +1015,53 @@ class RouteProcessContentActivity :
     }
 
     private fun reentry() {
-        val rpc = rpContAdapter?.currentRouteProcessContent()
-        if (rpc != null) {
-            com.dacosys.assetControl.model.routes.dataCollections.dataCollection.dbHelper.DataCollectionDbHelper()
-                .deleteById(rpc.dataCollectionId ?: return)
-            DataCollectionContentDbHelper().deleteByDataCollectionId(rpc.dataCollectionId ?: return)
-            RouteProcessStepsDbHelper().deleteByCollectorDataCollectionId(
-                rpc.dataCollectionId ?: return
-            )
+        if (User.hasPermission(PermissionEntry.ReentryRouteProcessContent)) {
+            val rpc = rpContAdapter?.currentRouteProcessContent()
 
-            updateStatus(
-                rpc = rpc,
-                s = RouteProcessStatus.notProcessed,
-                dc = null
-            )
+            if (rpc != null) {
+                if (rpc.routeProcessStatusId != RouteProcessStatus.processed.id) {
+                    makeText(binding.root,
+                        getContext().getString(R.string.not_processed),
+                        SnackBarType.INFO)
+                } else {
+                    JotterListener.pauseReaderDevices(this)
+                    try {
+                        val alert = AlertDialog.Builder(this)
+                        alert.setTitle(getContext().getString(R.string.enter_record_again))
+                        alert.setMessage(getContext().getString(R.string.are_you_sure_to_enter_this_record_again_question))
+                        alert.setNegativeButton(R.string.cancel, null)
+                        alert.setPositiveButton(R.string.accept) { _, _ ->
+                            positiveReentry()
+                        }
 
-            runOnUiThread {
-                binding.confirmButton.isEnabled = false
+                        alert.show()
+                    } catch (ex: java.lang.Exception) {
+                        ex.printStackTrace()
+                        ErrorLog.writeLog(this, this::class.java.simpleName, ex)
+                    } finally {
+                        JotterListener.resumeReaderDevices(this)
+                    }
+                }
             }
+        } else {
+            makeText(binding.root,
+                getContext().getString(R.string.you_do_not_have_permission_to_enter_collected_data_again),
+                SnackBarType.ERROR)
+        }
+    }
+
+    private fun positiveReentry() {
+        val rpc = rpContAdapter?.currentRouteProcessContent() ?: return
+        val dcId = rpc.dataCollectionId ?: return
+
+        DataCollectionDbHelper().deleteById(dcId)
+        DataCollectionContentDbHelper().deleteByDataCollectionId(dcId)
+        RouteProcessStepsDbHelper().deleteByCollectorDataCollectionId(dcId)
+
+        updateStatus(rpc = rpc, s = RouteProcessStatus.notProcessed, dc = null)
+
+        runOnUiThread {
+            binding.confirmButton.isEnabled = false
         }
     }
 
@@ -1230,7 +1081,7 @@ class RouteProcessContentActivity :
                 }
             }
         } else if (rpc.warehouseAreaId != null) {
-            val tempWa = WarehouseAreaDbHelper().selectById(rpc.warehouseAreaId ?: return)
+            val tempWa = WarehouseAreaDbHelper().selectById(rpc.warehouseAreaId)
             if (tempWa != null) {
                 if (!rejectNewInstances) {
                     rejectNewInstances = true
@@ -1250,11 +1101,9 @@ class RouteProcessContentActivity :
         val rpc = rpContAdapter?.currentRouteProcessContent() ?: return
 
         if (rpc.routeProcessStatusId == RouteProcessStatus.processed.id) {
-            makeText(
-                binding.root,
+            makeText(binding.root,
                 getContext().getString(R.string.already_processed),
-                SnackbarType.INFO
-            )
+                SnackBarType.INFO)
             return
         }
 
@@ -1325,23 +1174,30 @@ class RouteProcessContentActivity :
         }
     }
 
+
     private fun saveRouteProcess() {
+        val rp = routeProcess ?: return
+
+        saving = true
+
         JotterListener.lockScanner(this, true)
+
         thread {
             val saveRouteProcess = SaveRouteProcess()
-            saveRouteProcess.addParams(
-                callback = this,
-                collectorRouteProcessId = (routeProcess ?: return@thread).collectorRouteProcessId,
-                allRouteProcessContent = rpContArray
-            )
+            saveRouteProcess.addParams(routeProcess = rp,
+                allRouteProcessContent = rpContArray,
+                onSaveProgress = { saveViewModel.setSaveProgress(it) },
+                onSyncProgress = { syncViewModel.setSyncUploadProgress(it) })
             saveRouteProcess.execute()
         }
     }
 
+    @Suppress("unused")
     private fun next() {
         rpContAdapter?.selectNext()
     }
 
+    @Suppress("unused")
     private fun prev() {
         rpContAdapter?.selectPrev()
     }
@@ -1391,12 +1247,14 @@ class RouteProcessContentActivity :
             }
         }
 
-        if (Statics.demoMode) Handler(Looper.getMainLooper()).postDelayed({ demo() }, 300)
+        if (!saving && Statics.demoMode) Handler(Looper.getMainLooper()).postDelayed({ demo() },
+            500)
     }
 
     private fun isRouteFinished(): Boolean {
         return try {
-            isCurrentLevelCompleted() && rpContAdapter!!.currentLevel() == 1
+            val level = rpContAdapter?.currentLevel() ?: 1
+            isCurrentLevelCompleted() && level == 1
         } catch (ex: Exception) {
             ex.printStackTrace()
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
@@ -1405,35 +1263,18 @@ class RouteProcessContentActivity :
     }
 
     private fun isCurrentLevelCompleted(): Boolean {
-        (0 until rpContAdapter!!.count).forEach { i ->
+        val c = rpContAdapter?.count ?: 0
+
+        (0 until c).forEach { i ->
             val z = rpContAdapter?.getItem(i)
             if (z != null) {
-                if (z.routeProcessStatusId == RouteProcessStatus.notProcessed.id ||
-                    z.routeProcessStatusId == RouteProcessStatus.unknown.id
-                ) {
+                if (z.routeProcessStatusId == RouteProcessStatus.notProcessed.id || z.routeProcessStatusId == RouteProcessStatus.unknown.id) {
                     return false
                 }
             }
         }
 
         return true
-    }
-
-    private fun checkAttributeComposition(): Boolean {
-        if (route == null) {
-            return false
-        }
-
-        val allAttrCompIdRoute =
-            DataCollectionRuleContentDbHelper().selectAttributeCompositionIdByRouteId(route!!.routeId)
-        val allAComp = AttributeCompositionDbHelper().select()
-
-        val allAttrCompIdAvailable = ArrayList<Long>()
-        for (aC in allAComp) {
-            allAttrCompIdAvailable.add(aC.attributeCompositionId)
-        }
-
-        return allAttrCompIdAvailable.containsAll(allAttrCompIdRoute)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -1478,12 +1319,10 @@ class RouteProcessContentActivity :
     private fun endProcess(dataCollection: DataCollection) {
         val rpc = rpContAdapter?.currentRouteProcessContent() ?: return
 
-        updateStatus(
-            rpc = rpc,
+        updateStatus(rpc = rpc,
             s = RouteProcessStatus.processed,
             dc = dataCollection,
-            refreshLater = false
-        )
+            refreshLater = false)
 
         // PROCESO TERMINADO, SALIR
         runOnUiThread {
@@ -1493,9 +1332,10 @@ class RouteProcessContentActivity :
 
     private fun processFinish(dc: DataCollection) {
         val rpc = rpContAdapter?.currentRouteProcessContent() ?: return
+        val currentRc = routeComposition ?: return
 
         var rc: RouteComposition? = null
-        for (r in routeComposition ?: return) {
+        for (r in currentRc) {
             if (r.level == rpc.level && r.position == rpc.position) {
                 rc = r
                 break
@@ -1506,7 +1346,8 @@ class RouteProcessContentActivity :
         if (rc == null) {
             return
         }
-        // ERROR
+
+        // Contenidos recolectados
         val dcCont = dc.contents
 
         // Tomar los parámetros devueltos por la regla y sus valores
@@ -1525,11 +1366,12 @@ class RouteProcessContentActivity :
                 continue
             }
 
-            val paramName = rc.level.toString() + separator +
-                    rc.position + separator +
-                    c.level + separator +
-                    c.position + separator +
-                    c.attributeCompositionId
+            val paramName =
+                rc.level.toString() + separator +
+                        rc.position + separator +
+                        c.level + separator +
+                        c.position + separator +
+                        c.attributeCompositionId
 
             parameters.add(Parameter(paramName, c.valueStr))
         }
@@ -1550,46 +1392,40 @@ class RouteProcessContentActivity :
             }
         }
 
-        // Evalúo el contenido de ruta actual       
+        // Evalúo el contenido de ruta actual
         val result = evaluate(rc, allParameters)
 
         // Cuando no existe expresión para realizar una evaluación, pero el diseño de la ruta espera un resultado
         // determinado es porque está mal diseñada esa parte de la ruta.
-        if (result == null && rc.expression.isNullOrEmpty() && (rc.trueResult != 0 || rc.falseResult != 0)) {
+        if (result == null && rc.expression.isNullOrEmpty() &&
+            (rc.trueResult != 0 || rc.falseResult != 0)
+        ) {
             // No puede seguir
-            makeText(
-                binding.root,
+            makeText(binding.root,
                 getContext().getString(R.string.route_design_error),
-                SnackbarType.ERROR
-            )
+                SnackBarType.ERROR)
             return
         }
 
-        if ((result == null && rc.trueResult != DcrResult.cont.id) ||
-            (result == null && rc.falseResult != DcrResult.cont.id)
+        if (result == null && rc.trueResult != DcrResult.cont.id ||
+            result == null && rc.falseResult != DcrResult.cont.id
         ) {
             // No puede seguir
-            makeText(
-                binding.root,
+            makeText(binding.root,
                 getContext().getString(R.string.invalid_value_does_not_allow_to_continue),
-                SnackbarType.ERROR
-            )
+                SnackBarType.ERROR)
             return
         }
 
         // region -3 - NO CONTINUAR
         /////////////////////////
-        if (rc.trueResult == DcrResult.noContinue.id &&
-            result != null && result == true ||
-            rc.falseResult == DcrResult.noContinue.id &&
-            result != null && result == false
+        if (rc.trueResult == DcrResult.noContinue.id && result != null && result == true ||
+            rc.falseResult == DcrResult.noContinue.id && result != null && result == false
         ) {
             // No puede seguir
-            makeText(
-                binding.root,
+            makeText(binding.root,
                 getContext().getString(R.string.value_does_not_allow_to_continue),
-                SnackbarType.ERROR
-            )
+                SnackBarType.ERROR)
             return
         }
         // endregion
@@ -1604,11 +1440,7 @@ class RouteProcessContentActivity :
             rc.falseResult == DcrResult.cont.id && result != null && result == false
         ) {
             // No hay evaluación, pasar al siguiente del nivel
-            updateStatus(
-                rpc = rpc,
-                s = RouteProcessStatus.processed,
-                dc = dc
-            )
+            updateStatus(rpc = rpc, s = RouteProcessStatus.processed, dc = dc)
 
             if (isRouteFinished()) {
                 endProcess(dc)
@@ -1634,21 +1466,13 @@ class RouteProcessContentActivity :
         // region Mayor de 0 - NIVEL
         //////////////////
         if (result != null && (rc.trueResult > 0 && result == true)) {
-            updateStatus(
-                rpc = rpc,
-                s = RouteProcessStatus.processed,
-                dc = dc
-            )
+            updateStatus(rpc = rpc, s = RouteProcessStatus.processed, dc = dc)
             fill(rc.trueResult)
             return
         }
 
         if (result != null && (rc.falseResult > 0 && result == false)) {
-            updateStatus(
-                rpc = rpc,
-                s = RouteProcessStatus.processed,
-                dc = dc
-            )
+            updateStatus(rpc = rpc, s = RouteProcessStatus.processed, dc = dc)
             fill(rc.falseResult)
             return
         }
@@ -1678,12 +1502,10 @@ class RouteProcessContentActivity :
                     }
 
                     if (levelsToNavigate.size > 0) {
-                        updateStatus(
-                            rpc = rpc,
+                        updateStatus(rpc = rpc,
                             s = RouteProcessStatus.processed,
                             dc = dc,
-                            refreshLater = false
-                        )
+                            refreshLater = false)
 
                         fill(levelsToNavigate[0])
                         levelsToNavigate.remove(levelsToNavigate[0])
@@ -1694,34 +1516,28 @@ class RouteProcessContentActivity :
                 {
                     if (result > 0) // IR AL NIVEL DETERMINADO
                     {
-                        updateStatus(
-                            rpc = rpc,
+                        updateStatus(rpc = rpc,
                             s = RouteProcessStatus.processed,
                             dc = dc,
-                            refreshLater = false
-                        )
+                            refreshLater = false)
                         fill(result)
                         return
                     }
                     if (result == DcrResult.cont.id) // CONTINUAR
                     {
-                        updateStatus(
-                            rpc = rpc,
+                        updateStatus(rpc = rpc,
                             s = RouteProcessStatus.processed,
                             dc = dc,
-                            refreshLater = false
-                        )
+                            refreshLater = false)
                         next()
                         return
                     }
                     if (result == DcrResult.back.id) // VOLVER
                     {
-                        updateStatus(
-                            rpc = rpc,
+                        updateStatus(rpc = rpc,
                             s = RouteProcessStatus.processed,
                             dc = dc,
-                            refreshLater = false
-                        )
+                            refreshLater = false)
 
                         runOnUiThread {
                             binding.confirmButton.isEnabled = true
@@ -1737,11 +1553,9 @@ class RouteProcessContentActivity :
                     // NO CONTINUAR
                     {
                         // No puede seguir
-                        makeText(
-                            binding.root,
+                        makeText(binding.root,
                             getContext().getString(R.string.value_does_not_allow_to_continue),
-                            SnackbarType.ERROR
-                        )
+                            SnackBarType.ERROR)
                         return
                     }
                 }
@@ -1755,11 +1569,7 @@ class RouteProcessContentActivity :
             (rc.trueResult == DcrResult.back.id && result == true ||
                     rc.falseResult == DcrResult.back.id && result == false)
         ) {
-            updateStatus(
-                rpc = rpc,
-                s = RouteProcessStatus.processed,
-                dc = dc
-            )
+            updateStatus(rpc = rpc, s = RouteProcessStatus.processed, dc = dc)
 
             runOnUiThread {
                 binding.confirmButton.isEnabled = true
@@ -1775,38 +1585,36 @@ class RouteProcessContentActivity :
             // Nada que hacer, volver
             if (scannedCode.trim().isEmpty()) {
                 val res = this.getString(R.string.invalid_code)
-                makeText(binding.root, res, SnackbarType.ERROR)
+                makeText(binding.root, res, SnackBarType.ERROR)
                 Log.d(this::class.java.simpleName, res)
                 return
             }
 
-            val sc = ScannedCode(this).getFromCode(
-                code = scannedCode,
+            val sc = ScannedCode(this).getFromCode(code = scannedCode,
                 searchWarehouseAreaId = true,
                 searchAssetCode = true,
                 searchAssetSerial = true,
-                validateId = true
-            )
+                validateId = true)
 
             if (sc.codeFound && sc.asset != null && sc.labelNbr == 0) {
                 val res = this.getString(R.string.report_code)
-                makeText(binding.root, res, SnackbarType.ERROR)
+                makeText(binding.root, res, SnackBarType.ERROR)
                 Log.d(this::class.java.simpleName, res)
                 return
             }
 
             if (sc.codeFound && sc.asset != null && (sc.asset ?: return).labelNumber == null) {
                 val res = this.getString(R.string.no_printed_label)
-                makeText(binding.root, res, SnackbarType.ERROR)
+                makeText(binding.root, res, SnackBarType.ERROR)
                 Log.d(this::class.java.simpleName, res)
                 return
             }
 
-            if (sc.codeFound && (sc.asset != null
-                        && (sc.asset ?: return).labelNumber != sc.labelNbr && sc.labelNbr != null)
+            if (sc.codeFound && (sc.asset != null && (sc.asset
+                    ?: return).labelNumber != sc.labelNbr && sc.labelNbr != null)
             ) {
                 val res = this.getString(R.string.invalid_code)
-                makeText(binding.root, res, SnackbarType.ERROR)
+                makeText(binding.root, res, SnackBarType.ERROR)
                 Log.d(this::class.java.simpleName, res)
                 return
             }
@@ -1825,28 +1633,24 @@ class RouteProcessContentActivity :
 
             if (rpContAdapter != null && !rpContAdapter!!.isEmpty) {
                 // Buscar primero en el adaptador de la lista
-                (0 until rpContAdapter!!.count)
-                    .map { rpContAdapter!!.getItem(it) }
-                    .filter {
-                        it != null && (sc.asset != null && it.assetCode != null && it.assetCode == tempCode ||
-                                sc.warehouseArea != null && it.warehouseAreaId != null && it.warehouseAreaId.toString() == tempCode)
+                (0 until rpContAdapter!!.count).map { rpContAdapter!!.getItem(it) }.filter {
+                    it != null && (sc.asset != null && it.assetCode != null && it.assetCode == tempCode || sc.warehouseArea != null && it.warehouseAreaId != null && it.warehouseAreaId.toString() == tempCode)
+                }.forEach {
+                    // Process the ROW
+                    rpc = if ((it
+                            ?: return@forEach).routeProcessStatusId == RouteProcessStatus.notProcessed.id
+                    ) {
+                        val res = this.getString(R.string.ok)
+                        makeText(binding.root, res, SnackBarType.SUCCESS)
+                        Log.d(this::class.java.simpleName, res)
+                        it
+                    } else {
+                        val res = this.getString(R.string.already_registered)
+                        makeText(binding.root, res, SnackBarType.INFO)
+                        Log.d(this::class.java.simpleName, res)
+                        it
                     }
-                    .forEach {
-                        // Process the ROW
-                        rpc = if ((it
-                                ?: return@forEach).routeProcessStatusId == RouteProcessStatus.notProcessed.id
-                        ) {
-                            val res = this.getString(R.string.ok)
-                            makeText(binding.root, res, SnackbarType.SUCCESS)
-                            Log.d(this::class.java.simpleName, res)
-                            it
-                        } else {
-                            val res = this.getString(R.string.already_registered)
-                            makeText(binding.root, res, SnackbarType.INFO)
-                            Log.d(this::class.java.simpleName, res)
-                            it
-                        }
-                    }
+                }
             }
 
             if (rpc != null) {
@@ -1857,7 +1661,7 @@ class RouteProcessContentActivity :
             return
         } catch (ex: Exception) {
             ex.printStackTrace()
-            makeText(binding.root, ex.message.toString(), SnackbarType.ERROR)
+            makeText(binding.root, ex.message.toString(), SnackBarType.ERROR)
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
             return
         } finally {
@@ -1867,9 +1671,7 @@ class RouteProcessContentActivity :
     }
 
     private fun demo() {
-        if (!Statics.demoMode) {
-            return
-        }
+        if (!Statics.demoMode) return
 
         if (isCurrentLevelCompleted()) {
             confirmLevel(false)
@@ -1881,14 +1683,10 @@ class RouteProcessContentActivity :
             when (currentRpc.routeProcessStatusId) {
                 RouteProcessStatus.processed.id -> {
                     rpContAdapter?.selectNext()
-                    if (Statics.demoMode) Handler(Looper.getMainLooper()).postDelayed({
-                        demo()
-                    }, 300)
+                    if (!saving && Statics.demoMode) demo()
                 }
                 RouteProcessStatus.notProcessed.id -> {
-                    Handler(Looper.getMainLooper()).postDelayed({
-                        beginProcess()
-                    }, 300)
+                    beginProcess()
                 }
                 RouteProcessStatus.skipped.id,
                 RouteProcessStatus.unknown.id,
@@ -1902,7 +1700,8 @@ class RouteProcessContentActivity :
         super.onResume()
         rejectNewInstances = false
 
-        if (Statics.demoMode) Handler(Looper.getMainLooper()).postDelayed({ demo() }, 300)
+        if (!saving && Statics.demoMode) Handler(Looper.getMainLooper()).postDelayed({ demo() },
+            300)
     }
 
     override fun onBackPressed() {
@@ -1970,14 +1769,11 @@ class RouteProcessContentActivity :
                     alertBinding.progressBarHor.max = 0
                     alertBinding.progressBarHor.visibility = View.GONE
                     alertBinding.progressTextView.visibility = View.GONE
-                    alertBinding.progressBarHor.progressTintList =
-                        ColorStateList.valueOf(appColor)
+                    alertBinding.progressBarHor.progressTintList = ColorStateList.valueOf(appColor)
                     alertBinding.progressBar.visibility = View.VISIBLE
-                    alertBinding.progressBar.progressTintList =
-                        ColorStateList.valueOf(appColor)
+                    alertBinding.progressBar.progressTintList = ColorStateList.valueOf(appColor)
 
-                    progressDialog?.setButton(
-                        DialogInterface.BUTTON_NEGATIVE,
+                    progressDialog?.setButton(DialogInterface.BUTTON_NEGATIVE,
                         getContext().getString(R.string.cancel),
                         DialogInterface.OnClickListener { _, _ ->
                             return@OnClickListener
@@ -2000,8 +1796,8 @@ class RouteProcessContentActivity :
                             alertBinding.progressTextView.visibility = View.VISIBLE
                         }
 
-                        if (alertBinding.progressBar.visibility == View.VISIBLE)
-                            alertBinding.progressBar.visibility = View.GONE
+                        if (alertBinding.progressBar.visibility == View.VISIBLE) alertBinding.progressBar.visibility =
+                            View.GONE
                     } else {
                         alertBinding.progressBar.progress = 0
                         alertBinding.progressBar.max = 0
@@ -2011,12 +1807,11 @@ class RouteProcessContentActivity :
                             alertBinding.progressBarHor.visibility = View.GONE
                             alertBinding.progressTextView.visibility = View.GONE
                         }
-                        if (alertBinding.progressBar.visibility == View.GONE)
-                            alertBinding.progressBar.visibility = View.VISIBLE
+                        if (alertBinding.progressBar.visibility == View.GONE) alertBinding.progressBar.visibility =
+                            View.VISIBLE
                     }
 
-                    progressDialog?.setButton(
-                        DialogInterface.BUTTON_NEGATIVE,
+                    progressDialog?.setButton(DialogInterface.BUTTON_NEGATIVE,
                         getContext().getString(R.string.cancel),
                         DialogInterface.OnClickListener { _, _ ->
                             return@OnClickListener
@@ -2061,5 +1856,5 @@ class RouteProcessContentActivity :
         scannerCompleted(scanCode)
     }
 
-    //endregion READERS Reception    
+    //endregion READERS Reception
 }

@@ -3,10 +3,10 @@ package com.dacosys.assetControl.model.barcodeLabels.barcodeLabelCustom.dbHelper
 import android.database.Cursor
 import android.database.SQLException
 import android.util.Log
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.dataBase.StaticDbHelper
-import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.getReadableDb
+import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.getWritableDb
 import com.dacosys.assetControl.model.barcodeLabels.barcodeLabelCustom.`object`.BarcodeLabelCustom
 import com.dacosys.assetControl.model.barcodeLabels.barcodeLabelCustom.dbHelper.BarcodeLabelCustomContract.BarcodeLabelCustomEntry.Companion.ACTIVE
 import com.dacosys.assetControl.model.barcodeLabels.barcodeLabelCustom.dbHelper.BarcodeLabelCustomContract.BarcodeLabelCustomEntry.Companion.BARCODE_LABEL_CUSTOM_ID
@@ -16,9 +16,10 @@ import com.dacosys.assetControl.model.barcodeLabels.barcodeLabelCustom.dbHelper.
 import com.dacosys.assetControl.model.barcodeLabels.barcodeLabelCustom.dbHelper.BarcodeLabelCustomContract.BarcodeLabelCustomEntry.Companion.TEMPLATE
 import com.dacosys.assetControl.model.barcodeLabels.barcodeLabelCustom.dbHelper.BarcodeLabelCustomContract.getAllColumns
 import com.dacosys.assetControl.model.barcodeLabels.barcodeLabelCustom.wsObject.BarcodeLabelCustomObject
-import com.dacosys.assetControl.sync.functions.ProgressStatus
-import com.dacosys.assetControl.sync.functions.Sync.Companion.SyncTaskProgress
-import com.dacosys.assetControl.sync.functions.SyncRegistryType
+import com.dacosys.assetControl.network.sync.SyncProgress
+import com.dacosys.assetControl.network.sync.SyncRegistryType
+import com.dacosys.assetControl.network.utils.ProgressStatus
+import com.dacosys.assetControl.utils.errorLog.ErrorLog
 
 /**
  * Created by Agustin on 28/12/2016.
@@ -27,7 +28,7 @@ import com.dacosys.assetControl.sync.functions.SyncRegistryType
 class BarcodeLabelCustomDbHelper {
     fun sync(
         objArray: Array<BarcodeLabelCustomObject>,
-        callback: SyncTaskProgress,
+        onSyncProgress: (SyncProgress) -> Unit = {},
         currentCount: Int,
         countTotal: Int,
     ): Boolean {
@@ -48,7 +49,7 @@ class BarcodeLabelCustomDbHelper {
 
         Log.d(this::class.java.simpleName, query)
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
+        val sqLiteDatabase = getWritableDb()
         sqLiteDatabase.beginTransaction()
         try {
             sqLiteDatabase.execSQL(query)
@@ -68,14 +69,14 @@ class BarcodeLabelCustomDbHelper {
                     String.format(": SQLite -> insert: id:%s", obj.barcode_label_custom_id)
                 )
                 count++
-                callback.onSyncTaskProgress(
+                onSyncProgress.invoke(SyncProgress(
                     totalTask = countTotal,
                     completedTask = currentCount + count,
-                    msg = Statics.AssetControl.getContext()
+                    msg = getContext()
                         .getString(R.string.synchronizing_barcode_labels),
                     registryType = SyncRegistryType.BarcodeLabelCustom,
                     progressStatus = ProgressStatus.running
-                )
+                ))
 
                 val values = "(" +
                         obj.barcode_label_custom_id + "," +
@@ -121,26 +122,21 @@ class BarcodeLabelCustomDbHelper {
             template
         )
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.insert(
+            return sqLiteDatabase.insert(
                 TABLE_NAME, null,
                 newBarcodeLabelCustom.toContentValues()
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            return r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
     private fun getChangesCount(): Long {
-        val db = StaticDbHelper.getReadableDb()
+        val db = getReadableDb()
         val statement = db.compileStatement("SELECT changes()")
         return statement.simpleQueryForLong()
     }
@@ -148,22 +144,17 @@ class BarcodeLabelCustomDbHelper {
     fun insert(barcodeLabelCustom: BarcodeLabelCustom): Long {
         Log.i(this::class.java.simpleName, ": SQLite -> insert")
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.insert(
+            return sqLiteDatabase.insert(
                 TABLE_NAME,
                 null,
                 barcodeLabelCustom.toContentValues()
             )
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             0
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -173,23 +164,18 @@ class BarcodeLabelCustomDbHelper {
         val selection = "$BARCODE_LABEL_CUSTOM_ID = ?" // WHERE code LIKE ?
         val selectionArgs = arrayOf(barcodeLabelCustom.barcodeLabelCustomId.toString())
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.update(
+            return sqLiteDatabase.update(
                 TABLE_NAME,
                 barcodeLabelCustom.toContentValues(),
                 selection,
                 selectionArgs
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -203,44 +189,34 @@ class BarcodeLabelCustomDbHelper {
         val selection = "$BARCODE_LABEL_CUSTOM_ID = ?" // WHERE code LIKE ?
         val selectionArgs = arrayOf(id.toString())
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.delete(
+            return sqLiteDatabase.delete(
                 TABLE_NAME,
                 selection,
                 selectionArgs
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
     fun deleteAll(): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> deleteAll")
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.delete(
+            return sqLiteDatabase.delete(
                 TABLE_NAME,
                 null,
                 null
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -254,7 +230,7 @@ class BarcodeLabelCustomDbHelper {
             selection = "${TABLE_NAME}.${ACTIVE} = 1"
         }
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
+        val sqLiteDatabase = getReadableDb()
         sqLiteDatabase.beginTransaction()
         try {
             val c = sqLiteDatabase.query(
@@ -285,7 +261,7 @@ class BarcodeLabelCustomDbHelper {
         val selectionArgs = arrayOf(id.toString())
         val order = DESCRIPTION
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
+        val sqLiteDatabase = getReadableDb()
         sqLiteDatabase.beginTransaction()
         try {
             val c = sqLiteDatabase.query(
@@ -320,7 +296,7 @@ class BarcodeLabelCustomDbHelper {
         val selectionArgs = arrayOf("%$description%")
         val order = DESCRIPTION
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
+        val sqLiteDatabase = getReadableDb()
         sqLiteDatabase.beginTransaction()
         try {
             val c = sqLiteDatabase.query(
@@ -357,7 +333,7 @@ class BarcodeLabelCustomDbHelper {
         val selectionArgs = arrayOf("%$description%", barcodeLabelTargetId.toString())
         val order = DESCRIPTION
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
+        val sqLiteDatabase = getReadableDb()
         sqLiteDatabase.beginTransaction()
         try {
             val c = sqLiteDatabase.query(
@@ -397,7 +373,7 @@ class BarcodeLabelCustomDbHelper {
         val selectionArgs = arrayOf(barcodeLabelTargetId.toString())
         val order = DESCRIPTION
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
+        val sqLiteDatabase = getReadableDb()
         sqLiteDatabase.beginTransaction()
         try {
             val c = sqLiteDatabase.query(

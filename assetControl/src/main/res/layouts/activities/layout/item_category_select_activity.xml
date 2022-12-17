@@ -13,13 +13,16 @@
     android:clickable="true"
     android:excludeFromRecents="true"
     android:focusable="true"
-    android:focusableInTouchMode="true">
+    android:focusableInTouchMode="true"
+    tools:context=".views.assets.itemCategory.activities.ItemCategorySelectActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/gralLayout"
         android:layout_width="320dp"
         android:layout_height="wrap_content"
         android:background="@drawable/layout_background_dialog"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

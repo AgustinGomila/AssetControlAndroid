@@ -16,7 +16,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.menu.MenuBuilder
-import androidx.appcompat.widget.Toolbar
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
@@ -28,15 +27,7 @@ import androidx.transition.ChangeBounds
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.databinding.AssetReviewSelectActivityBinding
-import com.dacosys.assetControl.utils.configuration.Preference
-import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.scannedCode.ScannedCode
-import com.dacosys.assetControl.utils.scanners.JotterListener
-import com.dacosys.assetControl.utils.scanners.Scanner
-import com.dacosys.assetControl.utils.scanners.nfc.Nfc
-import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.model.assets.asset.dbHelper.AssetDbHelper
 import com.dacosys.assetControl.model.locations.warehouseArea.`object`.WarehouseArea
 import com.dacosys.assetControl.model.locations.warehouseArea.dbHelper.WarehouseAreaDbHelper
@@ -46,9 +37,17 @@ import com.dacosys.assetControl.model.reviews.assetReview.dbHelper.AssetReviewDb
 import com.dacosys.assetControl.model.reviews.assetReviewContent.dbHelper.AssetReviewContentDbHelper
 import com.dacosys.assetControl.model.reviews.assetReviewStatus.`object`.AssetReviewStatus
 import com.dacosys.assetControl.model.table.Table
+import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.configuration.Preference
+import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.scanners.JotterListener
+import com.dacosys.assetControl.utils.scanners.ScannedCode
+import com.dacosys.assetControl.utils.scanners.Scanner
+import com.dacosys.assetControl.utils.scanners.nfc.Nfc
+import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType.CREATOR.ERROR
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType.CREATOR.ERROR
 import com.dacosys.assetControl.views.locations.locationSelect.LocationSelectActivity
 import com.dacosys.assetControl.views.locations.warehouseArea.fragments.WarehouseAreaSelectFilterFragment
 import com.dacosys.imageControl.dbHelper.DbCommands.Companion.deleteDocument
@@ -204,6 +203,7 @@ class AssetReviewSelectActivity : AppCompatActivity(),
         binding = AssetReviewSelectActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         waSelectFilterFragment =
@@ -385,7 +385,7 @@ class AssetReviewSelectActivity : AppCompatActivity(),
                 makeText(
                     binding.root,
                     getString(R.string.the_selected_revision_has_already_been_completed_and_can_not_be_deleted),
-                    SnackbarType.INFO
+                    SnackBarType.INFO
                 )
                 return
             }
@@ -551,7 +551,7 @@ class AssetReviewSelectActivity : AppCompatActivity(),
     }
 
     private fun beginAssetReview(warehouseArea: WarehouseArea) {
-        makeText(binding.assetReviewSelect, warehouseArea.description, SnackbarType.INFO)
+        makeText(binding.assetReviewSelect, warehouseArea.description, SnackBarType.INFO)
 
         // Contar la cantidad activos del área
         // Si es mayor a 1000, pedir que divida el área para poder hacer revisiones
@@ -609,23 +609,15 @@ class AssetReviewSelectActivity : AppCompatActivity(),
             menu.setOptionalIconsVisible(true)
         }
 
-        val drawable =
-            ContextCompat.getDrawable(Statics.AssetControl.getContext(), R.drawable.ic_visibility)
-        val toolbar = findViewById<Toolbar>(R.id.action_bar)
-        toolbar.overflowIcon = drawable
+        val drawable = ContextCompat.getDrawable(this, R.drawable.ic_visibility)
+        binding.topAppbar.overflowIcon = drawable
 
         val allStatus = AssetReviewStatus.getAll()
 
         // Opciones de visibilidad del menú
         for (i in 0 until allStatus.size) {
-            menu.add(
-                0,
-                allStatus[i].id,
-                i,
-                allStatus[i].description
-            )
-                .setChecked(visibleStatusArray.contains(allStatus[i]))
-                .isCheckable = true
+            menu.add(0, allStatus[i].id, i, allStatus[i].description)
+                .setChecked(visibleStatusArray.contains(allStatus[i])).isCheckable = true
         }
 
         //region Icon colors
@@ -650,26 +642,18 @@ class AssetReviewSelectActivity : AppCompatActivity(),
 
         //endregion Icon colors
 
-        for (i in 0 until allStatus.size) {
-            val icon = ResourcesCompat.getDrawable(
-                Statics.AssetControl.getContext().resources,
-                R.drawable.ic_lens,
-                null
-            )
+        for ((index, i) in allStatus.withIndex()) {
+            val icon = ResourcesCompat.getDrawable(resources, R.drawable.ic_lens, null)
             icon?.mutate()?.colorFilter =
-                BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-                    colors[i],
-                    BlendModeCompat.SRC_IN
-                )
-
-            val item = menu.getItem(i)
+                BlendModeColorFilterCompat.createBlendModeColorFilterCompat(colors[index],
+                    BlendModeCompat.SRC_IN)
+            val item = menu.getItem(i.id)
             item.icon = icon
 
             // Keep the popup menu open
             item.setShowAsAction(MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW)
             item.actionView = View(this)
-            item.setOnActionExpandListener(object :
-                MenuItem.OnActionExpandListener {
+            item.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
                 override fun onMenuItemActionExpand(item: MenuItem): Boolean {
                     return false
                 }

@@ -17,6 +17,7 @@
     <string name="active">Activo</string>
     <string name="asset">Activo fijo</string>
     <string name="add">Agregar</string>
+    <string name="error_when_copying_database">Error al copiar la base de datos</string>
     <string name="information">Información</string>
     <string name="update">Actualizado</string>
     <string name="add_observations">Agregar observaciones</string>
@@ -198,7 +199,6 @@
     <string name="offline_mode">Modo desconectado</string>
     <string name="there_are_no_users_you_must_synchronize_the_database">No hay usuarios. Debe sincronizar la base de datos</string>
     <string name="unable_to_create_database">Imposible crear la base de datos</string>
-    <string name="unable_to_create_imagecontrol_database">Imposible crear la base de datos de ImageControl</string>
     <string name="you_do_not_have_access_to_the_configuration">No tiene acceso a la configuración</string>
     <string name="you_do_not_have_permission_to_print_labels">Usted no tiene permisos para imprimir etiquetas</string>
     <string name="you_do_not_have_permission_to_move_assets">Usted no tiene permisos para mover activos</string>
@@ -241,7 +241,7 @@
     <string name="you_must_select_a_type_of_maintenance_task">Debe seleccionar un tipo de tarea de mantenimiento</string>
     <string name="maintenance_saved_correctly">Mantenimiento guardado correctamente</string>
     <string name="failed_to_save_maintenance">Error al guardar el mantenimiento</string>
-    <string name="select_asset_maintenance">Seleccionar mantenimiento de activo</string>
+    <string name="select_asset_maintenance">Seleccionar mantenimiento</string>
     <string name="no_maintenance_to_show">No hay mantenimientos a mostrar</string>
     <string name="maintenance_status">Estado de mantenimiento</string>
     <string name="you_must_select_a_state">Debe seleccionar un estado</string>
@@ -441,7 +441,7 @@
     <string name="area_information">Información del área</string>
     <string name="the_selected_warehouse_area_was_not_uploaded_to_the_server_and_does_not_have_a_definitive_id">El área seleccionada aún no fue subida al servidor y no tiene un identificador definitivo</string>
     <string name="select_warehouse_area">Seleccionar área</string>
-    <string name="assets_movement">Movimiento de activos</string>
+    <string name="assets_movement">Movimiento</string>
     <string name="cancel_movement">Cancelar movimiento</string>
     <string name="processing_asset_to_move">Procesando activo a mover</string>
     <string name="processing_asset">Procesando activo</string>
@@ -805,7 +805,7 @@
     <string name="route_process_contents">Contenidos de proceso de rutas</string>
     <string name="barcode_label_custom">Etiquetas</string>
     <string name="ownership_status_unknown">Desconocido</string>
-    <string name="images_to_send_">Imágenes por enviar: %s</string>
+    <string name="images_to_send">Imágenes por enviar</string>
     <string name="processing_asset_to_register">Procesando activo encontrado</string>
     <string name="no_need_to_move">Innecesario mover</string>
     <string name="desk_menu">Menús de escritorio</string>
@@ -947,4 +947,9 @@
     <string name="rss_expanded">RSS Expanded</string>
     <string name="upc_e">UPC E</string>
     <string name="upc_ean_extension">UPC/EAN extension</string>
+    <string name="camera_scan">Escanear con cámara</string>
+    <string name="edit_asset">Editar activo</string>
+    <string name="edit_category">Editar categoría</string>
+    <string name="edit_area">Editar área</string>
+    <string name="edit_warehouse">Editar depósito</string>
 </resources>

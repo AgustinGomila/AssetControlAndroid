@@ -13,8 +13,8 @@ import android.widget.EditText
 import android.widget.Switch
 import androidx.appcompat.app.AppCompatActivity
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.databinding.PrintLabelActivityBinding
+import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.views.assets.asset.activities.AssetPrintLabelActivity
 import com.dacosys.assetControl.views.locations.warehouseArea.activities.WarehouseAreaPrintLabelActivity
 
@@ -71,6 +71,7 @@ class PrintLabelActivity : AppCompatActivity() {
         binding = PrintLabelActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         title = getString(R.string.print_labels)

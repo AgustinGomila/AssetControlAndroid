@@ -10,16 +10,16 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.databinding.ObservationsActivityBinding
+import com.dacosys.assetControl.model.assets.asset.`object`.Asset
+import com.dacosys.assetControl.model.assets.asset.dbHelper.AssetDbHelper
+import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.utils.scanners.nfc.Nfc
-import com.dacosys.assetControl.model.assets.asset.`object`.Asset
-import com.dacosys.assetControl.model.assets.asset.dbHelper.AssetDbHelper
 import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
 
 class ObservationsActivity : AppCompatActivity(), Scanner.ScannerListener {
     private var obs = ""
@@ -73,6 +73,7 @@ class ObservationsActivity : AppCompatActivity(), Scanner.ScannerListener {
         binding = ObservationsActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         title = getString(R.string.observations)
@@ -210,10 +211,10 @@ class ObservationsActivity : AppCompatActivity(), Scanner.ScannerListener {
                 binding.obsEditText.scrollTo(0, binding.obsEditText.bottom)
             }
 
-            makeText(binding.root, getString(R.string.ok), SnackbarType.SUCCESS)
+            makeText(binding.root, getString(R.string.ok), SnackBarType.SUCCESS)
         } catch (ex: Exception) {
             ex.printStackTrace()
-            makeText(binding.root, ex.message.toString(), SnackbarType.ERROR)
+            makeText(binding.root, ex.message.toString(), SnackBarType.ERROR)
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         } finally {
             // Unless is blocked, unlock the partial

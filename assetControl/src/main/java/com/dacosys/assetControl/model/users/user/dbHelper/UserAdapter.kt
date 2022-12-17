@@ -8,10 +8,10 @@ import android.widget.ArrayAdapter
 import android.widget.Spinner
 import android.widget.TextView
 import androidx.core.content.res.ResourcesCompat
+import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.R.id.descriptionTextView
 import com.dacosys.assetControl.R.layout.custom_spinner_dropdown_item
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.model.users.user.`object`.User
 
 /**
@@ -21,12 +21,12 @@ import com.dacosys.assetControl.model.users.user.`object`.User
 class UserAdapter : ArrayAdapter<User> {
 
     constructor(CheckedTextViewResourceId: Int) : super(
-        Statics.AssetControl.getContext(),
+        AssetControlApp.getContext(),
         CheckedTextViewResourceId
     )
 
     constructor(resource: Int, user: List<User>, spinner: Spinner?) : super(
-        Statics.AssetControl.getContext(),
+        AssetControlApp.getContext(),
         resource,
         user
     ) {
@@ -52,13 +52,13 @@ class UserAdapter : ArrayAdapter<User> {
                 // Font colors
                 val dimgray =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.dimgray,
                         null
                     )
                 val black =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.text_dark,
                         null
                     )

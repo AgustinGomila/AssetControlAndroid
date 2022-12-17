@@ -17,15 +17,15 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.Statics.AssetControl.Companion.getContext
-import com.dacosys.assetControl.utils.Statics.Companion.getSystemBarsHeight
 import com.dacosys.assetControl.databinding.FloatingCameraActivityBinding
+import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.Statics.Companion.getSystemBarsHeight
 import com.dacosys.assetControl.utils.configuration.Preference
 import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
 import com.dacosys.assetControl.views.commons.views.scaleImageView.ScaleImage
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.client.android.BeepManager
@@ -470,7 +470,7 @@ class FloatingCameraBarcode(private var activity: AppCompatActivity) :
                 makeText(
                     activity.window.decorView,
                     getContext().getString(R.string.app_dont_have_necessary_permissions),
-                    SnackbarType.ERROR
+                    SnackBarType.ERROR
                 )
             } else {
                 checkFloatingPermission()
@@ -501,7 +501,7 @@ class FloatingCameraBarcode(private var activity: AppCompatActivity) :
         try {
             checkCameraFloatingPermission()
         } catch (ex: Exception) {
-            makeText(activity.window.decorView, "Error: ${ex.message}", SnackbarType.ERROR)
+            makeText(activity.window.decorView, "Error: ${ex.message}", SnackBarType.ERROR)
             ex.message
         }
     }

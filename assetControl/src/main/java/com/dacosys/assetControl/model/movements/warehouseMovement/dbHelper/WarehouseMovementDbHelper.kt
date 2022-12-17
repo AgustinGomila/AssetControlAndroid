@@ -4,9 +4,8 @@ import android.content.ContentValues
 import android.database.Cursor
 import android.database.SQLException
 import android.util.Log
-import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.dataBase.StaticDbHelper
-import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.getReadableDb
+import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.getWritableDb
 import com.dacosys.assetControl.model.locations.warehouse.dbHelper.WarehouseContract
 import com.dacosys.assetControl.model.locations.warehouseArea.dbHelper.WarehouseAreaContract
 import com.dacosys.assetControl.model.movements.warehouseMovement.`object`.WarehouseMovement
@@ -27,6 +26,8 @@ import com.dacosys.assetControl.model.movements.warehouseMovement.dbHelper.Wareh
 import com.dacosys.assetControl.model.movements.warehouseMovement.dbHelper.WarehouseMovementContract.WarehouseMovementEntry.Companion.WAREHOUSE_MOVEMENT_DATE
 import com.dacosys.assetControl.model.movements.warehouseMovement.dbHelper.WarehouseMovementContract.WarehouseMovementEntry.Companion.WAREHOUSE_MOVEMENT_ID
 import com.dacosys.assetControl.model.movements.warehouseMovementContent.dbHelper.WarehouseMovementContentDbHelper
+import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.errorLog.ErrorLog
 
 /**
  * Created by Agustin on 28/12/2016.
@@ -37,14 +38,12 @@ class WarehouseMovementDbHelper {
         get() {
             Log.i(this::class.java.simpleName, ": SQLite -> lastId")
 
-            val sqLiteDatabase = StaticDbHelper.getReadableDb()
-            sqLiteDatabase.beginTransaction()
+            val sqLiteDatabase = getReadableDb()
             return try {
                 val mCount = sqLiteDatabase.rawQuery(
                     "SELECT MAX($COLLECTOR_WAREHOUSE_MOVEMENT_ID) FROM $TABLE_NAME",
                     null
                 )
-                sqLiteDatabase.setTransactionSuccessful()
                 mCount.moveToFirst()
                 val count = mCount.getLong(0)
                 mCount.close()
@@ -53,8 +52,6 @@ class WarehouseMovementDbHelper {
                 ex.printStackTrace()
                 ErrorLog.writeLog(null, this::class.java.simpleName, ex)
                 0
-            } finally {
-                sqLiteDatabase.endTransaction()
             }
         }
 
@@ -111,7 +108,7 @@ class WarehouseMovementDbHelper {
                 newId + ", " +
                 "'" + obs + "')"
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
+        val sqLiteDatabase = getWritableDb()
         sqLiteDatabase.beginTransaction()
         try {
             sqLiteDatabase.execSQL(insertQ)
@@ -155,10 +152,9 @@ class WarehouseMovementDbHelper {
             newId
         )
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = if (sqLiteDatabase.insertOrThrow(
+            return if (sqLiteDatabase.insertOrThrow(
                     TABLE_NAME,
                     null,
                     newWarehouseMovement.toContentValues()
@@ -168,35 +164,26 @@ class WarehouseMovementDbHelper {
             } else {
                 0L
             }
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             0
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
     fun insert(warehouseMovement: WarehouseMovement): Long {
         Log.i(this::class.java.simpleName, ": SQLite -> insert")
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.insert(
+            return sqLiteDatabase.insert(
                 TABLE_NAME, null,
                 warehouseMovement.toContentValues()
             )
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             0L
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -208,23 +195,18 @@ class WarehouseMovementDbHelper {
         val values = ContentValues()
         values.put(ORIGIN_WAREHOUSE_ID, newWarehouseId)
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.update(
+            return sqLiteDatabase.update(
                 TABLE_NAME,
                 values,
                 selection,
                 selectionArgs
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -236,23 +218,18 @@ class WarehouseMovementDbHelper {
         val values = ContentValues()
         values.put(ORIGIN_WAREHOUSE_AREA_ID, newWarehouseAreaId)
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.update(
+            return sqLiteDatabase.update(
                 TABLE_NAME,
                 values,
                 selection,
                 selectionArgs
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -264,23 +241,18 @@ class WarehouseMovementDbHelper {
         val values = ContentValues()
         values.put(DESTINATION_WAREHOUSE_ID, newWarehouseId)
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.update(
+            return sqLiteDatabase.update(
                 TABLE_NAME,
                 values,
                 selection,
                 selectionArgs
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -292,23 +264,18 @@ class WarehouseMovementDbHelper {
         val values = ContentValues()
         values.put(DESTINATION_WAREHOUSE_AREA_ID, newWarehouseAreaId)
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.update(
+            return sqLiteDatabase.update(
                 TABLE_NAME,
                 values,
                 selection,
                 selectionArgs
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -318,28 +285,23 @@ class WarehouseMovementDbHelper {
         val selection = "$COLLECTOR_WAREHOUSE_MOVEMENT_ID = ?" // WHERE code LIKE ?
         val selectionArgs = arrayOf(warehouseMovement.collectorWarehouseMovementId.toString())
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.update(
+            return sqLiteDatabase.update(
                 TABLE_NAME,
                 warehouseMovement.toContentValues(),
                 selection,
                 selectionArgs
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
     private fun getChangesCount(): Long {
-        val db = StaticDbHelper.getReadableDb()
+        val db = getReadableDb()
         val statement = db.compileStatement("SELECT changes()")
         return statement.simpleQueryForLong()
     }
@@ -362,21 +324,18 @@ class WarehouseMovementDbHelper {
                     WAREHOUSE_MOVEMENT_ID + " = " + wmId +
                     " WHERE (" + COLLECTOR_WAREHOUSE_MOVEMENT_ID + " = " + collectorWmId + ")"
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
-        return try {
+        val sqLiteDatabase = getWritableDb()
+        val result: Boolean = try {
             val c = sqLiteDatabase.rawQuery(updateQ, null)
             c.moveToFirst()
             c.close()
-            sqLiteDatabase.setTransactionSuccessful()
             getChangesCount() > 0
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
+        return result
     }
 
     fun delete(warehouseMovement: WarehouseMovement): Boolean {
@@ -389,22 +348,17 @@ class WarehouseMovementDbHelper {
         val selection = "$COLLECTOR_WAREHOUSE_MOVEMENT_ID = ?" // WHERE code LIKE ?
         val selectionArgs = arrayOf(id.toString())
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.delete(
+            return sqLiteDatabase.delete(
                 TABLE_NAME,
                 selection,
                 selectionArgs
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -431,22 +385,17 @@ class WarehouseMovementDbHelper {
     fun deleteAll(): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> deleteAll")
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.delete(
+            return sqLiteDatabase.delete(
                 TABLE_NAME,
                 null,
                 null
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -460,18 +409,14 @@ class WarehouseMovementDbHelper {
                 basicLeftJoin +
                 " ORDER BY " + TABLE_NAME + "." + COLLECTOR_WAREHOUSE_MOVEMENT_ID
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getReadableDb()
         return try {
             val c = sqLiteDatabase.rawQuery(rawQuery, null)
-            sqLiteDatabase.setTransactionSuccessful()
             fromCursor(c)
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             ArrayList()
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -488,22 +433,18 @@ class WarehouseMovementDbHelper {
                 where +
                 " ORDER BY " + TABLE_NAME + "." + COLLECTOR_WAREHOUSE_MOVEMENT_ID
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
-        sqLiteDatabase.beginTransaction()
-        try {
+        val sqLiteDatabase = getReadableDb()
+        return try {
             val c = sqLiteDatabase.rawQuery(rawQuery, null)
-            sqLiteDatabase.setTransactionSuccessful()
             val result = fromCursor(c)
-            return when {
+            when {
                 result.size > 0 -> result[0]
                 else -> null
             }
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
-            return null
-        } finally {
-            sqLiteDatabase.endTransaction()
+            null
         }
     }
 
@@ -525,18 +466,14 @@ class WarehouseMovementDbHelper {
                 where +
                 " ORDER BY " + TABLE_NAME + "." + COLLECTOR_WAREHOUSE_MOVEMENT_ID
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getReadableDb()
         return try {
             val c = sqLiteDatabase.rawQuery(rawQuery, null)
-            sqLiteDatabase.setTransactionSuccessful()
             fromCursor(c)
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             ArrayList()
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -552,18 +489,14 @@ class WarehouseMovementDbHelper {
                 where +
                 " ORDER BY " + TABLE_NAME + "." + COLLECTOR_WAREHOUSE_MOVEMENT_ID
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getReadableDb()
         return try {
             val c = sqLiteDatabase.rawQuery(rawQuery, null)
-            sqLiteDatabase.setTransactionSuccessful()
             fromCursor(c)
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             ArrayList()
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 

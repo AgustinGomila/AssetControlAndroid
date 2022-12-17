@@ -5,11 +5,10 @@ import android.database.Cursor
 import android.database.DatabaseUtils
 import android.database.SQLException
 import android.util.Log
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.dataBase.StaticDbHelper
-import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.splitList
+import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.getReadableDb
+import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.getWritableDb
 import com.dacosys.assetControl.model.assets.asset.`object`.Asset
 import com.dacosys.assetControl.model.assets.asset.dbHelper.AssetContract.AssetEntry.Companion.ACTIVE
 import com.dacosys.assetControl.model.assets.asset.dbHelper.AssetContract.AssetEntry.Companion.ASSET_ID
@@ -50,9 +49,11 @@ import com.dacosys.assetControl.model.movements.warehouseMovement.`object`.Wareh
 import com.dacosys.assetControl.model.movements.warehouseMovementContent.`object`.WarehouseMovementContent
 import com.dacosys.assetControl.model.reviews.assetReview.`object`.AssetReview
 import com.dacosys.assetControl.model.reviews.assetReviewContent.`object`.AssetReviewContent
-import com.dacosys.assetControl.sync.functions.ProgressStatus
-import com.dacosys.assetControl.sync.functions.Sync.Companion.SyncTaskProgress
-import com.dacosys.assetControl.sync.functions.SyncRegistryType
+import com.dacosys.assetControl.network.sync.SyncProgress
+import com.dacosys.assetControl.network.sync.SyncRegistryType
+import com.dacosys.assetControl.network.utils.ProgressStatus
+import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.misc.splitList
 
 /**
  * Created by Agustin on 28/12/2016.
@@ -110,28 +111,23 @@ class AssetDbHelper {
             last_asset_review_date = last_asset_review_date
         )
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.insertOrThrow(
+            return sqLiteDatabase.insertOrThrow(
                 TABLE_NAME,
                 null,
                 newAsset.toContentValues()
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
     fun sync(
         objArray: Array<AssetObject>,
-        callback: SyncTaskProgress,
+        onSyncTaskProgress: (SyncProgress) -> Unit = {},
         currentCount: Int,
         countTotal: Int,
     ): Boolean {
@@ -152,7 +148,7 @@ class AssetDbHelper {
 
         Log.d(this::class.java.simpleName, query)
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
+        val sqLiteDatabase = getWritableDb()
         sqLiteDatabase.beginTransaction()
         try {
             sqLiteDatabase.execSQL(query)
@@ -189,14 +185,14 @@ class AssetDbHelper {
                     String.format(": SQLite -> insert: id:%s", obj.asset_id)
                 )
                 count++
-                callback.onSyncTaskProgress(
+                onSyncTaskProgress.invoke(SyncProgress(
                     totalTask = countTotal,
                     completedTask = currentCount + count,
-                    msg = Statics.AssetControl.getContext()
+                    msg = getContext()
                         .getString(R.string.synchronizing_assets),
                     registryType = SyncRegistryType.Asset,
                     progressStatus = ProgressStatus.running
-                )
+                ))
 
                 var lastAssetReviewDate: String? = null
                 if (obj.last_asset_review_date.isNotEmpty()) {
@@ -268,10 +264,9 @@ class AssetDbHelper {
     fun insert(asset: Asset): Long {
         Log.i(this::class.java.simpleName, ": SQLite -> insert")
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = if (sqLiteDatabase.insert(
+            return if (sqLiteDatabase.insert(
                     TABLE_NAME,
                     null,
                     asset.toContentValues()
@@ -281,14 +276,10 @@ class AssetDbHelper {
             } else {
                 0
             }
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             0
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -300,23 +291,18 @@ class AssetDbHelper {
         val values = ContentValues()
         values.put(WAREHOUSE_ID, newWarehouseId)
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.update(
+            return sqLiteDatabase.update(
                 TABLE_NAME,
                 values,
                 selection,
                 selectionArgs
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -328,23 +314,18 @@ class AssetDbHelper {
         val values = ContentValues()
         values.put(WAREHOUSE_AREA_ID, newWarehouseAreaId)
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.update(
+            return sqLiteDatabase.update(
                 TABLE_NAME,
                 values,
                 selection,
                 selectionArgs
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -356,23 +337,18 @@ class AssetDbHelper {
         val values = ContentValues()
         values.put(ITEM_CATEGORY_ID, newItemCategoryId)
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.update(
+            return sqLiteDatabase.update(
                 TABLE_NAME,
                 values,
                 selection,
                 selectionArgs
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -403,23 +379,18 @@ class AssetDbHelper {
         values.put(WAREHOUSE_AREA_ID, asset.warehouse_area_id)
         values.put(WAREHOUSE_ID, asset.warehouse_id)
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.update(
+            return sqLiteDatabase.update(
                 TABLE_NAME,
                 values,
                 selection,
                 selectionArgs
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -429,28 +400,23 @@ class AssetDbHelper {
         val selection = "$ASSET_ID = ?" // WHERE code LIKE ?
         val selectionArgs = arrayOf(asset.assetId.toString())
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.update(
+            return sqLiteDatabase.update(
                 TABLE_NAME,
                 asset.toContentValues(),
                 selection,
                 selectionArgs
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
     private fun getChangesCount(): Long {
-        val db = StaticDbHelper.getReadableDb()
+        val db = getReadableDb()
         val statement = db.compileStatement("SELECT changes()")
         return statement.simpleQueryForLong()
     }
@@ -463,23 +429,18 @@ class AssetDbHelper {
         val values = ContentValues()
         values.put(ASSET_ID, newAssetId)
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.update(
+            return sqLiteDatabase.update(
                 TABLE_NAME,
                 values,
                 selection,
                 selectionArgs
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -505,21 +466,18 @@ class AssetDbHelper {
                     LAST_ASSET_REVIEW_DATE + " = DATETIME('now', 'localtime')" +
                     " WHERE (" + ASSET_ID + " = " + assetId + ")"
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
-        return try {
+        val sqLiteDatabase = getWritableDb()
+        val result: Boolean = try {
             val c = sqLiteDatabase.rawQuery(updateQ, null)
             c.moveToFirst()
             c.close()
-            sqLiteDatabase.setTransactionSuccessful()
             getChangesCount() > 0
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
+        return result
     }
 
     private fun updateLocation(wId: Long, waId: Long, assetId: Long): Boolean {
@@ -542,21 +500,18 @@ class AssetDbHelper {
                     TRANSFERED + " = 0" +
                     " WHERE (" + ASSET_ID + " = " + assetId + ")"
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
-        return try {
+        val sqLiteDatabase = getWritableDb()
+        val result: Boolean = try {
             val c = sqLiteDatabase.rawQuery(updateQ, null)
             c.moveToFirst()
             c.close()
-            sqLiteDatabase.setTransactionSuccessful()
             getChangesCount() > 0
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
+        return result
     }
 
     private fun updateOnInventory(wId: Long, waId: Long, assetId: Long): Boolean {
@@ -585,21 +540,18 @@ class AssetDbHelper {
                     LAST_ASSET_REVIEW_DATE + " = DATETIME('now', 'localtime')" +
                     " WHERE (" + ASSET_ID + " = " + assetId + ")"
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
-        return try {
+        val sqLiteDatabase = getWritableDb()
+        val result: Boolean = try {
             val c = sqLiteDatabase.rawQuery(updateQ, null)
             c.moveToFirst()
             c.close()
-            sqLiteDatabase.setTransactionSuccessful()
             getChangesCount() > 0
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
+        return result
     }
 
     private fun updateMissing(assetId: Long): Boolean {
@@ -622,21 +574,18 @@ class AssetDbHelper {
                     MISSING_DATE + " = DATETIME('now', 'localtime')" +
                     " WHERE (" + ASSET_ID + " = " + assetId + ")"
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
-        return try {
+        val sqLiteDatabase = getWritableDb()
+        val result: Boolean = try {
             val c = sqLiteDatabase.rawQuery(updateQ, null)
             c.moveToFirst()
             c.close()
-            sqLiteDatabase.setTransactionSuccessful()
             getChangesCount() > 0
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
+        return result
     }
 
     fun updateTransferred(assetId: Long): Boolean {
@@ -655,21 +604,18 @@ class AssetDbHelper {
                     TRANSFERED + " = 1 " +
                     " WHERE (" + ASSET_ID + " = " + assetId + ")"
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
-        return try {
+        val sqLiteDatabase = getWritableDb()
+        val result: Boolean = try {
             val c = sqLiteDatabase.rawQuery(updateQ, null)
             c.moveToFirst()
             c.close()
-            sqLiteDatabase.setTransactionSuccessful()
             getChangesCount() > 0
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
+        return result
     }
 
     fun delete(asset: Asset): Boolean {
@@ -682,22 +628,17 @@ class AssetDbHelper {
         val selection = "$ASSET_ID = ?" // WHERE code LIKE ?
         val selectionArgs = arrayOf(id!!.toString())
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.delete(
+            return sqLiteDatabase.delete(
                 TABLE_NAME,
                 selection,
                 selectionArgs
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -709,11 +650,9 @@ class AssetDbHelper {
                 " FROM " + TABLE_NAME +
                 " ORDER BY " + TABLE_NAME + "." + CODE
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getReadableDb()
         try {
             val c = sqLiteDatabase.rawQuery(rawQuery, null)
-            sqLiteDatabase.setTransactionSuccessful()
             c.use {
                 if (it != null) {
                     while (it.moveToNext()) {
@@ -724,8 +663,6 @@ class AssetDbHelper {
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
 
         return result
@@ -740,11 +677,9 @@ class AssetDbHelper {
                 " WHERE " + TABLE_NAME + "." + WAREHOUSE_AREA_ID + " = " + waId +
                 " ORDER BY " + TABLE_NAME + "." + CODE
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getReadableDb()
         try {
             val c = sqLiteDatabase.rawQuery(rawQuery, null)
-            sqLiteDatabase.setTransactionSuccessful()
             c.use {
                 if (it != null) {
                     while (it.moveToNext()) {
@@ -755,8 +690,6 @@ class AssetDbHelper {
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
 
         return result
@@ -777,18 +710,14 @@ class AssetDbHelper {
                 } +
                 " ORDER BY " + TABLE_NAME + "." + ASSET_ID
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getReadableDb()
         return try {
             val c = sqLiteDatabase.rawQuery(rawQuery, null)
-            sqLiteDatabase.setTransactionSuccessful()
             fromCursor(c)
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             ArrayList()
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -804,18 +733,14 @@ class AssetDbHelper {
                 where +
                 " ORDER BY " + TABLE_NAME + "." + CODE
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getReadableDb()
         return try {
             val c = sqLiteDatabase.rawQuery(rawQuery, null)
-            sqLiteDatabase.setTransactionSuccessful()
             fromCursor(c)
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             ArrayList()
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -841,18 +766,14 @@ class AssetDbHelper {
                 where +
                 " ORDER BY " + TABLE_NAME + "." + CODE
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getReadableDb()
         return try {
             val c = sqLiteDatabase.rawQuery(rawQuery, null)
-            sqLiteDatabase.setTransactionSuccessful()
             fromCursor(c)
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             ArrayList()
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -872,22 +793,18 @@ class AssetDbHelper {
                 where +
                 " ORDER BY " + TABLE_NAME + "." + ASSET_ID
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
-        sqLiteDatabase.beginTransaction()
-        try {
+        val sqLiteDatabase = getReadableDb()
+        return try {
             val c = sqLiteDatabase.rawQuery(rawQuery, null)
-            sqLiteDatabase.setTransactionSuccessful()
             val result = fromCursor(c)
-            return when {
+            when {
                 result.size > 0 -> result[0]
                 else -> null
             }
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
-            return null
-        } finally {
-            sqLiteDatabase.endTransaction()
+            null
         }
     }
 
@@ -936,18 +853,14 @@ class AssetDbHelper {
                 where +
                 " ORDER BY " + TABLE_NAME + "." + ASSET_ID
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getReadableDb()
         return try {
             val c = sqLiteDatabase.rawQuery(rawQuery, null)
-            sqLiteDatabase.setTransactionSuccessful()
             fromCursor(c)
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             ArrayList()
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -967,18 +880,14 @@ class AssetDbHelper {
                 where +
                 " ORDER BY " + TABLE_NAME + "." + ASSET_ID
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getReadableDb()
         return try {
             val c = sqLiteDatabase.rawQuery(rawQuery, null)
-            sqLiteDatabase.setTransactionSuccessful()
             fromCursor(c)
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             ArrayList()
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -998,18 +907,14 @@ class AssetDbHelper {
                 where +
                 " ORDER BY " + TABLE_NAME + "." + ASSET_ID
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getReadableDb()
         return try {
             val c = sqLiteDatabase.rawQuery(rawQuery, null)
-            sqLiteDatabase.setTransactionSuccessful()
             fromCursor(c)
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             ArrayList()
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -1029,18 +934,14 @@ class AssetDbHelper {
                 where +
                 " ORDER BY " + TABLE_NAME + "." + ASSET_ID
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getReadableDb()
         return try {
             val c = sqLiteDatabase.rawQuery(rawQuery, null)
-            sqLiteDatabase.setTransactionSuccessful()
             fromCursor(c)
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             ArrayList()
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -1150,7 +1051,7 @@ class AssetDbHelper {
                 CODE + " = '" + code + "') AND (" +
                 ASSET_ID + " <> " + assetId + ")"
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
+        val sqLiteDatabase = getReadableDb()
         return DatabaseUtils.longForQuery(
             sqLiteDatabase,
             countQuery,
@@ -1167,7 +1068,7 @@ class AssetDbHelper {
         WHERE (warehouse_area_id = @warehouse_area_id)
          */
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
+        val sqLiteDatabase = getReadableDb()
         return DatabaseUtils.queryNumEntries(
             sqLiteDatabase,
             TABLE_NAME,
@@ -1643,25 +1544,17 @@ class AssetDbHelper {
         get() {
             Log.i(this::class.java.simpleName, ": SQLite -> minId")
 
-            val sqLiteDatabase = StaticDbHelper.getReadableDb()
-            sqLiteDatabase.beginTransaction()
+            val sqLiteDatabase = getReadableDb()
             return try {
                 val mCount = sqLiteDatabase.rawQuery("SELECT MIN($ASSET_ID) FROM $TABLE_NAME", null)
-                sqLiteDatabase.setTransactionSuccessful()
                 mCount.moveToFirst()
                 val count = mCount.getLong(0)
                 mCount.close()
-                if (count > 0) {
-                    -1
-                } else {
-                    count - 1
-                }
+                if (count > 0) -1 else count - 1
             } catch (ex: SQLException) {
                 ex.printStackTrace()
                 ErrorLog.writeLog(null, this::class.java.simpleName, ex)
                 0
-            } finally {
-                sqLiteDatabase.endTransaction()
             }
         }
 
@@ -1674,10 +1567,16 @@ class AssetDbHelper {
         val allCommands: ArrayList<String> = ArrayList()
         allCommands.add(CREATE_TEMP_TABLE)
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        for (sql in allCommands) {
-            println("$sql;")
-            sqLiteDatabase.execSQL(sql)
+        val sqLiteDatabase = getWritableDb()
+        sqLiteDatabase.beginTransaction()
+        try {
+            for (sql in allCommands) {
+                println("$sql;")
+                sqLiteDatabase.execSQL(sql)
+            }
+            sqLiteDatabase.setTransactionSuccessful()
+        } finally {
+            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -1696,18 +1595,14 @@ class AssetDbHelper {
                 where +
                 " ORDER BY " + TABLE_NAME + "." + ASSET_ID
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getReadableDb()
         return try {
             val c = sqLiteDatabase.rawQuery(rawQuery, null)
-            sqLiteDatabase.setTransactionSuccessful()
             fromCursor(c)
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             ArrayList()
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -1718,11 +1613,18 @@ class AssetDbHelper {
 
         val splitList = splitList(arrayId.toTypedArray(), 100)
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
+
         try {
             sqLiteDatabase.delete("${temp}${TABLE_NAME}", null, null)
+        } catch (ex: SQLException) {
+            ex.printStackTrace()
+            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
+            return false
+        }
 
+        try {
+            sqLiteDatabase.beginTransaction()
             for (part in splitList) {
                 var insertQ =
                     "INSERT INTO " + temp + TABLE_NAME + " (" + temp + ASSET_ID + ") VALUES "

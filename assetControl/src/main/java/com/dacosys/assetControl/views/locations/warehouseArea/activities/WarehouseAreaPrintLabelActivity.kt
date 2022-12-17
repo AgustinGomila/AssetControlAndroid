@@ -22,16 +22,7 @@ import androidx.transition.ChangeBounds
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.Statics.Companion.isRfidRequired
 import com.dacosys.assetControl.databinding.WarehouseAreaPrintLabelActivityTopPanelCollapsedBinding
-import com.dacosys.assetControl.utils.configuration.Preference
-import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.scannedCode.ScannedCode
-import com.dacosys.assetControl.utils.scanners.JotterListener
-import com.dacosys.assetControl.utils.scanners.Scanner
-import com.dacosys.assetControl.utils.scanners.nfc.Nfc
-import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.model.barcodeLabels.barcodeLabelCustom.`object`.BarcodeLabelCustom
 import com.dacosys.assetControl.model.barcodeLabels.barcodeLabelCustom.dbHelper.BarcodeLabelCustomDbHelper
 import com.dacosys.assetControl.model.barcodeLabels.barcodeLabelTarget.`object`.BarcodeLabelTarget
@@ -39,9 +30,19 @@ import com.dacosys.assetControl.model.locations.async.GetLocationAsync
 import com.dacosys.assetControl.model.locations.warehouseArea.`object`.WarehouseArea
 import com.dacosys.assetControl.model.locations.warehouseArea.dbHelper.WarehouseAreaAdapter
 import com.dacosys.assetControl.model.locations.warehouseArea.dbHelper.WarehouseAreaDbHelper
-import com.dacosys.assetControl.sync.functions.ProgressStatus
+import com.dacosys.assetControl.network.utils.ProgressStatus
+import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.Statics.Companion.isRfidRequired
+import com.dacosys.assetControl.utils.configuration.Preference
+import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.misc.ParcelLong
+import com.dacosys.assetControl.utils.scanners.JotterListener
+import com.dacosys.assetControl.utils.scanners.ScannedCode
+import com.dacosys.assetControl.utils.scanners.Scanner
+import com.dacosys.assetControl.utils.scanners.nfc.Nfc
+import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
 import com.dacosys.assetControl.views.locations.warehouseArea.fragments.WarehouseAreaSelectFilterFragment
 import com.dacosys.assetControl.views.print.fragments.PrinterFragment
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
@@ -188,6 +189,7 @@ class WarehouseAreaPrintLabelActivity :
         binding = WarehouseAreaPrintLabelActivityTopPanelCollapsedBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         KeyboardVisibilityEvent.registerEventListener(this, this)
@@ -196,7 +198,6 @@ class WarehouseAreaPrintLabelActivity :
             supportFragmentManager.findFragmentById(binding.filterFragment.id) as WarehouseAreaSelectFilterFragment
         printerFragment =
             supportFragmentManager.findFragmentById(binding.printFragment.id) as PrinterFragment
-
 
 
         if (savedInstanceState != null) {
@@ -261,12 +262,12 @@ class WarehouseAreaPrintLabelActivity :
             if (!multiSelect && warehouseArea != null) {
                 data.putParcelableArrayListExtra(
                     "ids",
-                    arrayListOf(Statics.ParcelLong(warehouseArea.warehouseAreaId))
+                    arrayListOf(ParcelLong(warehouseArea.warehouseAreaId))
                 )
                 setResult(RESULT_OK, data)
             } else if (multiSelect && warehouseAreaIdArray != null && warehouseAreaIdArray.size > 0) {
-                val parcelIdArray: ArrayList<Statics.ParcelLong> = ArrayList()
-                for (it in warehouseAreaIdArray) parcelIdArray.add(Statics.ParcelLong(it))
+                val parcelIdArray: ArrayList<ParcelLong> = ArrayList()
+                for (it in warehouseAreaIdArray) parcelIdArray.add(ParcelLong(it))
                 data.putParcelableArrayListExtra("ids", parcelIdArray)
                 setResult(RESULT_OK, data)
             } else {
@@ -609,7 +610,7 @@ class WarehouseAreaPrintLabelActivity :
             // Nada que hacer, volver
             if (scanCode.trim().isEmpty()) {
                 val res = getString(R.string.invalid_code)
-                makeText(binding.root, res, SnackbarType.ERROR)
+                makeText(binding.root, res, SnackBarType.ERROR)
                 ErrorLog.writeLog(this, this::class.java.simpleName, res)
                 return
             }
@@ -626,7 +627,7 @@ class WarehouseAreaPrintLabelActivity :
                 sc.warehouseArea
             } else {
                 val res = this.getString(R.string.invalid_warehouse_area_code)
-                makeText(binding.root, res, SnackbarType.ERROR)
+                makeText(binding.root, res, SnackBarType.ERROR)
                 null
             }
 
@@ -636,7 +637,7 @@ class WarehouseAreaPrintLabelActivity :
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
-            makeText(binding.root, ex.message.toString(), SnackbarType.ERROR)
+            makeText(binding.root, ex.message.toString(), SnackBarType.ERROR)
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         } finally {
             // Unless is blocked, unlock the partial
@@ -709,7 +710,7 @@ class WarehouseAreaPrintLabelActivity :
             }
             ProgressStatus.crashed -> {
                 showProgressBar(false)
-                makeText(binding.root, msg, SnackbarType.ERROR)
+                makeText(binding.root, msg, SnackBarType.ERROR)
             }
             ProgressStatus.finished -> {
                 showProgressBar(false)

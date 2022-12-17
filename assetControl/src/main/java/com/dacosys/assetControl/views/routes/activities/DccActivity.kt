@@ -49,15 +49,15 @@ import com.dacosys.assetControl.model.routes.routeProcessContent.`object`.RouteP
 import com.dacosys.assetControl.model.table.Table
 import com.dacosys.assetControl.model.users.user.`object`.User
 import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.UTCDataTime
 import com.dacosys.assetControl.utils.configuration.Preference
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.misc.UTCDataTime
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.utils.scanners.nfc.Nfc
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
 import com.dacosys.assetControl.views.routes.fragment.*
 import com.dacosys.imageControl.fragments.ImageControlButtonsFragment
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
@@ -69,12 +69,9 @@ import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 
 
-class DccActivity : AppCompatActivity(),
-    Scanner.ScannerListener,
+class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
     CommaSeparatedSpinnerFragment.OnItemSelectedListener,
-    UnitTypeSpinnerFragment.OnItemSelectedListener,
-    DccFragmentListener,
-    Rfid.RfidDeviceListener,
+    UnitTypeSpinnerFragment.OnItemSelectedListener, DccFragmentListener, Rfid.RfidDeviceListener,
     KeyboardVisibilityEventListener {
     override fun onDestroy() {
         destroyLocals()
@@ -227,6 +224,7 @@ class DccActivity : AppCompatActivity(),
         binding = DataCollectionContentActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         title = getString(R.string.data_collection)
@@ -252,13 +250,13 @@ class DccActivity : AppCompatActivity(),
         when {
             targetWarehouseArea != null -> makeText(binding.root,
                 (targetWarehouseArea ?: return).description,
-                SnackbarType.INFO)
+                SnackBarType.INFO)
             targetItemCategory != null -> makeText(binding.root,
                 (targetItemCategory ?: return).description,
-                SnackbarType.INFO)
+                SnackBarType.INFO)
             targetAsset != null -> makeText(binding.root,
                 (targetAsset ?: return).description,
-                SnackbarType.INFO)
+                SnackBarType.INFO)
         }
 
         binding.nextButton.setOnClickListener { next() }
@@ -278,11 +276,27 @@ class DccActivity : AppCompatActivity(),
 
         KeyboardVisibilityEvent.registerEventListener(this, this)
 
-        // Llenar la grilla
         setPanels()
+
+        // Llenar la grilla
+        initDcc()
 
         // ESTO SIRVE PARA OCULTAR EL TECLADO EN PANTALLA CUANDO PIERDEN EL FOCO LOS CONTROLES QUE LO NECESITAN
         setupUI(binding.root)
+    }
+
+    private fun initDcc() {
+        if (!fragCollectionCreated) {
+            // Es una nueva sesión de recolección de datos
+            createFragmentCollection()
+            fragCollectionCreated = true
+        } else {
+            // Carga del estado del adaptador desde la DB temporal
+            val allFragData = FragmentDataDbHelper().tempTableSelect()
+            createFragmentCollection(allFragData)
+        }
+
+        fillControl(level = currentLevel, position = currentPos)
     }
 
     private fun setEnable(isChecked: Boolean) {
@@ -299,14 +313,16 @@ class DccActivity : AppCompatActivity(),
 
     private fun setRouteProcessContent(tempRpc: RouteProcessContent) {
         rpc = tempRpc
-        dcr = DataCollectionRule(id = (rpc ?: return).dataCollectionRuleId, doChecks = false)
+        val rpc = rpc ?: return
 
-        val rp = RouteProcess(id = (rpc ?: return).routeProcessId, doChecks = false)
+        dcr = DataCollectionRule(id = rpc.dataCollectionRuleId, doChecks = false)
+        val dcr = dcr ?: return
+
+        val rp = RouteProcess(id = rpc.routeProcessId, doChecks = false)
         collectorRouteProcessId = rp.collectorRouteProcessId
 
         dcrContArray =
-            ArrayList(DataCollectionRuleContentDbHelper().selectByDataCollectionRuleIdActive((dcr
-                ?: return).dataCollectionRuleId)
+            ArrayList(DataCollectionRuleContentDbHelper().selectByDataCollectionRuleIdActive(dcr.dataCollectionRuleId)
                 .sortedWith(compareBy({ it.level }, { it.position })))
     }
 
@@ -392,11 +408,19 @@ class DccActivity : AppCompatActivity(),
     }
 
     private fun setImageControlFragment() {
-        var description = "${(dcr ?: return).description}, ${
-            if ((rpc ?: return).assetStr != null && ((rpc ?: return).assetStr ?: return).isNotEmpty()) (rpc ?: return).assetStr
-            else if ((rpc ?: return).warehouseAreaStr != null && ((rpc ?: return).warehouseAreaStr ?: return).isNotEmpty()) (rpc ?: return).warehouseAreaStr
-            else if ((rpc ?: return).warehouseStr != null && ((rpc ?: return).warehouseStr ?: return).isNotEmpty()) (rpc ?: return).warehouseStr
-            else getString(R.string.no_name)
+        val dcr = dcr ?: return
+        val rpc = rpc ?: return
+
+        var description = "${dcr.description}, ${
+            if (rpc.assetStr != null && (rpc.assetStr ?: return).isNotEmpty()) {
+                rpc.assetStr
+            } else if (rpc.warehouseAreaStr != null && (rpc.warehouseAreaStr ?: return).isNotEmpty()) {
+                rpc.warehouseAreaStr
+            } else if (rpc.warehouseStr != null && (rpc.warehouseStr ?: return).isNotEmpty()) {
+                rpc.warehouseStr
+            } else {
+                getString(R.string.no_name)
+            }
         }"
 
         val tableName = Table.routeProcess.tableName
@@ -408,7 +432,7 @@ class DccActivity : AppCompatActivity(),
         if (imageControlFragment == null) {
             imageControlFragment =
                 ImageControlButtonsFragment.newInstance(Table.routeProcess.tableId,
-                    (rpc ?: return).routeProcessId,
+                    rpc.routeProcessId,
                     null)
 
             if (description.isNotEmpty()) {
@@ -436,7 +460,7 @@ class DccActivity : AppCompatActivity(),
             }
         } else {
             imageControlFragment?.setTableId(Table.routeProcess.tableId)
-            imageControlFragment?.setObjectId1((rpc ?: return).routeProcessId)
+            imageControlFragment?.setObjectId1(rpc.routeProcessId)
             imageControlFragment?.setObjectId2(null)
 
             if (description.isNotEmpty()) {
@@ -791,6 +815,7 @@ class DccActivity : AppCompatActivity(),
         }
 
         var tempDcc: ArrayList<DataCollectionContent> = ArrayList()
+        val rpc = rpc
 
         binding.enableCheckBox.isChecked = f.isEnabled
 
@@ -798,40 +823,37 @@ class DccActivity : AppCompatActivity(),
             val dccDbHelper = DataCollectionContentDbHelper()
             val dcrCont = f.dataCollectionRuleContent ?: return
             when {
-                (rpc ?: return).assetId != null && ((rpc ?: return).assetId ?: return) > 0 -> {
-                    binding.codeTextView.setText((rpc ?: return).assetCode ?: "",
-                        TextView.BufferType.EDITABLE)
-                    binding.descriptionTextView.setText((rpc ?: return).assetStr ?: "",
+                rpc.assetId != null && (rpc.assetId ?: return) > 0 -> {
+                    binding.codeTextView.setText(rpc.assetCode ?: "", TextView.BufferType.EDITABLE)
+                    binding.descriptionTextView.setText(rpc.assetStr ?: "",
                         TextView.BufferType.EDITABLE)
 
                     tempDcc = ArrayList(dccDbHelper.selectByDataCollectionRuleContentIdAssetId(
                         dcrCont.dataCollectionRuleContentId,
-                        (rpc ?: return).assetId ?: return)
-                        .sortedWith(compareBy { it.dataCollectionDate }).reversed())
+                        rpc.assetId ?: return).sortedWith(compareBy { it.dataCollectionDate })
+                        .reversed())
                 }
-                (rpc ?: return).warehouseId != null && ((rpc ?: return).warehouseId
-                    ?: return) > 0 -> {
-                    binding.codeTextView.setText((rpc ?: return).warehouseId.toString(),
+                rpc.warehouseId != null && (rpc.warehouseId ?: return) > 0 -> {
+                    binding.codeTextView.setText(rpc.warehouseId.toString(),
                         TextView.BufferType.EDITABLE)
-                    binding.descriptionTextView.setText((rpc ?: return).warehouseStr ?: "",
+                    binding.descriptionTextView.setText(rpc.warehouseStr ?: "",
                         TextView.BufferType.EDITABLE)
 
                     tempDcc = ArrayList(dccDbHelper.selectByDataCollectionRuleContentIdWarehouseId(
                         dcrCont.dataCollectionRuleContentId,
-                        (rpc ?: return).warehouseId ?: return)
-                        .sortedWith(compareBy { it.dataCollectionDate }).reversed())
+                        rpc.warehouseId ?: return).sortedWith(compareBy { it.dataCollectionDate })
+                        .reversed())
                 }
-                (rpc ?: return).warehouseAreaId != null && ((rpc ?: return).warehouseAreaId
-                    ?: return) > 0 -> {
-                    binding.codeTextView.setText((rpc ?: return).warehouseAreaId.toString(),
+                rpc.warehouseAreaId != null && (rpc.warehouseAreaId ?: return) > 0 -> {
+                    binding.codeTextView.setText(rpc.warehouseAreaId.toString(),
                         TextView.BufferType.EDITABLE)
-                    binding.descriptionTextView.setText((rpc ?: return).warehouseAreaStr ?: "",
+                    binding.descriptionTextView.setText(rpc.warehouseAreaStr ?: "",
                         TextView.BufferType.EDITABLE)
 
                     tempDcc =
                         ArrayList(dccDbHelper.selectByDataCollectionRuleContentIdWarehouseAreaId(
                             dcrCont.dataCollectionRuleContentId,
-                            (rpc ?: return).warehouseAreaId ?: return)
+                            rpc.warehouseAreaId ?: return)
                             .sortedWith(compareBy { it.dataCollectionDate }).reversed())
                 }
             }
@@ -989,7 +1011,7 @@ class DccActivity : AppCompatActivity(),
         if (!f.isEnabled && z.mandatory || f.valueStr == null && z.mandatory) {
             // No puede seguir, valor obligatorio
             val str = "${getString(R.string.mandatory_value_for)} ${z.description}"
-            makeText(binding.root, str, SnackbarType.ERROR)
+            makeText(binding.root, str, SnackBarType.ERROR)
             return
         }
 
@@ -1164,7 +1186,7 @@ class DccActivity : AppCompatActivity(),
             if (!f.isEnabled && dcrCont.mandatory || f.valueStr == null && dcrCont.mandatory) {
                 // No puede seguir, valor obligatorio
                 val str = "${getString(R.string.mandatory_value_for)} ${dcrCont.description}"
-                makeText(binding.root, str, SnackbarType.ERROR)
+                makeText(binding.root, str, SnackBarType.ERROR)
                 return
             }
 
@@ -1182,7 +1204,7 @@ class DccActivity : AppCompatActivity(),
                     res == DcrResult.noContinue.id -> {
                         makeText(binding.root,
                             "${getString(R.string.value_does_not_allow_to_continue_for)} ${dcrCont.description}",
-                            SnackbarType.ERROR)
+                            SnackBarType.ERROR)
                     }
                     res == DcrResult.end.id -> {
                         saveDataCollection()
@@ -1211,7 +1233,7 @@ class DccActivity : AppCompatActivity(),
                         // No puede seguir
                         makeText(binding.root,
                             "${getString(R.string.invalid_value_for)} ${dcrCont.description}",
-                            SnackbarType.ERROR)
+                            SnackBarType.ERROR)
                     }
                 }
             }
@@ -1224,7 +1246,7 @@ class DccActivity : AppCompatActivity(),
     }
 
     private fun saveDataCollection() {
-        makeText(binding.root, getString(R.string.saving_data_collection), SnackbarType.INFO)
+        makeText(binding.root, getString(R.string.saving_data_collection), SnackBarType.INFO)
 
         for (targetControl in attrFrags) {
             saveFragValues(targetControl)
@@ -1251,7 +1273,7 @@ class DccActivity : AppCompatActivity(),
         if (dc == null) {
             makeText(binding.root,
                 getString(R.string.error_saving_data_collection),
-                SnackbarType.ERROR)
+                SnackBarType.ERROR)
             return
         }
         ///////////////////////////////////////////
@@ -1296,7 +1318,7 @@ class DccActivity : AppCompatActivity(),
         } else {
             makeText(binding.root,
                 getString(R.string.failed_to_save_the_data_collection_contents),
-                SnackbarType.ERROR)
+                SnackBarType.ERROR)
         }
     }
 
@@ -1407,7 +1429,7 @@ class DccActivity : AppCompatActivity(),
                 eval.toInt() == DcrResult.noContinue.id -> {
                     makeText(binding.root,
                         "${getString(R.string.value_does_not_allow_to_continue_for)} ${z.description}",
-                        SnackbarType.ERROR)
+                        SnackBarType.ERROR)
                 }
             }
         }
@@ -1451,7 +1473,7 @@ class DccActivity : AppCompatActivity(),
             if (prevControl == null) {
                 makeText(binding.root,
                     getString(R.string.the_previous_control_is_not_found),
-                    SnackbarType.ERROR)
+                    SnackBarType.ERROR)
                 return
             }
 
@@ -1472,7 +1494,7 @@ class DccActivity : AppCompatActivity(),
                 if (f == null) {
                     makeText(binding.root,
                         getString(R.string.the_previous_control_is_not_found),
-                        SnackbarType.ERROR)
+                        SnackBarType.ERROR)
                     return
                 }
 
@@ -1559,11 +1581,11 @@ class DccActivity : AppCompatActivity(),
         JotterListener.lockScanner(this, true)
 
         try {
-            makeText(binding.root, getString(R.string.ok), SnackbarType.SUCCESS)
+            makeText(binding.root, getString(R.string.ok), SnackBarType.SUCCESS)
         } catch (ex: Exception) {
             ex.printStackTrace()
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
-            makeText(binding.root, ex.message.toString(), SnackbarType.ERROR)
+            makeText(binding.root, ex.message.toString(), SnackBarType.ERROR)
         } finally {
             // Unless is blocked, unlock the partial
             JotterListener.lockScanner(this, false)
@@ -1572,18 +1594,6 @@ class DccActivity : AppCompatActivity(),
 
     public override fun onResume() {
         super.onResume()
-
-        if (!fragCollectionCreated) {
-            // Es una nueva sesión de recolección de datos
-            createFragmentCollection()
-            fragCollectionCreated = true
-        } else {
-            // Carga del estado del adaptador desde la DB temporal
-            val allFragData = FragmentDataDbHelper().tempTableSelect()
-            createFragmentCollection(allFragData)
-        }
-
-        fillControl(level = currentLevel, position = currentPos)
 
         setImageControlFragment()
     }

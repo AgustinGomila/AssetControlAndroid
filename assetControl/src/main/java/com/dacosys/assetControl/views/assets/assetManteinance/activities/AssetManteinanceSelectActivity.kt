@@ -16,17 +16,18 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.databinding.AssetManteinanceSelectActivityBinding
-import com.dacosys.assetControl.utils.configuration.Preference
-import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.model.assets.asset.dbHelper.AssetDbHelper
 import com.dacosys.assetControl.model.assets.manteinances.assetMainteinance.`object`.AssetManteinance
 import com.dacosys.assetControl.model.assets.manteinances.assetMainteinance.dbHelper.AssetManteinanceAdapter
 import com.dacosys.assetControl.model.assets.manteinances.assetMainteinance.dbHelper.AssetManteinanceDbHelper
+import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.configuration.Preference
+import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.misc.ParcelLong
 import com.dacosys.assetControl.views.assets.asset.activities.AssetPrintLabelActivity
 import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
 
 class AssetManteinanceSelectActivity : AppCompatActivity(),
     AssetManteinanceAdapter.CustomCheckedChangeListener {
@@ -138,6 +139,7 @@ class AssetManteinanceSelectActivity : AppCompatActivity(),
         binding = AssetManteinanceSelectActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         if (savedInstanceState != null) {
@@ -274,7 +276,7 @@ class AssetManteinanceSelectActivity : AppCompatActivity(),
             try {
                 if (it?.resultCode == RESULT_OK && data != null) {
                     val idParcel =
-                        data.getParcelableArrayListExtra<Statics.ParcelLong>(
+                        data.getParcelableArrayListExtra<ParcelLong>(
                             "ids"
                         ) ?: return@registerForActivityResult
 
@@ -300,7 +302,7 @@ class AssetManteinanceSelectActivity : AppCompatActivity(),
                         makeText(
                             binding.root,
                             res,
-                            SnackbarType.ERROR
+                            SnackBarType.ERROR
                         )
                         android.util.Log.d(this::class.java.simpleName, res)
                     }
@@ -335,7 +337,7 @@ class AssetManteinanceSelectActivity : AppCompatActivity(),
             makeText(
                 binding.root,
                 getString(R.string.you_must_enter_at_least_one_letter_in_the_description),
-                SnackbarType.INFO
+                SnackBarType.INFO
             )
 
             showProgressBar(false)
@@ -396,7 +398,7 @@ class AssetManteinanceSelectActivity : AppCompatActivity(),
             makeText(
                 binding.root,
                 getString(R.string.no_maintenance_to_show),
-                SnackbarType.INFO
+                SnackBarType.INFO
             )
         }
     }

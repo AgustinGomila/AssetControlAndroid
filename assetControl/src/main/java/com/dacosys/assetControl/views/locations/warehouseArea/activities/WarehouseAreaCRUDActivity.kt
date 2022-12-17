@@ -3,7 +3,6 @@ package com.dacosys.assetControl.views.locations.warehouseArea.activities
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import android.widget.Button
 import android.widget.CheckBox
@@ -15,16 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.Statics.Companion.isRfidRequired
 import com.dacosys.assetControl.databinding.WarehouseAreaCrudActivityBinding
-import com.dacosys.assetControl.utils.configuration.Preference
-import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.scannedCode.ScannedCode
-import com.dacosys.assetControl.utils.scanners.JotterListener
-import com.dacosys.assetControl.utils.scanners.Scanner
-import com.dacosys.assetControl.utils.scanners.nfc.Nfc
-import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.model.locations.warehouseArea.`object`.WarehouseArea
 import com.dacosys.assetControl.model.locations.warehouseArea.`object`.WarehouseAreaCRUD
 import com.dacosys.assetControl.model.locations.warehouseArea.`object`.WarehouseAreaCRUD.Companion.RC_ERROR_INSERT
@@ -33,11 +23,17 @@ import com.dacosys.assetControl.model.locations.warehouseArea.`object`.Warehouse
 import com.dacosys.assetControl.model.locations.warehouseArea.`object`.WarehouseAreaCRUD.Companion.RC_INSERT_OK
 import com.dacosys.assetControl.model.locations.warehouseArea.`object`.WarehouseAreaCRUD.Companion.RC_UPDATE_OK
 import com.dacosys.assetControl.model.table.Table
-import com.dacosys.assetControl.sync.functions.ProgressStatus
-import com.dacosys.assetControl.sync.functions.Sync.Companion.SyncTaskProgress
-import com.dacosys.assetControl.sync.functions.SyncRegistryType
+import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.Statics.Companion.isRfidRequired
+import com.dacosys.assetControl.utils.configuration.Preference
+import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.scanners.JotterListener
+import com.dacosys.assetControl.utils.scanners.ScannedCode
+import com.dacosys.assetControl.utils.scanners.Scanner
+import com.dacosys.assetControl.utils.scanners.nfc.Nfc
+import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
 import com.dacosys.assetControl.views.locations.locationSelect.LocationSelectActivity
 import com.dacosys.assetControl.views.locations.warehouseArea.fragments.WarehouseAreaCRUDFragment
 import com.dacosys.imageControl.fragments.ImageControlButtonsFragment
@@ -47,7 +43,6 @@ import org.parceler.Parcels
 class WarehouseAreaCRUDActivity : AppCompatActivity(),
     Scanner.ScannerListener,
     WarehouseAreaCRUD.Companion.TaskCompleted,
-    SyncTaskProgress,
     Rfid.RfidDeviceListener,
     ImageControlButtonsFragment.DescriptionRequired {
     override fun onDestroy() {
@@ -60,41 +55,19 @@ class WarehouseAreaCRUDActivity : AppCompatActivity(),
         imageControlFragment = null
     }
 
-    override fun onSyncTaskProgress(
-        totalTask: Int,
-        completedTask: Int,
-        msg: String,
-        registryType: SyncRegistryType?,
-        progressStatus: ProgressStatus,
-    ) {
-        val progressStatusDesc = progressStatus.description
-        var registryDesc = getString(R.string.all_tasks)
-
-        if (registryType != null) {
-            registryDesc = registryType.description
-        }
-
-        Log.d(
-            this::class.java.simpleName, "$progressStatusDesc: $registryDesc, $msg ${
-                Statics.getPercentage(
-                    completedTask,
-                    totalTask
-                )
-            }"
-        )
-    }
-
     /**
      * Interface que recibe los resultados del alta/modificación
      * del área
      */
     override fun onTaskCompleted(result: WarehouseAreaCRUD.Companion.WarehouseAreaCRUDResult) {
+        if (isDestroyed || isFinishing) return
+
         when (result.resultCode) {
             RC_UPDATE_OK -> {
                 makeText(
                     binding.root,
                     getString(R.string.warehouse_area_modified_correctly),
-                    SnackbarType.SUCCESS
+                    SnackBarType.SUCCESS
                 )
                 if (imageControlFragment != null && result.warehouseArea != null) {
                     imageControlFragment?.saveImages(true)
@@ -115,7 +88,7 @@ class WarehouseAreaCRUDActivity : AppCompatActivity(),
                 makeText(
                     binding.root,
                     getString(R.string.warehouse_area_added_correctly),
-                    SnackbarType.SUCCESS
+                    SnackBarType.SUCCESS
                 )
                 if (imageControlFragment != null && result.warehouseArea != null) {
                     imageControlFragment?.updateObjectId1(
@@ -139,17 +112,17 @@ class WarehouseAreaCRUDActivity : AppCompatActivity(),
             RC_ERROR_OBJECT_NULL -> makeText(
                 binding.root,
                 getString(R.string.error_null_object),
-                SnackbarType.ERROR
+                SnackBarType.ERROR
             )
             RC_ERROR_UPDATE -> makeText(
                 binding.root,
                 getString(R.string.error_updating_warehouse_area),
-                SnackbarType.ERROR
+                SnackBarType.ERROR
             )
             RC_ERROR_INSERT -> makeText(
                 binding.root,
                 getString(R.string.error_adding_warehouse_area),
-                SnackbarType.ERROR
+                SnackBarType.ERROR
             )
         }
     }
@@ -213,9 +186,10 @@ class WarehouseAreaCRUDActivity : AppCompatActivity(),
         binding = WarehouseAreaCrudActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        title = getString(R.string.add_modify_area)
+        title = getString(R.string.edit_area)
 
         warehouseAreaCRUDFragment =
             supportFragmentManager.findFragmentById(binding.crudFragment.id) as WarehouseAreaCRUDFragment
@@ -332,7 +306,7 @@ class WarehouseAreaCRUDActivity : AppCompatActivity(),
             val intent = Intent(baseContext, LocationSelectActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
             intent.putExtra("title", getString(R.string.select_warehouse_area))
-            intent.putExtra("onlyActive", false)
+            intent.putExtra("onlyActive", true)
             intent.putExtra("warehouseVisible", true)
             intent.putExtra("warehouseAreaVisible", true)
             resultForAreaSelect.launch(intent)
@@ -354,7 +328,7 @@ class WarehouseAreaCRUDActivity : AppCompatActivity(),
                         makeText(
                             binding.root,
                             getString(R.string.error_trying_to_add_the_area),
-                            SnackbarType.ERROR
+                            SnackBarType.ERROR
                         )
                         ErrorLog.writeLog(this, this::class.java.simpleName, ex)
                     }

@@ -18,20 +18,20 @@ import android.widget.AdapterView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.databinding.CodeSelectActivityBinding
+import com.dacosys.assetControl.model.assets.asset.`object`.Asset
+import com.dacosys.assetControl.model.assets.asset.dbHelper.AssetAdapter
+import com.dacosys.assetControl.model.assets.asset.dbHelper.AssetDbHelper
+import com.dacosys.assetControl.model.assets.assetStatus.AssetStatus
+import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.configuration.Preference
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.utils.scanners.nfc.Nfc
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
-import com.dacosys.assetControl.model.assets.asset.`object`.Asset
-import com.dacosys.assetControl.model.assets.asset.dbHelper.AssetAdapter
-import com.dacosys.assetControl.model.assets.asset.dbHelper.AssetDbHelper
-import com.dacosys.assetControl.model.assets.assetStatus.AssetStatus
 import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
 import com.dacosys.assetControl.views.commons.views.ContractsAutoCompleteTextView
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener
@@ -65,6 +65,7 @@ class CodeSelectDialogActivity : AppCompatActivity(),
 
         refreshFilterData()
         savedInstanceState.putString("itemCode", itemCode)
+        savedInstanceState.putBoolean("onlyActive", onlyActive)
     }
 
     private lateinit var binding: CodeSelectActivityBinding
@@ -192,7 +193,6 @@ class CodeSelectDialogActivity : AppCompatActivity(),
 
         KeyboardVisibilityEvent.registerEventListener(this, this)
         refreshCodeText(cleanText = false, focus = true)
-
         thread { fillAdapter() }
     }
 
@@ -300,7 +300,7 @@ class CodeSelectDialogActivity : AppCompatActivity(),
             //makeText(getString(R.string.ok), SnackbarType.SUCCESS)
         } catch (ex: Exception) {
             ex.printStackTrace()
-            makeText(binding.root, ex.message.toString(), SnackbarType.ERROR)
+            makeText(binding.root, ex.message.toString(), SnackBarType.ERROR)
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         } finally {
             // Unless is blocked, unlock the partial

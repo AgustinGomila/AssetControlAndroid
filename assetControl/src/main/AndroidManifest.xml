@@ -47,7 +47,8 @@
         android:required="false" />
 
     <application
-        android:name="com.dacosys.assetControl.utils.Statics$AssetControl"
+        android:name="com.dacosys.assetControl.AssetControlApp"
+        android:configChanges="uiMode"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"

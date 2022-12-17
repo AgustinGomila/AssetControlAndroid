@@ -2,7 +2,6 @@ package com.dacosys.assetControl.model.routes.dataCollections.dataCollectionCont
 
 import android.content.ContentValues
 import android.os.Parcelable
-import com.dacosys.assetControl.utils.UTCDataTime
 import com.dacosys.assetControl.model.routes.dataCollections.dataCollectionContent.dbHelper.DataCollectionContentContract.DataCollectionContentEntry.Companion.ATTRIBUTE_COMPOSITION_ID
 import com.dacosys.assetControl.model.routes.dataCollections.dataCollectionContent.dbHelper.DataCollectionContentContract.DataCollectionContentEntry.Companion.ATTRIBUTE_ID
 import com.dacosys.assetControl.model.routes.dataCollections.dataCollectionContent.dbHelper.DataCollectionContentContract.DataCollectionContentEntry.Companion.COLLECTOR_DATA_COLLECTION_CONTENT_ID
@@ -16,6 +15,7 @@ import com.dacosys.assetControl.model.routes.dataCollections.dataCollectionConte
 import com.dacosys.assetControl.model.routes.dataCollections.dataCollectionContent.dbHelper.DataCollectionContentContract.DataCollectionContentEntry.Companion.VALUE_STR
 import com.dacosys.assetControl.model.routes.dataCollections.dataCollectionContent.dbHelper.DataCollectionContentDbHelper
 import com.dacosys.assetControl.model.routes.dataCollections.dataCollectionRuleContent.`object`.DataCollectionRuleContent
+import com.dacosys.assetControl.utils.misc.UTCDataTime
 
 class DataCollectionContent : Parcelable {
     var collectorDataCollectionContentId: Long = 0

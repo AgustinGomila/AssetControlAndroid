@@ -2,7 +2,7 @@ package com.dacosys.assetControl.wsGeneral
 
 import android.util.Log
 import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.Md5
+import com.dacosys.assetControl.utils.misc.Md5
 import org.ksoap2.HeaderProperty
 import org.ksoap2.SoapEnvelope
 import org.ksoap2.serialization.SoapObject

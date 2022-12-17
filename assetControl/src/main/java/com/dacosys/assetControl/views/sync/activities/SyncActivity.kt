@@ -10,9 +10,9 @@ import android.text.method.ScrollingMovementMethod
 import android.util.Log
 import android.view.*
 import android.widget.*
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.menu.MenuBuilder
-import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.BlendModeColorFilterCompat
@@ -22,42 +22,34 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.R.id
 import com.dacosys.assetControl.R.layout
-import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.Statics.AssetControl.Companion.getContext
 import com.dacosys.assetControl.databinding.SyncActivityBinding
+import com.dacosys.assetControl.model.assets.asset.`object`.Asset
+import com.dacosys.assetControl.model.assets.itemCategory.`object`.ItemCategory
+import com.dacosys.assetControl.model.locations.warehouse.`object`.Warehouse
+import com.dacosys.assetControl.model.locations.warehouseArea.`object`.WarehouseArea
+import com.dacosys.assetControl.model.movements.warehouseMovement.`object`.WarehouseMovement
+import com.dacosys.assetControl.model.reviews.assetReview.`object`.AssetReview
+import com.dacosys.assetControl.model.routes.dataCollections.dataCollection.`object`.DataCollection
+import com.dacosys.assetControl.model.routes.routeProcess.`object`.RouteProcess
+import com.dacosys.assetControl.network.adapter.SyncElementAdapter
+import com.dacosys.assetControl.network.serverDate.GetMySqlDate
+import com.dacosys.assetControl.network.serverDate.MySqlDateResult
+import com.dacosys.assetControl.network.sync.*
+import com.dacosys.assetControl.network.utils.*
+import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.configuration.Preference
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.sync.functions.*
-import com.dacosys.assetControl.sync.functions.Sync.Companion.SyncTaskProgress
-import com.dacosys.assetControl.sync.adapter.SyncElementAdapter
 import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
-import com.dacosys.imageControl.Statics.Companion.pendingImages
-import com.dacosys.imageControl.`object`.Images
-import com.dacosys.imageControl.main.UploadTask
-import com.dacosys.imageControl.wsObject.DocumentAddResultObject
-import java.lang.ref.WeakReference
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
+import com.dacosys.assetControl.views.sync.viewModels.PendingViewModel
+import com.dacosys.assetControl.views.sync.viewModels.SyncViewModel
+import com.dacosys.imageControl.main.UploadImagesProgress
+import kotlinx.coroutines.*
 import kotlin.concurrent.thread
 
 @Suppress("UNCHECKED_CAST")
-class SyncActivity :
-    AppCompatActivity(),
-    UploadTask.UploadTaskCompleted,
-    SyncTaskProgress,
-    SwipeRefreshLayout.OnRefreshListener,
-    SyncElementAdapter.CheckedChangedListener,
-    SyncElementAdapter.DataSetChangedListener,
-    Statics.SessionCreated {
-    override fun onSessionCreated(result: Boolean) {
-        if (!result) {
-            makeText(
-                binding.root,
-                getString(R.string.offline_mode),
-                SnackbarType.INFO
-            )
-        }
-    }
-
+class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
+    SyncElementAdapter.CheckedChangedListener, SyncElementAdapter.DataSetChangedListener {
     override fun onDestroy() {
         saveSharedPreferences()
         destroyLocals()
@@ -81,12 +73,18 @@ class SyncActivity :
     override fun onCheckedChanged(isChecked: Boolean, pos: Int) {
     }
 
-    override fun onUploadTaskCompleted(
-        result: com.dacosys.imageControl.misc.ProgressStatus,
-        msg: String,
-        docs: ArrayList<DocumentAddResultObject>,
-        images: ArrayList<Images>,
-    ) {
+    private fun onSessionCreated(result: Boolean) {
+        if (!result) {
+            makeText(binding.root, getString(R.string.offline_mode), SnackBarType.INFO)
+        }
+    }
+
+    private fun onUploadImagesProgress(it: UploadImagesProgress) {
+        if (isDestroyed || isFinishing) return
+
+        val result: com.dacosys.imageControl.misc.ProgressStatus = it.result
+        val msg: String = it.msg
+
         when (result.id) {
             ProgressStatus.starting.id, ProgressStatus.running.id -> {
                 setProgressBarText(msg)
@@ -94,17 +92,13 @@ class SyncActivity :
             }
             ProgressStatus.crashed.id, ProgressStatus.canceled.id -> {
                 showImageProgressBar(false)
-                makeText(this,
-                    msg,
-                    SnackbarType.ERROR)
+                makeText(this, msg, SnackBarType.ERROR)
 
                 fillPendingData()
             }
             ProgressStatus.success.id -> {
                 showImageProgressBar(false)
-                makeText(this,
-                    getString(R.string.upload_images_success),
-                    SnackbarType.SUCCESS)
+                makeText(this, getString(R.string.upload_images_success), SnackBarType.SUCCESS)
 
                 fillPendingData()
             }
@@ -112,8 +106,7 @@ class SyncActivity :
     }
 
     private fun setProgressBarText(text: String) {
-        runOnUiThread()
-        {
+        runOnUiThread {
             run {
                 binding.syncStatusTextView.text = text
             }
@@ -127,23 +120,23 @@ class SyncActivity :
                 binding.progressBarLayout.visibility = View.VISIBLE
 
                 ViewCompat.setZ(binding.progressBarLayout, 0F)
-            } else if (!show && binding.progressBarLayout.visibility != View.GONE
-            ) {
+            } else if (!show && binding.progressBarLayout.visibility != View.GONE) {
                 binding.progressBarLayout.visibility = View.GONE
             }
         }
     }
 
-    override fun onSyncTaskProgress(
-        totalTask: Int,
-        completedTask: Int,
-        msg: String,
-        registryType: SyncRegistryType?,
-        progressStatus: ProgressStatus,
-    ) {
-        when (progressStatus) {
+    fun onSyncProgress(it: SyncProgress) {
+        if (isDestroyed || isFinishing) return
+
+        val totalTask: Int = it.totalTask
+        val completedTask: Int = it.completedTask
+        val msg: String = it.msg
+        val registryType: SyncRegistryType? = it.registryType
+
+        when (val progressStatus: ProgressStatus = it.progressStatus) {
             ProgressStatus.bigStarting -> {
-                changeButtonsEnableState(false)
+                changeButtonsEnableState()
             }
             ProgressStatus.bigCrashed,
             ProgressStatus.bigFinished,
@@ -155,13 +148,10 @@ class SyncActivity :
                         tempMsg = getString(R.string.data_updated_successfully)
                     }
                     setDownloadText(tempMsg)
-                    CURRENT_MODE = -1
-                    syncDownload = null
-                } else {
-                    CURRENT_MODE = -1
-                    syncUpload = null
                 }
 
+                CURRENT_MODE = -1
+                syncing = false
                 checkConnection()
             }
             ProgressStatus.success,
@@ -169,12 +159,10 @@ class SyncActivity :
             ProgressStatus.starting,
             ProgressStatus.running,
             -> {
-                sendText(
-                    totalTask = totalTask,
+                sendText(totalTask = totalTask,
                     completedTask = completedTask,
                     registryType = registryType,
-                    progressStatus = progressStatus
-                )
+                    progressStatus = progressStatus)
             }
         }
     }
@@ -185,12 +173,10 @@ class SyncActivity :
         registryType: SyncRegistryType?,
         progressStatus: ProgressStatus,
     ) {
-        refreshSyncTexts(
-            totalTask = totalTask,
+        refreshSyncTexts(totalTask = totalTask,
             completedTask = completedTask,
             registryType = registryType,
-            progressStatus = progressStatus
-        )
+            progressStatus = progressStatus)
 
         if (CURRENT_MODE == MODE_DOWNLOAD) {
             setDownloadText(concatDownloadText())
@@ -208,6 +194,8 @@ class SyncActivity :
     private var firstVisiblePos: Int? = null
     private var syncAdapter: SyncElementAdapter? = null
     //
+
+    private var syncing: Boolean = false
 
     private var userStatus = ""
     private var assetStatus = ""
@@ -254,6 +242,8 @@ class SyncActivity :
 
         b.putInt("CURRENT_MODE", CURRENT_MODE)
 
+        b.putBoolean("syncing", syncing)
+
         b.putString("userStatus", userStatus)
         b.putString("assetStatus", assetStatus)
         b.putString("itemCategoryStatus", itemCategoryStatus)
@@ -276,10 +266,7 @@ class SyncActivity :
         if (syncAdapter != null) {
             b.putInt("currentPos", syncAdapter?.currentPos() ?: 0)
             b.putInt("firstVisiblePos", syncAdapter?.firstVisiblePos() ?: 0)
-            b.putParcelableArrayList(
-                "visibleRegistryArray",
-                syncAdapter?.getVisibleRegistry()
-            )
+            b.putParcelableArrayList("visibleRegistryArray", syncAdapter?.getVisibleRegistry())
             b.putStringArrayList("checkedIdArray", syncAdapter?.getAllChecked())
         }
     }
@@ -292,6 +279,8 @@ class SyncActivity :
         // endregion
 
         CURRENT_MODE = b.getInt("CURRENT_MODE")
+
+        syncing = b.getBoolean("syncing")
 
         userStatus = b.getString("userStatus") ?: ""
         assetStatus = b.getString("assetStatus") ?: ""
@@ -336,10 +325,8 @@ class SyncActivity :
 
     private fun loadDefaultVisibleStatus() {
         visibleRegistryArray.clear()
-        val set = Statics.prefsGetStringSet(
-            Preference.syncVisibleRegistry.key,
-            Preference.syncVisibleRegistry.defaultValue as ArrayList<String>
-        )
+        val set = Statics.prefsGetStringSet(Preference.syncVisibleRegistry.key,
+            Preference.syncVisibleRegistry.defaultValue as ArrayList<String>)
         if (set != null) {
             for (i in set) {
                 val status = SyncRegistryType.getById(i.toInt())
@@ -352,29 +339,20 @@ class SyncActivity :
         }
     }
 
-    private lateinit var binding: SyncActivityBinding
-
     override fun onResume() {
         super.onResume()
 
         checkConnection()
 
-        syncDownload?.addParams(WeakReference(this), WeakReference(this))
-        syncUpload?.addParams(WeakReference(this), WeakReference(this))
-
-        if (someSyncing()) {
-            setUploadText(
-                if (syncUpload != null)
-                    getString(
-                        R.string.sending_data_please_wait
-                    ) else getString(R.string.downloading_data_please_wait)
-            )
+        if (syncing) {
+            setUploadText(if (CURRENT_MODE == MODE_UPLOAD) getString(R.string.sending_data_please_wait) else getString(
+                R.string.downloading_data_please_wait))
         }
     }
 
-    private fun someSyncing(): Boolean {
-        return syncUpload != null || syncDownload != null
-    }
+    private lateinit var binding: SyncActivityBinding
+    private val syncViewModel: SyncViewModel by viewModels()
+    private val pendingViewModel: PendingViewModel by viewModels()
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -383,6 +361,7 @@ class SyncActivity :
         binding = SyncActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         if (savedInstanceState != null) {
@@ -391,136 +370,118 @@ class SyncActivity :
             loadDefaultValues()
         }
 
+        syncViewModel.syncUploadProgress.observe(this) { if (it != null) onSyncProgress(it) }
+        syncViewModel.uploadImagesProgress.observe(this) { if (it != null) onUploadImagesProgress(it) }
+        syncViewModel.syncDownloadProgress.observe(this) { if (it != null) onSyncProgress(it) }
+        syncViewModel.sessionCreated.observe(this) { if (it != null) onSessionCreated(it) }
+        pendingViewModel.pendingLiveData.observe(this) { if (it != null) onPendingData(it) }
+
         title = tempTitle
 
         binding.dowloadTextView.movementMethod = ScrollingMovementMethod()
 
         binding.swipeRefresh.setOnRefreshListener(this)
-        binding.swipeRefresh.setColorSchemeResources(
-            android.R.color.holo_blue_bright,
+        binding.swipeRefresh.setColorSchemeResources(android.R.color.holo_blue_bright,
             android.R.color.holo_green_light,
             android.R.color.holo_orange_light,
-            android.R.color.holo_red_light
-        )
+            android.R.color.holo_red_light)
 
-        binding.sendDataButton.isEnabled = !someSyncing()
+        binding.sendDataButton.isEnabled = !syncing
         binding.sendDataButton.setOnClickListener {
-            if (someSyncing()) return@setOnClickListener
-            try {
-                if (Statics.OFFLINE_MODE || !Statics.isOnline()) {
-                    makeText(
-                        binding.root,
-                        getString(R.string.offline_mode),
-                        SnackbarType.INFO
-                    )
-                    return@setOnClickListener
-                }
-
-                CURRENT_MODE = MODE_UPLOAD
-                addLogText(
-                    "<b>${getString(R.string.sending_data)}...</b>",
-                    binding.uploadTextView
-                )
-
-                thread {
-                    syncUpload = SyncUpload()
-                    syncUpload?.addParams(WeakReference(this), WeakReference(this))
-                    syncUpload?.execute()
-                }
-            } catch (ex: Exception) {
-                val fontColor = "#" + Integer.toHexString(
-                    ContextCompat.getColor(
-                        this,
-                        R.color.firebrick
-                    ) and 0x00ffffff
-                )
-                val t =
-                    "<font color='$fontColor'>${getString(R.string.error)}: ${ex.message}...</font>"
-                addLogText(t, binding.uploadTextView)
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    ErrorLog.writeLog(
-                        this,
-                        this::class.java.simpleName,
-                        Html.fromHtml(ex.message.toString(), Html.FROM_HTML_MODE_COMPACT).toString()
-                    )
-                } else {
-                    @Suppress("DEPRECATION")
-                    ErrorLog.writeLog(
-                        this,
-                        this::class.java.simpleName,
-                        Html.fromHtml(ex.message.toString()).toString()
-                    )
-                }
-
-                CURRENT_MODE = -1
-                syncUpload = null
-            }
+            sendData()
         }
 
-        binding.downloadDataButton.isEnabled = !someSyncing()
+        binding.downloadDataButton.isEnabled = !syncing
         binding.downloadDataButton.setOnClickListener {
-            if (someSyncing()) return@setOnClickListener
-            try {
-                if (Statics.OFFLINE_MODE || !Statics.isOnline()) {
-                    makeText(
-                        binding.root,
-                        getString(R.string.offline_mode),
-                        SnackbarType.INFO
-                    )
-                    return@setOnClickListener
-                }
-
-                CURRENT_MODE = MODE_DOWNLOAD
-                addLogText(
-                    "<b>${getString(R.string.downloading_data)}...</b>",
-                    binding.dowloadTextView
-                )
-
-                thread {
-                    syncDownload = SyncDownload()
-                    syncDownload?.addParams(WeakReference(this), WeakReference(this))
-                    syncDownload?.execute()
-                }
-            } catch (ex: Exception) {
-                val fontColor = "#" + Integer.toHexString(
-                    ContextCompat.getColor(
-                        this,
-                        R.color.firebrick
-                    ) and 0x00ffffff
-                )
-                val t =
-                    "<font color='$fontColor'>${getString(R.string.error)}: ${ex.message}...</font>"
-                addLogText(t, binding.dowloadTextView)
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    ErrorLog.writeLog(
-                        this,
-                        this::class.java.simpleName,
-                        Html.fromHtml(ex.message.toString(), Html.FROM_HTML_MODE_COMPACT).toString()
-                    )
-                } else {
-                    @Suppress("DEPRECATION")
-                    ErrorLog.writeLog(
-                        this,
-                        this::class.java.simpleName,
-                        Html.fromHtml(ex.message.toString()).toString()
-                    )
-                }
-
-                CURRENT_MODE = -1
-                syncDownload = null
-            }
+            downloadData()
         }
 
         // ESTO SIRVE PARA OCULTAR EL TECLADO EN PANTALLA CUANDO PIERDEN EL FOCO LOS CONTROLES QUE LO NECESITAN
         setupUI(binding.root)
     }
 
-    private fun changeButtonsEnableState(enable: Boolean) {
+    private fun sendData() {
+        if (syncing) return
+
+        try {
+            if (Statics.OFFLINE_MODE || !Statics.isOnline()) {
+                makeText(binding.root, getString(R.string.offline_mode), SnackBarType.INFO)
+                return
+            }
+
+            syncing = true
+            CURRENT_MODE = MODE_UPLOAD
+
+            addLogText("<b>${getString(R.string.sending_data)}...</b>", binding.uploadTextView)
+
+            thread {
+                SyncUpload(onSyncTaskProgress = { syncViewModel.setSyncUploadProgress(it) },
+                    onUploadProgress = { syncViewModel.setUploadImagesProgress(it) })
+            }
+        } catch (ex: Exception) {
+            val fontColor = "#" + Integer.toHexString(ContextCompat.getColor(this,
+                R.color.firebrick) and 0x00ffffff)
+            val t = "<font color='$fontColor'>${getString(R.string.error)}: ${ex.message}...</font>"
+            addLogText(t, binding.uploadTextView)
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                ErrorLog.writeLog(this,
+                    this::class.java.simpleName,
+                    Html.fromHtml(ex.message.toString(), Html.FROM_HTML_MODE_COMPACT).toString())
+            } else {
+                @Suppress("DEPRECATION") ErrorLog.writeLog(this,
+                    this::class.java.simpleName,
+                    Html.fromHtml(ex.message.toString()).toString())
+            }
+
+            CURRENT_MODE = -1
+            syncing = false
+        }
+    }
+
+    private fun downloadData() {
+        if (syncing) return
+
+        try {
+            if (Statics.OFFLINE_MODE || !Statics.isOnline()) {
+                makeText(binding.root, getString(R.string.offline_mode), SnackBarType.INFO)
+                return
+            }
+
+            syncing = true
+            CURRENT_MODE = MODE_DOWNLOAD
+
+            addLogText("<b>${getString(R.string.downloading_data)}...</b>", binding.dowloadTextView)
+
+            thread {
+                SyncDownload(onSyncTaskProgress = { syncViewModel.setSyncDownloadProgress(it) },
+                    onSessionCreated = { syncViewModel.setSessionCreated(it) })
+            }
+        } catch (ex: Exception) {
+            val fontColor = "#" + Integer.toHexString(ContextCompat.getColor(this,
+                R.color.firebrick) and 0x00ffffff)
+            val t = "<font color='$fontColor'>${getString(R.string.error)}: ${ex.message}...</font>"
+            addLogText(t, binding.dowloadTextView)
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                ErrorLog.writeLog(this,
+                    this::class.java.simpleName,
+                    Html.fromHtml(ex.message.toString(), Html.FROM_HTML_MODE_COMPACT).toString())
+            } else {
+                @Suppress("DEPRECATION") ErrorLog.writeLog(this,
+                    this::class.java.simpleName,
+                    Html.fromHtml(ex.message.toString()).toString())
+            }
+
+            CURRENT_MODE = -1
+            syncing = false
+        }
+    }
+
+    private fun changeButtonsEnableState() {
         runOnUiThread {
-            binding.sendDataButton.isEnabled = enable
-            binding.downloadDataButton.isEnabled = enable
+            binding.sendDataButton.isEnabled = !syncing
+            binding.downloadDataButton.isEnabled = !syncing
         }
     }
 
@@ -529,8 +490,7 @@ class SyncActivity :
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 binding.dowloadTextView.text = Html.fromHtml(d, Html.FROM_HTML_MODE_COMPACT)
             } else {
-                @Suppress("DEPRECATION")
-                binding.dowloadTextView.text = Html.fromHtml(d)
+                @Suppress("DEPRECATION") binding.dowloadTextView.text = Html.fromHtml(d)
             }
         }
     }
@@ -540,8 +500,7 @@ class SyncActivity :
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 binding.uploadTextView.text = Html.fromHtml(u, Html.FROM_HTML_MODE_COMPACT)
             } else {
-                @Suppress("DEPRECATION")
-                binding.uploadTextView.text = Html.fromHtml(u)
+                @Suppress("DEPRECATION") binding.uploadTextView.text = Html.fromHtml(u)
             }
         }
     }
@@ -560,44 +519,24 @@ class SyncActivity :
 
         val fontColor: String = when (progressStatus) {
             ProgressStatus.crashed -> {
-                "#" + Integer.toHexString(
-                    ContextCompat.getColor(
-                        this,
-                        R.color.firebrick
-                    ) and 0x00ffffff
-                )
+                "#" + Integer.toHexString(ContextCompat.getColor(this,
+                    R.color.firebrick) and 0x00ffffff)
             }
             ProgressStatus.running -> {
-                "#" + Integer.toHexString(
-                    ContextCompat.getColor(
-                        this,
-                        R.color.steelblue
-                    ) and 0x00ffffff
-                )
+                "#" + Integer.toHexString(ContextCompat.getColor(this,
+                    R.color.steelblue) and 0x00ffffff)
             }
             ProgressStatus.success -> {
-                "#" + Integer.toHexString(
-                    ContextCompat.getColor(
-                        this,
-                        R.color.seagreen
-                    ) and 0x00ffffff
-                )
+                "#" + Integer.toHexString(ContextCompat.getColor(this,
+                    R.color.seagreen) and 0x00ffffff)
             }
             ProgressStatus.finished -> {
-                "#" + Integer.toHexString(
-                    ContextCompat.getColor(
-                        this,
-                        R.color.darkslategray
-                    ) and 0x00ffffff
-                )
+                "#" + Integer.toHexString(ContextCompat.getColor(this,
+                    R.color.darkslategray) and 0x00ffffff)
             }
             else -> {
-                "#" + Integer.toHexString(
-                    ContextCompat.getColor(
-                        this,
-                        R.color.goldenrod
-                    ) and 0x00ffffff
-                )
+                "#" + Integer.toHexString(ContextCompat.getColor(this,
+                    R.color.goldenrod) and 0x00ffffff)
             }
         }
 
@@ -608,10 +547,7 @@ class SyncActivity :
             message = "$registryDesc: <font color='$fontColor'>$progressStatusDesc</font>"
             if (progressStatus == ProgressStatus.running) {
                 message = "$message ${
-                    Statics.getPercentage(
-                        completedTask,
-                        totalTask
-                    )
+                    Statics.getPercentage(completedTask, totalTask)
                 }"
             }
         } else {
@@ -621,38 +557,28 @@ class SyncActivity :
                     prefix = "T"
                 }
                 message = "$prefix:${
-                    Statics.getPercentage(
-                        completedTask,
-                        totalTask
-                    )
+                    Statics.getPercentage(completedTask, totalTask)
                 }"
             }
         }
 
         if (progressStatus == ProgressStatus.crashed) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                ErrorLog.writeLog(
-                    this,
+                ErrorLog.writeLog(this,
                     this::class.java.simpleName,
-                    Html.fromHtml(message, Html.FROM_HTML_MODE_COMPACT).toString()
-                )
+                    Html.fromHtml(message, Html.FROM_HTML_MODE_COMPACT).toString())
             } else {
-                @Suppress("DEPRECATION")
-                ErrorLog.writeLog(
-                    this,
+                @Suppress("DEPRECATION") ErrorLog.writeLog(this,
                     this::class.java.simpleName,
-                    Html.fromHtml(message).toString()
-                )
+                    Html.fromHtml(message).toString())
             }
         } else {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                Log.d(
-                    this::class.java.simpleName,
-                    Html.fromHtml(message, Html.FROM_HTML_MODE_COMPACT).toString()
-                )
+                Log.d(this::class.java.simpleName,
+                    Html.fromHtml(message, Html.FROM_HTML_MODE_COMPACT).toString())
             } else {
-                @Suppress("DEPRECATION")
-                Log.d(this::class.java.simpleName, Html.fromHtml(message).toString())
+                @Suppress("DEPRECATION") Log.d(this::class.java.simpleName,
+                    Html.fromHtml(message).toString())
             }
         }
 
@@ -753,13 +679,11 @@ class SyncActivity :
     private fun addLogText(s: String, textView: TextView) {
         val editableText = textView.editableText
         var tempText = ""
-        if (editableText != null) tempText =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                "${Html.toHtml(editableText, Html.FROM_HTML_MODE_COMPACT)}<br>"
-            } else {
-                @Suppress("DEPRECATION")
-                "${Html.toHtml(editableText)}<br>"
-            }
+        if (editableText != null) tempText = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            "${Html.toHtml(editableText, Html.FROM_HTML_MODE_COMPACT)}<br>"
+        } else {
+            @Suppress("DEPRECATION") "${Html.toHtml(editableText)}<br>"
+        }
 
         tempText = "$tempText$s"
 
@@ -767,12 +691,8 @@ class SyncActivity :
 
         if (lines.size > 50) {
             tempText = ""
-            val color = "#" + Integer.toHexString(
-                ContextCompat.getColor(
-                    this,
-                    R.color.firebrick
-                ) and 0x00ffffff
-            )
+            val color = "#" + Integer.toHexString(ContextCompat.getColor(this,
+                R.color.firebrick) and 0x00ffffff)
 
             var x = 0
             for (l in lines) {
@@ -786,8 +706,7 @@ class SyncActivity :
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 textView.text = Html.fromHtml(tempText, Html.FROM_HTML_MODE_COMPACT)
             } else {
-                @Suppress("DEPRECATION")
-                textView.text = Html.fromHtml(tempText)
+                @Suppress("DEPRECATION") textView.text = Html.fromHtml(tempText)
             }
 
             // AUTO SCROLL
@@ -818,9 +737,7 @@ class SyncActivity :
 
         //If a layout container, iterate over children and seed recursion.
         if (view is ViewGroup) {
-            (0 until view.childCount)
-                .map { view.getChildAt(it) }
-                .forEach { setupUI(it) }
+            (0 until view.childCount).map { view.getChildAt(it) }.forEach { setupUI(it) }
         }
     }
 
@@ -829,9 +746,6 @@ class SyncActivity :
         private var CURRENT_MODE: Int = -1
         private const val MODE_UPLOAD: Int = 0
         private const val MODE_DOWNLOAD = 1
-
-        private var syncDownload: SyncDownload? = null
-        private var syncUpload: SyncUpload? = null
     }
 
     private fun touchButton(motionEvent: MotionEvent, button: Button) {
@@ -847,99 +761,67 @@ class SyncActivity :
     }
 
     private fun checkConnection() {
-        thread {
-            val getMySqlDate = GetMySqlDate()
-            val r = getMySqlDate.execute(Statics.getWebservice())
+        fun onConnectionResult(it: MySqlDateResult) {
+            if (isDestroyed || isFinishing) return
 
-            when (r.status) {
+            when (it.status) {
                 ProgressStatus.finished -> {
                     fillPendingData()
                 }
                 ProgressStatus.crashed, ProgressStatus.canceled -> {
                     runOnUiThread {
-                        binding.uploadTextView.text = r.msg
-                        changeButtonsEnableState(true)
+                        binding.uploadTextView.text = it.msg
+                        changeButtonsEnableState()
                     }
                 }
             }
         }
+        GetMySqlDate(Statics.getWebservice()) { onConnectionResult(it) }.execute()
     }
 
     private fun fillPendingData() {
+        pendingViewModel.refreshPending()
+    }
+
+    private fun onPendingData(syncElements: ArrayList<Any>) {
         var t = ""
 
-        val ar = Statics.pendingAssetReview()
-        val wm = Statics.pendingWarehouseMovement()
-        val a = Statics.pendingAsset()
-        val wa = Statics.pendingWarehouseArea()
-        val w = Statics.pendingWarehouse()
-        val ic = Statics.pendingItemCategory()
-        val dc = Statics.pendingDataCollection()
-        val rp = Statics.pendingRouteProcess()
-        val am = Statics.pendingAssetManteinance()
-        val pendingImages = pendingImages()
+        var r = syncElements.count { it is AssetReview }
+        if (r > 0) t = "$t${getString(R.string.asset_reviews)}: $r<br>"
 
-        val syncElements: ArrayList<Any> = ArrayList()
+        r = syncElements.count { it is WarehouseMovement }
+        if (r > 0) t = "$t${getString(R.string.movements)}: $r<br>"
 
-        if (ar.any()) {
-            ar.forEach { x -> syncElements.add(x) }
-            t = "$t${getString(R.string.asset_reviews)}: ${ar.size}<br>"
-        }
+        r = syncElements.count { it is Asset }
+        if (r > 0) t = "$t${getString(R.string.assets)}: $r<br>"
 
-        if (wm.any()) {
-            wm.forEach { x -> syncElements.add(x) }
-            t = "$t${getString(R.string.movements)}: ${wm.size}<br>"
-        }
+        r = syncElements.count { it is WarehouseArea }
+        if (r > 0) t = "$t${getString(R.string.areas)}: $r}<br>"
 
-        if (a.any()) {
-            a.forEach { x -> syncElements.add(x) }
-            t = "$t${getString(R.string.assets)}: ${a.size}<br>"
-        }
+        r = syncElements.count { it is Warehouse }
+        if (r > 0) t = "$t${getString(R.string.warehouses)}: $r<br>"
 
-        if (wa.any()) {
-            wa.forEach { x -> syncElements.add(x) }
-            t = "$t${getString(R.string.areas)}: ${wa.size}<br>"
-        }
+        r = syncElements.count { it is ItemCategory }
+        if (r > 0) t = "$t${getString(R.string.categories)}: $r<br>"
 
-        if (w.any()) {
-            w.forEach { x -> syncElements.add(x) }
-            t = "$t${getString(R.string.warehouses)}: ${w.size}<br>"
-        }
+        r = syncElements.count { it is DataCollection }
+        if (r > 0) t = "$t${getString(R.string.data_collections)}: $r<br>"
 
-        if (ic.any()) {
-            ic.forEach { x -> syncElements.add(x) }
-            t = "$t${getString(R.string.categories)}: ${ic.size}<br>"
-        }
+        r = syncElements.count { it is RouteProcess }
+        if (r > 0) t = "$t${getString(R.string.route_process)}: $r<br>"
 
-        if (dc.any()) {
-            dc.forEach { x -> syncElements.add(x) }
-            t = "$t${getString(R.string.data_collections)}: ${dc.size}<br>"
-        }
-
-        if (rp.any()) {
-            rp.forEach { x -> syncElements.add(x) }
-            t = "$t${getString(R.string.route_process)}: ${rp.size}<br>"
-        }
-
-        if (am.any()) {
-            am.forEach { x -> syncElements.add(x) }
-            t = "$t${getString(R.string.maintenances)}: ${am.size}<br>"
-        }
+        r = syncElements.count { it is Int }
+        if (r > 0) t = "$t${getString(R.string.images_to_send)}: $r<br>"
 
         t = when {
             t.isNotEmpty() -> "<b>${getString(R.string.data_to_send)}</b><br>$t"
-            pendingImages > 0 -> String.format(
-                getString(
-                    R.string.images_to_send_,
-                    pendingImages.toString()
-                )
-            )
             else -> getString(R.string.no_data_to_send)
         }
 
         when {
-            someSyncing() -> when (CURRENT_MODE) {
-                MODE_DOWNLOAD -> setDownloadText(concatDownloadText())
+            syncing -> when (CURRENT_MODE) {
+                MODE_DOWNLOAD ->
+                    setDownloadText(concatDownloadText())
                 else -> setUploadText(concatUploadText())
             }
             else -> setUploadText(t)
@@ -947,7 +829,7 @@ class SyncActivity :
 
         fillAdapter(syncElements)
 
-        changeButtonsEnableState(true)
+        changeButtonsEnableState()
     }
 
     private fun fillAdapter(syncElements: ArrayList<Any>?) {
@@ -961,8 +843,7 @@ class SyncActivity :
                 }
 
                 if (syncAdapter == null || syncElements != null) {
-                    syncAdapter = SyncElementAdapter(
-                        activity = this,
+                    syncAdapter = SyncElementAdapter(activity = this,
                         resource = layout.null_row,
                         syncElements = syncElements ?: ArrayList(),
                         listView = binding.syncElementListView,
@@ -970,18 +851,15 @@ class SyncActivity :
                         checkedIdArray = checkedIdArray,
                         visibleRegistry = visibleRegistryArray,
                         checkedChangedListener = this,
-                        dataSetChangedListener = this
-                    )
+                        dataSetChangedListener = this)
                 } else {
                     // IMPORTANTE:
                     // Se deben actualizar los listeners, sino
                     // las variables de esta actividad pueden
                     // tener valores antiguos en del adaptador.
 
-                    syncAdapter?.refreshListeners(
-                        checkedChangedListener = this,
-                        dataSetChangedListener = this
-                    )
+                    syncAdapter?.refreshListeners(checkedChangedListener = this,
+                        dataSetChangedListener = this)
                     syncAdapter?.refresh()
                 }
 
@@ -989,10 +867,7 @@ class SyncActivity :
                     // Horrible wait for full load
                 }
 
-                syncAdapter?.setSelectItemAndScrollPos(
-                    currentPos,
-                    firstVisiblePos
-                )
+                syncAdapter?.setSelectItemAndScrollPos(currentPos, firstVisiblePos)
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
@@ -1009,25 +884,18 @@ class SyncActivity :
             menu.setOptionalIconsVisible(true)
         }
 
-        val drawable =
-            ContextCompat.getDrawable(getContext(), R.drawable.ic_visibility)
-        val toolbar = findViewById<Toolbar>(id.action_bar)
-        toolbar.overflowIcon = drawable
+        val drawable = ContextCompat.getDrawable(this, R.drawable.ic_visibility)
+        binding.topAppbar.overflowIcon = drawable
 
         // Opciones de visibilidad del menú
         for (i in SyncRegistryType.getSyncUpload()) {
-            menu.add(
-                0,
-                i.id,
-                i.id,
-                i.description
-            )
-                .setChecked(visibleRegistryArray.contains(i))
-                .isCheckable = true
+            menu.add(0, i.id, i.id, i.description)
+                .setChecked(visibleRegistryArray.contains(i)).isCheckable = true
         }
 
         //region Icon colors
-        val asset = ResourcesCompat.getColor(resources, R.color.sync_element_asset, null)
+        val asset =
+            ResourcesCompat.getColor(resources, R.color.sync_element_asset, null)
         val assetManteinance =
             ResourcesCompat.getColor(resources, R.color.sync_element_asset_maintenance, null)
         val assetReview =
@@ -1038,7 +906,8 @@ class SyncActivity :
             ResourcesCompat.getColor(resources, R.color.sync_element_item_category, null)
         val routeProcess =
             ResourcesCompat.getColor(resources, R.color.sync_element_route_process, null)
-        val warehouse = ResourcesCompat.getColor(resources, R.color.sync_element_warehouse, null)
+        val warehouse =
+            ResourcesCompat.getColor(resources, R.color.sync_element_warehouse, null)
         val warehouseArea =
             ResourcesCompat.getColor(resources, R.color.sync_element_warehouse_area, null)
         val warehouseMovement =
@@ -1069,25 +938,18 @@ class SyncActivity :
         colors.add(routeProcess)
         //endregion Icon colors
 
-        for ((c, i) in SyncRegistryType.getSyncUpload().withIndex()) {
-            val icon = ResourcesCompat.getDrawable(
-                getContext().resources,
-                R.drawable.ic_lens,
-                null
-            )
+        for ((index, i) in SyncRegistryType.getSyncUpload().withIndex()) {
+            val icon = ResourcesCompat.getDrawable(resources, R.drawable.ic_lens, null)
             icon?.mutate()?.colorFilter =
-                BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-                    colors[c],
-                    BlendModeCompat.SRC_IN
-                )
+                BlendModeColorFilterCompat.createBlendModeColorFilterCompat(colors[index],
+                    BlendModeCompat.SRC_IN)
             val item = menu.findItem(i.id)
             item.icon = icon
 
             // Keep the popup menu open
             item.setShowAsAction(MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW)
             item.actionView = View(this)
-            item.setOnActionExpandListener(object :
-                MenuItem.OnActionExpandListener {
+            item.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
                 override fun onMenuItemActionExpand(item: MenuItem): Boolean {
                     return false
                 }

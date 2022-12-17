@@ -1,8 +1,8 @@
 package com.dacosys.assetControl.model.barcodeLabels.fields
 
+import com.dacosys.assetControl.model.barcodeLabels.BarcodeLabelPrintOps
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.configuration.entries.ConfEntry
-import com.dacosys.assetControl.model.barcodeLabels.BarcodeLabelPrintOps
 
 class BarcodeLabel(templateStr: String) {
     private var templateStr: String = ""

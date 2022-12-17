@@ -11,15 +11,15 @@ import android.widget.EditText
 import android.widget.Switch
 import androidx.appcompat.app.AppCompatActivity
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.databinding.AssetManteinanceStatusActivityBinding
 import com.dacosys.assetControl.model.assets.manteinances.assetMainteinance.`object`.AssetManteinance
 import com.dacosys.assetControl.model.assets.manteinances.manteinanceStatus.`object`.ManteinanceStatus
 import com.dacosys.assetControl.model.assets.manteinances.manteinanceType.`object`.ManteinanceType
+import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.views.assets.assetManteinance.fragment.ManteinanceStatusSpinnerFragment
 import com.dacosys.assetControl.views.assets.assetManteinance.fragment.ManteinanceTypeSpinnerFragment
 import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
 
 class AssetManteinanceStatusActivity : AppCompatActivity(),
     ManteinanceTypeSpinnerFragment.OnItemSelectedListener,
@@ -60,6 +60,7 @@ class AssetManteinanceStatusActivity : AppCompatActivity(),
         binding = AssetManteinanceStatusActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         title = getString(R.string.maintenance_status)
@@ -109,7 +110,7 @@ class AssetManteinanceStatusActivity : AppCompatActivity(),
             makeText(
                 binding.root,
                 getString(R.string.you_must_select_a_state),
-                SnackbarType.INFO
+                SnackBarType.INFO
             )
             return
         }
@@ -120,7 +121,7 @@ class AssetManteinanceStatusActivity : AppCompatActivity(),
             makeText(
                 binding.root,
                 getString(R.string.you_must_select_a_maintenance_task),
-                SnackbarType.INFO
+                SnackBarType.INFO
             )
             return
         }
@@ -136,14 +137,14 @@ class AssetManteinanceStatusActivity : AppCompatActivity(),
             makeText(
                 binding.root,
                 getString(R.string.maintenance_saved_correctly),
-                SnackbarType.SUCCESS
+                SnackBarType.SUCCESS
             )
             finish()
         } else {
             makeText(
                 binding.root,
                 getString(R.string.failed_to_save_maintenance),
-                SnackbarType.ERROR
+                SnackBarType.ERROR
             )
         }
     }

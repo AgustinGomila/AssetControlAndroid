@@ -8,10 +8,10 @@ import android.widget.ArrayAdapter
 import android.widget.Spinner
 import android.widget.TextView
 import androidx.core.content.res.ResourcesCompat
+import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.R.id.descriptionTextView
 import com.dacosys.assetControl.R.layout.custom_spinner_dropdown_item
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.model.assets.manteinances.manteinanceType.`object`.ManteinanceType
 
 /**
@@ -21,7 +21,7 @@ import com.dacosys.assetControl.model.assets.manteinances.manteinanceType.`objec
 class ManteinanceTypeAdapter : ArrayAdapter<ManteinanceType> {
 
     constructor(CheckedTextViewResourceId: Int) : super(
-        Statics.AssetControl.getContext(),
+        AssetControlApp.getContext(),
         CheckedTextViewResourceId
     )
 
@@ -29,7 +29,7 @@ class ManteinanceTypeAdapter : ArrayAdapter<ManteinanceType> {
         resource: Int,
         itemCategories: List<ManteinanceType>,
         spinner: Spinner?,
-    ) : super(Statics.AssetControl.getContext(), resource, itemCategories) {
+    ) : super(AssetControlApp.getContext(), resource, itemCategories) {
         this.spinner = spinner
         this.resource = resource
     }
@@ -52,13 +52,13 @@ class ManteinanceTypeAdapter : ArrayAdapter<ManteinanceType> {
                 // Font colors
                 val dimgray =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.dimgray,
                         null
                     )
                 val black =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.text_dark,
                         null
                     )

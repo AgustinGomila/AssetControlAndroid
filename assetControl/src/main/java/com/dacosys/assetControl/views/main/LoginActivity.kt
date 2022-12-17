@@ -10,6 +10,8 @@ import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
@@ -17,33 +19,47 @@ import android.util.Log
 import android.view.*
 import android.view.inputmethod.EditorInfo
 import android.widget.*
+import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.ViewCompat
 import com.dacosys.assetControl.R
+import com.dacosys.assetControl.dataBase.DataBaseHelper
+import com.dacosys.assetControl.databinding.LoginActivityBinding
+import com.dacosys.assetControl.model.users.user.`object`.User
+import com.dacosys.assetControl.model.users.user.dbHelper.UserDbHelper
+import com.dacosys.assetControl.network.clientPackages.ClientPackagesProgress
+import com.dacosys.assetControl.network.download.DownloadDb
+import com.dacosys.assetControl.network.download.DownloadStatus
+import com.dacosys.assetControl.network.download.DownloadStatus.*
+import com.dacosys.assetControl.network.download.DownloadTask
+import com.dacosys.assetControl.network.download.FileType
+import com.dacosys.assetControl.network.sync.SyncDownload
+import com.dacosys.assetControl.network.sync.SyncProgress
+import com.dacosys.assetControl.network.sync.SyncRegistryType
+import com.dacosys.assetControl.network.utils.*
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.Statics.Companion.OFFLINE_MODE
 import com.dacosys.assetControl.utils.Statics.Companion.appName
 import com.dacosys.assetControl.utils.Statics.Companion.closeKeyboard
 import com.dacosys.assetControl.utils.Statics.Companion.prefsGetString
-import com.dacosys.assetControl.dataBase.DataBaseHelper
-import com.dacosys.assetControl.databinding.LoginActivityBinding
-import com.dacosys.assetControl.utils.Md5
 import com.dacosys.assetControl.utils.configuration.Preference
 import com.dacosys.assetControl.utils.configuration.QRConfigType.CREATOR.QRConfigApp
 import com.dacosys.assetControl.utils.configuration.QRConfigType.CREATOR.QRConfigClientAccount
 import com.dacosys.assetControl.utils.configuration.QRConfigType.CREATOR.QRConfigWebservice
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.misc.Md5
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.Scanner
-import com.dacosys.assetControl.model.users.user.`object`.User
-import com.dacosys.assetControl.model.users.user.dbHelper.UserDbHelper
-import com.dacosys.assetControl.sync.functions.*
 import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarEventData
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
+import com.dacosys.assetControl.views.sync.viewModels.DownloadDbViewModel
+import com.dacosys.assetControl.views.sync.viewModels.SyncViewModel
 import com.dacosys.assetControl.views.users.fragment.UserSpinnerFragment
+import com.dacosys.imageControl.dbHelper.ImageControlDbHelper
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
@@ -51,62 +67,48 @@ import org.json.JSONObject
 import java.lang.ref.WeakReference
 import kotlin.concurrent.thread
 
-class LoginActivity :
-    AppCompatActivity(),
-    UserSpinnerFragment.OnItemSelectedListener,
-    Statics.SessionCreated,
-    Scanner.ScannerListener,
-    DownloadDb.DownloadDbTask,
-    Statics.TaskConfigEnded,
-    Sync.Companion.SyncTaskProgress,
-    GetClientPackages.TaskGetPackagesEnded,
-    Statics.Companion.TaskConfigPanelEnded {
+class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedListener,
+    Scanner.ScannerListener, Statics.TaskConfigEnded, Statics.Companion.TaskConfigPanelEnded {
     override fun onTaskConfigPanelEnded(status: ProgressStatus) {
         if (status == ProgressStatus.finished) {
-            makeText(binding.root, getString(R.string.configuration_applied), SnackbarType.SUCCESS)
+            makeText(binding.root, getString(R.string.configuration_applied), SnackBarType.SUCCESS)
             initialSetup()
         } else if (status == ProgressStatus.crashed) {
-            makeText(
-                binding.root,
-                getString(R.string.error_setting_user_panel),
-                SnackbarType.ERROR
-            )
+            makeText(binding.root, getString(R.string.error_setting_user_panel), SnackBarType.ERROR)
         }
     }
 
-    override fun onTaskGetPackagesEnded(
-        status: ProgressStatus,
-        result: ArrayList<JSONObject>,
-        clientEmail: String,
-        clientPassword: String,
-        msg: String,
-    ) {
+    private fun onTaskGetPackagesEnded(it: ClientPackagesProgress) {
+        if (isDestroyed || isFinishing) return
+
+        val status: ProgressStatus = it.status
+        val result: ArrayList<JSONObject> = it.result
+        val clientEmail: String = it.clientEmail
+        val clientPassword: String = it.clientPassword
+        val msg: String = it.msg
+
         if (status == ProgressStatus.finished) {
             if (result.size > 0) {
                 runOnUiThread {
-                    Statics.selectClientPackage(
-                        parentView = binding.login,
+                    Statics.selectClientPackage(parentView = binding.login,
                         callback = this,
                         weakAct = WeakReference(this),
                         allPackage = result,
                         email = clientEmail,
-                        password = clientPassword
-                    )
+                        password = clientPassword)
                 }
             } else {
-                makeText(binding.root, msg, SnackbarType.INFO)
+                makeText(binding.root, msg, SnackBarType.INFO)
             }
         } else if (status == ProgressStatus.success) {
-            makeText(binding.root, msg, SnackbarType.SUCCESS)
+            makeText(binding.root, msg, SnackBarType.SUCCESS)
             initialSetup()
         }
         if (status == ProgressStatus.running) {
             setButton(ButtonStyle.BUSY)
-        } else if (status == ProgressStatus.crashed ||
-            status == ProgressStatus.canceled
-        ) {
+        } else if (status == ProgressStatus.crashed || status == ProgressStatus.canceled) {
             // Error de conexión
-            makeText(binding.root, msg, SnackbarType.ERROR)
+            makeText(binding.root, msg, SnackBarType.ERROR)
             attemptSync = false
             JotterListener.resumeReaderDevices(this)
             setButton(ButtonStyle.REFRESH)
@@ -122,22 +124,19 @@ class LoginActivity :
         userSpinnerFragment?.onDestroy()
     }
 
-    override fun onSyncTaskProgress(
-        totalTask: Int,
-        completedTask: Int,
-        msg: String,
-        registryType: SyncRegistryType?,
-        progressStatus: ProgressStatus,
-    ) {
+    private fun onSyncTaskProgress(it: SyncProgress) {
+        if (isDestroyed || isFinishing) return
+
+        val totalTask: Int = it.totalTask
+        val completedTask: Int = it.completedTask
+        val msg: String = it.msg
+        val registryType: SyncRegistryType? = it.registryType
+        val progressStatus: ProgressStatus = it.progressStatus
+
         if (registryType != null) {
-            setProgressBarText(
-                "${registryType.description}: ${
-                    Statics.getPercentage(
-                        completedTask,
-                        totalTask
-                    )
-                }"
-            )
+            setProgressBarText("${registryType.description}: ${
+                Statics.getPercentage(completedTask, totalTask)
+            }")
         }
 
         when (progressStatus) {
@@ -158,7 +157,7 @@ class LoginActivity :
             ProgressStatus.crashed,
             ProgressStatus.canceled,
             -> {
-                makeText(binding.root, msg, SnackbarType.ERROR)
+                makeText(binding.root, msg, SnackBarType.ERROR)
                 refreshUsers()
                 attemptRunning = false
                 showProgressBar(false)
@@ -166,17 +165,19 @@ class LoginActivity :
         }
     }
 
-    override fun onDownloadDbTask(
-        msg: String,
-        fileType: DownloadDb.FileType?,
-        downloadStatus: DownloadDb.DownloadStatus,
-        progress: Int?,
-        bytesCompleted: Long?,
-        bytesTotal: Long?,
-    ) {
-        if (downloadStatus == DownloadDb.DownloadStatus.CRASHED) {
+    private fun onDownloadDbTask(it: DownloadTask) {
+        if (isDestroyed || isFinishing) return
+
+        val msg: String = it.msg
+        val fileType: FileType? = it.fileType
+        val downloadStatus: DownloadStatus = it.downloadStatus
+        val progress: Int = it.progress
+        val bytesCompleted: Long = it.bytesCompleted
+        val bytesTotal: Long = it.bytesTotal
+
+        if (downloadStatus == CRASHED) {
             // Error al descargar
-            makeText(binding.root, msg, SnackbarType.ERROR)
+            makeText(binding.root, msg, SnackBarType.ERROR)
 
             attemptSync = false
             setButton(ButtonStyle.REFRESH)
@@ -184,9 +185,9 @@ class LoginActivity :
             setProgressBarText("")
             showProgressBar(false)
             return
-        } else if (downloadStatus == DownloadDb.DownloadStatus.CANCELED) {
+        } else if (downloadStatus == CANCELED) {
             // CANCELED = Sin conexión
-            makeText(binding.root, msg, SnackbarType.INFO)
+            makeText(binding.root, msg, SnackBarType.INFO)
 
             refreshTitle()
             refreshUsers()
@@ -196,31 +197,27 @@ class LoginActivity :
             return
         }
 
-        if (fileType == DownloadDb.FileType.TIMEFILE) return
+        if (fileType == FileType.TIMEFILE) return
 
         when (downloadStatus) {
-            DownloadDb.DownloadStatus.STARTING -> {
+            STARTING -> {
                 setProgressBarText(msg)
                 showProgressBar(true)
             }
-            DownloadDb.DownloadStatus.FINISHED -> {
+            FINISHED -> {
                 // FINISHED = Ok
                 refreshTitle()
                 refreshUsers()
                 showProgressBar(false)
             }
-            DownloadDb.DownloadStatus.DOWNLOADING -> {
-                Log.w(
-                    this::class.java.simpleName,
-                    "${downloadStatus.name}: ${bytesCompleted ?: 0}/${bytesTotal ?: 0} (${progress ?: 0}%)"
-                )
-                setProgressBarText(
-                    "${getString(R.string.downloading_)} ${progress ?: 0}%"
-                )
+            DOWNLOADING -> {
+                Log.w(this::class.java.simpleName,
+                    "${downloadStatus.name}: ${bytesCompleted}/${bytesTotal} (${progress}%)")
+                setProgressBarText("${getString(R.string.downloading_)} ${progress}%")
             }
-            DownloadDb.DownloadStatus.CANCELED,
-            DownloadDb.DownloadStatus.CRASHED,
-            DownloadDb.DownloadStatus.INFO,
+            CANCELED,
+            CRASHED,
+            INFO,
             -> {
             }
         }
@@ -228,10 +225,10 @@ class LoginActivity :
 
     override fun onTaskConfigEnded(result: Boolean, msg: String) {
         if (result) {
-            makeText(binding.root, msg, SnackbarType.SUCCESS)
+            makeText(binding.root, msg, SnackBarType.SUCCESS)
             initialSetup()
         } else {
-            makeText(binding.root, msg, SnackbarType.ERROR)
+            makeText(binding.root, msg, SnackBarType.ERROR)
         }
     }
 
@@ -243,14 +240,14 @@ class LoginActivity :
     private var userId: Long? = -1
     private var password: String = ""
 
-    override fun onSessionCreated(result: Boolean) {
+    private fun onSessionCreated(result: Boolean) {
         if (OFFLINE_MODE) {
-            makeText(binding.root, getString(R.string.offline_mode), SnackbarType.INFO)
+            makeText(binding.root, getString(R.string.offline_mode), SnackBarType.INFO)
             attemptRunning = false
             finish()
         } else {
             if (!result) {
-                makeText(binding.root, getString(R.string.offline_mode), SnackbarType.INFO)
+                makeText(binding.root, getString(R.string.offline_mode), SnackBarType.INFO)
                 attemptRunning = false
                 finish()
             } else {
@@ -262,12 +259,11 @@ class LoginActivity :
                 SQLiteDatabase.releaseMemory()
 
                 // Enviar las imágenes pendientes...
-                com.dacosys.imageControl.Statics.sendPendingImages(null)
+                com.dacosys.imageControl.Statics.sendPendingImages()
 
                 thread {
-                    val sync = SyncDownload()
-                    sync.addParams(WeakReference(this), WeakReference(this))
-                    sync.execute()
+                    SyncDownload(onSyncTaskProgress = { syncViewModel.setSyncDownloadProgress(it) },
+                        onSessionCreated = { syncViewModel.setSessionCreated(it) })
                 }
             }
         }
@@ -306,29 +302,22 @@ class LoginActivity :
     private fun refreshUsers() {
         if (Statics.downloadDbRequired) {
             if (!Statics.isOnline()) {
-                makeText(
-                    binding.root,
-                    getString(R.string.download_db_required_and_no_connection),
-                    SnackbarType.ERROR
-                )
+                showSnackBar(SnackBarEventData(getString(R.string.download_db_required_and_no_connection),
+                    SnackBarType.ERROR))
             }
             setButton(ButtonStyle.REFRESH)
             attemptSync = false
             return
         }
 
-        Statics.beginDataBaseHelper()
-
         try {
             runOnUiThread {
                 if (userSpinnerFragment?.fillAdapter() == true) {
                     setButton(ButtonStyle.READY)
                 } else {
-                    makeText(
-                        binding.root,
+                    makeText(binding.root,
                         getString(R.string.there_are_no_users_you_must_synchronize_the_database),
-                        SnackbarType.ERROR
-                    )
+                        SnackBarType.ERROR)
                     setButton(ButtonStyle.REFRESH)
                 }
             }
@@ -337,7 +326,7 @@ class LoginActivity :
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         } finally {
             if (!Statics.isOnline()) {
-                makeText(binding.root, getString(R.string.no_connection), SnackbarType.INFO)
+                makeText(binding.root, getString(R.string.no_connection), SnackBarType.INFO)
             }
             attemptSync = false
         }
@@ -366,59 +355,34 @@ class LoginActivity :
         runOnUiThread {
             binding.loginImageView.setImageResource(R.drawable.ic_refresh)
             binding.loginImageView.background =
-                ResourcesCompat.getDrawable(
-                    resources,
-                    R.drawable.rounded_corner_button_gold,
-                    null
-                )
+                ResourcesCompat.getDrawable(resources, R.drawable.rounded_corner_button_gold, null)
             binding.loginImageView.contentDescription = getString(R.string.retry_connection)
-            binding.loginImageView.foregroundTintList = ColorStateList.valueOf(
-                ResourcesCompat.getColor(
-                    resources,
-                    R.color.black,
-                    null
-                )
-            )
+            binding.loginImageView.foregroundTintList =
+                ColorStateList.valueOf(ResourcesCompat.getColor(resources, R.color.black, null))
         }
     }
 
     private fun setWaitButton() {
         runOnUiThread {
             binding.loginImageView.setImageResource(R.drawable.ic_hourglass)
-            binding.loginImageView.background =
-                ResourcesCompat.getDrawable(
-                    resources,
-                    R.drawable.rounded_corner_button_steelblue,
-                    null
-                )
+            binding.loginImageView.background = ResourcesCompat.getDrawable(resources,
+                R.drawable.rounded_corner_button_steelblue,
+                null)
             binding.loginImageView.contentDescription = getString(R.string.connecting)
-            binding.loginImageView.foregroundTintList = ColorStateList.valueOf(
-                ResourcesCompat.getColor(
-                    resources,
-                    R.color.white,
-                    null
-                )
-            )
+            binding.loginImageView.foregroundTintList =
+                ColorStateList.valueOf(ResourcesCompat.getColor(resources, R.color.white, null))
         }
     }
 
     private fun setLoginButton() {
         runOnUiThread {
             binding.loginImageView.setImageResource(R.drawable.ic_check)
-            binding.loginImageView.background =
-                ResourcesCompat.getDrawable(
-                    resources,
-                    R.drawable.rounded_corner_button_seagreen,
-                    null
-                )
+            binding.loginImageView.background = ResourcesCompat.getDrawable(resources,
+                R.drawable.rounded_corner_button_seagreen,
+                null)
             binding.loginImageView.contentDescription = getString(R.string.sign_in)
-            binding.loginImageView.foregroundTintList = ColorStateList.valueOf(
-                ResourcesCompat.getColor(
-                    resources,
-                    R.color.cornsilk,
-                    null
-                )
-            )
+            binding.loginImageView.foregroundTintList =
+                ColorStateList.valueOf(ResourcesCompat.getColor(resources, R.color.cornsilk, null))
         }
     }
     // endregion
@@ -452,9 +416,7 @@ class LoginActivity :
 
         //If a layout container, iterate over children and seed recursion.
         if (view is ViewGroup) {
-            (0 until view.childCount)
-                .map { view.getChildAt(it) }
-                .forEach { setupUI(it) }
+            (0 until view.childCount).map { view.getChildAt(it) }.forEach { setupUI(it) }
         }
     }
 
@@ -471,6 +433,8 @@ class LoginActivity :
     }
 
     private lateinit var binding: LoginActivityBinding
+    private val syncViewModel: SyncViewModel by viewModels()
+    private val downloadDbViewModel: DownloadDbViewModel by viewModels()
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -479,7 +443,13 @@ class LoginActivity :
         binding = LoginActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        syncViewModel.syncDownloadProgress.observe(this) { if (it != null) onSyncTaskProgress(it) }
+        syncViewModel.sessionCreated.observe(this) { if (it != null) onSessionCreated(it) }
+        downloadDbViewModel.downloadTaskEvent.observe(this) { if (it != null) onDownloadDbTask(it) }
+        downloadDbViewModel.uiEvent.observe(this) { if (it != null) showSnackBar(it) }
 
         userSpinnerFragment =
             supportFragmentManager.findFragmentById(binding.userSpinnerFragment.id) as UserSpinnerFragment
@@ -505,21 +475,14 @@ class LoginActivity :
 
         userSpinnerFragment?.selectedUserId = userId
 
-        binding.password.setText(
-            password,
-            TextView.BufferType.EDITABLE
-        )
+        binding.password.setText(password, TextView.BufferType.EDITABLE)
         binding.password.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(p0: Editable?) {}
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
         })
         binding.password.setOnKeyListener { _, keyCode, keyEvent ->
-            if (keyCode == EditorInfo.IME_ACTION_DONE ||
-                (keyEvent.action == KeyEvent.ACTION_UP &&
-                        (keyCode == KeyEvent.KEYCODE_ENTER ||
-                                keyCode == KeyEvent.KEYCODE_DPAD_CENTER))
-            ) {
+            if (keyCode == EditorInfo.IME_ACTION_DONE || (keyEvent.action == KeyEvent.ACTION_UP && (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_DPAD_CENTER))) {
                 binding.loginImageView.performClick()
                 true
             } else {
@@ -554,7 +517,7 @@ class LoginActivity :
         refreshTitle()
         showProgressBar(false)
 
-        initialSetup()
+        Handler(Looper.getMainLooper()).postDelayed({ initialSetup() }, 350)
 
         // ESTO SIRVE PARA OCULTAR EL TECLADO EN PANTALLA CUANDO PIERDEN EL FOCO LOS CONTROLES QUE LO NECESITAN
         setupUI(binding.root)
@@ -566,10 +529,7 @@ class LoginActivity :
             try {
                 // region CABECERA DE LA ACTIVIDAD
                 binding.versionTextView.text = "${getString(R.string.app_milestone)} ${
-                    packageManager.getPackageInfo(
-                        packageName,
-                        0
-                    ).versionName
+                    packageManager.getPackageInfo(packageName, 0).versionName
                 }"
                 binding.packageTextView.text = Statics.clientPackage
                 when {
@@ -585,8 +545,7 @@ class LoginActivity :
     }
 
     private fun setProgressBarText(text: String) {
-        runOnUiThread()
-        {
+        runOnUiThread {
             run {
                 binding.syncStatusTextView.text = text
             }
@@ -600,8 +559,7 @@ class LoginActivity :
                 binding.progressBarLayout.visibility = View.VISIBLE
 
                 ViewCompat.setZ(binding.progressBarLayout, 0F)
-            } else if (!show && binding.progressBarLayout.visibility != View.GONE
-            ) {
+            } else if (!show && binding.progressBarLayout.visibility != View.GONE) {
                 binding.progressBarLayout.visibility = View.GONE
             }
         }
@@ -617,11 +575,8 @@ class LoginActivity :
         // Comprobar validez de la fecha del dispositivo
         if (Statics.deviceDateIsValid(binding.root)) {
             if (Statics.wsUrl.isEmpty() || Statics.wsNamespace.isEmpty()) {
-                makeText(
-                    binding.root,
-                    getString(R.string.webservice_is_not_configured),
-                    SnackbarType.ERROR
-                )
+                showSnackBar(SnackBarEventData(getString(R.string.webservice_is_not_configured),
+                    SnackBarType.ERROR))
                 attemptSync = false
             } else {
                 initSync()
@@ -632,6 +587,24 @@ class LoginActivity :
     }
 
     private fun initSync() {
+        try {
+            /////////////// BASE DE DATOS SQLITE /////////////////
+            // Acá arranca la base de datos, si no existe se crea.
+            DataBaseHelper.beginDataBase()
+
+            // Acá arranca la base de datos de ImageControl, si no existe se crea.
+            if (Statics.useImageControl) {
+                ImageControlDbHelper.beginDataBase()
+            }
+            ///////////// FIN INICIALIZACIÓN SQLITE //////////////
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+            ErrorLog.writeLog(this, this::class.java.simpleName, ex)
+
+            attemptSync = false
+            return
+        }
+
         try {
             if (OFFLINE_MODE) {
                 refreshTitle()
@@ -644,10 +617,14 @@ class LoginActivity :
                  */
                 Statics.closeImageControl()
 
-                thread {
-                    val sync = DownloadDb()
-                    sync.addParams(binding.login, this)
-                    sync.execute()
+                if (!Statics.isOnline()) {
+                    refreshTitle()
+                    refreshUsers()
+                } else {
+                    thread {
+                        DownloadDb(onDownloadEvent = { downloadDbViewModel.setDownloadTask(it) },
+                            onSnackBarEvent = { downloadDbViewModel.setUiEvent(it) })
+                    }
                 }
             }
         } catch (ex: Exception) {
@@ -656,6 +633,12 @@ class LoginActivity :
 
             attemptSync = false
         }
+    }
+
+    private fun showSnackBar(it: SnackBarEventData) {
+        if (isDestroyed || isFinishing) return
+
+        makeText(binding.root, it.text, it.snackBarType)
     }
 
     private fun configApp() {
@@ -718,11 +701,7 @@ class LoginActivity :
             }
             isReturnedFromSettings = true
         } else {
-            makeText(
-                binding.root,
-                getString(R.string.invalid_password),
-                SnackbarType.ERROR
-            )
+            makeText(binding.root, getString(R.string.invalid_password), SnackBarType.ERROR)
         }
     }
 
@@ -740,10 +719,10 @@ class LoginActivity :
 
     private fun resize(image: Drawable): Drawable {
         val bitmap = (image as BitmapDrawable).bitmap
-        val bitmapResized = Bitmap.createScaledBitmap(
-            bitmap,
-            (bitmap.width * 0.5).toInt(), (bitmap.height * 0.5).toInt(), false
-        )
+        val bitmapResized = Bitmap.createScaledBitmap(bitmap,
+            (bitmap.width * 0.5).toInt(),
+            (bitmap.height * 0.5).toInt(),
+            false)
         return BitmapDrawable(resources, bitmapResized)
     }
 
@@ -758,11 +737,7 @@ class LoginActivity :
         val password = binding.password.text.toString()
 
         runOnUiThread {
-            attemptLogin(
-                userId = userId,
-                encondedPass = userPass,
-                password = password
-            )
+            attemptLogin(userId = userId, encondedPass = userPass, password = password)
         }
     }
 
@@ -776,11 +751,11 @@ class LoginActivity :
         // Check for a valid email address.
         if (userId == null || userId <= 0) {
             focusView = userSpinnerFragment?.view
-            makeText(binding.root, getString(R.string.you_must_select_a_user), SnackbarType.ERROR)
+            makeText(binding.root, getString(R.string.you_must_select_a_user), SnackBarType.ERROR)
             cancel = true
         } else if (!isUserValid(userId)) {
             focusView = userSpinnerFragment?.view
-            makeText(binding.root, getString(R.string.you_must_select_a_user), SnackbarType.ERROR)
+            makeText(binding.root, getString(R.string.you_must_select_a_user), SnackBarType.ERROR)
             cancel = true
         }
 
@@ -797,16 +772,11 @@ class LoginActivity :
                 Statics.setupImageControl()
 
                 thread {
-                    val sessionCreated = SetCurrentSession()
-                    sessionCreated.addParams(this)
-                    sessionCreated.execute()
+                    SetCurrentSession { syncViewModel.setSessionCreated(it) }
                 }
             } else {
-                makeText(
-                    binding.root,
-                    getString(R.string.wrong_user_password_combination),
-                    SnackbarType.ERROR
-                )
+                showSnackBar(SnackBarEventData(getString(R.string.wrong_user_password_combination),
+                    SnackBarType.ERROR))
                 attemptRunning = false
             }
         }
@@ -818,8 +788,11 @@ class LoginActivity :
         grantResults: IntArray,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (permissions.contains(Manifest.permission.BLUETOOTH_CONNECT))
-            JotterListener.onRequestPermissionsResult(this, requestCode, permissions, grantResults)
+        if (permissions.contains(Manifest.permission.BLUETOOTH_CONNECT)) JotterListener.onRequestPermissionsResult(
+            this,
+            requestCode,
+            permissions,
+            grantResults)
     }
 
     override fun scannerCompleted(scanCode: String) {
@@ -840,36 +813,23 @@ class LoginActivity :
                     val user = UserDbHelper().selectUserByNameOrEmail(userName)
                     if (user != null) {
                         runOnUiThread {
-                            attemptLogin(
-                                userId = user.userId,
+                            attemptLogin(userId = user.userId,
                                 encondedPass = userPass,
-                                password = user.password
-                            )
+                                password = user.password)
                         }
                     } else {
-                        makeText(
-                            binding.root,
-                            getString(R.string.invalid_user),
-                            SnackbarType.ERROR
-                        )
+                        makeText(binding.root, getString(R.string.invalid_user), SnackBarType.ERROR)
                     }
                 } else {
-                    makeText(
-                        binding.root,
-                        getString(R.string.invalid_code),
-                        SnackbarType.ERROR
-                    )
+                    makeText(binding.root, getString(R.string.invalid_code), SnackBarType.ERROR)
                 }
                 return
             }
 
             when {
                 mainJson.has("config") -> {
-                    Statics.getConfigFromScannedCode(
-                        callback = this,
-                        scanCode = scanCode,
-                        mode = QRConfigClientAccount
-                    )
+                    Statics.getConfigFromScannedCode(scanCode = scanCode,
+                        mode = QRConfigClientAccount) { onTaskGetPackagesEnded(it) }
                 }
                 mainJson.has(appName) -> {
                     when {
@@ -880,38 +840,25 @@ class LoginActivity :
                             adb.setNegativeButton(R.string.cancel, null)
                             adb.setPositiveButton(R.string.accept) { _, _ ->
                                 Statics.downloadDbRequired = true
-                                Statics.getConfigFromScannedCode(
-                                    callback = this,
-                                    scanCode = scanCode,
-                                    mode = QRConfigWebservice
-                                )
+                                Statics.getConfigFromScannedCode(scanCode = scanCode,
+                                    mode = QRConfigWebservice) { onTaskGetPackagesEnded(it) }
                             }
                             adb.show()
                         }
                         else -> {
                             // APP CONFIGURATION
-                            Statics.getConfigFromScannedCode(
-                                callback = this,
-                                scanCode = scanCode,
-                                mode = QRConfigApp
-                            )
+                            Statics.getConfigFromScannedCode(scanCode = scanCode,
+                                mode = QRConfigApp) { onTaskGetPackagesEnded(it) }
                         }
                     }
                 }
                 else -> {
-                    makeText(
-                        binding.root,
-                        getString(R.string.invalid_code),
-                        SnackbarType.ERROR
-                    )
+                    makeText(binding.root, getString(R.string.invalid_code), SnackBarType.ERROR)
                 }
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
-            makeText(
-                binding.root,
-                ex.message.toString(), SnackbarType.ERROR
-            )
+            makeText(binding.root, ex.message.toString(), SnackBarType.ERROR)
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         } finally {
             // Unless is blocked, unlock the partial

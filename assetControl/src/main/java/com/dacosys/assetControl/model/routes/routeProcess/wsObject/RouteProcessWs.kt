@@ -1,7 +1,7 @@
 package com.dacosys.assetControl.model.routes.routeProcess.wsObject
 
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.model.routes.routeProcessContent.wsObject.RouteProcessContentObject
+import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.wsGeneral.WsParam
 import org.ksoap2.serialization.SoapObject
 import java.util.*

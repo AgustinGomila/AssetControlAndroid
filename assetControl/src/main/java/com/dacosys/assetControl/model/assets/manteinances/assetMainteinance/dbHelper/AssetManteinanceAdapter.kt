@@ -14,11 +14,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat
+import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.Statics.Companion.getColorWithAlpha
 import com.dacosys.assetControl.model.assets.manteinances.assetMainteinance.`object`.AssetManteinance
 import com.dacosys.assetControl.model.assets.manteinances.manteinanceStatus.`object`.ManteinanceStatus
+import com.dacosys.assetControl.utils.Statics.Companion.getColorWithAlpha
 import java.lang.ref.WeakReference
 
 /**
@@ -42,7 +42,7 @@ class AssetManteinanceAdapter : ArrayAdapter<AssetManteinance> {
         listView: ListView?,
         multiSelect: Boolean,
         listener: CustomCheckedChangeListener?,
-    ) : super(Statics.AssetControl.getContext(), resource, assets) {
+    ) : super(AssetControlApp.getContext(), resource, assets) {
         this.activity = activity
         this.listView = listView
         this.resource = resource
@@ -266,60 +266,60 @@ class AssetManteinanceAdapter : ArrayAdapter<AssetManteinance> {
                 // Background colors
                 val firebrick =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.firebrick,
                         null
                     )
                 val seagreen =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.seagreen,
                         null
                     )
                 val gold = ResourcesCompat.getColor(
-                    Statics.AssetControl.getContext().resources,
+                    AssetControlApp.getContext().resources,
                     R.color.gold,
                     null
                 )
                 val lightblue =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.lightblue,
                         null
                     )
                 val darkseagreen =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.darkseagreen,
                         null
                     )
                 val darkslategray =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.darkslategray,
                         null
                     )
                 val darkred =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.darkred,
                         null
                     )
                 val dodgerblue =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.dodgerblue,
                         null
                     )
                 val darkcyan =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.darkcyan,
                         null
                     )
                 val crimson =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.crimson,
                         null
                     )
@@ -327,13 +327,13 @@ class AssetManteinanceAdapter : ArrayAdapter<AssetManteinance> {
                 // Font colors
                 val black =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.text_dark,
                         null
                     )
                 val white =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.text_light,
                         null
                     )

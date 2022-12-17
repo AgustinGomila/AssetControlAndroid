@@ -3,15 +3,16 @@ package com.dacosys.assetControl.model.users.userPermission.dbHelper
 import android.database.Cursor
 import android.database.SQLException
 import android.util.Log
-import com.dacosys.assetControl.dataBase.StaticDbHelper
-import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.splitList
+import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.getReadableDb
+import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.getWritableDb
 import com.dacosys.assetControl.model.users.userPermission.`object`.UserPermission
 import com.dacosys.assetControl.model.users.userPermission.dbHelper.UserPermissionContract.UserPermissionEntry.Companion.PERMISSION_ID
 import com.dacosys.assetControl.model.users.userPermission.dbHelper.UserPermissionContract.UserPermissionEntry.Companion.TABLE_NAME
 import com.dacosys.assetControl.model.users.userPermission.dbHelper.UserPermissionContract.UserPermissionEntry.Companion.USER_ID
 import com.dacosys.assetControl.model.users.userPermission.dbHelper.UserPermissionContract.getAllColumns
 import com.dacosys.assetControl.model.users.userPermission.wsObject.UserPermissionObject
+import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.misc.splitList
 
 /**
  * Created by Agustin on 28/12/2016.
@@ -29,22 +30,17 @@ class UserPermissionDbHelper {
             permissionId
         )
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.insert(
+            return sqLiteDatabase.insert(
                 TABLE_NAME,
                 null,
                 newUserPermission.toContentValues()
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -57,7 +53,7 @@ class UserPermissionDbHelper {
 
         val splitList = splitList(upArray, 100)
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
+        val sqLiteDatabase = getWritableDb()
         sqLiteDatabase.beginTransaction()
         return try {
             for (part in splitList) {
@@ -95,22 +91,17 @@ class UserPermissionDbHelper {
     fun insert(userPermission: UserPermission): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> insert")
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.insert(
+            return sqLiteDatabase.insert(
                 TABLE_NAME,
                 null,
                 userPermission.toContentValues()
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -120,44 +111,34 @@ class UserPermissionDbHelper {
         val selection = "$USER_ID = ?" // WHERE code LIKE ?
         val selectionArgs = arrayOf(userId.toString())
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.delete(
+            return sqLiteDatabase.delete(
                 TABLE_NAME,
                 selection,
                 selectionArgs
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: Exception) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
     fun deleteAll(): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> deleteAll")
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.delete(
+            return sqLiteDatabase.delete(
                 TABLE_NAME,
                 null,
                 null
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -167,7 +148,7 @@ class UserPermissionDbHelper {
         val columns = getAllColumns()
         val order = "$USER_ID, $PERMISSION_ID"
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
+        val sqLiteDatabase = getReadableDb()
         sqLiteDatabase.beginTransaction()
         return try {
             val c = sqLiteDatabase.query(
@@ -201,7 +182,7 @@ class UserPermissionDbHelper {
         val selectionArgs = arrayOf(userId.toString(), userPermissionId.toString())
         val order = "$USER_ID, $PERMISSION_ID"
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
+        val sqLiteDatabase = getReadableDb()
         sqLiteDatabase.beginTransaction()
         try {
             val c = sqLiteDatabase.query(
@@ -236,7 +217,7 @@ class UserPermissionDbHelper {
         val selectionArgs = arrayOf(userId.toString())
         val order = "$USER_ID, $PERMISSION_ID"
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
+        val sqLiteDatabase = getReadableDb()
         sqLiteDatabase.beginTransaction()
         try {
             val c = sqLiteDatabase.query(

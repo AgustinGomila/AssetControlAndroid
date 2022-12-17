@@ -12,8 +12,9 @@ import android.widget.ListView
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat
+import com.dacosys.assetControl.AssetControlApp
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.Statics.Companion.getColorWithAlpha
 
 /**
@@ -25,11 +26,10 @@ class DeviceListAdapter(
     device: List<PrinterDevice>,
     private var listView: ListView?,
 ) : ArrayAdapter<DeviceListAdapter.Companion.PrinterDevice>(
-    Statics.AssetControl.getContext(),
+    getContext(),
     resource,
     device
 ) {
-
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         var v = convertView
 
@@ -56,7 +56,7 @@ class DeviceListAdapter(
                 // Background colors
                 val whitesmoke =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.whitesmoke,
                         null
                     )
@@ -64,7 +64,7 @@ class DeviceListAdapter(
                 // Font colors
                 val black =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.text_dark,
                         null
                     )

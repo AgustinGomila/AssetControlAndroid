@@ -7,9 +7,11 @@ import android.view.View.GONE
 import android.view.ViewGroup
 import android.widget.*
 import androidx.core.content.res.ResourcesCompat
+import com.dacosys.assetControl.AssetControlApp
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.model.locations.warehouse.`object`.Warehouse
+import com.dacosys.assetControl.utils.Statics
 import java.util.*
 
 /**
@@ -20,7 +22,7 @@ class WarehouseAdapter(
     private var resource: Int,
     private var wArray: ArrayList<Warehouse>,
     private var suggestedList: ArrayList<Warehouse>,
-) : ArrayAdapter<Warehouse>(Statics.AssetControl.getContext(), resource, suggestedList),
+) : ArrayAdapter<Warehouse>(getContext(), resource, suggestedList),
     Filterable {
 
     override fun add(`object`: Warehouse?) {
@@ -91,13 +93,13 @@ class WarehouseAdapter(
                 // Background colors
                 val lightgray =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.lightgray,
                         null
                     )
                 val whitesmoke =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.whitesmoke,
                         null
                     )
@@ -105,13 +107,13 @@ class WarehouseAdapter(
                 // Font colors
                 val black =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.text_dark,
                         null
                     )
                 val dimgray =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.dimgray,
                         null
                     )

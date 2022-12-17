@@ -1,11 +1,11 @@
 package com.dacosys.assetControl.model.locations.async
 
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.model.locations.warehouseArea.`object`.WarehouseArea
 import com.dacosys.assetControl.model.locations.warehouseArea.dbHelper.WarehouseAreaDbHelper
-import com.dacosys.assetControl.sync.functions.ProgressStatus
+import com.dacosys.assetControl.network.utils.ProgressStatus
+import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import kotlinx.coroutines.*
 
 class GetLocationAsync {
@@ -48,15 +48,21 @@ class GetLocationAsync {
         this.onlyActive = onlyActive
     }
 
-    fun execute(): Boolean {
+    private val scope = CoroutineScope(Job() + Dispatchers.IO)
+
+    fun cancel() {
+        scope.cancel()
+    }
+
+    fun execute() {
         preExecute()
-        return doInBackground()
+        scope.launch { doInBackground() }
     }
 
     private var deferred: Deferred<Boolean>? = null
-    private fun doInBackground(): Boolean {
+    private suspend fun doInBackground(): Boolean {
         var result = false
-        runBlocking {
+        coroutineScope {
             deferred = async { suspendFunction() }
             result = deferred?.await() ?: false
         }
@@ -87,7 +93,7 @@ class GetLocationAsync {
 
         if (waDescription.isEmpty() && wDescription.isEmpty()) {
             mCallback?.onGetLocationProgress(
-                Statics.AssetControl.getContext()
+                getContext()
                     .getString(R.string.you_must_enter_at_least_one_letter_in_the_area_or_warehouse_description),
                 ProgressStatus.canceled,
                 completeList

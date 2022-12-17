@@ -26,8 +26,8 @@ android {
             value = 1
         }
 
-        def versionMajor = 12
-        def versionMinor = 1
+        def versionMajor = 13
+        def versionMinor = 0
         def versionPatch = versionProps['VERSION_PATCH'].toInteger() + value
         def versionBuild = versionProps['VERSION_BUILD'].toInteger() + 1
         def versionNumber = versionProps['VERSION_NUMBER'].toInteger() + value
@@ -131,14 +131,10 @@ dependencies {
     // No actualizar a 2.0.0+
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.6'
 
-    // TODO: Implementar Unit Test
-    //androidTestImplementation('androidx.test.espresso:espresso-core:3.4.0', {
-    //    exclude group: 'com.android.support', module: 'support-annotations'
-    //})
-
-    // JETPACK
-    // implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.5.0-alpha06"
-    // implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.0-alpha06"
+    // Implementar Unit Test
+    implementation 'androidx.test.ext:junit-ktx:1.1.4'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'junit:junit:4.13.2'
 
     // ESTA VERSION ES LA QUE FUNCIONA JUNTO CON LAS OTRAS DEPENDENCIAS
     // SÓLO SI ESTÁ LOCALMENTE
@@ -158,6 +154,10 @@ dependencies {
     implementation 'androidx.activity:activity-ktx:1.5.1'
     implementation 'androidx.fragment:fragment-ktx:1.5.4'
 
+    // ViewModel and LiveData
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.5.1"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1"
+
     // Apache Commons Net
     implementation 'commons-net:commons-net:3.8.0'
 
@@ -173,14 +173,9 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
 
     implementation 'androidx.percentlayout:percentlayout:1.0.0'
-    //implementation 'com.android.volley:volley:1.2.1'
 
     // SOAP Library
     implementation 'com.google.code.ksoap2-android:ksoap2-android:3.6.2'
-
-    // TODO
-    //androidTestImplementation 'androidx.test:runner:1.4.0'
-    //androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 
     // Java Expression Evaluator
     implementation 'com.udojava:EvalEx:2.7'
@@ -189,9 +184,9 @@ dependencies {
     implementation 'com.loopj.android:android-async-http:1.4.11'
 
     // debugImplementation because LeakCanary should only run in debug builds.
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.9.1'
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.10'
 
-    // coroutines
+    // COROUTINES
     //implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2-native-mt'
     //implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2-native-mt'
 

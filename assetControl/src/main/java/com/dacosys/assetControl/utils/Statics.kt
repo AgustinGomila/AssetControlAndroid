@@ -3,7 +3,6 @@ package com.dacosys.assetControl.utils
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.Application
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.content.ContentUris
@@ -17,6 +16,7 @@ import android.content.res.Configuration
 import android.content.res.Resources
 import android.content.res.TypedArray
 import android.database.Cursor
+import android.database.sqlite.SQLiteDatabase
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Insets
@@ -27,8 +27,6 @@ import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
-import android.os.Parcel
-import android.os.Parcelable
 import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.provider.OpenableColumns
@@ -49,22 +47,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.preference.PreferenceManager
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics.AssetControl.Companion.getContext
-import com.dacosys.assetControl.dataBase.StaticDbHelper
-import com.dacosys.assetControl.utils.configuration.Preference
-import com.dacosys.assetControl.utils.configuration.QRConfigType
-import com.dacosys.assetControl.utils.configuration.QRConfigType.CREATOR.QRConfigApp
-import com.dacosys.assetControl.utils.configuration.QRConfigType.CREATOR.QRConfigClientAccount
-import com.dacosys.assetControl.utils.configuration.QRConfigType.CREATOR.QRConfigImageControl
-import com.dacosys.assetControl.utils.configuration.QRConfigType.CREATOR.QRConfigWebservice
-import com.dacosys.assetControl.utils.configuration.collectorType.CollectorType
-import com.dacosys.assetControl.utils.configuration.entries.ConfEntry
-import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.scanners.JotterListener
-import com.dacosys.assetControl.utils.scanners.rfid.Rfid
-import com.dacosys.assetControl.utils.scanners.vh75.Vh75Bt
+import com.dacosys.assetControl.dataBase.DataBaseHelper
 import com.dacosys.assetControl.model.assets.asset.`object`.Asset
 import com.dacosys.assetControl.model.assets.asset.dbHelper.AssetDbHelper
 import com.dacosys.assetControl.model.assets.itemCategory.`object`.ItemCategory
@@ -84,124 +70,52 @@ import com.dacosys.assetControl.model.routes.routeProcess.`object`.RouteProcess
 import com.dacosys.assetControl.model.routes.routeProcess.dbHelper.RouteProcessDbHelper
 import com.dacosys.assetControl.model.users.user.`object`.User
 import com.dacosys.assetControl.model.users.user.dbHelper.UserDbHelper
-import com.dacosys.assetControl.sync.functions.GetClientPackages
-import com.dacosys.assetControl.sync.functions.ProgressStatus
-import com.dacosys.assetControl.sync.functions.SyncDownload
-import com.dacosys.assetControl.sync.functions.SyncRegistryType
+import com.dacosys.assetControl.network.clientPackages.ClientPackagesProgress
+import com.dacosys.assetControl.network.clientPackages.GetClientPackages
+import com.dacosys.assetControl.network.sync.SyncDownload
+import com.dacosys.assetControl.network.sync.SyncRegistryType
+import com.dacosys.assetControl.network.utils.*
+import com.dacosys.assetControl.utils.configuration.Preference
+import com.dacosys.assetControl.utils.configuration.QRConfigType
+import com.dacosys.assetControl.utils.configuration.QRConfigType.CREATOR.QRConfigApp
+import com.dacosys.assetControl.utils.configuration.QRConfigType.CREATOR.QRConfigClientAccount
+import com.dacosys.assetControl.utils.configuration.QRConfigType.CREATOR.QRConfigImageControl
+import com.dacosys.assetControl.utils.configuration.QRConfigType.CREATOR.QRConfigWebservice
+import com.dacosys.assetControl.utils.configuration.collectorType.CollectorType
+import com.dacosys.assetControl.utils.configuration.entries.ConfEntry
+import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.scanners.rfid.Rfid
+import com.dacosys.assetControl.utils.scanners.vh75.Vh75Bt
 import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
 import com.dacosys.assetControl.wsGeneral.SessionObject
 import com.dacosys.assetControl.wsGeneral.Webservice
-import com.dacosys.imageControl.dbHelper.StaticImageControlDbHelper
+import com.dacosys.imageControl.dbHelper.ImageControlDbHelper
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.google.android.material.textfield.TextInputLayout.END_ICON_PASSWORD_TOGGLE
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.WriterException
 import com.google.zxing.qrcode.QRCodeWriter
-import id.pahlevikun.jotter.Jotter
-import id.pahlevikun.jotter.event.ActivityEvent
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
-import java.io.IOException
 import java.io.InputStream
 import java.lang.ref.WeakReference
 import java.math.BigDecimal
 import java.util.*
-import kotlin.concurrent.thread
 import kotlin.math.min
 import kotlin.math.roundToInt
-
 
 /**
  * Created by Agustin on 24/01/2017.
  */
 
 class Statics {
-    class AssetControl : Application() {
-        override fun onCreate() {
-            super.onCreate()
-            sApplication = this
-
-            // Setup ImageControl context
-            com.dacosys.imageControl.Statics.ImageControl().setAppContext(this)
-
-            // Eventos del ciclo de vida de las actividades
-            // que nos interesa interceptar para conectar y
-            // desconectar los medios de lectura de códigos.
-            Jotter
-                .Builder(this)
-                .setLogEnable(true)
-                .setActivityEventFilter(
-                    listOf(
-                        ActivityEvent.CREATE,
-                        ActivityEvent.RESUME,
-                        ActivityEvent.PAUSE,
-                        ActivityEvent.DESTROY
-                    )
-                )
-                //.setFragmentEventFilter(listOf(FragmentEvent.VIEW_CREATE, FragmentEvent.PAUSE))
-                .setJotterListener(JotterListener)
-                .build()
-                .startListening()
-        }
-
-        companion object {
-            fun getContext(): Context {
-                return getApplication()!!.applicationContext
-            }
-
-            private fun getApplication(): Application? {
-                return sApplication
-            }
-
-            private var sApplication: Application? = null
-        }
-    }
-
-    class ParcelLong() : Parcelable {
-        var value: Long = 0L
-
-        constructor(value: Long) : this() {
-            this.value = value
-        }
-
-        constructor(parcel: Parcel) : this() {
-            value = parcel.readLong()
-        }
-
-        override fun writeToParcel(out: Parcel, flags: Int) {
-            out.writeLong(value)
-        }
-
-        override fun describeContents(): Int {
-            return 0
-        }
-
-        companion object CREATOR :
-            Parcelable.Creator<ParcelLong> {
-            override fun createFromParcel(parcel: Parcel): ParcelLong {
-                return ParcelLong(
-                    parcel
-                )
-            }
-
-            override fun newArray(size: Int): Array<ParcelLong?> {
-                return arrayOfNulls(size)
-            }
-        }
-    }
-
     interface TaskConfigEnded {
         // Define data you like to return from AysncTask
         fun onTaskConfigEnded(result: Boolean, msg: String)
-    }
-
-    interface SessionCreated {
-        // Define data you like to return from AysncTask
-        fun onSessionCreated(result: Boolean)
     }
 
     @Suppress("unused", "MemberVisibilityCanBePrivate")
@@ -210,7 +124,7 @@ class Statics {
         // region DEBUG DEMO
         const val demoMode = false
         var demoQrConfigCode = """
-{"config":{"client_email":"centralpuerto.com","client_password":"293f0w4n"}}
+{"config":{"client_email":"demo@dacosys.com","client_password":"1234"}}
                     """.trimIndent()
         // endregion DEBUG DEMO
 
@@ -220,7 +134,7 @@ class Statics {
         var collectorTypeChanged = false
 
         fun closeImageControl() {
-            com.dacosys.imageControl.Statics.isInitialized = false
+            com.dacosys.imageControl.Statics.cleanInstance()
         }
 
         const val defaultDate = "2001-01-01 00:00:00"
@@ -234,7 +148,7 @@ class Statics {
             if (currentUser != null) {
                 com.dacosys.imageControl.Statics.currentUserId = currentUser.userId
                 com.dacosys.imageControl.Statics.currentUserName = currentUser.name
-                com.dacosys.imageControl.Statics.isInitialized = true
+                com.dacosys.imageControl.Statics.newInstance()
             }
 
             com.dacosys.imageControl.Statics.useImageControl = useImageControl
@@ -338,22 +252,6 @@ class Statics {
         const val reservedChar = "#"
         private var timeFilename = "android_time.txt"
 
-        fun beginDataBaseHelper() {
-            try {
-                StaticDbHelper.createDb()
-            } catch (ioe: IOException) {
-                throw Error(getContext().getString(R.string.unable_to_create_database))
-            }
-
-            if (useImageControl) {
-                try {
-                    StaticImageControlDbHelper.createDb()
-                } catch (ioe: IOException) {
-                    throw Error(getContext().getString(R.string.unable_to_create_imagecontrol_database))
-                }
-            }
-        }
-
         val clientPackage: String
             get() {
                 return prefsGetString(Preference.clientPackage)
@@ -373,7 +271,7 @@ class Statics {
                         parentView,
                         getContext()
                             .getString(R.string.device_date_is_invalid),
-                        SnackbarType.ERROR
+                        SnackBarType.ERROR
                     )
                     false
                 }
@@ -708,6 +606,13 @@ class Statics {
                     0.0722 * Color.blue(backColor)
             return if (l <= 128) textLightColor()
             else textDarkColor()
+        }
+
+        fun toStringColorToInt(color: String): Int {
+            val backColor = Color.parseColor(color)
+            return Color.red(backColor) +
+                    Color.green(backColor) +
+                    Color.blue(backColor)
         }
 
         @ColorInt
@@ -1165,7 +1070,7 @@ class Statics {
                     parentView,
                     getContext()
                         .getString(R.string.there_are_no_valid_products_for_the_selected_client),
-                    SnackbarType.ERROR
+                    SnackBarType.ERROR
                 )
                 return
             }
@@ -1189,7 +1094,7 @@ class Statics {
                         parentView,
                         getContext()
                             .getString(R.string.there_are_no_valid_products_for_the_selected_client),
-                        SnackbarType.ERROR
+                        SnackBarType.ERROR
                     )
                     return
                 }
@@ -1221,7 +1126,7 @@ class Statics {
                     parentView,
                     getContext()
                         .getString(R.string.there_are_no_valid_products_for_the_selected_client),
-                    SnackbarType.ERROR
+                    SnackBarType.ERROR
                 )
                 return
             }
@@ -1300,7 +1205,7 @@ class Statics {
                     makeText(
                         parentView,
                         getContext().getString(R.string.inactive_installation),
-                        SnackbarType.ERROR
+                        SnackBarType.ERROR
                     )
                     continue
                 }
@@ -1319,7 +1224,7 @@ class Statics {
                     makeText(
                         parentView,
                         getContext().getString(R.string.app_panel_url_can_not_be_obtained),
-                        SnackbarType.ERROR
+                        SnackBarType.ERROR
                     )
                     return
                 }
@@ -1392,22 +1297,18 @@ class Statics {
         // endregion
 
         fun getConfig(
-            callback: GetClientPackages.TaskGetPackagesEnded,
             email: String,
             password: String,
             installationCode: String,
+            onRequestProgress: (ClientPackagesProgress) -> Unit = {},
         ) {
             if (email.trim().isNotEmpty() && password.trim().isNotEmpty()) {
-                thread {
-                    val get = GetClientPackages()
-                    get.addParams(
-                        callback = callback,
-                        email = email,
-                        password = password,
-                        installationCode = installationCode
-                    )
-                    get.execute()
-                }
+                GetClientPackages(
+                    email = email,
+                    password = password,
+                    installationCode = installationCode,
+                    onProgress = onRequestProgress
+                )
             }
         }
 
@@ -1546,19 +1447,19 @@ class Statics {
 
         // region SOME CONFIG VALUES AND PREFERENCES FUNCTIONS
         fun getConfigFromScannedCode(
-            callback: GetClientPackages.TaskGetPackagesEnded,
             scanCode: String,
             mode: QRConfigType,
+            onRequestProgress: (ClientPackagesProgress) -> Unit = {},
         ) {
             if (prefs == null) {
-                callback.onTaskGetPackagesEnded(
+                onRequestProgress.invoke(ClientPackagesProgress(
                     status = ProgressStatus.crashed,
                     result = ArrayList(),
                     clientEmail = "",
                     clientPassword = "",
                     msg = getContext()
                         .getString(R.string.configuration_not_loaded)
-                )
+                ))
                 return
             }
 
@@ -1571,14 +1472,14 @@ class Statics {
                 }
 
             if (mainTag.isEmpty()) {
-                callback.onTaskGetPackagesEnded(
+                onRequestProgress.invoke(ClientPackagesProgress(
                     status = ProgressStatus.crashed,
                     result = ArrayList(),
                     clientEmail = "",
                     clientPassword = "",
                     msg = getContext()
                         .getString(R.string.invalid_code)
-                )
+                ))
                 return
             }
 
@@ -1600,24 +1501,24 @@ class Statics {
 
                     if (email.trim().isNotEmpty() && password.trim().isNotEmpty()) {
                         getConfig(
-                            callback = callback,
                             email = email,
                             password = password,
-                            installationCode = installationCode
+                            installationCode = installationCode,
+                            onRequestProgress = onRequestProgress
                         )
                     } else {
-                        callback.onTaskGetPackagesEnded(
+                        onRequestProgress.invoke(ClientPackagesProgress(
                             status = ProgressStatus.crashed,
                             result = ArrayList(),
                             clientEmail = email,
                             clientPassword = password,
                             msg = getContext().getString(R.string.invalid_code)
-                        )
+                        ))
                     }
                 }
                 QRConfigWebservice, QRConfigApp, QRConfigImageControl -> {
                     tryToLoadConfig(confJson)
-                    callback.onTaskGetPackagesEnded(
+                    onRequestProgress.invoke(ClientPackagesProgress(
                         status = ProgressStatus.success,
                         result = ArrayList(),
                         clientEmail = "",
@@ -1628,16 +1529,16 @@ class Statics {
                             QRConfigWebservice -> getContext().getString(R.string.server_configured)
                             else -> getContext().getString(R.string.configuration_applied)
                         }
-                    )
+                    ))
                 }
                 else -> {
-                    callback.onTaskGetPackagesEnded(
+                    onRequestProgress.invoke(ClientPackagesProgress(
                         status = ProgressStatus.crashed,
                         result = ArrayList(),
                         clientEmail = "",
                         clientPassword = "",
                         msg = getContext().getString(R.string.invalid_code)
-                    )
+                    ))
                 }
             }
         }
@@ -2055,43 +1956,11 @@ class Statics {
 
         fun removeDataBases() {
             SyncDownload.resetSyncDates()
-            removeImageControlDataBase()
-            removeLocalDataBase()
-        }
 
-        private fun removeImageControlDataBase() {
-            // Path to the just created empty db
-            val outFileName =
-                getContext().getDatabasePath(IMAGE_CONTROL_DATABASE_NAME)
-                    .toString()
+            ImageControlDbHelper().deleteDb()
+            DataBaseHelper().deleteDb()
 
-            try {
-                Log.i("IC DataBase", "Eliminando: $outFileName")
-                val f = File(outFileName)
-                if (f.exists()) {
-                    f.delete()
-                }
-            } catch (e: IOException) {
-                e.printStackTrace()
-                ErrorLog.writeLog(null, "removeICDataBase", e)
-            }
-        }
-
-        private fun removeLocalDataBase() {
-            // Path to the just created empty db
-            val outFileName =
-                getContext().getDatabasePath(DATABASE_NAME).toString()
-
-            try {
-                Log.i("Local DataBase", "Eliminando: $outFileName")
-                val f = File(outFileName)
-                if (f.exists()) {
-                    f.delete()
-                }
-            } catch (e: IOException) {
-                e.printStackTrace()
-                ErrorLog.writeLog(null, "removeLocalDataBase", e)
-            }
+            SQLiteDatabase.releaseMemory()
         }
 
         //region FileHelper

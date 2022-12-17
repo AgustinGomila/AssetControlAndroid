@@ -14,13 +14,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat
+import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.Statics.Companion.getColorWithAlpha
 import com.dacosys.assetControl.model.reviews.assetReview.`object`.AssetReview
 import com.dacosys.assetControl.model.reviews.assetReviewStatus.`object`.AssetReviewStatus
+import com.dacosys.assetControl.utils.Statics.Companion.getColorWithAlpha
 import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
 import java.lang.ref.WeakReference
 import java.util.*
 
@@ -56,7 +56,7 @@ class AssetReviewAdapter :
         checkedIdArray: ArrayList<Long>,
         visibleStatus: ArrayList<AssetReviewStatus>,
 
-        ) : super(Statics.AssetControl.getContext(), resource, assetReviews) {
+        ) : super(AssetControlApp.getContext(), resource, assetReviews) {
         this.activity = activity
         this.resource = resource
         this.visibleStatus = visibleStatus
@@ -180,10 +180,10 @@ class AssetReviewAdapter :
 
         res += ": " +
                 if (assetReviewArray.size > 1)
-                    " ${Statics.AssetControl.getContext().getString(R.string.added_plural)}" else
-                    " ${Statics.AssetControl.getContext().getString(R.string.added)}"
+                    " ${AssetControlApp.getContext().getString(R.string.added_plural)}" else
+                    " ${AssetControlApp.getContext().getString(R.string.added)}"
 
-        makeText(activity, res, SnackbarType.ADD)
+        makeText(activity, res, SnackBarType.ADD)
         Log.d(this::class.java.simpleName, res)
     }
 
@@ -209,10 +209,10 @@ class AssetReviewAdapter :
 
         res += ": " +
                 if (assetReviewArray.size > 1)
-                    " ${Statics.AssetControl.getContext().getString(R.string.removed_plural)}" else
-                    " ${Statics.AssetControl.getContext().getString(R.string.removed)}"
+                    " ${AssetControlApp.getContext().getString(R.string.removed_plural)}" else
+                    " ${AssetControlApp.getContext().getString(R.string.removed)}"
 
-        makeText(activity, res, SnackbarType.REMOVE)
+        makeText(activity, res, SnackBarType.REMOVE)
         Log.d(this::class.java.simpleName, res)
     }
 
@@ -613,22 +613,22 @@ class AssetReviewAdapter :
 
                 // Background layouts
                 val layoutTransferred = ResourcesCompat.getDrawable(
-                    Statics.AssetControl.getContext().resources,
+                    AssetControlApp.getContext().resources,
                     R.drawable.layout_thin_border_green,
                     null
                 )
                 val layoutOnProcess = ResourcesCompat.getDrawable(
-                    Statics.AssetControl.getContext().resources,
+                    AssetControlApp.getContext().resources,
                     R.drawable.layout_thin_border_blue,
                     null
                 )
                 val layoutCompleted = ResourcesCompat.getDrawable(
-                    Statics.AssetControl.getContext().resources,
+                    AssetControlApp.getContext().resources,
                     R.drawable.layout_thin_border_yellow,
                     null
                 )
                 val layoutDefault = ResourcesCompat.getDrawable(
-                    Statics.AssetControl.getContext().resources,
+                    AssetControlApp.getContext().resources,
                     R.drawable.layout_thin_border,
                     null
                 )
@@ -636,13 +636,13 @@ class AssetReviewAdapter :
                 // Font colors
                 val white =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.text_light,
                         null
                     )
                 val black =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.text_dark,
                         null
                     )
@@ -650,13 +650,13 @@ class AssetReviewAdapter :
                 // CheckBox color
                 val darkslategray =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.darkslategray,
                         null
                     )
                 val lightgray =
                     ResourcesCompat.getColor(
-                        Statics.AssetControl.getContext().resources,
+                        AssetControlApp.getContext().resources,
                         R.color.lightgray,
                         null
                     )

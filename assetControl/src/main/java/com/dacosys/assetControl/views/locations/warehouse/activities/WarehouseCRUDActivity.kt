@@ -3,7 +3,6 @@ package com.dacosys.assetControl.views.locations.warehouse.activities
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
@@ -17,10 +16,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.databinding.WarehouseCrudActivityBinding
-import com.dacosys.assetControl.utils.configuration.Preference
-import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.model.locations.warehouse.`object`.Warehouse
 import com.dacosys.assetControl.model.locations.warehouse.`object`.WarehouseCRUD
 import com.dacosys.assetControl.model.locations.warehouse.`object`.WarehouseCRUD.Companion.RC_ERROR_INSERT
@@ -29,11 +25,11 @@ import com.dacosys.assetControl.model.locations.warehouse.`object`.WarehouseCRUD
 import com.dacosys.assetControl.model.locations.warehouse.`object`.WarehouseCRUD.Companion.RC_INSERT_OK
 import com.dacosys.assetControl.model.locations.warehouse.`object`.WarehouseCRUD.Companion.RC_UPDATE_OK
 import com.dacosys.assetControl.model.table.Table
-import com.dacosys.assetControl.sync.functions.ProgressStatus
-import com.dacosys.assetControl.sync.functions.Sync.Companion.SyncTaskProgress
-import com.dacosys.assetControl.sync.functions.SyncRegistryType
+import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.configuration.Preference
+import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
 import com.dacosys.assetControl.views.locations.locationSelect.LocationSelectActivity
 import com.dacosys.assetControl.views.locations.warehouse.fragment.WarehouseCRUDFragment
 import com.dacosys.imageControl.fragments.ImageControlButtonsFragment
@@ -42,7 +38,7 @@ import org.parceler.Parcels
 
 class WarehouseCRUDActivity : AppCompatActivity(),
     WarehouseCRUD.Companion.TaskCompleted,
-    SyncTaskProgress, ImageControlButtonsFragment.DescriptionRequired {
+    ImageControlButtonsFragment.DescriptionRequired {
     override fun onDestroy() {
         destroyLocals()
         super.onDestroy()
@@ -54,12 +50,14 @@ class WarehouseCRUDActivity : AppCompatActivity(),
     }
 
     override fun onTaskCompleted(result: WarehouseCRUD.Companion.WarehouseCRUDResult) {
+        if (isDestroyed || isFinishing) return
+
         when (result.resultCode) {
             RC_UPDATE_OK -> {
                 makeText(
                     binding.root,
                     getString(R.string.warehouse_modified_correctly),
-                    SnackbarType.SUCCESS
+                    SnackBarType.SUCCESS
                 )
                 if (imageControlFragment != null && result.warehouse != null) {
                     imageControlFragment?.saveImages(true)
@@ -80,7 +78,7 @@ class WarehouseCRUDActivity : AppCompatActivity(),
                 makeText(
                     binding.root,
                     getString(R.string.warehouse_added_correctly),
-                    SnackbarType.SUCCESS
+                    SnackBarType.SUCCESS
                 )
                 if (imageControlFragment != null && result.warehouse != null) {
                     imageControlFragment?.updateObjectId1(
@@ -103,43 +101,19 @@ class WarehouseCRUDActivity : AppCompatActivity(),
             RC_ERROR_OBJECT_NULL -> makeText(
                 binding.root,
                 getString(R.string.error_null_object),
-                SnackbarType.ERROR
+                SnackBarType.ERROR
             )
             RC_ERROR_UPDATE -> makeText(
                 binding.root,
                 getString(R.string.error_updating_warehouse),
-                SnackbarType.ERROR
+                SnackBarType.ERROR
             )
             RC_ERROR_INSERT -> makeText(
                 binding.root,
                 getString(R.string.error_adding_warehouse),
-                SnackbarType.ERROR
+                SnackBarType.ERROR
             )
         }
-    }
-
-    override fun onSyncTaskProgress(
-        totalTask: Int,
-        completedTask: Int,
-        msg: String,
-        registryType: SyncRegistryType?,
-        progressStatus: ProgressStatus,
-    ) {
-        val progressStatusDesc = progressStatus.description
-        var registryDesc = getString(R.string.all_tasks)
-
-        if (registryType != null) {
-            registryDesc = registryType.description
-        }
-
-        Log.d(
-            this::class.java.simpleName, "$progressStatusDesc: $registryDesc, $msg ${
-                Statics.getPercentage(
-                    completedTask,
-                    totalTask
-                )
-            }"
-        )
     }
 
     private var isNew = true
@@ -201,12 +175,13 @@ class WarehouseCRUDActivity : AppCompatActivity(),
         binding = WarehouseCrudActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         // Permitir escanear códigos dentro de la actividad
         // Si ya está cargado un área preguntar si descartar cambios
 
-        title = getString(R.string.warehouses_registration_modification)
+        title = getString(R.string.edit_warehouse)
 
         warehouseCRUDFragment =
             supportFragmentManager.findFragmentById(binding.crudFragment.id) as WarehouseCRUDFragment
@@ -250,7 +225,7 @@ class WarehouseCRUDActivity : AppCompatActivity(),
             intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
             intent.putExtra("title", getString(R.string.select_warehouse))
             intent.putExtra("warehouseVisible", true)
-            intent.putExtra("onlyActive", false)
+            intent.putExtra("onlyActive", true)
             intent.putExtra("warehouseAreaVisible", false)
             resultForWarehouseSelect.launch(intent)
         }
@@ -271,7 +246,7 @@ class WarehouseCRUDActivity : AppCompatActivity(),
                         makeText(
                             binding.root,
                             getString(R.string.error_trying_to_add_warehouse),
-                            SnackbarType.ERROR
+                            SnackBarType.ERROR
                         )
                         ErrorLog.writeLog(this, this::class.java.simpleName, ex)
                     }

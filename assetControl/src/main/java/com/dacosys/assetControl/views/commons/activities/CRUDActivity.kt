@@ -13,8 +13,8 @@ import android.widget.EditText
 import android.widget.Switch
 import androidx.appcompat.app.AppCompatActivity
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.databinding.CrudActivityBinding
+import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.views.assets.asset.activities.AssetCRUDActivity
 import com.dacosys.assetControl.views.assets.itemCategory.activities.ItemCategoryCRUDActivity
 import com.dacosys.assetControl.views.locations.warehouse.activities.WarehouseCRUDActivity
@@ -73,6 +73,7 @@ class CRUDActivity : AppCompatActivity() {
         binding = CrudActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         title = getString(R.string.register_modification)

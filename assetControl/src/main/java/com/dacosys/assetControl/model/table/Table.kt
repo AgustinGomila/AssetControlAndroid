@@ -2,8 +2,8 @@ package com.dacosys.assetControl.model.table
 
 import android.os.Parcel
 import android.os.Parcelable
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
 import java.util.*
 
 class Table : Parcelable {
@@ -52,74 +52,74 @@ class Table : Parcelable {
             return arrayOfNulls(size)
         }
 
-        var actionLog = Table(1, Statics.AssetControl.getContext().getString(R.string.action_logs))
-        var asset = Table(2, Statics.AssetControl.getContext().getString(R.string.assets))
+        var actionLog = Table(1, getContext().getString(R.string.action_logs))
+        var asset = Table(2, getContext().getString(R.string.assets))
         var assetManteinance =
-            Table(3, Statics.AssetControl.getContext().getString(R.string.asset_manteinance))
+            Table(3, getContext().getString(R.string.asset_manteinance))
         var assetManteinanceLog =
-            Table(4, Statics.AssetControl.getContext().getString(R.string.asset_manteinance_log))
+            Table(4, getContext().getString(R.string.asset_manteinance_log))
         var assetManteinanceProgramed = Table(
             5,
-            Statics.AssetControl.getContext().getString(R.string.asset_manteinance_programed)
+            getContext().getString(R.string.asset_manteinance_programed)
         )
         var assetReview =
-            Table(6, Statics.AssetControl.getContext().getString(R.string.asset_review))
+            Table(6, getContext().getString(R.string.asset_review))
         var assetReviewContent =
-            Table(7, Statics.AssetControl.getContext().getString(R.string.asset_review_content))
+            Table(7, getContext().getString(R.string.asset_review_content))
         var itemCategory =
-            Table(8, Statics.AssetControl.getContext().getString(R.string.categories))
+            Table(8, getContext().getString(R.string.categories))
         var manteinanceType =
-            Table(9, Statics.AssetControl.getContext().getString(R.string.manteinance_type))
+            Table(9, getContext().getString(R.string.manteinance_type))
         var manteinanceTypeGroup =
-            Table(10, Statics.AssetControl.getContext().getString(R.string.manteinance_type_group))
-        var provider = Table(11, Statics.AssetControl.getContext().getString(R.string.providers))
+            Table(10, getContext().getString(R.string.manteinance_type_group))
+        var provider = Table(11, getContext().getString(R.string.providers))
         var repairmanRepairshop =
-            Table(12, Statics.AssetControl.getContext().getString(R.string.repairman_repairshop))
-        var user = Table(13, Statics.AssetControl.getContext().getString(R.string.user))
+            Table(12, getContext().getString(R.string.repairman_repairshop))
+        var user = Table(13, getContext().getString(R.string.user))
         var userPermission =
-            Table(14, Statics.AssetControl.getContext().getString(R.string.permissions))
-        var warehouse = Table(15, Statics.AssetControl.getContext().getString(R.string.warehouse))
+            Table(14, getContext().getString(R.string.permissions))
+        var warehouse = Table(15, getContext().getString(R.string.warehouse))
         var warehouseArea =
-            Table(16, Statics.AssetControl.getContext().getString(R.string.warehouse_area))
+            Table(16, getContext().getString(R.string.warehouse_area))
         var warehouseMovement =
-            Table(17, Statics.AssetControl.getContext().getString(R.string.movements))
+            Table(17, getContext().getString(R.string.movements))
         var warehouseMovementContent =
-            Table(18, Statics.AssetControl.getContext().getString(R.string.movement_contents))
+            Table(18, getContext().getString(R.string.movement_contents))
         var costCentre =
-            Table(19, Statics.AssetControl.getContext().getString(R.string.cost_centre))
-        var route = Table(20, Statics.AssetControl.getContext().getString(R.string.route))
+            Table(19, getContext().getString(R.string.cost_centre))
+        var route = Table(20, getContext().getString(R.string.route))
         var routeComposition =
-            Table(21, Statics.AssetControl.getContext().getString(R.string.route_composition))
-        var attribute = Table(22, Statics.AssetControl.getContext().getString(R.string.attribute))
+            Table(21, getContext().getString(R.string.route_composition))
+        var attribute = Table(22, getContext().getString(R.string.attribute))
         var attributeComposition =
-            Table(23, Statics.AssetControl.getContext().getString(R.string.attribute_composition))
+            Table(23, getContext().getString(R.string.attribute_composition))
         var attributeCategory =
-            Table(24, Statics.AssetControl.getContext().getString(R.string.attribute_categories))
+            Table(24, getContext().getString(R.string.attribute_categories))
         var dataCollectionRule =
-            Table(25, Statics.AssetControl.getContext().getString(R.string.data_collection_rules))
+            Table(25, getContext().getString(R.string.data_collection_rules))
         var dataCollectionRuleContent = Table(
             26,
-            Statics.AssetControl.getContext().getString(R.string.data_collection_rule_contents)
+            getContext().getString(R.string.data_collection_rule_contents)
         )
         var dataCollectionRuleTarget = Table(
             27,
-            Statics.AssetControl.getContext().getString(R.string.data_collection_rule_target)
+            getContext().getString(R.string.data_collection_rule_target)
         )
-        var report = Table(28, Statics.AssetControl.getContext().getString(R.string.reports))
+        var report = Table(28, getContext().getString(R.string.reports))
         var reportContent =
-            Table(29, Statics.AssetControl.getContext().getString(R.string.report_contents))
+            Table(29, getContext().getString(R.string.report_contents))
         var dataCollection =
-            Table(30, Statics.AssetControl.getContext().getString(R.string.data_collection))
+            Table(30, getContext().getString(R.string.data_collection))
         var dataCollectionContent = Table(
             31,
-            Statics.AssetControl.getContext().getString(R.string.data_collection_contents)
+            getContext().getString(R.string.data_collection_contents)
         )
         var routeProcess =
-            Table(32, Statics.AssetControl.getContext().getString(R.string.route_process))
+            Table(32, getContext().getString(R.string.route_process))
         var routeProcessContent =
-            Table(33, Statics.AssetControl.getContext().getString(R.string.route_process_contents))
+            Table(33, getContext().getString(R.string.route_process_contents))
         var barcodeLabelCustom =
-            Table(34, Statics.AssetControl.getContext().getString(R.string.barcode_label_custom))
+            Table(34, getContext().getString(R.string.barcode_label_custom))
 
         fun getAll(): ArrayList<Table> {
             val allSections = ArrayList<Table>()

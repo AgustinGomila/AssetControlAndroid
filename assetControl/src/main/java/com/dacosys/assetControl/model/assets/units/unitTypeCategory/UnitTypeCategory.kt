@@ -2,8 +2,8 @@ package com.dacosys.assetControl.model.assets.units.unitTypeCategory
 
 import android.os.Parcel
 import android.os.Parcelable
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
 import java.util.*
 
 class UnitTypeCategory : Parcelable {
@@ -53,24 +53,24 @@ class UnitTypeCategory : Parcelable {
         }
 
         var unknown = UnitTypeCategory(
-            0, Statics.AssetControl.getContext().getString(
+            0, getContext().getString(
                 R.string.unknown
             )
         )
         var temperature =
-            UnitTypeCategory(1, Statics.AssetControl.getContext().getString(R.string.temperature))
+            UnitTypeCategory(1, getContext().getString(R.string.temperature))
         var weight =
-            UnitTypeCategory(2, Statics.AssetControl.getContext().getString(R.string.weight))
+            UnitTypeCategory(2, getContext().getString(R.string.weight))
         var lenght =
-            UnitTypeCategory(3, Statics.AssetControl.getContext().getString(R.string.lenght))
+            UnitTypeCategory(3, getContext().getString(R.string.lenght))
         var volume =
-            UnitTypeCategory(4, Statics.AssetControl.getContext().getString(R.string.volume))
+            UnitTypeCategory(4, getContext().getString(R.string.volume))
         var quantity =
-            UnitTypeCategory(5, Statics.AssetControl.getContext().getString(R.string.quantity))
+            UnitTypeCategory(5, getContext().getString(R.string.quantity))
         var area =
-            UnitTypeCategory(6, Statics.AssetControl.getContext().getString(R.string.area_surface))
+            UnitTypeCategory(6, getContext().getString(R.string.area_surface))
         var pressure =
-            UnitTypeCategory(7, Statics.AssetControl.getContext().getString(R.string.pressure))
+            UnitTypeCategory(7, getContext().getString(R.string.pressure))
 
         fun getAll(): ArrayList<UnitTypeCategory> {
             val allSections = ArrayList<UnitTypeCategory>()

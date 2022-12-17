@@ -7,9 +7,11 @@ import android.os.Environment
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.fragment.app.FragmentActivity
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.UTCDataTime
 import com.dacosys.assetControl.utils.configuration.Preference
+import com.dacosys.assetControl.utils.misc.UTCDataTime
 import java.io.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -31,7 +33,7 @@ class ErrorLog {
         }
 
         var errorLogPath =
-            Statics.AssetControl.getContext().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
+            getContext().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
                 .toString() +
                     "${Statics.AC_ROOT_PATH}${Statics.ERROR_LOG_PATH}"
 
@@ -68,73 +70,86 @@ class ErrorLog {
 
         private var tClassName: String = ""
         private var tMsg: String = ""
-        fun writeLog(activity: AppCompatActivity? = null, className: String, msg: String) {
-            if (activity == null) {
-                return
-            }
-            writeLog(activity as Activity, className, msg)
-        }
-
-        fun writeLog(activity: Activity? = null, className: String, msg: String) {
-            if (activity == null) {
-                return
-            }
-
-            tMsg = msg
-            tClassName = className
-
-            // Ver si la aplicación tiene permiso de escritura, sino pedir permiso.
-            verifyPermissions(activity)
-        }
-
-        fun writeLog(activity: AppCompatActivity? = null, className: String, ex: Exception) {
-            if (activity == null) {
-                return
-            }
-
-            writeLog(activity as Activity, className, ex)
-        }
-
-        fun writeLog(activity: Activity? = null, className: String, ex: Exception) {
-            if (activity == null) {
-                return
-            }
+        fun writeLog(activity: FragmentActivity? = null, className: String, ex: Exception) {
+            if (activity == null) return
 
             val errors = StringWriter()
             ex.printStackTrace(PrintWriter(errors))
             tMsg = errors.toString()
             tClassName = className
+            Log.e(tClassName, tMsg)
+
+            if (!Statics.prefsGetBoolean(Preference.registryError)) return
+
+            writeLog(activity as Activity)
+        }
+
+        fun writeLog(activity: FragmentActivity? = null, className: String, msg: String) {
+            if (activity == null) return
+
+            tMsg = msg
+            tClassName = className
+            Log.e(tClassName, tMsg)
+
+            if (!Statics.prefsGetBoolean(Preference.registryError)) return
+
+            writeLog(activity as Activity)
+        }
+
+        fun writeLog(activity: AppCompatActivity? = null, className: String, msg: String) {
+            if (activity == null) return
+
+            tMsg = msg
+            tClassName = className
+            Log.e(tClassName, tMsg)
+
+            if (!Statics.prefsGetBoolean(Preference.registryError)) return
+
+            writeLog(activity as Activity)
+        }
+
+        fun writeLog(activity: AppCompatActivity? = null, className: String, ex: Exception) {
+            if (activity == null) return
+
+            val errors = StringWriter()
+            ex.printStackTrace(PrintWriter(errors))
+            tMsg = errors.toString()
+            tClassName = className
+            Log.e(tClassName, tMsg)
+
+            if (!Statics.prefsGetBoolean(Preference.registryError)) return
+
+            writeLog(activity as Activity)
+        }
+
+        private fun writeLog(activity: Activity? = null) {
+            if (activity == null) return
 
             // Ver si la aplicación tiene permiso de escritura, sino pedir permiso.
             verifyPermissions(activity)
         }
 
         private fun reallyWriteLog() {
-            Log.e(tClassName, tMsg)
+            val logFileName = getFileName()
+            val logPath = errorLogPath
 
-            val writeLog = Statics.prefsGetBoolean(Preference.registryError)
-            if (writeLog) {
-                val logFileName = getFileName()
-                val logPath = errorLogPath
+            val logFile = File("$logPath/$logFileName")
+            val currentDate = UTCDataTime.getUTCDateTimeAsString()
 
-                val logFile = File("$logPath/$logFileName")
-                val currentDate = UTCDataTime.getUTCDateTimeAsString()
+            val parent = logFile.parentFile
+            parent?.mkdirs()
 
-                val parent = logFile.parentFile
-                parent?.mkdirs()
+            try {
+                val fOut = FileOutputStream(logFile, true)
+                val outWriter = OutputStreamWriter(fOut)
+                outWriter.append("\r$currentDate - $tClassName: $tMsg")
 
-                try {
-                    val fOut = FileOutputStream(logFile, true)
-                    val outWriter = OutputStreamWriter(fOut)
-                    outWriter.append("\r$currentDate - $tClassName: $tMsg")
+                outWriter.close()
 
-                    outWriter.close()
-
-                    fOut.flush()
-                    fOut.close()
-                } catch (ex: IOException) {
-                    ex.printStackTrace()
-                }
+                fOut.flush()
+                fOut.close()
+            } catch (ex: IOException) {
+                ex.printStackTrace()
             }
         }
 

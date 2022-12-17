@@ -14,13 +14,25 @@
     tools:layout_editor_absoluteX="0dp"
     tools:layout_editor_absoluteY="81dp">
 
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/top_appbar"
+        style="@style/MyActionBar"
+        android:layout_width="match_parent"
+        android:layout_height="?android:attr/actionBarSize"
+        android:elevation="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:menu="@menu/menu_login"
+        app:title="@string/title_activity_login" />
+
     <TextView
         android:id="@+id/userLabelTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:text="@string/user"
-        android:textColor="@color/colorAccent"
+        android:textColor="@color/assetControlDark"
         android:textSize="12sp"
         android:textStyle="normal"
         android:visibility="visible"
@@ -69,7 +81,7 @@
         app:layout_constraintHorizontal_bias="0.533"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/top_appbar"
         app:srcCompat="@drawable/ac" />
 
     <TextView
@@ -94,7 +106,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@+id/top_appbar">
 
         <ProgressBar
             android:id="@+id/progressBar"

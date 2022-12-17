@@ -2,8 +2,8 @@ package com.dacosys.assetControl.model.reviews.assetReviewContentStatus
 
 import android.os.Parcel
 import android.os.Parcelable
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
 import java.util.*
 
 class AssetReviewContentStatus : Parcelable {
@@ -54,27 +54,27 @@ class AssetReviewContentStatus : Parcelable {
 
         var notInReview = AssetReviewContentStatus(
             assetReviewContentStatusId = 0,
-            Statics.AssetControl.getContext().getString(R.string.review_cont_status_not_in_review)
+            getContext().getString(R.string.review_cont_status_not_in_review)
         )
         var revised = AssetReviewContentStatus(
             assetReviewContentStatusId = 1,
-            Statics.AssetControl.getContext().getString(R.string.review_cont_status_revised)
+            getContext().getString(R.string.review_cont_status_revised)
         )
         var external = AssetReviewContentStatus(
             assetReviewContentStatusId = 2,
-            Statics.AssetControl.getContext().getString(R.string.review_cont_status_external)
+            getContext().getString(R.string.review_cont_status_external)
         )
         var unknown = AssetReviewContentStatus(
             assetReviewContentStatusId = 3,
-            Statics.AssetControl.getContext().getString(R.string.review_cont_status_unknown)
+            getContext().getString(R.string.review_cont_status_unknown)
         )
         var appeared = AssetReviewContentStatus(
             4,
-            Statics.AssetControl.getContext().getString(R.string.review_cont_status_appeared)
+            getContext().getString(R.string.review_cont_status_appeared)
         )
         var newAsset = AssetReviewContentStatus(
             assetReviewContentStatusId = 5,
-            Statics.AssetControl.getContext().getString(R.string.review_cont_status_new)
+            getContext().getString(R.string.review_cont_status_new)
         )
 
         fun getAllConfirm(): ArrayList<AssetReviewContentStatus> {

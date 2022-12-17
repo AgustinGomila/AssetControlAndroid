@@ -10,9 +10,9 @@ import android.media.AudioManager
 import android.media.ToneGenerator
 import android.util.Log
 import androidx.core.app.ActivityCompat
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.Statics.AssetControl.Companion.getContext
 import com.dacosys.assetControl.utils.configuration.Preference
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import java.io.IOException

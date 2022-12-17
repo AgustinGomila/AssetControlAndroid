@@ -3,14 +3,15 @@ package com.dacosys.assetControl.model.routes.routeProcessStatus.dbHelper
 import android.database.Cursor
 import android.database.SQLException
 import android.util.Log
-import com.dacosys.assetControl.dataBase.StaticDbHelper
-import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.getReadableDb
+import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.getWritableDb
 import com.dacosys.assetControl.model.reviews.assetReviewStatus.`object`.AssetReviewStatus
 import com.dacosys.assetControl.model.routes.routeProcessStatus.`object`.RouteProcessStatus
 import com.dacosys.assetControl.model.routes.routeProcessStatus.dbHelper.RouteProcessStatusContract.RouteProcessStatusEntry.Companion.DESCRIPTION
 import com.dacosys.assetControl.model.routes.routeProcessStatus.dbHelper.RouteProcessStatusContract.RouteProcessStatusEntry.Companion.ROUTE_PROCESS_STATUS_ID
 import com.dacosys.assetControl.model.routes.routeProcessStatus.dbHelper.RouteProcessStatusContract.RouteProcessStatusEntry.Companion.TABLE_NAME
 import com.dacosys.assetControl.model.routes.routeProcessStatus.dbHelper.RouteProcessStatusContract.getAllColumns
+import com.dacosys.assetControl.utils.errorLog.ErrorLog
 
 /**
  * Created by Agustin on 28/12/2016.
@@ -20,27 +21,18 @@ class RouteProcessStatusDbHelper {
     fun insert(routeProcessStatusId: Int): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> insert")
 
-        val newRouteProcessStatus = RouteProcessStatus.getById(routeProcessStatusId)
+        val newRouteProcessStatus = RouteProcessStatus.getById(routeProcessStatusId) ?: return false
 
-        if (newRouteProcessStatus != null) {
-            val sqLiteDatabase = StaticDbHelper.getWritableDb()
-            sqLiteDatabase.beginTransaction()
-            return try {
-                val r = sqLiteDatabase.insert(
-                    TABLE_NAME, null,
-                    newRouteProcessStatus.toContentValues()
-                ) > 0
-                sqLiteDatabase.setTransactionSuccessful()
-                r
-            } catch (ex: Exception) {
-                ex.printStackTrace()
-                ErrorLog.writeLog(null, this::class.java.simpleName, ex)
-                false
-            } finally {
-                sqLiteDatabase.endTransaction()
-            }
-        } else {
-            return false
+        val sqLiteDatabase = getWritableDb()
+        return try {
+            return sqLiteDatabase.insert(
+                TABLE_NAME, null,
+                newRouteProcessStatus.toContentValues()
+            ) > 0
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
+            false
         }
     }
 
@@ -50,28 +42,23 @@ class RouteProcessStatusDbHelper {
         val selection = "$ROUTE_PROCESS_STATUS_ID = ?" // WHERE code LIKE ?
         val selectionArgs = arrayOf(routeProcessStatus.id.toString())
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
-        sqLiteDatabase.beginTransaction()
+        val sqLiteDatabase = getWritableDb()
         return try {
-            val r = sqLiteDatabase.update(
+            return sqLiteDatabase.update(
                 TABLE_NAME,
                 routeProcessStatus.toContentValues(),
                 selection,
                 selectionArgs
             ) > 0
-            sqLiteDatabase.setTransactionSuccessful()
-            r
         } catch (ex: Exception) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             false
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
     }
 
     private fun getChangesCount(): Long {
-        val db = StaticDbHelper.getReadableDb()
+        val db = getReadableDb()
         val statement = db.compileStatement("SELECT changes()")
         return statement.simpleQueryForLong()
     }
@@ -86,7 +73,7 @@ class RouteProcessStatusDbHelper {
 
         Log.d(this::class.java.simpleName, query)
 
-        val sqLiteDatabase = StaticDbHelper.getWritableDb()
+        val sqLiteDatabase = getWritableDb()
         sqLiteDatabase.beginTransaction()
         try {
             sqLiteDatabase.execSQL(query)
@@ -129,7 +116,7 @@ class RouteProcessStatusDbHelper {
         val columns = getAllColumns()
         val order = DESCRIPTION
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
+        val sqLiteDatabase = getReadableDb()
         sqLiteDatabase.beginTransaction()
         try {
             val c = sqLiteDatabase.query(
@@ -160,7 +147,7 @@ class RouteProcessStatusDbHelper {
         val selectionArgs = arrayOf(id.toString())
         val order = DESCRIPTION
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
+        val sqLiteDatabase = getReadableDb()
         sqLiteDatabase.beginTransaction()
         try {
             val c = sqLiteDatabase.query(
@@ -195,7 +182,7 @@ class RouteProcessStatusDbHelper {
         val selectionArgs = arrayOf("%$description%")
         val order = DESCRIPTION
 
-        val sqLiteDatabase = StaticDbHelper.getReadableDb()
+        val sqLiteDatabase = getReadableDb()
         sqLiteDatabase.beginTransaction()
         try {
             val c = sqLiteDatabase.query(

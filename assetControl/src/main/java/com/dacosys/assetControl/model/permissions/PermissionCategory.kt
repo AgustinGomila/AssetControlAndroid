@@ -1,7 +1,7 @@
 package com.dacosys.assetControl.model.permissions
 
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
 import java.util.*
 
 /**
@@ -45,95 +45,95 @@ class PermissionCategory(permissionCategoryId: Long, description: String) {
     companion object {
         var DeskMenu = PermissionCategory(
             1,
-            Statics.AssetControl.getContext().getString(R.string.desk_menu)
+            getContext().getString(R.string.desk_menu)
         )
         var Asset = PermissionCategory(
             2,
-            Statics.AssetControl.getContext().getString(R.string.assets)
+            getContext().getString(R.string.assets)
         )
         var ItemCategory = PermissionCategory(
             3,
-            Statics.AssetControl.getContext().getString(R.string.categories)
+            getContext().getString(R.string.categories)
         )
         var Warehouse = PermissionCategory(
             4,
-            Statics.AssetControl.getContext().getString(R.string.warehouses)
+            getContext().getString(R.string.warehouses)
         )
         var Entity = PermissionCategory(
             5,
-            Statics.AssetControl.getContext().getString(R.string.entities)
+            getContext().getString(R.string.entities)
         )
         var Movement = PermissionCategory(
             6,
-            Statics.AssetControl.getContext().getString(R.string.movements)
+            getContext().getString(R.string.movements)
         )
         var AssetReview = PermissionCategory(
             7,
-            Statics.AssetControl.getContext().getString(R.string.asset_reviews)
+            getContext().getString(R.string.asset_reviews)
         )
         var Configuration = PermissionCategory(
             8,
-            Statics.AssetControl.getContext().getString(R.string.configuration)
+            getContext().getString(R.string.configuration)
         )
         var CollMenu = PermissionCategory(
             9,
-            Statics.AssetControl.getContext().getString(R.string.collector_buttons)
+            getContext().getString(R.string.collector_buttons)
         )
         var Print = PermissionCategory(
             10,
-            Statics.AssetControl.getContext().getString(R.string.print_options)
+            getContext().getString(R.string.print_options)
         )
         var User = PermissionCategory(
             11,
-            Statics.AssetControl.getContext().getString(R.string.users)
+            getContext().getString(R.string.users)
         )
         var DeskPage = PermissionCategory(
             12,
-            Statics.AssetControl.getContext().getString(R.string.desk_page)
+            getContext().getString(R.string.desk_page)
         )
         var AssetManteinance = PermissionCategory(
             13,
-            Statics.AssetControl.getContext().getString(R.string.asset_manteinance)
+            getContext().getString(R.string.asset_manteinance)
         )
         var Repairman = PermissionCategory(
             14,
-            Statics.AssetControl.getContext().getString(R.string.repairmans)
+            getContext().getString(R.string.repairmans)
         )
         var Repairshop = PermissionCategory(
             15,
-            Statics.AssetControl.getContext().getString(R.string.repairshop)
+            getContext().getString(R.string.repairshop)
         )
         var DeskMenuAssetManteinance = PermissionCategory(
             16,
-            Statics.AssetControl.getContext().getString(R.string.desk_menu_asset_manteinance)
+            getContext().getString(R.string.desk_menu_asset_manteinance)
         )
         var DeskPageAssetManteinance = PermissionCategory(
             17,
-            Statics.AssetControl.getContext().getString(R.string.desk_page_asset_manteinance)
+            getContext().getString(R.string.desk_page_asset_manteinance)
         )
         var CostCentre = PermissionCategory(
             18,
-            Statics.AssetControl.getContext().getString(R.string.cost_centre)
+            getContext().getString(R.string.cost_centre)
         )
         var Attribute = PermissionCategory(
             19,
-            Statics.AssetControl.getContext().getString(R.string.attributes)
+            getContext().getString(R.string.attributes)
         )
         var Route = PermissionCategory(
             20,
-            Statics.AssetControl.getContext().getString(R.string.routes)
+            getContext().getString(R.string.routes)
         )
         var DataCollectionRule = PermissionCategory(
             21,
-            Statics.AssetControl.getContext().getString(R.string.data_collection_rule)
+            getContext().getString(R.string.data_collection_rule)
         )
         var DataCollectionReport = PermissionCategory(
             22,
-            Statics.AssetControl.getContext().getString(R.string.data_collection_report)
+            getContext().getString(R.string.data_collection_report)
         )
         var RouteProcess = PermissionCategory(
             23,
-            Statics.AssetControl.getContext().getString(R.string.route_process)
+            getContext().getString(R.string.route_process)
         )
 
         fun getAll(): ArrayList<PermissionCategory> {

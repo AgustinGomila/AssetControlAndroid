@@ -12,21 +12,20 @@ import android.widget.EditText
 import android.widget.Switch
 import androidx.appcompat.app.AppCompatActivity
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.databinding.WarehouseAreaDetailActivityBinding
 import com.dacosys.assetControl.model.locations.warehouseArea.`object`.WarehouseArea
 import com.dacosys.assetControl.model.table.Table
+import com.dacosys.assetControl.network.utils.ProgressStatus
+import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.views.commons.snackbar.MakeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
 import com.dacosys.imageControl.activities.ImageControlGridActivity
-import com.dacosys.imageControl.main.DownloadTask
 import com.dacosys.imageControl.main.GetImagesTask
+import com.dacosys.imageControl.main.ImagesTask
 import com.dacosys.imageControl.wsObject.DocumentContentObject
 import com.dacosys.imageControl.wsObject.DocumentContentRequestResultObject
 
-class WarehouseAreaDetailActivity : AppCompatActivity(),
-    GetImagesTask.GetImagesTask,
-    DownloadTask.DownloadTaskListener {
+class WarehouseAreaDetailActivity : AppCompatActivity() {
     private var warehouseArea: WarehouseArea? = null
     private var rejectNewInstances = false
 
@@ -108,27 +107,28 @@ class WarehouseAreaDetailActivity : AppCompatActivity(),
 
                 val getDocs = GetImagesTask()
                 getDocs.addParams(
-                    this,
-                    this,
-                    Statics.INTERNAL_IMAGE_CONTROL_APP_ID,
-                    Table.warehouseArea.tableId,
-                    (warehouseArea ?: return).warehouseId.toString(),
-                    ""
+                    programId = Statics.INTERNAL_IMAGE_CONTROL_APP_ID,
+                    programObjectId = Table.warehouseArea.tableId,
+                    objId1 = (warehouseArea ?: return).warehouseId.toString(),
+                    objId2 = "",
+                    onImagesProgress = { onGetImages(it) }
                 )
                 getDocs.downloadFiles(false)
-                getDocs.start()
+                getDocs.execute()
             }
         }
     }
 
-    override fun onGetImagesTaskListener(
-        status: com.dacosys.imageControl.misc.ProgressStatus,
-        msg: String,
-        docContReqResObj: DocumentContentRequestResultObject?,
-    ) {
-        if (status == com.dacosys.imageControl.misc.ProgressStatus.finished) {
+    private fun onGetImages(it: ImagesTask) {
+        if (isDestroyed || isFinishing) return
+
+        val status: ProgressStatus = ProgressStatus.getById(it.status.id) ?: ProgressStatus.unknown
+        val docContReqResObj: DocumentContentRequestResultObject? = it.docContReqResObj
+        val msg = it.msg
+
+        if (status == ProgressStatus.finished) {
             if (docContReqResObj == null) {
-                MakeText.makeText(binding.root, msg, SnackbarType.INFO)
+                MakeText.makeText(binding.root, msg, SnackBarType.INFO)
                 rejectNewInstances = false
                 return
             }
@@ -136,7 +136,7 @@ class WarehouseAreaDetailActivity : AppCompatActivity(),
             if (docContReqResObj.documentContentArray == null ||
                 (docContReqResObj.documentContentArray ?: return).isEmpty()
             ) {
-                MakeText.makeText(binding.root, getString(R.string.no_images), SnackbarType.INFO)
+                MakeText.makeText(binding.root, getString(R.string.no_images), SnackBarType.INFO)
                 rejectNewInstances = false
                 return
             }
@@ -153,7 +153,7 @@ class WarehouseAreaDetailActivity : AppCompatActivity(),
                 MakeText.makeText(
                     binding.root,
                     getString(R.string.images_not_yet_processed),
-                    SnackbarType.INFO
+                    SnackBarType.INFO
                 )
                 rejectNewInstances = false
                 return
@@ -168,20 +168,5 @@ class WarehouseAreaDetailActivity : AppCompatActivity(),
             intent.putExtra("docContObjArrayList", ArrayList<DocumentContentObject>())
             startActivity(intent)
         }
-    }
-
-    override fun onDownloadTaskResult(
-        docContObj: DocumentContentObject?,
-        destination: String,
-        target: Int,
-    ) {
-    }
-
-    override fun onDownloadProgressChanged(
-        status: com.dacosys.imageControl.misc.ProgressStatus,
-        msg: String,
-        value: Int,
-        total: Int,
-    ) {
     }
 }

@@ -22,13 +22,9 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
+import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.Statics.Companion.prefsGetString
 import com.dacosys.assetControl.databinding.PrinterFragmentBinding
-import com.dacosys.assetControl.utils.CounterHandler
-import com.dacosys.assetControl.utils.configuration.Preference
-import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.model.assets.asset.`object`.Asset
 import com.dacosys.assetControl.model.assets.asset.dbHelper.AssetDbHelper
 import com.dacosys.assetControl.model.barcodeLabels.barcodeLabelCustom.`object`.BarcodeLabelCustom
@@ -39,9 +35,14 @@ import com.dacosys.assetControl.model.barcodeLabels.fields.BarcodeLabel
 import com.dacosys.assetControl.model.barcodeLabels.fields.WarehouseAreaLabelField
 import com.dacosys.assetControl.model.locations.warehouseArea.`object`.WarehouseArea
 import com.dacosys.assetControl.model.locations.warehouseArea.dbHelper.WarehouseAreaDbHelper
+import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.Statics.Companion.prefsGetString
+import com.dacosys.assetControl.utils.configuration.Preference
+import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.misc.CounterHandler
 import com.dacosys.assetControl.views.assets.asset.activities.AssetPrintLabelActivity
 import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackbarType
+import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
 import com.dacosys.assetControl.views.locations.warehouseArea.activities.WarehouseAreaPrintLabelActivity
 import com.dacosys.assetControl.views.main.SettingsActivity
 import com.dacosys.assetControl.views.print.activities.TemplateSelectDialogActivity
@@ -221,7 +222,7 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
     override fun run() {
         try {
             if (ActivityCompat.checkSelfPermission(
-                    Statics.AssetControl.getContext(),
+                    AssetControlApp.getContext(),
                     Manifest.permission.BLUETOOTH_CONNECT
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
@@ -247,7 +248,7 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
                 mBluetoothSocket!!.close()
             }
 
-            makeText(binding.root, getString(R.string.error_connecting_device), SnackbarType.ERROR)
+            makeText(binding.root, getString(R.string.error_connecting_device), SnackBarType.ERROR)
             return
         }
     }
@@ -270,14 +271,14 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
 
     private fun initializePrinter() {
         if (Statics.printerBluetoothDevice != null) {
-            val bluetoothManager = Statics.AssetControl.getContext()
+            val bluetoothManager = AssetControlApp.getContext()
                 .getSystemService(AppCompatActivity.BLUETOOTH_SERVICE) as BluetoothManager
             val mBluetoothAdapter = bluetoothManager.adapter
             if (mBluetoothAdapter == null) {
                 makeText(
                     binding.root,
                     getString(R.string.there_are_no_bluetooth_devices),
-                    SnackbarType.ERROR
+                    SnackBarType.ERROR
                 )
             } else {
                 if (!mBluetoothAdapter.isEnabled) {
@@ -434,7 +435,7 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
                 makeText(
                     binding.root,
                     getString(R.string.you_must_select_a_printer),
-                    SnackbarType.ERROR
+                    SnackBarType.ERROR
                 )
                 return@setOnClickListener
             }
@@ -442,7 +443,7 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
                 makeText(
                     binding.root,
                     getString(R.string.you_must_select_a_template),
-                    SnackbarType.ERROR
+                    SnackBarType.ERROR
                 )
                 return@setOnClickListener
             }
@@ -450,7 +451,7 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
                 makeText(
                     binding.root,
                     getString(R.string.you_must_select_the_amount_of_labels_to_print),
-                    SnackbarType.ERROR
+                    SnackBarType.ERROR
                 )
                 return@setOnClickListener
             }
@@ -526,7 +527,7 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
             makeText(
                 binding.root,
                 getString(R.string.invalid_password),
-                SnackbarType.ERROR
+                SnackBarType.ERROR
             )
         }
     }
@@ -716,7 +717,7 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
             makeText(
                 binding.root,
                 getString(R.string.you_must_select_at_least_one_area),
-                SnackbarType.ERROR
+                SnackBarType.ERROR
             )
             return
         }
@@ -738,7 +739,7 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
             makeText(
                 binding.root,
                 getString(R.string.you_must_select_at_least_one_area),
-                SnackbarType.ERROR
+                SnackBarType.ERROR
             )
             return
         }
@@ -748,7 +749,7 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
                 makeText(
                     binding.root,
                     getString(R.string.the_selected_warehouse_area_was_not_uploaded_to_the_server_and_does_not_have_a_definitive_id),
-                    SnackbarType.ERROR
+                    SnackBarType.ERROR
                 )
                 return
             }
@@ -758,7 +759,7 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
             makeText(
                 binding.root,
                 getString(R.string.there_is_no_selected_printer),
-                SnackbarType.ERROR
+                SnackBarType.ERROR
             )
             return
         }
@@ -769,7 +770,7 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
             makeText(
                 binding.root,
                 getString(R.string.no_template_selected),
-                SnackbarType.ERROR
+                SnackBarType.ERROR
             )
             return
         }
@@ -814,7 +815,7 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
             makeText(
                 binding.root,
                 getString(R.string.you_must_select_at_least_one_asset),
-                SnackbarType.ERROR
+                SnackBarType.ERROR
             )
             return
         }
@@ -836,7 +837,7 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
             makeText(
                 binding.root,
                 getString(R.string.you_must_select_at_least_one_asset),
-                SnackbarType.ERROR
+                SnackBarType.ERROR
             )
             return
         }
@@ -846,7 +847,7 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
                 makeText(
                     binding.root,
                     getString(R.string.the_selected_asset_was_not_uploaded_to_the_server_and_does_not_have_a_definitive_id),
-                    SnackbarType.ERROR
+                    SnackBarType.ERROR
                 )
                 return
             }
@@ -856,7 +857,7 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
             makeText(
                 binding.root,
                 getString(R.string.there_is_no_selected_printer),
-                SnackbarType.ERROR
+                SnackBarType.ERROR
             )
             return
         }
@@ -867,7 +868,7 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
             makeText(
                 binding.root,
                 getString(R.string.no_template_selected),
-                SnackbarType.ERROR
+                SnackBarType.ERROR
             )
             return
         }
@@ -939,7 +940,7 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
                 makeText(
                     activity.binding.root,
                     activity.getString(R.string.device_connected),
-                    SnackbarType.INFO
+                    SnackBarType.INFO
                 )
             }
         }

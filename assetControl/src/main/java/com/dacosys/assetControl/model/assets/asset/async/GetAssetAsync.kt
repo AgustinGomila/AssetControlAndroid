@@ -1,13 +1,13 @@
 package com.dacosys.assetControl.model.assets.asset.async
 
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.model.assets.asset.`object`.Asset
 import com.dacosys.assetControl.model.assets.asset.dbHelper.AssetDbHelper
 import com.dacosys.assetControl.model.assets.itemCategory.`object`.ItemCategory
 import com.dacosys.assetControl.model.locations.warehouseArea.`object`.WarehouseArea
-import com.dacosys.assetControl.sync.functions.ProgressStatus
+import com.dacosys.assetControl.network.utils.ProgressStatus
+import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import kotlinx.coroutines.*
 
 class GetAssetAsync {
@@ -52,15 +52,21 @@ class GetAssetAsync {
         this.onlyActive = onlyActive
     }
 
-    fun execute(): Boolean {
+    private val scope = CoroutineScope(Job() + Dispatchers.IO)
+
+    fun cancel() {
+        scope.cancel()
+    }
+
+    fun execute() {
         preExecute()
-        return doInBackground()
+        scope.launch { doInBackground() }
     }
 
     private var deferred: Deferred<Boolean>? = null
-    private fun doInBackground(): Boolean {
+    private suspend fun doInBackground(): Boolean {
         var result = false
-        runBlocking {
+        coroutineScope {
             deferred = async { suspendFunction() }
             result = deferred?.await() ?: false
         }
@@ -94,7 +100,7 @@ class GetAssetAsync {
             (warehouseArea == null || (warehouseArea?.warehouseAreaId ?: -1) <= 0)
         ) {
             mCallback?.onGetAssetProgress(
-                Statics.AssetControl.getContext()
+                getContext()
                     .getString(R.string.you_must_enter_at_least_one_letter_in_the_description_category_or_warehouse_area),
                 ProgressStatus.canceled,
                 completeList

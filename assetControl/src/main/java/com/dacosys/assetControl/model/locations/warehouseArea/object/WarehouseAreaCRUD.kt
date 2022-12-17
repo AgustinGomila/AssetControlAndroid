@@ -1,12 +1,11 @@
 package com.dacosys.assetControl.model.locations.warehouseArea.`object`
 
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.model.locations.warehouseArea.dbHelper.WarehouseAreaDbHelper
 import com.dacosys.assetControl.model.locations.warehouseArea.wsObject.WarehouseAreaObject
-import com.dacosys.assetControl.sync.functions.SyncRegistryType
-import com.dacosys.assetControl.sync.functions.SyncUpload
+import com.dacosys.assetControl.network.sync.SyncRegistryType
+import com.dacosys.assetControl.network.sync.SyncUpload
+import com.dacosys.assetControl.utils.Statics
 import kotlinx.coroutines.*
-import kotlin.concurrent.thread
 
 /**
  * Create, Read, Update and Delete
@@ -41,16 +40,19 @@ class WarehouseAreaCRUD {
             this.mCallback = callback
         }
 
-        fun execute() {
-            doInBackground()
+        private val scope = CoroutineScope(Job() + Dispatchers.IO)
+
+        fun cancel() {
+            scope.cancel()
         }
 
-        private var job: Job? = null
+        fun execute() {
+            scope.launch { doInBackground() }
+        }
 
-        private fun doInBackground() {
-            runBlocking {
-                job = launch { suspendFunction() }
-                job?.join()
+        private suspend fun doInBackground() {
+            coroutineScope {
+                suspendFunction()
                 mCallback?.onTaskCompleted(waCRUDResult)
             }
         }
@@ -60,11 +62,7 @@ class WarehouseAreaCRUD {
                 val waObj = warehouseAreaObject!!
                 if (addWarehouseArea(waObj).resultCode == RC_INSERT_OK) {
                     if (Statics.autoSend()) {
-                        thread {
-                            val sync = SyncUpload()
-                            sync.addRegistryToSync(SyncRegistryType.WarehouseArea)
-                            sync.execute()
-                        }
+                        SyncUpload(SyncRegistryType.WarehouseArea)
                     }
                 } else {
                     waCRUDResult.resultCode = RC_ERROR_INSERT
@@ -113,16 +111,19 @@ class WarehouseAreaCRUD {
             this.mCallback = callback
         }
 
-        fun execute() {
-            doInBackground()
+        private val scope = CoroutineScope(Job() + Dispatchers.IO)
+
+        fun cancel() {
+            scope.cancel()
         }
 
-        private var job: Job? = null
+        fun execute() {
+            scope.launch { doInBackground() }
+        }
 
-        private fun doInBackground() {
-            runBlocking {
-                job = launch { suspendFunction() }
-                job?.join()
+        private suspend fun doInBackground() {
+            coroutineScope {
+                suspendFunction()
                 mCallback?.onTaskCompleted(waCRUDResult)
             }
         }
@@ -132,11 +133,7 @@ class WarehouseAreaCRUD {
                 val waObj = warehouseAreaObject!!
                 if (updateWarehouseArea(waObj).resultCode == RC_UPDATE_OK) {
                     if (Statics.autoSend()) {
-                        thread {
-                            val sync = SyncUpload()
-                            sync.addRegistryToSync(SyncRegistryType.WarehouseArea)
-                            sync.execute()
-                        }
+                        SyncUpload(SyncRegistryType.WarehouseArea)
                     }
                 }
             } else {
