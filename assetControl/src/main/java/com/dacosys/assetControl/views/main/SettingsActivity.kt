@@ -435,7 +435,7 @@ class SettingsActivity :
                 SnackBarType.INFO
             )
             Statics.removeDataBases()
-            onBackPressed()
+            finish()
         } else if (status == ProgressStatus.crashed) {
             makeText(
                 binding.settings,
@@ -1079,7 +1079,7 @@ class SettingsActivity :
                     SnackBarType.INFO
                 ))
                 Statics.removeDataBases()
-                requireActivity().onBackPressed()
+                requireActivity().finish()
             } else if (status == ProgressStatus.crashed) {
                 if (view != null) showSnackBar(SnackBarEventData(
                     getString(R.string.error_setting_user_panel),
@@ -1871,7 +1871,7 @@ class SettingsActivity :
                     SnackBarType.INFO
                 ))
                 Statics.removeDataBases()
-                requireActivity().onBackPressed()
+                requireActivity().finish()
             } else if (status == ProgressStatus.crashed) {
                 if (view != null) showSnackBar(SnackBarEventData(
                     getString(R.string.error_setting_user_panel),

@@ -2,6 +2,7 @@ package com.dacosys.assetControl.network.download
 
 import android.content.Context
 import android.os.PowerManager
+import android.util.Log
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.network.download.DownloadStatus.*
@@ -86,13 +87,9 @@ class DownloadFile(
             return true
         }
 
-        onDownloadTask.invoke(DownloadTask(
-            msg = "${
-                getContext().getString(R.string.destination)
-            }: $destination${getProperty("line.separator")}URL: $urlStr",
-            fileType = fileType,
-            downloadStatus = INFO,
-        ))
+        Log.d(this.javaClass.simpleName, "${
+            getContext().getString(R.string.destination)
+        }: $destination${getProperty("line.separator")}URL: $urlStr")
 
         var input: InputStream? = null
         var output: OutputStream? = null
@@ -102,13 +99,10 @@ class DownloadFile(
         try {
             val url = URL(urlStr)
 
-            onDownloadTask.invoke(DownloadTask(
-                msg = "${
-                    getContext().getString(R.string.opening_connection)
-                }: $urlStr",
-                fileType = fileType,
-                downloadStatus = INFO,
-            ))
+            Log.d(this.javaClass.simpleName, "${
+                getContext().getString(R.string.opening_connection)
+            }: $urlStr")
+
             connection = url.openConnection() as HttpURLConnection
             connection.connect()
 
@@ -128,13 +122,9 @@ class DownloadFile(
             // this will be useful to display download percentage
             // might be -1: server did not report the length
             val fileLength = connection.contentLength
-            onDownloadTask.invoke(DownloadTask(
-                msg = "${
-                    getContext().getString(R.string.file_length)
-                }: $fileLength",
-                fileType = fileType,
-                downloadStatus = INFO,
-            ))
+            Log.d(this.javaClass.simpleName, "${
+                getContext().getString(R.string.file_length)
+            }: $fileLength")
 
             // Crear un nuevo archivo
             if (destination.exists()) {

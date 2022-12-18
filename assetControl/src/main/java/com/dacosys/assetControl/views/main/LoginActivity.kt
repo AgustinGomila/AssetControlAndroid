@@ -31,11 +31,8 @@ import com.dacosys.assetControl.databinding.LoginActivityBinding
 import com.dacosys.assetControl.model.users.user.`object`.User
 import com.dacosys.assetControl.model.users.user.dbHelper.UserDbHelper
 import com.dacosys.assetControl.network.clientPackages.ClientPackagesProgress
-import com.dacosys.assetControl.network.download.DownloadDb
-import com.dacosys.assetControl.network.download.DownloadStatus
+import com.dacosys.assetControl.network.download.*
 import com.dacosys.assetControl.network.download.DownloadStatus.*
-import com.dacosys.assetControl.network.download.DownloadTask
-import com.dacosys.assetControl.network.download.FileType
 import com.dacosys.assetControl.network.sync.SyncDownload
 import com.dacosys.assetControl.network.sync.SyncProgress
 import com.dacosys.assetControl.network.sync.SyncRegistryType
@@ -109,7 +106,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         } else if (status == ProgressStatus.crashed || status == ProgressStatus.canceled) {
             // Error de conexión
             makeText(binding.root, msg, SnackBarType.ERROR)
-            attemptSync = false
+            syncing = false
             JotterListener.resumeReaderDevices(this)
             setButton(ButtonStyle.REFRESH)
         }
@@ -150,7 +147,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
             ProgressStatus.bigFinished -> {
                 setButton(ButtonStyle.READY)
                 showProgressBar(false)
-                attemptRunning = false
+                logging = false
                 finish()
             }
             ProgressStatus.bigCrashed,
@@ -159,7 +156,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
             -> {
                 makeText(binding.root, msg, SnackBarType.ERROR)
                 refreshUsers()
-                attemptRunning = false
+                logging = false
                 showProgressBar(false)
             }
         }
@@ -179,7 +176,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
             // Error al descargar
             makeText(binding.root, msg, SnackBarType.ERROR)
 
-            attemptSync = false
+            syncing = false
             setButton(ButtonStyle.REFRESH)
 
             setProgressBarText("")
@@ -239,16 +236,17 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
 
     private var userId: Long? = -1
     private var password: String = ""
+    private var syncing = false
 
     private fun onSessionCreated(result: Boolean) {
         if (OFFLINE_MODE) {
             makeText(binding.root, getString(R.string.offline_mode), SnackBarType.INFO)
-            attemptRunning = false
+            logging = false
             finish()
         } else {
             if (!result) {
                 makeText(binding.root, getString(R.string.offline_mode), SnackBarType.INFO)
-                attemptRunning = false
+                logging = false
                 finish()
             } else {
                 showProgressBar(true)
@@ -284,16 +282,15 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
 
         JotterListener.lockScanner(this, false)
         rejectNewInstances = false
+        logging = false
 
         // Parece que las actividades de tipo Setting no devuelven resultados
         // así que de esta manera puedo volver a llenar el fragmento de usuarios
         if (isReturnedFromSettings) {
+            isReturnedFromSettings = false
+
             // Vamos a reconstruir el scanner por si cambió la configuración
             JotterListener.autodetectDeviceModel(this)
-
-            isReturnedFromSettings = false
-            attemptSync = false
-            attemptRunning = false
 
             initialSetup()
         }
@@ -306,7 +303,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                     SnackBarType.ERROR))
             }
             setButton(ButtonStyle.REFRESH)
-            attemptSync = false
+            syncing = false
             return
         }
 
@@ -328,7 +325,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
             if (!Statics.isOnline()) {
                 makeText(binding.root, getString(R.string.no_connection), SnackBarType.INFO)
             }
-            attemptSync = false
+            syncing = false
         }
     }
 
@@ -430,6 +427,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
 
         savedInstanceState.putLong("userId", userSpinnerFragment?.selectedUserId ?: -1)
         savedInstanceState.putString("password", binding.password.text.toString())
+        savedInstanceState.putBoolean("syncing", syncing)
     }
 
     private lateinit var binding: LoginActivityBinding
@@ -457,11 +455,13 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         if (savedInstanceState != null) {
             userId = savedInstanceState.getLong("userId")
             password = savedInstanceState.getString("pass") ?: ""
+            syncing = savedInstanceState.getBoolean("syncing")
         } else {
             val extras = intent.extras
             if (extras != null) {
                 userId = extras.getLong("userId")
                 password = extras.getString("password") ?: ""
+                syncing = extras.getBoolean("syncing")
             }
         }
 
@@ -517,7 +517,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         refreshTitle()
         showProgressBar(false)
 
-        Handler(Looper.getMainLooper()).postDelayed({ initialSetup() }, 350)
+        Handler(Looper.getMainLooper()).postDelayed({ initialSetup() }, 500)
 
         // ESTO SIRVE PARA OCULTAR EL TECLADO EN PANTALLA CUANDO PIERDEN EL FOCO LOS CONTROLES QUE LO NECESITAN
         setupUI(binding.root)
@@ -565,73 +565,72 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         }
     }
 
-    private var attemptSync: Boolean = false
     private fun initialSetup() {
-        if (attemptSync) return
-        attemptSync = true
+        if (syncing) return
+        syncing = true
 
         setButton(ButtonStyle.BUSY)
 
-        // Comprobar validez de la fecha del dispositivo
-        if (Statics.deviceDateIsValid(binding.root)) {
+        try {
+            /* Des-inicializamos IC para evitar que se
+               suban imágenes pendientes antes de loggearse.
+               Escenario en el que el usuario ha vuelto a esta
+               actividad después haber estado loggeado.
+             */
+            Statics.closeImageControl()
+
+            // Comprobar validez de la fecha del dispositivo
+            if (!Statics.deviceDateIsValid()) {
+                showSnackBar(SnackBarEventData(getString(R.string.device_date_is_invalid),
+                    SnackBarType.ERROR))
+                setButton(ButtonStyle.REFRESH)
+                syncing = false
+                return
+            }
+
             if (Statics.wsUrl.isEmpty() || Statics.wsNamespace.isEmpty()) {
                 showSnackBar(SnackBarEventData(getString(R.string.webservice_is_not_configured),
                     SnackBarType.ERROR))
-                attemptSync = false
-            } else {
-                initSync()
+                setButton(ButtonStyle.REFRESH)
+                syncing = false
+                return
             }
-        } else {
-            attemptSync = false
-        }
-    }
 
-    private fun initSync() {
-        try {
-            /////////////// BASE DE DATOS SQLITE /////////////////
-            // Acá arranca la base de datos, si no existe se crea.
+            /////////////// BASE DE DATOS SQLITE ///////////////////
+            // Acá arranca la base de datos, si no existe se crea // 
+            // Si existe una sesión previa se cierra.             //
             DataBaseHelper.beginDataBase()
 
             // Acá arranca la base de datos de ImageControl, si no existe se crea.
             if (Statics.useImageControl) {
                 ImageControlDbHelper.beginDataBase()
             }
-            ///////////// FIN INICIALIZACIÓN SQLITE //////////////
+            ///////////// FIN INICIALIZACIÓN SQLITE ////////////////
+
         } catch (ex: Exception) {
             ex.printStackTrace()
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
 
-            attemptSync = false
+            setButton(ButtonStyle.REFRESH)
+            syncing = false
             return
         }
 
-        try {
-            if (OFFLINE_MODE) {
-                refreshTitle()
-                refreshUsers()
-            } else {
-                /* Des-inicializamos IC para evitar que se
-                   suban imágenes pendientes antes de loggearse.
-                   Escenario en el que el usuario ha vuelto a esta
-                   actividad después haber estado loggeado.
-                 */
-                Statics.closeImageControl()
+        if (OFFLINE_MODE) {
+            refreshTitle()
+            refreshUsers()
+            return
+        }
 
-                if (!Statics.isOnline()) {
-                    refreshTitle()
-                    refreshUsers()
-                } else {
-                    thread {
-                        DownloadDb(onDownloadEvent = { downloadDbViewModel.setDownloadTask(it) },
-                            onSnackBarEvent = { downloadDbViewModel.setUiEvent(it) })
-                    }
-                }
+        if (!Statics.isOnline()) {
+            refreshTitle()
+            refreshUsers()
+        } else {
+            runOnUiThread {
+                DownloadDb(
+                    onDownloadEvent = { downloadDbViewModel.setDownloadTask(it) },
+                    onSnackBarEvent = { downloadDbViewModel.setUiEvent(it) })
             }
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-            ErrorLog.writeLog(this, this::class.java.simpleName, ex)
-
-            attemptSync = false
         }
     }
 
@@ -726,10 +725,10 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         return BitmapDrawable(resources, bitmapResized)
     }
 
-    private var attemptRunning: Boolean = false
+    private var logging: Boolean = false
     private fun attemptLogin() {
-        if (attemptRunning) return
-        attemptRunning = true
+        if (logging) return
+        logging = true
 
         // Store values at the time of the login attempt.
         val userId = userSpinnerFragment?.selectedUserId ?: -1
@@ -762,7 +761,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         if (cancel) {
             // There was an error; don't attempt login and focus the first
             // form field with an error.
-            attemptRunning = false
+            logging = false
             focusView?.requestFocus()
         } else {
             // Show a progress spinner, and kick off a background task to
@@ -777,7 +776,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
             } else {
                 showSnackBar(SnackBarEventData(getString(R.string.wrong_user_password_combination),
                     SnackBarType.ERROR))
-                attemptRunning = false
+                logging = false
             }
         }
     }

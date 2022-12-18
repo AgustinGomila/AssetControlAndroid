@@ -1,7 +1,7 @@
 package com.dacosys.assetControl.network.sync
 
 import android.util.Log
-import com.dacosys.assetControl.AssetControlApp
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.model.assets.asset.dbHelper.AssetDbHelper
 import com.dacosys.assetControl.model.assets.asset.wsObject.AssetWs
@@ -46,12 +46,12 @@ import com.dacosys.assetControl.model.users.userPermission.dbHelper.UserPermissi
 import com.dacosys.assetControl.model.users.userPermission.wsObject.UserPermissionWs
 import com.dacosys.assetControl.model.users.userWarehouseArea.dbHelper.UserWarehouseAreaDbHelper
 import com.dacosys.assetControl.model.users.userWarehouseArea.wsObject.UserWarehouseAreaWs
-import com.dacosys.assetControl.network.download.DownloadDb
 import com.dacosys.assetControl.network.serverDate.GetMySqlDate
 import com.dacosys.assetControl.network.serverDate.MySqlDateResult
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.network.utils.SetCurrentSession
 import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.Statics.Companion.timeFilename
 import com.dacosys.assetControl.utils.configuration.Preference
 import com.dacosys.assetControl.utils.configuration.entries.ConfEntry
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
@@ -100,7 +100,7 @@ class SyncDownload(
                     SyncProgress(
                         totalTask = 0,
                         completedTask = 0,
-                        msg = AssetControlApp.getContext().getString(R.string.download_finished),
+                        msg = getContext().getString(R.string.download_finished),
                         registryType = null,
                         progressStatus = ProgressStatus.bigFinished
                     )
@@ -108,7 +108,7 @@ class SyncDownload(
                     SyncProgress(
                         totalTask = 0,
                         completedTask = 0,
-                        msg = AssetControlApp.getContext()
+                        msg = getContext()
                             .getString(R.string.error_downloading_the_database_from_the_server),
                         registryType = null,
                         progressStatus = ProgressStatus.crashed
@@ -152,7 +152,7 @@ class SyncDownload(
             onUiEvent(SyncProgress(
                 totalTask = 0,
                 completedTask = 0,
-                msg = AssetControlApp.getContext().getString(R.string.downloading_starting),
+                msg = getContext().getString(R.string.downloading_starting),
                 registryType = null,
                 progressStatus = ProgressStatus.bigStarting
             ))
@@ -193,7 +193,7 @@ class SyncDownload(
                 ex.printStackTrace()
                 onUiEvent(SyncProgress(0,
                     0,
-                    AssetControlApp.getContext()
+                    getContext()
                         .getString(R.string.synchronization_failed),
                     null,
                     ProgressStatus.bigCrashed
@@ -215,8 +215,7 @@ class SyncDownload(
                     Log.d(
                         this::class.java.simpleName,
                         "${
-                            AssetControlApp.getContext()
-                                .getString(R.string.saving_synchronization_time)
+                            getContext().getString(R.string.saving_synchronization_time)
                         }: ${registryType.confEntry!!.description} (${serverTime})"
                     )
                     registries.add(registryType.confEntry!!.description)
@@ -237,7 +236,7 @@ class SyncDownload(
         onUiEvent(SyncProgress(
             0,
             0,
-            AssetControlApp.getContext().getString(R.string.starting_asset_synchronization),
+            getContext().getString(R.string.starting_asset_synchronization),
             registryType,
             ProgressStatus.starting
         ))
@@ -284,8 +283,7 @@ class SyncDownload(
                         onUiEvent(SyncProgress(
                             0,
                             0,
-                            AssetControlApp.getContext()
-                                .getString(R.string.local_error_in_asset_synchronization),
+                            getContext().getString(R.string.local_error_in_asset_synchronization),
                             registryType,
                             ProgressStatus.crashed
                         ))
@@ -299,8 +297,7 @@ class SyncDownload(
             // Error remoto
             onUiEvent(SyncProgress(0,
                 0,
-                AssetControlApp.getContext()
-                    .getString(R.string.remote_error_in_asset_synchronization),
+                getContext().getString(R.string.remote_error_in_asset_synchronization),
                 registryType,
                 ProgressStatus.crashed
             ))
@@ -314,7 +311,7 @@ class SyncDownload(
         when {
             !scope.isActive -> onUiEvent(SyncProgress(0,
                 0,
-                AssetControlApp.getContext().getString(R.string.synchronization_canceled),
+                getContext().getString(R.string.synchronization_canceled),
                 registryType,
                 ProgressStatus.canceled
             ))
@@ -322,7 +319,7 @@ class SyncDownload(
                 onUiEvent(SyncProgress(
                     0,
                     0,
-                    AssetControlApp.getContext()
+                    getContext()
                         .getString(R.string.asset_synchronization_completed),
                     registryType,
                     ProgressStatus.success
@@ -339,7 +336,7 @@ class SyncDownload(
         onUiEvent(SyncProgress(
             0,
             0,
-            AssetControlApp.getContext().getString(R.string.starting_category_synchronization),
+            getContext().getString(R.string.starting_category_synchronization),
             registryType,
             ProgressStatus.starting
         ))
@@ -384,8 +381,7 @@ class SyncDownload(
                         // Error local
                         onUiEvent(SyncProgress(0,
                             0,
-                            AssetControlApp.getContext()
-                                .getString(R.string.local_error_in_category_synchronization),
+                            getContext().getString(R.string.local_error_in_category_synchronization),
                             registryType,
                             ProgressStatus.crashed
                         ))
@@ -399,8 +395,7 @@ class SyncDownload(
             // Error remoto
             onUiEvent(SyncProgress(0,
                 0,
-                AssetControlApp.getContext()
-                    .getString(R.string.remote_error_in_category_synchronization),
+                getContext().getString(R.string.remote_error_in_category_synchronization),
                 registryType,
                 ProgressStatus.crashed
             ))
@@ -414,14 +409,14 @@ class SyncDownload(
         when {
             !scope.isActive -> onUiEvent(SyncProgress(0,
                 0,
-                AssetControlApp.getContext().getString(R.string.synchronization_canceled),
+                getContext().getString(R.string.synchronization_canceled),
                 registryType,
                 ProgressStatus.canceled
             ))
             else -> {
                 onUiEvent(SyncProgress(0,
                     0,
-                    AssetControlApp.getContext()
+                    getContext()
                         .getString(R.string.category_synchronization_completed),
                     registryType,
                     ProgressStatus.success
@@ -437,7 +432,7 @@ class SyncDownload(
         val registryType = SyncRegistryType.User
         onUiEvent(SyncProgress(0,
             0,
-            AssetControlApp.getContext().getString(R.string.starting_user_synchronization),
+            getContext().getString(R.string.starting_user_synchronization),
             registryType,
             ProgressStatus.starting
         ))
@@ -506,8 +501,7 @@ class SyncDownload(
                         // Error local
                         onUiEvent(SyncProgress(0,
                             0,
-                            AssetControlApp.getContext()
-                                .getString(R.string.local_error_in_user_synchronization),
+                            getContext().getString(R.string.local_error_in_user_synchronization),
                             registryType,
                             ProgressStatus.crashed
                         ))
@@ -521,8 +515,7 @@ class SyncDownload(
             // Error remoto
             onUiEvent(SyncProgress(0,
                 0,
-                AssetControlApp.getContext()
-                    .getString(R.string.remote_error_in_user_synchronization),
+                getContext().getString(R.string.remote_error_in_user_synchronization),
                 registryType,
                 ProgressStatus.crashed
             ))
@@ -536,14 +529,14 @@ class SyncDownload(
         when {
             !scope.isActive -> onUiEvent(SyncProgress(0,
                 0,
-                AssetControlApp.getContext().getString(R.string.synchronization_canceled),
+                getContext().getString(R.string.synchronization_canceled),
                 registryType,
                 ProgressStatus.canceled
             ))
             else -> {
                 onUiEvent(SyncProgress(0,
                     0,
-                    AssetControlApp.getContext()
+                    getContext()
                         .getString(R.string.user_synchronization_completed),
                     registryType,
                     ProgressStatus.success
@@ -559,7 +552,7 @@ class SyncDownload(
         val registryType = SyncRegistryType.Warehouse
         onUiEvent(SyncProgress(0,
             0,
-            AssetControlApp.getContext().getString(R.string.starting_warehouse_synchronization),
+            getContext().getString(R.string.starting_warehouse_synchronization),
             registryType,
             ProgressStatus.starting
         ))
@@ -604,8 +597,7 @@ class SyncDownload(
                         // Error local
                         onUiEvent(SyncProgress(0,
                             0,
-                            AssetControlApp.getContext()
-                                .getString(R.string.local_error_in_warehouse_synchronization),
+                            getContext().getString(R.string.local_error_in_warehouse_synchronization),
                             registryType,
                             ProgressStatus.crashed
                         ))
@@ -619,8 +611,7 @@ class SyncDownload(
             // Error remoto
             onUiEvent(SyncProgress(0,
                 0,
-                AssetControlApp.getContext()
-                    .getString(R.string.remote_error_in_warehouse_synchronization),
+                getContext().getString(R.string.remote_error_in_warehouse_synchronization),
                 registryType,
                 ProgressStatus.crashed
             ))
@@ -634,14 +625,14 @@ class SyncDownload(
         when {
             !scope.isActive -> onUiEvent(SyncProgress(0,
                 0,
-                AssetControlApp.getContext().getString(R.string.synchronization_canceled),
+                getContext().getString(R.string.synchronization_canceled),
                 registryType,
                 ProgressStatus.canceled
             ))
             else -> {
                 onUiEvent(SyncProgress(0,
                     0,
-                    AssetControlApp.getContext()
+                    getContext()
                         .getString(R.string.warehouse_synchronization_completed),
                     registryType,
                     ProgressStatus.success
@@ -657,7 +648,7 @@ class SyncDownload(
         val registryType = SyncRegistryType.WarehouseArea
         onUiEvent(SyncProgress(0,
             0,
-            AssetControlApp.getContext()
+            getContext()
                 .getString(R.string.starting_warehouse_area_synchronization),
             registryType,
             ProgressStatus.starting
@@ -703,8 +694,7 @@ class SyncDownload(
                         // Error local
                         onUiEvent(SyncProgress(0,
                             0,
-                            AssetControlApp.getContext()
-                                .getString(R.string.local_error_in_warehouse_area_synchronization),
+                            getContext().getString(R.string.local_error_in_warehouse_area_synchronization),
                             registryType,
                             ProgressStatus.crashed
                         ))
@@ -718,8 +708,7 @@ class SyncDownload(
             // Error remoto
             onUiEvent(SyncProgress(0,
                 0,
-                AssetControlApp.getContext()
-                    .getString(R.string.remote_error_in_warehouse_area_synchronization),
+                getContext().getString(R.string.remote_error_in_warehouse_area_synchronization),
                 registryType,
                 ProgressStatus.crashed
             ))
@@ -733,14 +722,14 @@ class SyncDownload(
         when {
             !scope.isActive -> onUiEvent(SyncProgress(0,
                 0,
-                AssetControlApp.getContext().getString(R.string.synchronization_canceled),
+                getContext().getString(R.string.synchronization_canceled),
                 registryType,
                 ProgressStatus.canceled
             ))
             else -> {
                 onUiEvent(SyncProgress(0,
                     0,
-                    AssetControlApp.getContext()
+                    getContext()
                         .getString(R.string.warehouse_area_synchronization_completed),
                     registryType,
                     ProgressStatus.success
@@ -756,7 +745,7 @@ class SyncDownload(
         val registryType = SyncRegistryType.Attribute
         onUiEvent(SyncProgress(0,
             0,
-            AssetControlApp.getContext().getString(R.string.starting_attribute_synchronization),
+            getContext().getString(R.string.starting_attribute_synchronization),
             registryType,
             ProgressStatus.starting
         ))
@@ -809,8 +798,7 @@ class SyncDownload(
                         // Error local
                         onUiEvent(SyncProgress(0,
                             0,
-                            AssetControlApp.getContext()
-                                .getString(R.string.local_error_in_attribute_synchronization),
+                            getContext().getString(R.string.local_error_in_attribute_synchronization),
                             registryType,
                             ProgressStatus.crashed
                         ))
@@ -824,8 +812,7 @@ class SyncDownload(
             // Error remoto
             onUiEvent(SyncProgress(0,
                 0,
-                AssetControlApp.getContext()
-                    .getString(R.string.remote_error_in_attribute_synchronization),
+                getContext().getString(R.string.remote_error_in_attribute_synchronization),
                 registryType,
                 ProgressStatus.crashed
             ))
@@ -839,14 +826,14 @@ class SyncDownload(
         when {
             !scope.isActive -> onUiEvent(SyncProgress(0,
                 0,
-                AssetControlApp.getContext().getString(R.string.synchronization_canceled),
+                getContext().getString(R.string.synchronization_canceled),
                 registryType,
                 ProgressStatus.canceled
             ))
             else -> {
                 onUiEvent(SyncProgress(0,
                     0,
-                    AssetControlApp.getContext()
+                    getContext()
                         .getString(R.string.attribute_synchronization_completed),
                     registryType,
                     ProgressStatus.success
@@ -875,7 +862,7 @@ class SyncDownload(
                 onUiEvent(SyncProgress(
                     totalTask = attr.size,
                     completedTask = currentCount,
-                    msg = AssetControlApp.getContext()
+                    msg = getContext()
                         .getString(R.string.synchronizing_attribute_compositions),
                     registryType = SyncRegistryType.AttributeComposition,
                     progressStatus = ProgressStatus.running
@@ -918,7 +905,7 @@ class SyncDownload(
         val registryType = SyncRegistryType.AttributeCategory
         onUiEvent(SyncProgress(0,
             0,
-            AssetControlApp.getContext()
+            getContext()
                 .getString(R.string.starting_attribute_category_synchronization),
             registryType,
             ProgressStatus.starting
@@ -963,8 +950,7 @@ class SyncDownload(
                         // Error local
                         onUiEvent(SyncProgress(0,
                             0,
-                            AssetControlApp.getContext()
-                                .getString(R.string.local_error_in_attribute_category_synchronization),
+                            getContext().getString(R.string.local_error_in_attribute_category_synchronization),
                             registryType,
                             ProgressStatus.crashed
                         ))
@@ -978,8 +964,7 @@ class SyncDownload(
             // Error remoto
             onUiEvent(SyncProgress(0,
                 0,
-                AssetControlApp.getContext()
-                    .getString(R.string.remote_error_in_attribute_category_synchronization),
+                getContext().getString(R.string.remote_error_in_attribute_category_synchronization),
                 registryType,
                 ProgressStatus.crashed
             ))
@@ -993,14 +978,14 @@ class SyncDownload(
         when {
             !scope.isActive -> onUiEvent(SyncProgress(0,
                 0,
-                AssetControlApp.getContext().getString(R.string.synchronization_canceled),
+                getContext().getString(R.string.synchronization_canceled),
                 registryType,
                 ProgressStatus.canceled
             ))
             else -> {
                 onUiEvent(SyncProgress(0,
                     0,
-                    AssetControlApp.getContext()
+                    getContext()
                         .getString(R.string.attribute_category_synchronization_completed),
                     registryType,
                     ProgressStatus.success
@@ -1016,7 +1001,7 @@ class SyncDownload(
         val registryType = SyncRegistryType.Route
         onUiEvent(SyncProgress(0,
             0,
-            AssetControlApp.getContext().getString(R.string.starting_route_synchronization),
+            getContext().getString(R.string.starting_route_synchronization),
             registryType,
             ProgressStatus.starting
         ))
@@ -1073,8 +1058,7 @@ class SyncDownload(
                         // Error local
                         onUiEvent(SyncProgress(0,
                             0,
-                            AssetControlApp.getContext()
-                                .getString(R.string.local_error_in_route_synchronization),
+                            getContext().getString(R.string.local_error_in_route_synchronization),
                             registryType,
                             ProgressStatus.crashed
                         ))
@@ -1088,8 +1072,7 @@ class SyncDownload(
             // Error remoto
             onUiEvent(SyncProgress(0,
                 0,
-                AssetControlApp.getContext()
-                    .getString(R.string.remote_error_in_route_synchronization),
+                getContext().getString(R.string.remote_error_in_route_synchronization),
                 registryType,
                 ProgressStatus.crashed
             ))
@@ -1103,14 +1086,14 @@ class SyncDownload(
         when {
             !scope.isActive -> onUiEvent(SyncProgress(totalTask = 0,
                 completedTask = 0,
-                msg = AssetControlApp.getContext().getString(R.string.synchronization_canceled),
+                msg = getContext().getString(R.string.synchronization_canceled),
                 registryType = registryType,
                 progressStatus = ProgressStatus.canceled
             ))
             else -> {
                 onUiEvent(SyncProgress(totalTask = 0,
                     completedTask = 0,
-                    msg = AssetControlApp.getContext()
+                    msg = getContext()
                         .getString(R.string.route_synchronization_completed),
                     registryType = registryType,
                     progressStatus = ProgressStatus.success
@@ -1141,8 +1124,7 @@ class SyncDownload(
                         onUiEvent(SyncProgress(
                             totalTask = countTotal,
                             completedTask = currentCount,
-                            msg = AssetControlApp.getContext()
-                                .getString(R.string.synchronizing_route_contents),
+                            msg = getContext().getString(R.string.synchronizing_route_contents),
                             registryType = SyncRegistryType.RouteComposition,
                             progressStatus = ProgressStatus.running
                         ))
@@ -1181,7 +1163,7 @@ class SyncDownload(
         val registryType = SyncRegistryType.DataCollectionRule
         onUiEvent(SyncProgress(0,
             0,
-            AssetControlApp.getContext()
+            getContext()
                 .getString(R.string.starting_data_collection_rule_synchronization),
             registryType,
             ProgressStatus.starting
@@ -1248,8 +1230,7 @@ class SyncDownload(
                         // Error local
                         onUiEvent(SyncProgress(0,
                             0,
-                            AssetControlApp.getContext()
-                                .getString(R.string.local_error_in_data_collection_rule_synchronization),
+                            getContext().getString(R.string.local_error_in_data_collection_rule_synchronization),
                             registryType,
                             ProgressStatus.crashed
                         ))
@@ -1263,8 +1244,7 @@ class SyncDownload(
             // Error remoto
             onUiEvent(SyncProgress(0,
                 0,
-                AssetControlApp.getContext()
-                    .getString(R.string.remote_error_in_data_collection_rule_synchronization),
+                getContext().getString(R.string.remote_error_in_data_collection_rule_synchronization),
                 registryType,
                 ProgressStatus.crashed
             ))
@@ -1278,14 +1258,14 @@ class SyncDownload(
         when {
             !scope.isActive -> onUiEvent(SyncProgress(0,
                 0,
-                AssetControlApp.getContext().getString(R.string.synchronization_canceled),
+                getContext().getString(R.string.synchronization_canceled),
                 registryType,
                 ProgressStatus.canceled
             ))
             else -> {
                 onUiEvent(SyncProgress(0,
                     0,
-                    AssetControlApp.getContext()
+                    getContext()
                         .getString(R.string.data_collection_rule_synchronization_completed),
                     registryType,
                     ProgressStatus.success
@@ -1316,8 +1296,7 @@ class SyncDownload(
                         onUiEvent(SyncProgress(
                             totalTask = countTotal,
                             completedTask = currentCount,
-                            msg = AssetControlApp.getContext()
-                                .getString(R.string.synchronizing_data_collection_rule_contents),
+                            msg = getContext().getString(R.string.synchronizing_data_collection_rule_contents),
                             registryType = SyncRegistryType.DataCollectionRuleContent,
                             progressStatus = ProgressStatus.running
                         ))
@@ -1373,8 +1352,7 @@ class SyncDownload(
                         onUiEvent(SyncProgress(
                             totalTask = countTotal,
                             completedTask = currentCount,
-                            msg = AssetControlApp.getContext()
-                                .getString(R.string.synchronizing_data_collection_rule_targets),
+                            msg = getContext().getString(R.string.synchronizing_data_collection_rule_targets),
                             registryType = SyncRegistryType.DataCollectionRuleTarget,
                             progressStatus = ProgressStatus.running
                         ))
@@ -1408,7 +1386,7 @@ class SyncDownload(
         val registryType = SyncRegistryType.ManteinanceType
         onUiEvent(SyncProgress(0,
             0,
-            AssetControlApp.getContext()
+            getContext()
                 .getString(R.string.starting_maintenance_type_synchronization),
             registryType,
             ProgressStatus.starting
@@ -1449,7 +1427,7 @@ class SyncDownload(
                             onUiEvent(SyncProgress(
                                 countTotal,
                                 currentCount,
-                                AssetControlApp.getContext()
+                                getContext()
                                     .getString(R.string.synchronizing_maintenance_types),
                                 registryType,
                                 ProgressStatus.running
@@ -1459,7 +1437,7 @@ class SyncDownload(
                                 onUiEvent(SyncProgress(
                                     0,
                                     0,
-                                    AssetControlApp.getContext()
+                                    getContext()
                                         .getString(R.string.canceling_maintenance_type_synchronization),
                                     registryType,
                                     ProgressStatus.canceled
@@ -1498,8 +1476,7 @@ class SyncDownload(
                         // Error local
                         onUiEvent(SyncProgress(0,
                             0,
-                            AssetControlApp.getContext()
-                                .getString(R.string.local_error_in_maintenance_type_synchronization),
+                            getContext().getString(R.string.local_error_in_maintenance_type_synchronization),
                             registryType,
                             ProgressStatus.crashed
                         ))
@@ -1513,8 +1490,7 @@ class SyncDownload(
             // Error remoto
             onUiEvent(SyncProgress(0,
                 0,
-                AssetControlApp.getContext()
-                    .getString(R.string.remote_error_in_maintenance_type_synchronization),
+                getContext().getString(R.string.remote_error_in_maintenance_type_synchronization),
                 registryType,
                 ProgressStatus.crashed
             ))
@@ -1528,14 +1504,14 @@ class SyncDownload(
         when {
             !scope.isActive -> onUiEvent(SyncProgress(0,
                 0,
-                AssetControlApp.getContext().getString(R.string.synchronization_canceled),
+                getContext().getString(R.string.synchronization_canceled),
                 registryType,
                 ProgressStatus.canceled
             ))
             else -> {
                 onUiEvent(SyncProgress(0,
                     0,
-                    AssetControlApp.getContext()
+                    getContext()
                         .getString(R.string.maintenance_type_synchronization_completed),
                     registryType,
                     ProgressStatus.success
@@ -1551,7 +1527,7 @@ class SyncDownload(
         val registryType = SyncRegistryType.ManteinanceTypeGroup
         onUiEvent(SyncProgress(0,
             0,
-            AssetControlApp.getContext()
+            getContext()
                 .getString(R.string.starting_maintenance_type_group_synchronization),
             registryType,
             ProgressStatus.starting
@@ -1592,7 +1568,7 @@ class SyncDownload(
                             onUiEvent(SyncProgress(
                                 countTotal,
                                 currentCount,
-                                AssetControlApp.getContext()
+                                getContext()
                                     .getString(R.string.synchronizing_maintenance_type_groups),
                                 registryType,
                                 ProgressStatus.starting
@@ -1602,7 +1578,7 @@ class SyncDownload(
                                 onUiEvent(SyncProgress(
                                     0,
                                     0,
-                                    AssetControlApp.getContext()
+                                    getContext()
                                         .getString(R.string.canceling_maintenance_type_group_synchronization),
                                     registryType,
                                     ProgressStatus.canceled
@@ -1644,8 +1620,7 @@ class SyncDownload(
                         // Error local
                         onUiEvent(SyncProgress(0,
                             0,
-                            AssetControlApp.getContext()
-                                .getString(R.string.local_error_in_maintenance_type_group_synchronization),
+                            getContext().getString(R.string.local_error_in_maintenance_type_group_synchronization),
                             registryType,
                             ProgressStatus.crashed
                         ))
@@ -1659,8 +1634,7 @@ class SyncDownload(
             // Error remoto
             onUiEvent(SyncProgress(0,
                 0,
-                AssetControlApp.getContext()
-                    .getString(R.string.remote_error_in_maintenance_type_group_synchronization),
+                getContext().getString(R.string.remote_error_in_maintenance_type_group_synchronization),
                 registryType,
                 ProgressStatus.crashed
             ))
@@ -1674,14 +1648,14 @@ class SyncDownload(
         when {
             !scope.isActive -> onUiEvent(SyncProgress(0,
                 0,
-                AssetControlApp.getContext().getString(R.string.synchronization_canceled),
+                getContext().getString(R.string.synchronization_canceled),
                 registryType,
                 ProgressStatus.canceled
             ))
             else -> {
                 onUiEvent(SyncProgress(0,
                     0,
-                    AssetControlApp.getContext()
+                    getContext()
                         .getString(R.string.maintenance_type_group_synchronization_completed),
                     registryType,
                     ProgressStatus.success
@@ -1697,7 +1671,7 @@ class SyncDownload(
         val registryType = SyncRegistryType.BarcodeLabelCustom
         onUiEvent(SyncProgress(0,
             0,
-            AssetControlApp.getContext().getString(R.string.starting_barcode_label_synchronization),
+            getContext().getString(R.string.starting_barcode_label_synchronization),
             registryType,
             ProgressStatus.starting
         ))
@@ -1742,8 +1716,7 @@ class SyncDownload(
                         // Error local
                         onUiEvent(SyncProgress(0,
                             0,
-                            AssetControlApp.getContext()
-                                .getString(R.string.local_error_in_barcode_label_synchronization),
+                            getContext().getString(R.string.local_error_in_barcode_label_synchronization),
                             registryType,
                             ProgressStatus.crashed
                         ))
@@ -1757,8 +1730,7 @@ class SyncDownload(
             // Error remoto
             onUiEvent(SyncProgress(0,
                 0,
-                AssetControlApp.getContext()
-                    .getString(R.string.remote_error_in_barcode_label_synchronization),
+                getContext().getString(R.string.remote_error_in_barcode_label_synchronization),
                 registryType,
                 ProgressStatus.crashed
             ))
@@ -1772,14 +1744,14 @@ class SyncDownload(
         when {
             !scope.isActive -> onUiEvent(SyncProgress(0,
                 0,
-                AssetControlApp.getContext().getString(R.string.synchronization_canceled),
+                getContext().getString(R.string.synchronization_canceled),
                 registryType,
                 ProgressStatus.canceled
             ))
             else -> {
                 onUiEvent(SyncProgress(0,
                     0,
-                    AssetControlApp.getContext()
+                    getContext()
                         .getString(R.string.barcode_label_synchronization_completed),
                     registryType,
                     ProgressStatus.success
@@ -1818,7 +1790,7 @@ class SyncDownload(
         private fun getDateTimeStr(): String {
             var dateTime = ""
             val timeFileLocation =
-                File(AssetControlApp.getContext().cacheDir.absolutePath + "/" + DownloadDb.timeFilename)
+                File(getContext().cacheDir.absolutePath + "/" + timeFilename)
 
             //Read text from file
             try {
@@ -1832,7 +1804,7 @@ class SyncDownload(
                 Log.e(
                     this::class.java.simpleName,
                     "${
-                        AssetControlApp.getContext()
+                        getContext()
                             .getString(R.string.failed_to_get_the_date_from_the_file)
                     }: ${ex.message}"
                 )

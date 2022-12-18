@@ -250,7 +250,7 @@ class Statics {
         const val INTERNAL_IMAGE_CONTROL_APP_ID: Int = 1
 
         const val reservedChar = "#"
-        private var timeFilename = "android_time.txt"
+        const val timeFilename = "android_time.txt"
 
         val clientPackage: String
             get() {
@@ -262,19 +262,11 @@ class Statics {
                 return prefsGetString(Preference.installationCode)
             }
 
-        fun deviceDateIsValid(parentView: View): Boolean {
+        fun deviceDateIsValid(): Boolean {
             val year = Calendar.getInstance().get(Calendar.YEAR)
             val pandemicYear = 2020
             return when {
-                year < pandemicYear -> {
-                    makeText(
-                        parentView,
-                        getContext()
-                            .getString(R.string.device_date_is_invalid),
-                        SnackBarType.ERROR
-                    )
-                    false
-                }
+                year < pandemicYear -> false
                 else -> true
             }
         }

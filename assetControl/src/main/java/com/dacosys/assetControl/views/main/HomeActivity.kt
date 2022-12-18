@@ -211,11 +211,16 @@ class HomeActivity :
     }
 
     private fun clickButton(clickedButton: Button) {
+        if (!Statics.deviceDateIsValid()) {
+            makeText(
+                binding.root,
+                getString(R.string.device_date_is_invalid),
+                SnackBarType.ERROR)
+            return
+        }
+
         when (MainButton.getById(clickedButton.tag.toString().toLong())) {
             MainButton.AssetReview -> {
-                if (!Statics.deviceDateIsValid(binding.root)) {
-                    return
-                }
                 if (!User.hasPermission(PermissionEntry.AddAssetReview)) {
                     makeText(
                         binding.root,
@@ -234,9 +239,6 @@ class HomeActivity :
                 }
             }
             MainButton.SendAndDownload -> {
-                if (!Statics.deviceDateIsValid(binding.root)) {
-                    return
-                }
                 if (!rejectNewInstances) {
                     rejectNewInstances = true
 
@@ -246,9 +248,6 @@ class HomeActivity :
                 }
             }
             MainButton.AssetMovement -> {
-                if (!Statics.deviceDateIsValid(binding.root)) {
-                    return
-                }
                 if (!User.hasPermission(PermissionEntry.AddWarehouseMovement)) {
                     makeText(
                         binding.root,
@@ -267,9 +266,6 @@ class HomeActivity :
                 }
             }
             MainButton.CheckCode -> {
-                if (!Statics.deviceDateIsValid(binding.root)) {
-                    return
-                }
                 if (!rejectNewInstances) {
                     rejectNewInstances = true
 
@@ -279,9 +275,6 @@ class HomeActivity :
                 }
             }
             MainButton.PrintLabel -> {
-                if (!Statics.deviceDateIsValid(binding.root)) {
-                    return
-                }
                 if (!User.hasPermission(PermissionEntry.PrintLabel)) {
                     makeText(
                         binding.root,
@@ -300,9 +293,6 @@ class HomeActivity :
                 }
             }
             MainButton.CRUD -> {
-                if (!Statics.deviceDateIsValid(binding.root)) {
-                    return
-                }
                 if (!rejectNewInstances) {
                     rejectNewInstances = true
 
@@ -312,9 +302,6 @@ class HomeActivity :
                 }
             }
             MainButton.AssetManteinance -> {
-                if (!Statics.deviceDateIsValid(binding.root)) {
-                    return
-                }
                 if (!rejectNewInstances) {
                     rejectNewInstances = true
 
@@ -324,10 +311,6 @@ class HomeActivity :
                 }
             }
             MainButton.Route -> {
-                if (!Statics.deviceDateIsValid(binding.root)) {
-                    return
-                }
-
                 if (!rejectNewInstances) {
                     rejectNewInstances = true
 
@@ -337,9 +320,6 @@ class HomeActivity :
                 }
             }
             MainButton.DataCollection -> {
-                if (!Statics.deviceDateIsValid(binding.root)) {
-                    return
-                }
                 if (!rejectNewInstances) {
                     rejectNewInstances = true
 
