@@ -1,5 +1,6 @@
 package com.dacosys.assetControl.model.reviews.async
 
+import android.util.Log
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.dataBase.DataBaseHelper
@@ -10,6 +11,7 @@ import com.dacosys.assetControl.model.movements.warehouseMovementContent.dbHelpe
 import com.dacosys.assetControl.model.reviews.assetReview.`object`.AssetReview
 import com.dacosys.assetControl.model.reviews.assetReviewContent.`object`.AssetReviewContent
 import com.dacosys.assetControl.model.reviews.assetReviewContent.dbHelper.AssetReviewContentDbHelper
+import com.dacosys.assetControl.model.reviews.assetReviewContentStatus.AssetReviewContentStatus
 import com.dacosys.assetControl.model.reviews.assetReviewStatus.`object`.AssetReviewStatus
 import com.dacosys.assetControl.network.sync.SyncProgress
 import com.dacosys.assetControl.network.sync.SyncRegistryType
@@ -21,27 +23,18 @@ import kotlinx.coroutines.*
 
 class SaveReview {
     private lateinit var tempReview: AssetReview
-    private var assetExternalList: ArrayList<AssetReviewContent> = ArrayList()
-    private var allAssetList: ArrayList<AssetReviewContent> = ArrayList()
-    private var assetNotInReviewList: ArrayList<AssetReviewContent> = ArrayList()
-    private var assetOnInventory: ArrayList<AssetReviewContent> = ArrayList()
+    private var allAssets: ArrayList<AssetReviewContent> = ArrayList()
     private var onSaveProgress: (SaveProgress) -> Unit = {}
     private var onSyncProgress: (SyncProgress) -> Unit = {}
 
     fun addParams(
         assetReview: AssetReview,
         allAssetList: ArrayList<AssetReviewContent>,
-        assetOnInventory: ArrayList<AssetReviewContent>,
-        assetNotInReviewList: ArrayList<AssetReviewContent>,
-        assetExternalList: ArrayList<AssetReviewContent>,
         onSaveProgress: (SaveProgress) -> Unit = {},
         onSyncProgress: (SyncProgress) -> Unit = {},
     ) {
         this.tempReview = assetReview
-        this.assetExternalList = assetExternalList
-        this.allAssetList = allAssetList
-        this.assetNotInReviewList = assetNotInReviewList
-        this.assetOnInventory = assetOnInventory
+        this.allAssets = allAssetList
         this.onSaveProgress = onSaveProgress
         this.onSyncProgress = onSyncProgress
     }
@@ -74,6 +67,61 @@ class SaveReview {
     }
 
     private suspend fun suspendFunction(): Boolean = withContext(Dispatchers.IO) {
+        /////////////////////////////////////
+        ///// Construir las colecciones /////
+
+        // Lista de activos que provienen de otra área
+        val assetExternalList: ArrayList<AssetReviewContent> = ArrayList()
+
+        // Listas de activos que cambiarán de estado cuando la revisión esté completada
+        val assetNotInReviewList: ArrayList<AssetReviewContent> = ArrayList()
+        val assetOnInventory: ArrayList<AssetReviewContent> = ArrayList()
+
+        // Lista de activos desconocidos que no están la base de datos
+        val assetUnknownList: ArrayList<AssetReviewContent> = ArrayList()
+
+        // Iteramos la lista de todos los activos, tanto los que fueron encotrados durante
+        // la revisión como los que no y los que no existen en la base de datos.
+        for (arCont in allAssets) {
+            var msg = ""
+            when (arCont.contentStatusId) {
+                AssetReviewContentStatus.external.id -> {
+                    assetOnInventory.add(arCont)
+                    assetExternalList.add(arCont)
+                    msg =
+                        "${getContext().getString(R.string.processing_external_asset)} ${arCont.code}"
+                }
+                AssetReviewContentStatus.revised.id -> {
+                    assetOnInventory.add(arCont)
+                    msg =
+                        "${getContext().getString(R.string.processing_revisedasset)} ${arCont.code}"
+                }
+                AssetReviewContentStatus.newAsset.id -> {
+                    assetOnInventory.add(arCont)
+                    msg = "${getContext().getString(R.string.processing_new_asset)} ${arCont.code}"
+                }
+                AssetReviewContentStatus.appeared.id -> {
+                    assetOnInventory.add(arCont)
+                    msg =
+                        "${getContext().getString(R.string.processing_appeared_asset)} ${arCont.code}"
+                }
+                AssetReviewContentStatus.unknown.id -> {
+                    assetUnknownList.add(arCont)
+                    msg =
+                        "${getContext().getString(R.string.processing_unknown_asset)} ${arCont.code}"
+                }
+                AssetReviewContentStatus.notInReview.id -> {
+                    // Activos faltantes en la revisión
+                    assetNotInReviewList.add(arCont)
+                    msg =
+                        "${getContext().getString(R.string.processing_missing_asset)} ${arCont.code}"
+                }
+            }
+
+            // makeText(binding.root, msg, LENGTH_SHORT)
+            Log.d(this::class.java.simpleName, msg)
+        }
+
         ///////////////////////////////////
         // Para controlar la transacción //
         val db = DataBaseHelper.getWritableDb()
@@ -84,7 +132,7 @@ class SaveReview {
             //////////// MOVEMENTS ////////////
             // Create a Array List with the differents
             // Origin Warehouse Areas to select the number of movements to do
-            val waIdList = java.util.ArrayList<Long>()
+            val waIdList = ArrayList<Long>()
 
             // Traer todos los orígenes únicos
             var total = assetExternalList.size
@@ -122,7 +170,7 @@ class SaveReview {
                     ))
 
                     if (newWm != null) {
-                        val l: java.util.ArrayList<AssetReviewContent> = java.util.ArrayList()
+                        val l: ArrayList<AssetReviewContent> = ArrayList()
                         for (x in assetExternalList) {
                             if (x.warehouseAreaId == origWaId) {
                                 l.add(x)
@@ -195,7 +243,7 @@ class SaveReview {
                 // Se agregan todos los activos, el sincronizador se encarga después
                 // de NO enviar aquellos que no fueron revisados
                 arContDbHelper.insert(ar = tempReview,
-                    arCont = allAssetList.toTypedArray(),
+                    arCont = allAssets.toTypedArray(),
                     onSaveProgress = { onSaveProgress.invoke(it) })
             } else {
                 // No es necesario settear error = true, termina acá.

@@ -301,6 +301,8 @@ class SyncUpload(
                         break
                     }
 
+                    // Los activos extraviados no deben aparecer en la revisión,
+                    // pero el estado de los activos sí cambia a extraviado.
                     if (arc.contentStatusId == AssetReviewContentStatus.notInReview.id) {
                         continue
                     }

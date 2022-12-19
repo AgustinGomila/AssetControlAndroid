@@ -152,7 +152,7 @@
     <string name="the_code_does_not_belong_to_any_asset_or_area_in_the_database">El código no pertenece a ningún activo fijo o área de depósito en la base de datos</string>
     <string name="the_code_belongs_to_an_area">El código pertenece a un área</string>
     <string name="the_code_belongs_to_an_asset">El código pertenece a un activo fijo</string>
-    <string name="asset_review">Revisión de activos</string>
+    <string name="asset_review">Revisión</string>
     <string name="asset_reviews">Revisiones</string>
     <string name="cancel_review">Cancelar revisión</string>
     <string name="NO_DATA">SIN DATOS</string>

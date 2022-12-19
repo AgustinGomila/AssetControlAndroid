@@ -1259,7 +1259,7 @@ class AssetDbHelper {
             for (a in assetExists) {
                 // Actualizando activo
 
-                // Si el activo está eliminado no vuelve a estar en inventario,
+                // Si el activo está eliminado (Dado de baja) no vuelve a estar en Inventario,
                 // sólo se actualiza su ubicación pero no cambia su estado.
                 if (a.assetStatusId != AssetStatus.removed.id) {
                     updateOnInventory(
@@ -1300,7 +1300,7 @@ class AssetDbHelper {
             }
 
             for (a in assetExists) {
-                // Actualizando activo a.code
+                // Actualizando ubicación de los activos
                 updateLocation(
                     w.warehouseId,
                     wa.warehouseAreaId,
@@ -1333,7 +1333,7 @@ class AssetDbHelper {
             }
 
             for (a in assetExists) {
-                // Actualizando activo a.code
+                // Actualizando ubicación de los activos
                 updateLocation(
                     w.warehouseId,
                     wa.warehouseAreaId,
@@ -1366,8 +1366,6 @@ class AssetDbHelper {
             }
 
             for (a in assetExists) {
-                // Actualizando activo a.code
-
                 // Si el activo está eliminado no vuelve a estar en inventario,
                 // sólo se actualiza su ubicación pero no cambia su estado.
                 if (a.assetStatusId != AssetStatus.removed.id) {
@@ -1410,7 +1408,6 @@ class AssetDbHelper {
             }
 
             for (a in assetExists) {
-                // Actualizando activo a.code
                 // Los activos extraviados vuelven a inventario.
                 updateOnInventory(
                     w.warehouseId,
@@ -1443,8 +1440,6 @@ class AssetDbHelper {
             }
 
             for (a in assetExists) {
-                // Actualizando activo a.code
-
                 // Si el activo está eliminado no vuelve a estar en inventario,
                 // sólo se actualiza su ubicación pero no cambia su estado.
                 if (a.assetStatusId != AssetStatus.removed.id) {
@@ -1487,8 +1482,6 @@ class AssetDbHelper {
             }
 
             for (a in assetExists) {
-                // Actualizando activo a.code
-
                 // Si el activo está eliminado no vuelve a estar en inventario,
                 // sólo se actualiza su ubicación pero no cambia su estado.
                 if (a.assetStatusId != AssetStatus.removed.id) {

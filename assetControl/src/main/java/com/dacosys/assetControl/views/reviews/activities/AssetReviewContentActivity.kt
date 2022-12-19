@@ -453,8 +453,9 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         setHeaderTextBox()
 
-        // Llenar la grilla
         setPanels()
+
+        Handler(Looper.getMainLooper()).postDelayed({ fillListView() }, 500)
     }
 
     private fun setHeaderTextBox() {
@@ -861,67 +862,10 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         saving = true
 
-        // Lista de activos que provienen de otra área
-        val assetExternalList: ArrayList<AssetReviewContent> = ArrayList()
-
-        // Listas de activos que cambiarán de estado cuando la revisión
-        // esté completada
-        val assetNotInReviewList: ArrayList<AssetReviewContent> = ArrayList()
-        val assetOnInventory: ArrayList<AssetReviewContent> = ArrayList()
-
-        // Lista de todos los activos, tanto los que fueron encotrados durante
-        // la revisión como los que no y los que no existen en la base de datos
-        val allAssetList: ArrayList<AssetReviewContent> = ArrayList()
-
-        // Lista de activos desconocidos que no están la base de datos
-        val assetUnknownList: ArrayList<AssetReviewContent> = ArrayList()
-
-        for (arCont in all) {
-            var msg = ""
-
-            allAssetList.add(arCont)
-
-            when (arCont.contentStatusId) {
-                AssetReviewContentStatus.external.id -> {
-                    assetOnInventory.add(arCont)
-                    assetExternalList.add(arCont)
-                    msg = "${getString(R.string.processing_external_asset)} ${arCont.code}"
-                }
-                AssetReviewContentStatus.revised.id -> {
-                    assetOnInventory.add(arCont)
-                    msg = "${getString(R.string.processing_revisedasset)} ${arCont.code}"
-                }
-                AssetReviewContentStatus.newAsset.id -> {
-                    assetOnInventory.add(arCont)
-                    msg = "${getString(R.string.processing_new_asset)} ${arCont.code}"
-                }
-                AssetReviewContentStatus.appeared.id -> {
-                    assetOnInventory.add(arCont)
-                    msg = "${getString(R.string.processing_appeared_asset)} ${arCont.code}"
-                }
-                AssetReviewContentStatus.unknown.id -> {
-                    assetUnknownList.add(arCont)
-                    msg = "${getString(R.string.processing_unknown_asset)} ${arCont.code}"
-                }
-                AssetReviewContentStatus.notInReview.id -> {
-                    // Activos faltantes en la revisión
-                    assetNotInReviewList.add(arCont)
-                    msg = "${getString(R.string.processing_missing_asset)} ${arCont.code}"
-                }
-            }
-
-            // makeText(binding.root, msg, LENGTH_SHORT)
-            Log.d(this::class.java.simpleName, msg)
-        }
-
         thread {
             val sr = SaveReview()
-            sr.addParams(
-                assetReview = tempReview,
-                allAssetList = allAssetList,
-                assetOnInventory = assetOnInventory,
-                assetNotInReviewList = assetNotInReviewList,
-                assetExternalList = assetExternalList,
+            sr.addParams(assetReview = tempReview,
+                allAssetList = all,
                 onSaveProgress = { saveViewModel.setSaveProgress(it) },
                 onSyncProgress = { syncViewModel.setSyncUploadProgress(it) })
             sr.execute()
@@ -1021,7 +965,6 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
         super.onResume()
 
         rejectNewInstances = false
-        fillListView()
     }
 
     override fun onBackPressed() {
@@ -1682,27 +1625,29 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
             } else {
                 if (Statics.demoMode) {
                     processAssetReview()
-                } else {
-                    JotterListener.pauseReaderDevices(this)
-                    try {
-                        runOnUiThread {
-                            val alert = AlertDialog.Builder(this)
-                            alert.setTitle(getContext().getString(R.string.added_assets))
-                            alert.setMessage(getContext().getString(R.string.there_are_assets_in_this_revision_that_belonged_to_another_area_do_you_want_to_make_the_movements_of_these_assets_to_the_current_area_question))
-                            alert.setNegativeButton(getContext().getString(R.string.no)) { _, _ ->
-                                return@setNegativeButton
-                            }
-                            alert.setPositiveButton(getContext().getString(R.string.yes)) { _, _ ->
-                                processAssetReview()
-                            }
-                            alert.show()
+                    return
+
+                }
+
+                JotterListener.pauseReaderDevices(this)
+                try {
+                    runOnUiThread {
+                        val alert = AlertDialog.Builder(this)
+                        alert.setTitle(getContext().getString(R.string.added_assets))
+                        alert.setMessage(getContext().getString(R.string.there_are_assets_in_this_revision_that_belonged_to_another_area_do_you_want_to_make_the_movements_of_these_assets_to_the_current_area_question))
+                        alert.setNegativeButton(getContext().getString(R.string.no)) { _, _ ->
+                            return@setNegativeButton
                         }
-                    } catch (ex: java.lang.Exception) {
-                        ex.printStackTrace()
-                        ErrorLog.writeLog(this, this::class.java.simpleName, ex)
-                    } finally {
-                        JotterListener.resumeReaderDevices(this)
+                        alert.setPositiveButton(getContext().getString(R.string.yes)) { _, _ ->
+                            processAssetReview()
+                        }
+                        alert.show()
                     }
+                } catch (ex: java.lang.Exception) {
+                    ex.printStackTrace()
+                    ErrorLog.writeLog(this, this::class.java.simpleName, ex)
+                } finally {
+                    JotterListener.resumeReaderDevices(this)
                 }
             }
         } else {
@@ -1903,8 +1848,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
             } else {
                 // Localmente no hay imágenes vamos a buscar en el servidor
                 val getDocs = GetImagesTask()
-                getDocs.addParams(
-                    programId = Statics.INTERNAL_IMAGE_CONTROL_APP_ID,
+                getDocs.addParams(programId = Statics.INTERNAL_IMAGE_CONTROL_APP_ID,
                     programObjectId = tempTableId,
                     objId1 = tempObjectId,
                     objId2 = "",
