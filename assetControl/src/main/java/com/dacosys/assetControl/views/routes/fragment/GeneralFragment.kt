@@ -11,31 +11,11 @@ import com.dacosys.assetControl.model.routes.commons.Parameter
 import com.dacosys.assetControl.model.routes.dataCollections.dataCollectionRuleContent.`object`.DataCollectionRuleContent
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.udojava.evalex.Expression
-import java.lang.ref.WeakReference
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.regex.Pattern
 
-class GeneralFragment :
-    DccFragmentListener {
-    override fun onFragmentStarted() {
-        dccFragmentListener?.onFragmentStarted()
-    }
-
-    override fun onFragmentDestroy() {
-        saveLastValue()
-        Log.d(
-            this::class.java.simpleName,
-            "Destroying fragment: ${attributeCompositionType.toString()}..."
-        )
-        currentFragment = null
-        dccFragmentListener?.onFragmentDestroy()
-    }
-
-    override fun onFragmentOk() {
-        dccFragmentListener?.onFragmentOk()
-    }
-
+class GeneralFragment(private var dccFragmentListener: DccFragmentListener) {
     override fun equals(other: Any?): Boolean {
         return if (other !is GeneralFragment) {
             false
@@ -59,12 +39,6 @@ class GeneralFragment :
         }
         return currentFragment
     }
-
-    fun refreshListeners(listener1: DccFragmentListener?) {
-        this.dccFragmentListener = listener1
-    }
-
-    var dccFragmentListener: DccFragmentListener? = null
 
     private var currentFragment: Any? = null
 
@@ -121,6 +95,15 @@ class GeneralFragment :
         val valueStr: String?,
     )
 
+    fun destroy() {
+        saveLastValue()
+        Log.d(
+            this::class.java.simpleName,
+            "Destroying fragment: ${attributeCompositionType.toString()}..."
+        )
+        currentFragment = null
+    }
+
     private var lastValue: GeneralFragmentValueData? = null
     fun saveLastValue() {
         lastValue = null
@@ -132,7 +115,6 @@ class GeneralFragment :
         val attrCompType = attributeCompositionType ?: return
         Log.d(this::class.java.simpleName, "Generating fragment: $attrCompType...")
 
-        val thisWeakRef = WeakReference(this)
         val lastV = convertStringToTypedAttr(attrCompType, lastValue?.valueStr)
 
         when {
@@ -142,7 +124,7 @@ class GeneralFragment :
                     description = attrComp.description,
                     value = lastV as Float?
                 )
-                (currentFragment as DecimalFragment).setListener(thisWeakRef.get() ?: return)
+                (currentFragment as DecimalFragment).setListener(dccFragmentListener)
             }
             attrCompType == AttributeCompositionType.TypeDecimalNumber ||
                     attrCompType == AttributeCompositionType.TypeCurrency -> {
@@ -151,14 +133,14 @@ class GeneralFragment :
                     description = attrComp.description,
                     value = lastV as Float?
                 )
-                (currentFragment as DecimalFragment).setListener(thisWeakRef.get() ?: return)
+                (currentFragment as DecimalFragment).setListener(dccFragmentListener)
             }
             attrCompType == AttributeCompositionType.TypeBool -> {
                 currentFragment = BooleanFragment.newInstance(
                     description = attrComp.description,
                     value = lastV as Boolean?
                 )
-                (currentFragment as BooleanFragment).setListener(thisWeakRef.get() ?: return)
+                (currentFragment as BooleanFragment).setListener(dccFragmentListener)
             }
             attrCompType == AttributeCompositionType.TypeTextLong ||
                     attrCompType == AttributeCompositionType.TypeTextShort -> {
@@ -166,21 +148,21 @@ class GeneralFragment :
                     description = attrComp.description,
                     value = lastV as String?
                 )
-                (currentFragment as StringFragment).setListener(thisWeakRef.get() ?: return)
+                (currentFragment as StringFragment).setListener(dccFragmentListener)
             }
             attrCompType == AttributeCompositionType.TypeTime -> {
                 currentFragment = TimeFragment.newInstance(
                     description = attrComp.description,
                     value = lastV as Calendar?
                 )
-                (currentFragment as TimeFragment).setListener(thisWeakRef.get() ?: return)
+                (currentFragment as TimeFragment).setListener(dccFragmentListener)
             }
             attrCompType == AttributeCompositionType.TypeDate -> {
                 currentFragment = DateFragment.newInstance(
                     description = attrComp.description,
                     value = lastV as Calendar?
                 )
-                (currentFragment as DateFragment).setListener(thisWeakRef.get() ?: return)
+                (currentFragment as DateFragment).setListener(dccFragmentListener)
             }
             attrCompType == AttributeCompositionType.TypeOptions -> {
                 var composition = ""
@@ -193,9 +175,7 @@ class GeneralFragment :
                     description = attrComp.description,
                     value = lastV as String?
                 )
-                (currentFragment as CommaSeparatedSpinnerFragment).setListener(
-                    thisWeakRef.get() ?: return
-                )
+                (currentFragment as CommaSeparatedSpinnerFragment).setListener(dccFragmentListener)
             }
             AttributeCompositionType.getAllUnitType().contains(attrCompType)
             -> {
@@ -206,9 +186,7 @@ class GeneralFragment :
                             description = attrComp.description,
                             value = lastV as UnitType?
                         )
-                        (currentFragment as UnitTypeSpinnerFragment).setListener(
-                            thisWeakRef.get() ?: return
-                        )
+                        (currentFragment as UnitTypeSpinnerFragment).setListener(dccFragmentListener)
                     }
                     AttributeCompositionType.TypeUnitWeight -> {
                         currentFragment = UnitTypeSpinnerFragment.newInstance(
@@ -216,9 +194,7 @@ class GeneralFragment :
                             description = attrComp.description,
                             value = lastV as UnitType?
                         )
-                        (currentFragment as UnitTypeSpinnerFragment).setListener(
-                            thisWeakRef.get() ?: return
-                        )
+                        (currentFragment as UnitTypeSpinnerFragment).setListener(dccFragmentListener)
                     }
                     AttributeCompositionType.TypeUnitTemperature -> {
                         currentFragment = UnitTypeSpinnerFragment.newInstance(
@@ -226,9 +202,7 @@ class GeneralFragment :
                             description = attrComp.description,
                             value = lastV as UnitType?
                         )
-                        (currentFragment as UnitTypeSpinnerFragment).setListener(
-                            thisWeakRef.get() ?: return
-                        )
+                        (currentFragment as UnitTypeSpinnerFragment).setListener(dccFragmentListener)
                     }
                     AttributeCompositionType.TypeUnitPressure -> {
                         currentFragment = UnitTypeSpinnerFragment.newInstance(
@@ -236,9 +210,7 @@ class GeneralFragment :
                             description = attrComp.description,
                             value = lastV as UnitType?
                         )
-                        (currentFragment as UnitTypeSpinnerFragment).setListener(
-                            thisWeakRef.get() ?: return
-                        )
+                        (currentFragment as UnitTypeSpinnerFragment).setListener(dccFragmentListener)
                     }
                     AttributeCompositionType.TypeUnitLenght -> {
                         currentFragment = UnitTypeSpinnerFragment.newInstance(
@@ -246,9 +218,7 @@ class GeneralFragment :
                             description = attrComp.description,
                             value = lastV as UnitType?
                         )
-                        (currentFragment as UnitTypeSpinnerFragment).setListener(
-                            thisWeakRef.get() ?: return
-                        )
+                        (currentFragment as UnitTypeSpinnerFragment).setListener(dccFragmentListener)
                     }
                     AttributeCompositionType.TypeUnitArea -> {
                         currentFragment = UnitTypeSpinnerFragment.newInstance(
@@ -256,9 +226,7 @@ class GeneralFragment :
                             description = attrComp.description,
                             value = lastV as UnitType?
                         )
-                        (currentFragment as UnitTypeSpinnerFragment).setListener(
-                            thisWeakRef.get() ?: return
-                        )
+                        (currentFragment as UnitTypeSpinnerFragment).setListener(dccFragmentListener)
                     }
                 }
             }

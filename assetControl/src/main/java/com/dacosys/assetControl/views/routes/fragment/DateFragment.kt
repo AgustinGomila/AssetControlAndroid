@@ -18,8 +18,8 @@ import java.util.*
 class DateFragment : Fragment() {
     private var dccFragmentListener: DccFragmentListener? = null
 
-    fun setListener(gf: GeneralFragment) {
-        dccFragmentListener = gf
+    fun setListener(dccList: DccFragmentListener) {
+        dccFragmentListener = dccList
     }
 
     private var _binding: FragmentDateBinding? = null
@@ -82,8 +82,6 @@ class DateFragment : Fragment() {
 
         setValues()
 
-        dccFragmentListener?.onFragmentStarted()
-
         return view
     }
 
@@ -94,10 +92,10 @@ class DateFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-
         if (isEnabled) {
             binding.datePicker.requestFocus()
         }
+        dccFragmentListener?.onFragmentStarted()
     }
 
     var isEnabled: Boolean = true

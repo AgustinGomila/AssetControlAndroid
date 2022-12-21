@@ -17,8 +17,8 @@ import java.util.*
 class TimeFragment : Fragment() {
     private var dccFragmentListener: DccFragmentListener? = null
 
-    fun setListener(gf: GeneralFragment) {
-        dccFragmentListener = gf
+    fun setListener(dccList: DccFragmentListener) {
+        dccFragmentListener = dccList
     }
 
     private var _binding: FragmentTimeBinding? = null
@@ -82,8 +82,6 @@ class TimeFragment : Fragment() {
 
         setValues()
 
-        dccFragmentListener?.onFragmentStarted()
-
         return view
     }
 
@@ -94,10 +92,10 @@ class TimeFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-
         if (isEnabled) {
             binding.autoResizeTextView.requestFocus()
         }
+        dccFragmentListener?.onFragmentStarted()
     }
 
     var isEnabled: Boolean = true

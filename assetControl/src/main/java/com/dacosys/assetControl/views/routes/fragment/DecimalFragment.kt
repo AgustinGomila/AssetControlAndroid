@@ -22,7 +22,7 @@ import com.dacosys.assetControl.views.commons.views.filters.DecimalDigitsInputFi
 class DecimalFragment : Fragment() {
     private var dccFragmentListener: DccFragmentListener? = null
 
-    fun setListener(gf: GeneralFragment) {
+    fun setListener(gf: DccFragmentListener) {
         dccFragmentListener = gf
     }
 
@@ -90,8 +90,6 @@ class DecimalFragment : Fragment() {
 
         setValues()
 
-        dccFragmentListener?.onFragmentStarted()
-
         return view
     }
 
@@ -102,10 +100,10 @@ class DecimalFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-
         if (isEnabled) {
             binding.decimalEditText.requestFocus()
         }
+        dccFragmentListener?.onFragmentStarted()
     }
 
     var isEnabled: Boolean = true

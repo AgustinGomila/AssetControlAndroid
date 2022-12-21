@@ -13,7 +13,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
-import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
@@ -79,7 +78,6 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     private fun destroyLocals() {
-        Statics.closeKeyboard(this)
         imageControlFragment?.onDestroy()
         imageControlFragment = null
         historicDataFragment?.onDestroy()
@@ -129,27 +127,6 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private var historicDataFragment: HistoricDataFragment? = null
 
-    @SuppressLint("ClickableViewAccessibility")
-    private fun setupUI(view: View) {
-        // Set up touch listener for non-text box views to hide keyboard.
-        if (view !is EditText) {
-            view.setOnTouchListener { _, motionEvent ->
-                Statics.closeKeyboard(this)
-                if (view is Button && view !is Switch && view !is CheckBox) {
-                    touchButton(motionEvent, view)
-                    true
-                } else {
-                    false
-                }
-            }
-        }
-
-        //If a layout container, iterate over children and seed recursion.
-        if (view is ViewGroup) {
-            (0 until view.childCount).map { view.getChildAt(it) }.forEach { setupUI(it) }
-        }
-    }
-
     override fun onSaveInstanceState(savedInstanceState: Bundle) {
         super.onSaveInstanceState(savedInstanceState)
         saveBundleValues(savedInstanceState)
@@ -159,14 +136,15 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         b.putInt("level", currentLevel)
         b.putInt("pos", currentPos)
 
-        if (imageControlFragment is ImageControlButtonsFragment) supportFragmentManager.putFragment(
-            b,
-            "imageControlFragment",
-            imageControlFragment as ImageControlButtonsFragment)
+        if (imageControlFragment is ImageControlButtonsFragment)
+            supportFragmentManager.putFragment(b,
+                "imageControlFragment",
+                imageControlFragment as ImageControlButtonsFragment)
 
-        if (historicDataFragment is HistoricDataFragment) supportFragmentManager.putFragment(b,
-            "historicDataFragment",
-            historicDataFragment as HistoricDataFragment)
+        if (historicDataFragment is HistoricDataFragment)
+            supportFragmentManager.putFragment(b,
+                "historicDataFragment",
+                historicDataFragment as HistoricDataFragment)
 
         b.putBoolean("panelBottomIsExpanded", panelBottomIsExpanded)
 
@@ -281,8 +259,8 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         // Llenar la grilla
         initDcc()
 
-        // ESTO SIRVE PARA OCULTAR EL TECLADO EN PANTALLA CUANDO PIERDEN EL FOCO LOS CONTROLES QUE LO NECESITAN
-        setupUI(binding.root)
+        // // ESTO SIRVE PARA OCULTAR EL TECLADO EN PANTALLA CUANDO PIERDEN EL FOCO LOS CONTROLES QUE LO NECESITAN
+        // setupUI(binding.root)
     }
 
     private fun initDcc() {
@@ -534,8 +512,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
             val dcrCont = DataCollectionRuleContentDbHelper().selectById(fd.dcrContId) ?: continue
 
             try {
-                val y = GeneralFragment()
-                y.refreshListeners(this)
+                val y = GeneralFragment(this)
                 y.dataCollectionRuleContent = dcrCont
 
                 val tempAttrCompTypeId = fd.attrCompTypeId ?: 0
@@ -568,8 +545,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         // Construyo un control por cada contenido de la regla
         for (dcrCont in dcrContArray.sortedWith(compareBy({ it.level }, { it.position }))) {
             try {
-                val y = GeneralFragment()
-                y.refreshListeners(this)
+                val y = GeneralFragment(this)
                 y.dataCollectionRuleContent = dcrCont
 
                 val tempAttrCompId = dcrCont.attributeCompositionId
@@ -1306,8 +1282,6 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         ///////////////////////////////////////////
 
         if (!error) {
-            Statics.closeKeyboard(this)
-
             allFrags.clear()
             attrFrags.clear()
 
@@ -1539,12 +1513,9 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
             alert.setMessage(getString(R.string.you_want_to_cancel_the_current_data_collection))
             alert.setNegativeButton(R.string.cancel, null)
             alert.setPositiveButton(R.string.accept) { _, _ ->
-                Statics.closeKeyboard(this)
-
                 setResult(RESULT_CANCELED, null)
                 finish()
             }
-
             alert.show()
         } catch (ex: java.lang.Exception) {
             ex.printStackTrace()
@@ -1607,11 +1578,18 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     override fun onFragmentStarted() {
         val f = currentFragment?.getFragment() ?: return
+
         Handler(Looper.getMainLooper()).postDelayed({
             if (f is StringFragment || f is DateFragment || f is TimeFragment || f is DecimalFragment) {
+
+                // Los fragmentos que necesitan mostrar el teclado llaman a requestFocus en onStart,
+                // acá vamos a cerrar el panel de datos históricos, para que entre el teclado en la
+                // pantalla.
+
                 if (panelBottomIsExpanded) {
                     binding.expandHistoricPanelButton?.performClick()
                 }
+
                 Statics.showKeyboard(this)
             } else {
                 Statics.closeKeyboard(this)
@@ -1620,6 +1598,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     override fun onFragmentDestroy() {
+        currentFragment?.destroy()
     }
 
     override fun onFragmentOk() {

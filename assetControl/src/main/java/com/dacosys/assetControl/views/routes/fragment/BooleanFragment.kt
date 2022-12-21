@@ -15,8 +15,8 @@ import com.dacosys.assetControl.databinding.FragmentBooleanBinding
 class BooleanFragment : Fragment() {
     private var dccFragmentListener: DccFragmentListener? = null
 
-    fun setListener(gf: GeneralFragment) {
-        dccFragmentListener = gf
+    fun setListener(dccList: DccFragmentListener) {
+        dccFragmentListener = dccList
     }
 
     private var _binding: FragmentBooleanBinding? = null
@@ -64,8 +64,6 @@ class BooleanFragment : Fragment() {
 
         setValues()
 
-        dccFragmentListener?.onFragmentStarted()
-
         return view
     }
 
@@ -79,6 +77,7 @@ class BooleanFragment : Fragment() {
         if (isEnabled) {
             binding.booleanCheckBox.requestFocus()
         }
+        dccFragmentListener?.onFragmentStarted()
     }
 
     var isEnabled: Boolean = true

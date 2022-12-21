@@ -19,8 +19,8 @@ import com.dacosys.assetControl.databinding.FragmentStringBinding
 class StringFragment : Fragment() {
     private var dccFragmentListener: DccFragmentListener? = null
 
-    fun setListener(gf: GeneralFragment) {
-        dccFragmentListener = gf
+    fun setListener(dccList: DccFragmentListener) {
+        dccFragmentListener = dccList
     }
 
     private var _binding: FragmentStringBinding? = null
@@ -83,8 +83,6 @@ class StringFragment : Fragment() {
 
         setValues()
 
-        dccFragmentListener?.onFragmentStarted()
-
         return view
     }
 
@@ -95,10 +93,10 @@ class StringFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-
         if (isEnabled) {
             binding.stringEditText.requestFocus()
         }
+        dccFragmentListener?.onFragmentStarted()
     }
 
     var isEnabled: Boolean = true

@@ -21,8 +21,8 @@ class CommaSeparatedSpinnerFragment : Fragment() {
     private var itemSelectedListener: OnItemSelectedListener? = null
     private var dccFragmentListener: DccFragmentListener? = null
 
-    fun setListener(gf: GeneralFragment) {
-        dccFragmentListener = gf
+    fun setListener(dccList: DccFragmentListener) {
+        dccFragmentListener = dccList
     }
 
     val count: Int
@@ -96,8 +96,6 @@ class CommaSeparatedSpinnerFragment : Fragment() {
 
         setValues()
 
-        dccFragmentListener?.onFragmentStarted()
-
         return view
     }
 
@@ -117,14 +115,13 @@ class CommaSeparatedSpinnerFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-
         if (activity is OnItemSelectedListener) {
             itemSelectedListener = activity as OnItemSelectedListener
         }
-
         if (isEnabled) {
             binding.fragmentSpinner.requestFocus()
         }
+        dccFragmentListener?.onFragmentStarted()
     }
 
     override fun onDetach() {
