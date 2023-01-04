@@ -84,7 +84,9 @@ class DownloadFile(
                 fileType = fileType,
                 downloadStatus = INFO,
             ))
-            return true
+
+            // Eliminar destino
+            destination.delete()
         }
 
         Log.d(this.javaClass.simpleName, "${
