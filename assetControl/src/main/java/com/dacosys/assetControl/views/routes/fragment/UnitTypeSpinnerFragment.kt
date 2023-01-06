@@ -42,7 +42,10 @@ class UnitTypeSpinnerFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        destroyLocals()
+    }
 
+    private fun destroyLocals() {
         dccFragmentListener?.onFragmentDestroy()
 
         itemSelectedListener = null

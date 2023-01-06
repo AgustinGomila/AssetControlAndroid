@@ -27,7 +27,10 @@ class BooleanFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        destroyLocals()
+    }
 
+    private fun destroyLocals() {
         dccFragmentListener?.onFragmentDestroy()
         dccFragmentListener = null
 

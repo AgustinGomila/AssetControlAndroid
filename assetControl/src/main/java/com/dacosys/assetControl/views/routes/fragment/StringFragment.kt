@@ -31,7 +31,10 @@ class StringFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        destroyLocals()
+    }
 
+    private fun destroyLocals() {
         dccFragmentListener?.onFragmentDestroy()
         dccFragmentListener = null
 
@@ -57,16 +60,10 @@ class StringFragment : Fragment() {
         _binding = FragmentStringBinding.inflate(inflater, container, false)
         val view = binding.root
 
-        if (arguments != null)
-            loadBundleValues(requireArguments())
+        if (arguments != null) loadBundleValues(requireArguments())
 
         binding.stringEditText.setOnEditorActionListener { _, keyCode, keyEvent ->
-            if (keyCode == EditorInfo.IME_ACTION_DONE ||
-                (keyEvent.action == KeyEvent.ACTION_DOWN &&
-                        (keyCode == KeyEvent.KEYCODE_UNKNOWN ||
-                                keyCode == KeyEvent.KEYCODE_ENTER ||
-                                keyCode == KeyEvent.KEYCODE_DPAD_CENTER))
-            ) {
+            if (keyCode == EditorInfo.IME_ACTION_DONE || (keyEvent.action == KeyEvent.ACTION_DOWN && (keyCode == KeyEvent.KEYCODE_UNKNOWN || keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_DPAD_CENTER))) {
                 dccFragmentListener?.onFragmentOk()
                 true
             } else {

@@ -40,8 +40,14 @@ class CommaSeparatedSpinnerFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-
         destroyLocals()
+    }
+
+    private fun destroyLocals() {
+        dccFragmentListener?.onFragmentDestroy()
+        itemSelectedListener = null
+        dccFragmentListener = null
+
         _binding = null
     }
 
@@ -105,12 +111,6 @@ class CommaSeparatedSpinnerFragment : Fragment() {
 
         // Llenar el binding.fragmentSpinner
         fillAdapter()
-    }
-
-    private fun destroyLocals() {
-        dccFragmentListener?.onFragmentDestroy()
-        itemSelectedListener = null
-        dccFragmentListener = null
     }
 
     override fun onStart() {

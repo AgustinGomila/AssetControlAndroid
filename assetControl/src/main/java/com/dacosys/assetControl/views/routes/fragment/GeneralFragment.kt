@@ -15,7 +15,25 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.regex.Pattern
 
-class GeneralFragment(private var dccFragmentListener: DccFragmentListener) {
+class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
+    override fun onFragmentStarted() {
+        listener.onFragmentStarted()
+    }
+
+    override fun onFragmentDestroy() {
+        saveLastValue()
+        Log.d(
+            this::class.java.simpleName,
+            "Destroying fragment: ${attributeCompositionType.toString()}..."
+        )
+        currentFragment = null
+        listener.onFragmentDestroy()
+    }
+
+    override fun onFragmentOk() {
+        listener.onFragmentOk()
+    }
+
     override fun equals(other: Any?): Boolean {
         return if (other !is GeneralFragment) {
             false
@@ -95,15 +113,6 @@ class GeneralFragment(private var dccFragmentListener: DccFragmentListener) {
         val valueStr: String?,
     )
 
-    fun destroy() {
-        saveLastValue()
-        Log.d(
-            this::class.java.simpleName,
-            "Destroying fragment: ${attributeCompositionType.toString()}..."
-        )
-        currentFragment = null
-    }
-
     private var lastValue: GeneralFragmentValueData? = null
     fun saveLastValue() {
         lastValue = null
@@ -124,7 +133,7 @@ class GeneralFragment(private var dccFragmentListener: DccFragmentListener) {
                     description = attrComp.description,
                     value = lastV as Float?
                 )
-                (currentFragment as DecimalFragment).setListener(dccFragmentListener)
+                (currentFragment as DecimalFragment).setListener(this)
             }
             attrCompType == AttributeCompositionType.TypeDecimalNumber ||
                     attrCompType == AttributeCompositionType.TypeCurrency -> {
@@ -133,14 +142,14 @@ class GeneralFragment(private var dccFragmentListener: DccFragmentListener) {
                     description = attrComp.description,
                     value = lastV as Float?
                 )
-                (currentFragment as DecimalFragment).setListener(dccFragmentListener)
+                (currentFragment as DecimalFragment).setListener(this)
             }
             attrCompType == AttributeCompositionType.TypeBool -> {
                 currentFragment = BooleanFragment.newInstance(
                     description = attrComp.description,
                     value = lastV as Boolean?
                 )
-                (currentFragment as BooleanFragment).setListener(dccFragmentListener)
+                (currentFragment as BooleanFragment).setListener(this)
             }
             attrCompType == AttributeCompositionType.TypeTextLong ||
                     attrCompType == AttributeCompositionType.TypeTextShort -> {
@@ -148,21 +157,21 @@ class GeneralFragment(private var dccFragmentListener: DccFragmentListener) {
                     description = attrComp.description,
                     value = lastV as String?
                 )
-                (currentFragment as StringFragment).setListener(dccFragmentListener)
+                (currentFragment as StringFragment).setListener(this)
             }
             attrCompType == AttributeCompositionType.TypeTime -> {
                 currentFragment = TimeFragment.newInstance(
                     description = attrComp.description,
                     value = lastV as Calendar?
                 )
-                (currentFragment as TimeFragment).setListener(dccFragmentListener)
+                (currentFragment as TimeFragment).setListener(this)
             }
             attrCompType == AttributeCompositionType.TypeDate -> {
                 currentFragment = DateFragment.newInstance(
                     description = attrComp.description,
                     value = lastV as Calendar?
                 )
-                (currentFragment as DateFragment).setListener(dccFragmentListener)
+                (currentFragment as DateFragment).setListener(this)
             }
             attrCompType == AttributeCompositionType.TypeOptions -> {
                 var composition = ""
@@ -175,7 +184,7 @@ class GeneralFragment(private var dccFragmentListener: DccFragmentListener) {
                     description = attrComp.description,
                     value = lastV as String?
                 )
-                (currentFragment as CommaSeparatedSpinnerFragment).setListener(dccFragmentListener)
+                (currentFragment as CommaSeparatedSpinnerFragment).setListener(this)
             }
             AttributeCompositionType.getAllUnitType().contains(attrCompType)
             -> {
@@ -186,7 +195,7 @@ class GeneralFragment(private var dccFragmentListener: DccFragmentListener) {
                             description = attrComp.description,
                             value = lastV as UnitType?
                         )
-                        (currentFragment as UnitTypeSpinnerFragment).setListener(dccFragmentListener)
+                        (currentFragment as UnitTypeSpinnerFragment).setListener(this)
                     }
                     AttributeCompositionType.TypeUnitWeight -> {
                         currentFragment = UnitTypeSpinnerFragment.newInstance(
@@ -194,7 +203,7 @@ class GeneralFragment(private var dccFragmentListener: DccFragmentListener) {
                             description = attrComp.description,
                             value = lastV as UnitType?
                         )
-                        (currentFragment as UnitTypeSpinnerFragment).setListener(dccFragmentListener)
+                        (currentFragment as UnitTypeSpinnerFragment).setListener(this)
                     }
                     AttributeCompositionType.TypeUnitTemperature -> {
                         currentFragment = UnitTypeSpinnerFragment.newInstance(
@@ -202,7 +211,7 @@ class GeneralFragment(private var dccFragmentListener: DccFragmentListener) {
                             description = attrComp.description,
                             value = lastV as UnitType?
                         )
-                        (currentFragment as UnitTypeSpinnerFragment).setListener(dccFragmentListener)
+                        (currentFragment as UnitTypeSpinnerFragment).setListener(this)
                     }
                     AttributeCompositionType.TypeUnitPressure -> {
                         currentFragment = UnitTypeSpinnerFragment.newInstance(
@@ -210,7 +219,7 @@ class GeneralFragment(private var dccFragmentListener: DccFragmentListener) {
                             description = attrComp.description,
                             value = lastV as UnitType?
                         )
-                        (currentFragment as UnitTypeSpinnerFragment).setListener(dccFragmentListener)
+                        (currentFragment as UnitTypeSpinnerFragment).setListener(this)
                     }
                     AttributeCompositionType.TypeUnitLenght -> {
                         currentFragment = UnitTypeSpinnerFragment.newInstance(
@@ -218,7 +227,7 @@ class GeneralFragment(private var dccFragmentListener: DccFragmentListener) {
                             description = attrComp.description,
                             value = lastV as UnitType?
                         )
-                        (currentFragment as UnitTypeSpinnerFragment).setListener(dccFragmentListener)
+                        (currentFragment as UnitTypeSpinnerFragment).setListener(this)
                     }
                     AttributeCompositionType.TypeUnitArea -> {
                         currentFragment = UnitTypeSpinnerFragment.newInstance(
@@ -226,7 +235,7 @@ class GeneralFragment(private var dccFragmentListener: DccFragmentListener) {
                             description = attrComp.description,
                             value = lastV as UnitType?
                         )
-                        (currentFragment as UnitTypeSpinnerFragment).setListener(dccFragmentListener)
+                        (currentFragment as UnitTypeSpinnerFragment).setListener(this)
                     }
                 }
             }
@@ -457,6 +466,45 @@ class GeneralFragment(private var dccFragmentListener: DccFragmentListener) {
     )
 
     var valueStr: String? = null
+        get() {
+            if (isAttribute) return null
+            val attrCompType = attributeCompositionType ?: return null
+            val f = getFragment()
+
+            return when {
+                attrCompType == AttributeCompositionType.TypeIntNumber ||
+                        attrCompType == AttributeCompositionType.TypeDecimalNumber ||
+                        attrCompType == AttributeCompositionType.TypeCurrency -> {
+                    (f as DecimalFragment).value.toString()
+                }
+                attrCompType == AttributeCompositionType.TypeBool -> {
+                    (f as BooleanFragment).value.toString()
+                }
+                attrCompType == AttributeCompositionType.TypeTextLong ||
+                        attrCompType == AttributeCompositionType.TypeTextShort -> {
+                    (f as StringFragment).value
+                }
+                attrCompType == AttributeCompositionType.TypeTime -> {
+                    val cal = (f as TimeFragment).value
+                    val dateFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+                    dateFormat.format(cal.time)
+                }
+                attrCompType == AttributeCompositionType.TypeDate -> {
+                    val cal = (f as DateFragment).value
+                    val dateFormat = SimpleDateFormat("dd/MM/yyyy hh:mm:ss", Locale.getDefault())
+                    dateFormat.format(cal.time)
+                }
+                attrCompType == AttributeCompositionType.TypeOptions -> {
+                    (f as CommaSeparatedSpinnerFragment).selectedStrOption
+                }
+                AttributeCompositionType.getAllUnitType().contains(attrCompType) -> {
+                    (f as UnitTypeSpinnerFragment).selectedUnitType.toString()
+                }
+                else -> {
+                    null
+                }
+            }
+        }
         set(value) {
             if (isAttribute) return
             field = value
@@ -499,45 +547,6 @@ class GeneralFragment(private var dccFragmentListener: DccFragmentListener) {
                 AttributeCompositionType.getAllUnitType().contains(attrCompType) -> {
                     (f as UnitTypeSpinnerFragment).defaultValue = typedV as UnitType
                     f.selectedUnitType = typedV
-                }
-            }
-        }
-        get() {
-            if (isAttribute) return null
-            val attrCompType = attributeCompositionType ?: return null
-            val f = getFragment()
-
-            return when {
-                attrCompType == AttributeCompositionType.TypeIntNumber ||
-                        attrCompType == AttributeCompositionType.TypeDecimalNumber ||
-                        attrCompType == AttributeCompositionType.TypeCurrency -> {
-                    (f as DecimalFragment).value.toString()
-                }
-                attrCompType == AttributeCompositionType.TypeBool -> {
-                    (f as BooleanFragment).value.toString()
-                }
-                attrCompType == AttributeCompositionType.TypeTextLong ||
-                        attrCompType == AttributeCompositionType.TypeTextShort -> {
-                    (f as StringFragment).value
-                }
-                attrCompType == AttributeCompositionType.TypeTime -> {
-                    val cal = (f as TimeFragment).value
-                    val dateFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-                    dateFormat.format(cal.time)
-                }
-                attrCompType == AttributeCompositionType.TypeDate -> {
-                    val cal = (f as DateFragment).value
-                    val dateFormat = SimpleDateFormat("dd/MM/yyyy hh:mm:ss", Locale.getDefault())
-                    dateFormat.format(cal.time)
-                }
-                attrCompType == AttributeCompositionType.TypeOptions -> {
-                    (f as CommaSeparatedSpinnerFragment).selectedStrOption
-                }
-                AttributeCompositionType.getAllUnitType().contains(attrCompType) -> {
-                    (f as UnitTypeSpinnerFragment).selectedUnitType.toString()
-                }
-                else -> {
-                    null
                 }
             }
         }

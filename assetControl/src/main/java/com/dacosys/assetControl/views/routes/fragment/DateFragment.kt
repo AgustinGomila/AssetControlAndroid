@@ -30,7 +30,10 @@ class DateFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        destroyLocals()
+    }
 
+    private fun destroyLocals() {
         dccFragmentListener?.onFragmentDestroy()
         dccFragmentListener = null
         _binding = null

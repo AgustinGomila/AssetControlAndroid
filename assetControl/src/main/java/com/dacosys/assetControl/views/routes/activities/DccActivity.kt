@@ -68,9 +68,12 @@ import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 
 
-class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
+class DccActivity : AppCompatActivity(),
+    Scanner.ScannerListener,
     CommaSeparatedSpinnerFragment.OnItemSelectedListener,
-    UnitTypeSpinnerFragment.OnItemSelectedListener, DccFragmentListener, Rfid.RfidDeviceListener,
+    UnitTypeSpinnerFragment.OnItemSelectedListener,
+    Rfid.RfidDeviceListener,
+    DccFragmentListener,
     KeyboardVisibilityEventListener {
     override fun onDestroy() {
         destroyLocals()
@@ -1576,30 +1579,9 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         FragmentDataDbHelper().tempTableInsert(allFragData.toTypedArray())
     }
 
-    override fun onFragmentStarted() {
-        val f = currentFragment?.getFragment() ?: return
+    override fun onFragmentStarted() {}
 
-        Handler(Looper.getMainLooper()).postDelayed({
-            if (f is StringFragment || f is DateFragment || f is TimeFragment || f is DecimalFragment) {
-
-                // Los fragmentos que necesitan mostrar el teclado llaman a requestFocus en onStart,
-                // acá vamos a cerrar el panel de datos históricos, para que entre el teclado en la
-                // pantalla.
-
-                if (panelBottomIsExpanded) {
-                    binding.expandHistoricPanelButton?.performClick()
-                }
-
-                Statics.showKeyboard(this)
-            } else {
-                Statics.closeKeyboard(this)
-            }
-        }, 20)
-    }
-
-    override fun onFragmentDestroy() {
-        currentFragment?.destroy()
-    }
+    override fun onFragmentDestroy() {}
 
     override fun onFragmentOk() {
         binding.nextButton.performClick()
