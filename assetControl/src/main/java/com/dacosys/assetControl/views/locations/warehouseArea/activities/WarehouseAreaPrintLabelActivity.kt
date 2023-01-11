@@ -199,7 +199,6 @@ class WarehouseAreaPrintLabelActivity :
         printerFragment =
             supportFragmentManager.findFragmentById(binding.printFragment.id) as PrinterFragment
 
-
         if (savedInstanceState != null) {
             loadBundleValues(savedInstanceState)
         } else {

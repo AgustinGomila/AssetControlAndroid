@@ -194,8 +194,6 @@ class WarehouseAreaCRUDActivity : AppCompatActivity(),
         warehouseAreaCRUDFragment =
             supportFragmentManager.findFragmentById(binding.crudFragment.id) as WarehouseAreaCRUDFragment
 
-
-
         if (savedInstanceState != null) {
             val t1 = savedInstanceState.getParcelable<WarehouseArea>("warehouseArea")
             if (t1 != null) warehouseArea = t1

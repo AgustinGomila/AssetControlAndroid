@@ -209,8 +209,6 @@ class AssetReviewSelectActivity : AppCompatActivity(),
         waSelectFilterFragment =
             supportFragmentManager.findFragmentById(binding.filterFragment.id) as WarehouseAreaSelectFilterFragment
 
-
-
         if (savedInstanceState != null) {
             loadBundleValues(savedInstanceState)
         } else {
@@ -603,10 +601,14 @@ class AssetReviewSelectActivity : AppCompatActivity(),
     @SuppressLint("RestrictedApi")
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
-        // menuInflater.inflate(R.menu.menu_asset_review_select, menu)
+        menuInflater.inflate(R.menu.menu_read_activity, menu)
 
         if (menu is MenuBuilder) {
             menu.setOptionalIconsVisible(true)
+        }
+
+        if (!Statics.isRfidRequired()) {
+            menu.removeItem(menu.findItem(R.id.action_rfid_connect).itemId)
         }
 
         val drawable = ContextCompat.getDrawable(this, R.drawable.ic_visibility)
@@ -615,9 +617,9 @@ class AssetReviewSelectActivity : AppCompatActivity(),
         val allStatus = AssetReviewStatus.getAll()
 
         // Opciones de visibilidad del menú
-        for (i in 0 until allStatus.size) {
-            menu.add(0, allStatus[i].id, i, allStatus[i].description)
-                .setChecked(visibleStatusArray.contains(allStatus[i])).isCheckable = true
+        for (i in allStatus) {
+            menu.add(0, i.id, i.id, i.description).setChecked(allStatus.contains(i)).isCheckable =
+                true
         }
 
         //region Icon colors
@@ -639,7 +641,6 @@ class AssetReviewSelectActivity : AppCompatActivity(),
         colors.add(steelblue)    // onProcess
         colors.add(gold)         // completed
         colors.add(seagreen)     // transferred
-
         //endregion Icon colors
 
         for ((index, i) in allStatus.withIndex()) {
@@ -647,7 +648,7 @@ class AssetReviewSelectActivity : AppCompatActivity(),
             icon?.mutate()?.colorFilter =
                 BlendModeColorFilterCompat.createBlendModeColorFilterCompat(colors[index],
                     BlendModeCompat.SRC_IN)
-            val item = menu.getItem(i.id)
+            val item = menu.findItem(i.id)
             item.icon = icon
 
             // Keep the popup menu open
@@ -671,13 +672,35 @@ class AssetReviewSelectActivity : AppCompatActivity(),
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
+        when (item.itemId) {
+            R.id.home, android.R.id.home -> {
+                onBackPressed()
+                return true
+            }
+            R.id.action_rfid_connect -> {
+                JotterListener.rfidStart(this)
+                return super.onOptionsItemSelected(item)
+            }
+            R.id.action_trigger_scan -> {
+                JotterListener.trigger(this)
+                return super.onOptionsItemSelected(item)
+            }
+            R.id.action_read_barcode -> {
+                JotterListener.toggleCameraFloatingWindowVisibility(this)
+                return super.onOptionsItemSelected(item)
+            }
+            else -> {
+                return statusItemSelected(item)
+            }
+        }
+    }
+
+    private fun statusItemSelected(item: MenuItem): Boolean {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
         if (arrayAdapter == null) {
             return false
-        }
-
-        if (item.itemId == R.id.home || item.itemId == android.R.id.home) {
-            onBackPressed()
-            return true
         }
 
         val visibleStatus = arrayAdapter!!.getVisibleStatus()
