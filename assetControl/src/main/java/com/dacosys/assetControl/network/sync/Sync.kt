@@ -3,8 +3,8 @@ package com.dacosys.assetControl.network.sync
 import android.os.Handler
 import android.os.Looper
 import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.configuration.Preference
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.settings.Preference
 import java.util.*
 
 @Suppress("unused")
@@ -60,7 +60,8 @@ class Sync {
 
                                 syncDownload = SyncDownload(
                                     onSyncTaskProgress = onSyncProgress,
-                                    onSessionCreated = onSessionCreated)
+                                    onSessionCreated = onSessionCreated
+                                )
                             }
                         } catch (ex: Exception) {
                             ex.printStackTrace()

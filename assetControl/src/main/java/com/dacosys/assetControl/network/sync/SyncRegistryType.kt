@@ -5,7 +5,7 @@ import android.os.Parcel
 import android.os.Parcelable
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.configuration.entries.ConfEntry
+import com.dacosys.assetControl.utils.settings.entries.ConfEntry
 import java.util.*
 
 class SyncRegistryType : Parcelable {

@@ -5,7 +5,7 @@
     android:id="@+id/asset_manteinance_status"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.dacosys.assetControl.views.assets.assetManteinance.activities.AssetManteinanceStatusActivity">
+    tools:context="com.dacosys.assetControl.ui.activities.manteinance.AssetManteinanceStatusActivity">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/top_appbar"
@@ -55,7 +55,7 @@
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/manteinanceStatusFragment"
-        android:name="com.dacosys.assetControl.views.assets.assetManteinance.fragment.ManteinanceStatusSpinnerFragment"
+        android:name="com.dacosys.assetControl.ui.fragments.manteinance.ManteinanceStatusSpinnerFragment"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="2dp"
@@ -76,7 +76,7 @@
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/manteinanceTypeFragment"
-        android:name="com.dacosys.assetControl.views.assets.assetManteinance.fragment.ManteinanceTypeSpinnerFragment"
+        android:name="com.dacosys.assetControl.ui.fragments.manteinance.ManteinanceTypeSpinnerFragment"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="2dp"

@@ -4,7 +4,7 @@ import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.wsGeneral.Webservice
+import com.dacosys.assetControl.webservice.common.Webservice
 import kotlinx.coroutines.*
 
 class GetMySqlDate(ws: Webservice, private var onResult: (MySqlDateResult) -> Unit = {}) {
@@ -13,8 +13,12 @@ class GetMySqlDate(ws: Webservice, private var onResult: (MySqlDateResult) -> Un
     fun execute() {
         if (Statics.isOnline()) launchRequest()
         else {
-            onResult.invoke(MySqlDateResult(ProgressStatus.canceled,
-                getContext().getString(R.string.no_connection)))
+            onResult.invoke(
+                MySqlDateResult(
+                    ProgressStatus.canceled,
+                    getContext().getString(R.string.no_connection)
+                )
+            )
         }
     }
 

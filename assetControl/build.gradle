@@ -186,10 +186,6 @@ dependencies {
     // debugImplementation because LeakCanary should only run in debug builds.
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.10'
 
-    // COROUTINES
-    //implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2-native-mt'
-    //implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2-native-mt'
-
     // ImageControl
     implementation project(':imageControl')
 

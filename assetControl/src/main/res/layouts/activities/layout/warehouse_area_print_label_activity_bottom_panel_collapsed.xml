@@ -9,7 +9,7 @@
     android:focusableInTouchMode="true"
     android:orientation="vertical"
     android:weightSum="1"
-    tools:context=".views.locations.warehouseArea.activities.WarehouseAreaPrintLabelActivity"
+    tools:context=".ui.activities.location.WarehouseAreaPrintLabelActivity"
     tools:layout_editor_absoluteX="0dp"
     tools:layout_editor_absoluteY="81dp">
 
@@ -36,7 +36,7 @@
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/printFragment"
-            android:name="com.dacosys.assetControl.views.print.fragments.PrinterFragment"
+            android:name="com.dacosys.assetControl.ui.fragments.print.PrinterFragment"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -146,7 +146,7 @@
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/filterFragment"
-            android:name="com.dacosys.assetControl.views.locations.warehouseArea.fragments.WarehouseAreaSelectFilterFragment"
+            android:name="com.dacosys.assetControl.ui.fragments.location.WarehouseAreaSelectFilterFragment"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintBottom_toBottomOf="parent"

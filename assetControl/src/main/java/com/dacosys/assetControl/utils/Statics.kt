@@ -51,46 +51,47 @@ import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.dataBase.DataBaseHelper
-import com.dacosys.assetControl.model.assets.asset.`object`.Asset
-import com.dacosys.assetControl.model.assets.asset.dbHelper.AssetDbHelper
-import com.dacosys.assetControl.model.assets.itemCategory.`object`.ItemCategory
-import com.dacosys.assetControl.model.assets.itemCategory.dbHelper.ItemCategoryDbHelper
-import com.dacosys.assetControl.model.assets.manteinances.assetMainteinance.`object`.AssetManteinance
-import com.dacosys.assetControl.model.assets.manteinances.assetMainteinance.dbHelper.AssetManteinanceDbHelper
-import com.dacosys.assetControl.model.locations.warehouse.`object`.Warehouse
-import com.dacosys.assetControl.model.locations.warehouse.dbHelper.WarehouseDbHelper
-import com.dacosys.assetControl.model.locations.warehouseArea.`object`.WarehouseArea
-import com.dacosys.assetControl.model.locations.warehouseArea.dbHelper.WarehouseAreaDbHelper
-import com.dacosys.assetControl.model.movements.warehouseMovement.`object`.WarehouseMovement
-import com.dacosys.assetControl.model.movements.warehouseMovement.dbHelper.WarehouseMovementDbHelper
-import com.dacosys.assetControl.model.reviews.assetReview.`object`.AssetReview
-import com.dacosys.assetControl.model.reviews.assetReview.dbHelper.AssetReviewDbHelper
-import com.dacosys.assetControl.model.routes.dataCollections.dataCollection.`object`.DataCollection
-import com.dacosys.assetControl.model.routes.routeProcess.`object`.RouteProcess
-import com.dacosys.assetControl.model.routes.routeProcess.dbHelper.RouteProcessDbHelper
-import com.dacosys.assetControl.model.users.user.`object`.User
-import com.dacosys.assetControl.model.users.user.dbHelper.UserDbHelper
+import com.dacosys.assetControl.dataBase.asset.AssetDbHelper
+import com.dacosys.assetControl.dataBase.category.ItemCategoryDbHelper
+import com.dacosys.assetControl.dataBase.datacollection.DataCollectionDbHelper
+import com.dacosys.assetControl.dataBase.location.WarehouseAreaDbHelper
+import com.dacosys.assetControl.dataBase.location.WarehouseDbHelper
+import com.dacosys.assetControl.dataBase.manteinance.AssetManteinanceDbHelper
+import com.dacosys.assetControl.dataBase.movement.WarehouseMovementDbHelper
+import com.dacosys.assetControl.dataBase.review.AssetReviewDbHelper
+import com.dacosys.assetControl.dataBase.route.RouteProcessDbHelper
+import com.dacosys.assetControl.dataBase.user.UserDbHelper
+import com.dacosys.assetControl.model.asset.Asset
+import com.dacosys.assetControl.model.category.ItemCategory
+import com.dacosys.assetControl.model.datacollection.DataCollection
+import com.dacosys.assetControl.model.location.Warehouse
+import com.dacosys.assetControl.model.location.WarehouseArea
+import com.dacosys.assetControl.model.manteinance.AssetManteinance
+import com.dacosys.assetControl.model.movement.WarehouseMovement
+import com.dacosys.assetControl.model.review.AssetReview
+import com.dacosys.assetControl.model.route.RouteProcess
+import com.dacosys.assetControl.model.user.User
 import com.dacosys.assetControl.network.clientPackages.ClientPackagesProgress
 import com.dacosys.assetControl.network.clientPackages.GetClientPackages
 import com.dacosys.assetControl.network.sync.SyncDownload
 import com.dacosys.assetControl.network.sync.SyncRegistryType
 import com.dacosys.assetControl.network.utils.*
-import com.dacosys.assetControl.utils.configuration.Preference
-import com.dacosys.assetControl.utils.configuration.QRConfigType
-import com.dacosys.assetControl.utils.configuration.QRConfigType.CREATOR.QRConfigApp
-import com.dacosys.assetControl.utils.configuration.QRConfigType.CREATOR.QRConfigClientAccount
-import com.dacosys.assetControl.utils.configuration.QRConfigType.CREATOR.QRConfigImageControl
-import com.dacosys.assetControl.utils.configuration.QRConfigType.CREATOR.QRConfigWebservice
-import com.dacosys.assetControl.utils.configuration.collectorType.CollectorType
-import com.dacosys.assetControl.utils.configuration.entries.ConfEntry
+import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
+import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.utils.scanners.vh75.Vh75Bt
-import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
-import com.dacosys.assetControl.wsGeneral.SessionObject
-import com.dacosys.assetControl.wsGeneral.Webservice
-import com.dacosys.imageControl.dbHelper.ImageControlDbHelper
+import com.dacosys.assetControl.utils.settings.Preference
+import com.dacosys.assetControl.utils.settings.QRConfigType
+import com.dacosys.assetControl.utils.settings.QRConfigType.CREATOR.QRConfigApp
+import com.dacosys.assetControl.utils.settings.QRConfigType.CREATOR.QRConfigClientAccount
+import com.dacosys.assetControl.utils.settings.QRConfigType.CREATOR.QRConfigImageControl
+import com.dacosys.assetControl.utils.settings.QRConfigType.CREATOR.QRConfigWebservice
+import com.dacosys.assetControl.utils.settings.collectorType.CollectorType
+import com.dacosys.assetControl.utils.settings.entries.ConfEntry
+import com.dacosys.assetControl.webservice.common.SessionObject
+import com.dacosys.assetControl.webservice.common.Webservice
+import com.dacosys.imageControl.dataBase.DbHelper
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.google.android.material.textfield.TextInputLayout.END_ICON_PASSWORD_TOGGLE
@@ -201,8 +202,7 @@ class Statics {
         @SuppressLint("MissingPermission")
         fun isOnline(): Boolean {
             val connectivityManager =
-                getContext()
-                    .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+                getContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
             val capabilities =
                 connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
             if (capabilities != null) {
@@ -321,8 +321,7 @@ class Statics {
             }
 
             return try {
-                with(prefs!!.edit())
-                {
+                with(prefs!!.edit()) {
                     remove(key).apply()
                 }
                 true
@@ -338,8 +337,7 @@ class Statics {
             }
 
             return try {
-                with(prefs!!.edit())
-                {
+                with(prefs!!.edit()) {
                     putLong(key, value).apply()
                 }
                 true
@@ -355,8 +353,7 @@ class Statics {
             }
 
             return try {
-                with(prefs!!.edit())
-                {
+                with(prefs!!.edit()) {
                     putInt(key, value).apply()
                 }
                 true
@@ -372,8 +369,7 @@ class Statics {
             }
 
             return try {
-                with(prefs!!.edit())
-                {
+                with(prefs!!.edit()) {
                     putBoolean(key, value).apply()
                 }
                 true
@@ -389,8 +385,7 @@ class Statics {
             }
 
             return try {
-                with(prefs!!.edit())
-                {
+                with(prefs!!.edit()) {
                     putString(key, value).apply()
                 }
                 true
@@ -406,8 +401,7 @@ class Statics {
             }
 
             return try {
-                with(prefs!!.edit())
-                {
+                with(prefs!!.edit()) {
                     for (k in key) {
                         putString(k, value).apply()
                     }
@@ -425,8 +419,7 @@ class Statics {
             }
 
             return try {
-                with(prefs!!.edit())
-                {
+                with(prefs!!.edit()) {
                     putStringSet(key, value).apply()
                 }
                 true
@@ -593,18 +586,17 @@ class Statics {
 
         fun getBestContrastColor(color: String): Int {
             val backColor = Color.parseColor(color)
-            val l = 0.2126 * Color.red(backColor) +
-                    0.7152 * Color.green(backColor) +
-                    0.0722 * Color.blue(backColor)
+            val l =
+                0.2126 * Color.red(backColor) + 0.7152 * Color.green(backColor) + 0.0722 * Color.blue(
+                    backColor
+                )
             return if (l <= 128) textLightColor()
             else textDarkColor()
         }
 
         fun toStringColorToInt(color: String): Int {
             val backColor = Color.parseColor(color)
-            return Color.red(backColor) +
-                    Color.green(backColor) +
-                    Color.blue(backColor)
+            return Color.red(backColor) + Color.green(backColor) + Color.blue(backColor)
         }
 
         @ColorInt
@@ -623,10 +615,7 @@ class Statics {
             val g = (Color.green(color) * factor).roundToInt()
             val b = (Color.blue(color) * factor).roundToInt()
             return Color.argb(
-                a,
-                min(r, 255),
-                min(g, 255),
-                min(b, 255)
+                a, min(r, 255), min(g, 255), min(b, 255)
             )
         }
 
@@ -646,8 +635,7 @@ class Statics {
                 val display = activity.display
                 display?.rotation ?: Surface.ROTATION_0
             } else {
-                @Suppress("DEPRECATION")
-                val display = activity.windowManager.defaultDisplay
+                @Suppress("DEPRECATION") val display = activity.windowManager.defaultDisplay
                 display.rotation
             }
             val height: Int
@@ -679,8 +667,8 @@ class Statics {
                         else -> activity.requestedOrientation =
                             ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                     }
-                    Surface.ROTATION_0 ->
-                        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                    Surface.ROTATION_0 -> activity.requestedOrientation =
+                        ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                     else -> when {
                         height > width -> activity.requestedOrientation =
                             ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
@@ -698,9 +686,7 @@ class Statics {
                 val insets: Insets = windowMetrics.windowInsets.getInsetsIgnoringVisibility(
                     WindowInsets.Type.systemBars()
                 )
-                if (activity.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE &&
-                    activity.resources.configuration.smallestScreenWidthDp < 600
-                ) { // landscape and phone
+                if (activity.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE && activity.resources.configuration.smallestScreenWidthDp < 600) { // landscape and phone
                     val navigationBarSize: Int = insets.right + insets.left
                     bounds.width() - navigationBarSize
                 } else { // portrait or tablet
@@ -708,8 +694,7 @@ class Statics {
                 }
             } else {
                 val outMetrics = DisplayMetrics()
-                @Suppress("DEPRECATION")
-                activity.windowManager.defaultDisplay.getMetrics(outMetrics)
+                @Suppress("DEPRECATION") activity.windowManager.defaultDisplay.getMetrics(outMetrics)
                 outMetrics.widthPixels
             }
         }
@@ -721,9 +706,7 @@ class Statics {
                 val insets: Insets = windowMetrics.windowInsets.getInsetsIgnoringVisibility(
                     WindowInsets.Type.systemBars()
                 )
-                if (activity.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE &&
-                    activity.resources.configuration.smallestScreenWidthDp < 600
-                ) { // landscape and phone
+                if (activity.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE && activity.resources.configuration.smallestScreenWidthDp < 600) { // landscape and phone
                     bounds.height()
                 } else { // portrait or tablet
                     val navigationBarSize: Int = insets.bottom
@@ -731,8 +714,7 @@ class Statics {
                 }
             } else {
                 val outMetrics = DisplayMetrics()
-                @Suppress("DEPRECATION")
-                activity.windowManager.defaultDisplay.getMetrics(outMetrics)
+                @Suppress("DEPRECATION") activity.windowManager.defaultDisplay.getMetrics(outMetrics)
                 outMetrics.heightPixels
             }
         }
@@ -769,8 +751,8 @@ class Statics {
         }
 
         fun isKeyboardVisible(): Boolean {
-            val imm = getContext()
-                .getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
+            val imm =
+                getContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
             return imm != null && imm.isActive
         }
 
@@ -794,8 +776,7 @@ class Statics {
         }
 
         fun deleteTimeFile() {
-            val timeFileLocation =
-                File(getContext().cacheDir.absolutePath + "/" + timeFilename)
+            val timeFileLocation = File(getContext().cacheDir.absolutePath + "/" + timeFilename)
             if (timeFileLocation.exists()) {
                 timeFileLocation.delete()
             }
@@ -828,13 +809,12 @@ class Statics {
                     return
                 }
 
-                val bluetoothManager = getContext()
-                    .getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+                val bluetoothManager =
+                    getContext().getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
                 val mBluetoothAdapter = bluetoothManager.adapter
 
                 if (ActivityCompat.checkSelfPermission(
-                        getContext(),
-                        Manifest.permission.BLUETOOTH_CONNECT
+                        getContext(), Manifest.permission.BLUETOOTH_CONNECT
                     ) != PackageManager.PERMISSION_GRANTED
                 ) {
                     return
@@ -1060,8 +1040,7 @@ class Statics {
             if (!allProductsArray.any()) {
                 makeText(
                     parentView,
-                    getContext()
-                        .getString(R.string.there_are_no_valid_products_for_the_selected_client),
+                    getContext().getString(R.string.there_are_no_valid_products_for_the_selected_client),
                     SnackBarType.ERROR
                 )
                 return
@@ -1069,10 +1048,7 @@ class Statics {
 
             if (allProductsArray.size == 1) {
                 val productVersionId = allProductsArray[0].getString("product_version_id")
-                if (
-                    productVersionId == APP_VERSION_ID.toString() ||
-                    productVersionId == APP_VERSION_ID_IMAGECONTROL.toString()
-                ) {
+                if (productVersionId == APP_VERSION_ID.toString() || productVersionId == APP_VERSION_ID_IMAGECONTROL.toString()) {
                     setConfigPanel(
                         parentView = parentView,
                         callback = callback,
@@ -1084,8 +1060,7 @@ class Statics {
                 } else {
                     makeText(
                         parentView,
-                        getContext()
-                            .getString(R.string.there_are_no_valid_products_for_the_selected_client),
+                        getContext().getString(R.string.there_are_no_valid_products_for_the_selected_client),
                         SnackBarType.ERROR
                     )
                     return
@@ -1101,10 +1076,7 @@ class Statics {
                 val productVersionId = pack.getString("product_version_id")
 
                 // AssetControl M13 o ImageControl M13
-                if (
-                    productVersionId == APP_VERSION_ID.toString() ||
-                    productVersionId == APP_VERSION_ID_IMAGECONTROL.toString()
-                ) {
+                if (productVersionId == APP_VERSION_ID.toString() || productVersionId == APP_VERSION_ID_IMAGECONTROL.toString()) {
                     validProducts = true
                     val clientPackage = pack.getString("client_package_content_description")
 
@@ -1116,8 +1088,7 @@ class Statics {
             if (!validProducts) {
                 makeText(
                     parentView,
-                    getContext()
-                        .getString(R.string.there_are_no_valid_products_for_the_selected_client),
+                    getContext().getString(R.string.there_are_no_valid_products_for_the_selected_client),
                     SnackBarType.ERROR
                 )
                 return
@@ -1129,20 +1100,15 @@ class Statics {
             val builder = AlertDialog.Builder(cw)
 
             val title = TextView(activity)
-            title.text =
-                String.format(
-                    "%s - %s",
-                    client,
-                    getContext().getString(R.string.select_package)
-                )
+            title.text = String.format(
+                "%s - %s", client, getContext().getString(R.string.select_package)
+            )
             title.textSize = 16F
             title.gravity = Gravity.CENTER_HORIZONTAL
             builder.setCustomTitle(title)
 
             builder.setMultiChoiceItems(
-                listItems.toTypedArray(),
-                selected,
-                this
+                listItems.toTypedArray(), selected, this
             )
 
             builder.setPositiveButton(R.string.accept) { dialog, _ ->
@@ -1166,9 +1132,7 @@ class Statics {
             }
 
             val layoutDefault = ResourcesCompat.getDrawable(
-                getContext().resources,
-                R.drawable.layout_thin_border,
-                null
+                getContext().resources, R.drawable.layout_thin_border, null
             )
             val inset = InsetDrawable(layoutDefault, 20)
 
@@ -1205,12 +1169,10 @@ class Statics {
                 // PANEL DE CONFIGURACIÓN
                 val productId = pack.getString("product_version_id")
                 val panelJsonObj = pack.getJSONObject("panel")
-                val appUrl =
-                    when {
-                        panelJsonObj.has("url")
-                        -> panelJsonObj.getString("url") ?: ""
-                        else -> ""
-                    }
+                val appUrl = when {
+                    panelJsonObj.has("url") -> panelJsonObj.getString("url") ?: ""
+                    else -> ""
+                }
 
                 if (appUrl.isEmpty()) {
                     makeText(
@@ -1221,19 +1183,16 @@ class Statics {
                     return
                 }
 
-                val clientPackage =
-                    when {
-                        pack.has("client_package_content_description")
-                        -> pack.getString("client_package_content_description") ?: ""
-                        else -> ""
-                    }
+                val clientPackage = when {
+                    pack.has("client_package_content_description") -> pack.getString("client_package_content_description")
+                        ?: ""
+                    else -> ""
+                }
 
-                val installationCode =
-                    when {
-                        pack.has("installation_code")
-                        -> pack.getString("installation_code") ?: ""
-                        else -> ""
-                    }
+                val installationCode = when {
+                    pack.has("installation_code") -> pack.getString("installation_code") ?: ""
+                    else -> ""
+                }
 
                 var url: String
                 var namespace: String
@@ -1444,34 +1403,35 @@ class Statics {
             onRequestProgress: (ClientPackagesProgress) -> Unit = {},
         ) {
             if (prefs == null) {
-                onRequestProgress.invoke(ClientPackagesProgress(
-                    status = ProgressStatus.crashed,
-                    result = ArrayList(),
-                    clientEmail = "",
-                    clientPassword = "",
-                    msg = getContext()
-                        .getString(R.string.configuration_not_loaded)
-                ))
+                onRequestProgress.invoke(
+                    ClientPackagesProgress(
+                        status = ProgressStatus.crashed,
+                        result = ArrayList(),
+                        clientEmail = "",
+                        clientPassword = "",
+                        msg = getContext().getString(R.string.configuration_not_loaded)
+                    )
+                )
                 return
             }
 
             val mainJson = JSONObject(scanCode)
-            val mainTag =
-                when {
-                    mainJson.has("config") && mode == QRConfigClientAccount -> "config"
-                    mainJson.has(appName) && mode != QRConfigClientAccount -> appName
-                    else -> ""
-                }
+            val mainTag = when {
+                mainJson.has("config") && mode == QRConfigClientAccount -> "config"
+                mainJson.has(appName) && mode != QRConfigClientAccount -> appName
+                else -> ""
+            }
 
             if (mainTag.isEmpty()) {
-                onRequestProgress.invoke(ClientPackagesProgress(
-                    status = ProgressStatus.crashed,
-                    result = ArrayList(),
-                    clientEmail = "",
-                    clientPassword = "",
-                    msg = getContext()
-                        .getString(R.string.invalid_code)
-                ))
+                onRequestProgress.invoke(
+                    ClientPackagesProgress(
+                        status = ProgressStatus.crashed,
+                        result = ArrayList(),
+                        clientEmail = "",
+                        clientPassword = "",
+                        msg = getContext().getString(R.string.invalid_code)
+                    )
+                )
                 return
             }
 
@@ -1499,38 +1459,43 @@ class Statics {
                             onRequestProgress = onRequestProgress
                         )
                     } else {
-                        onRequestProgress.invoke(ClientPackagesProgress(
-                            status = ProgressStatus.crashed,
-                            result = ArrayList(),
-                            clientEmail = email,
-                            clientPassword = password,
-                            msg = getContext().getString(R.string.invalid_code)
-                        ))
+                        onRequestProgress.invoke(
+                            ClientPackagesProgress(
+                                status = ProgressStatus.crashed,
+                                result = ArrayList(),
+                                clientEmail = email,
+                                clientPassword = password,
+                                msg = getContext().getString(R.string.invalid_code)
+                            )
+                        )
                     }
                 }
                 QRConfigWebservice, QRConfigApp, QRConfigImageControl -> {
                     tryToLoadConfig(confJson)
-                    onRequestProgress.invoke(ClientPackagesProgress(
-                        status = ProgressStatus.success,
-                        result = ArrayList(),
-                        clientEmail = "",
-                        clientPassword = "",
-                        msg =
-                        when (mode) {
-                            QRConfigImageControl -> getContext().getString(R.string.imagecontrol_configured)
-                            QRConfigWebservice -> getContext().getString(R.string.server_configured)
-                            else -> getContext().getString(R.string.configuration_applied)
-                        }
-                    ))
+                    onRequestProgress.invoke(
+                        ClientPackagesProgress(
+                            status = ProgressStatus.success,
+                            result = ArrayList(),
+                            clientEmail = "",
+                            clientPassword = "",
+                            msg = when (mode) {
+                                QRConfigImageControl -> getContext().getString(R.string.imagecontrol_configured)
+                                QRConfigWebservice -> getContext().getString(R.string.server_configured)
+                                else -> getContext().getString(R.string.configuration_applied)
+                            }
+                        )
+                    )
                 }
                 else -> {
-                    onRequestProgress.invoke(ClientPackagesProgress(
-                        status = ProgressStatus.crashed,
-                        result = ArrayList(),
-                        clientEmail = "",
-                        clientPassword = "",
-                        msg = getContext().getString(R.string.invalid_code)
-                    ))
+                    onRequestProgress.invoke(
+                        ClientPackagesProgress(
+                            status = ProgressStatus.crashed,
+                            result = ArrayList(),
+                            clientEmail = "",
+                            clientPassword = "",
+                            msg = getContext().getString(R.string.invalid_code)
+                        )
+                    )
                 }
             }
         }
@@ -1571,8 +1536,7 @@ class Statics {
 
                 val imageView = ImageView(activity)
                 imageView.setImageBitmap(bmp)
-                val builder = AlertDialog.Builder(activity)
-                    .setTitle(R.string.configuration_qr_code)
+                val builder = AlertDialog.Builder(activity).setTitle(R.string.configuration_qr_code)
                     .setMessage(R.string.scan_the_code_below_with_another_device_to_copy_the_configuration)
                     .setPositiveButton(R.string.ok) { dialog, _ -> dialog.dismiss() }
                     .setView(imageView)
@@ -1694,8 +1658,7 @@ class Statics {
                     // region ASSET CONTROL WEBSERVICE
                     if (wsUrl.isEmpty()) {
                         x.putString(
-                            Preference.acWsServer.key,
-                            Preference.acWsServer.debugValue as String?
+                            Preference.acWsServer.key, Preference.acWsServer.debugValue as String?
                         )
                     }
 
@@ -1708,29 +1671,25 @@ class Statics {
 
                     if (prefsGetString(Preference.acWsUser).isEmpty()) {
                         x.putString(
-                            Preference.acWsUser.key,
-                            Preference.acWsUser.debugValue as String?
+                            Preference.acWsUser.key, Preference.acWsUser.debugValue as String?
                         )
                     }
 
                     if (prefsGetString(Preference.acWsPass).isEmpty()) {
                         x.putString(
-                            Preference.acWsPass.key,
-                            Preference.acWsPass.debugValue as String?
+                            Preference.acWsPass.key, Preference.acWsPass.debugValue as String?
                         )
                     }
 
                     if (prefsGetString(Preference.acUser).isEmpty()) {
                         x.putString(
-                            Preference.acUser.key,
-                            Preference.acUser.debugValue as String?
+                            Preference.acUser.key, Preference.acUser.debugValue as String?
                         )
                     }
 
                     if (prefsGetString(Preference.acPass).isEmpty()) {
                         x.putString(
-                            Preference.acPass.key,
-                            Preference.acPass.debugValue as String?
+                            Preference.acPass.key, Preference.acPass.debugValue as String?
                         )
                     }
                     // endregion
@@ -1766,15 +1725,13 @@ class Statics {
 
                     if (prefsGetString(Preference.acMantUser).isEmpty()) {
                         x.putString(
-                            Preference.acMantUser.key,
-                            Preference.acMantUser.debugValue as String?
+                            Preference.acMantUser.key, Preference.acMantUser.debugValue as String?
                         )
                     }
 
                     if (prefsGetString(Preference.acMantPass).isEmpty()) {
                         x.putString(
-                            Preference.acMantPass.key,
-                            Preference.acMantPass.debugValue as String?
+                            Preference.acMantPass.key, Preference.acMantPass.debugValue as String?
                         )
                     }
                     // endregion
@@ -1782,8 +1739,7 @@ class Statics {
                     // region IMAGE CONTROL WEBSERVICE
                     if (wsIcUrl.isEmpty()) {
                         x.putString(
-                            Preference.icWsServer.key,
-                            Preference.icWsServer.debugValue as String?
+                            Preference.icWsServer.key, Preference.icWsServer.debugValue as String?
                         )
                     }
 
@@ -1796,43 +1752,37 @@ class Statics {
 
                     if (wsIcUser.isEmpty()) {
                         x.putString(
-                            Preference.icWsUser.key,
-                            Preference.icWsUser.debugValue as String?
+                            Preference.icWsUser.key, Preference.icWsUser.debugValue as String?
                         )
                     }
 
                     if (wsIcPass.isEmpty()) {
                         x.putString(
-                            Preference.icWsPass.key,
-                            Preference.icWsPass.debugValue as String?
+                            Preference.icWsPass.key, Preference.icWsPass.debugValue as String?
                         )
                     }
 
                     if (icUser.isEmpty()) {
                         x.putString(
-                            Preference.icUser.key,
-                            Preference.icUser.debugValue as String?
+                            Preference.icUser.key, Preference.icUser.debugValue as String?
                         )
                     }
 
                     if (icPass.isEmpty()) {
                         x.putString(
-                            Preference.icPass.key,
-                            Preference.icPass.debugValue as String?
+                            Preference.icPass.key, Preference.icPass.debugValue as String?
                         )
                     }
 
                     if (prefsGetString(Preference.icUser).isEmpty()) {
                         x.putString(
-                            Preference.icUser.key,
-                            Preference.icUser.debugValue as String?
+                            Preference.icUser.key, Preference.icUser.debugValue as String?
                         )
                     }
 
                     if (prefsGetString(Preference.icPass).isEmpty()) {
                         x.putString(
-                            Preference.icPass.key,
-                            Preference.icPass.debugValue as String?
+                            Preference.icPass.key, Preference.icPass.debugValue as String?
                         )
                     }
                     // endregion
@@ -1892,8 +1842,7 @@ class Statics {
         }
 
         fun pendingDataCollection(): ArrayList<DataCollection> {
-            return com.dacosys.assetControl.model.routes.dataCollections.dataCollection.dbHelper.DataCollectionDbHelper()
-                .selectByNoTransferred()
+            return DataCollectionDbHelper().selectByNoTransferred()
         }
 
         fun pendingRouteProcess(): ArrayList<RouteProcess> {
@@ -1949,7 +1898,7 @@ class Statics {
         fun removeDataBases() {
             SyncDownload.resetSyncDates()
 
-            ImageControlDbHelper().deleteDb()
+            DbHelper().deleteDb()
             DataBaseHelper().deleteDb()
 
             SQLiteDatabase.releaseMemory()
@@ -1994,17 +1943,12 @@ class Statics {
                 var cursor: Cursor? = null
                 try {
                     cursor = getContext().contentResolver.query(
-                        uri,
-                        arrayOf(MediaStore.MediaColumns.DISPLAY_NAME),
-                        null,
-                        null,
-                        null
+                        uri, arrayOf(MediaStore.MediaColumns.DISPLAY_NAME), null, null, null
                     )
                     if (cursor != null && cursor.moveToFirst()) {
                         val fileName: String = cursor.getString(0)
                         val path: String =
-                            getContext()
-                                .getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
+                            getContext().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
                                 .toString() + "/Download/" + fileName
                         if (!TextUtils.isEmpty(path)) {
                             return path
@@ -2019,14 +1963,12 @@ class Statics {
                         return id.replaceFirst("raw:".toRegex(), "")
                     }
                     val contentUriPrefixesToTry = arrayOf(
-                        "content://downloads/public_downloads",
-                        "content://downloads/my_downloads"
+                        "content://downloads/public_downloads", "content://downloads/my_downloads"
                     )
                     for (contentUriPrefix in contentUriPrefixesToTry) {
                         return try {
                             val contentUri: Uri = ContentUris.withAppendedId(
-                                Uri.parse(contentUriPrefix),
-                                java.lang.Long.valueOf(id)
+                                Uri.parse(contentUriPrefix), java.lang.Long.valueOf(id)
                             )
                             getDataColumn(contentUri, "", null)
                         } catch (e: NumberFormatException) {
@@ -2102,8 +2044,8 @@ class Statics {
             //
             // so no "primary" type, but let the check here for other devices
             if ("primary".equals(type, ignoreCase = true)) {
-                fullPath = getContext()
-                    .getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS).toString() + relativePath
+                fullPath = getContext().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
+                    .toString() + relativePath
                 if (fileExists(fullPath)) {
                     return fullPath
                 }
@@ -2127,14 +2069,9 @@ class Statics {
         @Suppress("UNUSED_VARIABLE")
         private fun getDriveFilePath(uri: Uri): String? {
             val returnUri: Uri = uri
-            val returnCursor: Cursor =
-                getContext().contentResolver.query(
-                    returnUri,
-                    null,
-                    null,
-                    null,
-                    null
-                ) ?: return null
+            val returnCursor: Cursor = getContext().contentResolver.query(
+                returnUri, null, null, null, null
+            ) ?: return null
             /*
              * Get the column indexes of the data in the Cursor,
              *     * move to the first row in the Cursor, get the data,
@@ -2203,8 +2140,7 @@ class Statics {
             val size = returnCursor.getLong(sizeIndex).toString()
 
             val output = if (newDirName != "") {
-                val dir =
-                    File(getContext().filesDir.toString() + "/" + newDirName)
+                val dir = File(getContext().filesDir.toString() + "/" + newDirName)
                 if (!dir.exists()) {
                     dir.mkdir()
                 }
@@ -2215,8 +2151,7 @@ class Statics {
 
             try {
                 val inputStream: InputStream =
-                    getContext().contentResolver.openInputStream(uri)
-                        ?: return null
+                    getContext().contentResolver.openInputStream(uri) ?: return null
                 val outputStream = FileOutputStream(output)
                 var read: Int
                 val bufferSize = 1024
@@ -2247,10 +2182,7 @@ class Statics {
             val projection = arrayOf(column)
             try {
                 cursor = getContext().contentResolver.query(
-                    uri, projection,
-                    selection,
-                    selectionArgs,
-                    null
+                    uri, projection, selection, selectionArgs, null
                 )
                 if (cursor != null && cursor.moveToFirst()) {
                     val index: Int = cursor.getColumnIndexOrThrow(column)

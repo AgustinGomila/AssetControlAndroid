@@ -26,21 +26,25 @@ class DownloadFile(
         mWakeLock?.release()
 
         if (result) {
-            onDownloadTask.invoke(DownloadTask(
-                msg = "${
-                    getContext().getString(R.string.download_ok)
-                }: $fileType",
-                fileType = fileType,
-                downloadStatus = FINISHED
-            ))
+            onDownloadTask.invoke(
+                DownloadTask(
+                    msg = "${
+                        getContext().getString(R.string.download_ok)
+                    }: $fileType",
+                    fileType = fileType,
+                    downloadStatus = FINISHED
+                )
+            )
         } else {
-            onDownloadTask.invoke(DownloadTask(
-                msg = "${
-                    getContext().getString(R.string.download_error)
-                }: $fileType",
-                fileType = fileType,
-                downloadStatus = CRASHED
-            ))
+            onDownloadTask.invoke(
+                DownloadTask(
+                    msg = "${
+                        getContext().getString(R.string.download_error)
+                    }: $fileType",
+                    fileType = fileType,
+                    downloadStatus = CRASHED
+                )
+            )
         }
 
         return result
@@ -67,31 +71,37 @@ class DownloadFile(
     }
 
     private fun getDownloadTaskResult(): Boolean {
-        onDownloadTask.invoke(DownloadTask(
-            msg = getContext().getString(R.string.starting_download),
-            fileType = fileType,
-            downloadStatus = STARTING
-        ))
+        onDownloadTask.invoke(
+            DownloadTask(
+                msg = getContext().getString(R.string.starting_download),
+                fileType = fileType,
+                downloadStatus = STARTING
+            )
+        )
 
         val destination = urlDestination.destination
         val urlStr = urlDestination.url
 
         if (destination.exists()) {
-            onDownloadTask.invoke(DownloadTask(
-                msg = "${
-                    getContext().getString(R.string.destination_already_exists)
-                }: $destination",
-                fileType = fileType,
-                downloadStatus = INFO,
-            ))
+            onDownloadTask.invoke(
+                DownloadTask(
+                    msg = "${
+                        getContext().getString(R.string.destination_already_exists)
+                    }: $destination",
+                    fileType = fileType,
+                    downloadStatus = INFO,
+                )
+            )
 
             // Eliminar destino
             destination.delete()
         }
 
-        Log.d(this.javaClass.simpleName, "${
-            getContext().getString(R.string.destination)
-        }: $destination${getProperty("line.separator")}URL: $urlStr")
+        Log.d(
+            this.javaClass.simpleName, "${
+                getContext().getString(R.string.destination)
+            }: $destination${getProperty("line.separator")}URL: $urlStr"
+        )
 
         var input: InputStream? = null
         var output: OutputStream? = null
@@ -101,9 +111,11 @@ class DownloadFile(
         try {
             val url = URL(urlStr)
 
-            Log.d(this.javaClass.simpleName, "${
-                getContext().getString(R.string.opening_connection)
-            }: $urlStr")
+            Log.d(
+                this.javaClass.simpleName, "${
+                    getContext().getString(R.string.opening_connection)
+                }: $urlStr"
+            )
 
             connection = url.openConnection() as HttpURLConnection
             connection.connect()
@@ -111,22 +123,26 @@ class DownloadFile(
             // expect HTTP 200 OK, so we don't mistakenly save error report
             // instead of the file
             if (connection.responseCode != HttpURLConnection.HTTP_OK) {
-                onDownloadTask.invoke(DownloadTask(
-                    msg = "${
-                        getContext().getString(R.string.error_connecting_to)
-                    } $urlStr: Server returned HTTP ${connection.responseCode} ${connection.responseMessage}",
-                    fileType = fileType,
-                    downloadStatus = CRASHED,
-                ))
+                onDownloadTask.invoke(
+                    DownloadTask(
+                        msg = "${
+                            getContext().getString(R.string.error_connecting_to)
+                        } $urlStr: Server returned HTTP ${connection.responseCode} ${connection.responseMessage}",
+                        fileType = fileType,
+                        downloadStatus = CRASHED,
+                    )
+                )
                 return false
             }
 
             // this will be useful to display download percentage
             // might be -1: server did not report the length
             val fileLength = connection.contentLength
-            Log.d(this.javaClass.simpleName, "${
-                getContext().getString(R.string.file_length)
-            }: $fileLength")
+            Log.d(
+                this.javaClass.simpleName, "${
+                    getContext().getString(R.string.file_length)
+                }: $fileLength"
+            )
 
             // Crear un nuevo archivo
             if (destination.exists()) {
@@ -150,12 +166,14 @@ class DownloadFile(
 
                 // allow canceling with back button
                 if (deferred?.isCancelled == true) {
-                    onDownloadTask.invoke(DownloadTask(
-                        msg = getContext()
-                            .getString(R.string.download_canceled),
-                        fileType = fileType,
-                        downloadStatus = CANCELED,
-                    ))
+                    onDownloadTask.invoke(
+                        DownloadTask(
+                            msg = getContext()
+                                .getString(R.string.download_canceled),
+                            fileType = fileType,
+                            downloadStatus = CANCELED,
+                        )
+                    )
                     input.close()
                     return false
                 }
@@ -165,25 +183,29 @@ class DownloadFile(
 
                 if (fileLength > 0) {
                     // only if total length is known
-                    onDownloadTask.invoke(DownloadTask(
-                        msg = getContext().getString(R.string.downloading_),
-                        fileType = fileType,
-                        downloadStatus = DOWNLOADING,
-                        progress = (total * 100 / fileLength).toInt(),
-                        bytesCompleted = total,
-                        bytesTotal = fileLength.toLong()
-                    ))
+                    onDownloadTask.invoke(
+                        DownloadTask(
+                            msg = getContext().getString(R.string.downloading_),
+                            fileType = fileType,
+                            downloadStatus = DOWNLOADING,
+                            progress = (total * 100 / fileLength).toInt(),
+                            bytesCompleted = total,
+                            bytesTotal = fileLength.toLong()
+                        )
+                    )
                 }
                 output.write(data, 0, count)
             } while (true)
         } catch (e: Exception) {
-            onDownloadTask.invoke(DownloadTask(
-                msg = "${
-                    getContext().getString(R.string.exception_when_downloading)
-                }: ${e.message}",
-                fileType = fileType,
-                downloadStatus = CRASHED
-            ))
+            onDownloadTask.invoke(
+                DownloadTask(
+                    msg = "${
+                        getContext().getString(R.string.exception_when_downloading)
+                    }: ${e.message}",
+                    fileType = fileType,
+                    downloadStatus = CRASHED
+                )
+            )
             return false
         } finally {
             try {

@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:weightSum="1"
-    tools:context="com.dacosys.assetControl.views.reviews.activities.AssetReviewSelectActivity">
+    tools:context="com.dacosys.assetControl.ui.activities.review.AssetReviewSelectActivity">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/top_appbar"
@@ -107,7 +107,7 @@
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/filterFragment"
-            android:name="com.dacosys.assetControl.views.locations.warehouseArea.fragments.WarehouseAreaSelectFilterFragment"
+            android:name="com.dacosys.assetControl.ui.fragments.location.WarehouseAreaSelectFilterFragment"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"

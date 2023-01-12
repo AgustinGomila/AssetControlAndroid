@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:weightSum="1"
-    tools:context=".views.movements.activities.WarehouseMovementContentActivity">
+    tools:context=".ui.activities.movement.WarehouseMovementContentActivity">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/top_appbar"
@@ -36,7 +36,7 @@
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/headerFragment"
-            android:name="com.dacosys.assetControl.views.movements.fragments.LocationHeaderFragment"
+            android:name="com.dacosys.assetControl.ui.fragments.movement.LocationHeaderFragment"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintBottom_toBottomOf="parent"

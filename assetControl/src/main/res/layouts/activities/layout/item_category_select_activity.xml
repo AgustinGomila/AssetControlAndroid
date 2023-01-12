@@ -14,7 +14,7 @@
     android:excludeFromRecents="true"
     android:focusable="true"
     android:focusableInTouchMode="true"
-    tools:context=".views.assets.itemCategory.activities.ItemCategorySelectActivity">
+    tools:context=".ui.activities.category.ItemCategorySelectActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/gralLayout"
@@ -65,7 +65,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <com.dacosys.assetControl.views.commons.views.ContractsAutoCompleteTextView
+            <com.dacosys.assetControl.ui.common.views.custom.ContractsAutoCompleteTextView
                 android:id="@+id/category"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"

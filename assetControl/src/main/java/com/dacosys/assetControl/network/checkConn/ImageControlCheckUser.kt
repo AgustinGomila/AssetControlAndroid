@@ -2,11 +2,11 @@ package com.dacosys.assetControl.network.checkConn
 
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
+import com.dacosys.assetControl.ui.common.snackbar.SnackBarEventData
+import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.views.commons.snackbar.SnackBarEventData
-import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
-import com.dacosys.imageControl.wsObject.UserAuthResultObject
+import com.dacosys.imageControl.network.webService.moshi.UserAuthResult
 import kotlinx.coroutines.*
 
 class ImageControlCheckUser(private var onSnackBarEvent: (SnackBarEventData) -> Unit = {}) {
@@ -16,7 +16,7 @@ class ImageControlCheckUser(private var onSnackBarEvent: (SnackBarEventData) -> 
         }
     }
 
-    private fun postExecute(result: UserAuthResultObject?): UserAuthResultObject? {
+    private fun postExecute(result: UserAuthResult?): UserAuthResult? {
         var fReturn = false
         var fError = false
 
@@ -26,20 +26,19 @@ class ImageControlCheckUser(private var onSnackBarEvent: (SnackBarEventData) -> 
         }
 
         scope.launch {
-            onUiEvent(SnackBarEventData(
-                when {
-                    fError -> getContext()
-                        .getString(R.string.connection_error)
-                    !fReturn -> getContext()
-                        .getString(R.string.incorrect_username_password_combination)
-                    else -> getContext().getString(R.string.ok)
-                },
-                when {
-                    fError -> SnackBarType.ERROR
-                    !fReturn -> SnackBarType.ERROR
-                    else -> SnackBarType.SUCCESS
-                }
-            ))
+            onUiEvent(
+                SnackBarEventData(
+                    when {
+                        fError -> getContext().getString(R.string.connection_error)
+                        !fReturn -> getContext().getString(R.string.incorrect_username_password_combination)
+                        else -> getContext().getString(R.string.ok)
+                    }, when {
+                        fError -> SnackBarType.ERROR
+                        !fReturn -> SnackBarType.ERROR
+                        else -> SnackBarType.SUCCESS
+                    }
+                )
+            )
         }
         return result
     }
@@ -54,9 +53,9 @@ class ImageControlCheckUser(private var onSnackBarEvent: (SnackBarEventData) -> 
         scope.launch { doInBackground() }
     }
 
-    private var deferred: Deferred<UserAuthResultObject?>? = null
-    private suspend fun doInBackground(): UserAuthResultObject? {
-        var result: UserAuthResultObject? = null
+    private var deferred: Deferred<UserAuthResult?>? = null
+    private suspend fun doInBackground(): UserAuthResult? {
+        var result: UserAuthResult? = null
         coroutineScope {
             deferred = async { suspendFunction() }
             result = deferred?.await()
@@ -64,10 +63,10 @@ class ImageControlCheckUser(private var onSnackBarEvent: (SnackBarEventData) -> 
         return postExecute(result)
     }
 
-    private suspend fun suspendFunction(): UserAuthResultObject? = withContext(Dispatchers.IO) {
+    private suspend fun suspendFunction(): UserAuthResult? = withContext(Dispatchers.IO) {
         return@withContext try {
             Statics.setupImageControl()
-            com.dacosys.imageControl.Statics.getWebservice().imageControlUserCheck()
+            com.dacosys.imageControl.ImageControl.webservice.imageControlUserCheck()
         } catch (ex: Exception) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)

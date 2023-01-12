@@ -10,7 +10,7 @@
     android:gravity="center_horizontal"
     android:orientation="vertical"
     app:passwordToggleEnabled="true"
-    tools:context="com.dacosys.assetControl.views.main.LoginActivity"
+    tools:context="com.dacosys.assetControl.ui.activities.main.LoginActivity"
     tools:layout_editor_absoluteX="0dp"
     tools:layout_editor_absoluteY="81dp">
 
@@ -175,7 +175,7 @@
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/userSpinnerFragment"
-        android:name="com.dacosys.assetControl.views.users.fragment.UserSpinnerFragment"
+        android:name="com.dacosys.assetControl.ui.fragments.user.UserSpinnerFragment"
         android:layout_width="0dp"
         android:layout_height="70dp"
         app:layout_constraintHorizontal_bias="0.0"

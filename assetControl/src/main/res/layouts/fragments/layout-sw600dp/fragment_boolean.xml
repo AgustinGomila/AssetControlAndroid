@@ -20,7 +20,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <com.dacosys.assetControl.views.commons.views.AutoResizeTextView
+    <com.dacosys.assetControl.ui.common.views.custom.AutoResizeTextView
         android:id="@+id/autoResizeTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

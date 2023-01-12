@@ -4,61 +4,61 @@ import android.util.Log
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.getWritableDb
-import com.dacosys.assetControl.model.assets.asset.dbHelper.AssetDbHelper
-import com.dacosys.assetControl.model.assets.asset.wsObject.AssetCollectorObject
-import com.dacosys.assetControl.model.assets.asset.wsObject.AssetObject
-import com.dacosys.assetControl.model.assets.asset.wsObject.AssetWs
-import com.dacosys.assetControl.model.assets.itemCategory.dbHelper.ItemCategoryDbHelper
-import com.dacosys.assetControl.model.assets.itemCategory.wsObject.ItemCategoryObject
-import com.dacosys.assetControl.model.assets.itemCategory.wsObject.ItemCategoryWs
-import com.dacosys.assetControl.model.assets.manteinances.assetMainteinance.dbHelper.AssetManteinanceDbHelper
-import com.dacosys.assetControl.model.assets.manteinances.assetMainteinance.wsObject.AssetManteinanceLogObject
-import com.dacosys.assetControl.model.assets.manteinances.assetMainteinance.wsObject.AssetManteinanceObject
-import com.dacosys.assetControl.model.assets.manteinances.assetMainteinance.wsObject.AssetManteinanceWs
-import com.dacosys.assetControl.model.locations.warehouse.dbHelper.WarehouseDbHelper
-import com.dacosys.assetControl.model.locations.warehouse.wsObject.WarehouseObject
-import com.dacosys.assetControl.model.locations.warehouse.wsObject.WarehouseWs
-import com.dacosys.assetControl.model.locations.warehouseArea.dbHelper.WarehouseAreaDbHelper
-import com.dacosys.assetControl.model.locations.warehouseArea.wsObject.WarehouseAreaObject
-import com.dacosys.assetControl.model.locations.warehouseArea.wsObject.WarehouseAreaWs
-import com.dacosys.assetControl.model.movements.warehouseMovement.dbHelper.WarehouseMovementDbHelper
-import com.dacosys.assetControl.model.movements.warehouseMovement.wsObject.WarehouseMovementObject
-import com.dacosys.assetControl.model.movements.warehouseMovement.wsObject.WarehouseMovementWs
-import com.dacosys.assetControl.model.movements.warehouseMovementContent.dbHelper.WarehouseMovementContentDbHelper
-import com.dacosys.assetControl.model.movements.warehouseMovementContent.wsObject.WarehouseMovementContentObject
-import com.dacosys.assetControl.model.reviews.assetReview.dbHelper.AssetReviewDbHelper
-import com.dacosys.assetControl.model.reviews.assetReview.wsObject.AssetReviewObject
-import com.dacosys.assetControl.model.reviews.assetReview.wsObject.AssetReviewWs
-import com.dacosys.assetControl.model.reviews.assetReviewContent.dbHelper.AssetReviewContentDbHelper
-import com.dacosys.assetControl.model.reviews.assetReviewContent.wsObject.AssetReviewContentObject
-import com.dacosys.assetControl.model.reviews.assetReviewContentStatus.AssetReviewContentStatus
-import com.dacosys.assetControl.model.reviews.assetReviewStatus.`object`.AssetReviewStatus
-import com.dacosys.assetControl.model.routes.dataCollections.dataCollection.dbHelper.DataCollectionDbHelper
-import com.dacosys.assetControl.model.routes.dataCollections.dataCollection.wsObject.DataCollectionObject
-import com.dacosys.assetControl.model.routes.dataCollections.dataCollection.wsObject.DataCollectionWs
-import com.dacosys.assetControl.model.routes.dataCollections.dataCollectionContent.dbHelper.DataCollectionContentDbHelper
-import com.dacosys.assetControl.model.routes.dataCollections.dataCollectionContent.wsObject.DataCollectionContentObject
-import com.dacosys.assetControl.model.routes.routeProcess.dbHelper.RouteProcessDbHelper
-import com.dacosys.assetControl.model.routes.routeProcess.wsObject.RouteProcessObject
-import com.dacosys.assetControl.model.routes.routeProcess.wsObject.RouteProcessWs
-import com.dacosys.assetControl.model.routes.routeProcessContent.dbHelper.RouteProcessContentDbHelper
-import com.dacosys.assetControl.model.routes.routeProcessContent.wsObject.RouteProcessContentObject
+import com.dacosys.assetControl.dataBase.asset.AssetDbHelper
+import com.dacosys.assetControl.dataBase.category.ItemCategoryDbHelper
+import com.dacosys.assetControl.dataBase.datacollection.DataCollectionContentDbHelper
+import com.dacosys.assetControl.dataBase.datacollection.DataCollectionDbHelper
+import com.dacosys.assetControl.dataBase.location.WarehouseAreaDbHelper
+import com.dacosys.assetControl.dataBase.location.WarehouseDbHelper
+import com.dacosys.assetControl.dataBase.manteinance.AssetManteinanceDbHelper
+import com.dacosys.assetControl.dataBase.movement.WarehouseMovementContentDbHelper
+import com.dacosys.assetControl.dataBase.movement.WarehouseMovementDbHelper
+import com.dacosys.assetControl.dataBase.review.AssetReviewContentDbHelper
+import com.dacosys.assetControl.dataBase.review.AssetReviewDbHelper
+import com.dacosys.assetControl.dataBase.route.RouteProcessContentDbHelper
+import com.dacosys.assetControl.dataBase.route.RouteProcessDbHelper
+import com.dacosys.assetControl.dataBase.user.UserWarehouseAreaDbHelper
+import com.dacosys.assetControl.model.review.AssetReviewContentStatus
+import com.dacosys.assetControl.model.review.AssetReviewStatus
 import com.dacosys.assetControl.model.table.Table
-import com.dacosys.assetControl.model.users.user.`object`.User
-import com.dacosys.assetControl.model.users.user.wsObject.UserObject
-import com.dacosys.assetControl.model.users.userWarehouseArea.dbHelper.UserWarehouseAreaDbHelper
-import com.dacosys.assetControl.model.users.userWarehouseArea.wsObject.UserWarehouseAreaObject
-import com.dacosys.assetControl.model.users.userWarehouseArea.wsObject.UserWarehouseAreaWs
+import com.dacosys.assetControl.model.user.User
 import com.dacosys.assetControl.network.serverDate.GetMySqlDate
 import com.dacosys.assetControl.network.serverDate.MySqlDateResult
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.configuration.Preference
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.imageControl.Statics.Companion.isInitialized
-import com.dacosys.imageControl.Statics.Companion.sendPendingImages
-import com.dacosys.imageControl.dbHelper.DbCommands.Companion.uploadTempDocument
-import com.dacosys.imageControl.main.UploadImagesProgress
+import com.dacosys.assetControl.utils.settings.Preference
+import com.dacosys.assetControl.webservice.asset.AssetCollectorObject
+import com.dacosys.assetControl.webservice.asset.AssetObject
+import com.dacosys.assetControl.webservice.asset.AssetWs
+import com.dacosys.assetControl.webservice.category.ItemCategoryObject
+import com.dacosys.assetControl.webservice.category.ItemCategoryWs
+import com.dacosys.assetControl.webservice.datacollection.DataCollectionContentObject
+import com.dacosys.assetControl.webservice.datacollection.DataCollectionObject
+import com.dacosys.assetControl.webservice.datacollection.DataCollectionWs
+import com.dacosys.assetControl.webservice.location.WarehouseAreaObject
+import com.dacosys.assetControl.webservice.location.WarehouseAreaWs
+import com.dacosys.assetControl.webservice.location.WarehouseObject
+import com.dacosys.assetControl.webservice.location.WarehouseWs
+import com.dacosys.assetControl.webservice.manteinance.AssetManteinanceLogObject
+import com.dacosys.assetControl.webservice.manteinance.AssetManteinanceObject
+import com.dacosys.assetControl.webservice.manteinance.AssetManteinanceWs
+import com.dacosys.assetControl.webservice.movement.WarehouseMovementContentObject
+import com.dacosys.assetControl.webservice.movement.WarehouseMovementObject
+import com.dacosys.assetControl.webservice.movement.WarehouseMovementWs
+import com.dacosys.assetControl.webservice.review.AssetReviewContentObject
+import com.dacosys.assetControl.webservice.review.AssetReviewObject
+import com.dacosys.assetControl.webservice.review.AssetReviewWs
+import com.dacosys.assetControl.webservice.route.RouteProcessContentObject
+import com.dacosys.assetControl.webservice.route.RouteProcessObject
+import com.dacosys.assetControl.webservice.route.RouteProcessWs
+import com.dacosys.assetControl.webservice.user.UserObject
+import com.dacosys.assetControl.webservice.user.UserWarehouseAreaObject
+import com.dacosys.assetControl.webservice.user.UserWarehouseAreaWs
+import com.dacosys.imageControl.network.upload.NetCommands.Companion.sendPendingImages
+import com.dacosys.imageControl.network.upload.NetCommands.Companion.uploadTempDocument
+import com.dacosys.imageControl.network.upload.UploadImagesProgress
+import com.google.android.gms.common.config.GservicesValue.isInitialized
 import kotlinx.coroutines.*
 
 class SyncUpload(
@@ -74,15 +74,12 @@ class SyncUpload(
                 scope.launch {
                     doInBackground { onSyncFinish(it) }
                 }
-            } else if (
-                it.status == ProgressStatus.crashed ||
-                it.status == ProgressStatus.canceled
-            ) {
-                onSyncTaskProgress.invoke(SyncProgress(0,
-                    0,
-                    it.msg,
-                    null,
-                    it.status))
+            } else if (it.status == ProgressStatus.crashed || it.status == ProgressStatus.canceled) {
+                onSyncTaskProgress.invoke(
+                    SyncProgress(
+                        0, 0, it.msg, null, it.status
+                    )
+                )
             }
         }
         GetMySqlDate(Statics.getWebservice()) { onConnectionResult(it) }.execute()
@@ -90,21 +87,25 @@ class SyncUpload(
 
     private fun onSyncFinish(result: Boolean) {
         if (result) {
-            onSyncTaskProgress.invoke(SyncProgress(
-                totalTask = 0,
-                completedTask = 0,
-                msg = getContext().getString(R.string.synchronization_finished),
-                registryType = null,
-                progressStatus = ProgressStatus.bigFinished
-            ))
+            onSyncTaskProgress.invoke(
+                SyncProgress(
+                    totalTask = 0,
+                    completedTask = 0,
+                    msg = getContext().getString(R.string.synchronization_finished),
+                    registryType = null,
+                    progressStatus = ProgressStatus.bigFinished
+                )
+            )
         } else {
-            onSyncTaskProgress.invoke(SyncProgress(
-                totalTask = 0,
-                completedTask = 0,
-                msg = getContext().getString(R.string.synchronization_failed),
-                registryType = null,
-                progressStatus = ProgressStatus.crashed
-            ))
+            onSyncTaskProgress.invoke(
+                SyncProgress(
+                    totalTask = 0,
+                    completedTask = 0,
+                    msg = getContext().getString(R.string.synchronization_failed),
+                    registryType = null,
+                    progressStatus = ProgressStatus.crashed
+                )
+            )
         }
     }
 
@@ -125,13 +126,15 @@ class SyncUpload(
     }
 
     private suspend fun suspendFunction(): Boolean = withContext(Dispatchers.IO) {
-        onSyncTaskProgress.invoke(SyncProgress(
-            totalTask = 0,
-            completedTask = 0,
-            msg = getContext().getString(R.string.synchronization_starting),
-            registryType = null,
-            progressStatus = ProgressStatus.bigStarting
-        ))
+        onSyncTaskProgress.invoke(
+            SyncProgress(
+                totalTask = 0,
+                completedTask = 0,
+                msg = getContext().getString(R.string.synchronization_starting),
+                registryType = null,
+                progressStatus = ProgressStatus.bigStarting
+            )
+        )
         return@withContext getUploadTaskResult()
     }
 
@@ -220,8 +223,7 @@ class SyncUpload(
 
     private fun removeOldData() {
         RouteProcessDbHelper().deleteTransferred()
-        DataCollectionDbHelper()
-            .deleteOrphansTransferred()
+        DataCollectionDbHelper().deleteOrphansTransferred()
         AssetReviewDbHelper().deleteTransferred()
         WarehouseMovementDbHelper().deleteTransferred()
     }
@@ -243,13 +245,15 @@ class SyncUpload(
 
         try {
             if (!scope.isActive) {
-                onSyncTaskProgress.invoke(SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.canceling_asset_review_synchronization),
-                    registryType,
-                    ProgressStatus.canceled
-                ))
+                onSyncTaskProgress.invoke(
+                    SyncProgress(
+                        0,
+                        0,
+                        getContext().getString(R.string.canceling_asset_review_synchronization),
+                        registryType,
+                        ProgressStatus.canceled
+                    )
+                )
                 return
             }
 
@@ -258,32 +262,38 @@ class SyncUpload(
                 return
             }
 
-            onSyncTaskProgress.invoke(SyncProgress(
-                0,
-                0,
-                getContext().getString(R.string.starting_asset_review_synchronization),
-                registryType,
-                ProgressStatus.starting
-            ))
+            onSyncTaskProgress.invoke(
+                SyncProgress(
+                    0,
+                    0,
+                    getContext().getString(R.string.starting_asset_review_synchronization),
+                    registryType,
+                    ProgressStatus.starting
+                )
+            )
 
             val totalTask = arAl.size
             for ((currentTask, ar) in arAl.toTypedArray().withIndex()) {
-                onSyncTaskProgress.invoke(SyncProgress(
-                    totalTask,
-                    currentTask,
-                    getContext().getString(R.string.synchronizing_asset_reviews),
-                    registryType,
-                    ProgressStatus.running
-                ))
+                onSyncTaskProgress.invoke(
+                    SyncProgress(
+                        totalTask,
+                        currentTask,
+                        getContext().getString(R.string.synchronizing_asset_reviews),
+                        registryType,
+                        ProgressStatus.running
+                    )
+                )
 
                 if (!scope.isActive) {
-                    onSyncTaskProgress.invoke(SyncProgress(
-                        0,
-                        0,
-                        getContext().getString(R.string.canceling_asset_review_synchronization),
-                        registryType,
-                        ProgressStatus.canceled
-                    ))
+                    onSyncTaskProgress.invoke(
+                        SyncProgress(
+                            0,
+                            0,
+                            getContext().getString(R.string.canceling_asset_review_synchronization),
+                            registryType,
+                            ProgressStatus.canceled
+                        )
+                    )
                     break
                 }
 
@@ -330,8 +340,7 @@ class SyncUpload(
                 arObj.statusId = AssetReviewStatus.transferred.id
 
                 val arId = arWs.assetReviewAdd(
-                    arObj,
-                    arcObjArray
+                    arObj, arcObjArray
                 )
 
                 if (arId > 0) {
@@ -360,13 +369,15 @@ class SyncUpload(
         } catch (ex: Exception) {
             ex.printStackTrace()
             // Error remoto
-            onSyncTaskProgress.invoke(SyncProgress(
-                0,
-                0,
-                getContext().getString(R.string.failed_to_synchronize_the_asset_reviews),
-                registryType,
-                ProgressStatus.crashed
-            ))
+            onSyncTaskProgress.invoke(
+                SyncProgress(
+                    0,
+                    0,
+                    getContext().getString(R.string.failed_to_synchronize_the_asset_reviews),
+                    registryType,
+                    ProgressStatus.crashed
+                )
+            )
 
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             return
@@ -374,19 +385,17 @@ class SyncUpload(
             db.endTransaction()
 
             registryOnProcess.remove(registryType)
-            onSyncTaskProgress.invoke(SyncProgress(
-                0,
-                0,
-                when {
-                    error -> getContext().getString(R.string.failed_to_synchronize_the_asset_reviews)
-                    else -> getContext().getString(R.string.asset_review_synchronization_completed)
-                },
-                registryType,
-                when {
-                    error -> ProgressStatus.crashed
-                    else -> ProgressStatus.success
-                }
-            ))
+            onSyncTaskProgress.invoke(
+                SyncProgress(
+                    0, 0, when {
+                        error -> getContext().getString(R.string.failed_to_synchronize_the_asset_reviews)
+                        else -> getContext().getString(R.string.asset_review_synchronization_completed)
+                    }, registryType, when {
+                        error -> ProgressStatus.crashed
+                        else -> ProgressStatus.success
+                    }
+                )
+            )
         }
     }
 
@@ -407,13 +416,15 @@ class SyncUpload(
 
         try {
             if (!scope.isActive) {
-                onSyncTaskProgress.invoke(SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.canceling_movement_synchronization),
-                    registryType,
-                    ProgressStatus.canceled
-                ))
+                onSyncTaskProgress.invoke(
+                    SyncProgress(
+                        0,
+                        0,
+                        getContext().getString(R.string.canceling_movement_synchronization),
+                        registryType,
+                        ProgressStatus.canceled
+                    )
+                )
                 return
             }
 
@@ -422,32 +433,38 @@ class SyncUpload(
                 return
             }
 
-            onSyncTaskProgress.invoke(SyncProgress(
-                0,
-                0,
-                getContext().getString(R.string.starting_movement_synchronization),
-                registryType,
-                ProgressStatus.starting
-            ))
+            onSyncTaskProgress.invoke(
+                SyncProgress(
+                    0,
+                    0,
+                    getContext().getString(R.string.starting_movement_synchronization),
+                    registryType,
+                    ProgressStatus.starting
+                )
+            )
 
             val totalTask = wmAl.size
             for ((currentTask, wm) in wmAl.toTypedArray().withIndex()) {
-                onSyncTaskProgress.invoke(SyncProgress(
-                    totalTask,
-                    currentTask,
-                    getContext().getString(R.string.synchronizing_movements),
-                    registryType,
-                    ProgressStatus.running
-                ))
+                onSyncTaskProgress.invoke(
+                    SyncProgress(
+                        totalTask,
+                        currentTask,
+                        getContext().getString(R.string.synchronizing_movements),
+                        registryType,
+                        ProgressStatus.running
+                    )
+                )
 
                 if (!scope.isActive) {
-                    onSyncTaskProgress.invoke(SyncProgress(
-                        0,
-                        0,
-                        getContext().getString(R.string.canceling_movement_synchronization),
-                        registryType,
-                        ProgressStatus.canceled
-                    ))
+                    onSyncTaskProgress.invoke(
+                        SyncProgress(
+                            0,
+                            0,
+                            getContext().getString(R.string.canceling_movement_synchronization),
+                            registryType,
+                            ProgressStatus.canceled
+                        )
+                    )
                     break
                 }
 
@@ -486,8 +503,7 @@ class SyncUpload(
                 wmObj.obs = wm.obs
 
                 val wmId = wmWs.warehouseMovementAdd(
-                    wmObj,
-                    wmcObjArray
+                    wmObj, wmcObjArray
                 )
 
                 if (wmId > 0) {
@@ -516,32 +532,32 @@ class SyncUpload(
         } catch (ex: Exception) {
             ex.printStackTrace()
             // Error remoto
-            onSyncTaskProgress.invoke(SyncProgress(
-                0,
-                0,
-                getContext().getString(R.string.failed_to_synchronize_the_movements),
-                registryType,
-                ProgressStatus.crashed
-            ))
+            onSyncTaskProgress.invoke(
+                SyncProgress(
+                    0,
+                    0,
+                    getContext().getString(R.string.failed_to_synchronize_the_movements),
+                    registryType,
+                    ProgressStatus.crashed
+                )
+            )
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             return
         } finally {
             db.endTransaction()
 
             registryOnProcess.remove(registryType)
-            onSyncTaskProgress.invoke(SyncProgress(
-                0,
-                0,
-                when {
-                    error -> getContext().getString(R.string.failed_to_synchronize_the_movements)
-                    else -> getContext().getString(R.string.movement_synchronization_completed)
-                },
-                registryType,
-                when {
-                    error -> ProgressStatus.crashed
-                    else -> ProgressStatus.success
-                }
-            ))
+            onSyncTaskProgress.invoke(
+                SyncProgress(
+                    0, 0, when {
+                        error -> getContext().getString(R.string.failed_to_synchronize_the_movements)
+                        else -> getContext().getString(R.string.movement_synchronization_completed)
+                    }, registryType, when {
+                        error -> ProgressStatus.crashed
+                        else -> ProgressStatus.success
+                    }
+                )
+            )
         }
     }
 
@@ -563,13 +579,15 @@ class SyncUpload(
 
         try {
             if (!scope.isActive) {
-                onSyncTaskProgress.invoke(SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.canceling_asset_synchronization),
-                    registryType,
-                    ProgressStatus.canceled
-                ))
+                onSyncTaskProgress.invoke(
+                    SyncProgress(
+                        0,
+                        0,
+                        getContext().getString(R.string.canceling_asset_synchronization),
+                        registryType,
+                        ProgressStatus.canceled
+                    )
+                )
                 return
             }
 
@@ -578,33 +596,39 @@ class SyncUpload(
                 return
             }
 
-            onSyncTaskProgress.invoke(SyncProgress(
-                0,
-                0,
-                getContext().getString(R.string.starting_asset_synchronization),
-                registryType,
-                ProgressStatus.starting
-            ))
+            onSyncTaskProgress.invoke(
+                SyncProgress(
+                    0,
+                    0,
+                    getContext().getString(R.string.starting_asset_synchronization),
+                    registryType,
+                    ProgressStatus.starting
+                )
+            )
 
             val totalTask = aAl.size
             for ((currentTask, a) in aAl.toTypedArray().withIndex()) {
                 a.setDataRead()
-                onSyncTaskProgress.invoke(SyncProgress(
-                    totalTask,
-                    currentTask,
-                    getContext().getString(R.string.synchronizing_assets),
-                    registryType,
-                    ProgressStatus.running
-                ))
+                onSyncTaskProgress.invoke(
+                    SyncProgress(
+                        totalTask,
+                        currentTask,
+                        getContext().getString(R.string.synchronizing_assets),
+                        registryType,
+                        ProgressStatus.running
+                    )
+                )
 
                 if (!scope.isActive) {
-                    onSyncTaskProgress.invoke(SyncProgress(
-                        0,
-                        0,
-                        getContext().getString(R.string.canceling_asset_synchronization),
-                        registryType,
-                        ProgressStatus.canceled
-                    ))
+                    onSyncTaskProgress.invoke(
+                        SyncProgress(
+                            0,
+                            0,
+                            getContext().getString(R.string.canceling_asset_synchronization),
+                            registryType,
+                            ProgressStatus.canceled
+                        )
+                    )
                     break
                 }
 
@@ -613,12 +637,10 @@ class SyncUpload(
                 var realAssetId: Long
                 if (a.assetId > 0) {
                     realAssetId = assetWs.assetCollectorModify(
-                        Statics.currentUserId ?: return,
-                        AssetCollectorObject(a)
+                        Statics.currentUserId ?: return, AssetCollectorObject(a)
                     )
                 } else {
-                    realAssetId =
-                        assetWs.assetAdd(Statics.currentUserId ?: return, AssetObject(a))
+                    realAssetId = assetWs.assetAdd(Statics.currentUserId ?: return, AssetObject(a))
                     if (realAssetId > 0) {
 
                         // Actualizar el propio activo
@@ -660,32 +682,32 @@ class SyncUpload(
         } catch (ex: Exception) {
             ex.printStackTrace()
             // Error remoto
-            onSyncTaskProgress.invoke(SyncProgress(
-                0,
-                0,
-                getContext().getString(R.string.failed_to_synchronize_the_assets),
-                registryType,
-                ProgressStatus.crashed
-            ))
+            onSyncTaskProgress.invoke(
+                SyncProgress(
+                    0,
+                    0,
+                    getContext().getString(R.string.failed_to_synchronize_the_assets),
+                    registryType,
+                    ProgressStatus.crashed
+                )
+            )
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             return
         } finally {
             db.endTransaction()
 
             registryOnProcess.remove(registryType)
-            onSyncTaskProgress.invoke(SyncProgress(
-                0,
-                0,
-                when {
-                    error -> getContext().getString(R.string.failed_to_synchronize_the_assets)
-                    else -> getContext().getString(R.string.asset_synchronization_completed)
-                },
-                registryType,
-                when {
-                    error -> ProgressStatus.crashed
-                    else -> ProgressStatus.success
-                }
-            ))
+            onSyncTaskProgress.invoke(
+                SyncProgress(
+                    0, 0, when {
+                        error -> getContext().getString(R.string.failed_to_synchronize_the_assets)
+                        else -> getContext().getString(R.string.asset_synchronization_completed)
+                    }, registryType, when {
+                        error -> ProgressStatus.crashed
+                        else -> ProgressStatus.success
+                    }
+                )
+            )
         }
     }
 
@@ -709,13 +731,15 @@ class SyncUpload(
 
         try {
             if (!scope.isActive) {
-                onSyncTaskProgress.invoke(SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.canceling_warehouse_area_synchronization),
-                    registryType,
-                    ProgressStatus.canceled
-                ))
+                onSyncTaskProgress.invoke(
+                    SyncProgress(
+                        0,
+                        0,
+                        getContext().getString(R.string.canceling_warehouse_area_synchronization),
+                        registryType,
+                        ProgressStatus.canceled
+                    )
+                )
                 return
             }
 
@@ -724,33 +748,39 @@ class SyncUpload(
                 return
             }
 
-            onSyncTaskProgress.invoke(SyncProgress(
-                0,
-                0,
-                getContext().getString(R.string.starting_warehouse_area_synchronization),
-                registryType,
-                ProgressStatus.starting
-            ))
+            onSyncTaskProgress.invoke(
+                SyncProgress(
+                    0,
+                    0,
+                    getContext().getString(R.string.starting_warehouse_area_synchronization),
+                    registryType,
+                    ProgressStatus.starting
+                )
+            )
 
             val totalTask = waAl.size
             for ((currentTask, wa) in waAl.toTypedArray().withIndex()) {
                 wa.setDataRead()
-                onSyncTaskProgress.invoke(SyncProgress(
-                    totalTask,
-                    currentTask,
-                    getContext().getString(R.string.synchronizing_warehouse_areas),
-                    registryType,
-                    ProgressStatus.running
-                ))
+                onSyncTaskProgress.invoke(
+                    SyncProgress(
+                        totalTask,
+                        currentTask,
+                        getContext().getString(R.string.synchronizing_warehouse_areas),
+                        registryType,
+                        ProgressStatus.running
+                    )
+                )
 
                 if (!scope.isActive) {
-                    onSyncTaskProgress.invoke(SyncProgress(
-                        0,
-                        0,
-                        getContext().getString(R.string.canceling_warehouse_area_synchronization),
-                        registryType,
-                        ProgressStatus.canceled
-                    ))
+                    onSyncTaskProgress.invoke(
+                        SyncProgress(
+                            0,
+                            0,
+                            getContext().getString(R.string.canceling_warehouse_area_synchronization),
+                            registryType,
+                            ProgressStatus.canceled
+                        )
+                    )
                     break
                 }
 
@@ -759,48 +789,40 @@ class SyncUpload(
                 var realWarehouseAreaId: Long
                 if (wa.warehouseAreaId > 0) {
                     realWarehouseAreaId = warehouseAreaWs.warehouseAreaModify(
-                        Statics.currentUserId ?: return,
-                        WarehouseAreaObject(wa)
+                        Statics.currentUserId ?: return, WarehouseAreaObject(wa)
                     )
                 } else {
                     realWarehouseAreaId = warehouseAreaWs.warehouseAreaAdd(
-                        Statics.currentUserId ?: return,
-                        WarehouseAreaObject(wa)
+                        Statics.currentUserId ?: return, WarehouseAreaObject(wa)
                     )
 
                     if (realWarehouseAreaId > 0) {
                         // Actualizar la propia área
                         waDb.updateWarehouseAreaId(
-                            realWarehouseAreaId,
-                            wa.warehouseAreaId
+                            realWarehouseAreaId, wa.warehouseAreaId
                         )
 
                         // Actualizar los activos fijos asociados
                         aDb.updateWarehouseAreaId(
-                            realWarehouseAreaId,
-                            wa.warehouseAreaId
+                            realWarehouseAreaId, wa.warehouseAreaId
                         )
 
                         // Actualizar las áreas de usuario
                         uwaDb.updateWarehouseAreaId(
-                            realWarehouseAreaId,
-                            wa.warehouseAreaId
+                            realWarehouseAreaId, wa.warehouseAreaId
                         )
 
                         // Actualizar las revisiones asociadas
                         arDb.updateWarehouseAreaId(
-                            realWarehouseAreaId,
-                            wa.warehouseAreaId
+                            realWarehouseAreaId, wa.warehouseAreaId
                         )
 
                         // Actualizar los movimientos asociados
                         wmDb.updateOriginWarehouseAreaId(
-                            realWarehouseAreaId,
-                            wa.warehouseAreaId
+                            realWarehouseAreaId, wa.warehouseAreaId
                         )
                         wmDb.updateDestWarehouseAreaId(
-                            realWarehouseAreaId,
-                            wa.warehouseAreaId
+                            realWarehouseAreaId, wa.warehouseAreaId
                         )
 
                         // Enviar las áreas del usuario
@@ -817,9 +839,7 @@ class SyncUpload(
                         uwaObj.see = 1
 
                         UserWarehouseAreaWs().userWarehouseAreaAdd(
-                            Statics.currentUserId ?: return,
-                            uObj,
-                            arrayListOf(uwaObj)
+                            Statics.currentUserId ?: return, uObj, arrayListOf(uwaObj)
                         )
 
                         // Enviar imágenes si existen
@@ -850,32 +870,32 @@ class SyncUpload(
         } catch (ex: Exception) {
             ex.printStackTrace()
             // Error remoto
-            onSyncTaskProgress.invoke(SyncProgress(
-                0,
-                0,
-                getContext().getString(R.string.failed_to_synchronize_the_warehouse_areas),
-                registryType,
-                ProgressStatus.crashed
-            ))
+            onSyncTaskProgress.invoke(
+                SyncProgress(
+                    0,
+                    0,
+                    getContext().getString(R.string.failed_to_synchronize_the_warehouse_areas),
+                    registryType,
+                    ProgressStatus.crashed
+                )
+            )
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             return
         } finally {
             db.endTransaction()
 
             registryOnProcess.remove(registryType)
-            onSyncTaskProgress.invoke(SyncProgress(
-                0,
-                0,
-                when {
-                    error -> getContext().getString(R.string.failed_to_synchronize_the_warehouse_areas)
-                    else -> getContext().getString(R.string.warehouse_area_synchronization_completed)
-                },
-                registryType,
-                when {
-                    error -> ProgressStatus.crashed
-                    else -> ProgressStatus.success
-                }
-            ))
+            onSyncTaskProgress.invoke(
+                SyncProgress(
+                    0, 0, when {
+                        error -> getContext().getString(R.string.failed_to_synchronize_the_warehouse_areas)
+                        else -> getContext().getString(R.string.warehouse_area_synchronization_completed)
+                    }, registryType, when {
+                        error -> ProgressStatus.crashed
+                        else -> ProgressStatus.success
+                    }
+                )
+            )
         }
     }
 
@@ -899,13 +919,15 @@ class SyncUpload(
 
         try {
             if (!scope.isActive) {
-                onSyncTaskProgress.invoke(SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.canceling_warehouse_synchronization),
-                    registryType,
-                    ProgressStatus.canceled
-                ))
+                onSyncTaskProgress.invoke(
+                    SyncProgress(
+                        0,
+                        0,
+                        getContext().getString(R.string.canceling_warehouse_synchronization),
+                        registryType,
+                        ProgressStatus.canceled
+                    )
+                )
                 return
             }
 
@@ -914,33 +936,39 @@ class SyncUpload(
                 return
             }
 
-            onSyncTaskProgress.invoke(SyncProgress(
-                0,
-                0,
-                getContext().getString(R.string.starting_warehouse_synchronization),
-                registryType,
-                ProgressStatus.starting
-            ))
+            onSyncTaskProgress.invoke(
+                SyncProgress(
+                    0,
+                    0,
+                    getContext().getString(R.string.starting_warehouse_synchronization),
+                    registryType,
+                    ProgressStatus.starting
+                )
+            )
 
             val totalTask = wAl.size
             for ((currentTask, w) in wAl.toTypedArray().withIndex()) {
                 w.setDataRead()
-                onSyncTaskProgress.invoke(SyncProgress(
-                    totalTask,
-                    currentTask,
-                    getContext().getString(R.string.synchronizing_warehouses),
-                    registryType,
-                    ProgressStatus.running
-                ))
+                onSyncTaskProgress.invoke(
+                    SyncProgress(
+                        totalTask,
+                        currentTask,
+                        getContext().getString(R.string.synchronizing_warehouses),
+                        registryType,
+                        ProgressStatus.running
+                    )
+                )
 
                 if (!scope.isActive) {
-                    onSyncTaskProgress.invoke(SyncProgress(
-                        0,
-                        0,
-                        getContext().getString(R.string.canceling_warehouse_synchronization),
-                        registryType,
-                        ProgressStatus.canceled
-                    ))
+                    onSyncTaskProgress.invoke(
+                        SyncProgress(
+                            0,
+                            0,
+                            getContext().getString(R.string.canceling_warehouse_synchronization),
+                            registryType,
+                            ProgressStatus.canceled
+                        )
+                    )
                     break
                 }
 
@@ -949,13 +977,11 @@ class SyncUpload(
                 var realWarehouseId: Long
                 if (w.warehouseId > 0) {
                     realWarehouseId = warehouseWs.warehouseModify(
-                        Statics.currentUserId ?: return,
-                        WarehouseObject(w)
+                        Statics.currentUserId ?: return, WarehouseObject(w)
                     )
                 } else {
                     realWarehouseId = warehouseWs.warehouseAdd(
-                        Statics.currentUserId ?: return,
-                        WarehouseObject(w)
+                        Statics.currentUserId ?: return, WarehouseObject(w)
                     )
 
                     if (realWarehouseId > 0) {
@@ -1003,32 +1029,32 @@ class SyncUpload(
         } catch (ex: Exception) {
             ex.printStackTrace()
             // Error remoto
-            onSyncTaskProgress.invoke(SyncProgress(
-                0,
-                0,
-                getContext().getString(R.string.failed_to_synchronize_the_warehouses),
-                registryType,
-                ProgressStatus.crashed
-            ))
+            onSyncTaskProgress.invoke(
+                SyncProgress(
+                    0,
+                    0,
+                    getContext().getString(R.string.failed_to_synchronize_the_warehouses),
+                    registryType,
+                    ProgressStatus.crashed
+                )
+            )
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             return
         } finally {
             db.endTransaction()
 
             registryOnProcess.remove(registryType)
-            onSyncTaskProgress.invoke(SyncProgress(
-                0,
-                0,
-                when {
-                    error -> getContext().getString(R.string.failed_to_synchronize_the_warehouses)
-                    else -> getContext().getString(R.string.warehouse_synchronization_completed)
-                },
-                registryType,
-                when {
-                    error -> ProgressStatus.crashed
-                    else -> ProgressStatus.success
-                }
-            ))
+            onSyncTaskProgress.invoke(
+                SyncProgress(
+                    0, 0, when {
+                        error -> getContext().getString(R.string.failed_to_synchronize_the_warehouses)
+                        else -> getContext().getString(R.string.warehouse_synchronization_completed)
+                    }, registryType, when {
+                        error -> ProgressStatus.crashed
+                        else -> ProgressStatus.success
+                    }
+                )
+            )
         }
     }
 
@@ -1049,13 +1075,15 @@ class SyncUpload(
 
         try {
             if (!scope.isActive) {
-                onSyncTaskProgress.invoke(SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.canceling_category_synchronization),
-                    registryType,
-                    ProgressStatus.canceled
-                ))
+                onSyncTaskProgress.invoke(
+                    SyncProgress(
+                        0,
+                        0,
+                        getContext().getString(R.string.canceling_category_synchronization),
+                        registryType,
+                        ProgressStatus.canceled
+                    )
+                )
                 return
             }
 
@@ -1064,33 +1092,39 @@ class SyncUpload(
                 return
             }
 
-            onSyncTaskProgress.invoke(SyncProgress(
-                0,
-                0,
-                getContext().getString(R.string.starting_category_synchronization),
-                registryType,
-                ProgressStatus.starting
-            ))
+            onSyncTaskProgress.invoke(
+                SyncProgress(
+                    0,
+                    0,
+                    getContext().getString(R.string.starting_category_synchronization),
+                    registryType,
+                    ProgressStatus.starting
+                )
+            )
 
             val totalTask = icAl.size
             for ((currentTask, ic) in icAl.toTypedArray().withIndex()) {
                 ic.setDataRead()
-                onSyncTaskProgress.invoke(SyncProgress(
-                    totalTask,
-                    currentTask,
-                    getContext().getString(R.string.synchronizing_categories),
-                    registryType,
-                    ProgressStatus.running
-                ))
+                onSyncTaskProgress.invoke(
+                    SyncProgress(
+                        totalTask,
+                        currentTask,
+                        getContext().getString(R.string.synchronizing_categories),
+                        registryType,
+                        ProgressStatus.running
+                    )
+                )
 
                 if (!scope.isActive) {
-                    onSyncTaskProgress.invoke(SyncProgress(
-                        0,
-                        0,
-                        getContext().getString(R.string.canceling_category_synchronization),
-                        registryType,
-                        ProgressStatus.canceled
-                    ))
+                    onSyncTaskProgress.invoke(
+                        SyncProgress(
+                            0,
+                            0,
+                            getContext().getString(R.string.canceling_category_synchronization),
+                            registryType,
+                            ProgressStatus.canceled
+                        )
+                    )
                     break
                 }
 
@@ -1099,20 +1133,17 @@ class SyncUpload(
                 var realItemCategoryId: Long
                 if (ic.itemCategoryId > 0) {
                     realItemCategoryId = itemCategoryWs.itemCategoryModify(
-                        Statics.currentUserId ?: return,
-                        ItemCategoryObject(ic)
+                        Statics.currentUserId ?: return, ItemCategoryObject(ic)
                     )
                 } else {
                     realItemCategoryId = itemCategoryWs.itemCategoryAdd(
-                        Statics.currentUserId ?: return,
-                        ItemCategoryObject(ic)
+                        Statics.currentUserId ?: return, ItemCategoryObject(ic)
                     )
 
                     if (realItemCategoryId > 0) {
                         // Actualizar la propia categoría
                         itemCategoryDb.updateItemCategoryId(
-                            realItemCategoryId,
-                            ic.itemCategoryId
+                            realItemCategoryId, ic.itemCategoryId
                         )
 
                         // Actualizar los activos fijos asociados
@@ -1146,32 +1177,32 @@ class SyncUpload(
         } catch (ex: Exception) {
             ex.printStackTrace()
             // Error remoto
-            onSyncTaskProgress.invoke(SyncProgress(
-                0,
-                0,
-                getContext().getString(R.string.failed_to_synchronize_the_categories),
-                registryType,
-                ProgressStatus.crashed
-            ))
+            onSyncTaskProgress.invoke(
+                SyncProgress(
+                    0,
+                    0,
+                    getContext().getString(R.string.failed_to_synchronize_the_categories),
+                    registryType,
+                    ProgressStatus.crashed
+                )
+            )
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             return
         } finally {
             db.endTransaction()
 
             registryOnProcess.remove(registryType)
-            onSyncTaskProgress.invoke(SyncProgress(
-                0,
-                0,
-                when {
-                    error -> getContext().getString(R.string.failed_to_synchronize_the_categories)
-                    else -> getContext().getString(R.string.category_synchronization_completed)
-                },
-                registryType,
-                when {
-                    error -> ProgressStatus.crashed
-                    else -> ProgressStatus.success
-                }
-            ))
+            onSyncTaskProgress.invoke(
+                SyncProgress(
+                    0, 0, when {
+                        error -> getContext().getString(R.string.failed_to_synchronize_the_categories)
+                        else -> getContext().getString(R.string.category_synchronization_completed)
+                    }, registryType, when {
+                        error -> ProgressStatus.crashed
+                        else -> ProgressStatus.success
+                    }
+                )
+            )
         }
     }
 
@@ -1192,13 +1223,15 @@ class SyncUpload(
 
         try {
             if (!scope.isActive) {
-                onSyncTaskProgress.invoke(SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.canceling_data_collection_synchronization),
-                    registryType,
-                    ProgressStatus.canceled
-                ))
+                onSyncTaskProgress.invoke(
+                    SyncProgress(
+                        0,
+                        0,
+                        getContext().getString(R.string.canceling_data_collection_synchronization),
+                        registryType,
+                        ProgressStatus.canceled
+                    )
+                )
                 return
             }
 
@@ -1207,32 +1240,38 @@ class SyncUpload(
                 return
             }
 
-            onSyncTaskProgress.invoke(SyncProgress(
-                0,
-                0,
-                getContext().getString(R.string.starting_data_collection_synchronization),
-                registryType,
-                ProgressStatus.starting
-            ))
+            onSyncTaskProgress.invoke(
+                SyncProgress(
+                    0,
+                    0,
+                    getContext().getString(R.string.starting_data_collection_synchronization),
+                    registryType,
+                    ProgressStatus.starting
+                )
+            )
 
             val totalTask = dcAl.size
             for ((currentTask, dc) in dcAl.toTypedArray().withIndex()) {
-                onSyncTaskProgress.invoke(SyncProgress(
-                    totalTask,
-                    currentTask,
-                    getContext().getString(R.string.synchronizing_data_collections),
-                    registryType,
-                    ProgressStatus.running
-                ))
+                onSyncTaskProgress.invoke(
+                    SyncProgress(
+                        totalTask,
+                        currentTask,
+                        getContext().getString(R.string.synchronizing_data_collections),
+                        registryType,
+                        ProgressStatus.running
+                    )
+                )
 
                 if (!scope.isActive) {
-                    onSyncTaskProgress.invoke(SyncProgress(
-                        0,
-                        0,
-                        getContext().getString(R.string.canceling_data_collection_synchronization),
-                        registryType,
-                        ProgressStatus.canceled
-                    ))
+                    onSyncTaskProgress.invoke(
+                        SyncProgress(
+                            0,
+                            0,
+                            getContext().getString(R.string.canceling_data_collection_synchronization),
+                            registryType,
+                            ProgressStatus.canceled
+                        )
+                    )
                     break
                 }
 
@@ -1275,8 +1314,7 @@ class SyncUpload(
                 dcObj.warehouseId = dc.warehouseId
 
                 val dcId = dcWs.dataCollectionAdd(
-                    dcObj,
-                    dccObjArray
+                    dcObj, dccObjArray
                 )
 
                 if (dcId > 0) {
@@ -1305,32 +1343,32 @@ class SyncUpload(
         } catch (ex: Exception) {
             ex.printStackTrace()
             // Error remoto
-            onSyncTaskProgress.invoke(SyncProgress(
-                0,
-                0,
-                getContext().getString(R.string.failed_to_synchronize_the_data_collections),
-                registryType,
-                ProgressStatus.crashed
-            ))
+            onSyncTaskProgress.invoke(
+                SyncProgress(
+                    0,
+                    0,
+                    getContext().getString(R.string.failed_to_synchronize_the_data_collections),
+                    registryType,
+                    ProgressStatus.crashed
+                )
+            )
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             return
         } finally {
             db.endTransaction()
 
             registryOnProcess.remove(registryType)
-            onSyncTaskProgress.invoke(SyncProgress(
-                0,
-                0,
-                when {
-                    error -> getContext().getString(R.string.failed_to_synchronize_the_data_collections)
-                    else -> getContext().getString(R.string.data_collection_synchronization_completed)
-                },
-                registryType,
-                when {
-                    error -> ProgressStatus.crashed
-                    else -> ProgressStatus.success
-                }
-            ))
+            onSyncTaskProgress.invoke(
+                SyncProgress(
+                    0, 0, when {
+                        error -> getContext().getString(R.string.failed_to_synchronize_the_data_collections)
+                        else -> getContext().getString(R.string.data_collection_synchronization_completed)
+                    }, registryType, when {
+                        error -> ProgressStatus.crashed
+                        else -> ProgressStatus.success
+                    }
+                )
+            )
         }
     }
 
@@ -1351,13 +1389,15 @@ class SyncUpload(
 
         try {
             if (!scope.isActive) {
-                onSyncTaskProgress.invoke(SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.canceling_route_process_synchronization),
-                    registryType,
-                    ProgressStatus.canceled
-                ))
+                onSyncTaskProgress.invoke(
+                    SyncProgress(
+                        0,
+                        0,
+                        getContext().getString(R.string.canceling_route_process_synchronization),
+                        registryType,
+                        ProgressStatus.canceled
+                    )
+                )
                 return
             }
 
@@ -1366,32 +1406,38 @@ class SyncUpload(
                 return
             }
 
-            onSyncTaskProgress.invoke(SyncProgress(
-                0,
-                0,
-                getContext().getString(R.string.starting_route_process_synchronization),
-                registryType,
-                ProgressStatus.starting
-            ))
+            onSyncTaskProgress.invoke(
+                SyncProgress(
+                    0,
+                    0,
+                    getContext().getString(R.string.starting_route_process_synchronization),
+                    registryType,
+                    ProgressStatus.starting
+                )
+            )
 
             val totalTask = rpAl.size
             for ((currentTask, rp) in rpAl.toTypedArray().withIndex()) {
-                onSyncTaskProgress.invoke(SyncProgress(
-                    totalTask,
-                    currentTask,
-                    getContext().getString(R.string.synchronizing_route_process),
-                    registryType,
-                    ProgressStatus.running
-                ))
+                onSyncTaskProgress.invoke(
+                    SyncProgress(
+                        totalTask,
+                        currentTask,
+                        getContext().getString(R.string.synchronizing_route_process),
+                        registryType,
+                        ProgressStatus.running
+                    )
+                )
 
                 if (!scope.isActive) {
-                    onSyncTaskProgress.invoke(SyncProgress(
-                        0,
-                        0,
-                        getContext().getString(R.string.canceling_route_process_synchronization),
-                        registryType,
-                        ProgressStatus.canceled
-                    ))
+                    onSyncTaskProgress.invoke(
+                        SyncProgress(
+                            0,
+                            0,
+                            getContext().getString(R.string.canceling_route_process_synchronization),
+                            registryType,
+                            ProgressStatus.canceled
+                        )
+                    )
                     break
                 }
 
@@ -1410,11 +1456,9 @@ class SyncUpload(
 
                     var dataCollectionId = 0L
                     if (rpc.dataCollectionId != null && (rpc.dataCollectionId ?: return) > 0) {
-                        val dc =
-                            DataCollectionDbHelper()
-                                .selectByCollectorId(
-                                    rpc.dataCollectionId ?: return
-                                )
+                        val dc = DataCollectionDbHelper().selectByCollectorId(
+                            rpc.dataCollectionId ?: return
+                        )
                         if (dc != null && dc.dataCollectionId > 0) {
                             // Actualizamos todos los Id temporales
                             dataCollectionId = dc.dataCollectionId
@@ -1449,8 +1493,7 @@ class SyncUpload(
                 rpObj.userId = rp.userId
 
                 val rpId = rpWs.routeProcessAdd(
-                    rpObj,
-                    rpcObjArray
+                    rpObj, rpcObjArray
                 )
 
                 if (rpId > 0) {
@@ -1479,32 +1522,32 @@ class SyncUpload(
         } catch (ex: Exception) {
             ex.printStackTrace()
             // Error remoto
-            onSyncTaskProgress.invoke(SyncProgress(
-                0,
-                0,
-                getContext().getString(R.string.failed_to_synchronize_the_route_process),
-                registryType,
-                ProgressStatus.crashed
-            ))
+            onSyncTaskProgress.invoke(
+                SyncProgress(
+                    0,
+                    0,
+                    getContext().getString(R.string.failed_to_synchronize_the_route_process),
+                    registryType,
+                    ProgressStatus.crashed
+                )
+            )
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             return
         } finally {
             db.endTransaction()
 
             registryOnProcess.remove(registryType)
-            onSyncTaskProgress.invoke(SyncProgress(
-                0,
-                0,
-                when {
-                    error -> getContext().getString(R.string.failed_to_synchronize_the_route_process)
-                    else -> getContext().getString(R.string.route_process_synchronization_completed)
-                },
-                registryType,
-                when {
-                    error -> ProgressStatus.crashed
-                    else -> ProgressStatus.success
-                }
-            ))
+            onSyncTaskProgress.invoke(
+                SyncProgress(
+                    0, 0, when {
+                        error -> getContext().getString(R.string.failed_to_synchronize_the_route_process)
+                        else -> getContext().getString(R.string.route_process_synchronization_completed)
+                    }, registryType, when {
+                        error -> ProgressStatus.crashed
+                        else -> ProgressStatus.success
+                    }
+                )
+            )
         }
     }
 
@@ -1524,13 +1567,15 @@ class SyncUpload(
 
         try {
             if (!scope.isActive) {
-                onSyncTaskProgress.invoke(SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.canceling_maintenance_type_synchronization),
-                    registryType,
-                    ProgressStatus.canceled
-                ))
+                onSyncTaskProgress.invoke(
+                    SyncProgress(
+                        0,
+                        0,
+                        getContext().getString(R.string.canceling_maintenance_type_synchronization),
+                        registryType,
+                        ProgressStatus.canceled
+                    )
+                )
                 return
             }
 
@@ -1539,33 +1584,39 @@ class SyncUpload(
                 return
             }
 
-            onSyncTaskProgress.invoke(SyncProgress(
-                0,
-                0,
-                getContext().getString(R.string.starting_maintenance_type_synchronization),
-                registryType,
-                ProgressStatus.starting
-            ))
+            onSyncTaskProgress.invoke(
+                SyncProgress(
+                    0,
+                    0,
+                    getContext().getString(R.string.starting_maintenance_type_synchronization),
+                    registryType,
+                    ProgressStatus.starting
+                )
+            )
 
             val totalTask = amAl.size
             for ((currentTask, am) in amAl.toTypedArray().withIndex()) {
                 am.setDataRead()
-                onSyncTaskProgress.invoke(SyncProgress(
-                    totalTask,
-                    currentTask,
-                    getContext().getString(R.string.synchronizing_maintenance_types),
-                    registryType,
-                    ProgressStatus.running
-                ))
+                onSyncTaskProgress.invoke(
+                    SyncProgress(
+                        totalTask,
+                        currentTask,
+                        getContext().getString(R.string.synchronizing_maintenance_types),
+                        registryType,
+                        ProgressStatus.running
+                    )
+                )
 
                 if (!scope.isActive) {
-                    onSyncTaskProgress.invoke(SyncProgress(
-                        0,
-                        0,
-                        getContext().getString(R.string.canceling_maintenance_type_synchronization),
-                        registryType,
-                        ProgressStatus.canceled
-                    ))
+                    onSyncTaskProgress.invoke(
+                        SyncProgress(
+                            0,
+                            0,
+                            getContext().getString(R.string.canceling_maintenance_type_synchronization),
+                            registryType,
+                            ProgressStatus.canceled
+                        )
+                    )
                     break
                 }
 
@@ -1584,20 +1635,15 @@ class SyncUpload(
                 amLogObj.manteinance_status_id = am.manteinanceStatusId
                 amLogObj.repairman_id = (Statics.currentUserId ?: return)
 
-                val assetManteinanceId =
-                    if (am.assetManteinanceId == 0L) {
-                        amWs.assetManteinanceAdd(
-                            Statics.currentUserId ?: return,
-                            amObj,
-                            amLogObj
-                        )
-                    } else {
-                        amWs.assetManteinanceModify(
-                            Statics.currentUserId ?: return,
-                            amObj,
-                            amLogObj
-                        )
-                    }
+                val assetManteinanceId = if (am.assetManteinanceId == 0L) {
+                    amWs.assetManteinanceAdd(
+                        Statics.currentUserId ?: return, amObj, amLogObj
+                    )
+                } else {
+                    amWs.assetManteinanceModify(
+                        Statics.currentUserId ?: return, amObj, amLogObj
+                    )
+                }
 
                 if (assetManteinanceId > 0) {
                     amDb.updateTransferred(assetManteinanceId)
@@ -1625,44 +1671,46 @@ class SyncUpload(
         } catch (ex: Exception) {
             ex.printStackTrace()
             // Error remoto
-            onSyncTaskProgress.invoke(SyncProgress(
-                0,
-                0,
-                getContext().getString(R.string.failed_to_synchronize_the_maintenance_types),
-                registryType,
-                ProgressStatus.crashed
-            ))
+            onSyncTaskProgress.invoke(
+                SyncProgress(
+                    0,
+                    0,
+                    getContext().getString(R.string.failed_to_synchronize_the_maintenance_types),
+                    registryType,
+                    ProgressStatus.crashed
+                )
+            )
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             return
         } finally {
             db.endTransaction()
 
             registryOnProcess.remove(registryType)
-            onSyncTaskProgress.invoke(SyncProgress(
-                0,
-                0,
-                when {
-                    error -> getContext().getString(R.string.failed_to_synchronize_the_maintenance_types)
-                    else -> getContext().getString(R.string.maintenance_type_synchronization_completed)
-                },
-                registryType,
-                when {
-                    error -> ProgressStatus.crashed
-                    else -> ProgressStatus.success
-                }
-            ))
+            onSyncTaskProgress.invoke(
+                SyncProgress(
+                    0, 0, when {
+                        error -> getContext().getString(R.string.failed_to_synchronize_the_maintenance_types)
+                        else -> getContext().getString(R.string.maintenance_type_synchronization_completed)
+                    }, registryType, when {
+                        error -> ProgressStatus.crashed
+                        else -> ProgressStatus.success
+                    }
+                )
+            )
         }
     }
 
     init {
         if (registryOnProcess.size > 0) {
-            onSyncTaskProgress.invoke(SyncProgress(
-                totalTask = 0,
-                completedTask = 0,
-                msg = "",
-                registryType = null,
-                progressStatus = ProgressStatus.canceled
-            ))
+            onSyncTaskProgress.invoke(
+                SyncProgress(
+                    totalTask = 0,
+                    completedTask = 0,
+                    msg = "",
+                    registryType = null,
+                    progressStatus = ProgressStatus.canceled
+                )
+            )
         } else {
             checkConnection()
         }

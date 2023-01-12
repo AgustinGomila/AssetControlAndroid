@@ -14,17 +14,17 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.views.assets.asset.activities.AssetCRUDActivity
-import com.dacosys.assetControl.views.assets.asset.activities.AssetPrintLabelActivity
-import com.dacosys.assetControl.views.codeCheck.CodeCheckActivity
-import com.dacosys.assetControl.views.commons.activities.ObservationsActivity
-import com.dacosys.assetControl.views.locations.locationSelect.LocationSelectActivity
-import com.dacosys.assetControl.views.locations.warehouseArea.activities.WarehouseAreaCRUDActivity
-import com.dacosys.assetControl.views.locations.warehouseArea.activities.WarehouseAreaPrintLabelActivity
-import com.dacosys.assetControl.views.movements.activities.WarehouseMovementContentActivity
-import com.dacosys.assetControl.views.reviews.activities.AssetReviewContentActivity
-import com.dacosys.assetControl.views.routes.activities.DccActivity
-import com.dacosys.assetControl.views.routes.activities.RouteProcessContentActivity
+import com.dacosys.assetControl.ui.activities.asset.AssetCRUDActivity
+import com.dacosys.assetControl.ui.activities.asset.AssetPrintLabelActivity
+import com.dacosys.assetControl.ui.activities.code.CodeCheckActivity
+import com.dacosys.assetControl.ui.activities.common.ObservationsActivity
+import com.dacosys.assetControl.ui.activities.location.LocationSelectActivity
+import com.dacosys.assetControl.ui.activities.location.WarehouseAreaCRUDActivity
+import com.dacosys.assetControl.ui.activities.location.WarehouseAreaPrintLabelActivity
+import com.dacosys.assetControl.ui.activities.movement.WarehouseMovementContentActivity
+import com.dacosys.assetControl.ui.activities.review.AssetReviewContentActivity
+import com.dacosys.assetControl.ui.activities.route.DccActivity
+import com.dacosys.assetControl.ui.activities.route.RouteProcessContentActivity
 import kotlin.experimental.or
 
 /**

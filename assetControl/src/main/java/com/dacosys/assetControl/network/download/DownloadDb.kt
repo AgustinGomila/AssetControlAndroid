@@ -9,11 +9,11 @@ import com.dacosys.assetControl.network.serverDate.GetMySqlDate
 import com.dacosys.assetControl.network.serverDate.MySqlDateResult
 import com.dacosys.assetControl.network.sync.*
 import com.dacosys.assetControl.network.utils.ProgressStatus
+import com.dacosys.assetControl.ui.common.snackbar.SnackBarEventData
+import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.configuration.entries.ConfEntry
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.views.commons.snackbar.SnackBarEventData
-import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
+import com.dacosys.assetControl.utils.settings.entries.ConfEntry
 import kotlinx.coroutines.*
 import java.io.*
 import java.text.SimpleDateFormat
@@ -78,18 +78,22 @@ class DownloadDb(
                     launchDownload()
                 }
                 ProgressStatus.crashed -> {
-                    onDownloadEvent.invoke(DownloadTask(
-                        msg = it.msg,
-                        fileType = null,
-                        downloadStatus = DownloadStatus.CRASHED,
-                    ))
+                    onDownloadEvent.invoke(
+                        DownloadTask(
+                            msg = it.msg,
+                            fileType = null,
+                            downloadStatus = DownloadStatus.CRASHED,
+                        )
+                    )
                 }
                 ProgressStatus.canceled -> {
-                    onDownloadEvent.invoke(DownloadTask(
-                        msg = it.msg,
-                        fileType = null,
-                        downloadStatus = DownloadStatus.CANCELED,
-                    ))
+                    onDownloadEvent.invoke(
+                        DownloadTask(
+                            msg = it.msg,
+                            fileType = null,
+                            downloadStatus = DownloadStatus.CANCELED,
+                        )
+                    )
                 }
             }
         }
@@ -99,22 +103,26 @@ class DownloadDb(
 
     private fun launchDownload() {
         if (Statics.wsUrlCron.isEmpty()) {
-            onDownloadEvent.invoke(DownloadTask(
-                msg = getContext().getString(R.string.webservice_is_not_configured),
-                fileType = null,
-                downloadStatus = DownloadStatus.CRASHED,
-            ))
+            onDownloadEvent.invoke(
+                DownloadTask(
+                    msg = getContext().getString(R.string.webservice_is_not_configured),
+                    fileType = null,
+                    downloadStatus = DownloadStatus.CRASHED,
+                )
+            )
             return
         }
 
         // Si aún no está loggeado y hay datos por enviar, no descargar la base de datos
         if (Statics.currentUserId == null && Statics.pendingDelivery()) {
-            onDownloadEvent.invoke(DownloadTask(
-                msg = getContext()
-                    .getString(R.string.the_database_will_not_be_downloaded_because_there_is_data_pending_delivery),
-                fileType = null,
-                downloadStatus = DownloadStatus.CANCELED,
-            ))
+            onDownloadEvent.invoke(
+                DownloadTask(
+                    msg = getContext()
+                        .getString(R.string.the_database_will_not_be_downloaded_because_there_is_data_pending_delivery),
+                    fileType = null,
+                    downloadStatus = DownloadStatus.CANCELED,
+                )
+            )
             return
         }
 
@@ -137,21 +145,27 @@ class DownloadDb(
         }
 
         if (progressStatus == ProgressStatus.crashed || progressStatus == ProgressStatus.canceled) {
-            ErrorLog.writeLog(null,
+            ErrorLog.writeLog(
+                null,
                 this::class.java.simpleName,
-                "$progressStatusDesc: $registryDesc, $msg")
+                "$progressStatusDesc: $registryDesc, $msg"
+            )
 
-            onDownloadEvent.invoke(DownloadTask(
-                msg = msg,
-                fileType = null,
-                downloadStatus = DownloadStatus.CRASHED,
-            ))
+            onDownloadEvent.invoke(
+                DownloadTask(
+                    msg = msg,
+                    fileType = null,
+                    downloadStatus = DownloadStatus.CRASHED,
+                )
+            )
             return
         }
 
-        Log.d(this::class.java.simpleName, "$progressStatusDesc: $registryDesc, $msg ${
-            Statics.getPercentage(completedTask, totalTask)
-        }")
+        Log.d(
+            this::class.java.simpleName, "$progressStatusDesc: $registryDesc, $msg ${
+                Statics.getPercentage(completedTask, totalTask)
+            }"
+        )
 
         if (progressStatus == ProgressStatus.bigFinished) {
             // Continuamos con la descarga del archivo de la fecha de creación
@@ -168,15 +182,19 @@ class DownloadDb(
         if (progressStatus == ProgressStatus.crashed ||
             progressStatus == ProgressStatus.crashed
         ) {
-            ErrorLog.writeLog(null,
+            ErrorLog.writeLog(
+                null,
                 this::class.java.simpleName,
-                "${progressStatus.description}: ${registryType?.description}, $msg")
+                "${progressStatus.description}: ${registryType?.description}, $msg"
+            )
 
-            onDownloadEvent.invoke(DownloadTask(
-                msg = msg,
-                fileType = null,
-                downloadStatus = DownloadStatus.CRASHED,
-            ))
+            onDownloadEvent.invoke(
+                DownloadTask(
+                    msg = msg,
+                    fileType = null,
+                    downloadStatus = DownloadStatus.CRASHED,
+                )
+            )
             return
         }
     }
@@ -193,8 +211,10 @@ class DownloadDb(
         DownloadFile(
             urlDestination = UrlDestParam(
                 url = timeUrl,
-                destination = timeFileLocation!!),
-            fileType = FileType.TIMEFILE) { onDownloadTimeFileTask(it) }
+                destination = timeFileLocation!!
+            ),
+            fileType = FileType.TIMEFILE
+        ) { onDownloadTimeFileTask(it) }
     }
 
     private fun onDownloadTimeFileTask(it: DownloadTask) {
@@ -203,11 +223,13 @@ class DownloadDb(
 
         when (downloadStatus) {
             DownloadStatus.CANCELED, DownloadStatus.CRASHED -> {
-                onDownloadEvent.invoke(DownloadTask(
-                    msg = msg,
-                    fileType = null,
-                    downloadStatus = DownloadStatus.CRASHED,
-                ))
+                onDownloadEvent.invoke(
+                    DownloadTask(
+                        msg = msg,
+                        fileType = null,
+                        downloadStatus = DownloadStatus.CRASHED,
+                    )
+                )
                 return
             }
             DownloadStatus.FINISHED -> {
@@ -233,17 +255,20 @@ class DownloadDb(
             SyncInitialUser { onSyncUsersProgress(it) }
             SyncStatics()
 
-            onDownloadEvent.invoke(DownloadTask(
-                msg = msg,
-                fileType = null,
-                downloadStatus = DownloadStatus.FINISHED,
-            ))
+            onDownloadEvent.invoke(
+                DownloadTask(
+                    msg = msg,
+                    fileType = null,
+                    downloadStatus = DownloadStatus.FINISHED,
+                )
+            )
             return
         }
 
         DownloadFile(
             urlDestination = UrlDestParam(dbUrl, dbFileLocation!!),
-            fileType = FileType.DBFILE) { onDownloadDbFileTask(it) }
+            fileType = FileType.DBFILE
+        ) { onDownloadDbFileTask(it) }
     }
 
     private fun onDownloadDbFileTask(it: DownloadTask) {
@@ -255,11 +280,13 @@ class DownloadDb(
             DataBaseHelper().close()
             prepareDataBase()
         } else {
-            onDownloadEvent.invoke(DownloadTask(
-                msg = msg,
-                fileType = fileType,
-                downloadStatus = downloadStatus,
-            ))
+            onDownloadEvent.invoke(
+                DownloadTask(
+                    msg = msg,
+                    fileType = fileType,
+                    downloadStatus = downloadStatus,
+                )
+            )
         }
     }
 
@@ -271,24 +298,30 @@ class DownloadDb(
             SyncInitialUser { onSyncUsersProgress(it) }
             SyncStatics()
 
-            onDownloadEvent.invoke(DownloadTask(
-                msg = getContext().getString(R.string.ok),
-                fileType = FileType.DBFILE,
-                downloadStatus = DownloadStatus.FINISHED,
-            ))
+            onDownloadEvent.invoke(
+                DownloadTask(
+                    msg = getContext().getString(R.string.ok),
+                    fileType = FileType.DBFILE,
+                    downloadStatus = DownloadStatus.FINISHED,
+                )
+            )
         } else {
-            onDownloadEvent.invoke(DownloadTask(
-                getContext().getString(R.string.error_when_copying_database),
-                FileType.DBFILE,
-                DownloadStatus.CRASHED,
-            ))
+            onDownloadEvent.invoke(
+                DownloadTask(
+                    getContext().getString(R.string.error_when_copying_database),
+                    FileType.DBFILE,
+                    DownloadStatus.CRASHED,
+                )
+            )
         }
     }
 
     private fun hasNewVersion(oldDate: String, newDate: String): Boolean {
         try {
-            Log.d(this::class.java.simpleName,
-                "DATABASE OLD VERSION: ${oldDate}, NEW VERSION: $newDate")
+            Log.d(
+                this::class.java.simpleName,
+                "DATABASE OLD VERSION: ${oldDate}, NEW VERSION: $newDate"
+            )
             if (oldDate.isEmpty()) {
                 return true
             }
@@ -320,8 +353,13 @@ class DownloadDb(
         } catch (ex: Exception) {
             ex.printStackTrace()
             scope.launch {
-                onUiEvent(SnackBarEventData(getContext()
-                    .getString(R.string.failed_to_get_the_date_from_the_file), SnackBarType.ERROR))
+                onUiEvent(
+                    SnackBarEventData(
+                        getContext()
+                            .getString(R.string.failed_to_get_the_date_from_the_file),
+                        SnackBarType.ERROR
+                    )
+                )
             }
         }
         return dateTime
@@ -341,8 +379,10 @@ class DownloadDb(
         Log.d(this::class.java.simpleName, getContext().getString(R.string.copying_database))
 
         if (dbFileLocation == null || !dbFileLocation!!.exists()) {
-            Log.e(this::class.java.simpleName,
-                getContext().getString(R.string.database_file_does_not_exist))
+            Log.e(
+                this::class.java.simpleName,
+                getContext().getString(R.string.database_file_does_not_exist)
+            )
             return false
         }
 
@@ -355,10 +395,14 @@ class DownloadDb(
         // Path to the just created empty db
         val outFileName = getContext().getDatabasePath(Statics.DATABASE_NAME).toString()
 
-        Log.d(this::class.java.simpleName,
-            "${getContext().getString(R.string.origin)}: ${dbFileLocation!!.absolutePath}")
-        Log.d(this::class.java.simpleName,
-            "${getContext().getString(R.string.destination)}: $outFileName")
+        Log.d(
+            this::class.java.simpleName,
+            "${getContext().getString(R.string.origin)}: ${dbFileLocation!!.absolutePath}"
+        )
+        Log.d(
+            this::class.java.simpleName,
+            "${getContext().getString(R.string.destination)}: $outFileName"
+        )
 
         try {
             //Open the empty db as the output stream
@@ -418,8 +462,12 @@ class DownloadDb(
                 Statics.prefsPutString(registries, Statics.defaultDate)
             } else {
                 scope.launch {
-                    onUiEvent(SnackBarEventData(getContext().getString(R.string.the_creation_date_of_the_db_on_the_server_is_invalid),
-                        SnackBarType.ERROR))
+                    onUiEvent(
+                        SnackBarEventData(
+                            getContext().getString(R.string.the_creation_date_of_the_db_on_the_server_is_invalid),
+                            SnackBarType.ERROR
+                        )
+                    )
                 }
                 return false
             }

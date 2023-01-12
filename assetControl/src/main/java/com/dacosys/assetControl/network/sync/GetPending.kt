@@ -2,6 +2,7 @@ package com.dacosys.assetControl.network.sync
 
 import com.dacosys.assetControl.dataBase.DataBaseHelper
 import com.dacosys.assetControl.utils.Statics
+import com.dacosys.imageControl.dataBase.DbCommands
 import kotlinx.coroutines.*
 
 class GetPending(
@@ -42,7 +43,7 @@ class GetPending(
             val dc = Statics.pendingDataCollection()
             val rp = Statics.pendingRouteProcess()
             val am = Statics.pendingAssetManteinance()
-            val pendingImages = com.dacosys.imageControl.Statics.pendingImages()
+            val pendingImages = DbCommands.countPending()
 
             db.setTransactionSuccessful()
 

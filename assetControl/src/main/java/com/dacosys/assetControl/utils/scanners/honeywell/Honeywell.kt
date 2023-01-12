@@ -11,9 +11,9 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.configuration.Preference
 import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.utils.scanners.honeywell.Honeywell.Constants.PROPERTY_DATA_PROCESSOR_DATA_INTENT
+import com.dacosys.assetControl.utils.settings.Preference
 import java.util.concurrent.atomic.AtomicBoolean
 
 

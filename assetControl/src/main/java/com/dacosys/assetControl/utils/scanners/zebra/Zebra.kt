@@ -9,7 +9,6 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.configuration.Preference
 import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.utils.scanners.zebra.Zebra.Constants.ACTION_DATAWEDGE
 import com.dacosys.assetControl.utils.scanners.zebra.Zebra.Constants.ACTION_RESULT
@@ -28,6 +27,7 @@ import com.dacosys.assetControl.utils.scanners.zebra.Zebra.Constants.EXTRA_SOFT_
 import com.dacosys.assetControl.utils.scanners.zebra.Zebra.Constants.EXTRA_UNREGISTER_NOTIFICATION
 import com.dacosys.assetControl.utils.scanners.zebra.Zebra.Constants.activityActionFromService
 import com.dacosys.assetControl.utils.scanners.zebra.Zebra.Constants.activityIntentFilterAction
+import com.dacosys.assetControl.utils.settings.Preference
 import java.util.concurrent.atomic.AtomicBoolean
 
 // ****************************************************************************************

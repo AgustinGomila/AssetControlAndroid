@@ -147,7 +147,7 @@
             android:orientation="vertical"
             app:layout_constraintGuide_percent="0.5" />
 
-        <com.dacosys.assetControl.views.commons.views.AutoResizeTextView
+        <com.dacosys.assetControl.ui.common.views.custom.AutoResizeTextView
             android:id="@+id/descriptionAutoSize"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -169,7 +169,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/dividerInternalGral" />
 
-        <com.dacosys.assetControl.views.commons.views.AutoResizeTextView
+        <com.dacosys.assetControl.ui.common.views.custom.AutoResizeTextView
             android:id="@+id/code"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -313,7 +313,7 @@
             android:orientation="vertical"
             app:layout_constraintGuide_percent="0.5" />
 
-        <com.dacosys.assetControl.views.commons.views.AutoResizeTextView
+        <com.dacosys.assetControl.ui.common.views.custom.AutoResizeTextView
             android:id="@+id/warehouseStr"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -333,7 +333,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/locationTextView" />
 
-        <com.dacosys.assetControl.views.commons.views.AutoResizeTextView
+        <com.dacosys.assetControl.ui.common.views.custom.AutoResizeTextView
             android:id="@+id/warehouseAreaStr"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

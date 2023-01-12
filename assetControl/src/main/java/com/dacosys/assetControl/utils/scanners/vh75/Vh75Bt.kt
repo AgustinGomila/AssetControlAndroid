@@ -13,8 +13,8 @@ import androidx.core.app.ActivityCompat
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.configuration.Preference
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
+import com.dacosys.assetControl.utils.settings.Preference
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream

@@ -47,7 +47,7 @@
             android:orientation="vertical"
             app:layout_constraintGuide_percent="0.5" />
 
-        <com.dacosys.assetControl.views.commons.views.AutoResizeTextView
+        <com.dacosys.assetControl.ui.common.views.custom.AutoResizeTextView
             android:id="@+id/warehouseStr"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -67,7 +67,7 @@
             app:layout_constraintStart_toEndOf="@+id/dividerVert"
             app:layout_constraintTop_toTopOf="@+id/warehouseAreaStr" />
 
-        <com.dacosys.assetControl.views.commons.views.AutoResizeTextView
+        <com.dacosys.assetControl.ui.common.views.custom.AutoResizeTextView
             android:id="@+id/warehouseAreaStr"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

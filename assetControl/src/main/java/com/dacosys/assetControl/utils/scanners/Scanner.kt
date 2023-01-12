@@ -4,10 +4,10 @@ import android.os.Build
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.configuration.collectorType.CollectorType
 import com.dacosys.assetControl.utils.scanners.honeywell.Honeywell
 import com.dacosys.assetControl.utils.scanners.honeywell.HoneywellNative
 import com.dacosys.assetControl.utils.scanners.zebra.Zebra
+import com.dacosys.assetControl.utils.settings.collectorType.CollectorType
 import java.lang.ref.WeakReference
 
 /**

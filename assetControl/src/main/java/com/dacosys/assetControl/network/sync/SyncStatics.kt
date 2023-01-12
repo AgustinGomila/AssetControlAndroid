@@ -1,9 +1,9 @@
 package com.dacosys.assetControl.network.sync
 
-import com.dacosys.assetControl.model.assets.manteinances.manteinanceStatus.dbHelper.ManteinanceStatusDbHelper
-import com.dacosys.assetControl.model.barcodeLabels.barcodeLabelTarget.dbHelper.BarcodeLabelTargetDbHelper
-import com.dacosys.assetControl.model.reviews.assetReviewStatus.dbHelper.AssetReviewStatusDbHelper
-import com.dacosys.assetControl.model.routes.routeProcessStatus.dbHelper.RouteProcessStatusDbHelper
+import com.dacosys.assetControl.dataBase.barcode.BarcodeLabelTargetDbHelper
+import com.dacosys.assetControl.dataBase.manteinance.ManteinanceStatusDbHelper
+import com.dacosys.assetControl.dataBase.review.AssetReviewStatusDbHelper
+import com.dacosys.assetControl.dataBase.route.RouteProcessStatusDbHelper
 import kotlinx.coroutines.*
 
 class SyncStatics {

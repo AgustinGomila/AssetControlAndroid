@@ -9,7 +9,7 @@
     android:focusableInTouchMode="true"
     android:gravity="center_horizontal"
     android:orientation="vertical"
-    tools:context="com.dacosys.assetControl.views.assets.asset.activities.AssetCRUDActivity"
+    tools:context="com.dacosys.assetControl.ui.activities.asset.AssetCRUDActivity"
     tools:layout_editor_absoluteX="0dp"
     tools:layout_editor_absoluteY="81dp">
 
@@ -37,7 +37,7 @@
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/crudFragment"
-            android:name="com.dacosys.assetControl.views.assets.asset.fragments.AssetCRUDFragment"
+            android:name="com.dacosys.assetControl.ui.fragments.asset.AssetCRUDFragment"
             android:layout_width="0dp"
             android:layout_height="0dp"
             app:layout_constraintBottom_toTopOf="@+id/expandButton"

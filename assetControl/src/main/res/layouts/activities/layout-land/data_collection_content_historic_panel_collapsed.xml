@@ -47,7 +47,7 @@
         app:layout_constraintStart_toStartOf="@+id/guideline25"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <com.dacosys.assetControl.views.commons.views.AutoResizeTextView
+    <com.dacosys.assetControl.ui.common.views.custom.AutoResizeTextView
         android:id="@+id/attributeTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -177,7 +177,7 @@
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/historicDataFragment"
-            android:name="com.dacosys.assetControl.views.routes.fragment.HistoricDataFragment"
+            android:name="com.dacosys.assetControl.ui.fragments.route.HistoricDataFragment"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintBottom_toBottomOf="parent"

@@ -197,13 +197,15 @@ class GetClientPackages(
         scope.launch {
             doInBackground()
 
-            onProgress.invoke(ClientPackagesProgress(
-                status = progressStatus,
-                result = jsonObjArray,
-                clientEmail = email,
-                clientPassword = password,
-                msg = msg
-            ))
+            onProgress.invoke(
+                ClientPackagesProgress(
+                    status = progressStatus,
+                    result = jsonObjArray,
+                    clientEmail = email,
+                    clientPassword = password,
+                    msg = msg
+                )
+            )
         }
     }
 }

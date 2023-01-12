@@ -8,7 +8,7 @@
     android:clickable="true"
     android:focusable="true"
     android:orientation="vertical"
-    tools:context="com.dacosys.assetControl.views.assets.asset.activities.AssetDetailActivity"
+    tools:context="com.dacosys.assetControl.ui.activities.asset.AssetDetailActivity"
     tools:layout_editor_absoluteX="0dp"
     tools:layout_editor_absoluteY="81dp">
 

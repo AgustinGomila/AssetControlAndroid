@@ -20,13 +20,13 @@ import androidx.core.content.ContextCompat
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.databinding.FloatingCameraActivityBinding
+import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
+import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
+import com.dacosys.assetControl.ui.common.views.scaleImageView.ScaleImage
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.Statics.Companion.getSystemBarsHeight
-import com.dacosys.assetControl.utils.configuration.Preference
 import com.dacosys.assetControl.utils.scanners.Scanner
-import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
-import com.dacosys.assetControl.views.commons.views.scaleImageView.ScaleImage
+import com.dacosys.assetControl.utils.settings.Preference
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.client.android.BeepManager
 import com.journeyapps.barcodescanner.BarcodeCallback

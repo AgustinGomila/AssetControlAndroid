@@ -6,7 +6,7 @@ import android.provider.Settings
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.wsGeneral.SessionObject
+import com.dacosys.assetControl.webservice.common.SessionObject
 import kotlinx.coroutines.*
 import java.net.NetworkInterface
 import java.util.*

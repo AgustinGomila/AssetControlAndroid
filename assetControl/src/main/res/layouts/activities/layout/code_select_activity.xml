@@ -14,7 +14,7 @@
     android:excludeFromRecents="true"
     android:focusable="true"
     android:focusableInTouchMode="true"
-    tools:context=".views.assets.asset.activities.CodeSelectDialogActivity">
+    tools:context=".ui.activities.asset.CodeSelectDialogActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/gralLayout"
@@ -41,7 +41,7 @@
             app:layout_constraintTop_toTopOf="@+id/autoCompleteTextView"
             app:srcCompat="@drawable/ic_close_black" />
 
-        <com.dacosys.assetControl.views.commons.views.ContractsAutoCompleteTextView
+        <com.dacosys.assetControl.ui.common.views.custom.ContractsAutoCompleteTextView
             android:id="@+id/autoCompleteTextView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

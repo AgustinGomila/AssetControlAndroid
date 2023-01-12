@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:weightSum="1"
-    tools:context=".views.routes.activities.RouteSelectActivity">
+    tools:context=".ui.activities.route.RouteSelectActivity">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/top_appbar"
@@ -133,7 +133,7 @@
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/filterFragment"
-            android:name="com.dacosys.assetControl.views.routes.fragment.RouteSelectFilterFragment"
+            android:name="com.dacosys.assetControl.ui.fragments.route.RouteSelectFilterFragment"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintBottom_toBottomOf="parent"

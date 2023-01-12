@@ -16,9 +16,9 @@ import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
+import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
+import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.configuration.Preference
-import com.dacosys.assetControl.utils.configuration.collectorType.CollectorType
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.scanners.Scanner.ScannerListener
 import com.dacosys.assetControl.utils.scanners.floatingCamera.FloatingCameraBarcode
@@ -26,8 +26,8 @@ import com.dacosys.assetControl.utils.scanners.nfc.Nfc
 import com.dacosys.assetControl.utils.scanners.nfc.Nfc.enableNfcForegroundDispatch
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.utils.scanners.rfid.RfidType
-import com.dacosys.assetControl.views.commons.snackbar.MakeText.Companion.makeText
-import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
+import com.dacosys.assetControl.utils.settings.Preference
+import com.dacosys.assetControl.utils.settings.collectorType.CollectorType
 import com.google.android.gms.common.api.CommonStatusCodes
 import id.pahlevikun.jotter.Jotter
 

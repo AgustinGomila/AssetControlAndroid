@@ -1,9 +1,9 @@
 package com.dacosys.assetControl.utils.scanners
 
 import android.util.Log
-import com.dacosys.assetControl.model.assets.asset.`object`.Asset
-import com.dacosys.assetControl.model.assets.asset.dbHelper.AssetDbHelper
-import com.dacosys.assetControl.model.locations.warehouseArea.`object`.WarehouseArea
+import com.dacosys.assetControl.dataBase.asset.AssetDbHelper
+import com.dacosys.assetControl.model.asset.Asset
+import com.dacosys.assetControl.model.location.WarehouseArea
 
 class ScannedCode {
     private var targetInt: Any? = null

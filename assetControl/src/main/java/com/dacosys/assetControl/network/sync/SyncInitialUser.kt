@@ -3,20 +3,16 @@ package com.dacosys.assetControl.network.sync
 import android.util.Log
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.model.users.user.dbHelper.UserDbHelper
-import com.dacosys.assetControl.model.users.user.wsObject.UserWs
-import com.dacosys.assetControl.model.users.userPermission.dbHelper.UserPermissionDbHelper
-import com.dacosys.assetControl.model.users.userPermission.wsObject.UserPermissionObject
-import com.dacosys.assetControl.model.users.userPermission.wsObject.UserPermissionWs
-import com.dacosys.assetControl.model.users.userWarehouseArea.dbHelper.UserWarehouseAreaDbHelper
-import com.dacosys.assetControl.model.users.userWarehouseArea.wsObject.UserWarehouseAreaObject
-import com.dacosys.assetControl.model.users.userWarehouseArea.wsObject.UserWarehouseAreaWs
+import com.dacosys.assetControl.dataBase.user.UserDbHelper
+import com.dacosys.assetControl.dataBase.user.UserPermissionDbHelper
+import com.dacosys.assetControl.dataBase.user.UserWarehouseAreaDbHelper
 import com.dacosys.assetControl.network.serverDate.GetMySqlDate
 import com.dacosys.assetControl.network.serverDate.MySqlDateResult
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.configuration.entries.ConfEntry
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.settings.entries.ConfEntry
+import com.dacosys.assetControl.webservice.user.*
 import kotlinx.coroutines.*
 
 class SyncInitialUser(
@@ -47,14 +43,16 @@ class SyncInitialUser(
         val qty = Statics.prefsGetInt(ConfEntry.acSyncQtyRegistry)
 
         scope.launch {
-            onUiEvent(SyncProgress(
-                totalTask = 0,
-                completedTask = 0,
-                msg = getContext()
-                    .getString(R.string.starting_user_synchronization),
-                registryType = registryType,
-                progressStatus = ProgressStatus.starting
-            ))
+            onUiEvent(
+                SyncProgress(
+                    totalTask = 0,
+                    completedTask = 0,
+                    msg = getContext()
+                        .getString(R.string.starting_user_synchronization),
+                    registryType = registryType,
+                    progressStatus = ProgressStatus.starting
+                )
+            )
         }
 
         val ws = UserWs()
@@ -96,7 +94,8 @@ class SyncInitialUser(
 
                     try {
                         if (objArray.isNotEmpty()) {
-                            db.sync(objArray = objArray,
+                            db.sync(
+                                objArray = objArray,
                                 onSyncTaskProgress = { onSyncTaskProgress.invoke(it) },
                                 currentCount = currentCount,
                                 countTotal = countTotal
@@ -146,13 +145,15 @@ class SyncInitialUser(
 
         if (errorOccurred) {
             scope.launch {
-                onUiEvent(SyncProgress(
-                    totalTask = 0,
-                    completedTask = 0,
-                    msg = errorMsg,
-                    registryType = registryType,
-                    progressStatus = ProgressStatus.crashed
-                ))
+                onUiEvent(
+                    SyncProgress(
+                        totalTask = 0,
+                        completedTask = 0,
+                        msg = errorMsg,
+                        registryType = registryType,
+                        progressStatus = ProgressStatus.crashed
+                    )
+                )
             }
             return
         }
@@ -179,23 +180,28 @@ class SyncInitialUser(
                     it.msg
                 )
                 scope.launch {
-                    onUiEvent(SyncProgress(
-                        totalTask = 0,
-                        completedTask = 0,
-                        msg = getContext().getString(R.string.ok),
-                        registryType = registryType,
-                        progressStatus = ProgressStatus.finished
-                    ))
+                    onUiEvent(
+                        SyncProgress(
+                            totalTask = 0,
+                            completedTask = 0,
+                            msg = getContext().getString(R.string.ok),
+                            registryType = registryType,
+                            progressStatus = ProgressStatus.finished
+                        )
+                    )
                 }
             }
             ProgressStatus.crashed, ProgressStatus.canceled -> {
                 scope.launch {
-                    onUiEvent(SyncProgress(
-                        totalTask = 0,
-                        completedTask = 0,
-                        msg = it.msg,
-                        registryType = registryType,
-                        progressStatus = it.status))
+                    onUiEvent(
+                        SyncProgress(
+                            totalTask = 0,
+                            completedTask = 0,
+                            msg = it.msg,
+                            registryType = registryType,
+                            progressStatus = it.status
+                        )
+                    )
                 }
             }
         }

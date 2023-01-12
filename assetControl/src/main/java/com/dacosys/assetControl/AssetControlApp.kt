@@ -3,6 +3,7 @@ package com.dacosys.assetControl
 import android.app.Application
 import android.content.Context
 import com.dacosys.assetControl.utils.scanners.JotterListener
+import com.dacosys.imageControl.Statics
 import id.pahlevikun.jotter.Jotter
 import id.pahlevikun.jotter.event.ActivityEvent
 
@@ -12,25 +13,21 @@ class AssetControlApp : Application() {
         sApplication = this
 
         // Setup ImageControl context
-        com.dacosys.imageControl.Statics.ImageControl().setAppContext(this)
+        com.dacosys.imageControl.ImageControl().create(applicationContext, Statics.APP_ROOT_PATH)
 
         // Eventos del ciclo de vida de las actividades
         // que nos interesa interceptar para conectar y
         // desconectar los medios de lectura de códigos.
-        Jotter.Builder(this)
-            .setLogEnable(true)
-            .setActivityEventFilter(
-                listOf(
-                    ActivityEvent.CREATE,
-                    ActivityEvent.RESUME,
-                    ActivityEvent.PAUSE,
-                    ActivityEvent.DESTROY
-                )
+        Jotter.Builder(this).setLogEnable(true).setActivityEventFilter(
+            listOf(
+                ActivityEvent.CREATE,
+                ActivityEvent.RESUME,
+                ActivityEvent.PAUSE,
+                ActivityEvent.DESTROY
             )
+        )
             //.setFragmentEventFilter(listOf(FragmentEvent.VIEW_CREATE, FragmentEvent.PAUSE))
-            .setJotterListener(JotterListener)
-            .build()
-            .startListening()
+            .setJotterListener(JotterListener).build().startListening()
     }
 
     companion object {

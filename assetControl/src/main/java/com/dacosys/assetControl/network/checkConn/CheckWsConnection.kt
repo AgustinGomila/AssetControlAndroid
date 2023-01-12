@@ -5,9 +5,9 @@ import com.dacosys.assetControl.R
 import com.dacosys.assetControl.network.serverDate.GetMySqlDate
 import com.dacosys.assetControl.network.serverDate.MySqlDateResult
 import com.dacosys.assetControl.network.utils.ProgressStatus
+import com.dacosys.assetControl.ui.common.snackbar.SnackBarEventData
+import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.views.commons.snackbar.SnackBarEventData
-import com.dacosys.assetControl.views.commons.snackbar.SnackBarType
 
 class CheckWsConnection(
     private var url: String,
@@ -60,9 +60,13 @@ class CheckWsConnection(
                     onSnackBarEvent.invoke(SnackBarEventData(it.msg, SnackBarType.INFO))
                 }
                 ProgressStatus.finished -> {
-                    onSnackBarEvent.invoke(SnackBarEventData(getContext()
-                        .getString(R.string.ok),
-                        SnackBarType.SUCCESS))
+                    onSnackBarEvent.invoke(
+                        SnackBarEventData(
+                            getContext()
+                                .getString(R.string.ok),
+                            SnackBarType.SUCCESS
+                        )
+                    )
                 }
             }
         }

@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:gravity="center_horizontal"
     android:orientation="vertical"
-    tools:context="com.dacosys.assetControl.views.locations.warehouse.activities.WarehouseCRUDActivity"
+    tools:context="com.dacosys.assetControl.ui.activities.location.WarehouseCRUDActivity"
     tools:layout_editor_absoluteX="0dp"
     tools:layout_editor_absoluteY="81dp">
 
@@ -32,7 +32,7 @@
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/crudFragment"
-            android:name="com.dacosys.assetControl.views.locations.warehouse.fragment.WarehouseCRUDFragment"
+            android:name="com.dacosys.assetControl.ui.fragments.location.WarehouseCRUDFragment"
             android:layout_width="0dp"
             android:layout_height="0dp"
             app:layout_constraintBottom_toBottomOf="parent"

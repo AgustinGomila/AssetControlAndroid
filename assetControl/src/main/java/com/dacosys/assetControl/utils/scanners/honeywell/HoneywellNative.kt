@@ -7,8 +7,8 @@ import androidx.appcompat.app.AppCompatActivity
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.configuration.Preference
 import com.dacosys.assetControl.utils.scanners.Scanner
+import com.dacosys.assetControl.utils.settings.Preference
 import com.honeywell.aidc.*
 import java.lang.ref.WeakReference
 import java.util.concurrent.atomic.AtomicBoolean
