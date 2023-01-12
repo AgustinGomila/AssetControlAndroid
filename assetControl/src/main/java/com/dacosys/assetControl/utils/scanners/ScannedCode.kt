@@ -61,7 +61,7 @@ class ScannedCode {
                     .isNotEmpty()
             ) {
                 try {
-                    return matches.groups[position].toString()
+                    return matches.groups[position]?.value.toString()
                 } catch (ex: Exception) {
                     val res =
                         "Error doing regex.\r\n formula $formula\r\n string $origin\r\n${ex.message}"

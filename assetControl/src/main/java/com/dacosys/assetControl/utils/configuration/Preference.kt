@@ -944,10 +944,10 @@ class Preference(key: String, defaultValue: Any, debugValue: Any) {
         fun getEnviroment(): ArrayList<Preference> {
             val allSections = ArrayList<Preference>()
 
-            allSections.union(getAcMant())
-            allSections.union(getAcWebserivce())
-            allSections.union(getClientPackage())
-            allSections.union(getImageControl())
+            allSections.addAll(getAcMant())
+            allSections.addAll(getAcWebserivce())
+            allSections.addAll(getClientPackage())
+            allSections.addAll(getImageControl())
 
             return ArrayList(allSections.sortedWith(compareBy { it.key }))
         }
@@ -955,24 +955,24 @@ class Preference(key: String, defaultValue: Any, debugValue: Any) {
         private fun getAll(): ArrayList<Preference> {
             val allSections = ArrayList<Preference>()
 
-            allSections.union(getAcMant())
-            allSections.union(getAcWebserivce())
-            allSections.union(getAppConf())
-            allSections.union(getClientPackage())
-            allSections.union(getImageControl())
-            allSections.union(getPersistentStateActivity())
-            allSections.union(getPrinter())
-            allSections.union(getRfidNfc())
-            allSections.union(getSymbology())
+            allSections.addAll(getAcMant())
+            allSections.addAll(getAcWebserivce())
+            allSections.addAll(getAppConf())
+            allSections.addAll(getClientPackage())
+            allSections.addAll(getImageControl())
+            allSections.addAll(getPersistentStateActivity())
+            allSections.addAll(getPrinter())
+            allSections.addAll(getRfidNfc())
+            allSections.addAll(getSymbology())
 
             return ArrayList(allSections.sortedWith(compareBy { it.key }))
         }
 
         fun getConfigPreferences(): ArrayList<Preference> {
             val allSections = ArrayList<Preference>()
-            allSections.union(getAppConf())
-            allSections.union(getImageControl())
-            allSections.union(getAcWebserivce())
+            allSections.addAll(getAppConf())
+            allSections.addAll(getImageControl())
+            allSections.addAll(getAcWebserivce())
 
             return ArrayList(allSections.sortedWith(compareBy { it.key }))
         }

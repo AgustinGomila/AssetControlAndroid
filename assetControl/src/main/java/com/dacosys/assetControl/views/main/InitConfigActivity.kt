@@ -27,6 +27,7 @@ import com.dacosys.assetControl.utils.Statics.Companion.closeKeyboard
 import com.dacosys.assetControl.utils.Statics.Companion.getConfig
 import com.dacosys.assetControl.utils.Statics.Companion.setupProxy
 import com.dacosys.assetControl.utils.configuration.Preference
+import com.dacosys.assetControl.utils.configuration.QRConfigType
 import com.dacosys.assetControl.utils.configuration.QRConfigType.CREATOR.QRConfigClientAccount
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.scanners.JotterListener
@@ -388,10 +389,23 @@ class InitConfigActivity :
         JotterListener.hideWindow(this)
 
         try {
-            Statics.getConfigFromScannedCode(
-                scanCode = scanCode,
-                mode = QRConfigClientAccount
-            ) { onTaskGetPackagesEnded(it) }
+            val mainJson = JSONObject(scanCode)
+
+            when {
+                mainJson.has("config") -> {
+                    Statics.getConfigFromScannedCode(scanCode = scanCode,
+                        mode = QRConfigClientAccount) { onTaskGetPackagesEnded(it) }
+                }
+                mainJson.has(Statics.appName) -> {
+                    if (scanCode.contains(Preference.acWsServer.key)) {
+                        Statics.getConfigFromScannedCode(scanCode = scanCode,
+                            mode = QRConfigType.QRConfigWebservice) { onTaskGetPackagesEnded(it) }
+                    }
+                }
+                else -> {
+                    makeText(binding.root, getString(R.string.invalid_code), ERROR)
+                }
+            }
         } catch (ex: Exception) {
             ex.printStackTrace()
             makeText(binding.root, ex.message.toString(), ERROR)
