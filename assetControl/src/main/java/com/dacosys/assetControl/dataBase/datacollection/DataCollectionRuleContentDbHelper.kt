@@ -118,8 +118,8 @@ class DataCollectionRuleContentDbHelper {
                     "'${obj.expression?.replace("'", "''")}'," +
                     "${obj.trueResult}," +
                     "${obj.falseResult}," +
-                    "${obj.active}," +
-                    "${obj.mandatory}),"
+                    "${if (obj.active) 1 else 0}," +
+                    "${if (obj.mandatory) 1 else 0}),"
             query = "$query$values"
         }
 

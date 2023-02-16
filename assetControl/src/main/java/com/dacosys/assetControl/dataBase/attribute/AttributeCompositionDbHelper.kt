@@ -87,9 +87,9 @@ class AttributeCompositionDbHelper {
                     "${obj.attributeCompositionTypeId}," +
                     "'${obj.description.replace("'", "''")}'," +
                     "'${obj.composition?.replace("'", "''")}'," +
-                    "${obj.used}," +
+                    "${if (obj.used) 1 else 0}," +
                     "'${obj.name.replace("'", "''")}'," +
-                    "${obj.readOnly}," +
+                    "${if (obj.readOnly) 1 else 0}," +
                     "'${obj.defaultValue.replace("'", "''")}'),"
             query = "$query$values"
         }
