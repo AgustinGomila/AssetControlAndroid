@@ -405,7 +405,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         if (imageControlFragment == null) {
             imageControlFragment = ImageControlButtonsFragment.newInstance(
-                Table.routeProcess.tableId, rpc.routeProcessId, null
+                Table.routeProcess.tableId.toLong(), rpc.routeProcessId.toString(), null
             )
 
             if (description.isNotEmpty()) {

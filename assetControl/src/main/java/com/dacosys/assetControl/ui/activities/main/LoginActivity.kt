@@ -56,8 +56,7 @@ import com.dacosys.assetControl.utils.settings.QRConfigType.CREATOR.QRConfigClie
 import com.dacosys.assetControl.utils.settings.QRConfigType.CREATOR.QRConfigWebservice
 import com.dacosys.assetControl.viewModel.sync.DownloadDbViewModel
 import com.dacosys.assetControl.viewModel.sync.SyncViewModel
-import com.dacosys.imageControl.dataBase.DbHelper
-import com.dacosys.imageControl.network.upload.NetCommands.Companion.sendPendingImages
+import com.dacosys.imageControl.network.upload.SendPending
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
@@ -264,7 +263,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                 SQLiteDatabase.releaseMemory()
 
                 // Enviar las imágenes pendientes...
-                sendPendingImages()
+                if (Statics.useImageControl) SendPending()
 
                 thread {
                     SyncDownload(onSyncTaskProgress = { syncViewModel.setSyncDownloadProgress(it) },
@@ -620,10 +619,11 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
             // Si existe una sesión previa se cierra.             //
             DataBaseHelper.beginDataBase()
 
+            // TODO: Eliminar este código cuando ya no se necesite ROOM / SQLite
             // Acá arranca la base de datos de ImageControl, si no existe se crea.
-            if (Statics.useImageControl) {
-                DbHelper.beginDataBase()
-            }
+            // if (Statics.useImageControl) {
+            //     DbHelper.beginDataBase()
+            // }
             ///////////// FIN INICIALIZACIÓN SQLITE ////////////////
 
         } catch (ex: Exception) {

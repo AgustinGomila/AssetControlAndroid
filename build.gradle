@@ -26,7 +26,9 @@ allprojects {
     }
 
     ext {
-        nav_version = '2.4.1'
+        // No actualizar a Room 2.5.0 porque requiere API 33
+        roomVersion = '2.4.3'
+
         moshiVersion = '1.14.0'
         retrofitVersion = '2.9.0'
         parcelerVersion = '1.1.13'

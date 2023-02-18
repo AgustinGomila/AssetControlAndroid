@@ -297,7 +297,7 @@ class WarehouseCRUDActivity : AppCompatActivity(), WarehouseCRUD.Companion.TaskC
 
         if (imageControlFragment == null) {
             imageControlFragment = ImageControlButtonsFragment.newInstance(
-                Table.warehouse.tableId, warehouseId, null
+                Table.warehouse.tableId.toLong(), warehouseId.toString(), null
             )
 
             if (description.isNotEmpty()) {

@@ -17,7 +17,7 @@ import com.dacosys.assetControl.network.sync.SyncUpload
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.imageControl.dataBase.DbCommands.Companion.updateObjectId1
+import com.dacosys.imageControl.room.database.IcDatabase
 import kotlinx.coroutines.*
 
 class SaveMovement {
@@ -224,8 +224,8 @@ class SaveMovement {
 
                     if (collectorMovementId != null) {
                         // ACTUALIZAR EL ID DEL MOVIMIENTO EN LA BASE DE IMAGECONTROL
-                        updateObjectId1(
-                            programObjectId = Table.warehouseMovement.tableId.toString(),
+                        IcDatabase.getDatabase().imageDao().updateImage(
+                            programObjectId = Table.warehouseMovement.tableId.toLong(),
                             newObjectId1 = collectorMovementId.toString(),
                             oldObjectId1 = "0"
                         )

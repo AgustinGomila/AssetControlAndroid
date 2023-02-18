@@ -394,7 +394,9 @@ class WarehouseMovementContentConfirmActivity : AppCompatActivity(),
     }
 
     private fun setImageControlFragment() {
-        var description = (headerFragment?.warehouseArea ?: return).description
+        val wa = headerFragment?.warehouseArea ?: return
+
+        var description = wa.description
         val tableName = Table.warehouseMovement.tableName
         description = "$tableName: $description"
         if (description.length > 255) {
@@ -403,7 +405,7 @@ class WarehouseMovementContentConfirmActivity : AppCompatActivity(),
 
         if (imageControlFragment == null) {
             imageControlFragment = ImageControlButtonsFragment.newInstance(
-                Table.warehouseMovement.tableId, 0, null
+                Table.warehouseMovement.tableId.toLong(), "0", null
             )
 
             if (description.isNotEmpty()) {

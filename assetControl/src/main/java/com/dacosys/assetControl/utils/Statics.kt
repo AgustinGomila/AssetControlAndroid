@@ -91,7 +91,7 @@ import com.dacosys.assetControl.utils.settings.collectorType.CollectorType
 import com.dacosys.assetControl.utils.settings.entries.ConfEntry
 import com.dacosys.assetControl.webservice.common.SessionObject
 import com.dacosys.assetControl.webservice.common.Webservice
-import com.dacosys.imageControl.dataBase.DbHelper
+import com.dacosys.imageControl.room.database.IcDatabase.Companion.cleanInstance
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.google.android.material.textfield.TextInputLayout.END_ICON_PASSWORD_TOGGLE
@@ -1898,7 +1898,9 @@ class Statics {
         fun removeDataBases() {
             SyncDownload.resetSyncDates()
 
-            DbHelper().deleteDb()
+            // TODO: Eliminar cuando ya no se necesite
+            // DbHelper().deleteDb()
+            cleanInstance()
             DataBaseHelper().deleteDb()
 
             SQLiteDatabase.releaseMemory()

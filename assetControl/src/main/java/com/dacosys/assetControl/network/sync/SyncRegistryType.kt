@@ -5,6 +5,7 @@ import android.os.Parcel
 import android.os.Parcelable
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
+import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.settings.entries.ConfEntry
 import java.util.*
 
@@ -63,62 +64,40 @@ class SyncRegistryType : Parcelable {
         }
 
         var Warehouse = SyncRegistryType(
-            1,
-            getContext().getString(R.string.warehouses),
-            ConfEntry.acLastUpdateWarehouse
+            1, getContext().getString(R.string.warehouses), ConfEntry.acLastUpdateWarehouse
         )
         var Asset = SyncRegistryType(
-            2,
-            getContext().getString(R.string.assets),
-            ConfEntry.acLastUpdateAsset
+            2, getContext().getString(R.string.assets), ConfEntry.acLastUpdateAsset
         )
         var User = SyncRegistryType(
-            3,
-            getContext().getString(R.string.users),
-            ConfEntry.acLastUpdateUser
+            3, getContext().getString(R.string.users), ConfEntry.acLastUpdateUser
         )
         var WarehouseArea = SyncRegistryType(
-            4,
-            getContext().getString(R.string.areas),
-            ConfEntry.acLastUpdateWarehouseArea
+            4, getContext().getString(R.string.areas), ConfEntry.acLastUpdateWarehouseArea
         )
         var ItemCategory = SyncRegistryType(
-            5,
-            getContext().getString(R.string.categories),
-            ConfEntry.acLastUpdateItemCategory
+            5, getContext().getString(R.string.categories), ConfEntry.acLastUpdateItemCategory
         )
         var AssetReview = SyncRegistryType(
-            6,
-            getContext().getString(R.string.asset_reviews),
-            ConfEntry.acLastUpdateAssetReview
+            6, getContext().getString(R.string.asset_reviews), ConfEntry.acLastUpdateAssetReview
         )
         var WarehouseMovement = SyncRegistryType(
-            7,
-            getContext().getString(R.string.movements),
-            ConfEntry.acLastUpdateWarehouseMovement
+            7, getContext().getString(R.string.movements), ConfEntry.acLastUpdateWarehouseMovement
         )
         /*
         var ActionLog = SyncRegistryType(8, "Registro de acciones", ConfEntry.acLastUpdateActionLog) */
 
         var Provider = SyncRegistryType(
-            9,
-            getContext().getString(R.string.providers),
-            ConfEntry.acLastUpdateProviders
+            9, getContext().getString(R.string.providers), ConfEntry.acLastUpdateProviders
         )
         var Repairman = SyncRegistryType(
-            10,
-            getContext().getString(R.string.manteinance_user),
-            ConfEntry.acLastUpdateRepairman
+            10, getContext().getString(R.string.manteinance_user), ConfEntry.acLastUpdateRepairman
         )
         var Repairshop = SyncRegistryType(
-            11,
-            getContext().getString(R.string.repairshop),
-            ConfEntry.acLastUpdateRepairshop
+            11, getContext().getString(R.string.repairshop), ConfEntry.acLastUpdateRepairshop
         )
         var AssetManteinance = SyncRegistryType(
-            12,
-            getContext().getString(R.string.manteinance),
-            ConfEntry.acLastUpdateAssetManteinance
+            12, getContext().getString(R.string.manteinance), ConfEntry.acLastUpdateAssetManteinance
         )
         var AssetManteinanceLog = SyncRegistryType(
             13,
@@ -136,9 +115,7 @@ class SyncRegistryType : Parcelable {
             ConfEntry.acLastUpdateManteinanceTypeGroup
         )
         var CostCentre = SyncRegistryType(
-            16,
-            getContext().getString(R.string.cost_centre),
-            ConfEntry.acLastUpdateCostCentre
+            16, getContext().getString(R.string.cost_centre), ConfEntry.acLastUpdateCostCentre
         )
         var AssetManteinanceProgramed = SyncRegistryType(
             17,
@@ -146,14 +123,10 @@ class SyncRegistryType : Parcelable {
             ConfEntry.acLastUpdateAssetManteinanceProgramed
         )
         var DataCollectionRule = SyncRegistryType(
-            18,
-            getContext().getString(R.string.rules),
-            ConfEntry.acLastUpdateDataCollectionRule
+            18, getContext().getString(R.string.rules), ConfEntry.acLastUpdateDataCollectionRule
         )
         var Attribute = SyncRegistryType(
-            19,
-            getContext().getString(R.string.attributes),
-            ConfEntry.acLastUpdateAttribute
+            19, getContext().getString(R.string.attributes), ConfEntry.acLastUpdateAttribute
         )
         var AttributeCategory = SyncRegistryType(
             20,
@@ -166,19 +139,13 @@ class SyncRegistryType : Parcelable {
             ConfEntry.acLastUpdateDataCollection
         )
         var Route = SyncRegistryType(
-            22,
-            getContext().getString(R.string.routes),
-            ConfEntry.acLastUpdateRoute
+            22, getContext().getString(R.string.routes), ConfEntry.acLastUpdateRoute
         )
         var RouteProcess = SyncRegistryType(
-            23,
-            getContext().getString(R.string.route_process),
-            ConfEntry.acLastUpdateRouteProcess
+            23, getContext().getString(R.string.route_process), ConfEntry.acLastUpdateRouteProcess
         )
         var BarcodeLabelCustom = SyncRegistryType(
-            24,
-            getContext().getString(R.string.labels),
-            ConfEntry.acLastUpdateBarcodeLabelCustom
+            24, getContext().getString(R.string.labels), ConfEntry.acLastUpdateBarcodeLabelCustom
         )
         var UserWarehouseArea = SyncRegistryType(
             25,
@@ -186,36 +153,32 @@ class SyncRegistryType : Parcelable {
             ConfEntry.acLastUpdateUserWarehouseArea
         )
         var AttributeComposition = SyncRegistryType(
-            26,
-            getContext().getString(R.string.attribute_composition)
+            26, getContext().getString(R.string.attribute_composition)
         )
         var RouteComposition = SyncRegistryType(
-            27,
-            getContext().getString(R.string.route_composition)
+            27, getContext().getString(R.string.route_composition)
         )
         var DataCollectionRuleContent = SyncRegistryType(
-            28,
-            getContext().getString(R.string.rule_content)
+            28, getContext().getString(R.string.rule_content)
         )
         var DataCollectionRuleTarget = SyncRegistryType(
-            29,
-            getContext().getString(R.string.rule_target)
+            29, getContext().getString(R.string.rule_target)
         )
         var AssetReviewStatus = SyncRegistryType(
-            100,
-            getContext().getString(R.string.asset_review_status)
+            100, getContext().getString(R.string.asset_review_status)
         )
         var RouteProcessStatus = SyncRegistryType(
-            101,
-            getContext().getString(R.string.route_process_status)
+            101, getContext().getString(R.string.route_process_status)
         )
         var ManteinanceStatus = SyncRegistryType(
-            102,
-            getContext().getString(R.string.manteinance_status)
+            102, getContext().getString(R.string.manteinance_status)
         )
         var BarcodeLabelTarget = SyncRegistryType(
-            103,
-            getContext().getString(R.string.label_target)
+            103, getContext().getString(R.string.label_target)
+        )
+
+        var Image = SyncRegistryType(
+            999, getContext().getString(R.string.images)
         )
 
         fun getAll(): ArrayList<SyncRegistryType> {
@@ -258,6 +221,8 @@ class SyncRegistryType : Parcelable {
                 BarcodeLabelTarget
             )
 
+            if (Statics.useImageControl) allSections.add(Image)
+
             return ArrayList(allSections.sortedWith(compareBy { it.id }))
         }
 
@@ -299,6 +264,8 @@ class SyncRegistryType : Parcelable {
                 RouteProcess
             )
 
+            if (Statics.useImageControl) allSections.add(Image)
+
             return ArrayList(allSections.sortedWith(compareBy { it.id }))
         }
 
@@ -316,6 +283,8 @@ class SyncRegistryType : Parcelable {
                 DataCollection.id.toString(),
                 RouteProcess.id.toString()
             )
+
+            if (Statics.useImageControl) allSections.add(Image.id.toString())
 
             return ArrayList(allSections.sortedWith(compareBy { it }))
         }

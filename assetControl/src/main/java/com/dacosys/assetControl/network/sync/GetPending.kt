@@ -2,7 +2,7 @@ package com.dacosys.assetControl.network.sync
 
 import com.dacosys.assetControl.dataBase.DataBaseHelper
 import com.dacosys.assetControl.utils.Statics
-import com.dacosys.imageControl.dataBase.DbCommands
+import com.dacosys.imageControl.room.database.IcDatabase
 import kotlinx.coroutines.*
 
 class GetPending(
@@ -43,7 +43,6 @@ class GetPending(
             val dc = Statics.pendingDataCollection()
             val rp = Statics.pendingRouteProcess()
             val am = Statics.pendingAssetManteinance()
-            val pendingImages = DbCommands.countPending()
 
             db.setTransactionSuccessful()
 
@@ -56,9 +55,13 @@ class GetPending(
             if (dc.any()) syncElements.addAll(dc)
             if (rp.any()) syncElements.addAll(rp)
             if (am.any()) syncElements.addAll(am)
-            if (pendingImages > 0) syncElements.addAll(arrayOf(pendingImages))
         } finally {
             db.endTransaction()
+        }
+
+        if (Statics.useImageControl) {
+            val pendingImages = IcDatabase.getDatabase().imageDao().getPending()
+            if (pendingImages.any()) syncElements.addAll(ArrayList(pendingImages))
         }
 
         return@withContext syncElements

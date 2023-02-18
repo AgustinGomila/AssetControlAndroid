@@ -55,10 +55,9 @@ import com.dacosys.assetControl.webservice.route.RouteProcessWs
 import com.dacosys.assetControl.webservice.user.UserObject
 import com.dacosys.assetControl.webservice.user.UserWarehouseAreaObject
 import com.dacosys.assetControl.webservice.user.UserWarehouseAreaWs
-import com.dacosys.imageControl.network.upload.NetCommands.Companion.sendPendingImages
-import com.dacosys.imageControl.network.upload.NetCommands.Companion.uploadTempDocument
+import com.dacosys.imageControl.network.upload.SendImages
+import com.dacosys.imageControl.network.upload.SendPending
 import com.dacosys.imageControl.network.upload.UploadImagesProgress
-import com.google.android.gms.common.config.GservicesValue.isInitialized
 import kotlinx.coroutines.*
 
 class SyncUpload(
@@ -135,10 +134,7 @@ class SyncUpload(
                 progressStatus = ProgressStatus.bigStarting
             )
         )
-        return@withContext getUploadTaskResult()
-    }
 
-    private fun getUploadTaskResult(): Boolean {
         // Enviar imágenes pendientes que tienen IDs reales,
         // por ejemplo: Activos, categorías, ubicaciones
         // existentes modificadas desde los CRUDs o desde el
@@ -146,9 +142,7 @@ class SyncUpload(
 
         // Las imágenes con IDs locales se enviarán después de
         // obtener los IDs reales.
-        if (isInitialized()) {
-            sendPendingImages { onUploadProgress.invoke(it) }
-        }
+        SendPending { onUploadProgress.invoke(it) }
 
         // El orden está dado por la dependencia de los IDs
         // en las subsiguientes tablas
@@ -218,7 +212,7 @@ class SyncUpload(
 
         // Eliminar datos enviados
         removeOldData()
-        return true
+        return@withContext true
     }
 
     private fun removeOldData() {
@@ -347,13 +341,10 @@ class SyncUpload(
                     arDb.updateTransferred(arId, ar.collectorAssetReviewId)
 
                     // Enviar imágenes si existen
-                    uploadTempDocument(
-                        programObjectId = Table.assetReview.tableId.toString(),
-                        newObjectId1 = arId.toString(),
-                        newObjectId2 = "",
-                        localObjectId1 = ar.collectorAssetReviewId.toString(),
-                        localObjectId2 = ""
-                    ) { onUploadProgress.invoke(it) }
+                    SendImages(programObjectId = Table.assetReview.tableId.toLong(),
+                        newObjectId1 = arId,
+                        localObjectId1 = ar.collectorAssetReviewId,
+                        onUploadProgress = { onUploadProgress.invoke(it) }).execute()
                 } else {
                     error = true
                     Log.d(
@@ -510,13 +501,10 @@ class SyncUpload(
                     wmDb.updateTransferred(wmId, wm.collectorWarehouseMovementId)
 
                     // Enviar imágenes si existen
-                    uploadTempDocument(
-                        programObjectId = Table.warehouseMovement.tableId.toString(),
-                        newObjectId1 = wmId.toString(),
-                        newObjectId2 = "",
-                        localObjectId1 = wm.collectorWarehouseMovementId.toString(),
-                        localObjectId2 = ""
-                    ) { onUploadProgress.invoke(it) }
+                    SendImages(programObjectId = Table.warehouseMovement.tableId.toLong(),
+                        newObjectId1 = wmId,
+                        localObjectId1 = wm.collectorWarehouseMovementId,
+                        onUploadProgress = { onUploadProgress.invoke(it) }).execute()
                 } else {
                     error = true
                     Log.d(
@@ -653,20 +641,17 @@ class SyncUpload(
                             // Actualizar las revisiones asociadas
                             arcDb.updateAssetId(realAsset, a.assetId)
                         }
-
-                        // Enviar imágenes si existen
-                        uploadTempDocument(
-                            programObjectId = Table.asset.tableId.toString(),
-                            newObjectId1 = realAssetId.toString(),
-                            newObjectId2 = "",
-                            localObjectId1 = a.assetId.toString(),
-                            localObjectId2 = ""
-                        ) { onUploadProgress.invoke(it) }
                     }
                 }
 
                 if (realAssetId > 0) {
                     assetDb.updateTransferred(realAssetId)
+
+                    // Enviar imágenes si existen
+                    SendImages(programObjectId = Table.asset.tableId.toLong(),
+                        newObjectId1 = realAssetId,
+                        localObjectId1 = a.assetId,
+                        onUploadProgress = { onUploadProgress.invoke(it) }).execute()
                 } else {
                     error = true
                     Log.d(
@@ -841,20 +826,17 @@ class SyncUpload(
                         UserWarehouseAreaWs().userWarehouseAreaAdd(
                             Statics.currentUserId ?: return, uObj, arrayListOf(uwaObj)
                         )
-
-                        // Enviar imágenes si existen
-                        uploadTempDocument(
-                            programObjectId = Table.warehouseArea.tableId.toString(),
-                            newObjectId1 = realWarehouseAreaId.toString(),
-                            newObjectId2 = "",
-                            localObjectId1 = wa.warehouseAreaId.toString(),
-                            localObjectId2 = ""
-                        ) { onUploadProgress.invoke(it) }
                     }
                 }
 
                 if (realWarehouseAreaId > 0) {
                     waDb.updateTransferred(realWarehouseAreaId)
+
+                    // Enviar imágenes si existen
+                    SendImages(programObjectId = Table.warehouseArea.tableId.toLong(),
+                        newObjectId1 = realWarehouseAreaId,
+                        localObjectId1 = wa.warehouseAreaId,
+                        onUploadProgress = { onUploadProgress.invoke(it) }).execute()
                 } else {
                     error = true
                     Log.d(
@@ -1000,20 +982,17 @@ class SyncUpload(
                         // Actualizar los movimientos asociados
                         wmDb.updateOriginWarehouseId(realWarehouseId, w.warehouseId)
                         wmDb.updateDestWarehouseId(realWarehouseId, w.warehouseId)
-
-                        // Enviar imágenes si existen
-                        uploadTempDocument(
-                            programObjectId = Table.warehouse.tableId.toString(),
-                            newObjectId1 = realWarehouseId.toString(),
-                            newObjectId2 = "",
-                            localObjectId1 = w.warehouseId.toString(),
-                            localObjectId2 = ""
-                        ) { onUploadProgress.invoke(it) }
                     }
                 }
 
                 if (realWarehouseId > 0) {
                     wDb.updateTransferred(realWarehouseId)
+
+                    // Enviar imágenes si existen
+                    SendImages(programObjectId = Table.warehouse.tableId.toLong(),
+                        newObjectId1 = realWarehouseId,
+                        localObjectId1 = w.warehouseId,
+                        onUploadProgress = { onUploadProgress.invoke(it) }).execute()
                 } else {
                     error = true
                     Log.d(
@@ -1148,20 +1127,17 @@ class SyncUpload(
 
                         // Actualizar los activos fijos asociados
                         aDb.updateItemCategoryId(realItemCategoryId, ic.itemCategoryId)
-
-                        // Enviar imágenes si existen
-                        uploadTempDocument(
-                            programObjectId = Table.itemCategory.tableId.toString(),
-                            newObjectId1 = realItemCategoryId.toString(),
-                            newObjectId2 = "",
-                            localObjectId1 = ic.itemCategoryId.toString(),
-                            localObjectId2 = ""
-                        ) { onUploadProgress.invoke(it) }
                     }
                 }
 
                 if (realItemCategoryId > 0) {
                     itemCategoryDb.updateTransferred(realItemCategoryId)
+
+                    // Enviar imágenes si existen
+                    SendImages(programObjectId = Table.itemCategory.tableId.toLong(),
+                        newObjectId1 = realItemCategoryId,
+                        localObjectId1 = ic.itemCategoryId,
+                        onUploadProgress = { onUploadProgress.invoke(it) }).execute()
                 } else {
                     error = true
                     Log.d(
@@ -1321,13 +1297,10 @@ class SyncUpload(
                     dcDb.updateTransferred(dcId, dc.collectorDataCollectionId)
 
                     // Enviar imágenes si existen
-                    uploadTempDocument(
-                        programObjectId = Table.dataCollection.tableId.toString(),
-                        newObjectId1 = dcId.toString(),
-                        newObjectId2 = "",
-                        localObjectId1 = dc.collectorDataCollectionId.toString(),
-                        localObjectId2 = ""
-                    ) { onUploadProgress.invoke(it) }
+                    SendImages(programObjectId = Table.dataCollection.tableId.toLong(),
+                        newObjectId1 = dcId,
+                        localObjectId1 = dc.collectorDataCollectionId,
+                        onUploadProgress = { onUploadProgress.invoke(it) }).execute()
                 } else {
                     error = true
                     Log.d(
@@ -1500,13 +1473,10 @@ class SyncUpload(
                     rpDb.updateTransfered(rpId, rp.collectorRouteProcessId)
 
                     // Enviar imágenes si existen
-                    uploadTempDocument(
-                        programObjectId = Table.routeProcess.tableId.toString(),
-                        newObjectId1 = rpId.toString(),
-                        newObjectId2 = "",
-                        localObjectId1 = rp.collectorRouteProcessId.toString(),
-                        localObjectId2 = ""
-                    ) { onUploadProgress.invoke(it) }
+                    SendImages(programObjectId = Table.routeProcess.tableId.toLong(),
+                        newObjectId1 = rpId,
+                        localObjectId1 = rp.collectorRouteProcessId,
+                        onUploadProgress = { onUploadProgress.invoke(it) }).execute()
                 } else {
                     error = true
                     Log.d(
@@ -1649,13 +1619,10 @@ class SyncUpload(
                     amDb.updateTransferred(assetManteinanceId)
 
                     // Enviar imágenes si existen
-                    uploadTempDocument(
-                        programObjectId = Table.assetManteinance.tableId.toString(),
-                        newObjectId1 = assetManteinanceId.toString(),
-                        newObjectId2 = "",
-                        localObjectId1 = am.assetManteinanceId.toString(),
-                        localObjectId2 = ""
-                    ) { onUploadProgress.invoke(it) }
+                    SendImages(programObjectId = Table.assetManteinance.tableId.toLong(),
+                        newObjectId1 = assetManteinanceId,
+                        localObjectId1 = am.assetManteinanceId,
+                        onUploadProgress = { onUploadProgress.invoke(it) }).execute()
                 } else {
                     error = true
                     Log.d(

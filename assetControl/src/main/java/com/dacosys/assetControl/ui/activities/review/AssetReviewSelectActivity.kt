@@ -50,8 +50,8 @@ import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.utils.scanners.nfc.Nfc
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.utils.settings.Preference
-import com.dacosys.imageControl.dataBase.DbCommands.Companion.deleteDocument
-import com.dacosys.imageControl.dataBase.DbCommands.Companion.selectByProgramObjectObj1Obj2
+import com.dacosys.imageControl.network.common.ProgramData
+import com.dacosys.imageControl.room.dao.ImageCoroutines
 import org.parceler.Parcels
 import java.io.File
 import java.util.concurrent.ThreadLocalRandom
@@ -404,25 +404,30 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
             val ar = arrayAdapter?.currentAssetReview() ?: return
 
             try {
-                val localImages = selectByProgramObjectObj1Obj2(
-                    Table.assetReview.tableId.toString(), ar.collectorAssetReviewId.toString(), ""
+                val programData = ProgramData(
+                    programId = Statics.INTERNAL_IMAGE_CONTROL_APP_ID.toLong(),
+                    programObjectId = Table.assetReview.tableId.toLong(),
+                    objId1 = ar.collectorAssetReviewId.toString()
                 )
 
-                if (localImages.size > 0) {
-                    for (t in localImages) {
-                        val file = File(t.filenameOriginal)
-                        if (file.exists()) {
-                            file.delete()
+                ImageCoroutines().get(programData = programData) {
+                    if (it.isNotEmpty()) {
+                        for (t in it) {
+                            val file = File(t.filenameOriginal ?: "")
+                            if (file.exists()) {
+                                file.delete()
+                            }
                         }
                     }
-                }
 
-                // Eliminar las referencias a las imágenes en
-                // la base de datos local de ImageControl
-                deleteDocument(
-                    Table.assetReview.tableId.toString(), ar.collectorAssetReviewId.toString()
-                )
-            } catch (ex: Exception) {
+                    // Eliminar las referencias a las imágenes en
+                    // la base de datos local de ImageControl
+                    ImageCoroutines().delete(
+                        programObjectId = Table.assetReview.tableId.toLong(),
+                        objectId1 = ar.collectorAssetReviewId.toString()
+                    )
+                }
+            } catch (ex: java.lang.Exception) {
                 ex.printStackTrace()
                 ErrorLog.writeLog(this, this::class.java.simpleName, ex)
             }

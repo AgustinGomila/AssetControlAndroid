@@ -229,7 +229,7 @@ class WarehouseAreaCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         if (imageControlFragment == null) {
             imageControlFragment = ImageControlButtonsFragment.newInstance(
-                Table.warehouseArea.tableId, warehouseAreaId, null
+                Table.warehouseArea.tableId.toLong(), warehouseAreaId.toString(), null
             )
 
             if (description.isNotEmpty()) {

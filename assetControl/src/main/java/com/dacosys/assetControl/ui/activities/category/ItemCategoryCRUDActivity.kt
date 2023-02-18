@@ -253,7 +253,7 @@ class ItemCategoryCRUDActivity : AppCompatActivity(), ItemCategoryCRUD.Companion
 
         if (imageControlFragment == null) {
             imageControlFragment = ImageControlButtonsFragment.newInstance(
-                Table.itemCategory.tableId, itemCategoryId, null
+                Table.itemCategory.tableId.toLong(), itemCategoryId.toString(), null
             )
 
             if (description.isNotEmpty()) {

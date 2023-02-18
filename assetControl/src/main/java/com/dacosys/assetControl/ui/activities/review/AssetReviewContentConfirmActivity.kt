@@ -404,7 +404,9 @@ class AssetReviewContentConfirmActivity : AppCompatActivity(),
     }
 
     private fun setImageControlFragment() {
-        var description = (assetReview ?: return).warehouseAreaStr
+        val ar = assetReview ?: return
+
+        var description = ar.warehouseAreaStr
         val tableName = Table.assetReview.tableName
         description = "$tableName: $description"
         if (description.length > 255) {
@@ -412,39 +414,37 @@ class AssetReviewContentConfirmActivity : AppCompatActivity(),
         }
 
         if (imageControlFragment == null) {
-            imageControlFragment = ImageControlButtonsFragment.newInstance(
-                Table.assetReview.tableId, (assetReview ?: return).collectorAssetReviewId, null
-            )
+            imageControlFragment =
+                ImageControlButtonsFragment.newInstance(
+                    Table.assetReview.tableId.toLong(), ar.collectorAssetReviewId.toString(), null
+                )
+        }
 
-            if (description.isNotEmpty()) {
-                imageControlFragment?.setDescription(description)
-            }
+        if (description.isNotEmpty()) {
+            imageControlFragment?.setDescription(description)
+        }
 
-            val fm = supportFragmentManager
+        val fm = supportFragmentManager
 
-            if (!isFinishing) runOnUiThread {
+        if (!isFinishing) runOnUiThread {
+            fm.beginTransaction()
+                .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out).replace(
+                    binding.imageControlFragment.id, imageControlFragment ?: return@runOnUiThread
+                ).commit()
+
+            if (!Statics.prefsGetBoolean(Preference.useImageControl)) {
                 fm.beginTransaction()
-                    .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out).replace(
-                        binding.imageControlFragment.id,
-                        imageControlFragment ?: return@runOnUiThread
-                    ).commit()
-
-                if (!Statics.prefsGetBoolean(Preference.useImageControl)) {
-                    fm.beginTransaction()
-                        .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                        .hide(imageControlFragment as Fragment).commitAllowingStateLoss()
-                } else {
-                    fm.beginTransaction()
-                        .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                        .show((imageControlFragment ?: return@runOnUiThread) as Fragment)
-                        .commitAllowingStateLoss()
-                }
+                    .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                    .hide(imageControlFragment as Fragment).commitAllowingStateLoss()
+            } else {
+                fm.beginTransaction()
+                    .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                    .show((imageControlFragment ?: return@runOnUiThread) as Fragment)
+                    .commitAllowingStateLoss()
             }
         } else {
             imageControlFragment?.setTableId(Table.assetReview.tableId)
-            imageControlFragment?.setObjectId1(
-                (assetReview ?: return).collectorAssetReviewId
-            )
+            imageControlFragment?.setObjectId1(ar.collectorAssetReviewId)
             imageControlFragment?.setObjectId2(null)
 
             if (description.isNotEmpty()) {

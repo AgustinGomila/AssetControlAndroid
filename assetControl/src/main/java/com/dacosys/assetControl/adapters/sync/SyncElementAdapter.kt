@@ -28,13 +28,15 @@ import com.dacosys.assetControl.model.movement.WarehouseMovement
 import com.dacosys.assetControl.model.review.AssetReview
 import com.dacosys.assetControl.model.route.RouteProcess
 import com.dacosys.assetControl.network.sync.SyncRegistryType
-import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
-import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.common.views.custom.AutoResizeTextView
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.Statics.Companion.getColorWithAlpha
 import com.dacosys.assetControl.utils.Statics.Companion.manipulateColor
+import com.dacosys.assetControl.utils.misc.Md5.Companion.getMd5
+import com.dacosys.assetControl.utils.settings.Preference.Companion.lineSeparator
+import com.dacosys.imageControl.room.entity.Image
 import java.lang.ref.WeakReference
+import java.math.BigInteger
 import java.util.*
 
 
@@ -44,12 +46,9 @@ import java.util.*
 
 @Suppress("SpellCheckingInspection", "DEPRECATION")
 @SuppressLint("ClickableViewAccessibility", "ObsoleteSdkInt")
-class SyncElementAdapter :
-    ArrayAdapter<Any>,
-    Filterable {
+class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
     private var activity: AppCompatActivity
     private var resource: Int = 0
-    var suspendReport = false
     private var lastSelectedPos = -1
     private var checkedDefault = true
 
@@ -114,42 +113,32 @@ class SyncElementAdapter :
     }
 
     override fun add(syncElement: Any?) {
-        if (syncElement != null) {
-            if (!getAll().contains(syncElement)) {
-                activity.runOnUiThread {
-                    super.add(syncElement)
-                    if (checkedDefault) {
-                        val key = getKey(syncElement)
-                        if (!checkedIdArray.contains(key)) {
-                            checkedIdArray.add(key)
-                        }
-                    }
-                }
+        if (syncElement == null) return
+        if (getAll().contains(syncElement)) return
 
-                reportItemAdded(arrayListOf(syncElement))
+        activity.runOnUiThread {
+            super.add(syncElement)
+            if (checkedDefault) {
+                val key = getKey(syncElement)
+                if (!checkedIdArray.contains(key)) {
+                    checkedIdArray.add(key)
+                }
             }
         }
     }
 
     fun add(syncElements: ArrayList<Any>) {
-        val syncElementsAdded: ArrayList<Any> = ArrayList()
-
         activity.runOnUiThread {
             for (w in syncElements) {
-                if (!getAll().contains(w)) {
-                    syncElementsAdded.add(w)
-                    super.add(w)
-                    if (checkedDefault) {
-                        val key = getKey(w)
-                        if (!checkedIdArray.contains(key)) {
-                            checkedIdArray.add(key)
-                        }
+                if (getAll().contains(w)) continue
+
+                super.add(w)
+                if (checkedDefault) {
+                    val key = getKey(w)
+                    if (!checkedIdArray.contains(key)) {
+                        checkedIdArray.add(key)
                     }
                 }
-            }
-
-            if (syncElementsAdded.size > 0) {
-                reportItemAdded(syncElementsAdded)
             }
         }
     }
@@ -199,15 +188,11 @@ class SyncElementAdapter :
         val syncElementsRemoved: ArrayList<Any> = ArrayList()
         activity.runOnUiThread {
             for (w in syncElements) {
-                if (getAll().contains(w)) {
-                    syncElementsRemoved.add(w)
-                    checkedIdArray.remove(getKey(w))
-                    super.remove(w)
-                }
-            }
+                if (!getAll().contains(w)) continue
 
-            if (syncElementsRemoved.size > 0) {
-                reportItemRemoved(syncElementsRemoved)
+                syncElementsRemoved.add(w)
+                checkedIdArray.remove(getKey(w))
+                super.remove(w)
             }
         }
 
@@ -218,122 +203,6 @@ class SyncElementAdapter :
         activity.runOnUiThread {
             listView?.smoothScrollToPosition(lastSelectedPos)
         }
-    }
-
-    /**
-     * Muestra un mensaje en pantalla con los códigos agregados
-     */
-    private fun reportItemAdded(syncElementArray: ArrayList<Any>) {
-        if (suspendReport) {
-            return
-        }
-        if (syncElementArray.size <= 0) {
-            return
-        }
-
-        var res = ""
-        for (syncElement in syncElementArray) {
-            when (syncElement) {
-                is Asset -> {
-                    res += "${syncElement.code}, "
-                }
-                is ItemCategory -> {
-                    res += "${syncElement.description}, "
-                }
-                is Warehouse -> {
-                    res += "${syncElement.description}, "
-                }
-                is WarehouseArea -> {
-                    res += "${syncElement.description}, "
-                }
-                is AssetManteinance -> {
-                    res += "${syncElement.manteinanceTypeStr}, "
-                }
-                is DataCollection -> {
-                    res += "${syncElement.assetId} ${syncElement.dateEnd}, "
-                }
-                is RouteProcess -> {
-                    res += "${syncElement.routeId} ${syncElement.routeProcessDate}, "
-                }
-                is WarehouseMovement -> {
-                    res += "${syncElement.destWarehouseAreaId}, "
-                }
-                is AssetReview -> {
-                    res += "${syncElement.warehouseAreaStr}, "
-                }
-            }
-        }
-
-        if (res.endsWith(", ")) {
-            res = res.substring(0, res.length - 2)
-        }
-
-        res += ": " +
-                if (syncElementArray.size > 1)
-                    " ${AssetControlApp.getContext().getString(R.string.added_plural)}" else
-                    " ${AssetControlApp.getContext().getString(R.string.added)}"
-
-        makeText(activity, res, SnackBarType.ADD)
-        Log.d(this::class.java.simpleName, res)
-    }
-
-    /**
-     * Muestra un mensaje en pantalla con los códigos eliminados
-     */
-    private fun reportItemRemoved(syncElementArray: ArrayList<Any>) {
-        // En modo arqueo no se muestran los carteles de eliminación de syncElements
-        // porque nunca se eliminan sino que se ponen en cero
-        if (suspendReport) {
-            return
-        }
-        if (syncElementArray.size <= 0) {
-            return
-        }
-
-        var res = ""
-        for (syncElement in syncElementArray) {
-            when (syncElement) {
-                is Asset -> {
-                    res += "${syncElement.code}, "
-                }
-                is ItemCategory -> {
-                    res += "${syncElement.description}, "
-                }
-                is Warehouse -> {
-                    res += "${syncElement.description}, "
-                }
-                is WarehouseArea -> {
-                    res += "${syncElement.description}, "
-                }
-                is AssetManteinance -> {
-                    res += "${syncElement.manteinanceTypeStr}, "
-                }
-                is DataCollection -> {
-                    res += "${syncElement.assetId} ${syncElement.dateEnd}, "
-                }
-                is RouteProcess -> {
-                    res += "${syncElement.routeId} ${syncElement.routeProcessDate}, "
-                }
-                is WarehouseMovement -> {
-                    res += "${syncElement.destWarehouseAreaId}, "
-                }
-                is AssetReview -> {
-                    res += "${syncElement.warehouseAreaStr}, "
-                }
-            }
-        }
-
-        if (res.endsWith(", ")) {
-            res = res.substring(0, res.length - 2)
-        }
-
-        res += ": " +
-                if (syncElementArray.size > 1)
-                    " ${AssetControlApp.getContext().getString(R.string.removed_plural)}" else
-                    " ${AssetControlApp.getContext().getString(R.string.removed)}"
-
-        makeText(activity, res, SnackBarType.REMOVE)
-        Log.d(this::class.java.simpleName, res)
     }
 
     private fun getIndex(syncElement: Any): Int {
@@ -423,11 +292,27 @@ class SyncElementAdapter :
                 regId = SyncRegistryType.AssetReview.id.toString()
                 itemId = item.collectorAssetReviewId.toString()
             }
+            is Image -> {
+                regId = SyncRegistryType.Image.id.toString()
+                itemId = md5HashToInt(item.hash ?: getMd5(item.objectId1.toString())).toString()
+            }
         }
 
         val regIdStr = String.format("%0" + (4 - regId.length).toString() + "d%s", 0, regId)
         val itemIdStr = String.format("%0" + (11 - itemId.length).toString() + "d%s", 0, itemId)
         return "${regIdStr}${itemIdStr}"
+    }
+
+    /**
+     * Md5hash to int
+     *
+     * @param hash
+     * @return Entero de 10 dígitos de longitud que puede usarse como identificador
+     */
+    private fun md5HashToInt(hash: String): Long {
+        val bigInt = BigInteger(hash, 16)
+        val maxVal = BigInteger.TEN.pow(10).subtract(BigInteger.ONE)
+        return bigInt.mod(maxVal).toLong()
     }
 
     fun setChecked(item: Any, isChecked: Boolean, suspendRefresh: Boolean = false) {
@@ -454,7 +339,7 @@ class SyncElementAdapter :
         setChecked(checkedItems, true)
     }
 
-    fun clearChecked() {
+    private fun clearChecked() {
         checkedIdArray.clear()
     }
 
@@ -462,13 +347,11 @@ class SyncElementAdapter :
         super.sort(customComparator)
     }
 
-    private val customComparator =
-        Comparator { o1: Any?, o2: Any? ->
-            ItemComparator().compareNullable(
-                o1,
-                o2
-            )
-        }
+    private val customComparator = Comparator { o1: Any?, o2: Any? ->
+        ItemComparator().compareNullable(
+            o1, o2
+        )
+    }
 
     fun refresh() {
         activity.runOnUiThread {
@@ -531,17 +414,14 @@ class SyncElementAdapter :
     }
 
     fun currentSyncElement(): Any? {
-        return (0 until count)
-            .firstOrNull { isSelected(it) }
-            ?.let {
-                val t = getItem(it)
-                t
-            }
+        return (0 until count).firstOrNull { isSelected(it) }?.let {
+            val t = getItem(it)
+            t
+        }
     }
 
     fun currentPos(): Int {
-        return (0 until count)
-            .firstOrNull { isSelected(it) } ?: -1
+        return (0 until count).firstOrNull { isSelected(it) } ?: -1
     }
 
     fun firstVisiblePos(): Int {
@@ -564,33 +444,16 @@ class SyncElementAdapter :
     fun isStatusVisible(arc: Any?): Boolean {
         return if (arc != null) {
             when (arc) {
-                is Asset -> {
-                    return visibleRegistry.contains(SyncRegistryType.Asset)
-                }
-                is ItemCategory -> {
-                    return visibleRegistry.contains(SyncRegistryType.ItemCategory)
-                }
-                is Warehouse -> {
-                    return visibleRegistry.contains(SyncRegistryType.Warehouse)
-                }
-                is WarehouseArea -> {
-                    return visibleRegistry.contains(SyncRegistryType.WarehouseArea)
-                }
-                is AssetManteinance -> {
-                    return visibleRegistry.contains(SyncRegistryType.AssetManteinance)
-                }
-                is DataCollection -> {
-                    return visibleRegistry.contains(SyncRegistryType.DataCollection)
-                }
-                is RouteProcess -> {
-                    return visibleRegistry.contains(SyncRegistryType.RouteProcess)
-                }
-                is WarehouseMovement -> {
-                    return visibleRegistry.contains(SyncRegistryType.WarehouseMovement)
-                }
-                is AssetReview -> {
-                    return visibleRegistry.contains(SyncRegistryType.AssetReview)
-                }
+                is Asset -> return visibleRegistry.contains(SyncRegistryType.Asset)
+                is ItemCategory -> return visibleRegistry.contains(SyncRegistryType.ItemCategory)
+                is Warehouse -> return visibleRegistry.contains(SyncRegistryType.Warehouse)
+                is WarehouseArea -> return visibleRegistry.contains(SyncRegistryType.WarehouseArea)
+                is AssetManteinance -> return visibleRegistry.contains(SyncRegistryType.AssetManteinance)
+                is DataCollection -> return visibleRegistry.contains(SyncRegistryType.DataCollection)
+                is RouteProcess -> return visibleRegistry.contains(SyncRegistryType.RouteProcess)
+                is WarehouseMovement -> return visibleRegistry.contains(SyncRegistryType.WarehouseMovement)
+                is AssetReview -> return visibleRegistry.contains(SyncRegistryType.AssetReview)
+                is Image -> return visibleRegistry.contains(SyncRegistryType.Image)
                 else -> return false
             }
         } else false
@@ -649,181 +512,87 @@ class SyncElementAdapter :
         selectItem(newPos)
     }
 
-    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-        var v = convertView
-        var alreadyExists = true
+    override fun getView(pos: Int, view: View?, parent: ViewGroup): View {
+        var v = view
+        var exists = true
 
         // Seleccionamos el layout dependiendo si es
         // un row visible u oculto según su AsseStatus.
 
-        val currentLayout: Int =
-            if (listView == null) {
-                // Estamos trabajando en un Dropdown
-                R.layout.null_row
-            } else when {
-                // Estamos trabajando en un ListView
-                !isStatusVisible(position) -> R.layout.null_row
-                isSelected(position) -> {
-                    when (val it = getItem(position)) {
-                        null -> {
-                            R.layout.null_row
-                        }
-                        else -> {
-                            when (it) {
-                                is Asset -> {
-                                    R.layout.sync_element_asset_row
-                                }
-                                is ItemCategory -> {
-                                    R.layout.sync_element_item_category_row
-                                }
-                                is Warehouse -> {
-                                    R.layout.sync_element_warehouse_row
-                                }
-                                is WarehouseArea -> {
-                                    R.layout.sync_element_warehouse_area_row
-                                }
-                                /*is AssetManteinance -> {
-                                    R.layout.sync_element_asset_manteinance_row
-                                }*/
-                                is DataCollection -> {
-                                    R.layout.sync_element_data_collection_row
-                                }
-                                is RouteProcess -> {
-                                    R.layout.sync_element_route_process_row
-                                }
-                                is WarehouseMovement -> {
-                                    R.layout.sync_element_warehouse_movement_row
-                                }
-                                is AssetReview -> {
-                                    R.layout.sync_element_asset_review_row
-                                }
-                                else -> {
-                                    R.layout.null_row
-                                }
-                            }
-                        }
-                    }
-                }
-                else -> {
-                    when (val it = getItem(position)) {
-                        null -> {
-                            R.layout.null_row
-                        }
-                        else -> {
-                            when (it) {
-                                is Asset -> {
-                                    R.layout.sync_element_asset_row
-                                }
-                                is ItemCategory -> {
-                                    R.layout.sync_element_item_category_row
-                                }
-                                is Warehouse -> {
-                                    R.layout.sync_element_warehouse_row
-                                }
-                                is WarehouseArea -> {
-                                    R.layout.sync_element_warehouse_area_row
-                                }
-                                /* is AssetManteinance -> {
-                                     R.layout.sync_element_asset_manteinance_row
-                                 }*/
-                                is DataCollection -> {
-                                    R.layout.sync_element_data_collection_row
-                                }
-                                is RouteProcess -> {
-                                    R.layout.sync_element_route_process_row
-                                }
-                                is WarehouseMovement -> {
-                                    R.layout.sync_element_warehouse_movement_row
-                                }
-                                is AssetReview -> {
-                                    R.layout.sync_element_asset_review_row
-                                }
-                                else -> {
-                                    R.layout.null_row
-                                }
-                            }
-                        }
-                    }
+        val currentLayout: Int = if (listView == null) {
+            // Estamos trabajando en un Dropdown
+            R.layout.null_row
+        } else when {
+            // Estamos trabajando en un ListView
+            !isStatusVisible(pos) -> R.layout.null_row
+            isSelected(pos) -> {
+                // Se usaría si tenemos un layout diferente para la versión expandida del layout.
+                when (val it = getItem(pos)) {
+                    null -> R.layout.null_row
+                    else -> getLayout(it)
                 }
             }
+            else -> {
+                when (val it = getItem(pos)) {
+                    null -> R.layout.null_row
+                    else -> getLayout(it)
+                }
+            }
+        }
 
         if (v == null || v.tag == null) {
             // El view todavía no fue creado, crearlo con el layout correspondiente.
             val vi = LayoutInflater.from(context)
             v = vi.inflate(currentLayout, parent, false)
 
-            alreadyExists = false
+            exists = false
         } else {
             // El view ya existe, comprobar que no necesite cambiar de layout.
             if (
             // Row null cambiando...
-                v.tag is String ||
-                (v.tag is AssetViewHolder && currentLayout != R.layout.sync_element_asset_row) ||
-                (v.tag is ItemCategoryViewHolder && currentLayout != R.layout.sync_element_item_category_row) ||
-                (v.tag is WarehouseViewHolder && currentLayout != R.layout.sync_element_warehouse_row) ||
-                (v.tag is WarehouseAreaViewHolder && currentLayout != R.layout.sync_element_warehouse_area_row) ||
-                (v.tag is WarehouseViewHolder && currentLayout != R.layout.sync_element_warehouse_row) ||
-                /*(v.tag is AssetManteinanceViewHolder && currentLayout != R.layout.sync_element_asset_manteinance_row) ||*/
-                (v.tag is DataCollectionViewHolder && currentLayout != R.layout.sync_element_data_collection_row) ||
-                (v.tag is RouteProcessViewHolder && currentLayout != R.layout.sync_element_route_process_row) ||
-                (v.tag is WarehouseMovementViewHolder && currentLayout != R.layout.sync_element_warehouse_movement_row) ||
-                (v.tag is AssetReviewViewHolder && currentLayout != R.layout.sync_element_asset_review_row)
-            ) {
+                v.tag is String || v.tag is AssetViewHolder && currentLayout != R.layout.sync_element_asset_row || v.tag is ItemCategoryViewHolder && currentLayout != R.layout.sync_element_item_category_row || v.tag is WarehouseViewHolder && currentLayout != R.layout.sync_element_warehouse_row || v.tag is WarehouseAreaViewHolder && currentLayout != R.layout.sync_element_warehouse_area_row || v.tag is WarehouseViewHolder && currentLayout != R.layout.sync_element_warehouse_row || v.tag is DataCollectionViewHolder && currentLayout != R.layout.sync_element_data_collection_row || v.tag is RouteProcessViewHolder && currentLayout != R.layout.sync_element_route_process_row || v.tag is WarehouseMovementViewHolder && currentLayout != R.layout.sync_element_warehouse_movement_row || v.tag is AssetReviewViewHolder && currentLayout != R.layout.sync_element_asset_review_row || v.tag is ImageViewHolder && currentLayout != R.layout.sync_element_image_row) {
                 // Ya fue creado, si es un row normal que está siendo seleccionada
                 // o un row expandido que está siendo deseleccionado
                 // debe cambiar de layout, por lo tanto volver a crearse.
                 val vi = LayoutInflater.from(context)
                 v = vi.inflate(currentLayout, parent, false)
 
-                alreadyExists = false
+                exists = false
             }
         }
 
         v = when (currentLayout) {
             R.layout.null_row -> fillNullView(v!!)
-            R.layout.sync_element_asset_row -> getAssetItemView(position, v!!, alreadyExists)
-            R.layout.sync_element_item_category_row -> getItemCategoryItemView(
-                position,
-                v!!,
-                alreadyExists
-            )
-            R.layout.sync_element_warehouse_row -> getWarehouseItemView(
-                position,
-                v!!,
-                alreadyExists
-            )
-            R.layout.sync_element_warehouse_area_row -> getWarehouseAreaItemView(
-                position,
-                v!!,
-                alreadyExists
-            )
-            /*R.layout.sync_element_asset_manteinance_row -> getAssetManteinanceItemView(position, v!!, alreadyExists)*/
-            R.layout.sync_element_data_collection_row -> getDataCollectionItemView(
-                position,
-                v!!,
-                alreadyExists
-            )
-            R.layout.sync_element_route_process_row -> getRouteProcessItemView(
-                position,
-                v!!,
-                alreadyExists
-            )
-            R.layout.sync_element_warehouse_movement_row -> getWarehouseMovementItemView(
-                position,
-                v!!,
-                alreadyExists
-            )
-            R.layout.sync_element_asset_review_row -> getAssetReviewItemView(
-                position,
-                v!!,
-                alreadyExists
-            )
+            R.layout.sync_element_asset_row -> getAssetItemView(pos, v!!, exists)
+            R.layout.sync_element_item_category_row -> getItemCategoryItemView(pos, v!!, exists)
+            R.layout.sync_element_warehouse_row -> getWarehouseItemView(pos, v!!, exists)
+            R.layout.sync_element_warehouse_area_row -> getWarehouseAreaItemView(pos, v!!, exists)
+            R.layout.sync_element_data_collection_row -> getDataCollectionItemView(pos, v!!, exists)
+            R.layout.sync_element_route_process_row -> getRouteProcessItemView(pos, v!!, exists)
+            R.layout.sync_element_warehouse_movement_row -> getMovementItemView(pos, v!!, exists)
+            R.layout.sync_element_asset_review_row -> getAssetReviewItemView(pos, v!!, exists)
+            R.layout.sync_element_image_row -> getImageItemView(pos, v!!, exists)
             else -> fillNullView(v!!)
         }
         if (v.height > 0) {
             Log.d(this::class.java.simpleName, "-------{RES: $resource Height:${v.height}}-------")
         }
         return v
+    }
+
+    private fun getLayout(it: Any): Int {
+        return when (it) {
+            is Asset -> R.layout.sync_element_asset_row
+            is ItemCategory -> R.layout.sync_element_item_category_row
+            is Warehouse -> R.layout.sync_element_warehouse_row
+            is WarehouseArea -> R.layout.sync_element_warehouse_area_row
+            is DataCollection -> R.layout.sync_element_data_collection_row
+            is RouteProcess -> R.layout.sync_element_route_process_row
+            is WarehouseMovement -> R.layout.sync_element_warehouse_movement_row
+            is AssetReview -> R.layout.sync_element_asset_review_row
+            is Image -> R.layout.sync_element_image_row
+            else -> R.layout.null_row
+        }
     }
 
     private fun fillNullView(v: View): View {
@@ -833,72 +602,144 @@ class SyncElementAdapter :
 
     private fun getWarehouseAreaItemView(position: Int, v: View, alreadyExists: Boolean): View {
         var holder = WarehouseAreaViewHolder()
-        if (alreadyExists) {
-            if (v.tag is String) {
-                createWarehouseAreaViewHolder(v, holder)
-            } else {
-                holder = v.tag as WarehouseAreaViewHolder
-            }
-        } else {
+        if (!alreadyExists || v.tag is String) {
             createWarehouseAreaViewHolder(v, holder)
+        } else {
+            holder = v.tag as WarehouseAreaViewHolder
         }
 
-        if (position >= 0) {
-            val syncElement = getItem(position)
+        if (position < 0) return v
 
-            if (syncElement != null && syncElement is WarehouseArea) {
-                holder.descriptionTextView?.text = syncElement.description
-                holder.warehouseTextView?.text = syncElement.warehouseStr
+        val syncElement = getItem(position)
 
-                if (holder.checkBox != null) {
-                    var isSpeakButtonLongPressed = false
+        if (syncElement != null && syncElement is WarehouseArea) {
+            holder.descriptionTextView?.text = syncElement.description
+            holder.warehouseTextView?.text = syncElement.warehouseStr
 
-                    val checkChangeListener =
-                        CompoundButton.OnCheckedChangeListener { _, isChecked ->
-                            this.setChecked(syncElement, isChecked, true)
-                        }
+            if (holder.checkBox != null) {
+                var isSpeakButtonLongPressed = false
 
-                    val pressHoldListener =
-                        OnLongClickListener { // Do something when your hold starts here.
-                            isSpeakButtonLongPressed = true
-                            true
-                        }
-
-                    val pressTouchListener = OnTouchListener { pView, pEvent ->
-                        pView.onTouchEvent(pEvent)
-                        // We're only interested in when the button is released.
-                        if (pEvent.action == MotionEvent.ACTION_UP) {
-                            // We're only interested in anything if our speak button is currently pressed.
-                            if (isSpeakButtonLongPressed) {
-                                // Do something when the button is released.
-                                if (!isFilling) {
-                                    holder.checkBox!!.setOnCheckedChangeListener(null)
-                                    val newState = !holder.checkBox!!.isChecked
-                                    this.setChecked(getAll(), newState)
-                                }
-                                isSpeakButtonLongPressed = false
-                            }
-                        }
-                        return@OnTouchListener true
-                    }
-
-                    //Important to remove previous checkedChangedListener before calling setChecked
-                    holder.checkBox!!.setOnCheckedChangeListener(null)
-                    holder.checkBox!!.isChecked = checkedIdArray.contains(getKey(syncElement))
-                    holder.checkBox!!.tag = position
-                    holder.checkBox!!.setOnLongClickListener(pressHoldListener)
-                    holder.checkBox!!.setOnTouchListener(pressTouchListener)
-                    holder.checkBox!!.setOnCheckedChangeListener(checkChangeListener)
+                val checkChangeListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
+                    this.setChecked(syncElement, isChecked, true)
                 }
 
-                // Set layouts
-                val col = getColor(syncElement, position)
-                v.background = col.backColor
-                holder.descriptionTextView?.setTextColor(col.foreColor)
-                holder.warehouseTextView?.setTextColor(col.foreColor)
-                holder.checkBox?.buttonTintList = ColorStateList.valueOf(col.titleForeColor)
-                holder.titleTextView?.setTextColor(col.titleForeColor)
+                val pressHoldListener =
+                    OnLongClickListener { // Do something when your hold starts here.
+                        isSpeakButtonLongPressed = true
+                        true
+                    }
+
+                val pressTouchListener = OnTouchListener { pView, pEvent ->
+                    pView.onTouchEvent(pEvent)
+                    // We're only interested in when the button is released.
+                    if (pEvent.action == MotionEvent.ACTION_UP) {
+                        // We're only interested in anything if our speak button is currently pressed.
+                        if (isSpeakButtonLongPressed) {
+                            // Do something when the button is released.
+                            if (!isFilling) {
+                                holder.checkBox!!.setOnCheckedChangeListener(null)
+                                val newState = !holder.checkBox!!.isChecked
+                                this.setChecked(getAll(), newState)
+                            }
+                            isSpeakButtonLongPressed = false
+                        }
+                    }
+                    return@OnTouchListener true
+                }
+
+                //Important to remove previous checkedChangedListener before calling setChecked
+                holder.checkBox!!.setOnCheckedChangeListener(null)
+                holder.checkBox!!.isChecked = checkedIdArray.contains(getKey(syncElement))
+                holder.checkBox!!.tag = position
+                holder.checkBox!!.setOnLongClickListener(pressHoldListener)
+                holder.checkBox!!.setOnTouchListener(pressTouchListener)
+                holder.checkBox!!.setOnCheckedChangeListener(checkChangeListener)
             }
+
+            // Set layouts
+            val col = getColor(syncElement, position)
+            v.background = col.backColor
+            holder.descriptionTextView?.setTextColor(col.foreColor)
+            holder.warehouseTextView?.setTextColor(col.foreColor)
+            holder.checkBox?.buttonTintList = ColorStateList.valueOf(col.titleForeColor)
+            holder.titleTextView?.setTextColor(col.titleForeColor)
+        }
+
+        if (listView != null) {
+            if (listView!!.isItemChecked(position)) {
+                v.background.colorFilter =
+                    BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
+                        getColorWithAlpha(colorId = R.color.lightslategray, alpha = 240),
+                        BlendModeCompat.MODULATE
+                    )
+            } else {
+                v.background.colorFilter = null
+            }
+        }
+        return v
+    }
+
+    private fun getWarehouseItemView(position: Int, v: View, alreadyExists: Boolean): View {
+        var holder = WarehouseViewHolder()
+        if (!alreadyExists || v.tag is String) {
+            createWarehouseViewHolder(v, holder)
+        } else {
+            holder = v.tag as WarehouseViewHolder
+        }
+
+        if (position < 0) return v
+
+        val syncElement = getItem(position)
+
+        if (syncElement != null && syncElement is Warehouse) {
+            holder.descriptionTextView?.text = syncElement.description
+
+            if (holder.checkBox != null) {
+                var isSpeakButtonLongPressed = false
+
+                val checkChangeListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
+                    this.setChecked(syncElement, isChecked, true)
+                }
+
+                val pressHoldListener =
+                    OnLongClickListener { // Do something when your hold starts here.
+                        isSpeakButtonLongPressed = true
+                        true
+                    }
+
+                val pressTouchListener = OnTouchListener { pView, pEvent ->
+                    pView.onTouchEvent(pEvent)
+                    // We're only interested in when the button is released.
+                    if (pEvent.action == MotionEvent.ACTION_UP) {
+                        // We're only interested in anything if our speak button is currently pressed.
+                        if (isSpeakButtonLongPressed) {
+                            // Do something when the button is released.
+                            if (!isFilling) {
+                                holder.checkBox!!.setOnCheckedChangeListener(null)
+                                val newState = !holder.checkBox!!.isChecked
+                                this.setChecked(getAll(), newState)
+                            }
+                            isSpeakButtonLongPressed = false
+                        }
+                    }
+                    return@OnTouchListener true
+                }
+
+                //Important to remove previous checkedChangedListener before calling setChecked
+                holder.checkBox!!.setOnCheckedChangeListener(null)
+                holder.checkBox!!.isChecked = checkedIdArray.contains(getKey(syncElement))
+                holder.checkBox!!.tag = position
+                holder.checkBox!!.setOnLongClickListener(pressHoldListener)
+                holder.checkBox!!.setOnTouchListener(pressTouchListener)
+                holder.checkBox!!.setOnCheckedChangeListener(checkChangeListener)
+            }
+
+            // Set layouts
+            val col = getColor(syncElement, position)
+            v.background = col.backColor
+            holder.descriptionTextView?.setTextColor(col.foreColor)
+            holder.checkBox?.buttonTintList = ColorStateList.valueOf(col.titleForeColor)
+            holder.titleTextView?.setTextColor(col.titleForeColor)
 
             if (listView != null) {
                 if (listView!!.isItemChecked(position)) {
@@ -912,175 +753,82 @@ class SyncElementAdapter :
                 }
             }
         }
-        if (v.height > 0) {
-            Log.d(this::class.java.simpleName, "-------{RES: $resource Height:${v.height}}-------")
-        }
-        return v
-    }
-
-    private fun getWarehouseItemView(position: Int, v: View, alreadyExists: Boolean): View {
-        var holder = WarehouseViewHolder()
-        if (alreadyExists) {
-            if (v.tag is String) {
-                createWarehouseViewHolder(v, holder)
-            } else {
-                holder = v.tag as WarehouseViewHolder
-            }
-        } else {
-            createWarehouseViewHolder(v, holder)
-        }
-
-        if (position >= 0) {
-            val syncElement = getItem(position)
-
-            if (syncElement != null && syncElement is Warehouse) {
-                holder.descriptionTextView?.text = syncElement.description
-
-                if (holder.checkBox != null) {
-                    var isSpeakButtonLongPressed = false
-
-                    val checkChangeListener =
-                        CompoundButton.OnCheckedChangeListener { _, isChecked ->
-                            this.setChecked(syncElement, isChecked, true)
-                        }
-
-                    val pressHoldListener =
-                        OnLongClickListener { // Do something when your hold starts here.
-                            isSpeakButtonLongPressed = true
-                            true
-                        }
-
-                    val pressTouchListener = OnTouchListener { pView, pEvent ->
-                        pView.onTouchEvent(pEvent)
-                        // We're only interested in when the button is released.
-                        if (pEvent.action == MotionEvent.ACTION_UP) {
-                            // We're only interested in anything if our speak button is currently pressed.
-                            if (isSpeakButtonLongPressed) {
-                                // Do something when the button is released.
-                                if (!isFilling) {
-                                    holder.checkBox!!.setOnCheckedChangeListener(null)
-                                    val newState = !holder.checkBox!!.isChecked
-                                    this.setChecked(getAll(), newState)
-                                }
-                                isSpeakButtonLongPressed = false
-                            }
-                        }
-                        return@OnTouchListener true
-                    }
-
-                    //Important to remove previous checkedChangedListener before calling setChecked
-                    holder.checkBox!!.setOnCheckedChangeListener(null)
-                    holder.checkBox!!.isChecked = checkedIdArray.contains(getKey(syncElement))
-                    holder.checkBox!!.tag = position
-                    holder.checkBox!!.setOnLongClickListener(pressHoldListener)
-                    holder.checkBox!!.setOnTouchListener(pressTouchListener)
-                    holder.checkBox!!.setOnCheckedChangeListener(checkChangeListener)
-                }
-
-                // Set layouts
-                val col = getColor(syncElement, position)
-                v.background = col.backColor
-                holder.descriptionTextView?.setTextColor(col.foreColor)
-                holder.checkBox?.buttonTintList = ColorStateList.valueOf(col.titleForeColor)
-                holder.titleTextView?.setTextColor(col.titleForeColor)
-
-                if (listView != null) {
-                    if (listView!!.isItemChecked(position)) {
-                        v.background.colorFilter =
-                            BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-                                getColorWithAlpha(colorId = R.color.lightslategray, alpha = 240),
-                                BlendModeCompat.MODULATE
-                            )
-                    } else {
-                        v.background.colorFilter = null
-                    }
-                }
-            }
-        }
-        if (v.height > 0) {
-            Log.d(this::class.java.simpleName, "-------{RES: $resource Height:${v.height}}-------")
-        }
         return v
     }
 
     private fun getItemCategoryItemView(position: Int, v: View, alreadyExists: Boolean): View {
         var holder = ItemCategoryViewHolder()
-        if (alreadyExists) {
-            if (v.tag is String) {
-                createItemCategoryViewHolder(v, holder)
-            } else {
-                holder = v.tag as ItemCategoryViewHolder
-            }
-        } else {
+        if (!alreadyExists || v.tag is String) {
             createItemCategoryViewHolder(v, holder)
+        } else {
+            holder = v.tag as ItemCategoryViewHolder
         }
 
-        if (position >= 0) {
-            val syncElement = getItem(position)
+        if (position < 0) return v
 
-            if (syncElement != null && syncElement is ItemCategory) {
-                holder.descriptionTextView?.text = syncElement.description
-                holder.parentCategoryTextView?.text = syncElement.parentStr
+        val syncElement = getItem(position)
 
-                if (holder.checkBox != null) {
-                    var isSpeakButtonLongPressed = false
+        if (syncElement != null && syncElement is ItemCategory) {
+            holder.descriptionTextView?.text = syncElement.description
+            holder.parentCategoryTextView?.text = syncElement.parentStr
 
-                    val checkChangeListener =
-                        CompoundButton.OnCheckedChangeListener { _, isChecked ->
-                            this.setChecked(syncElement, isChecked, true)
-                        }
+            if (holder.checkBox != null) {
+                var isSpeakButtonLongPressed = false
 
-                    val pressHoldListener =
-                        OnLongClickListener { // Do something when your hold starts here.
-                            isSpeakButtonLongPressed = true
-                            true
-                        }
-
-                    val pressTouchListener = OnTouchListener { pView, pEvent ->
-                        pView.onTouchEvent(pEvent)
-                        // We're only interested in when the button is released.
-                        if (pEvent.action == MotionEvent.ACTION_UP) {
-                            // We're only interested in anything if our speak button is currently pressed.
-                            if (isSpeakButtonLongPressed) {
-                                // Do something when the button is released.
-                                if (!isFilling) {
-                                    holder.checkBox!!.setOnCheckedChangeListener(null)
-                                    val newState = !holder.checkBox!!.isChecked
-                                    this.setChecked(getAll(), newState)
-                                }
-                                isSpeakButtonLongPressed = false
-                            }
-                        }
-                        return@OnTouchListener true
-                    }
-
-                    //Important to remove previous checkedChangedListener before calling setChecked
-                    holder.checkBox!!.setOnCheckedChangeListener(null)
-                    holder.checkBox!!.isChecked = checkedIdArray.contains(getKey(syncElement))
-                    holder.checkBox!!.tag = position
-                    holder.checkBox!!.setOnLongClickListener(pressHoldListener)
-                    holder.checkBox!!.setOnTouchListener(pressTouchListener)
-                    holder.checkBox!!.setOnCheckedChangeListener(checkChangeListener)
+                val checkChangeListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
+                    this.setChecked(syncElement, isChecked, true)
                 }
 
-                // Set layouts
-                val col = getColor(syncElement, position)
-                v.background = col.backColor
-                holder.descriptionTextView?.setTextColor(col.foreColor)
-                holder.parentCategoryTextView?.setTextColor(col.foreColor)
-                holder.checkBox?.buttonTintList = ColorStateList.valueOf(col.titleForeColor)
-                holder.titleTextView?.setTextColor(col.titleForeColor)
-
-                if (listView != null) {
-                    if (listView!!.isItemChecked(position)) {
-                        v.background.colorFilter =
-                            BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-                                getColorWithAlpha(colorId = R.color.lightslategray, alpha = 240),
-                                BlendModeCompat.MODULATE
-                            )
-                    } else {
-                        v.background.colorFilter = null
+                val pressHoldListener =
+                    OnLongClickListener { // Do something when your hold starts here.
+                        isSpeakButtonLongPressed = true
+                        true
                     }
+
+                val pressTouchListener = OnTouchListener { pView, pEvent ->
+                    pView.onTouchEvent(pEvent)
+                    // We're only interested in when the button is released.
+                    if (pEvent.action == MotionEvent.ACTION_UP) {
+                        // We're only interested in anything if our speak button is currently pressed.
+                        if (isSpeakButtonLongPressed) {
+                            // Do something when the button is released.
+                            if (!isFilling) {
+                                holder.checkBox!!.setOnCheckedChangeListener(null)
+                                val newState = !holder.checkBox!!.isChecked
+                                this.setChecked(getAll(), newState)
+                            }
+                            isSpeakButtonLongPressed = false
+                        }
+                    }
+                    return@OnTouchListener true
+                }
+
+                //Important to remove previous checkedChangedListener before calling setChecked
+                holder.checkBox!!.setOnCheckedChangeListener(null)
+                holder.checkBox!!.isChecked = checkedIdArray.contains(getKey(syncElement))
+                holder.checkBox!!.tag = position
+                holder.checkBox!!.setOnLongClickListener(pressHoldListener)
+                holder.checkBox!!.setOnTouchListener(pressTouchListener)
+                holder.checkBox!!.setOnCheckedChangeListener(checkChangeListener)
+            }
+
+            // Set layouts
+            val col = getColor(syncElement, position)
+            v.background = col.backColor
+            holder.descriptionTextView?.setTextColor(col.foreColor)
+            holder.parentCategoryTextView?.setTextColor(col.foreColor)
+            holder.checkBox?.buttonTintList = ColorStateList.valueOf(col.titleForeColor)
+            holder.titleTextView?.setTextColor(col.titleForeColor)
+
+            if (listView != null) {
+                if (listView!!.isItemChecked(position)) {
+                    v.background.colorFilter =
+                        BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
+                            getColorWithAlpha(colorId = R.color.lightslategray, alpha = 240),
+                            BlendModeCompat.MODULATE
+                        )
+                } else {
+                    v.background.colorFilter = null
                 }
             }
         }
@@ -1089,188 +837,171 @@ class SyncElementAdapter :
 
     private fun getDataCollectionItemView(position: Int, v: View, alreadyExists: Boolean): View {
         var holder = DataCollectionViewHolder()
-        if (alreadyExists) {
-            if (v.tag is String) {
-                createDataCollectionViewHolder(v, holder)
-            } else {
-                holder = v.tag as DataCollectionViewHolder
-            }
-        } else {
+        if (!alreadyExists || v.tag is String) {
             createDataCollectionViewHolder(v, holder)
+        } else {
+            holder = v.tag as DataCollectionViewHolder
         }
 
-        if (position >= 0) {
-            val syncElement = getItem(position)
+        if (position < 0) return v
 
-            if (syncElement != null && syncElement is DataCollection) {
-                holder.targetStrTextView?.text =
-                    when {
-                        syncElement.assetCode.isNotEmpty() -> {
-                            syncElement.assetCode
-                        }
-                        syncElement.warehouseStr.isNotEmpty() -> {
-                            syncElement.warehouseStr
-                        }
-                        syncElement.warehouseAreaStr.isNotEmpty() -> {
-                            syncElement.warehouseAreaStr
-                        }
-                        else -> {
-                            ""
-                        }
+        val syncElement = getItem(position)
+
+        if (syncElement != null && syncElement is DataCollection) {
+            holder.targetStrTextView?.text = when {
+                syncElement.assetCode.isNotEmpty() -> {
+                    syncElement.assetCode
+                }
+                syncElement.warehouseStr.isNotEmpty() -> {
+                    syncElement.warehouseStr
+                }
+                syncElement.warehouseAreaStr.isNotEmpty() -> {
+                    syncElement.warehouseAreaStr
+                }
+                else -> {
+                    ""
+                }
+            }
+            holder.dataCollectionDateTextView?.text = syncElement.dateEnd
+
+            if (holder.checkBox != null) {
+                var isSpeakButtonLongPressed = false
+
+                val checkChangeListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
+                    this.setChecked(syncElement, isChecked, true)
+                }
+
+                val pressHoldListener =
+                    OnLongClickListener { // Do something when your hold starts here.
+                        isSpeakButtonLongPressed = true
+                        true
                     }
-                holder.dataCollectionDateTextView?.text = syncElement.dateEnd
 
-                if (holder.checkBox != null) {
-                    var isSpeakButtonLongPressed = false
-
-                    val checkChangeListener =
-                        CompoundButton.OnCheckedChangeListener { _, isChecked ->
-                            this.setChecked(syncElement, isChecked, true)
-                        }
-
-                    val pressHoldListener =
-                        OnLongClickListener { // Do something when your hold starts here.
-                            isSpeakButtonLongPressed = true
-                            true
-                        }
-
-                    val pressTouchListener = OnTouchListener { pView, pEvent ->
-                        pView.onTouchEvent(pEvent)
-                        // We're only interested in when the button is released.
-                        if (pEvent.action == MotionEvent.ACTION_UP) {
-                            // We're only interested in anything if our speak button is currently pressed.
-                            if (isSpeakButtonLongPressed) {
-                                // Do something when the button is released.
-                                if (!isFilling) {
-                                    holder.checkBox!!.setOnCheckedChangeListener(null)
-                                    val newState = !holder.checkBox!!.isChecked
-                                    this.setChecked(getAll(), newState)
-                                }
-                                isSpeakButtonLongPressed = false
+                val pressTouchListener = OnTouchListener { pView, pEvent ->
+                    pView.onTouchEvent(pEvent)
+                    // We're only interested in when the button is released.
+                    if (pEvent.action == MotionEvent.ACTION_UP) {
+                        // We're only interested in anything if our speak button is currently pressed.
+                        if (isSpeakButtonLongPressed) {
+                            // Do something when the button is released.
+                            if (!isFilling) {
+                                holder.checkBox!!.setOnCheckedChangeListener(null)
+                                val newState = !holder.checkBox!!.isChecked
+                                this.setChecked(getAll(), newState)
                             }
+                            isSpeakButtonLongPressed = false
                         }
-                        return@OnTouchListener true
                     }
-
-                    //Important to remove previous checkedChangedListener before calling setChecked
-                    holder.checkBox!!.setOnCheckedChangeListener(null)
-                    holder.checkBox!!.isChecked = checkedIdArray.contains(getKey(syncElement))
-                    holder.checkBox!!.tag = position
-                    holder.checkBox!!.setOnLongClickListener(pressHoldListener)
-                    holder.checkBox!!.setOnTouchListener(pressTouchListener)
-                    holder.checkBox!!.setOnCheckedChangeListener(checkChangeListener)
+                    return@OnTouchListener true
                 }
 
-                // Set layouts
-                val col = getColor(syncElement, position)
-                v.background = col.backColor
-                holder.targetStrTextView?.setTextColor(col.foreColor)
-                holder.dataCollectionDateTextView?.setTextColor(col.foreColor)
-                holder.checkBox?.buttonTintList = ColorStateList.valueOf(col.titleForeColor)
-                holder.titleTextView?.setTextColor(col.titleForeColor)
+                //Important to remove previous checkedChangedListener before calling setChecked
+                holder.checkBox!!.setOnCheckedChangeListener(null)
+                holder.checkBox!!.isChecked = checkedIdArray.contains(getKey(syncElement))
+                holder.checkBox!!.tag = position
+                holder.checkBox!!.setOnLongClickListener(pressHoldListener)
+                holder.checkBox!!.setOnTouchListener(pressTouchListener)
+                holder.checkBox!!.setOnCheckedChangeListener(checkChangeListener)
             }
 
-            if (listView != null) {
-                if (listView!!.isItemChecked(position)) {
-                    v.background.colorFilter =
-                        BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-                            getColorWithAlpha(colorId = R.color.lightslategray, alpha = 240),
-                            BlendModeCompat.MODULATE
-                        )
-                } else {
-                    v.background.colorFilter = null
-                }
-            }
+            // Set layouts
+            val col = getColor(syncElement, position)
+            v.background = col.backColor
+            holder.targetStrTextView?.setTextColor(col.foreColor)
+            holder.dataCollectionDateTextView?.setTextColor(col.foreColor)
+            holder.checkBox?.buttonTintList = ColorStateList.valueOf(col.titleForeColor)
+            holder.titleTextView?.setTextColor(col.titleForeColor)
         }
-        if (v.height > 0) {
-            Log.d(this::class.java.simpleName, "-------{RES: $resource Height:${v.height}}-------")
+
+        if (listView != null) {
+            if (listView!!.isItemChecked(position)) {
+                v.background.colorFilter =
+                    BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
+                        getColorWithAlpha(colorId = R.color.lightslategray, alpha = 240),
+                        BlendModeCompat.MODULATE
+                    )
+            } else {
+                v.background.colorFilter = null
+            }
         }
         return v
     }
 
     private fun getRouteProcessItemView(position: Int, v: View, alreadyExists: Boolean): View {
         var holder = RouteProcessViewHolder()
-        if (alreadyExists) {
-            if (v.tag is String) {
-                createRouteProcessViewHolder(v, holder)
-            } else {
-                holder = v.tag as RouteProcessViewHolder
-            }
-        } else {
+        if (!alreadyExists || v.tag is String) {
             createRouteProcessViewHolder(v, holder)
+        } else {
+            holder = v.tag as RouteProcessViewHolder
         }
 
-        if (position >= 0) {
-            val syncElement = getItem(position)
+        if (position < 0) return v
 
-            if (syncElement != null && syncElement is RouteProcess) {
-                holder.routeStrTextView?.text = syncElement.routeStr
-                holder.routeProcessDateTextView?.text = syncElement.routeProcessDate
+        val syncElement = getItem(position)
 
-                if (holder.checkBox != null) {
-                    var isSpeakButtonLongPressed = false
+        if (syncElement != null && syncElement is RouteProcess) {
+            holder.routeStrTextView?.text = syncElement.routeStr
+            holder.routeProcessDateTextView?.text = syncElement.routeProcessDate
 
-                    val checkChangeListener =
-                        CompoundButton.OnCheckedChangeListener { _, isChecked ->
-                            this.setChecked(syncElement, isChecked, true)
-                        }
+            if (holder.checkBox != null) {
+                var isSpeakButtonLongPressed = false
 
-                    val pressHoldListener =
-                        OnLongClickListener { // Do something when your hold starts here.
-                            isSpeakButtonLongPressed = true
-                            true
-                        }
+                val checkChangeListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
+                    this.setChecked(syncElement, isChecked, true)
+                }
 
-                    val pressTouchListener = OnTouchListener { pView, pEvent ->
-                        pView.onTouchEvent(pEvent)
-                        // We're only interested in when the button is released.
-                        if (pEvent.action == MotionEvent.ACTION_UP) {
-                            // We're only interested in anything if our speak button is currently pressed.
-                            if (isSpeakButtonLongPressed) {
-                                // Do something when the button is released.
-                                if (!isFilling) {
-                                    holder.checkBox!!.setOnCheckedChangeListener(null)
-                                    val newState = !holder.checkBox!!.isChecked
-                                    this.setChecked(getAll(), newState)
-                                }
-                                isSpeakButtonLongPressed = false
-                            }
-                        }
-                        return@OnTouchListener true
+                val pressHoldListener =
+                    OnLongClickListener { // Do something when your hold starts here.
+                        isSpeakButtonLongPressed = true
+                        true
                     }
 
-                    //Important to remove previous checkedChangedListener before calling setChecked
-                    holder.checkBox!!.setOnCheckedChangeListener(null)
-                    holder.checkBox!!.isChecked = checkedIdArray.contains(getKey(syncElement))
-                    holder.checkBox!!.tag = position
-                    holder.checkBox!!.setOnLongClickListener(pressHoldListener)
-                    holder.checkBox!!.setOnTouchListener(pressTouchListener)
-                    holder.checkBox!!.setOnCheckedChangeListener(checkChangeListener)
+                val pressTouchListener = OnTouchListener { pView, pEvent ->
+                    pView.onTouchEvent(pEvent)
+                    // We're only interested in when the button is released.
+                    if (pEvent.action == MotionEvent.ACTION_UP) {
+                        // We're only interested in anything if our speak button is currently pressed.
+                        if (isSpeakButtonLongPressed) {
+                            // Do something when the button is released.
+                            if (!isFilling) {
+                                holder.checkBox!!.setOnCheckedChangeListener(null)
+                                val newState = !holder.checkBox!!.isChecked
+                                this.setChecked(getAll(), newState)
+                            }
+                            isSpeakButtonLongPressed = false
+                        }
+                    }
+                    return@OnTouchListener true
                 }
 
-                // Set layouts
-                val col = getColor(syncElement, position)
-                v.background = col.backColor
-                holder.routeStrTextView?.setTextColor(col.foreColor)
-                holder.routeProcessDateTextView?.setTextColor(col.foreColor)
-                holder.checkBox?.buttonTintList = ColorStateList.valueOf(col.titleForeColor)
-                holder.titleTextView?.setTextColor(col.titleForeColor)
+                //Important to remove previous checkedChangedListener before calling setChecked
+                holder.checkBox!!.setOnCheckedChangeListener(null)
+                holder.checkBox!!.isChecked = checkedIdArray.contains(getKey(syncElement))
+                holder.checkBox!!.tag = position
+                holder.checkBox!!.setOnLongClickListener(pressHoldListener)
+                holder.checkBox!!.setOnTouchListener(pressTouchListener)
+                holder.checkBox!!.setOnCheckedChangeListener(checkChangeListener)
             }
 
-            if (listView != null) {
-                if (listView!!.isItemChecked(position)) {
-                    v.background.colorFilter =
-                        BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-                            getColorWithAlpha(colorId = R.color.lightslategray, alpha = 240),
-                            BlendModeCompat.MODULATE
-                        )
-                } else {
-                    v.background.colorFilter = null
-                }
-            }
+            // Set layouts
+            val col = getColor(syncElement, position)
+            v.background = col.backColor
+            holder.routeStrTextView?.setTextColor(col.foreColor)
+            holder.routeProcessDateTextView?.setTextColor(col.foreColor)
+            holder.checkBox?.buttonTintList = ColorStateList.valueOf(col.titleForeColor)
+            holder.titleTextView?.setTextColor(col.titleForeColor)
         }
-        if (v.height > 0) {
-            Log.d(this::class.java.simpleName, "-------{RES: $resource Height:${v.height}}-------")
+
+        if (listView != null) {
+            if (listView!!.isItemChecked(position)) {
+                v.background.colorFilter =
+                    BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
+                        getColorWithAlpha(colorId = R.color.lightslategray, alpha = 240),
+                        BlendModeCompat.MODULATE
+                    )
+            } else {
+                v.background.colorFilter = null
+            }
         }
         return v
     }
@@ -1409,102 +1140,112 @@ class SyncElementAdapter :
         v.tag = holder
     }
 
-    @SuppressLint("ObsoleteSdkInt", "ClickableViewAccessibility")
-    private fun getWarehouseMovementItemView(position: Int, v: View, alreadyExists: Boolean): View {
-        var holder = WarehouseMovementViewHolder()
-        if (alreadyExists) {
-            if (v.tag is String) {
-                createWarehouseMovementViewHolder(v, holder)
-            } else {
-                holder = v.tag as WarehouseMovementViewHolder
-            }
+    private fun createImageViewHolder(v: View, holder: ImageViewHolder) {
+        // Holder para los rows normales.
+        holder.checkBoxConstraintLayout = v.findViewById(R.id.checkBoxConstraintLayout)
+        holder.checkBox = v.findViewById(R.id.checkBox)
+        holder.titleTextView = v.findViewById(R.id.titleTextView)
+        holder.gralConstraintLayout = v.findViewById(R.id.generalDataConstraintLayout)
+        holder.descriptionTextView = v.findViewById(R.id.descriptionAutoSize)
+        holder.codeTextView = v.findViewById(R.id.code)
+
+        if (multiSelect) {
+            holder.checkBox?.visibility = VISIBLE
         } else {
-            createWarehouseMovementViewHolder(v, holder)
+            holder.checkBox?.visibility = GONE
         }
 
-        if (position >= 0) {
-            val syncElement = getItem(position)
+        v.tag = holder
+    }
 
-            if (syncElement != null && syncElement is WarehouseMovement) {
-                holder.origWarehouseAreaTextView?.text = syncElement.origWarehouseAreaStr
-                holder.destWarehouseAreaTextView?.text = syncElement.destWarehouseAreaStr
-                holder.obsTextView?.text = syncElement.obs
-                if (syncElement.obs.isEmpty()) {
-                    holder.obsTextView?.visibility = GONE
-                    holder.dividerObs?.visibility = GONE
-                } else {
-                    holder.obsTextView?.visibility = VISIBLE
-                    holder.dividerObs?.visibility = VISIBLE
+    @SuppressLint("ObsoleteSdkInt", "ClickableViewAccessibility")
+    private fun getMovementItemView(position: Int, v: View, alreadyExists: Boolean): View {
+        var holder = WarehouseMovementViewHolder()
+        if (!alreadyExists || v.tag is String) {
+            createWarehouseMovementViewHolder(v, holder)
+        } else {
+            holder = v.tag as WarehouseMovementViewHolder
+        }
+
+        if (position < 0) return v
+
+        val syncElement = getItem(position)
+
+        if (syncElement != null && syncElement is WarehouseMovement) {
+            holder.origWarehouseAreaTextView?.text = syncElement.origWarehouseAreaStr
+            holder.destWarehouseAreaTextView?.text = syncElement.destWarehouseAreaStr
+            holder.obsTextView?.text = syncElement.obs
+            if (syncElement.obs.isEmpty()) {
+                holder.obsTextView?.visibility = GONE
+                holder.dividerObs?.visibility = GONE
+            } else {
+                holder.obsTextView?.visibility = VISIBLE
+                holder.dividerObs?.visibility = VISIBLE
+            }
+            holder.movDateCheckedTextView?.text = syncElement.warehouseMovementDate
+
+            if (holder.checkBox != null) {
+                var isSpeakButtonLongPressed = false
+
+                val checkChangeListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
+                    this.setChecked(syncElement, isChecked, true)
                 }
-                holder.movDateCheckedTextView?.text = syncElement.warehouseMovementDate
 
-                if (holder.checkBox != null) {
-                    var isSpeakButtonLongPressed = false
-
-                    val checkChangeListener =
-                        CompoundButton.OnCheckedChangeListener { _, isChecked ->
-                            this.setChecked(syncElement, isChecked, true)
-                        }
-
-                    val pressHoldListener =
-                        OnLongClickListener { // Do something when your hold starts here.
-                            isSpeakButtonLongPressed = true
-                            true
-                        }
-
-                    val pressTouchListener = OnTouchListener { pView, pEvent ->
-                        pView.onTouchEvent(pEvent)
-                        // We're only interested in when the button is released.
-                        if (pEvent.action == MotionEvent.ACTION_UP) {
-                            // We're only interested in anything if our speak button is currently pressed.
-                            if (isSpeakButtonLongPressed) {
-                                // Do something when the button is released.
-                                if (!isFilling) {
-                                    holder.checkBox!!.setOnCheckedChangeListener(null)
-                                    val newState = !holder.checkBox!!.isChecked
-                                    this.setChecked(getAll(), newState)
-                                }
-                                isSpeakButtonLongPressed = false
-                            }
-                        }
-                        return@OnTouchListener true
+                val pressHoldListener =
+                    OnLongClickListener { // Do something when your hold starts here.
+                        isSpeakButtonLongPressed = true
+                        true
                     }
 
-                    //Important to remove previous checkedChangedListener before calling setChecked
-                    holder.checkBox!!.setOnCheckedChangeListener(null)
-                    holder.checkBox!!.isChecked = checkedIdArray.contains(getKey(syncElement))
-                    holder.checkBox!!.tag = position
-                    holder.checkBox!!.setOnLongClickListener(pressHoldListener)
-                    holder.checkBox!!.setOnTouchListener(pressTouchListener)
-                    holder.checkBox!!.setOnCheckedChangeListener(checkChangeListener)
+                val pressTouchListener = OnTouchListener { pView, pEvent ->
+                    pView.onTouchEvent(pEvent)
+                    // We're only interested in when the button is released.
+                    if (pEvent.action == MotionEvent.ACTION_UP) {
+                        // We're only interested in anything if our speak button is currently pressed.
+                        if (isSpeakButtonLongPressed) {
+                            // Do something when the button is released.
+                            if (!isFilling) {
+                                holder.checkBox!!.setOnCheckedChangeListener(null)
+                                val newState = !holder.checkBox!!.isChecked
+                                this.setChecked(getAll(), newState)
+                            }
+                            isSpeakButtonLongPressed = false
+                        }
+                    }
+                    return@OnTouchListener true
                 }
 
-                // Background layouts
-                // Resalta por estado del activo
-                val col = getColor(syncElement, position)
-                v.background = col.backColor
-                holder.origWarehouseAreaTextView?.setTextColor(col.foreColor)
-                holder.destWarehouseAreaTextView?.setTextColor(col.foreColor)
-                holder.obsTextView?.setTextColor(col.foreColor)
-                holder.movDateCheckedTextView?.setTextColor(col.foreColor)
-                holder.checkBox?.buttonTintList = ColorStateList.valueOf(col.titleForeColor)
-                holder.titleTextView?.setTextColor(col.titleForeColor)
+                //Important to remove previous checkedChangedListener before calling setChecked
+                holder.checkBox!!.setOnCheckedChangeListener(null)
+                holder.checkBox!!.isChecked = checkedIdArray.contains(getKey(syncElement))
+                holder.checkBox!!.tag = position
+                holder.checkBox!!.setOnLongClickListener(pressHoldListener)
+                holder.checkBox!!.setOnTouchListener(pressTouchListener)
+                holder.checkBox!!.setOnCheckedChangeListener(checkChangeListener)
             }
 
-            if (listView != null) {
-                if (isSelected(position)) {
-                    v.background.colorFilter =
-                        BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-                            getColorWithAlpha(colorId = R.color.lightslategray, alpha = 240),
-                            BlendModeCompat.MODULATE
-                        )
-                } else {
-                    v.background.colorFilter = null
-                }
-            }
+            // Background layouts
+            // Resalta por estado del activo
+            val col = getColor(syncElement, position)
+            v.background = col.backColor
+            holder.origWarehouseAreaTextView?.setTextColor(col.foreColor)
+            holder.destWarehouseAreaTextView?.setTextColor(col.foreColor)
+            holder.obsTextView?.setTextColor(col.foreColor)
+            holder.movDateCheckedTextView?.setTextColor(col.foreColor)
+            holder.checkBox?.buttonTintList = ColorStateList.valueOf(col.titleForeColor)
+            holder.titleTextView?.setTextColor(col.titleForeColor)
         }
-        if (v.height > 0) {
-            Log.d(this::class.java.simpleName, "-------{RES: $resource Height:${v.height}}-------")
+
+        if (listView != null) {
+            if (isSelected(position)) {
+                v.background.colorFilter =
+                    BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
+                        getColorWithAlpha(colorId = R.color.lightslategray, alpha = 240),
+                        BlendModeCompat.MODULATE
+                    )
+            } else {
+                v.background.colorFilter = null
+            }
         }
         return v
     }
@@ -1512,97 +1253,89 @@ class SyncElementAdapter :
     @SuppressLint("ObsoleteSdkInt", "ClickableViewAccessibility")
     private fun getAssetReviewItemView(position: Int, v: View, alreadyExists: Boolean): View {
         var holder = AssetReviewViewHolder()
-        if (alreadyExists) {
-            if (v.tag is String) {
-                createAssetReviewViewHolder(v, holder)
-            } else {
-                holder = v.tag as AssetReviewViewHolder
-            }
-        } else {
+        if (!alreadyExists || v.tag is String) {
             createAssetReviewViewHolder(v, holder)
+        } else {
+            holder = v.tag as AssetReviewViewHolder
         }
 
-        if (position >= 0) {
-            val syncElement = getItem(position)
+        if (position < 0) return v
 
-            if (syncElement != null && syncElement is AssetReview) {
-                holder.warehouseAreaTextView?.text = syncElement.warehouseAreaStr
-                holder.obsTextView?.text = syncElement.obs
-                if (syncElement.obs.isEmpty()) {
-                    holder.obsTextView?.visibility = GONE
-                    holder.dividerObs?.visibility = GONE
-                } else {
-                    holder.obsTextView?.visibility = VISIBLE
-                    holder.dividerObs?.visibility = VISIBLE
+        val syncElement = getItem(position)
+
+        if (syncElement != null && syncElement is AssetReview) {
+            holder.warehouseAreaTextView?.text = syncElement.warehouseAreaStr
+            holder.obsTextView?.text = syncElement.obs
+            if (syncElement.obs.isEmpty()) {
+                holder.obsTextView?.visibility = GONE
+                holder.dividerObs?.visibility = GONE
+            } else {
+                holder.obsTextView?.visibility = VISIBLE
+                holder.dividerObs?.visibility = VISIBLE
+            }
+            holder.assetReviewDateCheckedTextView?.text = syncElement.assetReviewDate
+
+            if (holder.checkBox != null) {
+                var isSpeakButtonLongPressed = false
+
+                val checkChangeListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
+                    this.setChecked(syncElement, isChecked, true)
                 }
-                holder.assetReviewDateCheckedTextView?.text = syncElement.assetReviewDate
 
-                if (holder.checkBox != null) {
-                    var isSpeakButtonLongPressed = false
-
-                    val checkChangeListener =
-                        CompoundButton.OnCheckedChangeListener { _, isChecked ->
-                            this.setChecked(syncElement, isChecked, true)
-                        }
-
-                    val pressHoldListener =
-                        OnLongClickListener { // Do something when your hold starts here.
-                            isSpeakButtonLongPressed = true
-                            true
-                        }
-
-                    val pressTouchListener = OnTouchListener { pView, pEvent ->
-                        pView.onTouchEvent(pEvent)
-                        // We're only interested in when the button is released.
-                        if (pEvent.action == MotionEvent.ACTION_UP) {
-                            // We're only interested in anything if our speak button is currently pressed.
-                            if (isSpeakButtonLongPressed) {
-                                // Do something when the button is released.
-                                if (!isFilling) {
-                                    holder.checkBox!!.setOnCheckedChangeListener(null)
-                                    val newState = !holder.checkBox!!.isChecked
-                                    this.setChecked(getAll(), newState)
-                                }
-                                isSpeakButtonLongPressed = false
-                            }
-                        }
-                        return@OnTouchListener true
+                val pressHoldListener =
+                    OnLongClickListener { // Do something when your hold starts here.
+                        isSpeakButtonLongPressed = true
+                        true
                     }
 
-                    //Important to remove previous checkedChangedListener before calling setChecked
-                    holder.checkBox!!.setOnCheckedChangeListener(null)
-                    holder.checkBox!!.isChecked = checkedIdArray.contains(getKey(syncElement))
-                    holder.checkBox!!.tag = position
-                    holder.checkBox!!.setOnLongClickListener(pressHoldListener)
-                    holder.checkBox!!.setOnTouchListener(pressTouchListener)
-                    holder.checkBox!!.setOnCheckedChangeListener(checkChangeListener)
+                val pressTouchListener = OnTouchListener { pView, pEvent ->
+                    pView.onTouchEvent(pEvent)
+                    // We're only interested in when the button is released.
+                    if (pEvent.action == MotionEvent.ACTION_UP) {
+                        // We're only interested in anything if our speak button is currently pressed.
+                        if (isSpeakButtonLongPressed) {
+                            // Do something when the button is released.
+                            if (!isFilling) {
+                                holder.checkBox!!.setOnCheckedChangeListener(null)
+                                val newState = !holder.checkBox!!.isChecked
+                                this.setChecked(getAll(), newState)
+                            }
+                            isSpeakButtonLongPressed = false
+                        }
+                    }
+                    return@OnTouchListener true
                 }
 
-                // Background layouts
-                // Resalta por estado del activo
-                val col = getColor(syncElement, position)
-                v.background = col.backColor
-                holder.warehouseAreaTextView?.setTextColor(col.foreColor)
-                holder.obsTextView?.setTextColor(col.foreColor)
-                holder.assetReviewDateCheckedTextView?.setTextColor(col.foreColor)
-                holder.checkBox?.buttonTintList = ColorStateList.valueOf(col.titleForeColor)
-                holder.titleTextView?.setTextColor(col.titleForeColor)
+                //Important to remove previous checkedChangedListener before calling setChecked
+                holder.checkBox!!.setOnCheckedChangeListener(null)
+                holder.checkBox!!.isChecked = checkedIdArray.contains(getKey(syncElement))
+                holder.checkBox!!.tag = position
+                holder.checkBox!!.setOnLongClickListener(pressHoldListener)
+                holder.checkBox!!.setOnTouchListener(pressTouchListener)
+                holder.checkBox!!.setOnCheckedChangeListener(checkChangeListener)
             }
 
-            if (listView != null) {
-                if (isSelected(position)) {
-                    v.background.colorFilter =
-                        BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-                            getColorWithAlpha(colorId = R.color.lightslategray, alpha = 240),
-                            BlendModeCompat.MODULATE
-                        )
-                } else {
-                    v.background.colorFilter = null
-                }
-            }
+            // Background layouts
+            // Resalta por estado del activo
+            val col = getColor(syncElement, position)
+            v.background = col.backColor
+            holder.warehouseAreaTextView?.setTextColor(col.foreColor)
+            holder.obsTextView?.setTextColor(col.foreColor)
+            holder.assetReviewDateCheckedTextView?.setTextColor(col.foreColor)
+            holder.checkBox?.buttonTintList = ColorStateList.valueOf(col.titleForeColor)
+            holder.titleTextView?.setTextColor(col.titleForeColor)
         }
-        if (v.height > 0) {
-            Log.d(this::class.java.simpleName, "-------{RES: $resource Height:${v.height}}-------")
+
+        if (listView != null) {
+            if (isSelected(position)) {
+                v.background.colorFilter =
+                    BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
+                        getColorWithAlpha(colorId = R.color.lightslategray, alpha = 240),
+                        BlendModeCompat.MODULATE
+                    )
+            } else {
+                v.background.colorFilter = null
+            }
         }
         return v
     }
@@ -1610,91 +1343,165 @@ class SyncElementAdapter :
     @SuppressLint("ObsoleteSdkInt", "ClickableViewAccessibility")
     private fun getAssetItemView(position: Int, v: View, alreadyExists: Boolean): View {
         var holder = AssetViewHolder()
-        if (alreadyExists) {
-            if (v.tag is String) {
-                createAssetViewHolder(v, holder)
-            } else {
-                holder = v.tag as AssetViewHolder
-            }
-        } else {
+        if (!alreadyExists || v.tag is String) {
             createAssetViewHolder(v, holder)
+        } else {
+            holder = v.tag as AssetViewHolder
         }
 
-        if (position >= 0) {
-            val syncElement = getItem(position)
+        if (position < 0) return v
 
-            if (syncElement != null && syncElement is Asset) {
-                holder.descriptionTextView?.text = syncElement.description
-                holder.codeTextView?.text = syncElement.code
-                holder.assetStatusCheckedTextView?.text =
-                    AssetStatus.getById(syncElement.assetStatusId)?.description ?: ""
+        val syncElement = getItem(position)
 
-                if (holder.checkBox != null) {
-                    var isSpeakButtonLongPressed = false
+        if (syncElement != null && syncElement is Asset) {
+            holder.descriptionTextView?.text = syncElement.description
+            holder.codeTextView?.text = syncElement.code
+            holder.assetStatusCheckedTextView?.text =
+                AssetStatus.getById(syncElement.assetStatusId)?.description ?: ""
 
-                    val checkChangeListener =
-                        CompoundButton.OnCheckedChangeListener { _, isChecked ->
-                            this.setChecked(syncElement, isChecked, true)
-                        }
+            if (holder.checkBox != null) {
+                var isSpeakButtonLongPressed = false
 
-                    val pressHoldListener =
-                        OnLongClickListener { // Do something when your hold starts here.
-                            isSpeakButtonLongPressed = true
-                            true
-                        }
+                val checkChangeListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
+                    this.setChecked(syncElement, isChecked, true)
+                }
 
-                    val pressTouchListener = OnTouchListener { pView, pEvent ->
-                        pView.onTouchEvent(pEvent)
-                        // We're only interested in when the button is released.
-                        if (pEvent.action == MotionEvent.ACTION_UP) {
-                            // We're only interested in anything if our speak button is currently pressed.
-                            if (isSpeakButtonLongPressed) {
-                                // Do something when the button is released.
-                                if (!isFilling) {
-                                    holder.checkBox!!.setOnCheckedChangeListener(null)
-                                    val newState = !holder.checkBox!!.isChecked
-                                    this.setChecked(getAll(), newState)
-                                }
-                                isSpeakButtonLongPressed = false
-                            }
-                        }
-                        return@OnTouchListener true
+                val pressHoldListener =
+                    OnLongClickListener { // Do something when your hold starts here.
+                        isSpeakButtonLongPressed = true
+                        true
                     }
 
-                    //Important to remove previous checkedChangedListener before calling setChecked
-                    holder.checkBox!!.setOnCheckedChangeListener(null)
-                    holder.checkBox!!.isChecked = checkedIdArray.contains(getKey(syncElement))
-                    holder.checkBox!!.tag = position
-                    holder.checkBox!!.setOnLongClickListener(pressHoldListener)
-                    holder.checkBox!!.setOnTouchListener(pressTouchListener)
-                    holder.checkBox!!.setOnCheckedChangeListener(checkChangeListener)
+                val pressTouchListener = OnTouchListener { pView, pEvent ->
+                    pView.onTouchEvent(pEvent)
+                    // We're only interested in when the button is released.
+                    if (pEvent.action == MotionEvent.ACTION_UP) {
+                        // We're only interested in anything if our speak button is currently pressed.
+                        if (isSpeakButtonLongPressed) {
+                            // Do something when the button is released.
+                            if (!isFilling) {
+                                holder.checkBox!!.setOnCheckedChangeListener(null)
+                                val newState = !holder.checkBox!!.isChecked
+                                this.setChecked(getAll(), newState)
+                            }
+                            isSpeakButtonLongPressed = false
+                        }
+                    }
+                    return@OnTouchListener true
                 }
 
-                // Background layouts
-                // Resalta por estado del activo
-                val col = getColor(syncElement, position)
-                v.background = col.backColor
-                holder.descriptionTextView?.setTextColor(col.foreColor)
-                holder.codeTextView?.setTextColor(col.foreColor)
-                holder.assetStatusCheckedTextView?.setTextColor(col.foreColor)
-                holder.checkBox?.buttonTintList = ColorStateList.valueOf(col.titleForeColor)
-                holder.titleTextView?.setTextColor(col.titleForeColor)
+                //Important to remove previous checkedChangedListener before calling setChecked
+                holder.checkBox!!.setOnCheckedChangeListener(null)
+                holder.checkBox!!.isChecked = checkedIdArray.contains(getKey(syncElement))
+                holder.checkBox!!.tag = position
+                holder.checkBox!!.setOnLongClickListener(pressHoldListener)
+                holder.checkBox!!.setOnTouchListener(pressTouchListener)
+                holder.checkBox!!.setOnCheckedChangeListener(checkChangeListener)
             }
 
-            if (listView != null) {
-                if (isSelected(position)) {
-                    v.background.colorFilter =
-                        BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-                            getColorWithAlpha(colorId = R.color.lightslategray, alpha = 240),
-                            BlendModeCompat.MODULATE
-                        )
-                } else {
-                    v.background.colorFilter = null
-                }
+            // Background layouts
+            // Resalta por estado del activo
+            val col = getColor(syncElement, position)
+            v.background = col.backColor
+            holder.descriptionTextView?.setTextColor(col.foreColor)
+            holder.codeTextView?.setTextColor(col.foreColor)
+            holder.assetStatusCheckedTextView?.setTextColor(col.foreColor)
+            holder.checkBox?.buttonTintList = ColorStateList.valueOf(col.titleForeColor)
+            holder.titleTextView?.setTextColor(col.titleForeColor)
+        }
+
+        if (listView != null) {
+            if (isSelected(position)) {
+                v.background.colorFilter =
+                    BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
+                        getColorWithAlpha(colorId = R.color.lightslategray, alpha = 240),
+                        BlendModeCompat.MODULATE
+                    )
+            } else {
+                v.background.colorFilter = null
             }
         }
-        if (v.height > 0) {
-            Log.d(this::class.java.simpleName, "-------{RES: $resource Height:${v.height}}-------")
+        return v
+    }
+
+    @SuppressLint("ObsoleteSdkInt", "ClickableViewAccessibility")
+    private fun getImageItemView(position: Int, v: View, alreadyExists: Boolean): View {
+        var holder = ImageViewHolder()
+        if (!alreadyExists || v.tag is String) {
+            createImageViewHolder(v, holder)
+        } else {
+            holder = v.tag as ImageViewHolder
+        }
+
+        if (position < 0) return v
+
+        val syncElement = getItem(position)
+
+        if (syncElement != null && syncElement is Image) {
+            holder.descriptionTextView?.text = syncElement.description
+            val c = syncElement.reference + lineSeparator + syncElement.obs
+            holder.codeTextView?.text = c
+
+            if (holder.checkBox != null) {
+                var isSpeakButtonLongPressed = false
+
+                val checkChangeListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
+                    this.setChecked(syncElement, isChecked, true)
+                }
+
+                val pressHoldListener =
+                    OnLongClickListener { // Do something when your hold starts here.
+                        isSpeakButtonLongPressed = true
+                        true
+                    }
+
+                val pressTouchListener = OnTouchListener { pView, pEvent ->
+                    pView.onTouchEvent(pEvent)
+                    // We're only interested in when the button is released.
+                    if (pEvent.action == MotionEvent.ACTION_UP) {
+                        // We're only interested in anything if our speak button is currently pressed.
+                        if (isSpeakButtonLongPressed) {
+                            // Do something when the button is released.
+                            if (!isFilling) {
+                                holder.checkBox!!.setOnCheckedChangeListener(null)
+                                val newState = !holder.checkBox!!.isChecked
+                                this.setChecked(getAll(), newState)
+                            }
+                            isSpeakButtonLongPressed = false
+                        }
+                    }
+                    return@OnTouchListener true
+                }
+
+                //Important to remove previous checkedChangedListener before calling setChecked
+                holder.checkBox!!.setOnCheckedChangeListener(null)
+                holder.checkBox!!.isChecked = checkedIdArray.contains(getKey(syncElement))
+                holder.checkBox!!.tag = position
+                holder.checkBox!!.setOnLongClickListener(pressHoldListener)
+                holder.checkBox!!.setOnTouchListener(pressTouchListener)
+                holder.checkBox!!.setOnCheckedChangeListener(checkChangeListener)
+            }
+
+            // Background layouts
+            // Resalta por estado del activo
+            val col = getColor(syncElement, position)
+            v.background = col.backColor
+            holder.descriptionTextView?.setTextColor(col.foreColor)
+            holder.codeTextView?.setTextColor(col.foreColor)
+            holder.checkBox?.buttonTintList = ColorStateList.valueOf(col.titleForeColor)
+            holder.titleTextView?.setTextColor(col.titleForeColor)
+        }
+
+        if (listView != null) {
+            if (isSelected(position)) {
+                v.background.colorFilter =
+                    BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
+                        getColorWithAlpha(colorId = R.color.lightslategray, alpha = 240),
+                        BlendModeCompat.MODULATE
+                    )
+            } else {
+                v.background.colorFilter = null
+            }
         }
         return v
     }
@@ -1715,16 +1522,15 @@ class SyncElementAdapter :
                             continue
                         }
 
-                        if (
-                            filterableItem.code.toLowerCase(Locale.getDefault())
-                                .contains(filterString) ||
-                            filterableItem.description.toLowerCase(Locale.getDefault())
-                                .contains(filterString) ||
-                            (filterableItem.serialNumber != null
-                                    && filterableItem.serialNumber!!.toLowerCase(Locale.getDefault())
-                                .contains(filterString)) ||
-                            (filterableItem.ean != null
-                                    && filterableItem.ean.toString().contains(filterString))
+                        if (filterableItem.code.toLowerCase(Locale.getDefault())
+                                .contains(filterString) || filterableItem.description.toLowerCase(
+                                Locale.getDefault()
+                            )
+                                .contains(filterString) || (filterableItem.serialNumber != null && filterableItem.serialNumber!!.toLowerCase(
+                                Locale.getDefault()
+                            )
+                                .contains(filterString)) || (filterableItem.ean != null && filterableItem.ean.toString()
+                                .contains(filterString))
                         ) {
                             r.add(filterableItem)
                         }
@@ -1823,6 +1629,16 @@ class SyncElementAdapter :
         var assetStatusCheckedTextView: CheckedTextView? = null
     }
 
+    internal class ImageViewHolder {
+        var checkBoxConstraintLayout: ConstraintLayout? = null
+        var checkBox: CheckBox? = null
+        var titleTextView: TextView? = null
+
+        var gralConstraintLayout: ConstraintLayout? = null
+        var descriptionTextView: AutoResizeTextView? = null
+        var codeTextView: AutoResizeTextView? = null
+    }
+
     companion object {
 
         fun defaultRowHeight(): Int {
@@ -1844,8 +1660,7 @@ class SyncElementAdapter :
                         o1 is Asset && o2 is Asset -> {
                             val codeComp = o1.code.compareTo(o2.code, true)
                             val serialComp = (o1.serialNumber ?: "").compareTo(
-                                o2.serialNumber
-                                    ?: "", true
+                                o2.serialNumber ?: "", true
                             )
                             val eanComp = (o1.ean ?: "").compareTo(o2.ean ?: "", true)
 
@@ -1914,13 +1729,12 @@ class SyncElementAdapter :
     private var routeProcessForeColor: Int = 0
     private var warehouseMovementForeColor: Int = 0
     private var assetReviewForeColor: Int = 0
+    private var imageForeColor: Int = 0
     private var defaultForeColor: Int = 0
 
     private fun setupColors() {
         selectedForeColor = ResourcesCompat.getColor(
-            AssetControlApp.getContext().resources,
-            R.color.text_light,
-            null
+            AssetControlApp.getContext().resources, R.color.text_light, null
         )
 
         itemCategoryForeColor = Statics.getBestContrastColor("#009688")
@@ -1932,6 +1746,7 @@ class SyncElementAdapter :
         routeProcessForeColor = Statics.getBestContrastColor("#5639AF")
         warehouseMovementForeColor = Statics.getBestContrastColor("#FFC107")
         assetReviewForeColor = Statics.getBestContrastColor("#7323A3")
+        imageForeColor = Statics.getBestContrastColor("#FF9800")
         defaultForeColor = Statics.getBestContrastColor("#E4971B")
     }
 
@@ -1940,54 +1755,37 @@ class SyncElementAdapter :
     private fun getColor(syncElement: Any?, position: Int): SyncElementLayout {
         // Background layouts
         val layoutItemCategory = ResourcesCompat.getDrawable(
-            AssetControlApp.getContext().resources,
-            R.drawable.layout_thin_border_green,
-            null
+            AssetControlApp.getContext().resources, R.drawable.layout_thin_border_green, null
         )
         val layoutWarehouse = ResourcesCompat.getDrawable(
-            AssetControlApp.getContext().resources,
-            R.drawable.layout_thin_border_red,
-            null
+            AssetControlApp.getContext().resources, R.drawable.layout_thin_border_red, null
         )
         val layoutWarehouseArea = ResourcesCompat.getDrawable(
-            AssetControlApp.getContext().resources,
-            R.drawable.layout_thin_border_marron,
-            null
+            AssetControlApp.getContext().resources, R.drawable.layout_thin_border_marron, null
         )
         val layoutAsset = ResourcesCompat.getDrawable(
-            AssetControlApp.getContext().resources,
-            R.drawable.layout_thin_border_blue,
-            null
+            AssetControlApp.getContext().resources, R.drawable.layout_thin_border_blue, null
         )
         val layoutAssetManteinance = ResourcesCompat.getDrawable(
-            AssetControlApp.getContext().resources,
-            R.drawable.layout_thin_border_violet,
-            null
+            AssetControlApp.getContext().resources, R.drawable.layout_thin_border_violet, null
         )
         val layoutDataCollection = ResourcesCompat.getDrawable(
-            AssetControlApp.getContext().resources,
-            R.drawable.layout_thin_border_violet2,
-            null
+            AssetControlApp.getContext().resources, R.drawable.layout_thin_border_violet2, null
         )
         val layoutRouteProcess = ResourcesCompat.getDrawable(
-            AssetControlApp.getContext().resources,
-            R.drawable.layout_thin_border_violet3,
-            null
+            AssetControlApp.getContext().resources, R.drawable.layout_thin_border_violet3, null
         )
         val layoutWarehouseMovement = ResourcesCompat.getDrawable(
-            AssetControlApp.getContext().resources,
-            R.drawable.layout_thin_border_yellow,
-            null
+            AssetControlApp.getContext().resources, R.drawable.layout_thin_border_yellow, null
         )
         val layoutAssetReview = ResourcesCompat.getDrawable(
-            AssetControlApp.getContext().resources,
-            R.drawable.layout_thin_border_yellow2,
-            null
+            AssetControlApp.getContext().resources, R.drawable.layout_thin_border_yellow2, null
+        )
+        val layoutImage = ResourcesCompat.getDrawable(
+            AssetControlApp.getContext().resources, R.drawable.layout_thin_border_orange, null
         )
         val layoutDefault = ResourcesCompat.getDrawable(
-            AssetControlApp.getContext().resources,
-            R.drawable.layout_thin_border,
-            null
+            AssetControlApp.getContext().resources, R.drawable.layout_thin_border, null
         )
 
         val isSelected = isSelected(position)
@@ -2031,6 +1829,10 @@ class SyncElementAdapter :
                 backColor = layoutAssetReview!!
                 foreColor = if (isSelected) selectedForeColor else assetReviewForeColor
             }
+            is Image -> {
+                backColor = layoutImage!!
+                foreColor = if (isSelected) selectedForeColor else imageForeColor
+            }
             else -> {
                 backColor = layoutDefault!!
                 foreColor = if (isSelected) selectedForeColor else defaultForeColor
@@ -2044,9 +1846,7 @@ class SyncElementAdapter :
         }
 
         return SyncElementLayout(
-            foreColor,
-            backColor,
-            manipulateColor(foreColor, if (darkerColor) 0.8f else 1.4f)
+            foreColor, backColor, manipulateColor(foreColor, if (darkerColor) 0.8f else 1.4f)
         )
     }
 

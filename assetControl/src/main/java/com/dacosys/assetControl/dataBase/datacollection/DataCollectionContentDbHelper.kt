@@ -392,11 +392,11 @@ class DataCollectionContentDbHelper {
                 " LEFT OUTER JOIN " + attrComp.TABLE_NAME + " ON " +
                 attrComp.TABLE_NAME + "." + attrComp.ATTRIBUTE_COMPOSITION_ID + " = " +
                 TABLE_NAME + "." + ATTRIBUTE_COMPOSITION_ID +
-                " LEFT OUTER JOIN " + DataCollectionContract.DataCollectionEntry.TABLE_NAME + " ON " +
-                DataCollectionContract.DataCollectionEntry.TABLE_NAME + "." + DataCollectionContract.DataCollectionEntry.COLLECTOR_DATA_COLLECTION_ID + " = " +
+                " LEFT OUTER JOIN " + dc.TABLE_NAME + " ON " +
+                dc.TABLE_NAME + "." + dc.COLLECTOR_DATA_COLLECTION_ID + " = " +
                 TABLE_NAME + "." + DATA_COLLECTION_ID +
                 " WHERE (" + TABLE_NAME + "." + DATA_COLLECTION_RULE_CONTENT_ID + " = " + dcrContId + ") AND " +
-                "(" + DataCollectionContract.DataCollectionEntry.TABLE_NAME + "." + DataCollectionContract.DataCollectionEntry.ASSET_ID + " = " + assetId + ")"
+                "(" + dc.TABLE_NAME + "." + dc.ASSET_ID + " = " + assetId + ")"
 
         val sqLiteDatabase = getReadableDb()
         return try {
@@ -466,11 +466,11 @@ class DataCollectionContentDbHelper {
                 " LEFT OUTER JOIN " + attrComp.TABLE_NAME + " ON " +
                 attrComp.TABLE_NAME + "." + attrComp.ATTRIBUTE_COMPOSITION_ID + " = " +
                 TABLE_NAME + "." + ATTRIBUTE_COMPOSITION_ID +
-                " LEFT OUTER JOIN " + DataCollectionContract.DataCollectionEntry.TABLE_NAME + " ON " +
-                DataCollectionContract.DataCollectionEntry.TABLE_NAME + "." + DataCollectionContract.DataCollectionEntry.COLLECTOR_DATA_COLLECTION_ID + " = " +
+                " LEFT OUTER JOIN " + dc.TABLE_NAME + " ON " +
+                dc.TABLE_NAME + "." + dc.COLLECTOR_DATA_COLLECTION_ID + " = " +
                 TABLE_NAME + "." + DATA_COLLECTION_ID +
                 " WHERE (" + TABLE_NAME + "." + DATA_COLLECTION_RULE_CONTENT_ID + " = " + dcrContId + ") AND " +
-                "(" + DataCollectionContract.DataCollectionEntry.TABLE_NAME + "." + DataCollectionContract.DataCollectionEntry.WAREHOUSE_ID + " = " + warehouseId + ")"
+                "(" + dc.TABLE_NAME + "." + dc.WAREHOUSE_ID + " = " + warehouseId + ")"
 
         val sqLiteDatabase = getReadableDb()
         return try {
@@ -540,11 +540,11 @@ class DataCollectionContentDbHelper {
                 " LEFT OUTER JOIN " + attrComp.TABLE_NAME + " ON " +
                 attrComp.TABLE_NAME + "." + attrComp.ATTRIBUTE_COMPOSITION_ID + " = " +
                 TABLE_NAME + "." + ATTRIBUTE_COMPOSITION_ID +
-                " LEFT OUTER JOIN " + DataCollectionContract.DataCollectionEntry.TABLE_NAME + " ON " +
-                DataCollectionContract.DataCollectionEntry.TABLE_NAME + "." + DataCollectionContract.DataCollectionEntry.COLLECTOR_DATA_COLLECTION_ID + " = " +
+                " LEFT OUTER JOIN " + dc.TABLE_NAME + " ON " +
+                dc.TABLE_NAME + "." + dc.COLLECTOR_DATA_COLLECTION_ID + " = " +
                 TABLE_NAME + "." + DATA_COLLECTION_ID +
                 " WHERE (" + TABLE_NAME + "." + DATA_COLLECTION_RULE_CONTENT_ID + " = " + dcrContId + ") AND " +
-                "(" + DataCollectionContract.DataCollectionEntry.TABLE_NAME + "." + DataCollectionContract.DataCollectionEntry.WAREHOUSE_AREA_ID + " = " + warehouseAreaId + ")"
+                "(" + dc.TABLE_NAME + "." + dc.WAREHOUSE_AREA_ID + " = " + warehouseAreaId + ")"
 
         val sqLiteDatabase = getReadableDb()
         return try {
@@ -605,10 +605,10 @@ class DataCollectionContentDbHelper {
                 " LEFT OUTER JOIN " + attrComp.TABLE_NAME + " ON " +
                 attrComp.TABLE_NAME + "." + attrComp.ATTRIBUTE_COMPOSITION_ID + " = " +
                 TABLE_NAME + "." + ATTRIBUTE_COMPOSITION_ID +
-                " LEFT OUTER JOIN " + DataCollectionContract.DataCollectionEntry.TABLE_NAME + " ON " +
-                DataCollectionContract.DataCollectionEntry.TABLE_NAME + "." + DataCollectionContract.DataCollectionEntry.COLLECTOR_DATA_COLLECTION_ID + " = " +
+                " LEFT OUTER JOIN " + dc.TABLE_NAME + " ON " +
+                dc.TABLE_NAME + "." + dc.COLLECTOR_DATA_COLLECTION_ID + " = " +
                 TABLE_NAME + "." + DATA_COLLECTION_ID +
-                " WHERE (" + DataCollectionContract.DataCollectionEntry.TABLE_NAME + "." + DataCollectionContract.DataCollectionEntry.COLLECTOR_ROUTE_PROCESS_ID + " = " + crpId + ")"
+                " WHERE (" + dc.TABLE_NAME + "." + dc.COLLECTOR_ROUTE_PROCESS_ID + " = " + crpId + ")"
 
         val sqLiteDatabase = getReadableDb()
         return try {

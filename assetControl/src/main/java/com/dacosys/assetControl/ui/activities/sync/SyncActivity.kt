@@ -44,8 +44,10 @@ import com.dacosys.assetControl.utils.settings.Preference
 import com.dacosys.assetControl.viewModel.sync.PendingViewModel
 import com.dacosys.assetControl.viewModel.sync.SyncViewModel
 import com.dacosys.imageControl.network.upload.UploadImagesProgress
+import com.dacosys.imageControl.room.entity.Image
 import kotlinx.coroutines.*
 import kotlin.concurrent.thread
+import com.dacosys.imageControl.network.common.ProgressStatus as IcProgressStatus
 
 @Suppress("UNCHECKED_CAST")
 class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
@@ -82,7 +84,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
     private fun onUploadImagesProgress(it: UploadImagesProgress) {
         if (isDestroyed || isFinishing) return
 
-        val result: com.dacosys.imageControl.model.ProgressStatus = it.result
+        val result: IcProgressStatus = it.result
         val msg: String = it.msg
 
         when (result.id) {
@@ -515,8 +517,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 binding.dowloadTextView.text = Html.fromHtml(d, Html.FROM_HTML_MODE_COMPACT)
             } else {
-                @Suppress("DEPRECATION")
-                binding.dowloadTextView.text = Html.fromHtml(d)
+                @Suppress("DEPRECATION") binding.dowloadTextView.text = Html.fromHtml(d)
             }
         }
     }
@@ -526,8 +527,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 binding.uploadTextView.text = Html.fromHtml(u, Html.FROM_HTML_MODE_COMPACT)
             } else {
-                @Suppress("DEPRECATION")
-                binding.uploadTextView.text = Html.fromHtml(u)
+                @Suppress("DEPRECATION") binding.uploadTextView.text = Html.fromHtml(u)
             }
         }
     }
@@ -756,8 +756,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 textView.text = Html.fromHtml(tempText, Html.FROM_HTML_MODE_COMPACT)
             } else {
-                @Suppress("DEPRECATION")
-                textView.text = Html.fromHtml(tempText)
+                @Suppress("DEPRECATION") textView.text = Html.fromHtml(tempText)
             }
 
             // AUTO SCROLL
@@ -847,7 +846,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
         if (r > 0) t = "$t${getString(R.string.assets)}: $r<br>"
 
         r = syncElements.count { it is WarehouseArea }
-        if (r > 0) t = "$t${getString(R.string.areas)}: $r}<br>"
+        if (r > 0) t = "$t${getString(R.string.areas)}: $r<br>"
 
         r = syncElements.count { it is Warehouse }
         if (r > 0) t = "$t${getString(R.string.warehouses)}: $r<br>"
@@ -861,7 +860,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
         r = syncElements.count { it is RouteProcess }
         if (r > 0) t = "$t${getString(R.string.route_process)}: $r<br>"
 
-        r = syncElements.count { it is Int }
+        r = syncElements.count { it is Image }
         if (r > 0) t = "$t${getString(R.string.images_to_send)}: $r<br>"
 
         t = when {
@@ -963,6 +962,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
             ResourcesCompat.getColor(resources, R.color.sync_element_warehouse_area, null)
         val warehouseMovement =
             ResourcesCompat.getColor(resources, R.color.sync_element_warehouse_movement, null)
+        val image = ResourcesCompat.getColor(resources, R.color.sync_element_image, null)
 
         val colors: ArrayList<Int> = ArrayList()
         /*
@@ -987,6 +987,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
         colors.add(assetManteinance)
         colors.add(dataCollection)
         colors.add(routeProcess)
+        if (Statics.useImageControl) colors.add(image)
         //endregion Icon colors
 
         for ((index, i) in SyncRegistryType.getSyncUpload().withIndex()) {

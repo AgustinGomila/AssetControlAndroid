@@ -18,9 +18,9 @@ import com.dacosys.assetControl.model.table.Table
 import com.dacosys.assetControl.ui.common.snackbar.MakeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.utils.Statics
-import com.dacosys.imageControl.network.webService.common.WsFunction
-import com.dacosys.imageControl.network.webService.moshi.DocumentContent
-import com.dacosys.imageControl.network.webService.moshi.DocumentContentRequestResult
+import com.dacosys.imageControl.moshi.DocumentContent
+import com.dacosys.imageControl.moshi.DocumentContentRequestResult
+import com.dacosys.imageControl.network.webService.WsFunction
 import com.dacosys.imageControl.ui.activities.ImageControlGridActivity
 
 class WarehouseAreaDetailActivity : AppCompatActivity() {
@@ -100,15 +100,11 @@ class WarehouseAreaDetailActivity : AppCompatActivity() {
         if (warehouseArea != null) {
             if (!rejectNewInstances) {
                 rejectNewInstances = true
-
-                fillResults(
-                    WsFunction().documentContentGetBy12(
-                        programId = Statics.INTERNAL_IMAGE_CONTROL_APP_ID,
-                        programObjectId = Table.warehouseArea.tableId,
-                        object_id1 = (warehouseArea ?: return).warehouseId.toString(),
-                        object_id2 = "",
-                    ) ?: DocumentContentRequestResult()
-                )
+                WsFunction().documentContentGetBy12(
+                    programId = Statics.INTERNAL_IMAGE_CONTROL_APP_ID,
+                    programObjectId = Table.warehouseArea.tableId,
+                    objectId1 = (warehouseArea ?: return).warehouseId.toString()
+                ) { it2 -> if (it2 != null) fillResults(it2) }
             }
         }
     }
@@ -139,9 +135,8 @@ class WarehouseAreaDetailActivity : AppCompatActivity() {
         val intent = Intent(baseContext, ImageControlGridActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
         intent.putExtra("programId", Statics.INTERNAL_IMAGE_CONTROL_APP_ID)
-        intent.putExtra("programObjectId", Table.warehouseArea.tableId)
+        intent.putExtra("programObjectId", Table.warehouseArea.tableId.toLong())
         intent.putExtra("objectId1", (warehouseArea ?: return).warehouseAreaId.toString())
-        intent.putExtra("objectId2", "")
         intent.putExtra("docContObjArrayList", ArrayList<DocumentContent>())
         startActivity(intent)
     }

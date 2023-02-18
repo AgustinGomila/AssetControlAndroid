@@ -60,6 +60,7 @@
     <color name="sync_element_route_process">#FF5639AF</color>
     <color name="sync_element_warehouse_movement">#FFFFC107</color>
     <color name="sync_element_asset_review">#FFF9A825</color>
+    <color name="sync_element_image">#FF9800</color>
 
     <color name="text_dark">#FF1B1B1B</color>
     <color name="text_light">#FFFBFBFB</color>

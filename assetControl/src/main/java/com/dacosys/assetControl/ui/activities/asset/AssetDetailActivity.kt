@@ -146,7 +146,9 @@ class AssetDetailActivity : AppCompatActivity() {
 
         if (imageControlFragment == null) {
             imageControlFragment = ImageControlButtonsFragment.newInstance(
-                Table.asset.tableId, asset?.assetId ?: 0, null
+                Table.asset.tableId.toLong(),
+                if (asset?.assetId != null) asset?.assetId.toString() else "",
+                null
             )
 
             if (description.isNotEmpty()) {

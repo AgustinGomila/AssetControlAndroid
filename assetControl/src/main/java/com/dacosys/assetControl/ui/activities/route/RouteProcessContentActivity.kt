@@ -63,7 +63,6 @@ import com.dacosys.assetControl.utils.scanners.nfc.Nfc
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.viewModel.route.*
 import com.dacosys.assetControl.viewModel.sync.SyncViewModel
-import com.dacosys.imageControl.network.webService.moshi.DocumentContent
 import com.udojava.evalex.Expression
 import org.parceler.Parcels
 import java.util.regex.Pattern
@@ -222,7 +221,6 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
     private var lastSelected: RouteProcessContent? = null
     private var firstVisiblePos: Int? = null
 
-    private var docContObjArrayList: ArrayList<DocumentContent> = ArrayList()
     private var checkedIdArray: ArrayList<Long> = ArrayList()
 
     private var backLevelSteps: ArrayList<Int> = ArrayList()
@@ -252,7 +250,6 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
         b.putString("title", tempTitle)
         b.putParcelable("route", Parcels.wrap(route))
-        b.putParcelableArrayList("documentContentObject", docContObjArrayList)
         b.putBoolean("panelBottomIsExpanded", panelBottomIsExpanded)
 
         if (rpContAdapter != null) {
@@ -270,10 +267,6 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         val t0 = b.getString("title")
         tempTitle = if (t0 != null && t0.isNotEmpty()) t0 else getString(R.string.route_process)
         // endregion
-
-        // ImageControl
-        val t2 = b.getParcelableArrayList<DocumentContent>("documentContentObject")
-        if (t2 != null) docContObjArrayList = t2
 
         // Panels
         route = Parcels.unwrap<Route>(b.getParcelable("route"))

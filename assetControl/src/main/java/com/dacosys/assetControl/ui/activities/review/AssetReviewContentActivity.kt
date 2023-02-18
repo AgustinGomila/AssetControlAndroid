@@ -81,12 +81,13 @@ import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.utils.settings.Preference
 import com.dacosys.assetControl.viewModel.review.SaveReviewViewModel
 import com.dacosys.assetControl.viewModel.sync.SyncViewModel
-import com.dacosys.imageControl.dataBase.DbCommands
-import com.dacosys.imageControl.model.Images
-import com.dacosys.imageControl.model.StatusObject
-import com.dacosys.imageControl.network.webService.common.WsFunction
-import com.dacosys.imageControl.network.webService.moshi.DocumentContent
-import com.dacosys.imageControl.network.webService.moshi.DocumentContentRequestResult
+import com.dacosys.imageControl.moshi.DocumentContent
+import com.dacosys.imageControl.moshi.DocumentContentRequestResult
+import com.dacosys.imageControl.network.common.ProgramData
+import com.dacosys.imageControl.network.common.StatusObject
+import com.dacosys.imageControl.network.webService.WsFunction
+import com.dacosys.imageControl.room.dao.ImageCoroutines
+import com.dacosys.imageControl.room.entity.Image
 import com.dacosys.imageControl.ui.activities.ImageControlCameraActivity
 import com.dacosys.imageControl.ui.activities.ImageControlGridActivity
 import org.parceler.Parcels
@@ -1880,36 +1881,48 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
             tempObjectId = itemId.toString()
             tempTableId = tableId
 
-            val localImages =
-                DbCommands.selectByProgramObjectObj1Obj2(tempTableId.toString(), tempObjectId, "")
-            val allLocal = toDocumentContentList(tempObjectId, localImages)
-            if (allLocal.isNotEmpty()) {
-                showPhotoAlbum(allLocal)
-            } else {
-                fillResults(
-                    WsFunction().documentContentGetBy12(
-                        programId = INTERNAL_IMAGE_CONTROL_APP_ID,
-                        programObjectId = tempTableId,
-                        object_id1 = tempObjectId,
-                        object_id2 = ""
-                    ) ?: DocumentContentRequestResult()
-                )
+            val programData = ProgramData(
+                programId = INTERNAL_IMAGE_CONTROL_APP_ID.toLong(),
+                programObjectId = tempTableId.toLong(),
+                objId1 = tempObjectId
+            )
+
+            ImageCoroutines().get(programData = programData) {
+                val allLocal = toDocumentContentList(it)
+                if (allLocal.isEmpty()) {
+                    getFromWebservice()
+                } else {
+                    showPhotoAlbum(allLocal)
+                }
+            }
+        }
+    }
+
+    private fun getFromWebservice() {
+        WsFunction().documentContentGetBy12(
+            programId = INTERNAL_IMAGE_CONTROL_APP_ID,
+            programObjectId = tempTableId,
+            objectId1 = tempObjectId
+        ) { it2 ->
+            if (it2 != null) fillResults(it2)
+            else {
+                makeText(binding.root, getString(R.string.no_images), SnackBarType.INFO)
+                rejectNewInstances = false
             }
         }
     }
 
     private fun toDocumentContentList(
-        assetId: String,
-        images: ArrayList<Images>,
+        images: ArrayList<Image>,
     ): ArrayList<DocumentContent> {
         val list: ArrayList<DocumentContent> = ArrayList()
         for (i in images) {
             val x = DocumentContent()
 
-            x.description = i.description
-            x.reference = i.reference
-            x.obs = i.obs
-            x.filenameOriginal = i.filenameOriginal
+            x.description = i.description ?: ""
+            x.reference = i.reference ?: ""
+            x.obs = i.obs ?: ""
+            x.filenameOriginal = i.filenameOriginal ?: ""
             x.statusObjectId = StatusObject.Waiting.statusObjectId.toInt()
             x.statusStr = StatusObject.Waiting.description
             x.statusDate = UTCDataTime.getUTCDateTimeAsString()
@@ -1919,7 +1932,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
 
             x.programId = INTERNAL_IMAGE_CONTROL_APP_ID
             x.programObjectId = tempTableId
-            x.objectId1 = assetId
+            x.objectId1 = tempObjectId
             x.objectId2 = "0"
 
             list.add(x)
@@ -1931,7 +1944,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
         val intent = Intent(this, ImageControlGridActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
         intent.putExtra("programId", INTERNAL_IMAGE_CONTROL_APP_ID)
-        intent.putExtra("programObjectId", tempTableId)
+        intent.putExtra("programObjectId", tempTableId.toLong())
         intent.putExtra("objectId1", tempObjectId)
         intent.putExtra("docContObjArrayList", images)
         startActivity(intent)
@@ -1975,9 +1988,8 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
             val intent = Intent(this, ImageControlCameraActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
             intent.putExtra("programId", INTERNAL_IMAGE_CONTROL_APP_ID)
-            intent.putExtra("programObjectId", tableId)
+            intent.putExtra("programObjectId", tableId.toLong())
             intent.putExtra("objectId1", itemId.toString())
-            intent.putExtra("objectId2", "")
             intent.putExtra("description", description)
             intent.putExtra("addPhoto", Statics.autoSend())
             resultForPhotoCapture.launch(intent)
