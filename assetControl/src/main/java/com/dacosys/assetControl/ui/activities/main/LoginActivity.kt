@@ -132,12 +132,11 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         val registryType: SyncRegistryType? = it.registryType
         val progressStatus: ProgressStatus = it.progressStatus
 
+        val percent =
+            if (totalTask > 0) Statics.getPercentage(completedTask, totalTask) else ""
+
         if (registryType != null) {
-            setProgressBarText(
-                "${registryType.description}: ${
-                    Statics.getPercentage(completedTask, totalTask)
-                }"
-            )
+            setProgressBarText(registryType.description, percent)
         }
 
         when (progressStatus) {
@@ -145,8 +144,11 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
             ProgressStatus.bigStarting,
             ProgressStatus.running,
             -> {
-                setButton(ButtonStyle.BUSY)
-                showProgressBar(true)
+                if (registryType == null) {
+                    // Si es un registro ya lo estamos actualizando arriba...
+                    setButton(ButtonStyle.BUSY)
+                    setProgressBarText(it.msg, percent)
+                }
             }
             ProgressStatus.bigFinished -> {
                 setButton(ButtonStyle.READY)
@@ -159,7 +161,8 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
             ProgressStatus.canceled,
             -> {
                 makeText(binding.root, msg, SnackBarType.ERROR)
-                refreshUsers()
+                refresh()
+
                 logging = false
                 showProgressBar(false)
             }
@@ -180,21 +183,21 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
             // Error al descargar
             makeText(binding.root, msg, SnackBarType.ERROR)
 
-            syncing = false
             setButton(ButtonStyle.REFRESH)
 
-            setProgressBarText("")
             showProgressBar(false)
+
+            syncing = false
             return
         } else if (downloadStatus == CANCELED) {
             // CANCELED = Sin conexión
             makeText(binding.root, msg, SnackBarType.INFO)
 
-            refreshTitle()
-            refreshUsers()
+            refresh()
 
-            setProgressBarText("")
             showProgressBar(false)
+
+            syncing = false
             return
         }
 
@@ -203,20 +206,22 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         when (downloadStatus) {
             STARTING -> {
                 setProgressBarText(msg)
-                showProgressBar(true)
             }
             FINISHED -> {
                 // FINISHED = Ok
-                refreshTitle()
-                refreshUsers()
+                refresh()
                 showProgressBar(false)
+
+                syncing = false
+                return
             }
             DOWNLOADING -> {
                 Log.w(
                     this::class.java.simpleName,
                     "${downloadStatus.name}: ${bytesCompleted}/${bytesTotal} (${progress}%)"
                 )
-                setProgressBarText("${getString(R.string.downloading_)} ${progress}%")
+                val percent = if (bytesTotal > 0) progress.toString() else ""
+                setProgressBarText(getString(R.string.downloading_), percent)
             }
             CANCELED,
             CRASHED,
@@ -235,15 +240,6 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         }
     }
 
-    private var userSpinnerFragment: UserSpinnerFragment? = null
-    private var firstTime = true
-    private var rejectNewInstances = false
-    private var isReturnedFromSettings = false
-
-    private var userId: Long? = -1
-    private var password: String = ""
-    private var syncing = false
-
     private fun onSessionCreated(result: Boolean) {
         if (OFFLINE_MODE) {
             makeText(binding.root, getString(R.string.offline_mode), SnackBarType.INFO)
@@ -255,7 +251,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                 logging = false
                 finish()
             } else {
-                showProgressBar(true)
+                setProgressBarText(getString(R.string.creating_session_))
                 setButton(ButtonStyle.BUSY)
 
                 // Cerramos la base...
@@ -340,8 +336,6 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
             syncing = false
         }
     }
-
-    private var connectionSuccess = false
 
     // region Cambiar el aspecto del botón de ingreso
 
@@ -442,6 +436,18 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         savedInstanceState.putBoolean("syncing", syncing)
     }
 
+    private var connectionSuccess = false
+
+    private var userSpinnerFragment: UserSpinnerFragment? = null
+    private var firstTime = true
+    private var rejectNewInstances = false
+    private var isReturnedFromSettings = false
+
+    private var userId: Long? = -1
+    private var password: String = ""
+    private var syncing = false
+    private var logging = false
+
     private lateinit var binding: LoginActivityBinding
     private val syncViewModel: SyncViewModel by viewModels()
     private val downloadDbViewModel: DownloadDbViewModel by viewModels()
@@ -526,7 +532,9 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
             }
         }
 
+        // Limpiar el texto de versión e instalación
         refreshTitle()
+
         showProgressBar(false)
 
         Handler(Looper.getMainLooper()).postDelayed({ initialSetup() }, 500)
@@ -556,10 +564,13 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         }
     }
 
-    private fun setProgressBarText(text: String) {
+    private fun setProgressBarText(text: String = "", percent: String = "") {
         runOnUiThread {
             run {
+                if (text.isNotEmpty() || percent.isNotEmpty()) showProgressBar(true)
+
                 binding.syncStatusTextView.text = text
+                binding.syncPercentTextView.text = percent
             }
         }
     }
@@ -573,6 +584,9 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                 ViewCompat.setZ(binding.progressBarLayout, 0F)
             } else if (!show && binding.progressBarLayout.visibility != View.GONE) {
                 binding.progressBarLayout.visibility = View.GONE
+
+                // Limpiamos los textos...
+                setProgressBarText()
             }
         }
     }
@@ -636,20 +650,26 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         }
 
         if (OFFLINE_MODE) {
-            refreshTitle()
-            refreshUsers()
+            refresh()
+            syncing = false
             return
         }
 
         if (!Statics.isOnline()) {
-            refreshTitle()
-            refreshUsers()
-        } else {
-            runOnUiThread {
-                DownloadDb(onDownloadEvent = { downloadDbViewModel.setDownloadTask(it) },
-                    onSnackBarEvent = { downloadDbViewModel.setUiEvent(it) })
-            }
+            refresh()
+            syncing = false
+            return
         }
+
+        runOnUiThread {
+            DownloadDb(onDownloadEvent = { downloadDbViewModel.setDownloadTask(it) },
+                onSnackBarEvent = { downloadDbViewModel.setUiEvent(it) })
+        }
+    }
+
+    private fun refresh() {
+        refreshTitle()
+        refreshUsers()
     }
 
     private fun showSnackBar(it: SnackBarEventData) {
@@ -742,7 +762,6 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         return BitmapDrawable(resources, bitmapResized)
     }
 
-    private var logging: Boolean = false
     private fun attemptLogin() {
         if (logging) return
         logging = true
@@ -926,11 +945,11 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                 return super.onOptionsItemSelected(item)
             }
             R.id.action_trigger_scan -> {
-                ///* For Debug */
-                //scannerCompleted(
-                //    """{"config":{"client_email":"miguel@dacosys.com","client_password":"sarasa123!!"}}""".trimIndent()
-                //)
-                //return super.onOptionsItemSelected(item)
+                // /* For Debug */
+                // scannerCompleted(
+                //     """{"config":{"client_email":"centralpuerto.com","client_password":"293f0w4n"}}""".trimIndent()
+                // )
+                // return super.onOptionsItemSelected(item)
 
                 JotterListener.trigger(this)
                 return super.onOptionsItemSelected(item)

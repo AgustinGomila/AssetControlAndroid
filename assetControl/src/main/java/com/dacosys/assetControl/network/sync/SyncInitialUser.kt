@@ -47,8 +47,7 @@ class SyncInitialUser(
                 SyncProgress(
                     totalTask = 0,
                     completedTask = 0,
-                    msg = getContext()
-                        .getString(R.string.starting_user_synchronization),
+                    msg = getContext().getString(R.string.starting_user_synchronization),
                     registryType = registryType,
                     progressStatus = ProgressStatus.starting
                 )
@@ -83,9 +82,7 @@ class SyncInitialUser(
                     if (!scope.isActive) break
 
                     val objArray = ws.initialUserGetAllLimit(
-                        pos,
-                        qty,
-                        date
+                        pos, qty, date
                     )
                     if (!objArray.any()) break
 
@@ -101,14 +98,12 @@ class SyncInitialUser(
                                 countTotal = countTotal
                             )
 
-                            currentCount += objArray.size
-
-                            for (obj in objArray) {
+                            val total = objArray.size
+                            currentCount += total
+                            for ((index, obj) in objArray.withIndex()) {
                                 // user permission
                                 userPermission(
-                                    upWs.initialUserPermissionGet(obj.user_id),
-                                    upDb,
-                                    obj.user_id
+                                    upWs.initialUserPermissionGet(obj.user_id), upDb, obj.user_id
                                 )
 
                                 // user warehouse area
@@ -116,6 +111,16 @@ class SyncInitialUser(
                                     uwaWs.initialUserWarehouseAreaGet(obj.user_id),
                                     uwaDb,
                                     obj.user_id
+                                )
+
+                                onSyncTaskProgress.invoke(
+                                    SyncProgress(
+                                        totalTask = total,
+                                        completedTask = index + 1,
+                                        msg = getContext().getString(R.string.synchronizing_users),
+                                        registryType = SyncRegistryType.User,
+                                        progressStatus = ProgressStatus.running
+                                    )
                                 )
                             }
                         }
@@ -125,8 +130,7 @@ class SyncInitialUser(
 
                         // Error local
                         errorMsg =
-                            getContext()
-                                .getString(R.string.local_error_in_user_synchronization)
+                            getContext().getString(R.string.local_error_in_user_synchronization)
                         errorOccurred = true
 
                         break
@@ -138,8 +142,7 @@ class SyncInitialUser(
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
 
             // Error remoto
-            errorMsg = getContext()
-                .getString(R.string.remote_error_in_user_synchronization)
+            errorMsg = getContext().getString(R.string.remote_error_in_user_synchronization)
             errorOccurred = true
         }
 
@@ -169,15 +172,12 @@ class SyncInitialUser(
         when (it.status) {
             ProgressStatus.finished -> {
                 Log.d(
-                    this::class.java.simpleName,
-                    "${
-                        getContext()
-                            .getString(R.string.saving_synchronization_time)
+                    this::class.java.simpleName, "${
+                        getContext().getString(R.string.saving_synchronization_time)
                     }: ${(registryType.confEntry ?: return).description} ($it.msg)"
                 )
                 Statics.prefsPutString(
-                    (registryType.confEntry ?: return).description,
-                    it.msg
+                    (registryType.confEntry ?: return).description, it.msg
                 )
                 scope.launch {
                     onUiEvent(

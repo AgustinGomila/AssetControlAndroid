@@ -70,29 +70,15 @@ class UserDbHelper {
         currentCount: Int,
         countTotal: Int,
     ): Boolean {
-        var query = ("DELETE FROM [$TABLE_NAME] WHERE ")
-        for (obj in objArray) {
-            Log.i(
-                this::class.java.simpleName,
-                String.format(": SQLite -> delete: id:%s", obj.user_id)
-            )
-
-            val values = "($USER_ID = ${obj.user_id}) OR "
-            query = "$query$values"
-        }
-
-        if (query.endsWith(" OR ")) {
-            query = query.substring(0, query.length - 4)
-        }
-
-        Log.d(this::class.java.simpleName, query)
+        // Eliminar datos antiguos de los usuarios
+        deleteAll()
+        UserPermissionDbHelper().deleteAll()
+        UserWarehouseAreaDbHelper().deleteAll()
 
         val sqLiteDatabase = getWritableDb()
         sqLiteDatabase.beginTransaction()
         try {
-            sqLiteDatabase.execSQL(query)
-
-            query = "INSERT INTO [" + TABLE_NAME + "] (" +
+            var query = "INSERT INTO [" + TABLE_NAME + "] (" +
                     USER_ID + "," +
                     NAME + "," +
                     ACTIVE + "," +

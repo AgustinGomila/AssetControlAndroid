@@ -72,10 +72,7 @@ class SyncDownload(
         if (r.status == ProgressStatus.finished) {
             this.serverTime = r.msg
             launchDownload()
-        } else if (
-            r.status == ProgressStatus.crashed ||
-            r.status == ProgressStatus.canceled
-        ) {
+        } else if (r.status == ProgressStatus.crashed || r.status == ProgressStatus.canceled) {
             scope.launch {
                 onUiEvent(
                     SyncProgress(
@@ -98,25 +95,23 @@ class SyncDownload(
 
     private fun launchDownload() {
         fun onFinish(it: Boolean) {
-            val sp: SyncProgress =
-                if (it) {
-                    SyncProgress(
-                        totalTask = 0,
-                        completedTask = 0,
-                        msg = getContext().getString(R.string.download_finished),
-                        registryType = null,
-                        progressStatus = ProgressStatus.bigFinished
-                    )
-                } else {
-                    SyncProgress(
-                        totalTask = 0,
-                        completedTask = 0,
-                        msg = getContext()
-                            .getString(R.string.error_downloading_the_database_from_the_server),
-                        registryType = null,
-                        progressStatus = ProgressStatus.crashed
-                    )
-                }
+            val sp: SyncProgress = if (it) {
+                SyncProgress(
+                    totalTask = 0,
+                    completedTask = 0,
+                    msg = getContext().getString(R.string.download_finished),
+                    registryType = null,
+                    progressStatus = ProgressStatus.bigFinished
+                )
+            } else {
+                SyncProgress(
+                    totalTask = 0,
+                    completedTask = 0,
+                    msg = getContext().getString(R.string.error_downloading_the_database_from_the_server),
+                    registryType = null,
+                    progressStatus = ProgressStatus.crashed
+                )
+            }
 
             scope.launch {
                 onUiEvent(sp)
@@ -150,69 +145,64 @@ class SyncDownload(
         onFinish.invoke(result)
     }
 
-    private suspend fun suspendFunction(): Boolean =
-        withContext(Dispatchers.IO) {
+    private suspend fun suspendFunction(): Boolean = withContext(Dispatchers.IO) {
+        onUiEvent(
+            SyncProgress(
+                totalTask = 0,
+                completedTask = 0,
+                msg = getContext().getString(R.string.downloading_starting),
+                registryType = null,
+                progressStatus = ProgressStatus.bigStarting
+            )
+        )
+
+        qty = Statics.prefsGetInt(ConfEntry.acSyncQtyRegistry)
+
+        if (Statics.currentSession == null) {
+            SetCurrentSession(onSessionCreated = { scope.launch { onSessionEvent(it) } })
+        }
+
+        try {
+            val t = listOf(async { user() },
+                async { asset() },
+                async { itemCategory() },
+                async { warehouse() },
+                async { warehouseArea() },
+                async { attribute() },
+                async { attributeCategory() },
+                async { route() },
+                async { dataCollectionRule() },
+                async { barcodeLabelCustom() })
+
+            if (Statics.prefsGetBoolean(Preference.useAssetControlManteinance)) {
+                t.union(
+                    listOf(async { manteinanceType() }, async { manteinanceTypeGroup() })
+                )
+            }
+
+            // De esta manera se mantiene la ejecución de los threads
+            // dentro del bucle y sale recién cuando terminó con el último
+
+            t.awaitAll()
+
+        } catch (ex: java.lang.Exception) {
+            ex.printStackTrace()
             onUiEvent(
                 SyncProgress(
-                    totalTask = 0,
-                    completedTask = 0,
-                    msg = getContext().getString(R.string.downloading_starting),
-                    registryType = null,
-                    progressStatus = ProgressStatus.bigStarting
+                    0,
+                    0,
+                    getContext().getString(R.string.synchronization_failed),
+                    null,
+                    ProgressStatus.bigCrashed
                 )
             )
-
-            qty = Statics.prefsGetInt(ConfEntry.acSyncQtyRegistry)
-
-            if (Statics.currentSession == null) {
-                SetCurrentSession(onSessionCreated = { scope.launch { onSessionEvent(it) } })
-            }
-
-            try {
-                val t = listOf(
-                    async { user() },
-                    async { asset() },
-                    async { itemCategory() },
-                    async { warehouse() },
-                    async { warehouseArea() },
-                    async { attribute() },
-                    async { attributeCategory() },
-                    async { route() },
-                    async { dataCollectionRule() },
-                    async { barcodeLabelCustom() })
-
-                if (Statics.prefsGetBoolean(Preference.useAssetControlManteinance)) {
-                    t.union(
-                        listOf(
-                            async { manteinanceType() },
-                            async { manteinanceTypeGroup() })
-                    )
-                }
-
-                // De esta manera se mantiene la ejecución de los threads
-                // dentro del bucle y sale recién cuando terminó con el último
-
-                t.awaitAll()
-
-            } catch (ex: java.lang.Exception) {
-                ex.printStackTrace()
-                onUiEvent(
-                    SyncProgress(
-                        0,
-                        0,
-                        getContext()
-                            .getString(R.string.synchronization_failed),
-                        null,
-                        ProgressStatus.bigCrashed
-                    )
-                )
-                return@withContext false
-            } finally {
-                saveLastUpdateDates()
-            }
-
-            return@withContext true
+            return@withContext false
+        } finally {
+            saveLastUpdateDates()
         }
+
+        return@withContext true
+    }
 
     private fun saveLastUpdateDates(): Boolean {
         try {
@@ -221,8 +211,7 @@ class SyncDownload(
                 for (registryType in registryTypeUpdated) {
                     if (registryType.confEntry == null) continue
                     Log.d(
-                        this::class.java.simpleName,
-                        "${
+                        this::class.java.simpleName, "${
                             getContext().getString(R.string.saving_synchronization_time)
                         }: ${registryType.confEntry!!.description} (${serverTime})"
                     )
@@ -271,9 +260,7 @@ class SyncDownload(
                     if (!scope.isActive) break
 
                     val objArray = ws.assetGetAllLimit(
-                        pos,
-                        qty,
-                        date
+                        pos, qty, date
                     )
                     if (!objArray.any()) break
 
@@ -339,8 +326,7 @@ class SyncDownload(
                     SyncProgress(
                         0,
                         0,
-                        getContext()
-                            .getString(R.string.asset_synchronization_completed),
+                        getContext().getString(R.string.asset_synchronization_completed),
                         registryType,
                         ProgressStatus.success
                     )
@@ -384,9 +370,7 @@ class SyncDownload(
                     if (!scope.isActive) break
 
                     val objArray = ws.itemCategoryGetAllLimit(
-                        pos,
-                        qty,
-                        date
+                        pos, qty, date
                     )
                     if (!objArray.any()) break
 
@@ -452,8 +436,7 @@ class SyncDownload(
                     SyncProgress(
                         0,
                         0,
-                        getContext()
-                            .getString(R.string.category_synchronization_completed),
+                        getContext().getString(R.string.category_synchronization_completed),
                         registryType,
                         ProgressStatus.success
                     )
@@ -502,9 +485,7 @@ class SyncDownload(
                     if (!scope.isActive) break
 
                     val objArray = ws.userGetAllLimit(
-                        pos,
-                        qty,
-                        date
+                        pos, qty, date
                     )
                     if (!objArray.any()) break
 
@@ -519,21 +500,29 @@ class SyncDownload(
                                 currentCount = currentCount,
                                 countTotal = countTotal
                             )
+
                             currentCount += objArray.size
 
-                            for (obj in objArray) {
+                            val total = objArray.count()
+                            for ((index, obj) in objArray.withIndex()) {
                                 // user permission
                                 SyncInitialUser().userPermission(
-                                    upWs.userPermissionGet(obj.user_id),
-                                    upDb,
-                                    obj.user_id
+                                    upWs.userPermissionGet(obj.user_id), upDb, obj.user_id
                                 )
 
                                 // user warehouse area
                                 SyncInitialUser().userWarehouseArea(
-                                    uwaWs.userWarehouseAreaGet(obj.user_id),
-                                    uwaDb,
-                                    obj.user_id
+                                    uwaWs.userWarehouseAreaGet(obj.user_id), uwaDb, obj.user_id
+                                )
+
+                                onSyncTaskProgress.invoke(
+                                    SyncProgress(
+                                        totalTask = total,
+                                        completedTask = index + 1,
+                                        msg = getContext().getString(R.string.synchronizing_users),
+                                        registryType = SyncRegistryType.User,
+                                        progressStatus = ProgressStatus.running
+                                    )
                                 )
                             }
                         }
@@ -588,8 +577,7 @@ class SyncDownload(
                     SyncProgress(
                         0,
                         0,
-                        getContext()
-                            .getString(R.string.user_synchronization_completed),
+                        getContext().getString(R.string.user_synchronization_completed),
                         registryType,
                         ProgressStatus.success
                     )
@@ -633,9 +621,7 @@ class SyncDownload(
                     if (!scope.isActive) break
 
                     val objArray = ws.warehouseGetAllLimit(
-                        pos,
-                        qty,
-                        date
+                        pos, qty, date
                     )
                     if (!objArray.any()) break
 
@@ -701,8 +687,7 @@ class SyncDownload(
                     SyncProgress(
                         0,
                         0,
-                        getContext()
-                            .getString(R.string.warehouse_synchronization_completed),
+                        getContext().getString(R.string.warehouse_synchronization_completed),
                         registryType,
                         ProgressStatus.success
                     )
@@ -720,8 +705,7 @@ class SyncDownload(
             SyncProgress(
                 0,
                 0,
-                getContext()
-                    .getString(R.string.starting_warehouse_area_synchronization),
+                getContext().getString(R.string.starting_warehouse_area_synchronization),
                 registryType,
                 ProgressStatus.starting
             )
@@ -747,9 +731,7 @@ class SyncDownload(
                     if (!scope.isActive) break
 
                     val objArray = ws.warehouseAreaGetAllLimit(
-                        pos,
-                        qty,
-                        date
+                        pos, qty, date
                     )
                     if (!objArray.any()) break
 
@@ -815,8 +797,7 @@ class SyncDownload(
                     SyncProgress(
                         0,
                         0,
-                        getContext()
-                            .getString(R.string.warehouse_area_synchronization_completed),
+                        getContext().getString(R.string.warehouse_area_synchronization_completed),
                         registryType,
                         ProgressStatus.success
                     )
@@ -863,9 +844,7 @@ class SyncDownload(
                     if (!scope.isActive) break
 
                     val objArray = ws.attributeGetAllLimit(
-                        pos,
-                        qty,
-                        date
+                        pos, qty, date
                     )
                     if (!objArray.any()) break
 
@@ -881,9 +860,7 @@ class SyncDownload(
                         )
                         currentCount += objArray.size
                         attributeComposition(
-                            ws = upWs,
-                            aDb = acDb,
-                            attr = objArray
+                            ws = upWs, aDb = acDb, attr = objArray
                         )
                     } catch (ex: Exception) {
                         ex.printStackTrace()
@@ -936,8 +913,7 @@ class SyncDownload(
                     SyncProgress(
                         0,
                         0,
-                        getContext()
-                            .getString(R.string.attribute_synchronization_completed),
+                        getContext().getString(R.string.attribute_synchronization_completed),
                         registryType,
                         ProgressStatus.success
                     )
@@ -967,8 +943,7 @@ class SyncDownload(
                     SyncProgress(
                         totalTask = attr.size,
                         completedTask = currentCount,
-                        msg = getContext()
-                            .getString(R.string.synchronizing_attribute_compositions),
+                        msg = getContext().getString(R.string.synchronizing_attribute_compositions),
                         registryType = SyncRegistryType.AttributeComposition,
                         progressStatus = ProgressStatus.running
                     )
@@ -1013,8 +988,7 @@ class SyncDownload(
             SyncProgress(
                 0,
                 0,
-                getContext()
-                    .getString(R.string.starting_attribute_category_synchronization),
+                getContext().getString(R.string.starting_attribute_category_synchronization),
                 registryType,
                 ProgressStatus.starting
             )
@@ -1039,9 +1013,7 @@ class SyncDownload(
                     if (!scope.isActive) break
 
                     val objArray = ws.attributeCategoryGetAllLimit(
-                        pos,
-                        qty,
-                        date
+                        pos, qty, date
                     )
                     if (!objArray.any()) break
 
@@ -1107,8 +1079,7 @@ class SyncDownload(
                     SyncProgress(
                         0,
                         0,
-                        getContext()
-                            .getString(R.string.attribute_category_synchronization_completed),
+                        getContext().getString(R.string.attribute_category_synchronization_completed),
                         registryType,
                         ProgressStatus.success
                     )
@@ -1155,9 +1126,7 @@ class SyncDownload(
                     if (!scope.isActive) break
 
                     val objArray = ws.routeGetAllLimit(
-                        pos,
-                        qty,
-                        date
+                        pos, qty, date
                     )
                     if (!objArray.any()) break
 
@@ -1176,9 +1145,7 @@ class SyncDownload(
                         for (obj in objArray) {
                             // route composition
                             routeComposition(
-                                ws = upWs,
-                                aDb = rcDb,
-                                routeId = obj.route_id
+                                ws = upWs, aDb = rcDb, routeId = obj.route_id
                             )
                         }
                     } catch (ex: Exception) {
@@ -1232,8 +1199,7 @@ class SyncDownload(
                     SyncProgress(
                         totalTask = 0,
                         completedTask = 0,
-                        msg = getContext()
-                            .getString(R.string.route_synchronization_completed),
+                        msg = getContext().getString(R.string.route_synchronization_completed),
                         registryType = registryType,
                         progressStatus = ProgressStatus.success
                     )
@@ -1307,8 +1273,7 @@ class SyncDownload(
             SyncProgress(
                 0,
                 0,
-                getContext()
-                    .getString(R.string.starting_data_collection_rule_synchronization),
+                getContext().getString(R.string.starting_data_collection_rule_synchronization),
                 registryType,
                 ProgressStatus.starting
             )
@@ -1339,9 +1304,7 @@ class SyncDownload(
                     if (!scope.isActive) break
 
                     val objArray = ws.dataCollectionRuleGetAllLimit(
-                        pos,
-                        qty,
-                        date
+                        pos, qty, date
                     )
                     if (!objArray.any()) break
 
@@ -1423,8 +1386,7 @@ class SyncDownload(
                     SyncProgress(
                         0,
                         0,
-                        getContext()
-                            .getString(R.string.data_collection_rule_synchronization_completed),
+                        getContext().getString(R.string.data_collection_rule_synchronization_completed),
                         registryType,
                         ProgressStatus.success
                     )
@@ -1551,8 +1513,7 @@ class SyncDownload(
             SyncProgress(
                 0,
                 0,
-                getContext()
-                    .getString(R.string.starting_maintenance_type_synchronization),
+                getContext().getString(R.string.starting_maintenance_type_synchronization),
                 registryType,
                 ProgressStatus.starting
             )
@@ -1578,9 +1539,7 @@ class SyncDownload(
                     if (!scope.isActive) break
 
                     val objArray = ws.manteinanceTypeGetAllLimit(
-                        pos,
-                        qty,
-                        date
+                        pos, qty, date
                     )
                     if (!objArray.any()) break
 
@@ -1594,8 +1553,7 @@ class SyncDownload(
                                 SyncProgress(
                                     countTotal,
                                     currentCount,
-                                    getContext()
-                                        .getString(R.string.synchronizing_maintenance_types),
+                                    getContext().getString(R.string.synchronizing_maintenance_types),
                                     registryType,
                                     ProgressStatus.running
                                 )
@@ -1606,8 +1564,7 @@ class SyncDownload(
                                     SyncProgress(
                                         0,
                                         0,
-                                        getContext()
-                                            .getString(R.string.canceling_maintenance_type_synchronization),
+                                        getContext().getString(R.string.canceling_maintenance_type_synchronization),
                                         registryType,
                                         ProgressStatus.canceled
                                     )
@@ -1692,8 +1649,7 @@ class SyncDownload(
                     SyncProgress(
                         0,
                         0,
-                        getContext()
-                            .getString(R.string.maintenance_type_synchronization_completed),
+                        getContext().getString(R.string.maintenance_type_synchronization_completed),
                         registryType,
                         ProgressStatus.success
                     )
@@ -1711,8 +1667,7 @@ class SyncDownload(
             SyncProgress(
                 0,
                 0,
-                getContext()
-                    .getString(R.string.starting_maintenance_type_group_synchronization),
+                getContext().getString(R.string.starting_maintenance_type_group_synchronization),
                 registryType,
                 ProgressStatus.starting
             )
@@ -1738,9 +1693,7 @@ class SyncDownload(
                     if (!scope.isActive) break
 
                     val objArray = ws.manteinanceTypeGroupGetAllLimit(
-                        pos,
-                        qty,
-                        date
+                        pos, qty, date
                     )
                     if (!objArray.any()) break
 
@@ -1754,8 +1707,7 @@ class SyncDownload(
                                 SyncProgress(
                                     countTotal,
                                     currentCount,
-                                    getContext()
-                                        .getString(R.string.synchronizing_maintenance_type_groups),
+                                    getContext().getString(R.string.synchronizing_maintenance_type_groups),
                                     registryType,
                                     ProgressStatus.starting
                                 )
@@ -1766,8 +1718,7 @@ class SyncDownload(
                                     SyncProgress(
                                         0,
                                         0,
-                                        getContext()
-                                            .getString(R.string.canceling_maintenance_type_group_synchronization),
+                                        getContext().getString(R.string.canceling_maintenance_type_group_synchronization),
                                         registryType,
                                         ProgressStatus.canceled
                                     )
@@ -1776,9 +1727,7 @@ class SyncDownload(
                             }
 
                             val manteinanceTypeGroup = ManteinanceTypeGroup(
-                                obj.manteinanceTypeGroupId,
-                                obj.description,
-                                obj.active == 1
+                                obj.manteinanceTypeGroupId, obj.description, obj.active == 1
                             )
 
                             if (mtgDb.update(manteinanceTypeGroup)) {
@@ -1797,9 +1746,7 @@ class SyncDownload(
                                 } catch (ex: Exception) {
                                     // Posible inserción sobre Id existente
                                     ErrorLog.writeLog(
-                                        null,
-                                        this::class.java.simpleName,
-                                        ex
+                                        null, this::class.java.simpleName, ex
                                     )
                                 }
                             }
@@ -1855,8 +1802,7 @@ class SyncDownload(
                     SyncProgress(
                         0,
                         0,
-                        getContext()
-                            .getString(R.string.maintenance_type_group_synchronization_completed),
+                        getContext().getString(R.string.maintenance_type_group_synchronization_completed),
                         registryType,
                         ProgressStatus.success
                     )
@@ -1900,9 +1846,7 @@ class SyncDownload(
                     if (!scope.isActive) break
 
                     val objArray = ws.barcodeLabelCustomGetAllLimit(
-                        pos,
-                        qty,
-                        date
+                        pos, qty, date
                     )
                     if (!objArray.any()) break
 
@@ -1968,8 +1912,7 @@ class SyncDownload(
                     SyncProgress(
                         0,
                         0,
-                        getContext()
-                            .getString(R.string.barcode_label_synchronization_completed),
+                        getContext().getString(R.string.barcode_label_synchronization_completed),
                         registryType,
                         ProgressStatus.success
                     )
@@ -2007,8 +1950,7 @@ class SyncDownload(
 
         private fun getDateTimeStr(): String {
             var dateTime = ""
-            val timeFileLocation =
-                File(getContext().cacheDir.absolutePath + "/" + timeFilename)
+            val timeFileLocation = File(getContext().cacheDir.absolutePath + "/" + timeFilename)
 
             //Read text from file
             try {
@@ -2020,10 +1962,8 @@ class SyncDownload(
             } catch (ex: Exception) {
                 ex.printStackTrace()
                 Log.e(
-                    this::class.java.simpleName,
-                    "${
-                        getContext()
-                            .getString(R.string.failed_to_get_the_date_from_the_file)
+                    this::class.java.simpleName, "${
+                        getContext().getString(R.string.failed_to_get_the_date_from_the_file)
                     }: ${ex.message}"
                 )
             }

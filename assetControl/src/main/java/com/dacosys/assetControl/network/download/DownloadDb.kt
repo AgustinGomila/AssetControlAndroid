@@ -64,8 +64,7 @@ class DownloadDb(
     }
 
     private fun deleteTimeFile() {
-        timeFileLocation =
-            File(getContext().cacheDir.absolutePath + "/" + timeFilename)
+        timeFileLocation = File(getContext().cacheDir.absolutePath + "/" + timeFilename)
         if ((timeFileLocation ?: return).exists()) {
             (timeFileLocation ?: return).delete()
         }
@@ -117,8 +116,7 @@ class DownloadDb(
         if (Statics.currentUserId == null && Statics.pendingDelivery()) {
             onDownloadEvent.invoke(
                 DownloadTask(
-                    msg = getContext()
-                        .getString(R.string.the_database_will_not_be_downloaded_because_there_is_data_pending_delivery),
+                    msg = getContext().getString(R.string.the_database_will_not_be_downloaded_because_there_is_data_pending_delivery),
                     fileType = null,
                     downloadStatus = DownloadStatus.CANCELED,
                 )
@@ -146,9 +144,7 @@ class DownloadDb(
 
         if (progressStatus == ProgressStatus.crashed || progressStatus == ProgressStatus.canceled) {
             ErrorLog.writeLog(
-                null,
-                this::class.java.simpleName,
-                "$progressStatusDesc: $registryDesc, $msg"
+                null, this::class.java.simpleName, "$progressStatusDesc: $registryDesc, $msg"
             )
 
             onDownloadEvent.invoke(
@@ -179,9 +175,7 @@ class DownloadDb(
         val registryType: SyncRegistryType? = it.registryType
         val progressStatus: ProgressStatus = it.progressStatus
 
-        if (progressStatus == ProgressStatus.crashed ||
-            progressStatus == ProgressStatus.crashed
-        ) {
+        if (progressStatus == ProgressStatus.crashed || progressStatus == ProgressStatus.crashed) {
             ErrorLog.writeLog(
                 null,
                 this::class.java.simpleName,
@@ -210,10 +204,8 @@ class DownloadDb(
 
         DownloadFile(
             urlDestination = UrlDestParam(
-                url = timeUrl,
-                destination = timeFileLocation!!
-            ),
-            fileType = FileType.TIMEFILE
+                url = timeUrl, destination = timeFileLocation!!
+            ), fileType = FileType.TIMEFILE
         ) { onDownloadTimeFileTask(it) }
     }
 
@@ -247,28 +239,55 @@ class DownloadDb(
         currentDateTimeStr = getDateTimeStr()
 
         if (!hasNewVersion(oldDateTimeStr, currentDateTimeStr)) {
-            val msg = getContext()
-                .getString(R.string.is_not_necessary_to_download_the_database)
+            val msg = getContext().getString(R.string.is_not_necessary_to_download_the_database)
 
             Log.d(this::class.java.simpleName, msg)
 
-            SyncInitialUser { onSyncUsersProgress(it) }
-            SyncStatics()
+            SyncInitialUser {
+                onSyncUsersProgress(it)
 
-            onDownloadEvent.invoke(
-                DownloadTask(
-                    msg = msg,
-                    fileType = null,
-                    downloadStatus = DownloadStatus.FINISHED,
-                )
-            )
-            return
+                if (it.progressStatus == ProgressStatus.finished) {
+                    SyncStatics()
+                    onDownloadEvent.invoke(
+                        DownloadTask(
+                            msg = msg,
+                            fileType = null,
+                            downloadStatus = DownloadStatus.FINISHED,
+                        )
+                    )
+                } else if (it.progressStatus == ProgressStatus.starting) {
+                    onDownloadEvent.invoke(
+                        DownloadTask(
+                            msg = it.msg,
+                            fileType = null,
+                            downloadStatus = DownloadStatus.STARTING
+                        )
+                    )
+                } else if (it.progressStatus == ProgressStatus.running) {
+                    var progress = 0
+                    val completedTask: Long = it.completedTask.toLong()
+                    val totalTask: Long = it.totalTask.toLong()
+
+                    if (completedTask > 0 && totalTask > 0)
+                        progress = (completedTask * 100 / totalTask).toInt()
+
+                    onDownloadEvent.invoke(
+                        DownloadTask(
+                            msg = it.msg,
+                            fileType = null,
+                            downloadStatus = DownloadStatus.DOWNLOADING,
+                            progress = progress,
+                            bytesCompleted = completedTask,
+                            bytesTotal = totalTask
+                        )
+                    )
+                }
+            }
+        } else {
+            DownloadFile(
+                urlDestination = UrlDestParam(dbUrl, dbFileLocation!!), fileType = FileType.DBFILE
+            ) { onDownloadDbFileTask(it) }
         }
-
-        DownloadFile(
-            urlDestination = UrlDestParam(dbUrl, dbFileLocation!!),
-            fileType = FileType.DBFILE
-        ) { onDownloadDbFileTask(it) }
     }
 
     private fun onDownloadDbFileTask(it: DownloadTask) {
@@ -295,16 +314,46 @@ class DownloadDb(
         Statics.downloadDbRequired = false
 
         if (copyDataBase()) {
-            SyncInitialUser { onSyncUsersProgress(it) }
-            SyncStatics()
+            SyncInitialUser {
+                onSyncUsersProgress(it)
 
-            onDownloadEvent.invoke(
-                DownloadTask(
-                    msg = getContext().getString(R.string.ok),
-                    fileType = FileType.DBFILE,
-                    downloadStatus = DownloadStatus.FINISHED,
-                )
-            )
+                if (it.progressStatus == ProgressStatus.finished) {
+                    SyncStatics()
+                    onDownloadEvent.invoke(
+                        DownloadTask(
+                            msg = getContext().getString(R.string.ok),
+                            fileType = FileType.DBFILE,
+                            downloadStatus = DownloadStatus.FINISHED,
+                        )
+                    )
+                } else if (it.progressStatus == ProgressStatus.starting) {
+                    onDownloadEvent.invoke(
+                        DownloadTask(
+                            msg = it.msg,
+                            fileType = FileType.DBFILE,
+                            downloadStatus = DownloadStatus.STARTING
+                        )
+                    )
+                } else if (it.progressStatus == ProgressStatus.running) {
+                    var progress = 0
+                    val completedTask: Long = it.completedTask.toLong()
+                    val totalTask: Long = it.totalTask.toLong()
+
+                    if (completedTask > 0 && totalTask > 0)
+                        progress = (completedTask * 100 / totalTask).toInt()
+
+                    onDownloadEvent.invoke(
+                        DownloadTask(
+                            msg = it.msg,
+                            fileType = FileType.DBFILE,
+                            downloadStatus = DownloadStatus.DOWNLOADING,
+                            progress = progress,
+                            bytesCompleted = completedTask,
+                            bytesTotal = totalTask
+                        )
+                    )
+                }
+            }
         } else {
             onDownloadEvent.invoke(
                 DownloadTask(
@@ -355,8 +404,7 @@ class DownloadDb(
             scope.launch {
                 onUiEvent(
                     SnackBarEventData(
-                        getContext()
-                            .getString(R.string.failed_to_get_the_date_from_the_file),
+                        getContext().getString(R.string.failed_to_get_the_date_from_the_file),
                         SnackBarType.ERROR
                     )
                 )

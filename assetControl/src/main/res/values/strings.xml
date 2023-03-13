@@ -953,4 +953,5 @@
     <string name="edit_area">Editar área</string>
     <string name="edit_warehouse">Editar depósito</string>
     <string name="image_code">Código de imagen</string>
+    <string name="creating_session_">Creando sesión…</string>
 </resources>
