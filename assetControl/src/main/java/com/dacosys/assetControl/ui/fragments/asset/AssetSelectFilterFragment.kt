@@ -17,7 +17,10 @@ import com.dacosys.assetControl.model.location.WarehouseArea
 import com.dacosys.assetControl.ui.activities.asset.CodeSelectDialogActivity
 import com.dacosys.assetControl.ui.activities.category.ItemCategorySelectActivity
 import com.dacosys.assetControl.ui.activities.location.LocationSelectActivity
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetStringSet
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsPutBoolean
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsPutStringSet
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.settings.Preference
 import org.parceler.Parcels
@@ -85,10 +88,14 @@ class AssetSelectFilterFragment : Fragment() {
     }
 
     private fun saveSharedPreferences() {
-        Statics.prefsPutBoolean(Preference.selectAssetOnlyActive.key, onlyActive)
+        prefsPutBoolean(
+            Preference.selectAssetOnlyActive.key, onlyActive
+        )
         val set = HashSet<String>()
         for (i in visibleStatusArray) set.add(i.id.toString())
-        Statics.prefsPutStringSet(Preference.assetSelectFragmentVisibleStatus.key, set)
+        prefsPutStringSet(
+            Preference.assetSelectFragmentVisibleStatus.key, set
+        )
     }
 
     override fun onSaveInstanceState(savedInstanceState: Bundle) {
@@ -120,13 +127,13 @@ class AssetSelectFilterFragment : Fragment() {
         warehouseArea = null
         itemCategory = null
         itemCode = ""
-        onlyActive = Statics.prefsGetBoolean(Preference.selectAssetOnlyActive)
+        onlyActive = prefsGetBoolean(Preference.selectAssetOnlyActive)
         loadDefaultVisibleStatus()
     }
 
     private fun loadDefaultVisibleStatus() {
         visibleStatusArray.clear()
-        var set = Statics.prefsGetStringSet(
+        var set = prefsGetStringSet(
             Preference.assetSelectFragmentVisibleStatus.key,
             Preference.assetSelectFragmentVisibleStatus.defaultValue as ArrayList<String>
         )
@@ -239,8 +246,7 @@ class AssetSelectFilterFragment : Fragment() {
             val data = it?.data
             try {
                 if (it?.resultCode == AppCompatActivity.RESULT_OK && data != null) {
-                    itemCode = data.getStringExtra(argItemCode)
-                        ?: return@registerForActivityResult
+                    itemCode = data.getStringExtra(argItemCode) ?: return@registerForActivityResult
 
                     setCodeText()
                     sendMessage()
@@ -358,8 +364,8 @@ class AssetSelectFilterFragment : Fragment() {
                 binding.itemCategoryTextView.text = getString(R.string.search_by_category)
             } else {
                 binding.itemCategoryTextView.typeface = Typeface.DEFAULT_BOLD
-                binding.itemCategoryTextView.text = (itemCategory
-                    ?: return@runOnUiThread).description
+                binding.itemCategoryTextView.text =
+                    (itemCategory ?: return@runOnUiThread).description
             }
         }
     }
@@ -371,8 +377,8 @@ class AssetSelectFilterFragment : Fragment() {
                 binding.warehouseAreaTextView.text = getString(R.string.search_by_area)
             } else {
                 binding.warehouseAreaTextView.typeface = Typeface.DEFAULT_BOLD
-                binding.warehouseAreaTextView.text = (warehouseArea
-                    ?: return@runOnUiThread).description
+                binding.warehouseAreaTextView.text =
+                    (warehouseArea ?: return@runOnUiThread).description
             }
         }
     }

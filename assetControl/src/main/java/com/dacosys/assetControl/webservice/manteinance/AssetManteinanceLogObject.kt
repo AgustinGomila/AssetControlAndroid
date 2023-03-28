@@ -42,7 +42,7 @@ class AssetManteinanceLogObject() : Parcelable {
         log_date = "" // VER ESTO!!!
         asset_id = assetManteinance.assetId
         repairshop_id = 0 // VER ESTO!!!
-        repairman_id = Statics.currentUserId!!
+        repairman_id = Statics.currentUserId ?: 0
     }
 
     fun getBySoapObject(so: SoapObject): AssetManteinanceLogObject {

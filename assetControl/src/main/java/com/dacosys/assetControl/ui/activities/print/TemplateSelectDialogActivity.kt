@@ -22,7 +22,9 @@ import com.dacosys.assetControl.databinding.CodeSelectActivityBinding
 import com.dacosys.assetControl.model.barcode.BarcodeLabelCustom
 import com.dacosys.assetControl.model.barcode.BarcodeLabelTarget
 import com.dacosys.assetControl.ui.common.views.custom.ContractsAutoCompleteTextView
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
+import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.utils.Screen.Companion.showKeyboard
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener
@@ -37,7 +39,7 @@ class TemplateSelectDialogActivity : AppCompatActivity(),
     }
 
     private fun destroyLocals() {
-        Statics.closeKeyboard(this)
+        closeKeyboard(this)
         binding.autoCompleteTextView.setOnContractsAvailability(null)
         binding.autoCompleteTextView.setAdapter(null)
     }
@@ -58,7 +60,7 @@ class TemplateSelectDialogActivity : AppCompatActivity(),
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Statics.setScreenRotation(this)
+        setScreenRotation(this)
         binding = CodeSelectActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -139,11 +141,11 @@ class TemplateSelectDialogActivity : AppCompatActivity(),
             }
         binding.autoCompleteTextView.setOnTouchListener { _, motionEvent ->
             if (motionEvent.action == MotionEvent.ACTION_UP) {
-                Statics.showKeyboard(this)
+                showKeyboard(this)
                 adjustDropDownHeight()
                 return@setOnTouchListener false
             } else if (motionEvent.action == MotionEvent.BUTTON_BACK) {
-                Statics.closeKeyboard(this)
+                closeKeyboard(this)
 
                 setResult(RESULT_CANCELED, null)
                 finish()
@@ -238,7 +240,7 @@ class TemplateSelectDialogActivity : AppCompatActivity(),
     }
 
     private fun barcodeLabelTemplateSelected() {
-        Statics.closeKeyboard(this)
+        closeKeyboard(this)
 
         val data = Intent()
         data.putExtra("barcodeLabelCustom", barcodeLabelCustom)
@@ -287,7 +289,7 @@ class TemplateSelectDialogActivity : AppCompatActivity(),
     }
 
     override fun onBackPressed() {
-        Statics.closeKeyboard(this)
+        closeKeyboard(this)
 
         setResult(RESULT_CANCELED)
         finish()

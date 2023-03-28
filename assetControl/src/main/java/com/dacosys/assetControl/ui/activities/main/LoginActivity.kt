@@ -41,11 +41,15 @@ import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarEventData
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.fragments.user.UserSpinnerFragment
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetString
+import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
+import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.utils.Screen.Companion.setupUI
+import com.dacosys.assetControl.utils.Screen.Companion.showKeyboard
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.Statics.Companion.OFFLINE_MODE
 import com.dacosys.assetControl.utils.Statics.Companion.appName
-import com.dacosys.assetControl.utils.Statics.Companion.closeKeyboard
-import com.dacosys.assetControl.utils.Statics.Companion.prefsGetString
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.Md5
 import com.dacosys.assetControl.utils.scanners.JotterListener
@@ -220,7 +224,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                     this::class.java.simpleName,
                     "${downloadStatus.name}: ${bytesCompleted}/${bytesTotal} (${progress}%)"
                 )
-                val percent = if (bytesTotal > 0) progress.toString() else ""
+                val percent = if (bytesTotal > 0) "$progress%" else ""
                 setProgressBarText(getString(R.string.downloading_), percent)
             }
             CANCELED,
@@ -402,27 +406,6 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         setEditTextFocus(true)
     }
 
-    @SuppressLint("ClickableViewAccessibility")
-    private fun setupUI(view: View) {
-        // Set up touch setOnTouchListener for non-text box views to hide keyboard.
-        if (view !is EditText) {
-            view.setOnTouchListener { _, motionEvent ->
-                closeKeyboard(this)
-                if (view is Button && view !is Switch && view !is CheckBox) {
-                    touchButton(motionEvent, view)
-                    true
-                } else {
-                    false
-                }
-            }
-        }
-
-        //If a layout container, iterate over children and seed recursion.
-        if (view is ViewGroup) {
-            (0 until view.childCount).map { view.getChildAt(it) }.forEach { setupUI(it) }
-        }
-    }
-
     override fun onBackPressed() {
         // Esto sirve para salir del programa desde la pantalla de Login
         moveTaskToBack(true)
@@ -455,7 +438,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Statics.setScreenRotation(this)
+        setScreenRotation(this)
         binding = LoginActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -509,7 +492,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         }
         binding.password.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus && !KeyboardVisibilityEvent.isKeyboardVisible(this)) {
-                Statics.showKeyboard(this)
+                showKeyboard(this)
             } else {
                 closeKeyboard(this)
             }
@@ -539,8 +522,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
 
         Handler(Looper.getMainLooper()).postDelayed({ initialSetup() }, 500)
 
-        // ESTO SIRVE PARA OCULTAR EL TECLADO EN PANTALLA CUANDO PIERDEN EL FOCO LOS CONTROLES QUE LO NECESITAN
-        setupUI(binding.root)
+        setupUI(binding.root, this)
     }
 
     @SuppressLint("SetTextI18n")
@@ -742,18 +724,6 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         }
     }
 
-    private fun touchButton(motionEvent: MotionEvent, button: Button) {
-        when (motionEvent.action) {
-            MotionEvent.ACTION_UP -> {
-                button.isPressed = false
-                button.performClick()
-            }
-            MotionEvent.ACTION_DOWN -> {
-                button.isPressed = true
-            }
-        }
-    }
-
     private fun resize(image: Drawable): Drawable {
         val bitmap = (image as BitmapDrawable).bitmap
         val bitmapResized = Bitmap.createScaledBitmap(
@@ -915,7 +885,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_login, menu)
 
-        if (!Statics.prefsGetBoolean(Preference.showConfButton)) {
+        if (!prefsGetBoolean(Preference.showConfButton)) {
             menu.removeItem(menu.findItem(R.id.action_settings).itemId)
         }
 

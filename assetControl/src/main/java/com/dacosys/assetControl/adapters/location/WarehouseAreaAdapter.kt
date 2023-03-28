@@ -18,8 +18,8 @@ import com.dacosys.assetControl.R
 import com.dacosys.assetControl.model.location.WarehouseArea
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
-import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.Statics.Companion.getColorWithAlpha
+import com.dacosys.assetControl.utils.Screen.Companion.getColorWithAlpha
+import com.dacosys.assetControl.utils.Screen.Companion.isTablet
 import java.lang.ref.WeakReference
 import java.util.*
 
@@ -600,7 +600,10 @@ class WarehouseAreaAdapter : ArrayAdapter<WarehouseArea>, Filterable {
                 if (listView!!.isItemChecked(position)) {
                     v.background.colorFilter =
                         BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-                            getColorWithAlpha(colorId = R.color.lightslategray, alpha = 240),
+                            getColorWithAlpha(
+                                colorId = R.color.lightslategray,
+                                alpha = 240
+                            ),
                             BlendModeCompat.MODULATE
                         )
                 } else {
@@ -678,7 +681,7 @@ class WarehouseAreaAdapter : ArrayAdapter<WarehouseArea>, Filterable {
     companion object {
 
         fun defaultRowHeight(): Int {
-            return if (Statics.isTablet()) 58 else 92
+            return if (isTablet()) 58 else 92
         }
 
         class WarehouseAreaComparator(private val priorityText: String) :

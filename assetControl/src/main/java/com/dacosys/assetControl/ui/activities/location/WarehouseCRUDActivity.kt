@@ -4,13 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
-import android.view.MotionEvent
-import android.view.View
-import android.view.ViewGroup
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.EditText
-import android.widget.Switch
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -28,7 +21,10 @@ import com.dacosys.assetControl.model.table.Table
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.fragments.location.WarehouseCRUDFragment
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
+import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.settings.Preference
 import com.dacosys.imageControl.ui.fragments.ImageControlButtonsFragment
@@ -62,7 +58,7 @@ class WarehouseCRUDActivity : AppCompatActivity(), WarehouseCRUD.Companion.TaskC
                 }
 
                 if (returnOnSuccess) {
-                    Statics.closeKeyboard(this)
+                    closeKeyboard(this)
 
                     val data = Intent()
                     data.putExtra("warehouse", Parcels.wrap(result.warehouse))
@@ -86,7 +82,7 @@ class WarehouseCRUDActivity : AppCompatActivity(), WarehouseCRUD.Companion.TaskC
                 }
 
                 if (returnOnSuccess) {
-                    Statics.closeKeyboard(this)
+                    closeKeyboard(this)
 
                     val data = Intent()
                     data.putExtra("warehouse", Parcels.wrap(result.warehouse))
@@ -117,26 +113,6 @@ class WarehouseCRUDActivity : AppCompatActivity(), WarehouseCRUD.Companion.TaskC
     private var returnOnSuccess: Boolean = false
     private var rejectNewInstances = false
 
-    @SuppressLint("ClickableViewAccessibility")
-    private fun setupUI(view: View) {
-        // Set up touch listener for non-text box views to hide keyboard.
-        if (view !is EditText) {
-            view.setOnTouchListener { _, motionEvent ->
-                Statics.closeKeyboard(this)
-                if (view is Button && view !is Switch && view !is CheckBox) {
-                    touchButton(motionEvent, view)
-                    true
-                } else {
-                    false
-                }
-            }
-        }
-
-        //If a layout container, iterate over children and seed recursion.
-        if (view is ViewGroup) {
-            (0 until view.childCount).map { view.getChildAt(it) }.forEach { setupUI(it) }
-        }
-    }
 
     override fun onSaveInstanceState(savedInstanceState: Bundle) {
         super.onSaveInstanceState(savedInstanceState)
@@ -160,7 +136,7 @@ class WarehouseCRUDActivity : AppCompatActivity(), WarehouseCRUD.Companion.TaskC
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Statics.setScreenRotation(this)
+        setScreenRotation(this)
         binding = WarehouseCrudActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -201,8 +177,7 @@ class WarehouseCRUDActivity : AppCompatActivity(), WarehouseCRUD.Companion.TaskC
         binding.selectButton.setOnClickListener { selectWarehouse() }
         binding.saveButton.setOnClickListener { warehouseCRUDFragment?.saveWarehouse(this) }
 
-        // ESTO SIRVE PARA OCULTAR EL TECLADO EN PANTALLA CUANDO PIERDEN EL FOCO LOS CONTROLES QUE LO NECESITAN
-        setupUI(binding.root)
+        setupUI(binding.root, this)
     }
 
     private fun selectWarehouse() {
@@ -316,7 +291,7 @@ class WarehouseCRUDActivity : AppCompatActivity(), WarehouseCRUD.Companion.TaskC
                         imageControlFragment ?: return@runOnUiThread
                     ).commit()
 
-                if (!Statics.prefsGetBoolean(Preference.useImageControl)) {
+                if (!prefsGetBoolean(Preference.useImageControl)) {
                     fm.beginTransaction()
                         .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
                         .hide(imageControlFragment as Fragment).commitAllowingStateLoss()
@@ -369,7 +344,7 @@ class WarehouseCRUDActivity : AppCompatActivity(), WarehouseCRUD.Companion.TaskC
             alert.setMessage(getString(R.string.discard_changes_and_return_to_the_main_menu_question))
             alert.setNegativeButton(R.string.cancel, null)
             alert.setPositiveButton(R.string.accept) { _, _ ->
-                Statics.closeKeyboard(this)
+                closeKeyboard(this)
 
                 setResult(RESULT_CANCELED)
                 finish()
@@ -377,22 +352,10 @@ class WarehouseCRUDActivity : AppCompatActivity(), WarehouseCRUD.Companion.TaskC
 
             alert.show()
         } else {
-            Statics.closeKeyboard(this)
+            closeKeyboard(this)
 
             setResult(RESULT_CANCELED)
             finish()
-        }
-    }
-
-    private fun touchButton(motionEvent: MotionEvent, button: Button) {
-        when (motionEvent.action) {
-            MotionEvent.ACTION_UP -> {
-                button.isPressed = false
-                button.performClick()
-            }
-            MotionEvent.ACTION_DOWN -> {
-                button.isPressed = true
-            }
         }
     }
 

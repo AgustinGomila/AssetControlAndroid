@@ -19,8 +19,8 @@ import com.dacosys.assetControl.R
 import com.dacosys.assetControl.model.route.Route
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
-import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.Statics.Companion.getColorWithAlpha
+import com.dacosys.assetControl.utils.Screen.Companion.getColorWithAlpha
+import com.dacosys.assetControl.utils.Screen.Companion.isTablet
 import java.lang.ref.WeakReference
 import java.util.*
 
@@ -724,7 +724,10 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
                 if (listView!!.isItemChecked(position)) {
                     v.background.colorFilter =
                         BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-                            getColorWithAlpha(colorId = R.color.lightslategray, alpha = 240),
+                            getColorWithAlpha(
+                                colorId = R.color.lightslategray,
+                                alpha = 240
+                            ),
                             BlendModeCompat.MODULATE
                         )
                 } else {
@@ -945,7 +948,10 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
                 if (listView!!.isItemChecked(position)) {
                     v.background.colorFilter =
                         BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-                            getColorWithAlpha(colorId = R.color.lightslategray, alpha = 240),
+                            getColorWithAlpha(
+                                colorId = R.color.lightslategray,
+                                alpha = 240
+                            ),
                             BlendModeCompat.MODULATE
                         )
                 } else {
@@ -1025,11 +1031,11 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
     companion object {
 
         fun defaultRowHeight(): Int {
-            return if (Statics.isTablet()) 33 else 54
+            return if (isTablet()) 33 else 54
         }
 
         fun defaultDropDownItemHeight(): Int {
-            return if (Statics.isTablet()) 45 else 90
+            return if (isTablet()) 45 else 90
         }
 
         class RouteComparator(private val priorityText: String) : Comparator<Route> {

@@ -41,8 +41,10 @@ import com.dacosys.assetControl.ui.activities.main.SettingsActivity
 import com.dacosys.assetControl.ui.activities.print.TemplateSelectDialogActivity
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetLong
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetString
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsPutLong
 import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.Statics.Companion.prefsGetString
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.CounterHandler
 import com.dacosys.assetControl.utils.settings.Preference
@@ -123,12 +125,12 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
 
     private fun saveSharedPreferences() {
         if (barcodeLabelTarget == BarcodeLabelTarget.Asset) {
-            Statics.prefsPutLong(
+            prefsPutLong(
                 Preference.defaultBarcodeLabelCustomAsset.key,
                 barcodeLabelCustom?.barcodeLabelCustomId ?: 0L
             )
         } else if (barcodeLabelTarget == BarcodeLabelTarget.WarehouseArea) {
-            Statics.prefsPutLong(
+            prefsPutLong(
                 Preference.defaultBarcodeLabelCustomWa.key,
                 barcodeLabelCustom?.barcodeLabelCustomId ?: 0L
             )
@@ -181,7 +183,8 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
         // Seleccionamos la primer plantilla del tipo deseado si existe alguna.
         barcodeLabelCustom = when (requireActivity()) {
             is WarehouseAreaPrintLabelActivity -> {
-                val blcId = Statics.prefsGetLong(Preference.defaultBarcodeLabelCustomWa)
+                val blcId =
+                    prefsGetLong(Preference.defaultBarcodeLabelCustomWa)
                 if (blcId > 0) {
                     BarcodeLabelCustomDbHelper().selectById(blcId)
                 } else {
@@ -192,7 +195,8 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
                 }
             }
             is AssetPrintLabelActivity -> {
-                val blcId = Statics.prefsGetLong(Preference.defaultBarcodeLabelCustomAsset)
+                val blcId =
+                    prefsGetLong(Preference.defaultBarcodeLabelCustomAsset)
                 if (blcId > 0) {
                     BarcodeLabelCustomDbHelper().selectById(blcId)
                 } else {

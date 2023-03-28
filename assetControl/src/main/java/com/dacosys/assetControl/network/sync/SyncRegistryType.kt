@@ -218,7 +218,7 @@ class SyncRegistryType : Parcelable {
                 AssetReviewStatus,
                 RouteProcessStatus,
                 ManteinanceStatus,
-                BarcodeLabelTarget
+                BarcodeLabelTarget,
             )
 
             if (Statics.useImageControl) allSections.add(Image)

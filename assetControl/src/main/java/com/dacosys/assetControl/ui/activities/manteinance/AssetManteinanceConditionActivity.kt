@@ -2,9 +2,6 @@ package com.dacosys.assetControl.ui.activities.manteinance
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.view.MotionEvent
-import android.view.View
-import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.dacosys.assetControl.R
@@ -19,7 +16,9 @@ import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.fragments.asset.AssetConditionSpinnerFragment
 import com.dacosys.assetControl.ui.fragments.manteinance.ManteinanceTypeSpinnerFragment
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
+import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.utils.Screen.Companion.setupUI
 
 
 class AssetManteinanceConditionActivity : AppCompatActivity(),
@@ -30,35 +29,12 @@ class AssetManteinanceConditionActivity : AppCompatActivity(),
     private var currentAsset: Asset? = null
     private var assetManteinance: AssetManteinance? = null
 
-    @SuppressLint("ClickableViewAccessibility")
-    private fun setupUI(view: View) {
-        // Set up touch listener for non-text box views to hide keyboard.
-        if (view !is EditText) {
-            view.setOnTouchListener { _, motionEvent ->
-                Statics.closeKeyboard(this)
-                if (view is Button && view !is Switch && view !is CheckBox) {
-                    touchButton(motionEvent, view)
-                    true
-                } else {
-                    false
-                }
-            }
-        }
-
-        //If a layout container, iterate over children and seed recursion.
-        if (view is ViewGroup) {
-            (0 until view.childCount)
-                .map { view.getChildAt(it) }
-                .forEach { setupUI(it) }
-        }
-    }
-
     private lateinit var binding: AssetManteinanceConditionActivityBinding
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Statics.setScreenRotation(this)
+        setScreenRotation(this)
         binding = AssetManteinanceConditionActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -86,8 +62,7 @@ class AssetManteinanceConditionActivity : AppCompatActivity(),
 
         fillControls()
 
-        // ESTO SIRVE PARA OCULTAR EL TECLADO EN PANTALLA CUANDO PIERDEN EL FOCO LOS CONTROLES QUE LO NECESITAN
-        setupUI(binding.root)
+        setupUI(binding.root, this)
     }
 
     private fun fillControls() {
@@ -105,18 +80,6 @@ class AssetManteinanceConditionActivity : AppCompatActivity(),
                 assetManteinance?.observations,
                 TextView.BufferType.EDITABLE
             )
-        }
-    }
-
-    private fun touchButton(motionEvent: MotionEvent, button: Button) {
-        when (motionEvent.action) {
-            MotionEvent.ACTION_UP -> {
-                button.isPressed = false
-                button.performClick()
-            }
-            MotionEvent.ACTION_DOWN -> {
-                button.isPressed = true
-            }
         }
     }
 
@@ -211,7 +174,7 @@ class AssetManteinanceConditionActivity : AppCompatActivity(),
     }
 
     override fun onBackPressed() {
-        Statics.closeKeyboard(this)
+        closeKeyboard(this)
 
         setResult(RESULT_CANCELED)
         finish()

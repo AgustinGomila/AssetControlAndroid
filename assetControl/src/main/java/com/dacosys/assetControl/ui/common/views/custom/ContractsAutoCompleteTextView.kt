@@ -4,7 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.KeyEvent
 import androidx.appcompat.widget.AppCompatAutoCompleteTextView
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.Screen.Companion.isKeyboardVisible
 
 
 class ContractsAutoCompleteTextView : AppCompatAutoCompleteTextView {
@@ -59,7 +59,7 @@ class ContractsAutoCompleteTextView : AppCompatAutoCompleteTextView {
 
     override fun dispatchKeyEventPreIme(event: KeyEvent): Boolean {
         if (event.keyCode == KeyEvent.KEYCODE_BACK && isPopupShowing) {
-            if (Statics.isKeyboardVisible()) {
+            if (isKeyboardVisible()) {
                 return false
             }
         }

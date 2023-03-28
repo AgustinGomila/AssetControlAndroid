@@ -15,7 +15,7 @@ import androidx.core.graphics.BlendModeCompat
 import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics.Companion.getColorWithAlpha
+import com.dacosys.assetControl.utils.Screen.Companion.getColorWithAlpha
 
 /**
  * Created by Agustin on 18/01/2017.
@@ -77,7 +77,10 @@ class DeviceListAdapter(
             if (listView!!.isItemChecked(position)) {
                 v!!.background.colorFilter =
                     BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-                        getColorWithAlpha(colorId = R.color.lightslategray, alpha = 240),
+                        getColorWithAlpha(
+                            colorId = R.color.lightslategray,
+                            alpha = 240
+                        ),
                         BlendModeCompat.MODULATE
                     )
             } else {

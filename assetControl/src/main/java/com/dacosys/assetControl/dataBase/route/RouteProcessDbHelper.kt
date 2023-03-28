@@ -53,11 +53,13 @@ class RouteProcessDbHelper {
         }
 
     fun insert(route: Route): Long {
+        val userId = Statics.currentUserId ?: return 0
+
         Log.i(this::class.java.simpleName, ": SQLite -> insert")
 
         val newId = lastId
         val newRouteProcess = RouteProcess(
-            userId = Statics.currentUserId!!,
+            userId = userId,
             routeId = route.routeId,
             routeProcessDate = UTCDataTime.getUTCDateTimeAsString(),
             completed = false,

@@ -47,6 +47,8 @@ import com.dacosys.assetControl.model.user.permission.PermissionEntry
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.fragments.route.*
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.UTCDataTime
@@ -193,7 +195,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Statics.setScreenRotation(this)
+        setScreenRotation(this)
         binding = DataCollectionContentActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -253,9 +255,6 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         // Llenar la grilla
         initDcc()
-
-        // // ESTO SIRVE PARA OCULTAR EL TECLADO EN PANTALLA CUANDO PIERDEN EL FOCO LOS CONTROLES QUE LO NECESITAN
-        // setupUI(binding.root)
     }
 
     private fun initDcc() {
@@ -421,7 +420,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
                         imageControlFragment ?: return@runOnUiThread
                     ).commit()
 
-                if (!Statics.prefsGetBoolean(Preference.useImageControl)) {
+                if (!prefsGetBoolean(Preference.useImageControl)) {
                     fm.beginTransaction()
                         .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
                         .hide(imageControlFragment as Fragment).commitAllowingStateLoss()
@@ -1567,18 +1566,6 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         } catch (ex: java.lang.Exception) {
             ex.printStackTrace()
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
-        }
-    }
-
-    private fun touchButton(motionEvent: MotionEvent, button: Button) {
-        when (motionEvent.action) {
-            MotionEvent.ACTION_UP -> {
-                button.isPressed = false
-                button.performClick()
-            }
-            MotionEvent.ACTION_DOWN -> {
-                button.isPressed = true
-            }
         }
     }
 

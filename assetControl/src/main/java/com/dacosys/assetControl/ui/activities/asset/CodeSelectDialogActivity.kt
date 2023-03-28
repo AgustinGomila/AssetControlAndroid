@@ -26,7 +26,10 @@ import com.dacosys.assetControl.model.asset.AssetStatus
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.common.views.custom.ContractsAutoCompleteTextView
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetStringSet
+import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
+import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.utils.Screen.Companion.showKeyboard
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.Scanner
@@ -50,7 +53,7 @@ class CodeSelectDialogActivity : AppCompatActivity(),
     }
 
     private fun destroyLocals() {
-        Statics.closeKeyboard(this)
+        closeKeyboard(this)
         binding.autoCompleteTextView.setAdapter(null)
     }
 
@@ -73,7 +76,7 @@ class CodeSelectDialogActivity : AppCompatActivity(),
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Statics.setScreenRotation(this)
+        setScreenRotation(this)
         binding = CodeSelectActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -122,7 +125,7 @@ class CodeSelectDialogActivity : AppCompatActivity(),
         }
 
         //Retrieve the values
-        val set = Statics.prefsGetStringSet(
+        val set = prefsGetStringSet(
             Preference.assetSelectFragmentVisibleStatus.key,
             Preference.assetSelectFragmentVisibleStatus.defaultValue as ArrayList<String>
         )
@@ -163,11 +166,11 @@ class CodeSelectDialogActivity : AppCompatActivity(),
             }
         binding.autoCompleteTextView.setOnTouchListener { _, motionEvent ->
             if (motionEvent.action == MotionEvent.ACTION_UP) {
-                Statics.showKeyboard(this)
+                showKeyboard(this)
                 adjustDropDownHeight()
                 return@setOnTouchListener false
             } else if (motionEvent.action == MotionEvent.BUTTON_BACK) {
-                Statics.closeKeyboard(this)
+                closeKeyboard(this)
 
                 setResult(RESULT_CANCELED, null)
                 finish()
@@ -223,7 +226,7 @@ class CodeSelectDialogActivity : AppCompatActivity(),
     }
 
     private fun itemSelected() {
-        Statics.closeKeyboard(this)
+        closeKeyboard(this)
         refreshFilterData()
 
         val data = Intent()
@@ -309,7 +312,7 @@ class CodeSelectDialogActivity : AppCompatActivity(),
     }
 
     override fun onBackPressed() {
-        Statics.closeKeyboard(this)
+        closeKeyboard(this)
 
         setResult(RESULT_CANCELED)
         finish()

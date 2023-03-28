@@ -53,6 +53,8 @@ import com.dacosys.assetControl.ui.activities.asset.AssetDetailActivity
 import com.dacosys.assetControl.ui.activities.location.WarehouseAreaDetailActivity
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
+import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
+import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.Statics.Companion.isRfidRequired
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
@@ -181,14 +183,14 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
                 )
             }
             ProgressStatus.bigFinished -> {
-                Statics.closeKeyboard(this)
+                closeKeyboard(this)
                 setResult(RESULT_OK)
                 finish()
             }
             ProgressStatus.bigCrashed,
             ProgressStatus.canceled,
             -> {
-                Statics.closeKeyboard(this)
+                closeKeyboard(this)
                 makeText(binding.root, msg, SnackBarType.ERROR)
                 ErrorLog.writeLog(
                     this, this::class.java.simpleName, "$progressStatusDesc: $registryDesc ${
@@ -295,7 +297,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Statics.setScreenRotation(this)
+        setScreenRotation(this)
         binding = RouteProcessContentActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -381,7 +383,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
         val error = it.error
         if (error != null) {
-            Statics.closeKeyboard(this)
+            closeKeyboard(this)
 
             val data = Intent()
             data.putExtra("error_msg", error.errorMessage)
@@ -901,7 +903,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         }
 
         if ((routeComposition?.size ?: 0) <= 0) {
-            Statics.closeKeyboard(this)
+            closeKeyboard(this)
 
             val data = Intent()
             data.putExtra("error_msg", getContext().getString(R.string.empty_route))
@@ -1217,35 +1219,25 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
             fill(levelsToNavigate[0])
             levelsToNavigate.remove(levelsToNavigate[0])
-        } else {
+        } else if (backLevelSteps.size > 0) {
             Log.d(this::class.java.simpleName, getString(R.string.returning_to_the_previous_level))
 
             // Elimino el último paso ejecutado así el último paso es el previo
             backLevelSteps.remove(backLevelSteps.last())
 
-            if (backLevelSteps.size == 0) {
-                return
+            if (backLevelSteps.size > 0) {
+                fill(backLevelSteps.last())
+
+                // Elimino el paso que se agrega en el FILL porque sino quedan dos repetidos seguidos
+                backLevelSteps.remove(backLevelSteps.last())
             }
+        }
 
-            fill(backLevelSteps.last())
-
-            // Elimino el paso que se agrega en el FILL porque sino quedan dos repetidos seguidos
-            backLevelSteps.remove(backLevelSteps.last())
-
-            // El nivel al que volví está completo
-            if (isCurrentLevelCompleted()) {
-                // Es el primer nivel, guardar
-                // if (backLevelSteps.last() == 1) {
-                //     runOnUiThread {
-                //         binding.confirmButton.isEnabled = true
-                //     }
-                //     return
-                // }
-
-                // Seguir bajando
-                runOnUiThread {
-                    binding.confirmButton.isEnabled = true
-                }
+        // El nivel al que volví está completo
+        if (isCurrentLevelCompleted()) {
+            // Seguir bajando
+            runOnUiThread {
+                binding.confirmButton.isEnabled = true
             }
         }
 
@@ -1712,7 +1704,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             alert.setMessage(getContext().getString(R.string.you_want_to_suspend_the_data_collection_process))
             alert.setNegativeButton(R.string.cancel, null)
             alert.setPositiveButton(R.string.accept) { _, _ ->
-                Statics.closeKeyboard(this)
+                closeKeyboard(this)
 
                 setResult(RESULT_OK)
                 finish()
@@ -1732,7 +1724,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
     }
 
     // region ProgressBar
-    // Aparece mientras se realizan operaciones sobre las bases de datos remota y local
+// Aparece mientras se realizan operaciones sobre las bases de datos remota y local
     private var progressDialog: AlertDialog? = null
     private lateinit var alertBinding: ProgressBarDialogBinding
     private fun createProgressDialog() {
@@ -1826,7 +1818,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             }
         }
     }
-    // endregion
+// endregion
 
     companion object {
         fun equals(a: Any?, b: Any?): Boolean {
@@ -1834,7 +1826,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         }
     }
 
-    // region READERS Reception
+// region READERS Reception
 
     override fun onNewIntent(intent: Intent) {
         /*
@@ -1856,5 +1848,5 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         scannerCompleted(scanCode)
     }
 
-    //endregion READERS Reception
+//endregion READERS Reception
 }

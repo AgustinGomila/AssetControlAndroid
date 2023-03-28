@@ -11,6 +11,8 @@ import com.dacosys.assetControl.network.sync.*
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarEventData
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsPutString
+import com.dacosys.assetControl.utils.Preferences.Companion.resetLastUpdateDates
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.settings.entries.ConfEntry
@@ -56,7 +58,7 @@ class DownloadDb(
 
         // Antes de iniciar el proceso de descarga...
         if (Statics.downloadDbRequired) {
-            Statics.resetLastUpdateDates()
+            resetLastUpdateDates()
             deleteTimeFile()
         }
 
@@ -258,9 +260,7 @@ class DownloadDb(
                 } else if (it.progressStatus == ProgressStatus.starting) {
                     onDownloadEvent.invoke(
                         DownloadTask(
-                            msg = it.msg,
-                            fileType = null,
-                            downloadStatus = DownloadStatus.STARTING
+                            msg = it.msg, fileType = null, downloadStatus = DownloadStatus.STARTING
                         )
                     )
                 } else if (it.progressStatus == ProgressStatus.running) {
@@ -268,8 +268,8 @@ class DownloadDb(
                     val completedTask: Long = it.completedTask.toLong()
                     val totalTask: Long = it.totalTask.toLong()
 
-                    if (completedTask > 0 && totalTask > 0)
-                        progress = (completedTask * 100 / totalTask).toInt()
+                    if (completedTask > 0 && totalTask > 0) progress =
+                        (completedTask * 100 / totalTask).toInt()
 
                     onDownloadEvent.invoke(
                         DownloadTask(
@@ -339,8 +339,8 @@ class DownloadDb(
                     val completedTask: Long = it.completedTask.toLong()
                     val totalTask: Long = it.totalTask.toLong()
 
-                    if (completedTask > 0 && totalTask > 0)
-                        progress = (completedTask * 100 / totalTask).toInt()
+                    if (completedTask > 0 && totalTask > 0) progress =
+                        (completedTask * 100 / totalTask).toInt()
 
                     onDownloadEvent.invoke(
                         DownloadTask(
@@ -500,14 +500,16 @@ class DownloadDb(
                 for (confEntry in registryTypeUpdated) {
                     registries.add(confEntry.description)
                 }
-                Statics.prefsPutString(registries, timeDateStr)
+                prefsPutString(registries, timeDateStr)
 
                 registries.clear()
                 registries.add(ConfEntry.acLastUpdateRepairshop.description)
                 registries.add(ConfEntry.acLastUpdateAssetManteinance.description)
                 registries.add(ConfEntry.acLastUpdateManteinanceType.description)
                 registries.add(ConfEntry.acLastUpdateManteinanceTypeGroup.description)
-                Statics.prefsPutString(registries, Statics.defaultDate)
+                prefsPutString(
+                    registries, Statics.defaultDate
+                )
             } else {
                 scope.launch {
                     onUiEvent(

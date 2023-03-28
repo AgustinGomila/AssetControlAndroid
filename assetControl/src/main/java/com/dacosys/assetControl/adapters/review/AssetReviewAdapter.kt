@@ -20,7 +20,7 @@ import com.dacosys.assetControl.model.review.AssetReview
 import com.dacosys.assetControl.model.review.AssetReviewStatus
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
-import com.dacosys.assetControl.utils.Statics.Companion.getColorWithAlpha
+import com.dacosys.assetControl.utils.Screen.Companion.getColorWithAlpha
 import java.lang.ref.WeakReference
 import java.util.*
 
@@ -719,7 +719,10 @@ class AssetReviewAdapter :
                 if (isSelected(position)) {
                     v.background.colorFilter =
                         BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-                            getColorWithAlpha(colorId = R.color.lightslategray, alpha = 240),
+                            getColorWithAlpha(
+                                colorId = R.color.lightslategray,
+                                alpha = 240
+                            ),
                             BlendModeCompat.MODULATE
                         )
                 } else {

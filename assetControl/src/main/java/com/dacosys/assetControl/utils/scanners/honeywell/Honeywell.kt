@@ -10,7 +10,7 @@ import android.os.Looper
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.utils.scanners.honeywell.Honeywell.Constants.PROPERTY_DATA_PROCESSOR_DATA_INTENT
 import com.dacosys.assetControl.utils.settings.Preference
@@ -184,66 +184,67 @@ class Honeywell(private val activity: AppCompatActivity) : Scanner() {
         // Barcode camera scanner view
         properties?.putBoolean(
             Constants.PROPERTY_PDF_417_ENABLED,
-            Statics.prefsGetBoolean(Preference.symbologyPDF417)
+            prefsGetBoolean(Preference.symbologyPDF417)
         )
         properties?.putBoolean(
             Constants.PROPERTY_AZTEC_ENABLED,
-            Statics.prefsGetBoolean(Preference.symbologyAztec)
+            prefsGetBoolean(Preference.symbologyAztec)
         )
         properties?.putBoolean(
             Constants.PROPERTY_QR_CODE_ENABLED,
-            Statics.prefsGetBoolean(Preference.symbologyQRCode)
+            prefsGetBoolean(Preference.symbologyQRCode)
         )
         properties?.putBoolean(
             Constants.PROPERTY_CODABAR_ENABLED,
-            Statics.prefsGetBoolean(Preference.symbologyCODABAR)
+            prefsGetBoolean(Preference.symbologyCODABAR)
         )
         properties?.putBoolean(
             Constants.PROPERTY_CODE_128_ENABLED,
-            Statics.prefsGetBoolean(Preference.symbologyCode128)
+            prefsGetBoolean(Preference.symbologyCode128)
         )
         properties?.putBoolean(
             Constants.PROPERTY_CODE_39_ENABLED,
-            Statics.prefsGetBoolean(Preference.symbologyCode39)
+            prefsGetBoolean(Preference.symbologyCode39)
         )
         properties?.putBoolean(
             Constants.PROPERTY_CODE_93_ENABLED,
-            Statics.prefsGetBoolean(Preference.symbologyCode93)
+            prefsGetBoolean(Preference.symbologyCode93)
         )
         properties?.putBoolean(
             Constants.PROPERTY_DATAMATRIX_ENABLED,
-            Statics.prefsGetBoolean(Preference.symbologyDataMatrix)
+            prefsGetBoolean(Preference.symbologyDataMatrix)
         )
         properties?.putBoolean(
             Constants.PROPERTY_EAN_13_ENABLED,
-            Statics.prefsGetBoolean(Preference.symbologyEAN13)
+            prefsGetBoolean(Preference.symbologyEAN13)
         )
         properties?.putBoolean(
             Constants.PROPERTY_EAN_8_ENABLED,
-            Statics.prefsGetBoolean(Preference.symbologyEAN8)
+            prefsGetBoolean(Preference.symbologyEAN8)
         )
         properties?.putBoolean(
             Constants.PROPERTY_MAXICODE_ENABLED,
-            Statics.prefsGetBoolean(Preference.symbologyMaxiCode)
+            prefsGetBoolean(Preference.symbologyMaxiCode)
         )
         properties?.putBoolean(
             Constants.PROPERTY_RSS_ENABLED,
-            Statics.prefsGetBoolean(Preference.symbologyRSS14)
+            prefsGetBoolean(Preference.symbologyRSS14)
         )
         properties?.putBoolean(
             Constants.PROPERTY_RSS_EXPANDED_ENABLED,
-            Statics.prefsGetBoolean(Preference.symbologyRSSExpanded)
+            prefsGetBoolean(Preference.symbologyRSSExpanded)
         )
         properties?.putBoolean(
             Constants.PROPERTY_UPC_A_ENABLE,
-            Statics.prefsGetBoolean(Preference.symbologyUPCA)
+            prefsGetBoolean(Preference.symbologyUPCA)
         )
         properties?.putBoolean(
             Constants.PROPERTY_UPC_E_ENABLED,
-            Statics.prefsGetBoolean(Preference.symbologyUPCE)
+            prefsGetBoolean(Preference.symbologyUPCE)
         )
 
-        val sendDigit = Statics.prefsGetBoolean(Preference.sendBarcodeCheckDigit)
+        val sendDigit =
+            prefsGetBoolean(Preference.sendBarcodeCheckDigit)
         properties?.putBoolean(
             Constants.PROPERTY_EAN_13_CHECK_DIGIT_TRANSMIT_ENABLED,
             sendDigit

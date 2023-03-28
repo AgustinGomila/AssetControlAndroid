@@ -26,8 +26,13 @@ import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType.CREATOR.INFO
+import com.dacosys.assetControl.utils.Preferences.Companion.cleanPrefs
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetString
+import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
+import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.utils.Screen.Companion.showKeyboard
 import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.Statics.Companion.closeKeyboard
 import com.dacosys.assetControl.utils.Statics.Companion.getConfig
 import com.dacosys.assetControl.utils.Statics.Companion.setupProxy
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
@@ -41,18 +46,13 @@ import com.google.android.material.textfield.TextInputLayout
 import org.json.JSONObject
 import java.lang.ref.WeakReference
 
-class InitConfigActivity :
-    AppCompatActivity(),
-    Scanner.ScannerListener,
-    Statics.Companion.TaskSetupProxyEnded,
-    Statics.Companion.TaskConfigPanelEnded {
+class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
+    Statics.Companion.TaskSetupProxyEnded, Statics.Companion.TaskConfigPanelEnded {
     override fun onTaskConfigPanelEnded(status: ProgressStatus) {
         if (status == ProgressStatus.finished) {
             isConfiguring = false
             makeText(
-                binding.root,
-                getString(R.string.configuration_applied),
-                SnackBarType.SUCCESS
+                binding.root, getString(R.string.configuration_applied), SnackBarType.SUCCESS
             )
             Statics.removeDataBases()
             finish()
@@ -88,9 +88,7 @@ class InitConfigActivity :
             isConfiguring = false
             makeText(binding.root, msg, SnackBarType.SUCCESS)
             finish()
-        } else if (status == ProgressStatus.crashed ||
-            status == ProgressStatus.canceled
-        ) {
+        } else if (status == ProgressStatus.crashed || status == ProgressStatus.canceled) {
             isConfiguring = false
             makeText(binding.root, msg, ERROR)
         }
@@ -104,9 +102,7 @@ class InitConfigActivity :
     ) {
         if (status == ProgressStatus.finished) {
             getConfig(
-                email = email,
-                password = password,
-                installationCode = installationCode
+                email = email, password = password, installationCode = installationCode
             ) { onTaskGetPackagesEnded(it) }
         }
     }
@@ -133,9 +129,7 @@ class InitConfigActivity :
 
             if (Statics.urlPanel.isEmpty()) {
                 makeText(
-                    binding.root,
-                    getString(R.string.server_is_not_configured),
-                    ERROR
+                    binding.root, getString(R.string.server_is_not_configured), ERROR
                 )
                 return
             }
@@ -170,7 +164,7 @@ class InitConfigActivity :
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Statics.setScreenRotation(this)
+        setScreenRotation(this)
         binding = InitConfigActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -204,11 +198,7 @@ class InitConfigActivity :
 
         binding.passwordEditText.setText(password, TextView.BufferType.EDITABLE)
         binding.passwordEditText.setOnKeyListener { _, keyCode, keyEvent ->
-            if (keyCode == EditorInfo.IME_ACTION_DONE ||
-                (keyEvent.action == KeyEvent.ACTION_UP &&
-                        (keyCode == KeyEvent.KEYCODE_ENTER ||
-                                keyCode == KeyEvent.KEYCODE_DPAD_CENTER))
-            ) {
+            if (keyCode == EditorInfo.IME_ACTION_DONE || (keyEvent.action == KeyEvent.ACTION_UP && (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_DPAD_CENTER))) {
                 closeKeyboard(this)
                 attemptToConfigure()
                 true
@@ -218,7 +208,7 @@ class InitConfigActivity :
         }
         binding.passwordEditText.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
-                Statics.showKeyboard(this)
+                showKeyboard(this)
             }
         }
         binding.passwordEditText.setOnEditorActionListener { _, actionId, _ ->
@@ -235,15 +225,11 @@ class InitConfigActivity :
         binding.emailEditText.setText(email, TextView.BufferType.EDITABLE)
         binding.emailEditText.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
-                Statics.showKeyboard(this)
+                showKeyboard(this)
             }
         }
         binding.emailEditText.setOnKeyListener { _, keyCode, keyEvent ->
-            if (keyCode == EditorInfo.IME_ACTION_DONE ||
-                (keyEvent.action == KeyEvent.ACTION_UP &&
-                        (keyCode == KeyEvent.KEYCODE_ENTER ||
-                                keyCode == KeyEvent.KEYCODE_DPAD_CENTER))
-            ) {
+            if (keyCode == EditorInfo.IME_ACTION_DONE || (keyEvent.action == KeyEvent.ACTION_UP && (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_DPAD_CENTER))) {
                 binding.passwordEditText.requestFocus()
                 true
             } else {
@@ -264,11 +250,11 @@ class InitConfigActivity :
     }
 
     private fun clearOldPrefs() {
-        Statics.cleanPrefs()
+        cleanPrefs()
     }
 
     private fun configApp() {
-        val realPass = Statics.prefsGetString(Preference.confPassword)
+        val realPass = prefsGetString(Preference.confPassword)
         if (realPass.isEmpty()) {
             attemptEnterConfig(realPass)
             return
@@ -286,11 +272,7 @@ class InitConfigActivity :
         input.isFocusable = true
         input.isFocusableInTouchMode = true
         input.setOnKeyListener { _, keyCode, keyEvent ->
-            if (keyCode == EditorInfo.IME_ACTION_DONE ||
-                (keyEvent.action == KeyEvent.ACTION_UP &&
-                        (keyCode == KeyEvent.KEYCODE_ENTER ||
-                                keyCode == KeyEvent.KEYCODE_DPAD_CENTER))
-            ) {
+            if (keyCode == EditorInfo.IME_ACTION_DONE || (keyEvent.action == KeyEvent.ACTION_UP && (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_DPAD_CENTER))) {
                 if (alertDialog != null) {
                     alertDialog!!.getButton(DialogInterface.BUTTON_POSITIVE).performClick()
                 }
@@ -314,7 +296,7 @@ class InitConfigActivity :
     }
 
     private fun attemptEnterConfig(password: String) {
-        val realPass = Statics.prefsGetString(Preference.confPassword)
+        val realPass = prefsGetString(Preference.confPassword)
         if (password == realPass) {
             Statics.setDebugConfigValues()
 
@@ -328,9 +310,7 @@ class InitConfigActivity :
             isReturnedFromSettings = true
         } else {
             makeText(
-                binding.root,
-                getString(R.string.invalid_password),
-                ERROR
+                binding.root, getString(R.string.invalid_password), ERROR
             )
         }
     }
@@ -348,9 +328,7 @@ class InitConfigActivity :
         if (email.trim().isNotEmpty() && password.trim().isNotEmpty()) {
             if (!binding.proxyCheckBox.isChecked) {
                 getConfig(
-                    email = email,
-                    password = password,
-                    installationCode = ""
+                    email = email, password = password, installationCode = ""
                 ) { onTaskGetPackagesEnded(it) }
             } else {
                 setupProxy(
@@ -368,8 +346,7 @@ class InitConfigActivity :
     private fun resize(image: Drawable): Drawable {
         val bitmap = (image as BitmapDrawable).bitmap
         val bitmapResized = Bitmap.createScaledBitmap(
-            bitmap,
-            (bitmap.width * 0.5).toInt(), (bitmap.height * 0.5).toInt(), false
+            bitmap, (bitmap.width * 0.5).toInt(), (bitmap.height * 0.5).toInt(), false
         )
         return BitmapDrawable(resources, bitmapResized)
     }
@@ -380,8 +357,12 @@ class InitConfigActivity :
         grantResults: IntArray,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (permissions.contains(Manifest.permission.BLUETOOTH_CONNECT))
-            JotterListener.onRequestPermissionsResult(this, requestCode, permissions, grantResults)
+        if (permissions.contains(Manifest.permission.BLUETOOTH_CONNECT)) JotterListener.onRequestPermissionsResult(
+            this,
+            requestCode,
+            permissions,
+            grantResults
+        )
     }
 
     override fun scannerCompleted(scanCode: String) {
@@ -394,15 +375,13 @@ class InitConfigActivity :
             when {
                 mainJson.has("config") -> {
                     Statics.getConfigFromScannedCode(
-                        scanCode = scanCode,
-                        mode = QRConfigClientAccount
+                        scanCode = scanCode, mode = QRConfigClientAccount
                     ) { onTaskGetPackagesEnded(it) }
                 }
                 mainJson.has(Statics.appName) -> {
                     if (scanCode.contains(Preference.acWsServer.key)) {
                         Statics.getConfigFromScannedCode(
-                            scanCode = scanCode,
-                            mode = QRConfigType.QRConfigWebservice
+                            scanCode = scanCode, mode = QRConfigType.QRConfigWebservice
                         ) { onTaskGetPackagesEnded(it) }
                     }
                 }
@@ -424,7 +403,7 @@ class InitConfigActivity :
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_login, menu)
 
-        if (!Statics.prefsGetBoolean(Preference.showConfButton)) {
+        if (!prefsGetBoolean(Preference.showConfButton)) {
             menu.removeItem(menu.findItem(R.id.action_settings).itemId)
         }
 

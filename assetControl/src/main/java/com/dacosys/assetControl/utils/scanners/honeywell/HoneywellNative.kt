@@ -6,7 +6,7 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.utils.settings.Preference
 import com.honeywell.aidc.*
@@ -18,8 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  * Created by krrigan on 10/13/18.
  */
 class HoneywellNative(private var weakRef: WeakReference<AppCompatActivity>) : Scanner(),
-    BarcodeReader.BarcodeListener,
-    BarcodeReader.TriggerListener {
+    BarcodeReader.BarcodeListener, BarcodeReader.TriggerListener {
     private var initialized = AtomicBoolean(false)
     private var initializing = AtomicBoolean(false)
     private var pendingResume = AtomicBoolean(false)
@@ -94,8 +93,7 @@ class HoneywellNative(private var weakRef: WeakReference<AppCompatActivity>) : S
 
         // register trigger state change listener
         // When using Automatic Trigger control do not need to implement the onTriggerEvent
-        if (!autoMode)
-            scanner?.addTriggerListener(this)
+        if (!autoMode) scanner?.addTriggerListener(this)
 
         // set the trigger mode to auto control
         try {
@@ -113,8 +111,7 @@ class HoneywellNative(private var weakRef: WeakReference<AppCompatActivity>) : S
             }
             scanner?.setProperty(BarcodeReader.PROPERTY_DATA_PROCESSOR_LAUNCH_BROWSER, false)
             scanner?.setProperty(
-                BarcodeReader.PROPERTY_TRIGGER_SCAN_MODE,
-                BarcodeReader.TRIGGER_SCAN_MODE_ONESHOT
+                BarcodeReader.PROPERTY_TRIGGER_SCAN_MODE, BarcodeReader.TRIGGER_SCAN_MODE_ONESHOT
             )
         } catch (e: UnsupportedPropertyException) {
             e.printStackTrace()
@@ -192,46 +189,40 @@ class HoneywellNative(private var weakRef: WeakReference<AppCompatActivity>) : S
         properties = HashMap()
 
         properties[BarcodeReader.PROPERTY_PDF_417_ENABLED] =
-            Statics.prefsGetBoolean(Preference.symbologyPDF417)
+            prefsGetBoolean(Preference.symbologyPDF417)
         properties[BarcodeReader.PROPERTY_AZTEC_ENABLED] =
-            Statics.prefsGetBoolean(Preference.symbologyAztec)
+            prefsGetBoolean(Preference.symbologyAztec)
         properties[BarcodeReader.PROPERTY_QR_CODE_ENABLED] =
-            Statics.prefsGetBoolean(Preference.symbologyQRCode)
+            prefsGetBoolean(Preference.symbologyQRCode)
         properties[BarcodeReader.PROPERTY_CODABAR_ENABLED] =
-            Statics.prefsGetBoolean(Preference.symbologyCODABAR)
+            prefsGetBoolean(Preference.symbologyCODABAR)
         properties[BarcodeReader.PROPERTY_CODE_128_ENABLED] =
-            Statics.prefsGetBoolean(Preference.symbologyCode128)
+            prefsGetBoolean(Preference.symbologyCode128)
         properties[BarcodeReader.PROPERTY_CODE_39_ENABLED] =
-            Statics.prefsGetBoolean(Preference.symbologyCode39)
+            prefsGetBoolean(Preference.symbologyCode39)
         properties[BarcodeReader.PROPERTY_CODE_93_ENABLED] =
-            Statics.prefsGetBoolean(Preference.symbologyCode93)
+            prefsGetBoolean(Preference.symbologyCode93)
         properties[BarcodeReader.PROPERTY_DATAMATRIX_ENABLED] =
-            Statics.prefsGetBoolean(Preference.symbologyDataMatrix)
+            prefsGetBoolean(Preference.symbologyDataMatrix)
         properties[BarcodeReader.PROPERTY_EAN_13_ENABLED] =
-            Statics.prefsGetBoolean(Preference.symbologyEAN13)
-        properties[BarcodeReader.PROPERTY_EAN_8_ENABLED] =
-            Statics.prefsGetBoolean(Preference.symbologyEAN8)
+            prefsGetBoolean(Preference.symbologyEAN13)
+        properties[BarcodeReader.PROPERTY_EAN_8_ENABLED] = prefsGetBoolean(Preference.symbologyEAN8)
         properties[BarcodeReader.PROPERTY_MAXICODE_ENABLED] =
-            Statics.prefsGetBoolean(Preference.symbologyMaxiCode)
-        properties[BarcodeReader.PROPERTY_RSS_ENABLED] =
-            Statics.prefsGetBoolean(Preference.symbologyRSS14)
+            prefsGetBoolean(Preference.symbologyMaxiCode)
+        properties[BarcodeReader.PROPERTY_RSS_ENABLED] = prefsGetBoolean(Preference.symbologyRSS14)
         properties[BarcodeReader.PROPERTY_RSS_EXPANDED_ENABLED] =
-            Statics.prefsGetBoolean(Preference.symbologyRSSExpanded)
-        properties[BarcodeReader.PROPERTY_UPC_A_ENABLE] =
-            Statics.prefsGetBoolean(Preference.symbologyUPCA)
-        properties[BarcodeReader.PROPERTY_UPC_E_ENABLED] =
-            Statics.prefsGetBoolean(Preference.symbologyUPCE)
+            prefsGetBoolean(Preference.symbologyRSSExpanded)
+        properties[BarcodeReader.PROPERTY_UPC_A_ENABLE] = prefsGetBoolean(Preference.symbologyUPCA)
+        properties[BarcodeReader.PROPERTY_UPC_E_ENABLED] = prefsGetBoolean(Preference.symbologyUPCE)
 
-        val sendDigit = Statics.prefsGetBoolean(Preference.sendBarcodeCheckDigit)
+        val sendDigit = prefsGetBoolean(Preference.sendBarcodeCheckDigit)
         properties[BarcodeReader.PROPERTY_EAN_13_CHECK_DIGIT_TRANSMIT_ENABLED] = sendDigit
         properties[BarcodeReader.PROPERTY_EAN_8_CHECK_DIGIT_TRANSMIT_ENABLED] = sendDigit
         properties[BarcodeReader.PROPERTY_UPC_A_CHECK_DIGIT_TRANSMIT_ENABLED] = sendDigit
 
         properties[BarcodeReader.PROPERTY_CODE_39_CHECK_DIGIT_MODE] =
-            if (sendDigit)
-                BarcodeReader.CODE_39_CHECK_DIGIT_MODE_CHECK
-            else
-                BarcodeReader.CODE_39_CHECK_DIGIT_MODE_NO_CHECK
+            if (sendDigit) BarcodeReader.CODE_39_CHECK_DIGIT_MODE_CHECK
+            else BarcodeReader.CODE_39_CHECK_DIGIT_MODE_NO_CHECK
 
         // Set Max Code 39 barcode length
         properties[BarcodeReader.PROPERTY_CODE_39_MAXIMUM_LENGTH] = 10
@@ -247,8 +238,7 @@ class HoneywellNative(private var weakRef: WeakReference<AppCompatActivity>) : S
         loadProperties()
         properties.putAll(mapProperties)
 
-        if (scanner != null)
-            scanner?.setProperties(properties)
+        if (scanner != null) scanner?.setProperties(properties)
     }
 
     fun resume(): Boolean {

@@ -1,6 +1,8 @@
 package com.dacosys.assetControl.model.barcode.fields
 
 import com.dacosys.assetControl.model.barcode.BarcodeLabelPrintOps
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetInt
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetString
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.settings.entries.ConfEntry
 
@@ -13,11 +15,11 @@ class BarcodeLabel(templateStr: String) {
         this.templateStr = templateStr
 
         printOps = BarcodeLabelPrintOps(
-            Statics.prefsGetInt(ConfEntry.prnPrinterSpeed),
-            Statics.prefsGetInt(ConfEntry.prnPrinterPower),
-            Statics.prefsGetString(ConfEntry.prnPrinterName),
-            Statics.prefsGetInt(ConfEntry.prnColOffset),
-            Statics.prefsGetInt(ConfEntry.prnRowOffset)
+            prefsGetInt(ConfEntry.prnPrinterSpeed),
+            prefsGetInt(ConfEntry.prnPrinterPower),
+            prefsGetString(ConfEntry.prnPrinterName),
+            prefsGetInt(ConfEntry.prnColOffset),
+            prefsGetInt(ConfEntry.prnRowOffset)
         )
     }
 

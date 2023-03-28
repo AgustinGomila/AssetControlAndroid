@@ -31,9 +31,10 @@ import com.dacosys.assetControl.model.table.Table
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.common.views.custom.AutoResizeTextView
+import com.dacosys.assetControl.utils.Screen.Companion.getColorWithAlpha
+import com.dacosys.assetControl.utils.Screen.Companion.manipulateColor
+import com.dacosys.assetControl.utils.Screen.Companion.textLightColor
 import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.Statics.Companion.getColorWithAlpha
-import com.dacosys.assetControl.utils.Statics.Companion.manipulateColor
 import java.lang.ref.WeakReference
 import java.util.*
 
@@ -1143,12 +1144,15 @@ class AssetReviewContentAdapter :
 
                 val darkerColor = when {
                     isSelected -> true
-                    foreColor == Statics.textLightColor() -> true
+                    foreColor == textLightColor() -> true
                     else -> false
                 }
 
                 val titleForeColor: Int =
-                    manipulateColor(foreColor, if (darkerColor) 0.8f else 1.4f)
+                    manipulateColor(
+                        foreColor,
+                        if (darkerColor) 0.8f else 1.4f
+                    )
 
                 v.background = backColor
                 holder.descriptionTextView?.setTextColor(foreColor)
@@ -1182,7 +1186,10 @@ class AssetReviewContentAdapter :
                 if (isSelected(position)) {
                     v.background.colorFilter =
                         BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-                            getColorWithAlpha(colorId = R.color.lightslategray, alpha = 240),
+                            getColorWithAlpha(
+                                colorId = R.color.lightslategray,
+                                alpha = 240
+                            ),
                             BlendModeCompat.MODULATE
                         )
                 } else {
@@ -1384,12 +1391,15 @@ class AssetReviewContentAdapter :
 
                 val darkerColor = when {
                     isSelected -> true
-                    foreColor == Statics.textLightColor() -> true
+                    foreColor == textLightColor() -> true
                     else -> false
                 }
 
                 val titleForeColor: Int =
-                    manipulateColor(foreColor, if (darkerColor) 0.8f else 1.4f)
+                    manipulateColor(
+                        foreColor,
+                        if (darkerColor) 0.8f else 1.4f
+                    )
 
                 v.background = backColor
                 holder.descriptionTextView?.setTextColor(foreColor)
@@ -1408,7 +1418,10 @@ class AssetReviewContentAdapter :
                 if (isSelected(position)) {
                     v.background.colorFilter =
                         BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-                            getColorWithAlpha(colorId = R.color.lightslategray, alpha = 240),
+                            getColorWithAlpha(
+                                colorId = R.color.lightslategray,
+                                alpha = 240
+                            ),
                             BlendModeCompat.MODULATE
                         )
                 } else {

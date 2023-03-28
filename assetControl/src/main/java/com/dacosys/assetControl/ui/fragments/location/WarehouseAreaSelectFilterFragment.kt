@@ -12,7 +12,8 @@ import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.databinding.WarehouseAreaSelectFilterFragmentBinding
 import com.dacosys.assetControl.ui.activities.location.LocationSelectActivity
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsPutBoolean
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.settings.Preference
 
@@ -39,9 +40,7 @@ class WarehouseAreaSelectFilterFragment : Fragment() {
 
     private fun sendMessage() {
         fragmentListener?.onFilterChanged(
-            waDescription = waDescription,
-            wDescription = wDescription,
-            onlyActive = onlyActive
+            waDescription = waDescription, wDescription = wDescription, onlyActive = onlyActive
         )
     }
 
@@ -61,7 +60,9 @@ class WarehouseAreaSelectFilterFragment : Fragment() {
     }
 
     private fun saveSharedPreferences() {
-        Statics.prefsPutBoolean(Preference.selectWarehouseAreaOnlyActive.key, onlyActive)
+        prefsPutBoolean(
+            Preference.selectWarehouseAreaOnlyActive.key, onlyActive
+        )
     }
 
     override fun onSaveInstanceState(savedInstanceState: Bundle) {
@@ -88,7 +89,7 @@ class WarehouseAreaSelectFilterFragment : Fragment() {
     private fun loadDefaultValues() {
         wDescription = ""
         waDescription = ""
-        onlyActive = Statics.prefsGetBoolean(Preference.selectWarehouseAreaOnlyActive)
+        onlyActive = prefsGetBoolean(Preference.selectWarehouseAreaOnlyActive)
     }
 
     private fun saveBundleValues(b: Bundle) {

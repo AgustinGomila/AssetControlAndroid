@@ -8,7 +8,7 @@ import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.utils.scanners.zebra.Zebra.Constants.ACTION_DATAWEDGE
 import com.dacosys.assetControl.utils.scanners.zebra.Zebra.Constants.ACTION_RESULT
@@ -85,55 +85,68 @@ class Zebra(private val activity: AppCompatActivity) : Scanner() {
         // Set Symbologies
         barcodeProps.putString(
             "decoder_pdf417",
-            Statics.prefsGetBoolean(Preference.symbologyPDF417).toString()
+            prefsGetBoolean(Preference.symbologyPDF417)
+                .toString()
         )
         barcodeProps.putString(
             "decoder_aztec",
-            Statics.prefsGetBoolean(Preference.symbologyAztec).toString()
+            prefsGetBoolean(Preference.symbologyAztec)
+                .toString()
         )
         barcodeProps.putString(
             "decoder_qrcode",
-            Statics.prefsGetBoolean(Preference.symbologyQRCode).toString()
+            prefsGetBoolean(Preference.symbologyQRCode)
+                .toString()
         )
         barcodeProps.putString(
             "decoder_codabar",
-            Statics.prefsGetBoolean(Preference.symbologyCODABAR).toString()
+            prefsGetBoolean(Preference.symbologyCODABAR)
+                .toString()
         )
         barcodeProps.putString(
             "decoder_code128",
-            Statics.prefsGetBoolean(Preference.symbologyCode128).toString()
+            prefsGetBoolean(Preference.symbologyCode128)
+                .toString()
         )
         barcodeProps.putString(
             "decoder_code39",
-            Statics.prefsGetBoolean(Preference.symbologyCode39).toString()
+            prefsGetBoolean(Preference.symbologyCode39)
+                .toString()
         )
         barcodeProps.putString(
             "decoder_code93",
-            Statics.prefsGetBoolean(Preference.symbologyCode93).toString()
+            prefsGetBoolean(Preference.symbologyCode93)
+                .toString()
         )
         barcodeProps.putString(
             "decoder_datamatrix",
-            Statics.prefsGetBoolean(Preference.symbologyDataMatrix).toString()
+            prefsGetBoolean(Preference.symbologyDataMatrix)
+                .toString()
         )
         barcodeProps.putString(
             "decoder_ean13",
-            Statics.prefsGetBoolean(Preference.symbologyEAN13).toString()
+            prefsGetBoolean(Preference.symbologyEAN13)
+                .toString()
         )
         barcodeProps.putString(
             "decoder_ean8",
-            Statics.prefsGetBoolean(Preference.symbologyEAN8).toString()
+            prefsGetBoolean(Preference.symbologyEAN8)
+                .toString()
         )
         barcodeProps.putString(
             "decoder_maxicode",
-            Statics.prefsGetBoolean(Preference.symbologyMaxiCode).toString()
+            prefsGetBoolean(Preference.symbologyMaxiCode)
+                .toString()
         )
         barcodeProps.putString(
             "decoder_upca",
-            Statics.prefsGetBoolean(Preference.symbologyUPCA).toString()
+            prefsGetBoolean(Preference.symbologyUPCA)
+                .toString()
         )
         barcodeProps.putString(
             "decoder_upce0",
-            Statics.prefsGetBoolean(Preference.symbologyUPCE).toString()
+            prefsGetBoolean(Preference.symbologyUPCE)
+                .toString()
         )
 
         // Bundle "barcodeProps" within bundle "barcodeConfig"

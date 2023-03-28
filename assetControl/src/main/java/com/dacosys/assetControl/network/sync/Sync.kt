@@ -2,6 +2,7 @@ package com.dacosys.assetControl.network.sync
 
 import android.os.Handler
 import android.os.Looper
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetInt
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.settings.Preference
@@ -48,7 +49,8 @@ class Sync {
                 cancelTimer()
 
                 timer = Timer()
-                val interval = Statics.prefsGetInt(Preference.acSyncInterval)
+                val interval =
+                    prefsGetInt(Preference.acSyncInterval)
 
                 timerTask = object : TimerTask() {
                     override fun run() {

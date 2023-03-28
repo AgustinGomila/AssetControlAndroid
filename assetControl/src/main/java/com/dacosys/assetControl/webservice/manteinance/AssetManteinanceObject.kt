@@ -27,7 +27,7 @@ class AssetManteinanceObject() : Parcelable {
         manteinance_type_id = assetManteinance.manteinanceTypeId
         manteinance_status_id = assetManteinance.manteinanceStatusId
         asset_id = assetManteinance.assetId
-        repairman_id = Statics.currentUserId!!
+        repairman_id = Statics.currentUserId ?: 0
     }
 
     fun getBySoapObject(so: SoapObject): AssetManteinanceObject {

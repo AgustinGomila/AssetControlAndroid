@@ -18,6 +18,9 @@ import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsIsInitialized
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsPutString
+import com.dacosys.assetControl.utils.Preferences.Companion.startPrefs
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.scanners.Scanner.ScannerListener
@@ -142,8 +145,7 @@ object JotterListener : Jotter.Listener {
         when (event) {
             "CREATE" -> {
                 // Ok, esto sólo se ejecutaría luego de onCreate de HomeActivity
-                if (!Statics.prefsIsInitialized())
-                    Statics.startPrefs()
+                if (!prefsIsInitialized()) startPrefs()
 
                 onCreate(tActivity)
             }
@@ -196,14 +198,14 @@ object JotterListener : Jotter.Listener {
             val model = Build.MODEL
 
             when {
-                manufacturer.contains("Honeywell", true) ||
-                        manufacturer.startsWith("Universal Global Scientific Industrial") ||
-                        manufacturer.startsWith("Foxconn International Holdings Limited") ->
-                    collectorType = CollectorType.honeywellNative
-                manufacturer.contains("Motorola", true) ||
-                        manufacturer.contains("Zebra", true) ||
-                        manufacturer.contains("Symbol", true) ->
-                    collectorType = CollectorType.zebra
+                manufacturer.contains(
+                    "Honeywell", true
+                ) || manufacturer.startsWith("Universal Global Scientific Industrial") || manufacturer.startsWith(
+                    "Foxconn International Holdings Limited"
+                ) -> collectorType = CollectorType.honeywellNative
+                manufacturer.contains("Motorola", true) || manufacturer.contains(
+                    "Zebra", true
+                ) || manufacturer.contains("Symbol", true) -> collectorType = CollectorType.zebra
                 /*
                 manufacturer.contains("Janam", true)-> when (model) {
                     "XG3" -> collectorType = CollectorType.janamXG3
@@ -216,7 +218,9 @@ object JotterListener : Jotter.Listener {
             Log.v(javaClass.simpleName, "Manufacturer: $manufacturer, Model: $model")
 
             if (collectorType != null) {
-                Statics.prefsPutString(Preference.collectorType.key, collectorType.id.toString())
+                prefsPutString(
+                    Preference.collectorType.key, collectorType.id.toString()
+                )
                 makeText(
                     activity.window.decorView,
                     "${getContext().getString(R.string.device)}: $manufacturer $model",
@@ -267,8 +271,7 @@ object JotterListener : Jotter.Listener {
             // Creamos y agregamos el escáner de la actividad
             createBarcodeReader(activity)
 
-            if (Statics.isNfcRequired())
-                Nfc.setupNFCReader(activity)
+            if (Statics.isNfcRequired()) Nfc.setupNFCReader(activity)
 
             if (activity is Rfid.RfidDeviceListener && Statics.isRfidRequired()) {
                 rfidStart(activity)
@@ -283,8 +286,8 @@ object JotterListener : Jotter.Listener {
     }
 
     private fun rfidSetup(activity: AppCompatActivity) {
-        val bluetoothManager = getContext()
-            .getSystemService(AppCompatActivity.BLUETOOTH_SERVICE) as BluetoothManager
+        val bluetoothManager =
+            getContext().getSystemService(AppCompatActivity.BLUETOOTH_SERVICE) as BluetoothManager
         val mBluetoothAdapter = bluetoothManager.adapter
         if (mBluetoothAdapter == null) {
             makeText(
@@ -297,8 +300,7 @@ object JotterListener : Jotter.Listener {
                 val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
                 enableBtIntent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
                 if (ActivityCompat.checkSelfPermission(
-                        activity,
-                        Manifest.permission.BLUETOOTH_CONNECT
+                        activity, Manifest.permission.BLUETOOTH_CONNECT
                     ) != PackageManager.PERMISSION_GRANTED
                 ) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -359,11 +361,9 @@ object JotterListener : Jotter.Listener {
     }
 
     fun resumeReaderDevices(activity: AppCompatActivity) {
-        if (Statics.isNfcRequired())
-            enableNfcForegroundDispatch(activity)
+        if (Statics.isNfcRequired()) enableNfcForegroundDispatch(activity)
 
-        if (activity is Rfid.RfidDeviceListener && Statics.isRfidRequired())
-            Rfid.resume(activity)
+        if (activity is Rfid.RfidDeviceListener && Statics.isRfidRequired()) Rfid.resume(activity)
 
         scannerList.firstOrNull { it.activityName() == activity.javaClass.simpleName }?.onResume()
         floatingWindowList.firstOrNull { it.activityName == activity.javaClass.simpleName }
@@ -402,11 +402,9 @@ object JotterListener : Jotter.Listener {
     }
 
     fun pauseReaderDevices(activity: AppCompatActivity) {
-        if (activity is Rfid.RfidDeviceListener && Statics.isRfidRequired())
-            Rfid.pause()
+        if (activity is Rfid.RfidDeviceListener && Statics.isRfidRequired()) Rfid.pause()
 
-        if (Statics.isNfcRequired())
-            Nfc.disableNfcForegroundDispatch(activity)
+        if (Statics.isNfcRequired()) Nfc.disableNfcForegroundDispatch(activity)
 
         scannerList.firstOrNull { it.activityName() == activity.javaClass.simpleName }?.onPause()
         floatingWindowList.firstOrNull { it.activityName == activity.javaClass.simpleName }

@@ -12,7 +12,9 @@ import android.util.Log
 import androidx.core.app.ActivityCompat
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetInt
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetString
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.utils.settings.Preference
 import java.io.IOException
@@ -63,14 +65,13 @@ class Vh75Bt(
     }
 
     private fun pairDevice() {
-        val btAddress = Statics.prefsGetString(Preference.rfidBtAddress)
+        val btAddress = prefsGetString(Preference.rfidBtAddress)
         if (btAddress.isEmpty()) {
             return
         }
 
         if (ActivityCompat.checkSelfPermission(
-                getContext(),
-                Manifest.permission.BLUETOOTH_CONNECT
+                getContext(), Manifest.permission.BLUETOOTH_CONNECT
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             return
@@ -113,8 +114,7 @@ class Vh75Bt(
             // given BluetoothDevice
             try {
                 if (ActivityCompat.checkSelfPermission(
-                        getContext(),
-                        Manifest.permission.BLUETOOTH_CONNECT
+                        getContext(), Manifest.permission.BLUETOOTH_CONNECT
                     ) == PackageManager.PERMISSION_GRANTED
                 ) {
                     tmp = mDevice.createRfcommSocketToServiceRecord(uuid)
@@ -133,8 +133,7 @@ class Vh75Bt(
             Log.v(tag, "BEGIN mConnectThread")
 
             if (ActivityCompat.checkSelfPermission(
-                    getContext(),
-                    Manifest.permission.BLUETOOTH_CONNECT
+                    getContext(), Manifest.permission.BLUETOOTH_CONNECT
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
                 return
@@ -717,35 +716,27 @@ class Vh75Bt(
             }
 
             when {
-                data[0] == Head.RECEIVE_OK.code ->
-                    Log.v(
-                        tag,
-                        "checkSuccess: $commandCode ${Head.RECEIVE_OK.name} ${
-                            Utility.bytes2HexStringWithSperator(data)
-                        }"
-                    )
-                data[0] == Head.RECEIVE_FAIL.code ->
-                    Log.e(
-                        tag,
-                        "checkSuccess: $commandCode ${Head.RECEIVE_FAIL.name} ${
-                            Utility.bytes2HexStringWithSperator(data)
-                        }"
-                    )
-                data[0] == Head.SEND.code ->
-                    Log.v(
-                        tag,
-                        "checkSuccess: $commandCode ${Head.SEND.name} ${
-                            Utility.bytes2HexStringWithSperator(data)
-                        }"
-                    )
-                data[0] == 0x00.toByte() ->
-                    Log.v(
-                        tag,
-                        "checkSuccess: $commandCode OK ${Utility.bytes2HexStringWithSperator(data)}"
-                    )
-                else -> Log.v(
+                data[0] == Head.RECEIVE_OK.code -> Log.v(
+                    tag, "checkSuccess: $commandCode ${Head.RECEIVE_OK.name} ${
+                        Utility.bytes2HexStringWithSperator(data)
+                    }"
+                )
+                data[0] == Head.RECEIVE_FAIL.code -> Log.e(
+                    tag, "checkSuccess: $commandCode ${Head.RECEIVE_FAIL.name} ${
+                        Utility.bytes2HexStringWithSperator(data)
+                    }"
+                )
+                data[0] == Head.SEND.code -> Log.v(
+                    tag, "checkSuccess: $commandCode ${Head.SEND.name} ${
+                        Utility.bytes2HexStringWithSperator(data)
+                    }"
+                )
+                data[0] == 0x00.toByte() -> Log.v(
                     tag,
-                    "checkSuccess: $commandCode Unknown Result ${
+                    "checkSuccess: $commandCode OK ${Utility.bytes2HexStringWithSperator(data)}"
+                )
+                else -> Log.v(
+                    tag, "checkSuccess: $commandCode Unknown Result ${
                         Utility.bytes2HexStringWithSperator(data)
                     }"
                 )
@@ -879,8 +870,7 @@ class Vh75Bt(
     fun resetToFactory() {
         write(
             genCommand(
-                cmd = CommandCode.ReadFactoryParameter,
-                param = null
+                cmd = CommandCode.ReadFactoryParameter, param = null
             )
         )
     }
@@ -888,8 +878,7 @@ class Vh75Bt(
     fun setBluetoothName(name: String) {
         write(
             genCommand(
-                cmd = CommandCode.SetBluetoothName,
-                param = name.toByteArray()
+                cmd = CommandCode.SetBluetoothName, param = name.toByteArray()
             )
         )
     }
@@ -897,8 +886,7 @@ class Vh75Bt(
     fun getBluetoothName() {
         write(
             genCommand(
-                cmd = CommandCode.GetBluetoothName,
-                param = null
+                cmd = CommandCode.GetBluetoothName, param = null
             )
         )
     }
@@ -906,8 +894,7 @@ class Vh75Bt(
     private fun readConfigParam() {
         write(
             genCommand(
-                cmd = CommandCode.ReadHandsetParam,
-                param = null
+                cmd = CommandCode.ReadHandsetParam, param = null
             )
         )
     }
@@ -915,8 +902,7 @@ class Vh75Bt(
     fun setReaderMode(nMode: Byte) {
         write(
             genCommand(
-                cmd = CommandCode.SetReaderMode,
-                param = byteArrayOf(nMode)
+                cmd = CommandCode.SetReaderMode, param = byteArrayOf(nMode)
             )
         )
     }
@@ -924,8 +910,7 @@ class Vh75Bt(
     private fun getVersion() {
         write(
             genCommand(
-                cmd = CommandCode.GetVersion,
-                param = null
+                cmd = CommandCode.GetVersion, param = null
             )
         )
     }
@@ -933,10 +918,7 @@ class Vh75Bt(
     private fun listTagID(mem: Int, address: Int, len: Int) {
         write(
             genCommandListTagID(
-                mem = mem,
-                address = address,
-                len = len,
-                mask = byteArrayOf()
+                mem = mem, address = address, len = len, mask = byteArrayOf()
             )
         )
     }
@@ -948,10 +930,10 @@ class Vh75Bt(
             "Read RFID Config Parameters: TagType: ${param.TagType} Alarm: ${param.Alarm} Vibration: ${param.Reserve19} Power: ${param.Power} MinFrequence: ${param.Min_Frequence} MaxFrequence: ${param.Max_Frequence}"
         )
 
-        val power = Statics.prefsGetInt(Preference.rfidReadPower)
+        val power = prefsGetInt(Preference.rfidReadPower)
         val tagType = 4 //04H－ISO-18000-6C
-        val alarm = Statics.prefsGetBoolean(Preference.rfidPlaySoundOnRead)
-        val shock = Statics.prefsGetBoolean(Preference.rfidShockOnRead)
+        val alarm = prefsGetBoolean(Preference.rfidPlaySoundOnRead)
+        val shock = prefsGetBoolean(Preference.rfidShockOnRead)
 
         param.Power = power.toByte()
         param.Alarm = if (alarm) 1.toByte() else 0.toByte()
@@ -1158,8 +1140,7 @@ class Vh75Bt(
 
         override val remoteDeviceName: String
             get() = if (ActivityCompat.checkSelfPermission(
-                    getContext(),
-                    Manifest.permission.BLUETOOTH_CONNECT
+                    getContext(), Manifest.permission.BLUETOOTH_CONNECT
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
                 ""
@@ -1170,8 +1151,7 @@ class Vh75Bt(
         @Throws(IOException::class)
         override fun connect() {
             if (ActivityCompat.checkSelfPermission(
-                    getContext(),
-                    Manifest.permission.BLUETOOTH_CONNECT
+                    getContext(), Manifest.permission.BLUETOOTH_CONNECT
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
                 return
@@ -1202,8 +1182,7 @@ class Vh75Bt(
         @Throws(IOException::class)
         override fun connect() {
             if (ActivityCompat.checkSelfPermission(
-                    getContext(),
-                    Manifest.permission.BLUETOOTH_CONNECT
+                    getContext(), Manifest.permission.BLUETOOTH_CONNECT
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
                 return

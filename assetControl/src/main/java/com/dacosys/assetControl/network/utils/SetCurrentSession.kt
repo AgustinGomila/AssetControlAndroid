@@ -41,13 +41,14 @@ class SetCurrentSession(private var onSessionCreated: (Boolean) -> Unit = {}) {
             return@withContext false
         }
 
-        val macAddress = getMACAddress()
+        val macAddress = "" // getMACAddress()
 
         val user = Statics.currentUser()
         if (user == null) {
             Statics.currentSession = null
             return@withContext false
         }
+        val userId = Statics.currentUserId ?: return@withContext false
 
         val operatingSystem =
             "Android ${Build.VERSION.RELEASE} (SDK ${Build.VERSION.SDK_INT})"
@@ -95,7 +96,7 @@ class SetCurrentSession(private var onSessionCreated: (Boolean) -> Unit = {}) {
         if (sessionId.isNotEmpty()) {
             val cs = SessionObject()
             cs.sessionId = sessionId
-            cs.userId = Statics.currentUserId!!
+            cs.userId = userId
 
             Statics.currentSession = cs
         } else {
@@ -106,23 +107,23 @@ class SetCurrentSession(private var onSessionCreated: (Boolean) -> Unit = {}) {
         return@withContext Statics.currentSession != null
     }
 
-    private fun getMACAddress(interfaceName: String = "wlan0"): String {
-        try {
-            val interfaces = Collections.list(NetworkInterface.getNetworkInterfaces())
-            for (intF in interfaces) {
-                if (!intF.name.equals(interfaceName, true)) continue
-                val mac = intF.hardwareAddress ?: return ""
-                val buf = StringBuilder()
-                for (aMac in mac) buf.append(String.format("%02X:", aMac))
-                if (buf.isNotEmpty()) buf.deleteCharAt(buf.length - 1)
-                return buf.toString().replace(":", "")
-            }
-        } catch (ignored: Exception) {
-        }
-
-        // for now eat exceptions
-        return ""
-    }
+    // private fun getMACAddress(interfaceName: String = "wlan0"): String {
+    //     try {
+    //         val interfaces = Collections.list(NetworkInterface.getNetworkInterfaces())
+    //         for (intF in interfaces) {
+    //             if (!intF.name.equals(interfaceName, true)) continue
+    //             val mac = intF.hardwareAddress ?: return ""
+    //             val buf = StringBuilder()
+    //             for (aMac in mac) buf.append(String.format("%02X:", aMac))
+    //             if (buf.isNotEmpty()) buf.deleteCharAt(buf.length - 1)
+    //             return buf.toString().replace(":", "")
+    //         }
+    //     } catch (ignored: Exception) {
+    //     }
+    //
+    //     // for now eat exceptions
+    //     return ""
+    // }
 
     /**
      * Get IP address from first non-localhost interface

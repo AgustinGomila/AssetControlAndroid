@@ -1,14 +1,10 @@
 package com.dacosys.assetControl.ui.activities.asset
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
-import android.view.*
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.EditText
-import android.widget.Switch
+import android.view.Menu
+import android.view.MenuItem
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -34,7 +30,10 @@ import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.fragments.asset.AssetCRUDFragment
 import com.dacosys.assetControl.ui.fragments.asset.AssetStatusSpinnerFragment
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
+import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.utils.Statics.Companion.isRfidRequired
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.ParcelLong
@@ -78,7 +77,7 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
                 }
 
                 if (returnOnSuccess) {
-                    Statics.closeKeyboard(this)
+                    closeKeyboard(this)
 
                     val data = Intent()
                     data.putExtra("asset", Parcels.wrap(result.asset))
@@ -100,7 +99,7 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
                 }
 
                 if (returnOnSuccess) {
-                    Statics.closeKeyboard(this)
+                    closeKeyboard(this)
 
                     val data = Intent()
                     data.putExtra("asset", Parcels.wrap(result.asset))
@@ -133,26 +132,6 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
     private var returnOnSuccess: Boolean = false
     private var rejectNewInstances = false
 
-    @SuppressLint("ClickableViewAccessibility")
-    private fun setupUI(view: View) {
-        // Set up touch listener for non-text box views to hide keyboard.
-        if (view !is EditText) {
-            view.setOnTouchListener { _, motionEvent ->
-                Statics.closeKeyboard(this)
-                if (view is Button && view !is Switch && view !is CheckBox) {
-                    touchButton(motionEvent, view)
-                    true
-                } else {
-                    false
-                }
-            }
-        }
-
-        //If a layout container, iterate over children and seed recursion.
-        if (view is ViewGroup) {
-            (0 until view.childCount).map { view.getChildAt(it) }.forEach { setupUI(it) }
-        }
-    }
 
     override fun onSaveInstanceState(savedInstanceState: Bundle) {
         super.onSaveInstanceState(savedInstanceState)
@@ -178,7 +157,7 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Statics.setScreenRotation(this)
+        setScreenRotation(this)
         binding = AssetCrudActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -230,8 +209,7 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
         // Llenar la grilla
         setPanels()
 
-        // ESTO SIRVE PARA OCULTAR EL TECLADO EN PANTALLA CUANDO PIERDEN EL FOCO LOS CONTROLES QUE LO NECESITAN
-        setupUI(binding.root)
+        setupUI(binding.root, this)
     }
 
     private fun setPanels() {
@@ -328,7 +306,7 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
                         imageControlFragment ?: return@runOnUiThread
                     ).commit()
 
-                if (!Statics.prefsGetBoolean(Preference.useImageControl)) {
+                if (!prefsGetBoolean(Preference.useImageControl)) {
                     fm.beginTransaction()
                         .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
                         .hide(imageControlFragment as Fragment).commitAllowingStateLoss()
@@ -545,7 +523,7 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
                 alert.setMessage(getString(R.string.discard_changes_and_return_to_the_main_menu_question))
                 alert.setNegativeButton(R.string.cancel, null)
                 alert.setPositiveButton(R.string.accept) { _, _ ->
-                    Statics.closeKeyboard(this)
+                    closeKeyboard(this)
 
                     setResult(RESULT_CANCELED)
                     finish()
@@ -561,22 +539,10 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
                 JotterListener.resumeReaderDevices(this)
             }
         } else {
-            Statics.closeKeyboard(this)
+            closeKeyboard(this)
 
             setResult(RESULT_CANCELED)
             finish()
-        }
-    }
-
-    private fun touchButton(motionEvent: MotionEvent, button: Button) {
-        when (motionEvent.action) {
-            MotionEvent.ACTION_UP -> {
-                button.isPressed = false
-                button.performClick()
-            }
-            MotionEvent.ACTION_DOWN -> {
-                button.isPressed = true
-            }
         }
     }
 

@@ -18,7 +18,7 @@ import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.model.manteinance.AssetManteinance
 import com.dacosys.assetControl.model.manteinance.ManteinanceStatus
-import com.dacosys.assetControl.utils.Statics.Companion.getColorWithAlpha
+import com.dacosys.assetControl.utils.Screen.Companion.getColorWithAlpha
 import java.lang.ref.WeakReference
 
 /**
@@ -421,7 +421,10 @@ class AssetManteinanceAdapter : ArrayAdapter<AssetManteinance> {
             if (listView!!.isItemChecked(position)) {
                 v!!.background.colorFilter =
                     BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-                        getColorWithAlpha(colorId = R.color.lightslategray, alpha = 240),
+                        getColorWithAlpha(
+                            colorId = R.color.lightslategray,
+                            alpha = 240
+                        ),
                         BlendModeCompat.MODULATE
                     )
             } else {

@@ -8,10 +8,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.*
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.EditText
-import android.widget.Switch
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -42,6 +38,11 @@ import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.dacosys.assetControl.ui.fragments.location.WarehouseAreaSelectFilterFragment
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetStringSet
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsPutStringSet
+import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
+import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.scanners.JotterListener
@@ -74,7 +75,10 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
     private fun saveSharedPreferences() {
         val set = HashSet<String>()
         for (i in visibleStatusArray) set.add(i.id.toString())
-        Statics.prefsPutStringSet(Preference.assetReviewVisibleStatus.key, set)
+        prefsPutStringSet(
+            Preference.assetReviewVisibleStatus.key,
+            set
+        )
     }
 
     override fun onRefresh() {
@@ -99,26 +103,6 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
     private var arrayAdapter: AssetReviewAdapter? = null
     private var panelBottomIsExpanded = true
 
-    @SuppressLint("ClickableViewAccessibility")
-    private fun setupUI(view: View) {
-        // Set up touch listener for non-text box views to hide keyboard.
-        if (view !is EditText) {
-            view.setOnTouchListener { _, motionEvent ->
-                Statics.closeKeyboard(this)
-                if (view is Button && view !is Switch && view !is CheckBox) {
-                    touchButton(motionEvent, view)
-                    true
-                } else {
-                    false
-                }
-            }
-        }
-
-        //If a layout container, iterate over children and seed recursion.
-        if (view is ViewGroup) {
-            (0 until view.childCount).map { view.getChildAt(it) }.forEach { setupUI(it) }
-        }
-    }
 
     override fun onSaveInstanceState(savedInstanceState: Bundle) {
         super.onSaveInstanceState(savedInstanceState)
@@ -175,7 +159,7 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private fun loadDefaultVisibleStatus() {
         visibleStatusArray.clear()
-        var set = Statics.prefsGetStringSet(
+        var set = prefsGetStringSet(
             Preference.assetReviewVisibleStatus.key,
             Preference.assetReviewVisibleStatus.defaultValue as ArrayList<String>
         )
@@ -194,7 +178,7 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Statics.setScreenRotation(this)
+        setScreenRotation(this)
         binding = AssetReviewSelectActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -233,8 +217,7 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
         // Llenar la grilla
         setPanels()
 
-        // ESTO SIRVE PARA OCULTAR EL TECLADO EN PANTALLA CUANDO PIERDEN EL FOCO LOS CONTROLES QUE LO NECESITAN
-        setupUI(binding.assetReviewSelect)
+        setupUI(binding.root, this)
     }
 
     private fun setPanels() {
@@ -323,18 +306,6 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
     private fun showProgressBar(show: Boolean) {
         runOnUiThread {
             binding.swipeRefreshWarehouseArea.isRefreshing = show
-        }
-    }
-
-    private fun touchButton(motionEvent: MotionEvent, button: Button) {
-        when (motionEvent.action) {
-            MotionEvent.ACTION_UP -> {
-                button.isPressed = false
-                button.performClick()
-            }
-            MotionEvent.ACTION_DOWN -> {
-                button.isPressed = true
-            }
         }
     }
 
@@ -739,7 +710,7 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
         super.onResume()
 
         rejectNewInstances = false
-        Statics.closeKeyboard(this)
+        closeKeyboard(this)
         waSelectFilterFragment?.refreshViews()
     }
 
@@ -750,7 +721,7 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     override fun onFilterChanged(waDescription: String, wDescription: String, onlyActive: Boolean) {
-        Statics.closeKeyboard(this)
+        closeKeyboard(this)
         fillListView()
     }
 
@@ -817,7 +788,7 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
         } finally {
             // Unless is blocked, unlock the partial
             JotterListener.lockScanner(this, false)
-            Statics.closeKeyboard(this)
+            closeKeyboard(this)
         }
     }
 

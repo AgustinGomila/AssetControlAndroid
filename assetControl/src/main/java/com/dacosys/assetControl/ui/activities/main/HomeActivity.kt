@@ -59,9 +59,12 @@ import com.dacosys.assetControl.ui.activities.route.RouteSelectActivity
 import com.dacosys.assetControl.ui.activities.sync.SyncActivity
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetString
+import com.dacosys.assetControl.utils.Screen.Companion.getBestContrastColor
+import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.Statics.Companion.OFFLINE_MODE
-import com.dacosys.assetControl.utils.Statics.Companion.prefsGetString
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.mainButton.MainButton
 import com.dacosys.assetControl.utils.scanners.JotterListener
@@ -78,9 +81,7 @@ import kotlin.concurrent.thread
 import kotlin.math.ceil
 
 
-class HomeActivity :
-    AppCompatActivity(),
-    Scanner.ScannerListener {
+class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
     override fun attachBaseContext(base: Context) {
         super.attachBaseContext(base)
         Reflection.unseal(base)
@@ -104,8 +105,12 @@ class HomeActivity :
         grantResults: IntArray,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (permissions.contains(Manifest.permission.BLUETOOTH_CONNECT))
-            JotterListener.onRequestPermissionsResult(this, requestCode, permissions, grantResults)
+        if (permissions.contains(Manifest.permission.BLUETOOTH_CONNECT)) JotterListener.onRequestPermissionsResult(
+            this,
+            requestCode,
+            permissions,
+            grantResults
+        )
     }
 
     override fun scannerCompleted(scanCode: String) {
@@ -158,8 +163,7 @@ class HomeActivity :
 
         // Inicia el hilo de sincronización
         thread {
-            Sync.startTimer(
-                onSyncProgress = { syncViewModel.setSyncDownloadProgress(it) },
+            Sync.startTimer(onSyncProgress = { syncViewModel.setSyncDownloadProgress(it) },
                 onSessionCreated = { syncViewModel.setSessionCreated(it) })
         }
 
@@ -194,11 +198,7 @@ class HomeActivity :
     override fun onBackPressed() {
         Statics.currentUserId = null
 
-        if (isTaskRoot
-            && supportFragmentManager.primaryNavigationFragment
-                ?.childFragmentManager?.backStackEntryCount == 0
-            && supportFragmentManager.backStackEntryCount == 0
-        ) {
+        if (isTaskRoot && supportFragmentManager.primaryNavigationFragment?.childFragmentManager?.backStackEntryCount == 0 && supportFragmentManager.backStackEntryCount == 0) {
             finishAfterTransition()
         } else {
             super.onBackPressed()
@@ -213,9 +213,7 @@ class HomeActivity :
     private fun clickButton(clickedButton: Button) {
         if (!Statics.deviceDateIsValid()) {
             makeText(
-                binding.root,
-                getString(R.string.device_date_is_invalid),
-                SnackBarType.ERROR
+                binding.root, getString(R.string.device_date_is_invalid), SnackBarType.ERROR
             )
             return
         }
@@ -354,11 +352,7 @@ class HomeActivity :
         input.isFocusable = true
         input.isFocusableInTouchMode = true
         input.setOnKeyListener { _, keyCode, keyEvent ->
-            if (keyCode == EditorInfo.IME_ACTION_DONE ||
-                (keyEvent.action == KeyEvent.ACTION_UP &&
-                        (keyCode == KeyEvent.KEYCODE_ENTER ||
-                                keyCode == KeyEvent.KEYCODE_DPAD_CENTER))
-            ) {
+            if (keyCode == EditorInfo.IME_ACTION_DONE || (keyEvent.action == KeyEvent.ACTION_UP && (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_DPAD_CENTER))) {
                 if (alertDialog != null) {
                     alertDialog!!.getButton(DialogInterface.BUTTON_POSITIVE).performClick()
                 }
@@ -396,9 +390,7 @@ class HomeActivity :
             isReturnedFromSettings = true
         } else {
             makeText(
-                binding.root,
-                getString(R.string.invalid_password),
-                SnackBarType.ERROR
+                binding.root, getString(R.string.invalid_password), SnackBarType.ERROR
             )
         }
     }
@@ -416,7 +408,7 @@ class HomeActivity :
     override fun onCreate(savedInstanceState: Bundle?) {
         createSplashScreen()
         super.onCreate(savedInstanceState)
-        Statics.setScreenRotation(this)
+        setScreenRotation(this)
         binding = HomeActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -430,9 +422,7 @@ class HomeActivity :
 
         if (Statics.wsUrl.isEmpty() || Statics.wsNamespace.isEmpty()) {
             makeText(
-                binding.root,
-                getString(R.string.webservice_is_not_configured),
-                SnackBarType.ERROR
+                binding.root, getString(R.string.webservice_is_not_configured), SnackBarType.ERROR
             )
             setupInitConfig()
         } else {
@@ -530,8 +520,7 @@ class HomeActivity :
     private fun resize(image: Drawable): Drawable {
         val bitmap = (image as BitmapDrawable).bitmap
         val bitmapResized = Bitmap.createScaledBitmap(
-            bitmap,
-            (bitmap.width * 0.5).toInt(), (bitmap.height * 0.5).toInt(), false
+            bitmap, (bitmap.width * 0.5).toInt(), (bitmap.height * 0.5).toInt(), false
         )
         return BitmapDrawable(resources, bitmapResized)
     }
@@ -619,21 +608,9 @@ class HomeActivity :
             }
         }
         button.setOnTouchListener(View.OnTouchListener { view, motionEvent ->
-            touchButton(motionEvent, view as Button)
+            com.dacosys.assetControl.utils.Screen.touchButton(motionEvent, view as Button)
             return@OnTouchListener true
         })
-    }
-
-    private fun touchButton(motionEvent: MotionEvent, button: Button) {
-        when (motionEvent.action) {
-            MotionEvent.ACTION_UP -> {
-                button.isPressed = false
-                button.performClick()
-            }
-            MotionEvent.ACTION_DOWN -> {
-                button.isPressed = true
-            }
-        }
     }
 
     @SuppressLint("DiscouragedPrivateApi") /// El campo mGradientState no es parte de la SDK
@@ -667,7 +644,7 @@ class HomeActivity :
 
         for (b in t) {
             // Omitir el botón de mantenimientos
-            if (b.mainButtonId == MainButton.AssetManteinance.mainButtonId && !Statics.prefsGetBoolean(
+            if (b.mainButtonId == MainButton.AssetManteinance.mainButtonId && !prefsGetBoolean(
                     Preference.useAssetControlManteinance
                 )
             ) {
@@ -682,37 +659,37 @@ class HomeActivity :
         for (i in buttonCollection.indices) {
             val b = buttonCollection[i]
             if (i < allButtonMain.count()) {
-                val backColor: Int =
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                        ((b.background as StateListDrawable).current as GradientDrawable).color?.defaultColor
-                            ?: R.color.white
-                    } else {
-                        // Use reflection below API level 23
-                        try {
-                            val drawable =
-                                (b.background as StateListDrawable).current as GradientDrawable
-                            var field: Field =
-                                drawable.javaClass.getDeclaredField("mGradientState")
+                val backColor: Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    ((b.background as StateListDrawable).current as GradientDrawable).color?.defaultColor
+                        ?: R.color.white
+                } else {
+                    // Use reflection below API level 23
+                    try {
+                        val drawable =
+                            (b.background as StateListDrawable).current as GradientDrawable
+                        var field: Field = drawable.javaClass.getDeclaredField("mGradientState")
+                        field.isAccessible = true
+                        val myObj = field.get(drawable)
+                        if (myObj == null) R.color.white
+                        else {
+                            field = myObj.javaClass.getDeclaredField("mSolidColors")
                             field.isAccessible = true
-                            val myObj = field.get(drawable)
-                            if (myObj == null)
-                                R.color.white
-                            else {
-                                field = myObj.javaClass.getDeclaredField("mSolidColors")
-                                field.isAccessible = true
-                                (field.get(myObj) as ColorStateList).defaultColor
-                            }
-                        } catch (e: NoSuchFieldException) {
-                            e.printStackTrace()
-                            R.color.white
-                        } catch (e: IllegalAccessException) {
-                            e.printStackTrace()
-                            R.color.white
+                            (field.get(myObj) as ColorStateList).defaultColor
                         }
+                    } catch (e: NoSuchFieldException) {
+                        e.printStackTrace()
+                        R.color.white
+                    } catch (e: IllegalAccessException) {
+                        e.printStackTrace()
+                        R.color.white
                     }
+                }
 
-                val textColor =
-                    Statics.getBestContrastColor("#" + Integer.toHexString(backColor))
+                val textColor = getBestContrastColor(
+                    "#" + Integer.toHexString(
+                        backColor
+                    )
+                )
 
                 b.setTextColor(textColor)
                 b.visibility = View.VISIBLE
@@ -723,26 +700,17 @@ class HomeActivity :
                 if (allButtonMain[i].iconResource != null) {
                     b.setCompoundDrawablesWithIntrinsicBounds(
                         AppCompatResources.getDrawable(
-                            this,
-                            allButtonMain[i].iconResource!!
-                        ),
-                        null,
-                        null,
-                        null
+                            this, allButtonMain[i].iconResource!!
+                        ), null, null, null
                     )
-                    b.compoundDrawables
-                        .filterNotNull()
-                        .forEach {
-                            it.colorFilter =
-                                BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-                                    ResourcesCompat.getColor(
-                                        getContext().resources,
-                                        R.color.white,
-                                        null
-                                    ),
-                                    BlendModeCompat.SRC_IN
-                                )
-                        }
+                    b.compoundDrawables.filterNotNull().forEach {
+                        it.colorFilter =
+                            BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
+                                ResourcesCompat.getColor(
+                                    getContext().resources, R.color.white, null
+                                ), BlendModeCompat.SRC_IN
+                            )
+                    }
                 }
                 b.compoundDrawablePadding = 25
             } else {
@@ -759,36 +727,35 @@ class HomeActivity :
             }
         }
 
-        val backColor: Int =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                ((binding.mainButton13.background as StateListDrawable).current as GradientDrawable).color?.defaultColor
-                    ?: R.color.white
-            } else {
-                // Use reflection below API level 23
-                try {
-                    val drawable =
-                        (binding.mainButton13.background as StateListDrawable).current as GradientDrawable
-                    var field: Field =
-                        drawable.javaClass.getDeclaredField("mGradientState")
+        val backColor: Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            ((binding.mainButton13.background as StateListDrawable).current as GradientDrawable).color?.defaultColor
+                ?: R.color.white
+        } else {
+            // Use reflection below API level 23
+            try {
+                val drawable =
+                    (binding.mainButton13.background as StateListDrawable).current as GradientDrawable
+                var field: Field = drawable.javaClass.getDeclaredField("mGradientState")
+                field.isAccessible = true
+                val myObj = field.get(drawable)
+                if (myObj == null) R.color.white
+                else {
+                    field = myObj.javaClass.getDeclaredField("mSolidColors")
                     field.isAccessible = true
-                    val myObj = field.get(drawable)
-                    if (myObj == null)
-                        R.color.white
-                    else {
-                        field = myObj.javaClass.getDeclaredField("mSolidColors")
-                        field.isAccessible = true
-                        (field.get(myObj) as ColorStateList).defaultColor
-                    }
-                } catch (e: NoSuchFieldException) {
-                    e.printStackTrace()
-                    R.color.white
-                } catch (e: IllegalAccessException) {
-                    e.printStackTrace()
-                    R.color.white
+                    (field.get(myObj) as ColorStateList).defaultColor
                 }
+            } catch (e: NoSuchFieldException) {
+                e.printStackTrace()
+                R.color.white
+            } catch (e: IllegalAccessException) {
+                e.printStackTrace()
+                R.color.white
             }
+        }
 
-        val textColor = Statics.getBestContrastColor("#" + Integer.toHexString(backColor))
+        val textColor = getBestContrastColor(
+            "#" + Integer.toHexString(backColor)
+        )
 
         binding.mainButton13.tag = MainButton.Configuration.mainButtonId
         binding.mainButton13.text = MainButton.Configuration.description
@@ -819,12 +786,10 @@ class HomeActivity :
         val qty = AssetDbHelper().countAssets(warehouseArea.warehouseAreaId)
         if (qty > 1000) {
             makeText(
-                binding.root,
-                getString(
+                binding.root, getString(
                     R.string.there_are_x_assets_in_the_selected_area_divide_the_area_into_units_of_up_to_1000_assets_to_be_able_to_make_revisions,
                     qty.toString()
-                ),
-                SnackBarType.ERROR
+                ), SnackBarType.ERROR
             )
         } else {
             // Agregar un AssetReview del área
@@ -852,7 +817,7 @@ class HomeActivity :
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_main, menu)
 
-        if (!Statics.prefsGetBoolean(Preference.showConfButton)) {
+        if (!prefsGetBoolean(Preference.showConfButton)) {
             menu.removeItem(menu.findItem(R.id.action_settings).itemId)
         }
 
@@ -870,8 +835,7 @@ class HomeActivity :
                 return
             }
             thread {
-                SyncDownload(
-                    onSyncTaskProgress = { syncViewModel.setSyncDownloadProgress(it) },
+                SyncDownload(onSyncTaskProgress = { syncViewModel.setSyncDownloadProgress(it) },
                     onSessionCreated = { syncViewModel.setSessionCreated(it) })
             }
         } catch (ex: Exception) {
@@ -892,19 +856,16 @@ class HomeActivity :
             } else {
                 makeText(
                     binding.root,
-                    getContext()
-                        .getString(R.string.error_restarting_sync_dates),
+                    getContext().getString(R.string.error_restarting_sync_dates),
                     SnackBarType.ERROR
                 )
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
             makeText(
-                binding.root,
-                "${
+                binding.root, "${
                     getContext().getString(R.string.error)
-                }: ${ex.message}",
-                SnackBarType.ERROR
+                }: ${ex.message}", SnackBarType.ERROR
             )
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
         }

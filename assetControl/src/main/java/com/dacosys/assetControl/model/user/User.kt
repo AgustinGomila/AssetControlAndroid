@@ -229,7 +229,7 @@ class User : Parcelable {
         fun hasPermission(permission: PermissionEntry): Boolean {
             return if (Statics.currentUserId != null) {
                 val up = UserPermissionDbHelper().selectByUserIdUserPermissionId(
-                    userId = Statics.currentUserId!!,
+                    userId = Statics.currentUserId ?: 0,
                     userPermissionId = permission.id
                 )
                 up != null

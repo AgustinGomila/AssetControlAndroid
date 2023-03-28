@@ -132,9 +132,9 @@ dependencies {
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.6'
 
     // Implementar Unit Test
-    implementation 'androidx.test.ext:junit-ktx:1.1.4'
-    testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'junit:junit:4.13.2'
+    // implementation 'androidx.test.ext:junit-ktx:1.1.4'
+    // testImplementation 'junit:junit:4.13.2'
+    // androidTestImplementation 'junit:junit:4.13.2'
 
     // ESTA VERSION ES LA QUE FUNCIONA JUNTO CON LAS OTRAS DEPENDENCIAS
     // SÓLO SI ESTÁ LOCALMENTE

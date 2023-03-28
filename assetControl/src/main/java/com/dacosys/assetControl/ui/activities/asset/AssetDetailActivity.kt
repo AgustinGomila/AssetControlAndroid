@@ -2,20 +2,15 @@ package com.dacosys.assetControl.ui.activities.asset
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.view.MotionEvent
-import android.view.View
-import android.view.ViewGroup
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.EditText
-import android.widget.Switch
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.databinding.AssetDetailActivityBinding
 import com.dacosys.assetControl.model.asset.Asset
 import com.dacosys.assetControl.model.table.Table
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.utils.settings.Preference
 import com.dacosys.imageControl.ui.fragments.ImageControlButtonsFragment
 
@@ -55,45 +50,13 @@ class AssetDetailActivity : AppCompatActivity() {
         )
     }
 
-    @SuppressLint("ClickableViewAccessibility")
-    private fun setupUI(view: View) {
-        // Set up touch listener for non-text box views to hide keyboard.
-        if (view !is EditText) {
-            view.setOnTouchListener { _, motionEvent ->
-                Statics.closeKeyboard(this)
-                if (view is Button && view !is Switch && view !is CheckBox) {
-                    touchButton(motionEvent, view)
-                    true
-                } else {
-                    false
-                }
-            }
-        }
-
-        //If a layout container, iterate over children and seed recursion.
-        if (view is ViewGroup) {
-            (0 until view.childCount).map { view.getChildAt(it) }.forEach { setupUI(it) }
-        }
-    }
-
-    private fun touchButton(motionEvent: MotionEvent, button: Button) {
-        when (motionEvent.action) {
-            MotionEvent.ACTION_UP -> {
-                button.isPressed = false
-                button.performClick()
-            }
-            MotionEvent.ACTION_DOWN -> {
-                button.isPressed = true
-            }
-        }
-    }
 
     private lateinit var binding: AssetDetailActivityBinding
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Statics.setScreenRotation(this)
+        setScreenRotation(this)
         binding = AssetDetailActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -131,8 +94,7 @@ class AssetDetailActivity : AppCompatActivity() {
 
         setImageControlFragment()
 
-        // ESTO SIRVE PARA OCULTAR EL TECLADO EN PANTALLA CUANDO PIERDEN EL FOCO LOS CONTROLES QUE LO NECESITAN
-        setupUI(binding.root)
+        setupUI(binding.root, this)
     }
 
     private fun setImageControlFragment() {
@@ -163,7 +125,7 @@ class AssetDetailActivity : AppCompatActivity() {
                         binding.imageControlLayout.id, imageControlFragment ?: return@runOnUiThread
                     ).commit()
 
-                if (!Statics.prefsGetBoolean(Preference.useImageControl)) {
+                if (!prefsGetBoolean(Preference.useImageControl)) {
                     fm.beginTransaction()
                         .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
                         .hide(imageControlFragment as Fragment).commitAllowingStateLoss()

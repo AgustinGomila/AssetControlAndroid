@@ -25,6 +25,7 @@ import com.dacosys.assetControl.model.user.User
 import com.dacosys.assetControl.network.serverDate.GetMySqlDate
 import com.dacosys.assetControl.network.serverDate.MySqlDateResult
 import com.dacosys.assetControl.network.utils.ProgressStatus
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.settings.Preference
@@ -156,7 +157,7 @@ class SyncUpload(
             dataCollection()
             routeProcess()
 
-            if (Statics.prefsGetBoolean(Preference.useAssetControlManteinance)) {
+            if (prefsGetBoolean(Preference.useAssetControlManteinance)) {
                 assetManteinance()
             }
         } else {
@@ -189,7 +190,7 @@ class SyncUpload(
                     warehouseMovement()
                 }
                 SyncRegistryType.AssetManteinance -> {
-                    if (Statics.prefsGetBoolean(Preference.useAssetControlManteinance)) {
+                    if (prefsGetBoolean(Preference.useAssetControlManteinance)) {
                         itemCategory()
                         warehouse()
                         warehouseArea()

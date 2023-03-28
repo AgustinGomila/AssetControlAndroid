@@ -9,10 +9,6 @@ import android.os.Handler
 import android.os.Looper
 import android.view.*
 import android.view.View.GONE
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.EditText
-import android.widget.Switch
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.menu.MenuBuilder
 import androidx.constraintlayout.widget.ConstraintSet
@@ -35,7 +31,11 @@ import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.fragments.location.WarehouseAreaSelectFilterFragment
 import com.dacosys.assetControl.ui.fragments.print.PrinterFragment
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetLong
+import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
+import com.dacosys.assetControl.utils.Screen.Companion.isKeyboardVisible
+import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.utils.Statics.Companion.isRfidRequired
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.ParcelLong
@@ -49,14 +49,9 @@ import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener
 import kotlin.concurrent.thread
 
-class WarehouseAreaPrintLabelActivity :
-    AppCompatActivity(),
-    SwipeRefreshLayout.OnRefreshListener,
-    Scanner.ScannerListener,
-    KeyboardVisibilityEventListener,
-    Rfid.RfidDeviceListener,
-    WarehouseAreaSelectFilterFragment.FragmentListener,
-    GetLocationAsync.GetLocationAsyncListener,
+class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
+    Scanner.ScannerListener, KeyboardVisibilityEventListener, Rfid.RfidDeviceListener,
+    WarehouseAreaSelectFilterFragment.FragmentListener, GetLocationAsync.GetLocationAsyncListener,
     PrinterFragment.FragmentListener {
     override fun onDestroy() {
         destroyLocals()
@@ -131,12 +126,12 @@ class WarehouseAreaPrintLabelActivity :
         // endregion
 
         // PANELS
-        if (b.containsKey("hideFilterPanel"))
-            hideFilterPanel = b.getBoolean("hideFilterPanel", hideFilterPanel)
-        if (b.containsKey("panelBottomIsExpanded"))
-            panelBottomIsExpanded = b.getBoolean("panelBottomIsExpanded")
-        if (b.containsKey("panelTopIsExpanded"))
-            panelTopIsExpanded = b.getBoolean("panelTopIsExpanded")
+        if (b.containsKey("hideFilterPanel")) hideFilterPanel =
+            b.getBoolean("hideFilterPanel", hideFilterPanel)
+        if (b.containsKey("panelBottomIsExpanded")) panelBottomIsExpanded =
+            b.getBoolean("panelBottomIsExpanded")
+        if (b.containsKey("panelTopIsExpanded")) panelTopIsExpanded =
+            b.getBoolean("panelTopIsExpanded")
 
         // ADAPTER
         multiSelect = b.getBoolean("multiSelect", multiSelect)
@@ -152,40 +147,18 @@ class WarehouseAreaPrintLabelActivity :
 
     private fun loadDefaultValues() {
         tempTitle = getString(R.string.select_warehouse_area)
-        val id = Statics.prefsGetLong(Preference.defaultBarcodeLabelCustomWa)
+        val id = prefsGetLong(Preference.defaultBarcodeLabelCustomWa)
         val blc = BarcodeLabelCustomDbHelper().selectById(id)
         if (blc != null) printerFragment?.barcodeLabelCustom = blc
     }
 
-    @SuppressLint("ClickableViewAccessibility")
-    private fun setupUI(view: View) {
-        // Set up touch checkedChangedListener for non-text box views to hide keyboard.
-        if (view !is EditText) {
-            view.setOnTouchListener { _, motionEvent ->
-                Statics.closeKeyboard(this)
-                if (view is Button && view !is Switch && view !is CheckBox) {
-                    touchButton(motionEvent, view)
-                    true
-                } else {
-                    false
-                }
-            }
-        }
-
-        //If a layout container, iterate over children and seed recursion.
-        if (view is ViewGroup) {
-            (0 until view.childCount)
-                .map { view.getChildAt(it) }
-                .forEach { setupUI(it) }
-        }
-    }
 
     private lateinit var binding: WarehouseAreaPrintLabelActivityTopPanelCollapsedBinding
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Statics.setScreenRotation(this)
+        setScreenRotation(this)
         binding = WarehouseAreaPrintLabelActivityTopPanelCollapsedBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -245,13 +218,13 @@ class WarehouseAreaPrintLabelActivity :
 
         setPanels()
 
-        setupUI(binding.root)
+        setupUI(binding.root, this)
 
         showProgressBar(false)
     }
 
     private fun itemSelect() {
-        Statics.closeKeyboard(this)
+        closeKeyboard(this)
         val data = Intent()
 
         if (arrayAdapter != null) {
@@ -260,8 +233,7 @@ class WarehouseAreaPrintLabelActivity :
 
             if (!multiSelect && warehouseArea != null) {
                 data.putParcelableArrayListExtra(
-                    "ids",
-                    arrayListOf(ParcelLong(warehouseArea.warehouseAreaId))
+                    "ids", arrayListOf(ParcelLong(warehouseArea.warehouseAreaId))
                 )
                 setResult(RESULT_OK, data)
             } else if (multiSelect && warehouseAreaIdArray != null && warehouseAreaIdArray.size > 0) {
@@ -287,20 +259,17 @@ class WarehouseAreaPrintLabelActivity :
                     currentLayout.load(this, R.layout.warehouse_area_print_label_activity)
                 } else {
                     currentLayout.load(
-                        this,
-                        R.layout.warehouse_area_print_label_activity_top_panel_collapsed
+                        this, R.layout.warehouse_area_print_label_activity_top_panel_collapsed
                     )
                 }
             } else {
                 if (panelTopIsExpanded) {
                     currentLayout.load(
-                        this,
-                        R.layout.warehouse_area_print_label_activity_bottom_panel_collapsed
+                        this, R.layout.warehouse_area_print_label_activity_bottom_panel_collapsed
                     )
                 } else {
                     currentLayout.load(
-                        this,
-                        R.layout.warehouse_area_print_label_activity_both_panels_collapsed
+                        this, R.layout.warehouse_area_print_label_activity_both_panels_collapsed
                     )
                 }
             }
@@ -309,8 +278,7 @@ class WarehouseAreaPrintLabelActivity :
                 currentLayout.load(this, R.layout.warehouse_area_print_label_activity)
             } else {
                 currentLayout.load(
-                    this,
-                    R.layout.warehouse_area_print_label_activity_top_panel_collapsed
+                    this, R.layout.warehouse_area_print_label_activity_top_panel_collapsed
                 )
             }
         }
@@ -329,8 +297,7 @@ class WarehouseAreaPrintLabelActivity :
         })
 
         TransitionManager.beginDelayedTransition(
-            binding.warehouseAreaPrintLabel,
-            transition
+            binding.warehouseAreaPrintLabel, transition
         )
 
         currentLayout.applyTo(binding.warehouseAreaPrintLabel)
@@ -338,12 +305,10 @@ class WarehouseAreaPrintLabelActivity :
         if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
             when {
                 panelBottomIsExpanded -> {
-                    binding.expandBottomPanelButton?.text =
-                        getString(R.string.collapse_panel)
+                    binding.expandBottomPanelButton?.text = getString(R.string.collapse_panel)
                 }
                 else -> {
-                    binding.expandBottomPanelButton?.text =
-                        getString(R.string.search_options)
+                    binding.expandBottomPanelButton?.text = getString(R.string.search_options)
                 }
             }
         }
@@ -368,13 +333,11 @@ class WarehouseAreaPrintLabelActivity :
             if (panelBottomIsExpanded) {
                 if (panelTopIsExpanded) {
                     nextLayout.load(
-                        this,
-                        R.layout.warehouse_area_print_label_activity_bottom_panel_collapsed
+                        this, R.layout.warehouse_area_print_label_activity_bottom_panel_collapsed
                     )
                 } else {
                     nextLayout.load(
-                        this,
-                        R.layout.warehouse_area_print_label_activity_both_panels_collapsed
+                        this, R.layout.warehouse_area_print_label_activity_both_panels_collapsed
                     )
                 }
             } else {
@@ -382,8 +345,7 @@ class WarehouseAreaPrintLabelActivity :
                     nextLayout.load(this, R.layout.warehouse_area_print_label_activity)
                 } else {
                     nextLayout.load(
-                        this,
-                        R.layout.warehouse_area_print_label_activity_top_panel_collapsed
+                        this, R.layout.warehouse_area_print_label_activity_top_panel_collapsed
                     )
                 }
             }
@@ -403,20 +365,17 @@ class WarehouseAreaPrintLabelActivity :
             })
 
             TransitionManager.beginDelayedTransition(
-                binding.warehouseAreaPrintLabel,
-                transition
+                binding.warehouseAreaPrintLabel, transition
             )
 
             nextLayout.applyTo(binding.warehouseAreaPrintLabel)
 
             when {
                 panelBottomIsExpanded -> {
-                    binding.expandBottomPanelButton?.text =
-                        getString(R.string.collapse_panel)
+                    binding.expandBottomPanelButton?.text = getString(R.string.collapse_panel)
                 }
                 else -> {
-                    binding.expandBottomPanelButton?.text =
-                        getString(R.string.search_options)
+                    binding.expandBottomPanelButton?.text = getString(R.string.search_options)
                 }
             }
         }
@@ -429,8 +388,7 @@ class WarehouseAreaPrintLabelActivity :
                 if (panelBottomIsExpanded) {
                     if (panelTopIsExpanded) {
                         nextLayout.load(
-                            this,
-                            R.layout.warehouse_area_print_label_activity_top_panel_collapsed
+                            this, R.layout.warehouse_area_print_label_activity_top_panel_collapsed
                         )
                     } else {
                         nextLayout.load(this, R.layout.warehouse_area_print_label_activity)
@@ -438,8 +396,7 @@ class WarehouseAreaPrintLabelActivity :
                 } else {
                     if (panelTopIsExpanded) {
                         nextLayout.load(
-                            this,
-                            R.layout.warehouse_area_print_label_activity_both_panels_collapsed
+                            this, R.layout.warehouse_area_print_label_activity_both_panels_collapsed
                         )
                     } else {
                         nextLayout.load(
@@ -451,8 +408,7 @@ class WarehouseAreaPrintLabelActivity :
             } else {
                 if (panelTopIsExpanded) {
                     nextLayout.load(
-                        this,
-                        R.layout.warehouse_area_print_label_activity_top_panel_collapsed
+                        this, R.layout.warehouse_area_print_label_activity_top_panel_collapsed
                     )
                 } else {
                     nextLayout.load(this, R.layout.warehouse_area_print_label_activity)
@@ -475,8 +431,7 @@ class WarehouseAreaPrintLabelActivity :
             })
 
             TransitionManager.beginDelayedTransition(
-                binding.warehouseAreaPrintLabel,
-                transition
+                binding.warehouseAreaPrintLabel, transition
             )
 
             nextLayout.applyTo(binding.warehouseAreaPrintLabel)
@@ -502,18 +457,6 @@ class WarehouseAreaPrintLabelActivity :
     private fun showProgressBar(show: Boolean) {
         runOnUiThread {
             binding.swipeRefreshWarehouseArea.isRefreshing = show
-        }
-    }
-
-    private fun touchButton(motionEvent: MotionEvent, button: Button) {
-        when (motionEvent.action) {
-            MotionEvent.ACTION_UP -> {
-                button.isPressed = false
-                button.performClick()
-            }
-            MotionEvent.ACTION_DOWN -> {
-                button.isPressed = true
-            }
         }
     }
 
@@ -558,8 +501,7 @@ class WarehouseAreaPrintLabelActivity :
                     // tener valores antiguos en del adaptador.
 
                     arrayAdapter?.refreshListeners(
-                        checkedChangedListener = null,
-                        dataSetChangedListener = null
+                        checkedChangedListener = null, dataSetChangedListener = null
                     )
                     arrayAdapter?.refresh()
                 }
@@ -570,8 +512,7 @@ class WarehouseAreaPrintLabelActivity :
 
                 if (arrayAdapter != null) {
                     arrayAdapter?.setSelectItemAndScrollPos(
-                        lastSelected,
-                        firstVisiblePos
+                        lastSelected, firstVisiblePos
                     )
                 }
             }
@@ -587,7 +528,7 @@ class WarehouseAreaPrintLabelActivity :
         super.onResume()
 
         rejectNewInstances = false
-        Statics.closeKeyboard(this)
+        closeKeyboard(this)
         refreshTextViews()
     }
 
@@ -598,8 +539,12 @@ class WarehouseAreaPrintLabelActivity :
         grantResults: IntArray,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (permissions.contains(Manifest.permission.BLUETOOTH_CONNECT))
-            JotterListener.onRequestPermissionsResult(this, requestCode, permissions, grantResults)
+        if (permissions.contains(Manifest.permission.BLUETOOTH_CONNECT)) JotterListener.onRequestPermissionsResult(
+            this,
+            requestCode,
+            permissions,
+            grantResults
+        )
     }
 
     override fun scannerCompleted(scanCode: String) {
@@ -645,7 +590,7 @@ class WarehouseAreaPrintLabelActivity :
     }
 
     override fun onBackPressed() {
-        Statics.closeKeyboard(this)
+        closeKeyboard(this)
 
         setResult(RESULT_CANCELED)
         finish()
@@ -719,13 +664,11 @@ class WarehouseAreaPrintLabelActivity :
     }
 
     override fun onFilterChanged(waDescription: String, wDescription: String, onlyActive: Boolean) {
-        Statics.closeKeyboard(this)
+        closeKeyboard(this)
 
         if (fixedItemList) return
 
-        if (waDescription.isEmpty() &&
-            wDescription.isEmpty()
-        ) {
+        if (waDescription.isEmpty() && wDescription.isEmpty()) {
             // Limpiar el control
             completeList.clear()
             arrayAdapter?.clear()
@@ -748,8 +691,7 @@ class WarehouseAreaPrintLabelActivity :
         // el foco pasa al control de texto de búsqueda, se debe colapsar el panel de impresión
         // manualmente porque no se dispara el evento de cambio de visibilidad del teclado en
         // pantalla que lo haría normalmente.
-        if (Statics.isKeyboardVisible() && !hasFocus)
-            collapseTopPanel()
+        if (isKeyboardVisible() && !hasFocus) collapseTopPanel()
     }
 
 

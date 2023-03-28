@@ -5,14 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
-import android.view.MotionEvent
-import android.view.View
 import android.view.View.INVISIBLE
-import android.view.ViewGroup
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.EditText
-import android.widget.Switch
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.dacosys.assetControl.R
@@ -27,36 +20,15 @@ import com.dacosys.assetControl.ui.activities.asset.AssetPrintLabelActivity
 import com.dacosys.assetControl.ui.activities.location.LocationSelectActivity
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
+import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.ParcelLong
 import org.parceler.Parcels
 
 class DataCollectionRuleTargetActivity : AppCompatActivity() {
     private var rejectNewInstances = false
-
-    @SuppressLint("ClickableViewAccessibility")
-    private fun setupUI(view: View) {
-        // Set up touch listener for non-text box views to hide keyboard.
-        if (view !is EditText) {
-            view.setOnTouchListener { _, motionEvent ->
-                Statics.closeKeyboard(this)
-                if (view is Button && view !is Switch && view !is CheckBox) {
-                    touchButton(motionEvent, view)
-                    true
-                } else {
-                    false
-                }
-            }
-        }
-
-        //If a layout container, iterate over children and seed recursion.
-        if (view is ViewGroup) {
-            (0 until view.childCount)
-                .map { view.getChildAt(it) }
-                .forEach { setupUI(it) }
-        }
-    }
 
     override fun onResume() {
         super.onResume()
@@ -69,7 +41,7 @@ class DataCollectionRuleTargetActivity : AppCompatActivity() {
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Statics.setScreenRotation(this)
+        setScreenRotation(this)
         binding = DataCollectionRuleTargetActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -107,8 +79,7 @@ class DataCollectionRuleTargetActivity : AppCompatActivity() {
         // VER ESTO!!! No está implementado la recolección para categorías
         binding.itemCategoryButton.visibility = INVISIBLE
 
-        // ESTO SIRVE PARA OCULTAR EL TECLADO EN PANTALLA CUANDO PIERDEN EL FOCO LOS CONTROLES QUE LO NECESITAN
-        setupUI(binding.root)
+        setupUI(binding.root, this)
     }
 
     private val resultForAssetSelect =
@@ -234,7 +205,7 @@ class DataCollectionRuleTargetActivity : AppCompatActivity() {
             val data = it?.data
             try {
                 if (it?.resultCode == RESULT_OK && data != null) {
-                    Statics.closeKeyboard(this)
+                    closeKeyboard(this)
                     setResult(RESULT_OK)
                     finish()
                 }
@@ -245,18 +216,6 @@ class DataCollectionRuleTargetActivity : AppCompatActivity() {
                 rejectNewInstances = false
             }
         }
-
-    private fun touchButton(motionEvent: MotionEvent, button: Button) {
-        when (motionEvent.action) {
-            MotionEvent.ACTION_UP -> {
-                button.isPressed = false
-                button.performClick()
-            }
-            MotionEvent.ACTION_DOWN -> {
-                button.isPressed = true
-            }
-        }
-    }
 
     companion object {
         fun equals(a: Any?, b: Any?): Boolean {

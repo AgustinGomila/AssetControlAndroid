@@ -9,6 +9,8 @@ import com.dacosys.assetControl.dataBase.user.UserWarehouseAreaDbHelper
 import com.dacosys.assetControl.network.serverDate.GetMySqlDate
 import com.dacosys.assetControl.network.serverDate.MySqlDateResult
 import com.dacosys.assetControl.network.utils.ProgressStatus
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetInt
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsPutString
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.settings.entries.ConfEntry
@@ -40,7 +42,8 @@ class SyncInitialUser(
     // Descarga de usuarios, permisos, áreas del usuario
     // previo a iniciar sesión
     private fun initialUser() {
-        val qty = Statics.prefsGetInt(ConfEntry.acSyncQtyRegistry)
+        val qty =
+            prefsGetInt(ConfEntry.acSyncQtyRegistry)
 
         scope.launch {
             onUiEvent(
@@ -176,7 +179,7 @@ class SyncInitialUser(
                         getContext().getString(R.string.saving_synchronization_time)
                     }: ${(registryType.confEntry ?: return).description} ($it.msg)"
                 )
-                Statics.prefsPutString(
+                prefsPutString(
                     (registryType.confEntry ?: return).description, it.msg
                 )
                 scope.launch {

@@ -12,7 +12,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
-import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
@@ -30,7 +29,10 @@ import com.dacosys.assetControl.model.location.async.WarehouseChangedObserver
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.common.views.custom.ContractsAutoCompleteTextView
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
+import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.utils.Screen.Companion.setupUI
+import com.dacosys.assetControl.utils.Screen.Companion.showKeyboard
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.ScannedCode
@@ -145,28 +147,6 @@ class LocationSelectActivity : AppCompatActivity(),
         savedInstanceState.putString("warehouseAreaDescription", warehouseAreaDescription)
     }
 
-    @SuppressLint("ClickableViewAccessibility")
-    private fun setupUI(view: View) {
-        // Set up touch checkedChangedListener for non-text box views to hide keyboard.
-        if (view !is EditText) {
-            view.setOnTouchListener { _, motionEvent ->
-                Statics.closeKeyboard(this)
-                if (view is Button && view !is Switch && view !is CheckBox) {
-                    touchButton(motionEvent, view)
-                    true
-                } else {
-                    false
-                }
-            }
-        }
-
-        //If a layout container, iterate over children and seed recursion.
-        if (view is ViewGroup) {
-            (0 until view.childCount)
-                .map { view.getChildAt(it) }
-                .forEach { setupUI(it) }
-        }
-    }
 
     override fun onDestroy() {
         destroyLocals()
@@ -174,7 +154,7 @@ class LocationSelectActivity : AppCompatActivity(),
     }
 
     private fun destroyLocals() {
-        Statics.closeKeyboard(this)
+        closeKeyboard(this)
         binding.warehouse.setOnContractsAvailability(null)
         binding.warehouse.setAdapter(null)
         binding.warehouseArea.setOnContractsAvailability(null)
@@ -186,7 +166,7 @@ class LocationSelectActivity : AppCompatActivity(),
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Statics.setScreenRotation(this)
+        setScreenRotation(this)
         binding = LocationSelectActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -298,11 +278,11 @@ class LocationSelectActivity : AppCompatActivity(),
             }
         binding.warehouse.setOnTouchListener { _, motionEvent ->
             if (motionEvent.action == MotionEvent.ACTION_UP) {
-                Statics.showKeyboard(this)
+                showKeyboard(this)
                 adjustDropDownHeight()
                 return@setOnTouchListener false
             } else if (motionEvent.action == MotionEvent.BUTTON_BACK) {
-                Statics.closeKeyboard(this)
+                closeKeyboard(this)
 
                 setResult(RESULT_CANCELED, null)
                 finish()
@@ -364,11 +344,11 @@ class LocationSelectActivity : AppCompatActivity(),
             }
         binding.warehouseArea.setOnTouchListener { _, motionEvent ->
             if (motionEvent.action == MotionEvent.ACTION_UP) {
-                Statics.showKeyboard(this)
+                showKeyboard(this)
                 adjustDropDownHeight()
                 return@setOnTouchListener false
             } else if (motionEvent.action == MotionEvent.BUTTON_BACK) {
-                Statics.closeKeyboard(this)
+                closeKeyboard(this)
 
                 setResult(RESULT_CANCELED, null)
                 finish()
@@ -398,12 +378,11 @@ class LocationSelectActivity : AppCompatActivity(),
         refreshWarehouseAreaText(cleanText = false, focus = warehouseAreaVisible)
         fillAdapters()
 
-        // ESTO SIRVE PARA OCULTAR EL TECLADO EN PANTALLA CUANDO PIERDEN EL FOCO LOS CONTROLES QUE LO NECESITAN
-        setupUI(binding.root)
+        setupUI(binding.root, this)
     }
 
     private fun itemSelected() {
-        Statics.closeKeyboard(this)
+        closeKeyboard(this)
         refreshFilterData()
 
         val data = Intent()
@@ -658,20 +637,8 @@ class LocationSelectActivity : AppCompatActivity(),
         waIsFilling = false
     }
 
-    private fun touchButton(motionEvent: MotionEvent, button: Button) {
-        when (motionEvent.action) {
-            MotionEvent.ACTION_UP -> {
-                button.isPressed = false
-                button.performClick()
-            }
-            MotionEvent.ACTION_DOWN -> {
-                button.isPressed = true
-            }
-        }
-    }
-
     private fun locationSelect() {
-        Statics.closeKeyboard(this)
+        closeKeyboard(this)
 
         when {
             warehouseArea != null -> {
@@ -705,7 +672,7 @@ class LocationSelectActivity : AppCompatActivity(),
     }
 
     override fun onBackPressed() {
-        Statics.closeKeyboard(this)
+        closeKeyboard(this)
 
         setResult(RESULT_CANCELED)
         finish()

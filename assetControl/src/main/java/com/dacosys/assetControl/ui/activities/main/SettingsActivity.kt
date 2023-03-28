@@ -12,7 +12,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
-import android.provider.Settings
 import android.text.InputFilter
 import android.text.Spanned
 import android.view.*
@@ -41,13 +40,18 @@ import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarEventData
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
+import com.dacosys.assetControl.ui.common.snackbar.SnackBarType.CREATOR.INFO
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetInt
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetString
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsPutString
+import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.Statics.Companion.DATABASE_NAME
 import com.dacosys.assetControl.utils.Statics.Companion.OFFLINE_MODE
 import com.dacosys.assetControl.utils.Statics.Companion.generateQrCode
 import com.dacosys.assetControl.utils.Statics.Companion.getBarcodeForConfig
 import com.dacosys.assetControl.utils.Statics.Companion.getConfigFromScannedCode
-import com.dacosys.assetControl.utils.Statics.Companion.prefsGetString
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.errorLog.ErrorLog.Companion.getLastErrorLog
 import com.dacosys.assetControl.utils.scanners.JotterListener
@@ -56,7 +60,6 @@ import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.utils.scanners.rfid.RfidType
 import com.dacosys.assetControl.utils.scanners.vh75.Vh75Bt
 import com.dacosys.assetControl.utils.scanners.vh75.Vh75Bt.Companion.STATE_CONNECTED
-import com.dacosys.assetControl.utils.settings.DownloadController
 import com.dacosys.assetControl.utils.settings.PathHelper
 import com.dacosys.assetControl.utils.settings.QRConfigType
 import com.dacosys.assetControl.utils.settings.QRConfigType.CREATOR.QRConfigApp
@@ -91,12 +94,9 @@ import com.dacosys.assetControl.utils.settings.Preference.Companion as Preferenc
  * API Guide](http://developer.android.com/guide/topics/ui/settings.html) for more information on developing a Settings UI.
  */
 
-class SettingsActivity :
-    AppCompatActivity(),
-    PreferenceFragmentCompat.OnPreferenceStartFragmentCallback,
-    Scanner.ScannerListener,
-    Statics.TaskConfigEnded,
-    Statics.Companion.TaskConfigPanelEnded {
+class SettingsActivity : AppCompatActivity(),
+    PreferenceFragmentCompat.OnPreferenceStartFragmentCallback, Scanner.ScannerListener,
+    Statics.TaskConfigEnded, Statics.Companion.TaskConfigPanelEnded {
     class HeaderFragment : PreferenceFragmentCompat() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.pref_headers, rootKey)
@@ -128,10 +128,8 @@ class SettingsActivity :
 
                     // Set the summary to reflect the new value.
                     preference.setSummary(
-                        if (index >= 0)
-                            preference.entries[index]
-                        else
-                            null
+                        if (index >= 0) preference.entries[index]
+                        else null
                     )
                 } else {
                     // For all other preferences, set the summary to the value's
@@ -164,8 +162,7 @@ class SettingsActivity :
             pref: com.dacosys.assetControl.utils.settings.Preference,
         ) {
             val preference = frag.findPreference<Preference>(pref.key) ?: return
-            val defaultValue: Any? =
-                if (BuildConfig.DEBUG) pref.debugValue else pref.defaultValue
+            val defaultValue: Any? = if (BuildConfig.DEBUG) pref.debugValue else pref.defaultValue
             bindPreferenceSummaryToValue(preference, defaultValue)
         }
 
@@ -183,40 +180,35 @@ class SettingsActivity :
                 all[preference.key] is String -> {
                     sBindPreferenceSummaryToValueListener.onPreferenceChange(
                         preference,
-                        PreferenceManager
-                            .getDefaultSharedPreferences(preference.context)
+                        PreferenceManager.getDefaultSharedPreferences(preference.context)
                             .getString(preference.key, defaultValue.toString())
                     )
                 }
                 all[preference.key] is Boolean -> {
                     sBindPreferenceSummaryToValueListener.onPreferenceChange(
                         preference,
-                        PreferenceManager
-                            .getDefaultSharedPreferences(preference.context)
+                        PreferenceManager.getDefaultSharedPreferences(preference.context)
                             .getBoolean(preference.key, defaultValue.toString().toBoolean())
                     )
                 }
                 all[preference.key] is Float -> {
                     sBindPreferenceSummaryToValueListener.onPreferenceChange(
                         preference,
-                        PreferenceManager
-                            .getDefaultSharedPreferences(preference.context)
+                        PreferenceManager.getDefaultSharedPreferences(preference.context)
                             .getFloat(preference.key, defaultValue.toString().toFloat())
                     )
                 }
                 all[preference.key] is Int -> {
                     sBindPreferenceSummaryToValueListener.onPreferenceChange(
                         preference,
-                        PreferenceManager
-                            .getDefaultSharedPreferences(preference.context)
+                        PreferenceManager.getDefaultSharedPreferences(preference.context)
                             .getInt(preference.key, defaultValue.toString().toInt())
                     )
                 }
                 all[preference.key] is Long -> {
                     sBindPreferenceSummaryToValueListener.onPreferenceChange(
                         preference,
-                        PreferenceManager
-                            .getDefaultSharedPreferences(preference.context)
+                        PreferenceManager.getDefaultSharedPreferences(preference.context)
                             .getLong(preference.key, defaultValue.toString().toLong())
                     )
                 }
@@ -225,32 +217,27 @@ class SettingsActivity :
                         when (defaultValue) {
                             is String -> sBindPreferenceSummaryToValueListener.onPreferenceChange(
                                 preference,
-                                PreferenceManager
-                                    .getDefaultSharedPreferences(preference.context)
+                                PreferenceManager.getDefaultSharedPreferences(preference.context)
                                     .getString(preference.key, defaultValue)
                             )
                             is Float -> sBindPreferenceSummaryToValueListener.onPreferenceChange(
                                 preference,
-                                PreferenceManager
-                                    .getDefaultSharedPreferences(preference.context)
+                                PreferenceManager.getDefaultSharedPreferences(preference.context)
                                     .getFloat(preference.key, defaultValue)
                             )
                             is Int -> sBindPreferenceSummaryToValueListener.onPreferenceChange(
                                 preference,
-                                PreferenceManager
-                                    .getDefaultSharedPreferences(preference.context)
+                                PreferenceManager.getDefaultSharedPreferences(preference.context)
                                     .getInt(preference.key, defaultValue)
                             )
                             is Long -> sBindPreferenceSummaryToValueListener.onPreferenceChange(
                                 preference,
-                                PreferenceManager
-                                    .getDefaultSharedPreferences(preference.context)
+                                PreferenceManager.getDefaultSharedPreferences(preference.context)
                                     .getLong(preference.key, defaultValue)
                             )
                             is Boolean -> sBindPreferenceSummaryToValueListener.onPreferenceChange(
                                 preference,
-                                PreferenceManager
-                                    .getDefaultSharedPreferences(preference.context)
+                                PreferenceManager.getDefaultSharedPreferences(preference.context)
                                     .getBoolean(preference.key, defaultValue)
                             )
                         }
@@ -275,8 +262,7 @@ class SettingsActivity :
             if (url.isEmpty() || namespace.isEmpty()) {
                 showSnackBar(
                     parentView, SnackBarEventData(
-                        getContext()
-                            .getString(R.string.invalid_webservice_data), SnackBarType.INFO
+                        getContext().getString(R.string.invalid_webservice_data), SnackBarType.INFO
                     )
                 )
                 return
@@ -308,25 +294,20 @@ class SettingsActivity :
          * ya que está configurando el webservice de manera manual
          */
         private fun cleanPanelWebData() {
-            Statics.prefsPutString(
-                PreferencesApp.urlPanel.key,
-                ""
+            prefsPutString(
+                PreferencesApp.urlPanel.key, ""
             )
-            Statics.prefsPutString(
-                PreferencesApp.installationCode.key,
-                ""
+            prefsPutString(
+                PreferencesApp.installationCode.key, ""
             )
-            Statics.prefsPutString(
-                PreferencesApp.clientPackage.key,
-                ""
+            prefsPutString(
+                PreferencesApp.clientPackage.key, ""
             )
-            Statics.prefsPutString(
-                PreferencesApp.clientEmail.key,
-                ""
+            prefsPutString(
+                PreferencesApp.clientEmail.key, ""
             )
-            Statics.prefsPutString(
-                PreferencesApp.clientPassword.key,
-                ""
+            prefsPutString(
+                PreferencesApp.clientPassword.key, ""
             )
         }
     }
@@ -337,16 +318,13 @@ class SettingsActivity :
     ): Boolean {
         val args: Bundle = pref.extras
         val fragment: Fragment = supportFragmentManager.fragmentFactory.instantiate(
-            classLoader,
-            pref.fragment ?: ""
+            classLoader, pref.fragment ?: ""
         )
         fragment.arguments = args
 
         // Replace the existing Fragment with the new Fragment
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.settings, fragment)
-            .addToBackStack(null)
-            .commit()
+        supportFragmentManager.beginTransaction().replace(R.id.settings, fragment)
+            .addToBackStack(null).commit()
         supportFragmentManager.setFragmentResultListener("requestKey", this) { key, _ ->
             if (key == "requestKey") title = pref.title
         }
@@ -370,9 +348,7 @@ class SettingsActivity :
         titleTag = getString(R.string.settings)
 
         if (savedInstanceState == null) {
-            supportFragmentManager
-                .beginTransaction()
-                .replace(R.id.settings, HeaderFragment())
+            supportFragmentManager.beginTransaction().replace(R.id.settings, HeaderFragment())
                 .commit()
         } else {
             titleTag = savedInstanceState.getCharSequence("title").toString()
@@ -419,7 +395,7 @@ class SettingsActivity :
 
     override fun onResume() {
         super.onResume()
-        Statics.closeKeyboard(this)
+        closeKeyboard(this)
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -438,17 +414,13 @@ class SettingsActivity :
     override fun onTaskConfigPanelEnded(status: ProgressStatus) {
         if (status == ProgressStatus.finished) {
             makeText(
-                binding.settings,
-                getString(R.string.configuration_applied),
-                SnackBarType.INFO
+                binding.settings, getString(R.string.configuration_applied), SnackBarType.INFO
             )
             Statics.removeDataBases()
             finish()
         } else if (status == ProgressStatus.crashed) {
             makeText(
-                binding.settings,
-                getString(R.string.error_setting_user_panel),
-                ERROR
+                binding.settings, getString(R.string.error_setting_user_panel), ERROR
             )
         }
     }
@@ -479,9 +451,7 @@ class SettingsActivity :
             }
         } else if (status == ProgressStatus.success) {
             makeText(binding.settings, msg, SnackBarType.SUCCESS)
-        } else if (status == ProgressStatus.crashed ||
-            status == ProgressStatus.canceled
-        ) {
+        } else if (status == ProgressStatus.crashed || status == ProgressStatus.canceled) {
             makeText(binding.settings, msg, ERROR)
         }
     }
@@ -500,8 +470,9 @@ class SettingsActivity :
         grantResults: IntArray,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (permissions.contains(Manifest.permission.BLUETOOTH_CONNECT))
-            JotterListener.onRequestPermissionsResult(this, requestCode, permissions, grantResults)
+        if (permissions.contains(Manifest.permission.BLUETOOTH_CONNECT)) JotterListener.onRequestPermissionsResult(
+            this, requestCode, permissions, grantResults
+        )
     }
 
     override fun scannerCompleted(scanCode: String) {
@@ -509,23 +480,17 @@ class SettingsActivity :
 
         try {
             // No capturar códigos que cambian el servidor cuando está logeado.
-            if (
-                Statics.currentUserId != null &&
-                (currentQRConfigType == QRConfigClientAccount ||
-                        currentQRConfigType == QRConfigWebservice)
-            ) {
+            if (Statics.currentUserId != null && (currentQRConfigType == QRConfigClientAccount || currentQRConfigType == QRConfigWebservice)) {
                 return
             }
 
             getConfigFromScannedCode(
-                scanCode = scanCode,
-                mode = currentQRConfigType
+                scanCode = scanCode, mode = currentQRConfigType
             ) { onTaskGetPackagesEnded(it) }
         } catch (ex: Exception) {
             ex.printStackTrace()
             makeText(
-                binding.settings,
-                ex.message.toString(), ERROR
+                binding.settings, ex.message.toString(), ERROR
             )
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         } finally {
@@ -553,10 +518,7 @@ class SettingsActivity :
             val args = Bundle()
             args.putString("rootKey", preferenceScreen.key)
             prefFragment.arguments = args
-            parentFragmentManager
-                .beginTransaction()
-                .replace(id, prefFragment)
-                .addToBackStack(null)
+            parentFragmentManager.beginTransaction().replace(id, prefFragment).addToBackStack(null)
                 .commit()
         }
 
@@ -568,16 +530,14 @@ class SettingsActivity :
             // updated to reflect the new value, per the Android Design
             // guidelines.
             bindPreferenceSummaryToValue(
-                this,
-                PreferencesApp.acFilterRouteDescription
+                this, PreferencesApp.acFilterRouteDescription
             )
 
             findPreference<Preference>(PreferencesApp.registryError.key) as Preference
             findPreference<Preference>(PreferencesApp.showConfButton.key) as Preference
             if (BuildConfig.DEBUG) {
                 bindPreferenceSummaryToValue(
-                    this,
-                    PreferencesApp.confPassword
+                    this, PreferencesApp.confPassword
                 )
             }
         }
@@ -601,9 +561,7 @@ class SettingsActivity :
                 } catch (ex: Exception) {
                     ex.printStackTrace()
                     makeText(
-                        requireView(),
-                        "${getString(R.string.error)}: ${ex.message}",
-                        ERROR
+                        requireView(), "${getString(R.string.error)}: ${ex.message}", ERROR
                     )
                     ErrorLog.writeLog(null, this::class.java.simpleName, ex)
                     false
@@ -613,10 +571,8 @@ class SettingsActivity :
             val qrCodeButton = findPreference<Preference>("ac_qr_code")
             qrCodeButton?.onPreferenceClickListener = OnPreferenceClickListener {
                 generateQrCode(
-                    WeakReference(requireActivity()),
-                    getBarcodeForConfig(
-                        PreferencesApp.getAppConf(),
-                        Statics.appName
+                    WeakReference(requireActivity()), getBarcodeForConfig(
+                        PreferencesApp.getAppConf(), Statics.appName
                     )
                 )
                 true
@@ -633,8 +589,7 @@ class SettingsActivity :
                 ) { dialog, _ ->
                     deleteRecursive(File(ErrorLog.errorLogPath))
                     dialog.dismiss()
-                }
-                .setNegativeButton(
+                }.setNegativeButton(
                     R.string.cancel
                 ) { dialog, _ -> dialog.dismiss() }.create()
         }
@@ -668,10 +623,7 @@ class SettingsActivity :
             val args = Bundle()
             args.putString("rootKey", preferenceScreen.key)
             prefFragment.arguments = args
-            parentFragmentManager
-                .beginTransaction()
-                .replace(id, prefFragment)
-                .addToBackStack(null)
+            parentFragmentManager.beginTransaction().replace(id, prefFragment).addToBackStack(null)
                 .commit()
         }
 
@@ -687,12 +639,10 @@ class SettingsActivity :
 
             if (BuildConfig.DEBUG) {
                 bindPreferenceSummaryToValue(
-                    this,
-                    PreferencesApp.clientEmail
+                    this, PreferencesApp.clientEmail
                 )
                 bindPreferenceSummaryToValue(
-                    this,
-                    PreferencesApp.clientPassword
+                    this, PreferencesApp.clientPassword
                 )
             }
         }
@@ -700,13 +650,11 @@ class SettingsActivity :
         override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
             super.onViewCreated(view, savedInstanceState)
 
-            val emailEditText =
-                findPreference<Preference>(PreferencesApp.clientEmail.key)
+            val emailEditText = findPreference<Preference>(PreferencesApp.clientEmail.key)
             emailEditText?.setOnPreferenceChangeListener { preference, newValue ->
                 if (!alreadyAnsweredYes) {
                     val diaBox = askForDownloadDbRequired(
-                        preference = preference,
-                        newValue = newValue
+                        preference = preference, newValue = newValue
                     )
                     diaBox.show()
                     false
@@ -716,13 +664,11 @@ class SettingsActivity :
                 }
             }
 
-            val passwordEditText =
-                findPreference<Preference>(PreferencesApp.clientPassword.key)
+            val passwordEditText = findPreference<Preference>(PreferencesApp.clientPassword.key)
             passwordEditText?.setOnPreferenceChangeListener { preference, newValue ->
                 if (!alreadyAnsweredYes) {
                     val diaBox = askForDownloadDbRequired(
-                        preference = preference,
-                        newValue = newValue
+                        preference = preference, newValue = newValue
                     )
                     diaBox.show()
                     false
@@ -735,23 +681,18 @@ class SettingsActivity :
             val selectPackageButton = findPreference<Preference>("select_package")
             selectPackageButton?.onPreferenceClickListener = OnPreferenceClickListener {
                 if (emailEditText != null && passwordEditText != null) {
-                    val email =
-                        prefsGetString(PreferencesApp.clientEmail)
-                    val password =
-                        prefsGetString(PreferencesApp.clientPassword)
+                    val email = prefsGetString(PreferencesApp.clientEmail)
+                    val password = prefsGetString(PreferencesApp.clientPassword)
 
                     if (!alreadyAnsweredYes) {
                         val diaBox = askForDownloadDbRequired2(
-                            email = email,
-                            password = password
+                            email = email, password = password
                         )
                         diaBox.show()
                     } else {
                         if (email.isNotEmpty() && password.isNotEmpty()) {
                             Statics.getConfig(
-                                email = email,
-                                password = password,
-                                installationCode = ""
+                                email = email, password = password, installationCode = ""
                             ) { onTaskGetPackagesEnded(it) }
                         }
                     }
@@ -767,9 +708,7 @@ class SettingsActivity :
                 } catch (ex: Exception) {
                     ex.printStackTrace()
                     makeText(
-                        requireView(),
-                        "${getString(R.string.error)}: ${ex.message}",
-                        ERROR
+                        requireView(), "${getString(R.string.error)}: ${ex.message}", ERROR
                     )
                     ErrorLog.writeLog(null, this::class.java.simpleName, ex)
                     false
@@ -778,31 +717,24 @@ class SettingsActivity :
 
             val qrCodeButton = findPreference<Preference>("ac_qr_code")
             qrCodeButton?.onPreferenceClickListener = OnPreferenceClickListener {
-                val urlPanel =
-                    prefsGetString(PreferencesApp.urlPanel)
-                val installationCode =
-                    prefsGetString(PreferencesApp.installationCode)
-                val clientEmail =
-                    prefsGetString(PreferencesApp.clientEmail)
-                val clientPassword =
-                    prefsGetString(PreferencesApp.clientPassword)
-                val clientPackage =
-                    prefsGetString(PreferencesApp.clientPackage)
+                val urlPanel = prefsGetString(PreferencesApp.urlPanel)
+                val installationCode = prefsGetString(PreferencesApp.installationCode)
+                val clientEmail = prefsGetString(PreferencesApp.clientEmail)
+                val clientPassword = prefsGetString(PreferencesApp.clientPassword)
+                val clientPackage = prefsGetString(PreferencesApp.clientPackage)
 
                 if (urlPanel.isEmpty() || installationCode.isEmpty() || clientPackage.isEmpty() || clientEmail.isEmpty() || clientPassword.isEmpty()) {
                     makeText(
                         requireView(),
-                        AssetControlApp.getContext()
-                            .getString(R.string.invalid_client_data), ERROR
+                        AssetControlApp.getContext().getString(R.string.invalid_client_data),
+                        ERROR
                     )
                     return@OnPreferenceClickListener false
                 }
 
                 generateQrCode(
-                    WeakReference(requireActivity()),
-                    getBarcodeForConfig(
-                        PreferencesApp.getClient(),
-                        "config"
+                    WeakReference(requireActivity()), getBarcodeForConfig(
+                        PreferencesApp.getClient(), "config"
                     )
                 )
                 true
@@ -810,19 +742,21 @@ class SettingsActivity :
 
             // Actualizar el programa
             val updateAppButton = findPreference<Preference>("update_app") as Preference
+            updateAppButton.isEnabled = false
             updateAppButton.onPreferenceClickListener = OnPreferenceClickListener {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !requireContext().packageManager.canRequestPackageInstalls()) {
-                    val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES)
-                        .setData(
-                            Uri.parse(
-                                String.format("package:%s", requireContext().packageName)
-                            )
-                        )
-                    resultForRequestPackageInstall.launch(intent)
-                } else {
-                    // check storage permission granted if yes then start downloading file
-                    checkStoragePermission()
-                }
+                // if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !requireContext().packageManager.canRequestPackageInstalls()) {
+                //     val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).setData(
+                //         Uri.parse(
+                //             String.format("package:%s", requireContext().packageName)
+                //         )
+                //     )
+                //     resultForRequestPackageInstall.launch(intent)
+                // } else {
+                //     // check storage permission granted if yes then start downloading file
+                //     checkStoragePermission()
+                // }
+
+                makeText(requireView(), getString(R.string.no_available_option), INFO)
                 true
             }
 
@@ -835,47 +769,46 @@ class SettingsActivity :
             }
         }
 
-        private val resultForRequestPackageInstall =
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-                if (it?.resultCode == CommonStatusCodes.SUCCESS || it?.resultCode == CommonStatusCodes.SUCCESS_CACHE) {
-                    // check storage permission granted if yes then start downloading file
-                    checkStoragePermission()
-                }
-            }
-
-        private fun checkStoragePermission() {
-            // Check if the storage permission has been granted
-            if (ActivityCompat.checkSelfPermission(
-                    requireContext(),
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                // Permission is missing and must be requested.
-                resultForStoragePermission.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                return
-            }
-
-            // start downloading
-            val downloadController = DownloadController(requireView())
-            downloadController.enqueueDownload()
-        }
-
-        private val resultForStoragePermission =
-            registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-                // returns boolean representing whether the
-                // permission is granted or not
-                if (!isGranted) {
-                    makeText(
-                        requireView(),
-                        requireContext().getString(R.string.app_dont_have_necessary_permissions),
-                        ERROR
-                    )
-                } else {
-                    // start downloading
-                    val downloadController = DownloadController(requireView())
-                    downloadController.enqueueDownload()
-                }
-            }
+        // private val resultForRequestPackageInstall =
+        //     registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        //         if (it?.resultCode == CommonStatusCodes.SUCCESS || it?.resultCode == CommonStatusCodes.SUCCESS_CACHE) {
+        //             // check storage permission granted if yes then start downloading file
+        //             checkStoragePermission()
+        //         }
+        //     }
+        //
+        // private fun checkStoragePermission() {
+        //     // Check if the storage permission has been granted
+        //     if (ActivityCompat.checkSelfPermission(
+        //             requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE
+        //         ) != PackageManager.PERMISSION_GRANTED
+        //     ) {
+        //         // Permission is missing and must be requested.
+        //         resultForStoragePermission.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        //         return
+        //     }
+        //
+        //     // start downloading
+        //     val downloadController = DownloadController(requireView())
+        //     downloadController.enqueueDownload()
+        // }
+        //
+        // private val resultForStoragePermission =
+        //     registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+        //         // returns boolean representing whether the
+        //         // permission is granted or not
+        //         if (!isGranted) {
+        //             makeText(
+        //                 requireView(),
+        //                 requireContext().getString(R.string.app_dont_have_necessary_permissions),
+        //                 ERROR
+        //             )
+        //         } else {
+        //             // start downloading
+        //             val downloadController = DownloadController(requireView())
+        //             downloadController.enqueueDownload()
+        //         }
+        //     }
 
         private fun askForDownloadDbRequired2(
             email: String,
@@ -894,14 +827,11 @@ class SettingsActivity :
 
                     if (email.isNotEmpty() && password.isNotEmpty()) {
                         Statics.getConfig(
-                            email = email,
-                            password = password,
-                            installationCode = ""
+                            email = email, password = password, installationCode = ""
                         ) { onTaskGetPackagesEnded(it) }
                     }
                     dialog.dismiss()
-                }
-                .setNegativeButton(
+                }.setNegativeButton(
                     R.string.no
                 ) { dialog, _ -> dialog.dismiss() }.create()
         }
@@ -922,11 +852,12 @@ class SettingsActivity :
                     preference.summary = newValue.toString()
                     alreadyAnsweredYes = true
                     if (newValue is String) {
-                        Statics.prefsPutString(preference.key, newValue)
+                        prefsPutString(
+                            preference.key, newValue
+                        )
                     }
                     dialog.dismiss()
-                }
-                .setNegativeButton(
+                }.setNegativeButton(
                     R.string.no
                 ) { dialog, _ -> dialog.dismiss() }.create()
         }
@@ -963,78 +894,67 @@ class SettingsActivity :
                     all[pref.key] is String && preference != null -> {
                         sBindPreferenceSummaryToValueListener.onPreferenceChange(
                             preference,
-                            PreferenceManager
-                                .getDefaultSharedPreferences(preference.context)
+                            PreferenceManager.getDefaultSharedPreferences(preference.context)
                                 .getString(preference.key, defaultValue.toString())
                         )
                     }
                     all[pref.key] is Boolean && preference != null -> {
                         sBindPreferenceSummaryToValueListener.onPreferenceChange(
                             preference,
-                            PreferenceManager
-                                .getDefaultSharedPreferences(preference.context)
+                            PreferenceManager.getDefaultSharedPreferences(preference.context)
                                 .getBoolean(preference.key, defaultValue.toString().toBoolean())
                         )
                     }
                     all[pref.key] is Float && preference != null -> {
                         sBindPreferenceSummaryToValueListener.onPreferenceChange(
                             preference,
-                            PreferenceManager
-                                .getDefaultSharedPreferences(preference.context)
+                            PreferenceManager.getDefaultSharedPreferences(preference.context)
                                 .getFloat(preference.key, defaultValue.toString().toFloat())
                         )
                     }
                     all[pref.key] is Int && preference != null -> {
                         sBindPreferenceSummaryToValueListener.onPreferenceChange(
                             preference,
-                            PreferenceManager
-                                .getDefaultSharedPreferences(preference.context)
+                            PreferenceManager.getDefaultSharedPreferences(preference.context)
                                 .getInt(preference.key, defaultValue.toString().toInt())
                         )
                     }
                     all[pref.key] is Long && preference != null -> {
                         sBindPreferenceSummaryToValueListener.onPreferenceChange(
                             preference,
-                            PreferenceManager
-                                .getDefaultSharedPreferences(preference.context)
+                            PreferenceManager.getDefaultSharedPreferences(preference.context)
                                 .getLong(preference.key, defaultValue.toString().toLong())
                         )
                     }
                     else -> {
                         try {
-                            if (preference != null)
-                                when (defaultValue) {
-                                    is String -> sBindPreferenceSummaryToValueListener.onPreferenceChange(
-                                        preference,
-                                        PreferenceManager
-                                            .getDefaultSharedPreferences(preference.context)
-                                            .getString(preference.key, defaultValue)
-                                    )
-                                    is Float -> sBindPreferenceSummaryToValueListener.onPreferenceChange(
-                                        preference,
-                                        PreferenceManager
-                                            .getDefaultSharedPreferences(preference.context)
-                                            .getFloat(preference.key, defaultValue)
-                                    )
-                                    is Int -> sBindPreferenceSummaryToValueListener.onPreferenceChange(
-                                        preference,
-                                        PreferenceManager
-                                            .getDefaultSharedPreferences(preference.context)
-                                            .getInt(preference.key, defaultValue)
-                                    )
-                                    is Long -> sBindPreferenceSummaryToValueListener.onPreferenceChange(
-                                        preference,
-                                        PreferenceManager
-                                            .getDefaultSharedPreferences(preference.context)
-                                            .getLong(preference.key, defaultValue)
-                                    )
-                                    is Boolean -> sBindPreferenceSummaryToValueListener.onPreferenceChange(
-                                        preference,
-                                        PreferenceManager
-                                            .getDefaultSharedPreferences(preference.context)
-                                            .getBoolean(preference.key, defaultValue)
-                                    )
-                                }
+                            if (preference != null) when (defaultValue) {
+                                is String -> sBindPreferenceSummaryToValueListener.onPreferenceChange(
+                                    preference,
+                                    PreferenceManager.getDefaultSharedPreferences(preference.context)
+                                        .getString(preference.key, defaultValue)
+                                )
+                                is Float -> sBindPreferenceSummaryToValueListener.onPreferenceChange(
+                                    preference,
+                                    PreferenceManager.getDefaultSharedPreferences(preference.context)
+                                        .getFloat(preference.key, defaultValue)
+                                )
+                                is Int -> sBindPreferenceSummaryToValueListener.onPreferenceChange(
+                                    preference,
+                                    PreferenceManager.getDefaultSharedPreferences(preference.context)
+                                        .getInt(preference.key, defaultValue)
+                                )
+                                is Long -> sBindPreferenceSummaryToValueListener.onPreferenceChange(
+                                    preference,
+                                    PreferenceManager.getDefaultSharedPreferences(preference.context)
+                                        .getLong(preference.key, defaultValue)
+                                )
+                                is Boolean -> sBindPreferenceSummaryToValueListener.onPreferenceChange(
+                                    preference,
+                                    PreferenceManager.getDefaultSharedPreferences(preference.context)
+                                        .getBoolean(preference.key, defaultValue)
+                                )
+                            }
                         } catch (ex: Exception) {
                             ex.printStackTrace()
                             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
@@ -1066,27 +986,20 @@ class SettingsActivity :
                         )
                     }
                 } else {
-                    if (view != null)
-                        makeText(
-                            requireView(),
-                            msg,
-                            SnackBarType.INFO
-                        )
+                    if (view != null) makeText(
+                        requireView(), msg, SnackBarType.INFO
+                    )
                 }
             } else if (status == ProgressStatus.success) {
                 if (view != null) showSnackBar(
                     SnackBarEventData(
-                        msg,
-                        SnackBarType.SUCCESS
+                        msg, SnackBarType.SUCCESS
                     )
                 )
-            } else if (status == ProgressStatus.crashed ||
-                status == ProgressStatus.canceled
-            ) {
+            } else if (status == ProgressStatus.crashed || status == ProgressStatus.canceled) {
                 if (view != null) showSnackBar(
                     SnackBarEventData(
-                        msg,
-                        ERROR
+                        msg, ERROR
                     )
                 )
             }
@@ -1096,8 +1009,7 @@ class SettingsActivity :
             if (status == ProgressStatus.finished) {
                 if (view != null) showSnackBar(
                     SnackBarEventData(
-                        getString(R.string.configuration_applied),
-                        SnackBarType.INFO
+                        getString(R.string.configuration_applied), SnackBarType.INFO
                     )
                 )
                 Statics.removeDataBases()
@@ -1105,8 +1017,7 @@ class SettingsActivity :
             } else if (status == ProgressStatus.crashed) {
                 if (view != null) showSnackBar(
                     SnackBarEventData(
-                        getString(R.string.error_setting_user_panel),
-                        ERROR
+                        getString(R.string.error_setting_user_panel), ERROR
                     )
                 )
             }
@@ -1123,9 +1034,7 @@ class SettingsActivity :
      * This fragment shows notification preferences only. It is used when the
      * activity is showing a two-pane settings UI.
      */
-    class DevicesPreferenceFragment :
-        PreferenceFragmentCompat(),
-        Rfid.RfidDeviceListener {
+    class DevicesPreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceListener {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             var key = rootKey
             if (arguments != null) {
@@ -1153,10 +1062,7 @@ class SettingsActivity :
             val args = Bundle()
             args.putString("rootKey", preferenceScreen.key)
             prefFragment.arguments = args
-            parentFragmentManager
-                .beginTransaction()
-                .replace(id, prefFragment)
-                .addToBackStack(null)
+            parentFragmentManager.beginTransaction().replace(id, prefFragment).addToBackStack(null)
                 .commit()
         }
 
@@ -1199,8 +1105,7 @@ class SettingsActivity :
         private fun setCollectorPref() {
             ////////////////// COLECTOR //////////////////
             bindPreferenceSummaryToValue(
-                this,
-                PreferencesApp.collectorType
+                this, PreferencesApp.collectorType
             )
 
             // PERMITE ACTUALIZAR EN PANTALLA EL ITEM SELECCIONADO EN EL SUMMARY DEL CONTROL
@@ -1223,10 +1128,8 @@ class SettingsActivity :
                 }
         }
 
-        private val ipv4Regex = "^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
-                "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
-                "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
-                "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+        private val ipv4Regex =
+            "^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." + "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." + "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." + "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
 
         private val ipv4Pattern: Pattern = Pattern.compile(ipv4Regex)
 
@@ -1253,20 +1156,19 @@ class SettingsActivity :
             netPrinterIp: CharSequence,
             netPrinterPort: CharSequence,
         ): String {
-            val r =
-                if (!useBtPrinter && !useNetPrinter) {
-                    getString(R.string.there_is_no_selected_printer)
-                } else if (useBtPrinter && btPrinterName.isEmpty()) {
-                    getString(R.string.there_is_no_selected_printer)
-                } else if (useNetPrinter && (netPrinterIp.isEmpty() || netPrinterPort.isEmpty())) {
-                    getString(R.string.there_is_no_selected_printer)
-                } else {
-                    when {
-                        useBtPrinter -> btPrinterName.toString()
-                        useNetPrinter -> "$netPrinterIp ($netPrinterPort)"
-                        else -> getString(R.string.there_is_no_selected_printer)
-                    }
+            val r = if (!useBtPrinter && !useNetPrinter) {
+                getString(R.string.there_is_no_selected_printer)
+            } else if (useBtPrinter && btPrinterName.isEmpty()) {
+                getString(R.string.there_is_no_selected_printer)
+            } else if (useNetPrinter && (netPrinterIp.isEmpty() || netPrinterPort.isEmpty())) {
+                getString(R.string.there_is_no_selected_printer)
+            } else {
+                when {
+                    useBtPrinter -> btPrinterName.toString()
+                    useNetPrinter -> "$netPrinterIp ($netPrinterPort)"
+                    else -> getString(R.string.there_is_no_selected_printer)
                 }
+            }
             return r
         }
 
@@ -1291,8 +1193,7 @@ class SettingsActivity :
                         if (deviceListPreference.entry.isNullOrEmpty()) getString(R.string.there_is_no_selected_printer)
                         else deviceListPreference.entry.toString()
                     preference.summary = pn
-                    if (useBtPrinter)
-                        printerPref.summary = pn
+                    if (useBtPrinter) printerPref.summary = pn
                     true
                 }
             //endregion //// DEVICE LIST
@@ -1347,16 +1248,14 @@ class SettingsActivity :
                 val pn =
                     if (deviceListPreference.entry.isNullOrEmpty()) getString(R.string.there_is_no_selected_printer)
                     else deviceListPreference.entry.toString()
-                if (useBtPrinter)
-                    printerPref.summary = pn
+                if (useBtPrinter) printerPref.summary = pn
                 true
             }
             swPrefNetPrinter.setOnPreferenceChangeListener { _, newValue ->
                 useNetPrinter = newValue != null && newValue == true
                 if (newValue == true) swPrefBtPrinter.isChecked = false
                 val pn = "${ipNetPrinterPref.text} (${portNetPrinterPref.text})"
-                if (useNetPrinter)
-                    printerPref.summary = pn
+                if (useNetPrinter) printerPref.summary = pn
                 true
             }
             //endregion //// USE BLUETOOTH / NET PRINTER
@@ -1367,15 +1266,14 @@ class SettingsActivity :
                 findPreference<Preference>(PreferencesApp.printerPower.key) as EditTextPreference
             printerPowerPref.summary = printerPowerPref.text
             printerPowerPref.setOnBindEditTextListener {
-                val filters = arrayOf(
-                    InputFilter { source, _, _, dest, _, _ ->
-                        try {
-                            val input = (dest.toString() + source.toString()).toInt()
-                            if (input in 1 until maxPower) return@InputFilter null
-                        } catch (nfe: NumberFormatException) {
-                        }
-                        ""
-                    })
+                val filters = arrayOf(InputFilter { source, _, _, dest, _, _ ->
+                    try {
+                        val input = (dest.toString() + source.toString()).toInt()
+                        if (input in 1 until maxPower) return@InputFilter null
+                    } catch (nfe: NumberFormatException) {
+                    }
+                    ""
+                })
                 it.filters = filters
             }
 
@@ -1384,15 +1282,14 @@ class SettingsActivity :
                 findPreference<Preference>(PreferencesApp.printerSpeed.key) as EditTextPreference
             printerSpeedPref.summary = printerSpeedPref.text
             printerSpeedPref.setOnBindEditTextListener {
-                val filters = arrayOf(
-                    InputFilter { source, _, _, dest, _, _ ->
-                        try {
-                            val input = (dest.toString() + source.toString()).toInt()
-                            if (input in 1 until maxSpeed) return@InputFilter null
-                        } catch (nfe: NumberFormatException) {
-                        }
-                        ""
-                    })
+                val filters = arrayOf(InputFilter { source, _, _, dest, _, _ ->
+                    try {
+                        val input = (dest.toString() + source.toString()).toInt()
+                        if (input in 1 until maxSpeed) return@InputFilter null
+                    } catch (nfe: NumberFormatException) {
+                    }
+                    ""
+                })
                 it.filters = filters
             }
             //endregion //// POTENCIA Y VELOCIDAD
@@ -1403,16 +1300,14 @@ class SettingsActivity :
             val swPrefCharCR =
                 findPreference<Preference>("conf_printer_new_line_char_cr") as SwitchPreference
 
-            val lineSeparator =
-                prefsGetString(PreferencesApp.lineSeparator)
+            val lineSeparator = prefsGetString(PreferencesApp.lineSeparator)
             if (lineSeparator == Char(10).toString()) swPrefCharLF.isChecked
             else if (lineSeparator == Char(13).toString()) swPrefCharCR.isChecked
 
             swPrefCharLF.setOnPreferenceChangeListener { _, newValue ->
                 if (newValue == true) {
-                    Statics.prefsPutString(
-                        PreferencesApp.lineSeparator.key,
-                        Char(10).toString()
+                    prefsPutString(
+                        PreferencesApp.lineSeparator.key, Char(10).toString()
                     )
                     swPrefCharCR.isChecked = false
                 }
@@ -1421,9 +1316,8 @@ class SettingsActivity :
 
             swPrefCharCR.setOnPreferenceChangeListener { _, newValue ->
                 if (newValue == true) {
-                    Statics.prefsPutString(
-                        PreferencesApp.lineSeparator.key,
-                        Char(13).toString()
+                    prefsPutString(
+                        PreferencesApp.lineSeparator.key, Char(13).toString()
                     )
                     swPrefCharLF.isChecked = false
                 }
@@ -1431,13 +1325,12 @@ class SettingsActivity :
             }
             //endregion //// CARACTER DE SALTO DE LÍNEA
 
-            printerPref.summary =
-                if (!useBtPrinter && !useNetPrinter) getString(R.string.disabled)
-                else getPrinterName(
-                    btPrinterName = deviceListPreference.entry ?: "",
-                    netPrinterIp = ipNetPrinterPref.text.toString(),
-                    netPrinterPort = portNetPrinterPref.toString()
-                )
+            printerPref.summary = if (!useBtPrinter && !useNetPrinter) getString(R.string.disabled)
+            else getPrinterName(
+                btPrinterName = deviceListPreference.entry ?: "",
+                netPrinterIp = ipNetPrinterPref.text.toString(),
+                netPrinterPort = portNetPrinterPref.toString()
+            )
         }
 
         private var useRfid = false
@@ -1500,8 +1393,7 @@ class SettingsActivity :
             rfidDeviceNamePreference!!.setOnPreferenceClickListener {
                 if (Rfid.rfidDevice == null || (Rfid.rfidDevice as Vh75Bt).getState() != STATE_CONNECTED) {
                     makeText(
-                        v, getString(R.string.there_is_no_rfid_device_connected),
-                        ERROR
+                        v, getString(R.string.there_is_no_rfid_device_connected), ERROR
                     )
                 }
                 true
@@ -1511,8 +1403,7 @@ class SettingsActivity :
                     (Rfid.rfidDevice as Vh75Bt).setBluetoothName(newValue.toString())
                 } else {
                     makeText(
-                        v, getString(R.string.there_is_no_rfid_device_connected),
-                        ERROR
+                        v, getString(R.string.there_is_no_rfid_device_connected), ERROR
                     )
                 }
                 true
@@ -1529,11 +1420,9 @@ class SettingsActivity :
             }
             deviceListPreference.onPreferenceChangeListener =
                 Preference.OnPreferenceChangeListener { preference, newValue ->
-                    rfidName =
-                        getBluetoothNameFromAddress(
-                            newValue,
-                            getString(R.string.there_is_no_selected_rfid_scanner)
-                        )
+                    rfidName = getBluetoothNameFromAddress(
+                        newValue, getString(R.string.there_is_no_selected_rfid_scanner)
+                    )
 
                     preference.summary = rfidName
 
@@ -1555,8 +1444,7 @@ class SettingsActivity :
                 rfidReadPower.summary = "$newValue dB"
                 true
             }
-            rfidReadPower.summary =
-                "${Statics.prefsGetInt(PreferencesApp.rfidReadPower)} dB"
+            rfidReadPower.summary = "${prefsGetInt(PreferencesApp.rfidReadPower)} dB"
             //endregion //// RFID POWER
 
             //region //// RESET TO FACTORY
@@ -1567,8 +1455,7 @@ class SettingsActivity :
                     diaBox.show()
                 } else {
                     makeText(
-                        v, getString(R.string.there_is_no_rfid_device_connected),
-                        ERROR
+                        v, getString(R.string.there_is_no_rfid_device_connected), ERROR
                     )
                 }
                 true
@@ -1590,14 +1477,13 @@ class SettingsActivity :
         private fun connectToRfidDevice() {
             if (!useRfid) return
 
-            val bluetoothManager = AssetControlApp.getContext()
-                .getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
+            val bluetoothManager =
+                AssetControlApp.getContext().getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
             val mBluetoothAdapter = bluetoothManager.adapter
             if (mBluetoothAdapter == null) {
                 showSnackBar(
                     SnackBarEventData(
-                        getString(R.string.there_are_no_bluetooth_devices),
-                        SnackBarType.INFO
+                        getString(R.string.there_are_no_bluetooth_devices), SnackBarType.INFO
                     )
                 )
             } else {
@@ -1605,8 +1491,7 @@ class SettingsActivity :
                     val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
                     enableBtIntent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
                     if (ActivityCompat.checkSelfPermission(
-                            requireContext(),
-                            Manifest.permission.BLUETOOTH_CONNECT
+                            requireContext(), Manifest.permission.BLUETOOTH_CONNECT
                         ) != PackageManager.PERMISSION_GRANTED
                     ) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -1632,8 +1517,7 @@ class SettingsActivity :
                     //your deleting code
                     (Rfid.rfidDevice as Vh75Bt).resetToFactory()
                     dialog.dismiss()
-                }
-                .setNegativeButton(
+                }.setNegativeButton(
                     R.string.cancel
                 ) { dialog, _ -> dialog.dismiss() }.create()
         }
@@ -1662,8 +1546,7 @@ class SettingsActivity :
                 val mBluetoothAdapter = bluetoothManager.adapter
 
                 if (ActivityCompat.checkSelfPermission(
-                        AssetControlApp.getContext(),
-                        Manifest.permission.BLUETOOTH_CONNECT
+                        AssetControlApp.getContext(), Manifest.permission.BLUETOOTH_CONNECT
                     ) != PackageManager.PERMISSION_GRANTED
                 ) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -1713,10 +1596,7 @@ class SettingsActivity :
             val args = Bundle()
             args.putString("rootKey", preferenceScreen.key)
             prefFragment.arguments = args
-            parentFragmentManager
-                .beginTransaction()
-                .replace(id, prefFragment)
-                .addToBackStack(null)
+            parentFragmentManager.beginTransaction().replace(id, prefFragment).addToBackStack(null)
                 .commit()
         }
 
@@ -1724,46 +1604,37 @@ class SettingsActivity :
             super.onCreate(savedInstanceState)
 
             bindPreferenceSummaryToValue(
-                this,
-                PreferencesApp.icPhotoMaxHeightOrWidth
+                this, PreferencesApp.icPhotoMaxHeightOrWidth
             )
 
             bindPreferenceSummaryToValue(
-                this,
-                PreferencesApp.icWsServer
+                this, PreferencesApp.icWsServer
             )
             bindPreferenceSummaryToValue(
-                this,
-                PreferencesApp.icWsNamespace
+                this, PreferencesApp.icWsNamespace
             )
 
             if (BuildConfig.DEBUG) {
                 bindPreferenceSummaryToValue(
-                    this,
-                    PreferencesApp.icWsUser
+                    this, PreferencesApp.icWsUser
                 )
                 bindPreferenceSummaryToValue(
-                    this,
-                    PreferencesApp.icWsPass
+                    this, PreferencesApp.icWsPass
                 )
                 bindPreferenceSummaryToValue(
-                    this,
-                    PreferencesApp.icUser
+                    this, PreferencesApp.icUser
                 )
                 bindPreferenceSummaryToValue(
-                    this,
-                    PreferencesApp.icPass
+                    this, PreferencesApp.icPass
                 )
             }
 
             findPreference<Preference>(PreferencesApp.icWsUseProxy.key)
             bindPreferenceSummaryToValue(
-                this,
-                PreferencesApp.icWsProxy
+                this, PreferencesApp.icWsProxy
             )
             bindPreferenceSummaryToValue(
-                this,
-                PreferencesApp.icWsProxyPort
+                this, PreferencesApp.icWsProxyPort
             )
 
             /*
@@ -1778,72 +1649,53 @@ class SettingsActivity :
         override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
             super.onViewCreated(view, savedInstanceState)
 
-            val urlEditText =
-                findPreference<Preference>(PreferencesApp.icWsServer.key)
-            val namespaceEditText =
-                findPreference<Preference>(PreferencesApp.icWsNamespace.key)
-            val userEditText =
-                findPreference<Preference>(PreferencesApp.icUser.key)
-            val passEditText =
-                findPreference<Preference>(PreferencesApp.icPass.key)
+            val urlEditText = findPreference<Preference>(PreferencesApp.icWsServer.key)
+            val namespaceEditText = findPreference<Preference>(PreferencesApp.icWsNamespace.key)
+            val userEditText = findPreference<Preference>(PreferencesApp.icUser.key)
+            val passEditText = findPreference<Preference>(PreferencesApp.icPass.key)
 
             val button = findPreference<Preference>("ic_test")
             button?.onPreferenceClickListener = OnPreferenceClickListener {
-                if (urlEditText != null &&
-                    namespaceEditText != null &&
-                    userEditText != null &&
-                    passEditText != null
-                ) {
-                    val url =
-                        prefsGetString(PreferencesApp.icWsServer)
-                    val namespace =
-                        prefsGetString(PreferencesApp.icWsNamespace)
+                if (urlEditText != null && namespaceEditText != null && userEditText != null && passEditText != null) {
+                    val url = prefsGetString(PreferencesApp.icWsServer)
+                    val namespace = prefsGetString(PreferencesApp.icWsNamespace)
 
                     testImageControlConnection(
-                        url = url,
-                        namespace = namespace
+                        url = url, namespace = namespace
                     )
                 }
                 true
             }
 
             val removeImagesCache = findPreference<Preference>("remove_images_cache")
-            removeImagesCache?.onPreferenceClickListener =
-                OnPreferenceClickListener {
-                    //code for what you want it to do
-                    val diaBox = askForDelete()
-                    diaBox.show()
-                    true
-                }
+            removeImagesCache?.onPreferenceClickListener = OnPreferenceClickListener {
+                //code for what you want it to do
+                val diaBox = askForDelete()
+                diaBox.show()
+                true
+            }
 
             val qrCodeButton = findPreference<Preference>("ic_qr_code")
             qrCodeButton?.onPreferenceClickListener = OnPreferenceClickListener {
-                val icUrl =
-                    prefsGetString(PreferencesApp.icWsServer)
-                val icNamespace =
-                    prefsGetString(PreferencesApp.icWsNamespace)
-                val icUserWs =
-                    prefsGetString(PreferencesApp.icWsUser)
-                val icPasswordWs =
-                    prefsGetString(PreferencesApp.icWsPass)
+                val icUrl = prefsGetString(PreferencesApp.icWsServer)
+                val icNamespace = prefsGetString(PreferencesApp.icWsNamespace)
+                val icUserWs = prefsGetString(PreferencesApp.icWsUser)
+                val icPasswordWs = prefsGetString(PreferencesApp.icWsPass)
                 //val icUser = prefsGetString(P.icUser)
                 //val icPassword = prefsGetString(P.icPass)
 
                 if (icUrl.isEmpty() || icNamespace.isEmpty() || icUserWs.isEmpty() || icPasswordWs.isEmpty()) {
                     makeText(
                         requireView(),
-                        AssetControlApp.getContext()
-                            .getString(R.string.invalid_webservice_data),
+                        AssetControlApp.getContext().getString(R.string.invalid_webservice_data),
                         ERROR
                     )
                     return@OnPreferenceClickListener false
                 }
 
                 generateQrCode(
-                    WeakReference(requireActivity()),
-                    getBarcodeForConfig(
-                        PreferencesApp.getImageControl(),
-                        Statics.appName
+                    WeakReference(requireActivity()), getBarcodeForConfig(
+                        PreferencesApp.getImageControl(), Statics.appName
                     )
                 )
                 true
@@ -1857,9 +1709,7 @@ class SettingsActivity :
                 } catch (ex: Exception) {
                     ex.printStackTrace()
                     makeText(
-                        requireView(),
-                        "${getString(R.string.error)}: ${ex.message}",
-                        ERROR
+                        requireView(), "${getString(R.string.error)}: ${ex.message}", ERROR
                     )
                     ErrorLog.writeLog(null, this::class.java.simpleName, ex)
                     false
@@ -1879,8 +1729,7 @@ class SettingsActivity :
                     val albumFolder = File(
                         AssetControlApp.getContext().getExternalFilesDir(
                             Environment.DIRECTORY_PICTURES
-                        ),
-                        "ImageControl"
+                        ), "ImageControl"
                     )
 
                     if (albumFolder.isDirectory) {
@@ -1895,8 +1744,7 @@ class SettingsActivity :
                     }
 
                     dialog.dismiss()
-                }
-                .setNegativeButton(
+                }.setNegativeButton(
                     R.string.cancel
                 ) { dialog, _ -> dialog.dismiss() }.create()
         }
@@ -1908,8 +1756,7 @@ class SettingsActivity :
             if (url.isEmpty() || namespace.isEmpty()) {
                 if (view != null) showSnackBar(
                     SnackBarEventData(
-                        AssetControlApp.getContext()
-                            .getString(R.string.invalid_webservice_data),
+                        AssetControlApp.getContext().getString(R.string.invalid_webservice_data),
                         SnackBarType.INFO
                     )
                 )
@@ -1922,8 +1769,7 @@ class SettingsActivity :
             if (status == ProgressStatus.finished) {
                 if (view != null) showSnackBar(
                     SnackBarEventData(
-                        getString(R.string.configuration_applied),
-                        SnackBarType.INFO
+                        getString(R.string.configuration_applied), SnackBarType.INFO
                     )
                 )
                 Statics.removeDataBases()
@@ -1931,8 +1777,7 @@ class SettingsActivity :
             } else if (status == ProgressStatus.crashed) {
                 if (view != null) showSnackBar(
                     SnackBarEventData(
-                        getString(R.string.error_setting_user_panel),
-                        ERROR
+                        getString(R.string.error_setting_user_panel), ERROR
                     )
                 )
             }
@@ -1963,10 +1808,7 @@ class SettingsActivity :
             val args = Bundle()
             args.putString("rootKey", preferenceScreen.key)
             prefFragment.arguments = args
-            parentFragmentManager
-                .beginTransaction()
-                .replace(id, prefFragment)
-                .addToBackStack(null)
+            parentFragmentManager.beginTransaction().replace(id, prefFragment).addToBackStack(null)
                 .commit()
         }
 
@@ -1976,40 +1818,32 @@ class SettingsActivity :
             super.onCreate(savedInstanceState)
 
             bindPreferenceSummaryToValue(
-                this,
-                PreferencesApp.acWsServer
+                this, PreferencesApp.acWsServer
             )
             bindPreferenceSummaryToValue(
-                this,
-                PreferencesApp.acWsNamespace
+                this, PreferencesApp.acWsNamespace
             )
 
             if (BuildConfig.DEBUG) {
                 bindPreferenceSummaryToValue(
-                    this,
-                    PreferencesApp.acWsUser
+                    this, PreferencesApp.acWsUser
                 )
                 bindPreferenceSummaryToValue(
-                    this,
-                    PreferencesApp.acWsPass
+                    this, PreferencesApp.acWsPass
                 )
                 bindPreferenceSummaryToValue(
-                    this,
-                    PreferencesApp.acUser
+                    this, PreferencesApp.acUser
                 )
                 bindPreferenceSummaryToValue(
-                    this,
-                    PreferencesApp.acPass
+                    this, PreferencesApp.acPass
                 )
             }
 
             bindPreferenceSummaryToValue(
-                this,
-                PreferencesApp.acWsProxy
+                this, PreferencesApp.acWsProxy
             )
             bindPreferenceSummaryToValue(
-                this,
-                PreferencesApp.acWsProxyPort
+                this, PreferencesApp.acWsProxyPort
             )
         }
 
@@ -2024,51 +1858,39 @@ class SettingsActivity :
             val proxyPassEditText = findPreference<Preference>(P.acWsProxyPass.key)
             */
 
-            val urlEditText =
-                findPreference<Preference>(PreferencesApp.acWsServer.key)
-            val namespaceEditText =
-                findPreference<Preference>(PreferencesApp.acWsNamespace.key)
-            val userWsEditText =
-                findPreference<Preference>(PreferencesApp.acWsUser.key)
-            val passWsEditText =
-                findPreference<Preference>(PreferencesApp.acWsPass.key)
-            val userEditText =
-                findPreference<Preference>(PreferencesApp.acUser.key)
-            val passEditText =
-                findPreference<Preference>(PreferencesApp.acPass.key)
+            val urlEditText = findPreference<Preference>(PreferencesApp.acWsServer.key)
+            val namespaceEditText = findPreference<Preference>(PreferencesApp.acWsNamespace.key)
+            val userWsEditText = findPreference<Preference>(PreferencesApp.acWsUser.key)
+            val passWsEditText = findPreference<Preference>(PreferencesApp.acWsPass.key)
+            val userEditText = findPreference<Preference>(PreferencesApp.acUser.key)
+            val passEditText = findPreference<Preference>(PreferencesApp.acPass.key)
 
             val testButton = findPreference<Preference>("ac_test")
-            testButton?.onPreferenceClickListener =
-                OnPreferenceClickListener {
-                    if (urlEditText != null && namespaceEditText != null) {
-                        val url =
-                            prefsGetString(PreferencesApp.acWsServer)
-                        val namespace =
-                            prefsGetString(PreferencesApp.acWsNamespace)
-                        val urlProxy =
-                            prefsGetString(PreferencesApp.acWsProxy)
-                        val proxyPort =
-                            Statics.prefsGetInt(PreferencesApp.acWsProxyPort)
-                        val useProxy =
-                            Statics.prefsGetBoolean(PreferencesApp.acWsUseProxy)
-                        val proxyUser =
-                            prefsGetString(PreferencesApp.acWsProxyUser)
-                        val proxyPass =
-                            prefsGetString(PreferencesApp.acWsProxyPass)
+            testButton?.onPreferenceClickListener = OnPreferenceClickListener {
+                if (urlEditText != null && namespaceEditText != null) {
+                    val url = prefsGetString(PreferencesApp.acWsServer)
+                    val namespace = prefsGetString(PreferencesApp.acWsNamespace)
+                    val urlProxy = prefsGetString(PreferencesApp.acWsProxy)
+                    val proxyPort = prefsGetInt(PreferencesApp.acWsProxyPort)
+                    val useProxy = prefsGetBoolean(
+                        PreferencesApp.acWsUseProxy
+                    )
+                    val proxyUser = prefsGetString(PreferencesApp.acWsProxyUser)
+                    val proxyPass = prefsGetString(PreferencesApp.acWsProxyPass)
 
-                        testWsConnection(
-                            parentView = requireView(),
-                            url = url,
-                            namespace = namespace,
-                            useProxy = useProxy,
-                            proxyUrl = urlProxy,
-                            proxyPort = proxyPort,
-                            proxyUser = proxyUser,
-                            proxyPass = proxyPass
-                        )
-                    }
-                    true
+                    testWsConnection(
+                        parentView = requireView(),
+                        url = url,
+                        namespace = namespace,
+                        useProxy = useProxy,
+                        proxyUrl = urlProxy,
+                        proxyPort = proxyPort,
+                        proxyUser = proxyUser,
+                        proxyPass = proxyPass
+                    )
                 }
+                true
+            }
 
             val scanConfigCode = findPreference<Preference>("scan_config_code")
             scanConfigCode?.onPreferenceClickListener = OnPreferenceClickListener {
@@ -2078,9 +1900,7 @@ class SettingsActivity :
                 } catch (ex: Exception) {
                     ex.printStackTrace()
                     makeText(
-                        requireView(),
-                        "${getString(R.string.error)}: ${ex.message}",
-                        ERROR
+                        requireView(), "${getString(R.string.error)}: ${ex.message}", ERROR
                     )
                     ErrorLog.writeLog(null, this::class.java.simpleName, ex)
                     false
@@ -2089,30 +1909,23 @@ class SettingsActivity :
 
             val qrCodeButton = findPreference<Preference>("ac_qr_code")
             qrCodeButton?.onPreferenceClickListener = OnPreferenceClickListener {
-                val url =
-                    prefsGetString(PreferencesApp.acWsServer)
-                val namespace =
-                    prefsGetString(PreferencesApp.acWsNamespace)
-                val userWs =
-                    prefsGetString(PreferencesApp.acWsUser)
-                val passwordWs =
-                    prefsGetString(PreferencesApp.acWsPass)
+                val url = prefsGetString(PreferencesApp.acWsServer)
+                val namespace = prefsGetString(PreferencesApp.acWsNamespace)
+                val userWs = prefsGetString(PreferencesApp.acWsUser)
+                val passwordWs = prefsGetString(PreferencesApp.acWsPass)
 
                 if (url.isEmpty() || namespace.isEmpty() || userWs.isEmpty() || passwordWs.isEmpty()) {
                     makeText(
                         requireView(),
-                        AssetControlApp.getContext()
-                            .getString(R.string.invalid_webservice_data),
+                        AssetControlApp.getContext().getString(R.string.invalid_webservice_data),
                         ERROR
                     )
                     return@OnPreferenceClickListener false
                 }
 
                 generateQrCode(
-                    WeakReference(requireActivity()),
-                    getBarcodeForConfig(
-                        PreferencesApp.getAcWebserivce(),
-                        Statics.appName
+                    WeakReference(requireActivity()), getBarcodeForConfig(
+                        PreferencesApp.getAcWebserivce(), Statics.appName
                     )
                 )
                 true
@@ -2121,8 +1934,7 @@ class SettingsActivity :
             (urlEditText ?: return).setOnPreferenceChangeListener { preference, newValue ->
                 if (!alreadyAnsweredYes) {
                     val diaBox = askForDownloadDbRequired(
-                        preference = preference,
-                        newValue = newValue
+                        preference = preference, newValue = newValue
                     )
                     diaBox.show()
                     false
@@ -2134,8 +1946,7 @@ class SettingsActivity :
             namespaceEditText?.setOnPreferenceChangeListener { preference, newValue ->
                 if (!alreadyAnsweredYes) {
                     val diaBox = askForDownloadDbRequired(
-                        preference = preference,
-                        newValue = newValue
+                        preference = preference, newValue = newValue
                     )
                     diaBox.show()
                     false
@@ -2147,8 +1958,7 @@ class SettingsActivity :
             userWsEditText?.setOnPreferenceChangeListener { preference, newValue ->
                 if (!alreadyAnsweredYes) {
                     val diaBox = askForDownloadDbRequired(
-                        preference = preference,
-                        newValue = newValue
+                        preference = preference, newValue = newValue
                     )
                     diaBox.show()
                     false
@@ -2160,8 +1970,7 @@ class SettingsActivity :
             passWsEditText?.setOnPreferenceChangeListener { preference, newValue ->
                 if (!alreadyAnsweredYes) {
                     val diaBox = askForDownloadDbRequired(
-                        preference = preference,
-                        newValue = newValue
+                        preference = preference, newValue = newValue
                     )
                     diaBox.show()
                     false
@@ -2201,11 +2010,12 @@ class SettingsActivity :
                     preference.summary = newValue.toString()
                     alreadyAnsweredYes = true
                     if (newValue is String) {
-                        Statics.prefsPutString(preference.key, newValue)
+                        prefsPutString(
+                            preference.key, newValue
+                        )
                     }
                     dialog.dismiss()
-                }
-                .setNegativeButton(
+                }.setNegativeButton(
                     R.string.no
                 ) { dialog, _ -> dialog.dismiss() }.create()
         }
@@ -2229,10 +2039,7 @@ class SettingsActivity :
             val args = Bundle()
             args.putString("rootKey", preferenceScreen.key)
             prefFragment.arguments = args
-            parentFragmentManager
-                .beginTransaction()
-                .replace(id, prefFragment)
-                .addToBackStack(null)
+            parentFragmentManager.beginTransaction().replace(id, prefFragment).addToBackStack(null)
                 .commit()
         }
 
@@ -2240,41 +2047,33 @@ class SettingsActivity :
             super.onCreate(savedInstanceState)
 
             bindPreferenceSummaryToValue(
-                this,
-                PreferencesApp.acMantWsServer
+                this, PreferencesApp.acMantWsServer
             )
             bindPreferenceSummaryToValue(
-                this,
-                PreferencesApp.acMantWsNamespace
+                this, PreferencesApp.acMantWsNamespace
             )
 
             if (BuildConfig.DEBUG) {
                 bindPreferenceSummaryToValue(
-                    this,
-                    PreferencesApp.acMantWsUser
+                    this, PreferencesApp.acMantWsUser
                 )
                 bindPreferenceSummaryToValue(
-                    this,
-                    PreferencesApp.acMantWsPass
+                    this, PreferencesApp.acMantWsPass
                 )
                 bindPreferenceSummaryToValue(
-                    this,
-                    PreferencesApp.acMantUser
+                    this, PreferencesApp.acMantUser
                 )
                 bindPreferenceSummaryToValue(
-                    this,
-                    PreferencesApp.acMantPass
+                    this, PreferencesApp.acMantPass
                 )
             }
 
             findPreference<Preference>(PreferencesApp.acMantWsUseProxy.key)
             bindPreferenceSummaryToValue(
-                this,
-                PreferencesApp.acMantWsProxy
+                this, PreferencesApp.acMantWsProxy
             )
             bindPreferenceSummaryToValue(
-                this,
-                PreferencesApp.acMantWsProxyPort
+                this, PreferencesApp.acMantWsProxyPort
             )
 
             /*
@@ -2287,26 +2086,18 @@ class SettingsActivity :
 
             val button = findPreference<Preference>("ac_mant_test")
             button?.onPreferenceClickListener = OnPreferenceClickListener {
-                val urlEditText =
-                    findPreference<Preference>(PreferencesApp.acMantWsServer.key)
+                val urlEditText = findPreference<Preference>(PreferencesApp.acMantWsServer.key)
                 val namespaceEditText =
                     findPreference<Preference>(PreferencesApp.acMantWsNamespace.key)
 
                 if (urlEditText != null && namespaceEditText != null) {
-                    val url =
-                        prefsGetString(PreferencesApp.acMantWsServer)
-                    val namespace =
-                        prefsGetString(PreferencesApp.acMantWsNamespace)
-                    val urlProxy =
-                        prefsGetString(PreferencesApp.acMantWsProxy)
-                    val proxyPort =
-                        Statics.prefsGetInt(PreferencesApp.acMantWsProxyPort)
-                    val useProxy =
-                        Statics.prefsGetBoolean(PreferencesApp.acMantWsUseProxy)
-                    val proxyUser =
-                        prefsGetString(PreferencesApp.acMantWsProxyUser)
-                    val proxyPass =
-                        prefsGetString(PreferencesApp.acMantWsProxyPass)
+                    val url = prefsGetString(PreferencesApp.acMantWsServer)
+                    val namespace = prefsGetString(PreferencesApp.acMantWsNamespace)
+                    val urlProxy = prefsGetString(PreferencesApp.acMantWsProxy)
+                    val proxyPort = prefsGetInt(PreferencesApp.acMantWsProxyPort)
+                    val useProxy = prefsGetBoolean(PreferencesApp.acMantWsUseProxy)
+                    val proxyUser = prefsGetString(PreferencesApp.acMantWsProxyUser)
+                    val proxyPass = prefsGetString(PreferencesApp.acMantWsProxyPass)
 
                     testWsConnection(
                         parentView = requireView(),
@@ -2355,10 +2146,7 @@ class SettingsActivity :
             val args = Bundle()
             args.putString("rootKey", preferenceScreen.key)
             prefFragment.arguments = args
-            parentFragmentManager
-                .beginTransaction()
-                .replace(id, prefFragment)
-                .addToBackStack(null)
+            parentFragmentManager.beginTransaction().replace(id, prefFragment).addToBackStack(null)
                 .commit()
         }
 
@@ -2372,8 +2160,7 @@ class SettingsActivity :
 
             bindPreferenceSummaryToValue(this, ConfEntry.acSyncQtyRegistry)
             bindPreferenceSummaryToValue(
-                this,
-                PreferencesApp.acSyncInterval
+                this, PreferencesApp.acSyncInterval
             )
 
             val downloadDbButton = findPreference<Preference>("download_db_data")
@@ -2383,101 +2170,88 @@ class SettingsActivity :
                     askForDownload().show()
                 } catch (ex: Exception) {
                     ex.printStackTrace()
-                    if (view != null)
-                        makeText(
-                            requireView(),
-                            "${
-                                AssetControlApp.getContext().getString(R.string.error)
-                            }: ${ex.message}",
-                            ERROR
-                        )
+                    if (view != null) makeText(
+                        requireView(), "${
+                            AssetControlApp.getContext().getString(R.string.error)
+                        }: ${ex.message}", ERROR
+                    )
                     ErrorLog.writeLog(null, this::class.java.simpleName, ex)
                 }
                 true
             }
 
             val resetSyncDateButton = findPreference<Preference>("reset_last_sync_date")
-            resetSyncDateButton?.onPreferenceClickListener =
-                OnPreferenceClickListener {
-                    //code for what you want it to do
-                    try {
-                        if (SyncDownload.resetSyncDates()) {
-                            if (view != null) makeText(
-                                requireView(),
-                                AssetControlApp.getContext()
-                                    .getString(R.string.synchronization_dates_restarted_successfully),
-                                SnackBarType.SUCCESS
-                            )
-                        } else {
-                            if (view != null) makeText(
-                                requireView(),
-                                AssetControlApp.getContext()
-                                    .getString(R.string.error_restarting_sync_dates),
-                                ERROR
-                            )
-                        }
-                    } catch (ex: Exception) {
-                        ex.printStackTrace()
-                        if (view != null)
-                            makeText(
-                                requireView(),
-                                "${
-                                    AssetControlApp.getContext().getString(R.string.error)
-                                }: ${ex.message}",
-                                ERROR
-                            )
-                        ErrorLog.writeLog(null, this::class.java.simpleName, ex)
+            resetSyncDateButton?.onPreferenceClickListener = OnPreferenceClickListener {
+                //code for what you want it to do
+                try {
+                    if (SyncDownload.resetSyncDates()) {
+                        if (view != null) makeText(
+                            requireView(),
+                            AssetControlApp.getContext()
+                                .getString(R.string.synchronization_dates_restarted_successfully),
+                            SnackBarType.SUCCESS
+                        )
+                    } else {
+                        if (view != null) makeText(
+                            requireView(),
+                            AssetControlApp.getContext()
+                                .getString(R.string.error_restarting_sync_dates),
+                            ERROR
+                        )
                     }
-                    true
+                } catch (ex: Exception) {
+                    ex.printStackTrace()
+                    if (view != null) makeText(
+                        requireView(), "${
+                            AssetControlApp.getContext().getString(R.string.error)
+                        }: ${ex.message}", ERROR
+                    )
+                    ErrorLog.writeLog(null, this::class.java.simpleName, ex)
                 }
+                true
+            }
 
             val loadCustomDbButton = findPreference<Preference>("load_custom_db")
-            loadCustomDbButton?.onPreferenceClickListener =
-                OnPreferenceClickListener {
-                    //code for what you want it to do
-                    try {
-                        val permissions = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                        activity?.let {
-                            if (hasPermissions(activity as Context, permissions)) {
-                                selectFileDb()
-                            } else {
-                                NEXT_STEP = REQUEST_EXTERNAL_STORAGE_FOR_CUSTOM_DB
-                                permReqLauncher.launch(permissions)
-                            }
+            loadCustomDbButton?.onPreferenceClickListener = OnPreferenceClickListener {
+                //code for what you want it to do
+                try {
+                    val permissions = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    activity?.let {
+                        if (hasPermissions(activity as Context, permissions)) {
+                            selectFileDb()
+                        } else {
+                            NEXT_STEP = REQUEST_EXTERNAL_STORAGE_FOR_CUSTOM_DB
+                            permReqLauncher.launch(permissions)
                         }
-                    } catch (ex: Exception) {
-                        ex.printStackTrace()
-                        if (view != null)
-                            makeText(
-                                requireView(), "${
-                                    AssetControlApp.getContext().getString(R.string.error)
-                                }: ${ex.message}", ERROR
-                            )
-                        ErrorLog.writeLog(null, this::class.java.simpleName, ex)
                     }
-                    true
+                } catch (ex: Exception) {
+                    ex.printStackTrace()
+                    if (view != null) makeText(
+                        requireView(), "${
+                            AssetControlApp.getContext().getString(R.string.error)
+                        }: ${ex.message}", ERROR
+                    )
+                    ErrorLog.writeLog(null, this::class.java.simpleName, ex)
                 }
+                true
+            }
 
             val removeCustomDbButton = findPreference<Preference>("remove_custom_db")
-            removeCustomDbButton?.onPreferenceClickListener =
-                OnPreferenceClickListener {
-                    //code for what you want it to do
-                    try {
-                        deleteTempDbFiles()
-                    } catch (ex: Exception) {
-                        ex.printStackTrace()
-                        if (view != null)
-                            makeText(
-                                requireView(),
-                                "${
-                                    AssetControlApp.getContext().getString(R.string.error)
-                                }: ${ex.message}",
-                                ERROR
-                            )
-                        ErrorLog.writeLog(null, this::class.java.simpleName, ex)
-                    }
-                    true
+            removeCustomDbButton?.onPreferenceClickListener = OnPreferenceClickListener {
+                //code for what you want it to do
+                try {
+                    deleteTempDbFiles()
+                } catch (ex: Exception) {
+                    ex.printStackTrace()
+                    if (view != null) makeText(
+                        requireView(), "${
+                            AssetControlApp.getContext().getString(R.string.error)
+                        }: ${ex.message}", ERROR
+                    )
+                    ErrorLog.writeLog(null, this::class.java.simpleName, ex)
                 }
+                true
+            }
 
             val sendDbButton = findPreference<Preference>("send_db_by_mail")
             sendDbButton?.onPreferenceClickListener = OnPreferenceClickListener {
@@ -2494,14 +2268,11 @@ class SettingsActivity :
                     }
                 } catch (ex: Exception) {
                     ex.printStackTrace()
-                    if (view != null)
-                        makeText(
-                            requireView(),
-                            "${
-                                AssetControlApp.getContext().getString(R.string.error)
-                            }: ${ex.message}",
-                            ERROR
-                        )
+                    if (view != null) makeText(
+                        requireView(), "${
+                            AssetControlApp.getContext().getString(R.string.error)
+                        }: ${ex.message}", ERROR
+                    )
                     ErrorLog.writeLog(null, this::class.java.simpleName, ex)
                 }
                 true
@@ -2522,14 +2293,11 @@ class SettingsActivity :
                     }
                 } catch (ex: Exception) {
                     ex.printStackTrace()
-                    if (view != null)
-                        makeText(
-                            requireView(),
-                            "${
-                                AssetControlApp.getContext().getString(R.string.error)
-                            }: ${ex.message}",
-                            ERROR
-                        )
+                    if (view != null) makeText(
+                        requireView(), "${
+                            AssetControlApp.getContext().getString(R.string.error)
+                        }: ${ex.message}", ERROR
+                    )
                     ErrorLog.writeLog(null, this::class.java.simpleName, ex)
                 }
                 true
@@ -2553,16 +2321,14 @@ class SettingsActivity :
             try {
                 resultForPickfileRequestCode.launch(
                     Intent.createChooser(
-                        intent,
-                        getString(R.string.select_db_file)
+                        intent, getString(R.string.select_db_file)
                     )
                 )
             } catch (ex: Exception) {
                 ex.printStackTrace()
                 if (view != null) showSnackBar(
                     SnackBarEventData(
-                        getString(R.string.error_sending_email),
-                        ERROR
+                        getString(R.string.error_sending_email), ERROR
                     )
                 )
             }
@@ -2593,9 +2359,7 @@ class SettingsActivity :
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
                 val data = it?.data
                 try {
-                    if ((it?.resultCode == CommonStatusCodes.SUCCESS || it.resultCode == CommonStatusCodes.SUCCESS_CACHE) &&
-                        data != null
-                    ) {
+                    if ((it?.resultCode == CommonStatusCodes.SUCCESS || it.resultCode == CommonStatusCodes.SUCCESS_CACHE) && data != null) {
                         val dataFile: Uri? = data.data
                         if (dataFile != null) {
                             tempDbFile = PathHelper.getPath(dataFile) ?: ""
@@ -2603,8 +2367,7 @@ class SettingsActivity :
                                 val min = 10000
                                 val max = 99999
                                 DATABASE_NAME = String.format(
-                                    "temp%s.sqlite",
-                                    Random().nextInt(max - min + 1) + min
+                                    "temp%s.sqlite", Random().nextInt(max - min + 1) + min
                                 )
                                 OFFLINE_MODE = true
 
@@ -2620,9 +2383,7 @@ class SettingsActivity :
                                 }
                             } else {
                                 if (view != null) makeText(
-                                    requireView(),
-                                    getString(R.string.unable_to_open_file),
-                                    ERROR
+                                    requireView(), getString(R.string.unable_to_open_file), ERROR
                                 )
                             }
                         }
@@ -2672,12 +2433,9 @@ class SettingsActivity :
                     AssetControlApp.getContext().getDatabasePath(DATABASE_NAME).toString()
                 )
                 if (!dbFile.exists()) {
-                    if (view != null)
-                        makeText(
-                            requireView(),
-                            getString(R.string.database_file_does_not_exist),
-                            ERROR
-                        )
+                    if (view != null) makeText(
+                        requireView(), getString(R.string.database_file_does_not_exist), ERROR
+                    )
                     return
                 }
 
@@ -2685,12 +2443,9 @@ class SettingsActivity :
                 val result = DataBaseHelper.copyDbToDocuments()
                 val outFile = File(result.outFile)
                 if (!outFile.exists()) {
-                    if (view != null)
-                        makeText(
-                            requireView(),
-                            getString(R.string.database_file_does_not_exist),
-                            ERROR
-                        )
+                    if (view != null) makeText(
+                        requireView(), getString(R.string.database_file_does_not_exist), ERROR
+                    )
                     return
                 }
 
@@ -2700,12 +2455,9 @@ class SettingsActivity :
                     outFile
                 )
                 if (dbFilePath == null) {
-                    if (view != null)
-                        makeText(
-                            requireView(),
-                            getString(R.string.database_file_does_not_exist),
-                            ERROR
-                        )
+                    if (view != null) makeText(
+                        requireView(), getString(R.string.database_file_does_not_exist), ERROR
+                    )
                     return
                 }
 
@@ -2713,12 +2465,11 @@ class SettingsActivity :
                 val lastErrorLog = getLastErrorLog()
                 var lastErrorLogPath: Uri? = null
                 if (lastErrorLog != null) {
-                    lastErrorLogPath =
-                        FileProvider.getUriForFile(
-                            AssetControlApp.getContext(),
-                            AssetControlApp.getContext().applicationContext.packageName + ".provider",
-                            lastErrorLog
-                        )
+                    lastErrorLogPath = FileProvider.getUriForFile(
+                        AssetControlApp.getContext(),
+                        AssetControlApp.getContext().applicationContext.packageName + ".provider",
+                        lastErrorLog
+                    )
                 }
 
                 // Crear una colección de las URI's de los archivo a adjuntar
@@ -2748,14 +2499,12 @@ class SettingsActivity :
                 // Mensaje
                 val pInfo =
                     AssetControlApp.getContext().applicationContext.packageManager.getPackageInfo(
-                        AssetControlApp.getContext().packageName,
-                        0
+                        AssetControlApp.getContext().packageName, 0
                     )
 
                 // The mail subject
                 emailIntent.putExtra(
-                    Intent.EXTRA_SUBJECT,
-                    String.format(
+                    Intent.EXTRA_SUBJECT, String.format(
                         "%s %s",
                         getString(R.string.email_error_subject),
                         "${getString(R.string.app_milestone)} ${pInfo.versionName}"
@@ -2778,16 +2527,14 @@ class SettingsActivity :
 
                 startActivity(
                     Intent.createChooser(
-                        emailIntent,
-                        getString(R.string.sending_mail_)
+                        emailIntent, getString(R.string.sending_mail_)
                     )
                 )
             } catch (ex: Exception) {
                 ex.printStackTrace()
                 if (view != null) showSnackBar(
                     SnackBarEventData(
-                        getString(R.string.error_sending_email),
-                        ERROR
+                        getString(R.string.error_sending_email), ERROR
                     )
                 )
             }
@@ -2802,9 +2549,7 @@ class SettingsActivity :
                 val packageName = resolveInfo.activityInfo.packageName
                 for (uri in uris) {
                     activity.grantUriPermission(
-                        packageName,
-                        uri,
-                        Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        packageName, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
                     )
                 }
             }
@@ -2812,9 +2557,7 @@ class SettingsActivity :
 
         private fun deleteTempDbFiles() {
             var anyDeleted = false
-            val path =
-                AssetControlApp.getContext().getDatabasePath(DATABASE_NAME).parent
-                    ?: return
+            val path = AssetControlApp.getContext().getDatabasePath(DATABASE_NAME).parent ?: return
 
             val dir = File(path)
             val files = dir.listFiles()
@@ -2831,15 +2574,13 @@ class SettingsActivity :
             if (anyDeleted) {
                 if (view != null) showSnackBar(
                     SnackBarEventData(
-                        getString(R.string.temporary_databases_deleted),
-                        SnackBarType.SUCCESS
+                        getString(R.string.temporary_databases_deleted), SnackBarType.SUCCESS
                     )
                 )
             } else {
                 if (view != null) showSnackBar(
                     SnackBarEventData(
-                        getString(R.string.no_temporary_bases_found),
-                        SnackBarType.INFO
+                        getString(R.string.no_temporary_bases_found), SnackBarType.INFO
                     )
                 )
             }
@@ -2853,11 +2594,8 @@ class SettingsActivity :
                 if (view != null) showSnackBar(
                     SnackBarEventData(
                         String.format(
-                            "%s: %s",
-                            getString(R.string.database_changed),
-                            DATABASE_NAME
-                        ),
-                        SnackBarType.INFO
+                            "%s: %s", getString(R.string.database_changed), DATABASE_NAME
+                        ), SnackBarType.INFO
                     )
                 )
             } catch (ex: java.lang.Exception) {
@@ -2869,15 +2607,15 @@ class SettingsActivity :
             if (tempDbFile == "") return
             try {
                 copyDataBase(tempDbFile)
-                if (view != null)
-                    makeText(
-                        requireView(),
-                        String.format(
-                            "%s: %s",
-                            getString(R.string.database_changed),
-                            DATABASE_NAME
-                        ), SnackBarType.INFO
-                    )
+                if (view != null) makeText(
+                    requireView(), String.format(
+                        "%s: %s", getString(R.string.database_changed), DATABASE_NAME
+                    ), SnackBarType.INFO
+                )
+
+                // Reiniciamos la instancia
+                DataBaseHelper.cleanInstance()
+
             } catch (ex: java.lang.Exception) {
                 ex.printStackTrace()
             }
@@ -2893,15 +2631,13 @@ class SettingsActivity :
                 ) { dialog, _ ->
                     // Forzar descarga de la base de datos
                     Statics.downloadDbRequired = true
-                    if (view != null)
-                        makeText(
-                            requireView(),
-                            getString(R.string.the_database_will_be_downloaded_when_you_return_to_the_login_screen),
-                            SnackBarType.INFO
-                        )
+                    if (view != null) makeText(
+                        requireView(),
+                        getString(R.string.the_database_will_be_downloaded_when_you_return_to_the_login_screen),
+                        SnackBarType.INFO
+                    )
                     dialog.dismiss()
-                }
-                .setNegativeButton(
+                }.setNegativeButton(
                     R.string.no
                 ) { dialog, _ -> dialog.dismiss() }.create()
         }

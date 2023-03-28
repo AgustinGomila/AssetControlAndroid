@@ -11,7 +11,7 @@ import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.model.category.ItemCategory
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.Screen.Companion.isTablet
 import java.util.*
 
 /**
@@ -248,7 +248,7 @@ class ItemCategoryAdapter(
 
     companion object {
         fun defaultDropDownItemHeight(): Int {
-            return if (Statics.isTablet()) 55 else 92
+            return if (isTablet()) 55 else 92
         }
 
         class ItemCategoryComparator(private val priorityText: String) : Comparator<ItemCategory> {

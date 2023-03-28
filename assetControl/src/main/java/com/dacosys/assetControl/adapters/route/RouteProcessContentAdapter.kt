@@ -20,7 +20,7 @@ import com.dacosys.assetControl.model.route.RouteProcessContent
 import com.dacosys.assetControl.model.route.RouteProcessStatus
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
-import com.dacosys.assetControl.utils.Statics.Companion.getColorWithAlpha
+import com.dacosys.assetControl.utils.Screen.Companion.getColorWithAlpha
 import java.lang.ref.WeakReference
 
 /**
@@ -765,7 +765,10 @@ class RouteProcessContentAdapter :
             if (listView!!.isItemChecked(position)) {
                 v.background.colorFilter =
                     BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-                        getColorWithAlpha(colorId = R.color.lightslategray, alpha = 240),
+                        getColorWithAlpha(
+                            colorId = R.color.lightslategray,
+                            alpha = 240
+                        ),
                         BlendModeCompat.MODULATE
                     )
             } else {

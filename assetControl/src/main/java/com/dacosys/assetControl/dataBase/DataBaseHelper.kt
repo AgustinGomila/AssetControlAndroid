@@ -157,7 +157,7 @@ class DataBaseHelper : SQLiteOpenHelper(
             return getInstance()!!.writableDatabase
         }
 
-        private fun cleanInstance() {
+        fun cleanInstance() {
             sInstance = null
         }
 

@@ -5,10 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.*
 import android.view.inputmethod.EditorInfo
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.EditText
-import android.widget.Switch
 import androidx.appcompat.app.AppCompatActivity
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.adapters.datacollection.DataCollectionRuleAdapter
@@ -20,7 +16,11 @@ import com.dacosys.assetControl.model.datacollection.DataCollectionRule
 import com.dacosys.assetControl.model.location.WarehouseArea
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsPutBoolean
+import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
+import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.settings.Preference
 import org.parceler.Parcels
@@ -50,33 +50,10 @@ class DataCollectionRuleSelectActivity : AppCompatActivity() {
     }
 
     private fun saveSharedPreferences() {
-        Statics.prefsPutBoolean(
+        prefsPutBoolean(
             Preference.selectDataCollectionRuleOnlyActive.key,
             binding.onlyActiveSwitch.isChecked
         )
-    }
-
-    @SuppressLint("ClickableViewAccessibility")
-    private fun setupUI(view: View) {
-        // Set up touch listener for non-text box views to hide keyboard.
-        if (view !is EditText) {
-            view.setOnTouchListener { _, motionEvent ->
-                Statics.closeKeyboard(this)
-                if (view is Button && view !is Switch && view !is CheckBox) {
-                    touchButton(motionEvent, view)
-                    true
-                } else {
-                    false
-                }
-            }
-        }
-
-        //If a layout container, iterate over children and seed recursion.
-        if (view is ViewGroup) {
-            (0 until view.childCount)
-                .map { view.getChildAt(it) }
-                .forEach { setupUI(it) }
-        }
     }
 
     override fun onSaveInstanceState(savedInstanceState: Bundle) {
@@ -129,7 +106,7 @@ class DataCollectionRuleSelectActivity : AppCompatActivity() {
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Statics.setScreenRotation(this)
+        setScreenRotation(this)
         binding = DataCollectionRuleSelectActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -147,7 +124,7 @@ class DataCollectionRuleSelectActivity : AppCompatActivity() {
 
         binding.onlyActiveSwitch.setOnCheckedChangeListener(null)
         binding.onlyActiveSwitch.isChecked =
-            Statics.prefsGetBoolean(Preference.selectDataCollectionRuleOnlyActive)
+            prefsGetBoolean(Preference.selectDataCollectionRuleOnlyActive)
 
         when {
             warehouseArea != null -> makeText(
@@ -203,8 +180,7 @@ class DataCollectionRuleSelectActivity : AppCompatActivity() {
 
         fillListView()
 
-        // ESTO SIRVE PARA OCULTAR EL TECLADO EN PANTALLA CUANDO PIERDEN EL FOCO LOS CONTROLES QUE LO NECESITAN
-        setupUI(binding.root)
+        setupUI(binding.root, this)
     }
 
     private fun selectRow(dcr: DataCollectionRule?) {
@@ -244,20 +220,8 @@ class DataCollectionRuleSelectActivity : AppCompatActivity() {
         }
     }
 
-    private fun touchButton(motionEvent: MotionEvent, button: Button) {
-        when (motionEvent.action) {
-            MotionEvent.ACTION_UP -> {
-                button.isPressed = false
-                button.performClick()
-            }
-            MotionEvent.ACTION_DOWN -> {
-                button.isPressed = true
-            }
-        }
-    }
-
     private fun dataCollectionRuleSelect() {
-        Statics.closeKeyboard(this)
+        closeKeyboard(this)
 
         if (currentDataCollectionRule != null) {
             val data = Intent()

@@ -29,9 +29,12 @@ import com.dacosys.assetControl.model.review.AssetReview
 import com.dacosys.assetControl.model.route.RouteProcess
 import com.dacosys.assetControl.network.sync.SyncRegistryType
 import com.dacosys.assetControl.ui.common.views.custom.AutoResizeTextView
-import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.Statics.Companion.getColorWithAlpha
-import com.dacosys.assetControl.utils.Statics.Companion.manipulateColor
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetString
+import com.dacosys.assetControl.utils.Screen.Companion.getBestContrastColor
+import com.dacosys.assetControl.utils.Screen.Companion.getColorWithAlpha
+import com.dacosys.assetControl.utils.Screen.Companion.isTablet
+import com.dacosys.assetControl.utils.Screen.Companion.manipulateColor
+import com.dacosys.assetControl.utils.Screen.Companion.textLightColor
 import com.dacosys.assetControl.utils.misc.Md5.Companion.getMd5
 import com.dacosys.assetControl.utils.settings.Preference.Companion.lineSeparator
 import com.dacosys.imageControl.room.entity.Image
@@ -669,8 +672,9 @@ class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
             if (listView!!.isItemChecked(position)) {
                 v.background.colorFilter =
                     BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-                        getColorWithAlpha(colorId = R.color.lightslategray, alpha = 240),
-                        BlendModeCompat.MODULATE
+                        getColorWithAlpha(
+                            colorId = R.color.lightslategray, alpha = 240
+                        ), BlendModeCompat.MODULATE
                     )
             } else {
                 v.background.colorFilter = null
@@ -745,8 +749,9 @@ class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
                 if (listView!!.isItemChecked(position)) {
                     v.background.colorFilter =
                         BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-                            getColorWithAlpha(colorId = R.color.lightslategray, alpha = 240),
-                            BlendModeCompat.MODULATE
+                            getColorWithAlpha(
+                                colorId = R.color.lightslategray, alpha = 240
+                            ), BlendModeCompat.MODULATE
                         )
                 } else {
                     v.background.colorFilter = null
@@ -824,8 +829,9 @@ class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
                 if (listView!!.isItemChecked(position)) {
                     v.background.colorFilter =
                         BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-                            getColorWithAlpha(colorId = R.color.lightslategray, alpha = 240),
-                            BlendModeCompat.MODULATE
+                            getColorWithAlpha(
+                                colorId = R.color.lightslategray, alpha = 240
+                            ), BlendModeCompat.MODULATE
                         )
                 } else {
                     v.background.colorFilter = null
@@ -917,8 +923,9 @@ class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
             if (listView!!.isItemChecked(position)) {
                 v.background.colorFilter =
                     BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-                        getColorWithAlpha(colorId = R.color.lightslategray, alpha = 240),
-                        BlendModeCompat.MODULATE
+                        getColorWithAlpha(
+                            colorId = R.color.lightslategray, alpha = 240
+                        ), BlendModeCompat.MODULATE
                     )
             } else {
                 v.background.colorFilter = null
@@ -996,8 +1003,9 @@ class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
             if (listView!!.isItemChecked(position)) {
                 v.background.colorFilter =
                     BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-                        getColorWithAlpha(colorId = R.color.lightslategray, alpha = 240),
-                        BlendModeCompat.MODULATE
+                        getColorWithAlpha(
+                            colorId = R.color.lightslategray, alpha = 240
+                        ), BlendModeCompat.MODULATE
                     )
             } else {
                 v.background.colorFilter = null
@@ -1240,8 +1248,9 @@ class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
             if (isSelected(position)) {
                 v.background.colorFilter =
                     BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-                        getColorWithAlpha(colorId = R.color.lightslategray, alpha = 240),
-                        BlendModeCompat.MODULATE
+                        getColorWithAlpha(
+                            colorId = R.color.lightslategray, alpha = 240
+                        ), BlendModeCompat.MODULATE
                     )
             } else {
                 v.background.colorFilter = null
@@ -1330,8 +1339,9 @@ class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
             if (isSelected(position)) {
                 v.background.colorFilter =
                     BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-                        getColorWithAlpha(colorId = R.color.lightslategray, alpha = 240),
-                        BlendModeCompat.MODULATE
+                        getColorWithAlpha(
+                            colorId = R.color.lightslategray, alpha = 240
+                        ), BlendModeCompat.MODULATE
                     )
             } else {
                 v.background.colorFilter = null
@@ -1414,8 +1424,9 @@ class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
             if (isSelected(position)) {
                 v.background.colorFilter =
                     BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-                        getColorWithAlpha(colorId = R.color.lightslategray, alpha = 240),
-                        BlendModeCompat.MODULATE
+                        getColorWithAlpha(
+                            colorId = R.color.lightslategray, alpha = 240
+                        ), BlendModeCompat.MODULATE
                     )
             } else {
                 v.background.colorFilter = null
@@ -1439,7 +1450,9 @@ class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
 
         if (syncElement != null && syncElement is Image) {
             holder.descriptionTextView?.text = syncElement.description
-            val c = syncElement.reference + lineSeparator + syncElement.obs
+            val c = syncElement.reference + prefsGetString(
+                lineSeparator
+            ) + syncElement.obs
             holder.codeTextView?.text = c
 
             if (holder.checkBox != null) {
@@ -1496,8 +1509,9 @@ class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
             if (isSelected(position)) {
                 v.background.colorFilter =
                     BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-                        getColorWithAlpha(colorId = R.color.lightslategray, alpha = 240),
-                        BlendModeCompat.MODULATE
+                        getColorWithAlpha(
+                            colorId = R.color.lightslategray, alpha = 240
+                        ), BlendModeCompat.MODULATE
                     )
             } else {
                 v.background.colorFilter = null
@@ -1642,7 +1656,7 @@ class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
     companion object {
 
         fun defaultRowHeight(): Int {
-            return if (Statics.isTablet()) 51 else 157
+            return if (isTablet()) 51 else 157
         }
 
         class ItemComparator : Comparator<Any> {
@@ -1737,17 +1751,17 @@ class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
             AssetControlApp.getContext().resources, R.color.text_light, null
         )
 
-        itemCategoryForeColor = Statics.getBestContrastColor("#009688")
-        warehouseForeColor = Statics.getBestContrastColor("#F44336")
-        warehouseAreaForeColor = Statics.getBestContrastColor("#C22319")
-        assetForeColor = Statics.getBestContrastColor("#2196F3")
-        assetMaintenanceForeColor = Statics.getBestContrastColor("#AD1457")
-        dataCollectionForeColor = Statics.getBestContrastColor("#7323A3")
-        routeProcessForeColor = Statics.getBestContrastColor("#5639AF")
-        warehouseMovementForeColor = Statics.getBestContrastColor("#FFC107")
-        assetReviewForeColor = Statics.getBestContrastColor("#7323A3")
-        imageForeColor = Statics.getBestContrastColor("#FF9800")
-        defaultForeColor = Statics.getBestContrastColor("#E4971B")
+        itemCategoryForeColor = getBestContrastColor("#009688")
+        warehouseForeColor = getBestContrastColor("#F44336")
+        warehouseAreaForeColor = getBestContrastColor("#C22319")
+        assetForeColor = getBestContrastColor("#2196F3")
+        assetMaintenanceForeColor = getBestContrastColor("#AD1457")
+        dataCollectionForeColor = getBestContrastColor("#7323A3")
+        routeProcessForeColor = getBestContrastColor("#5639AF")
+        warehouseMovementForeColor = getBestContrastColor("#FFC107")
+        assetReviewForeColor = getBestContrastColor("#7323A3")
+        imageForeColor = getBestContrastColor("#FF9800")
+        defaultForeColor = getBestContrastColor("#E4971B")
     }
 
     //endregion
@@ -1841,12 +1855,14 @@ class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
 
         val darkerColor = when {
             isSelected -> true
-            foreColor == Statics.textLightColor() -> true
+            foreColor == textLightColor() -> true
             else -> false
         }
 
         return SyncElementLayout(
-            foreColor, backColor, manipulateColor(foreColor, if (darkerColor) 0.8f else 1.4f)
+            foreColor, backColor, manipulateColor(
+                foreColor, if (darkerColor) 0.8f else 1.4f
+            )
         )
     }
 

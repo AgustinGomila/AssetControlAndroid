@@ -12,7 +12,8 @@ import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.databinding.RouteSelectFilterFragmentBinding
 import com.dacosys.assetControl.ui.activities.route.RouteSelectDialogActivity
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsPutBoolean
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.settings.Preference
 
@@ -58,7 +59,10 @@ class RouteSelectFilterFragment : Fragment() {
     }
 
     private fun saveSharedPreferences() {
-        Statics.prefsPutBoolean(Preference.selectRouteOnlyActive.key, onlyActive)
+        prefsPutBoolean(
+            Preference.selectRouteOnlyActive.key,
+            onlyActive
+        )
     }
 
     override fun onDestroy() {
@@ -93,7 +97,8 @@ class RouteSelectFilterFragment : Fragment() {
 
     private fun loadDefaultValues() {
         routeDescription = ""
-        onlyActive = Statics.prefsGetBoolean(Preference.selectRouteOnlyActive)
+        onlyActive =
+            prefsGetBoolean(Preference.selectRouteOnlyActive)
     }
 
     private fun saveBundleValues(b: Bundle) {

@@ -3,13 +3,6 @@ package com.dacosys.assetControl.ui.activities.location
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import android.view.MotionEvent
-import android.view.View
-import android.view.ViewGroup
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.EditText
-import android.widget.Switch
 import androidx.appcompat.app.AppCompatActivity
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.databinding.WarehouseAreaDetailActivityBinding
@@ -17,6 +10,8 @@ import com.dacosys.assetControl.model.location.WarehouseArea
 import com.dacosys.assetControl.model.table.Table
 import com.dacosys.assetControl.ui.common.snackbar.MakeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
+import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.imageControl.moshi.DocumentContent
 import com.dacosys.imageControl.moshi.DocumentContentRequestResult
@@ -27,38 +22,6 @@ class WarehouseAreaDetailActivity : AppCompatActivity() {
     private var warehouseArea: WarehouseArea? = null
     private var rejectNewInstances = false
 
-    @SuppressLint("ClickableViewAccessibility")
-    private fun setupUI(view: View) {
-        // Set up touch listener for non-text box views to hide keyboard.
-        if (view !is EditText) {
-            view.setOnTouchListener { _, motionEvent ->
-                Statics.closeKeyboard(this)
-                if (view is Button && view !is Switch && view !is CheckBox) {
-                    touchButton(motionEvent, view)
-                    true
-                } else {
-                    false
-                }
-            }
-        }
-
-        //If a layout container, iterate over children and seed recursion.
-        if (view is ViewGroup) {
-            (0 until view.childCount).map { view.getChildAt(it) }.forEach { setupUI(it) }
-        }
-    }
-
-    private fun touchButton(motionEvent: MotionEvent, button: Button) {
-        when (motionEvent.action) {
-            MotionEvent.ACTION_UP -> {
-                button.isPressed = false
-                button.performClick()
-            }
-            MotionEvent.ACTION_DOWN -> {
-                button.isPressed = true
-            }
-        }
-    }
 
     override fun onResume() {
         super.onResume()
@@ -71,7 +34,7 @@ class WarehouseAreaDetailActivity : AppCompatActivity() {
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Statics.setScreenRotation(this)
+        setScreenRotation(this)
         binding = WarehouseAreaDetailActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -92,8 +55,7 @@ class WarehouseAreaDetailActivity : AppCompatActivity() {
                 ((warehouseArea ?: return).warehouse ?: return).description
         }
 
-        // ESTO SIRVE PARA OCULTAR EL TECLADO EN PANTALLA CUANDO PIERDEN EL FOCO LOS CONTROLES QUE LO NECESITAN
-        setupUI(binding.root)
+        setupUI(binding.root, this)
     }
 
     private fun showImages() {

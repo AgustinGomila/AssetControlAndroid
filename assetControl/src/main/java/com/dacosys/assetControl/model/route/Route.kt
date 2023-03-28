@@ -7,7 +7,7 @@ import com.dacosys.assetControl.dataBase.route.RouteContract.RouteEntry.Companio
 import com.dacosys.assetControl.dataBase.route.RouteContract.RouteEntry.Companion.DESCRIPTION
 import com.dacosys.assetControl.dataBase.route.RouteContract.RouteEntry.Companion.ROUTE_ID
 import com.dacosys.assetControl.dataBase.route.RouteDbHelper
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetString
 import com.dacosys.assetControl.utils.settings.Preference
 
 class Route : Parcelable {
@@ -170,7 +170,8 @@ class Route : Parcelable {
 
         fun getAvailableRoutes(routes: ArrayList<Route>): ArrayList<Route> {
             val result: ArrayList<Route> = ArrayList()
-            val prefix = Statics.prefsGetString(Preference.acFilterRouteDescription)
+            val prefix =
+                prefsGetString(Preference.acFilterRouteDescription)
             val prefixes = prefix.split(";", ignoreCase = true, limit = 0).toTypedArray()
 
             var validPrefix = false

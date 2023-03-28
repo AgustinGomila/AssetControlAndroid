@@ -14,7 +14,7 @@ import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.model.barcode.BarcodeLabelCustom
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.Screen.Companion.isTablet
 import java.util.*
 
 /**
@@ -336,7 +336,7 @@ class BarcodeLabelCustomAdapter(
     companion object {
 
         fun defaultRowHeight(): Int {
-            return if (Statics.isTablet()) 45 else 90
+            return if (isTablet()) 45 else 90
         }
 
         class ItemComparator(private val priorityText: String) : Comparator<BarcodeLabelCustom> {

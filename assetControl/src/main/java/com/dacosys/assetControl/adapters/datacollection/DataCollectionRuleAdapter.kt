@@ -17,7 +17,7 @@ import androidx.core.graphics.BlendModeCompat
 import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.model.datacollection.DataCollectionRule
-import com.dacosys.assetControl.utils.Statics.Companion.getColorWithAlpha
+import com.dacosys.assetControl.utils.Screen.Companion.getColorWithAlpha
 import java.lang.ref.WeakReference
 
 /**
@@ -180,17 +180,14 @@ class DataCollectionRuleAdapter : ArrayAdapter<DataCollectionRule> {
     }
 
     fun currentDataCollectionRule(): DataCollectionRule? {
-        return (0 until count)
-            .firstOrNull { isSelected(it) }
-            ?.let {
-                val t = getItem(it)
-                t
-            }
+        return (0 until count).firstOrNull { isSelected(it) }?.let {
+            val t = getItem(it)
+            t
+        }
     }
 
     fun currentPos(): Int {
-        return (0 until count)
-            .firstOrNull { isSelected(it) } ?: -1
+        return (0 until count).firstOrNull { isSelected(it) } ?: -1
     }
 
     fun firstVisiblePos(): Int {
@@ -274,39 +271,26 @@ class DataCollectionRuleAdapter : ArrayAdapter<DataCollectionRule> {
                         positionArray[position] = isChecked
 
                         listener?.onCustomCheckedChangeListener(
-                            isChecked,
-                            position
+                            isChecked, position
                         )
                     }
                 }
 
                 // Background colors
-                val lightgray =
-                    ResourcesCompat.getColor(
-                        AssetControlApp.getContext().resources,
-                        R.color.lightgray,
-                        null
-                    )
-                val whitesmoke =
-                    ResourcesCompat.getColor(
-                        AssetControlApp.getContext().resources,
-                        R.color.whitesmoke,
-                        null
-                    )
+                val lightgray = ResourcesCompat.getColor(
+                    AssetControlApp.getContext().resources, R.color.lightgray, null
+                )
+                val whitesmoke = ResourcesCompat.getColor(
+                    AssetControlApp.getContext().resources, R.color.whitesmoke, null
+                )
 
                 // Font colors
-                val black =
-                    ResourcesCompat.getColor(
-                        AssetControlApp.getContext().resources,
-                        R.color.text_dark,
-                        null
-                    )
-                val dimgray =
-                    ResourcesCompat.getColor(
-                        AssetControlApp.getContext().resources,
-                        R.color.dimgray,
-                        null
-                    )
+                val black = ResourcesCompat.getColor(
+                    AssetControlApp.getContext().resources, R.color.text_dark, null
+                )
+                val dimgray = ResourcesCompat.getColor(
+                    AssetControlApp.getContext().resources, R.color.dimgray, null
+                )
 
                 if (resource == R.layout.data_collection_rule_row && v != null) {
                     when {
@@ -327,10 +311,8 @@ class DataCollectionRuleAdapter : ArrayAdapter<DataCollectionRule> {
                             v.background.colorFilter =
                                 BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
                                     getColorWithAlpha(
-                                        colorId = R.color.lightslategray,
-                                        alpha = 240
-                                    ),
-                                    BlendModeCompat.MODULATE
+                                        colorId = R.color.lightslategray, alpha = 240
+                                    ), BlendModeCompat.MODULATE
                                 )
                         } else {
                             v.background.colorFilter = null

@@ -27,9 +27,12 @@ import com.dacosys.assetControl.model.table.Table
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.common.views.custom.AutoResizeTextView
+import com.dacosys.assetControl.utils.Screen.Companion.getBestContrastColor
+import com.dacosys.assetControl.utils.Screen.Companion.getColorWithAlpha
+import com.dacosys.assetControl.utils.Screen.Companion.isTablet
+import com.dacosys.assetControl.utils.Screen.Companion.manipulateColor
+import com.dacosys.assetControl.utils.Screen.Companion.textLightColor
 import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.Statics.Companion.getColorWithAlpha
-import com.dacosys.assetControl.utils.Statics.Companion.manipulateColor
 import java.lang.ref.WeakReference
 import java.util.*
 
@@ -39,9 +42,7 @@ import java.util.*
  */
 
 @Suppress("SpellCheckingInspection")
-class AssetAdapter :
-    ArrayAdapter<Asset>,
-    Filterable {
+class AssetAdapter : ArrayAdapter<Asset>, Filterable {
     private var activity: AppCompatActivity
     private var resource: Int = 0
     private var suspendReport = false
@@ -363,10 +364,9 @@ class AssetAdapter :
             res = res.substring(0, res.length - 2)
         }
 
-        res += ": " +
-                if (assetArray.size > 1)
-                    " ${AssetControlApp.getContext().getString(R.string.added_plural)}" else
-                    " ${AssetControlApp.getContext().getString(R.string.added)}"
+        res += ": " + if (assetArray.size > 1) " ${
+            AssetControlApp.getContext().getString(R.string.added_plural)
+        }" else " ${AssetControlApp.getContext().getString(R.string.added)}"
 
         makeText(activity, res, SnackBarType.ADD)
         Log.d(this::class.java.simpleName, res)
@@ -394,10 +394,9 @@ class AssetAdapter :
             res = res.substring(0, res.length - 2)
         }
 
-        res += ": " +
-                if (assetArray.size > 1)
-                    " ${AssetControlApp.getContext().getString(R.string.removed_plural)}" else
-                    " ${AssetControlApp.getContext().getString(R.string.removed)}"
+        res += ": " + if (assetArray.size > 1) " ${
+            AssetControlApp.getContext().getString(R.string.removed_plural)
+        }" else " ${AssetControlApp.getContext().getString(R.string.removed)}"
 
         makeText(activity, res, SnackBarType.REMOVE)
         Log.d(this::class.java.simpleName, res)
@@ -485,13 +484,11 @@ class AssetAdapter :
         super.sort(customComparator)
     }
 
-    private val customComparator =
-        Comparator { o1: Asset?, o2: Asset? ->
-            AssetComparator().compareNullable(
-                o1,
-                o2
-            )
-        }
+    private val customComparator = Comparator { o1: Asset?, o2: Asset? ->
+        AssetComparator().compareNullable(
+            o1, o2
+        )
+    }
 
     fun refresh() {
         activity.runOnUiThread { notifyDataSetChanged() }
@@ -584,17 +581,14 @@ class AssetAdapter :
     }
 
     fun currentAsset(): Asset? {
-        return (0 until count)
-            .firstOrNull { isSelected(it) }
-            ?.let {
-                val t = getItem(it)
-                t
-            }
+        return (0 until count).firstOrNull { isSelected(it) }?.let {
+            val t = getItem(it)
+            t
+        }
     }
 
     fun currentPos(): Int {
-        return (0 until count)
-            .firstOrNull { isSelected(it) } ?: -1
+        return (0 until count).firstOrNull { isSelected(it) } ?: -1
     }
 
     fun firstVisiblePos(): Int {
@@ -646,19 +640,18 @@ class AssetAdapter :
         // Seleccionamos el layout dependiendo si es
         // un row visible u oculto según su AsseStatus.
 
-        val currentLayout: Int =
-            if (listView == null) {
-                // Estamos trabajando en un Dropdown
-                when {
-                    isStatusVisible(position) -> R.layout.asset_simple_row
-                    else -> R.layout.null_row
-                }
-            } else when {
-                // Estamos trabajando en un ListView
-                !isStatusVisible(position) -> R.layout.null_row
-                isSelected(position) -> R.layout.asset_row_expanded
-                else -> R.layout.asset_row
+        val currentLayout: Int = if (listView == null) {
+            // Estamos trabajando en un Dropdown
+            when {
+                isStatusVisible(position) -> R.layout.asset_simple_row
+                else -> R.layout.null_row
             }
+        } else when {
+            // Estamos trabajando en un ListView
+            !isStatusVisible(position) -> R.layout.null_row
+            isSelected(position) -> R.layout.asset_row_expanded
+            else -> R.layout.asset_row
+        }
 
         if (v == null || v.tag == null) {
             // El view todavía no fue creado, crearlo con el layout correspondiente.
@@ -670,13 +663,9 @@ class AssetAdapter :
             // El view ya existe, comprobar que no necesite cambiar de layout.
             if (
             // Row null cambiando...
-                v.tag is String && currentLayout == R.layout.asset_row ||
-                v.tag is String && currentLayout == R.layout.asset_row_expanded ||
-                v.tag is String && currentLayout == R.layout.asset_simple_row ||
+                v.tag is String && currentLayout == R.layout.asset_row || v.tag is String && currentLayout == R.layout.asset_row_expanded || v.tag is String && currentLayout == R.layout.asset_simple_row ||
 
-                v.tag is CollapsedViewHolder && currentLayout != R.layout.asset_row ||
-                v.tag is ExpandedViewHolder && currentLayout != R.layout.asset_row_expanded ||
-                v.tag is SimpleViewHolder && currentLayout != R.layout.asset_simple_row
+                v.tag is CollapsedViewHolder && currentLayout != R.layout.asset_row || v.tag is ExpandedViewHolder && currentLayout != R.layout.asset_row_expanded || v.tag is SimpleViewHolder && currentLayout != R.layout.asset_simple_row
             ) {
                 // Ya fue creado, si es un row normal que está siendo seleccionada
                 // o un row expandido que está siendo deseleccionado
@@ -781,32 +770,20 @@ class AssetAdapter :
                 }
 
                 // Background colors
-                val lightgray =
-                    ResourcesCompat.getColor(
-                        AssetControlApp.getContext().resources,
-                        R.color.lightgray,
-                        null
-                    )
-                val white =
-                    ResourcesCompat.getColor(
-                        AssetControlApp.getContext().resources,
-                        R.color.text_light,
-                        null
-                    )
+                val lightgray = ResourcesCompat.getColor(
+                    AssetControlApp.getContext().resources, R.color.lightgray, null
+                )
+                val white = ResourcesCompat.getColor(
+                    AssetControlApp.getContext().resources, R.color.text_light, null
+                )
 
                 // Font colors
-                val black =
-                    ResourcesCompat.getColor(
-                        AssetControlApp.getContext().resources,
-                        R.color.text_dark,
-                        null
-                    )
-                val dimgray =
-                    ResourcesCompat.getColor(
-                        AssetControlApp.getContext().resources,
-                        R.color.dimgray,
-                        null
-                    )
+                val black = ResourcesCompat.getColor(
+                    AssetControlApp.getContext().resources, R.color.text_dark, null
+                )
+                val dimgray = ResourcesCompat.getColor(
+                    AssetControlApp.getContext().resources, R.color.dimgray, null
+                )
 
                 val colorText = when {
                     !asset.active -> dimgray
@@ -979,8 +956,7 @@ class AssetAdapter :
                 holder.editImageView!!.setOnTouchListener { _, event ->
                     if (event.action == MotionEvent.ACTION_DOWN) {
                         editAssetRequiredListener?.onEditAssetRequired(
-                            Table.asset.tableId,
-                            asset.assetId
+                            Table.asset.tableId, asset.assetId
                         )
                     }
                     true
@@ -992,8 +968,7 @@ class AssetAdapter :
                         holder.albumImageView!!.setOnTouchListener { _, event ->
                             if (event.action == MotionEvent.ACTION_DOWN) {
                                 albumViewRequiredListener?.onAlbumViewRequired(
-                                    Table.asset.tableId,
-                                    asset.assetId
+                                    Table.asset.tableId, asset.assetId
                                 )
                             }
                             true
@@ -1003,9 +978,7 @@ class AssetAdapter :
                         holder.addPhotoImageView!!.setOnTouchListener { _, event ->
                             if (event.action == MotionEvent.ACTION_DOWN) {
                                 addPhotoRequiredListener?.onAddPhotoRequired(
-                                    Table.asset.tableId,
-                                    asset.assetId,
-                                    asset.description
+                                    Table.asset.tableId, asset.assetId, asset.description
                                 )
                             }
                             true
@@ -1058,30 +1031,22 @@ class AssetAdapter :
 
                 // Background layouts
                 // Resalta por estado del activo
-                val layoutOnIventory =
-                    ResourcesCompat.getDrawable(
-                        AssetControlApp.getContext().resources,
-                        R.drawable.layout_thin_border_green,
-                        null
-                    )
-                val layoutMissing =
-                    ResourcesCompat.getDrawable(
-                        AssetControlApp.getContext().resources,
-                        R.drawable.layout_thin_border_red,
-                        null
-                    )
-                val layoutRemoved =
-                    ResourcesCompat.getDrawable(
-                        AssetControlApp.getContext().resources,
-                        R.drawable.layout_thin_border_yellow,
-                        null
-                    )
-                val layoutDefault =
-                    ResourcesCompat.getDrawable(
-                        AssetControlApp.getContext().resources,
-                        R.drawable.layout_thin_border,
-                        null
-                    )
+                val layoutOnIventory = ResourcesCompat.getDrawable(
+                    AssetControlApp.getContext().resources,
+                    R.drawable.layout_thin_border_green,
+                    null
+                )
+                val layoutMissing = ResourcesCompat.getDrawable(
+                    AssetControlApp.getContext().resources, R.drawable.layout_thin_border_red, null
+                )
+                val layoutRemoved = ResourcesCompat.getDrawable(
+                    AssetControlApp.getContext().resources,
+                    R.drawable.layout_thin_border_yellow,
+                    null
+                )
+                val layoutDefault = ResourcesCompat.getDrawable(
+                    AssetControlApp.getContext().resources, R.drawable.layout_thin_border, null
+                )
 
                 val backColor: Drawable
                 val foreColor: Int
@@ -1106,12 +1071,13 @@ class AssetAdapter :
 
                 val darkerColor = when {
                     isSelected -> true
-                    foreColor == Statics.textLightColor() -> true
+                    foreColor == textLightColor() -> true
                     else -> false
                 }
 
-                val titleForeColor: Int =
-                    manipulateColor(foreColor, if (darkerColor) 0.8f else 1.4f)
+                val titleForeColor: Int = manipulateColor(
+                    foreColor, if (darkerColor) 0.8f else 1.4f
+                )
 
                 v.background = backColor
                 holder.descriptionTextView?.setTextColor(foreColor)
@@ -1145,8 +1111,9 @@ class AssetAdapter :
                 if (isSelected(position)) {
                     v.background.colorFilter =
                         BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-                            getColorWithAlpha(colorId = R.color.lightslategray, alpha = 240),
-                            BlendModeCompat.MODULATE
+                            getColorWithAlpha(
+                                colorId = R.color.lightslategray, alpha = 240
+                            ), BlendModeCompat.MODULATE
                         )
                 } else {
                     v.background.colorFilter = null
@@ -1263,30 +1230,22 @@ class AssetAdapter :
 
                 // Background layouts
                 // Resalta por estado del activo
-                val layoutOnIventory =
-                    ResourcesCompat.getDrawable(
-                        AssetControlApp.getContext().resources,
-                        R.drawable.layout_thin_border_green,
-                        null
-                    )
-                val layoutMissing =
-                    ResourcesCompat.getDrawable(
-                        AssetControlApp.getContext().resources,
-                        R.drawable.layout_thin_border_red,
-                        null
-                    )
-                val layoutRemoved =
-                    ResourcesCompat.getDrawable(
-                        AssetControlApp.getContext().resources,
-                        R.drawable.layout_thin_border_yellow,
-                        null
-                    )
-                val layoutDefault =
-                    ResourcesCompat.getDrawable(
-                        AssetControlApp.getContext().resources,
-                        R.drawable.layout_thin_border,
-                        null
-                    )
+                val layoutOnIventory = ResourcesCompat.getDrawable(
+                    AssetControlApp.getContext().resources,
+                    R.drawable.layout_thin_border_green,
+                    null
+                )
+                val layoutMissing = ResourcesCompat.getDrawable(
+                    AssetControlApp.getContext().resources, R.drawable.layout_thin_border_red, null
+                )
+                val layoutRemoved = ResourcesCompat.getDrawable(
+                    AssetControlApp.getContext().resources,
+                    R.drawable.layout_thin_border_yellow,
+                    null
+                )
+                val layoutDefault = ResourcesCompat.getDrawable(
+                    AssetControlApp.getContext().resources, R.drawable.layout_thin_border, null
+                )
 
                 val backColor: Drawable
                 val foreColor: Int
@@ -1328,8 +1287,9 @@ class AssetAdapter :
                 if (isSelected(position)) {
                     v.background.colorFilter =
                         BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-                            getColorWithAlpha(colorId = R.color.lightslategray, alpha = 240),
-                            BlendModeCompat.MODULATE
+                            getColorWithAlpha(
+                                colorId = R.color.lightslategray, alpha = 240
+                            ), BlendModeCompat.MODULATE
                         )
                 } else {
                     v.background.colorFilter = null
@@ -1463,10 +1423,11 @@ class AssetAdapter :
     }
 
     fun isFilterable(filterableAsset: Asset, filterString: String): Boolean =
-        (filterableAsset.code.contains(filterString, true) ||
-                filterableAsset.description.contains(filterString, true) ||
-                (filterableAsset.serialNumber ?: "").contains(filterString, true) ||
-                (filterableAsset.ean ?: "").contains(filterString, true))
+        (filterableAsset.code.contains(filterString, true) || filterableAsset.description.contains(
+            filterString, true
+        ) || (filterableAsset.serialNumber ?: "").contains(
+            filterString, true
+        ) || (filterableAsset.ean ?: "").contains(filterString, true))
 
     fun selectNearVisible() {
         val currentPos = currentPos()
@@ -1510,34 +1471,23 @@ class AssetAdapter :
 
     private fun setupColors() {
         selectedForeColor = ResourcesCompat.getColor(
-            AssetControlApp.getContext().resources,
-            R.color.text_light,
-            null
+            AssetControlApp.getContext().resources, R.color.text_light, null
         )
 
-        onInventoryForeColor = Statics.getBestContrastColor("#009688")
-
-        missingForeColor = Statics.getBestContrastColor("#F44336")
-
-        removedForeColor = Statics.getBestContrastColor("#FFC107")
-
-        defaultForeColor = Statics.getBestContrastColor("#DFDFDF")
+        onInventoryForeColor = getBestContrastColor("#009688")
+        missingForeColor = getBestContrastColor("#F44336")
+        removedForeColor = getBestContrastColor("#FFC107")
+        defaultForeColor = getBestContrastColor("#DFDFDF")
 
         // CheckBox color
-        darkslategray =
-            ResourcesCompat.getColor(
-                AssetControlApp.getContext().resources,
-                R.color.darkslategray,
-                null
-            )
+        darkslategray = ResourcesCompat.getColor(
+            AssetControlApp.getContext().resources, R.color.darkslategray, null
+        )
 
         // Title color
-        lightgray =
-            ResourcesCompat.getColor(
-                AssetControlApp.getContext().resources,
-                R.color.lightgray,
-                null
-            )
+        lightgray = ResourcesCompat.getColor(
+            AssetControlApp.getContext().resources, R.color.lightgray, null
+        )
     }
 
     //endregion
@@ -1545,11 +1495,11 @@ class AssetAdapter :
     companion object {
 
         fun defaultRowHeight(): Int {
-            return if (Statics.isTablet()) 73 else 110
+            return if (isTablet()) 73 else 110
         }
 
         fun defaultDropDownItemHeight(): Int {
-            return if (Statics.isTablet()) 54 else 90
+            return if (isTablet()) 54 else 90
             //(54 + 138) / 2 else (90 + 115) / 2
         }
 
@@ -1580,51 +1530,61 @@ class AssetAdapter :
                 val fourthValue2: String = o2.serialNumber ?: ""
 
                 if (priorityText.isNotEmpty()) {
-                    firstField =
-                        if (fieldValue2.startsWith(priorityText, ignoreCase = true) &&
-                            !fieldValue1.startsWith(priorityText, true)
-                        ) (return 1)
-                        else if (fieldValue1.startsWith(priorityText, true) &&
-                            !fieldValue2.startsWith(priorityText, true)
-                        ) (return -1)
-                        else if (fieldValue1.startsWith(priorityText, true) &&
-                            fieldValue2.startsWith(priorityText, true)
-                        ) (return fieldValue1.compareTo(fieldValue2))
-                        else (fieldValue1.compareTo(fieldValue2))
+                    firstField = if (fieldValue2.startsWith(
+                            priorityText, ignoreCase = true
+                        ) && !fieldValue1.startsWith(priorityText, true)
+                    ) (return 1)
+                    else if (fieldValue1.startsWith(priorityText, true) && !fieldValue2.startsWith(
+                            priorityText, true
+                        )
+                    ) (return -1)
+                    else if (fieldValue1.startsWith(priorityText, true) && fieldValue2.startsWith(
+                            priorityText, true
+                        )
+                    ) (return fieldValue1.compareTo(fieldValue2))
+                    else (fieldValue1.compareTo(fieldValue2))
 
-                    secondField =
-                        if (secondValue2.startsWith(priorityText, ignoreCase = true) &&
-                            !secondValue1.startsWith(priorityText, true)
-                        ) (return 1)
-                        else if (secondValue1.startsWith(priorityText, true) &&
-                            !secondValue2.startsWith(priorityText, true)
-                        ) (return -1)
-                        else if (secondValue1.startsWith(priorityText, true) &&
-                            secondValue2.startsWith(priorityText, true)
-                        ) (return secondValue1.compareTo(secondValue2))
-                        else (secondValue1.compareTo(secondValue2))
+                    secondField = if (secondValue2.startsWith(
+                            priorityText, ignoreCase = true
+                        ) && !secondValue1.startsWith(priorityText, true)
+                    ) (return 1)
+                    else if (secondValue1.startsWith(
+                            priorityText, true
+                        ) && !secondValue2.startsWith(priorityText, true)
+                    ) (return -1)
+                    else if (secondValue1.startsWith(priorityText, true) && secondValue2.startsWith(
+                            priorityText, true
+                        )
+                    ) (return secondValue1.compareTo(secondValue2))
+                    else (secondValue1.compareTo(secondValue2))
 
                     thirdField =
-                        if (thirdValue2.startsWith(priorityText, true) &&
-                            !thirdValue1.startsWith(priorityText, true)
+                        if (thirdValue2.startsWith(priorityText, true) && !thirdValue1.startsWith(
+                                priorityText, true
+                            )
                         ) (return 1)
-                        else if (thirdValue1.startsWith(priorityText, true) &&
-                            !thirdValue2.startsWith(priorityText, true)
+                        else if (thirdValue1.startsWith(
+                                priorityText, true
+                            ) && !thirdValue2.startsWith(priorityText, true)
                         ) (return -1)
-                        else if (thirdValue1.startsWith(priorityText, true) &&
-                            thirdValue2.startsWith(priorityText, true)
+                        else if (thirdValue1.startsWith(
+                                priorityText, true
+                            ) && thirdValue2.startsWith(priorityText, true)
                         ) (return thirdValue1.compareTo(thirdValue2))
                         else thirdValue1.compareTo(thirdValue2)
 
                     fourthField =
-                        if (fourthValue2.startsWith(priorityText, true) &&
-                            !fourthValue1.startsWith(priorityText, true)
+                        if (fourthValue2.startsWith(priorityText, true) && !fourthValue1.startsWith(
+                                priorityText, true
+                            )
                         ) (return 1)
-                        else if (fourthValue1.startsWith(priorityText, true) &&
-                            !fourthValue2.startsWith(priorityText, true)
+                        else if (fourthValue1.startsWith(
+                                priorityText, true
+                            ) && !fourthValue2.startsWith(priorityText, true)
                         ) (return -1)
-                        else if (fourthValue1.startsWith(priorityText, true) &&
-                            fourthValue2.startsWith(priorityText, true)
+                        else if (fourthValue1.startsWith(
+                                priorityText, true
+                            ) && fourthValue2.startsWith(priorityText, true)
                         ) (return fourthValue1.compareTo(fourthValue2))
                         else fourthValue1.compareTo(fourthValue2)
                 } else {
@@ -1650,16 +1610,13 @@ class AssetAdapter :
 
         fun sortItems(originalList: ArrayList<Asset>): ArrayList<Asset> {
             // Get all of the parent groups
-            val groups = originalList
-                .sortedWith(
-                    compareBy(
-                        { it.parentAssetId },
-                        { it.code },
-                        { it.description },
-                        { it.serialNumber },
-                        { it.ean })
-                )
-                .groupBy { it.parentAssetId }
+            val groups = originalList.sortedWith(
+                compareBy({ it.parentAssetId },
+                    { it.code },
+                    { it.description },
+                    { it.serialNumber },
+                    { it.ean })
+            ).groupBy { it.parentAssetId }
 
             // Recursively get the children
             fun follow(asset: Asset): List<Asset> {
@@ -1669,8 +1626,7 @@ class AssetAdapter :
             // Run the follow method on each of the roots
             return originalList.map { it.parentAssetId }
                 .subtract(originalList.map { it.assetId }.toSet())
-                .flatMap { groups[it] ?: emptyList() }
-                .flatMap(::follow) as ArrayList<Asset>
+                .flatMap { groups[it] ?: emptyList() }.flatMap(::follow) as ArrayList<Asset>
         }
 
         interface AlbumViewRequiredListener {

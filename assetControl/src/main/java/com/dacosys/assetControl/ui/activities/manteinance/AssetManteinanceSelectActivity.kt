@@ -6,12 +6,7 @@ import android.os.Bundle
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
-import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.EditText
-import android.widget.Switch
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -24,7 +19,11 @@ import com.dacosys.assetControl.model.manteinance.AssetManteinance
 import com.dacosys.assetControl.ui.activities.asset.AssetPrintLabelActivity
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsPutBoolean
+import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
+import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.ParcelLong
 import com.dacosys.assetControl.utils.settings.Preference
@@ -57,37 +56,13 @@ class AssetManteinanceSelectActivity : AppCompatActivity(),
     }
 
     private fun saveSharedPreferences() {
-        Statics.prefsPutBoolean(
-            Preference.selectAssetMaintenanceOnlyActive.key,
-            binding.onlyActiveSwitch.isChecked
+        prefsPutBoolean(
+            Preference.selectAssetMaintenanceOnlyActive.key, binding.onlyActiveSwitch.isChecked
         )
     }
 
     private fun destroyLocals() {
         arrayAdapter?.refreshListeners(null)
-    }
-
-    @SuppressLint("ClickableViewAccessibility")
-    private fun setupUI(view: View) {
-        // Set up touch listener for non-text box views to hide keyboard.
-        if (view !is EditText) {
-            view.setOnTouchListener { _, motionEvent ->
-                Statics.closeKeyboard(this)
-                if (view is Button && view !is Switch && view !is CheckBox) {
-                    touchButton(motionEvent, view)
-                    true
-                } else {
-                    false
-                }
-            }
-        }
-
-        //If a layout container, iterate over children and seed recursion.
-        if (view is ViewGroup) {
-            (0 until view.childCount)
-                .map { view.getChildAt(it) }
-                .forEach { setupUI(it) }
-        }
     }
 
     override fun onSaveInstanceState(savedInstanceState: Bundle) {
@@ -135,7 +110,7 @@ class AssetManteinanceSelectActivity : AppCompatActivity(),
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Statics.setScreenRotation(this)
+        setScreenRotation(this)
         binding = AssetManteinanceSelectActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -152,17 +127,11 @@ class AssetManteinanceSelectActivity : AppCompatActivity(),
         title = tempTitle
 
         binding.onlyActiveSwitch.setOnCheckedChangeListener(null)
-        binding.onlyActiveSwitch.isChecked =
-            Statics.prefsGetBoolean(Preference.selectWarehouseOnlyActive)
+        binding.onlyActiveSwitch.isChecked = prefsGetBoolean(Preference.selectWarehouseOnlyActive)
 
         binding.etDescription.setOnEditorActionListener(null)
         binding.etDescription.setOnEditorActionListener { _, keyCode, keyEvent ->
-            if (keyCode == EditorInfo.IME_ACTION_DONE ||
-                (keyEvent.action == KeyEvent.ACTION_DOWN &&
-                        (keyCode == KeyEvent.KEYCODE_UNKNOWN ||
-                                keyCode == KeyEvent.KEYCODE_ENTER ||
-                                keyCode == KeyEvent.KEYCODE_DPAD_CENTER))
-            ) {
+            if (keyCode == EditorInfo.IME_ACTION_DONE || (keyEvent.action == KeyEvent.ACTION_DOWN && (keyCode == KeyEvent.KEYCODE_UNKNOWN || keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_DPAD_CENTER))) {
                 fillListView(false)
                 true
             } else {
@@ -175,8 +144,7 @@ class AssetManteinanceSelectActivity : AppCompatActivity(),
             when (event?.action) {
                 MotionEvent.ACTION_DOWN -> {
                     val pos = binding.assetManteinanceListView.pointToPosition(
-                        event.x.toInt(),
-                        event.y.toInt()
+                        event.x.toInt(), event.y.toInt()
                     )
                     if (pos >= 0) {
                         selectRow(pos)
@@ -193,8 +161,7 @@ class AssetManteinanceSelectActivity : AppCompatActivity(),
 
         fillListView(savedInstanceState != null)
 
-        // ESTO SIRVE PARA OCULTAR EL TECLADO EN PANTALLA CUANDO PIERDEN EL FOCO LOS CONTROLES QUE LO NECESITAN
-        setupUI(binding.root)
+        setupUI(binding.root, this)
     }
 
     private fun showProgressBar(show: Boolean) {
@@ -234,18 +201,6 @@ class AssetManteinanceSelectActivity : AppCompatActivity(),
         }
     }
 
-    private fun touchButton(motionEvent: MotionEvent, button: Button) {
-        when (motionEvent.action) {
-            MotionEvent.ACTION_UP -> {
-                button.isPressed = false
-                button.performClick()
-            }
-            MotionEvent.ACTION_DOWN -> {
-                button.isPressed = true
-            }
-        }
-    }
-
     private fun changeStatus() {
         if (currentAssetManteinance == null) return
 
@@ -275,10 +230,9 @@ class AssetManteinanceSelectActivity : AppCompatActivity(),
             val data = it?.data
             try {
                 if (it?.resultCode == RESULT_OK && data != null) {
-                    val idParcel =
-                        data.getParcelableArrayListExtra<ParcelLong>(
-                            "ids"
-                        ) ?: return@registerForActivityResult
+                    val idParcel = data.getParcelableArrayListExtra<ParcelLong>(
+                        "ids"
+                    ) ?: return@registerForActivityResult
 
                     val ids: ArrayList<Long?> = ArrayList()
                     for (i in idParcel) {
@@ -290,19 +244,15 @@ class AssetManteinanceSelectActivity : AppCompatActivity(),
                         if (!rejectNewInstances) {
                             rejectNewInstances = true
 
-                            val intent =
-                                Intent(this, AssetManteinanceConditionActivity::class.java)
+                            val intent = Intent(this, AssetManteinanceConditionActivity::class.java)
                             intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
                             intent.putExtra("asset", a)
                             startActivity(intent)
                         }
                     } catch (ex: Exception) {
-                        val res =
-                            getString(R.string.an_error_occurred_while_trying_to_add_the_item)
+                        val res = getString(R.string.an_error_occurred_while_trying_to_add_the_item)
                         makeText(
-                            binding.root,
-                            res,
-                            SnackBarType.ERROR
+                            binding.root, res, SnackBarType.ERROR
                         )
                         android.util.Log.d(this::class.java.simpleName, res)
                     }
@@ -323,7 +273,7 @@ class AssetManteinanceSelectActivity : AppCompatActivity(),
             (binding.assetManteinanceListView.adapter as AssetManteinanceAdapter).notifyDataSetChanged()
 
             showProgressBar(false)
-            Statics.closeKeyboard(this)
+            closeKeyboard(this)
             return
         }
 
@@ -341,7 +291,7 @@ class AssetManteinanceSelectActivity : AppCompatActivity(),
             )
 
             showProgressBar(false)
-            Statics.closeKeyboard(this)
+            closeKeyboard(this)
             return
         }
 
@@ -350,19 +300,18 @@ class AssetManteinanceSelectActivity : AppCompatActivity(),
         var assetMantList: ArrayList<AssetManteinance> = ArrayList()
         try {
             assetMantList = when {
-                description.isNotEmpty() ->
-                    AssetManteinanceDbHelper().selectByDescriptionCodeEan(description, onlyActive)
-                else ->
-                    AssetManteinanceDbHelper().select(onlyActive)
+                description.isNotEmpty() -> AssetManteinanceDbHelper().selectByDescriptionCodeEan(
+                    description,
+                    onlyActive
+                )
+                else -> AssetManteinanceDbHelper().select(onlyActive)
             }
 
             if (arrayAdapter == null) {
                 runOnUiThread {
                     if (arrayAdapter != null) {
-                        lastSelected =
-                            arrayAdapter?.currentAssetManteinance()
-                        firstVisiblePos =
-                            arrayAdapter?.firstVisiblePos()
+                        lastSelected = arrayAdapter?.currentAssetManteinance()
+                        firstVisiblePos = arrayAdapter?.firstVisiblePos()
                     }
 
                     arrayAdapter = AssetManteinanceAdapter(
@@ -380,8 +329,7 @@ class AssetManteinanceSelectActivity : AppCompatActivity(),
 
                     if (arrayAdapter != null) {
                         arrayAdapter?.setSelectItemAndScrollPos(
-                            lastSelected,
-                            firstVisiblePos
+                            lastSelected, firstVisiblePos
                         )
                     }
                 }
@@ -391,14 +339,12 @@ class AssetManteinanceSelectActivity : AppCompatActivity(),
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         } finally {
             showProgressBar(false)
-            Statics.closeKeyboard(this)
+            closeKeyboard(this)
         }
 
         if (!assetMantList.any()) {
             makeText(
-                binding.root,
-                getString(R.string.no_maintenance_to_show),
-                SnackBarType.INFO
+                binding.root, getString(R.string.no_maintenance_to_show), SnackBarType.INFO
             )
         }
     }
@@ -409,7 +355,7 @@ class AssetManteinanceSelectActivity : AppCompatActivity(),
     }
 
     override fun onBackPressed() {
-        Statics.closeKeyboard(this)
+        closeKeyboard(this)
 
         setResult(RESULT_CANCELED)
         finish()

@@ -44,6 +44,11 @@ import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.fragments.asset.AssetSelectFilterFragment
 import com.dacosys.assetControl.ui.fragments.print.PrinterFragment
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetLong
+import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
+import com.dacosys.assetControl.utils.Screen.Companion.isKeyboardVisible
+import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.Statics.Companion.isRfidRequired
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
@@ -111,26 +116,6 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         }
     }
 
-    @SuppressLint("ClickableViewAccessibility")
-    private fun setupUI(view: View) {
-        // Set up touch checkedChangedListener for non-text box views to hide keyboard.
-        if (view !is EditText) {
-            view.setOnTouchListener { _, motionEvent ->
-                Statics.closeKeyboard(this)
-                if (view is Button && view !is Switch && view !is CheckBox) {
-                    touchButton(motionEvent, view)
-                    true
-                } else {
-                    false
-                }
-            }
-        }
-
-        //If a layout container, iterate over children and seed recursion.
-        if (view is ViewGroup) {
-            (0 until view.childCount).map { view.getChildAt(it) }.forEach { setupUI(it) }
-        }
-    }
 
     private var tempTitle = ""
 
@@ -212,7 +197,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
 
     private fun loadDefaultValues() {
         tempTitle = getString(R.string.select_asset)
-        val id = Statics.prefsGetLong(Preference.defaultBarcodeLabelCustomAsset)
+        val id = prefsGetLong(Preference.defaultBarcodeLabelCustomAsset)
         val blc = BarcodeLabelCustomDbHelper().selectById(id)
         if (blc != null) printerFragment?.barcodeLabelCustom = blc
     }
@@ -222,7 +207,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Statics.setScreenRotation(this)
+        setScreenRotation(this)
         binding = AssetPrintLabelActivityTopPanelCollapsedBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -303,7 +288,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         )
         binding.searchEditText.setOnKeyListener { _, keyCode, keyEvent ->
             if (keyCode == EditorInfo.IME_ACTION_DONE || (keyEvent.action == KeyEvent.ACTION_UP && (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_DPAD_CENTER))) {
-                Statics.closeKeyboard(this)
+                closeKeyboard(this)
             }
             false
         }
@@ -316,7 +301,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
 
         setPanels()
 
-        setupUI(binding.root)
+        setupUI(binding.root, this)
     }
 
     override fun onStart() {
@@ -331,7 +316,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
     }
 
     private fun itemSelect() {
-        Statics.closeKeyboard(this)
+        closeKeyboard(this)
 
         val data = Intent()
 
@@ -539,18 +524,6 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         }
     }
 
-    private fun touchButton(motionEvent: MotionEvent, button: Button) {
-        when (motionEvent.action) {
-            MotionEvent.ACTION_UP -> {
-                button.isPressed = false
-                button.performClick()
-            }
-            MotionEvent.ACTION_DOWN -> {
-                button.isPressed = true
-            }
-        }
-    }
-
     private fun fillListView() {
         thread {
             val sync = GetAssetAsync()
@@ -607,7 +580,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
             ex.printStackTrace()
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         } finally {
-            Statics.closeKeyboard(this)
+            closeKeyboard(this)
             showProgressBar(false)
         }
     }
@@ -635,7 +608,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         super.onResume()
 
         rejectNewInstances = false
-        Statics.closeKeyboard(this)
+        closeKeyboard(this)
         refreshTextViews()
     }
 
@@ -693,7 +666,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
     }
 
     override fun onBackPressed() {
-        Statics.closeKeyboard(this)
+        closeKeyboard(this)
 
         setResult(RESULT_CANCELED)
         finish()
@@ -871,7 +844,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         warehouseArea: WarehouseArea?,
         onlyActive: Boolean,
     ) {
-        Statics.closeKeyboard(this)
+        closeKeyboard(this)
 
         if (fixedItemList) return
 
@@ -1035,9 +1008,9 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         // el foco pasa al control de texto de búsqueda, se debe colapsar el panel de impresión
         // manualmente porque no se dispara el evento de cambio de visibilidad del teclado en
         // pantalla que lo haría normalmente.
-        if (Statics.isKeyboardVisible() && !hasFocus && binding.searchEditText.isFocused) collapseTopPanel()
+        if (isKeyboardVisible() && !hasFocus && binding.searchEditText.isFocused) collapseTopPanel()
 
-        if (Statics.isKeyboardVisible() && hasFocus && panelBottomIsExpanded) collapseBottomPanel()
+        if (isKeyboardVisible() && hasFocus && panelBottomIsExpanded) collapseBottomPanel()
     }
 
     // region READERS Reception

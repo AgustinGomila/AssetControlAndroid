@@ -954,4 +954,5 @@
     <string name="edit_warehouse">Editar depósito</string>
     <string name="image_code">Código de imagen</string>
     <string name="creating_session_">Creando sesión…</string>
+    <string name="no_available_option">Opción no disponible</string>
 </resources>

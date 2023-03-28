@@ -11,7 +11,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
-import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
@@ -22,7 +21,10 @@ import com.dacosys.assetControl.dataBase.category.ItemCategoryDbHelper
 import com.dacosys.assetControl.databinding.ItemCategorySelectActivityBinding
 import com.dacosys.assetControl.model.category.ItemCategory
 import com.dacosys.assetControl.ui.common.views.custom.ContractsAutoCompleteTextView
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
+import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.utils.Screen.Companion.setupUI
+import com.dacosys.assetControl.utils.Screen.Companion.showKeyboard
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener
@@ -52,28 +54,6 @@ class ItemCategorySelectActivity :
         savedInstanceState.putString("itemCategoryStr", binding.category.text.toString())
     }
 
-    @SuppressLint("ClickableViewAccessibility")
-    private fun setupUI(view: View) {
-        // Set up touch checkedChangedListener for non-text box views to hide keyboard.
-        if (view !is EditText) {
-            view.setOnTouchListener { _, motionEvent ->
-                Statics.closeKeyboard(this)
-                if (view is Button && view !is Switch && view !is CheckBox) {
-                    touchButton(motionEvent, view)
-                    true
-                } else {
-                    false
-                }
-            }
-        }
-
-        //If a layout container, iterate over children and seed recursion.
-        if (view is ViewGroup) {
-            (0 until view.childCount)
-                .map { view.getChildAt(it) }
-                .forEach { setupUI(it) }
-        }
-    }
 
     override fun onDestroy() {
         destroyLocals()
@@ -81,7 +61,7 @@ class ItemCategorySelectActivity :
     }
 
     private fun destroyLocals() {
-        Statics.closeKeyboard(this)
+        closeKeyboard(this)
         binding.category.setOnContractsAvailability(null)
         binding.category.setAdapter(null)
     }
@@ -91,7 +71,7 @@ class ItemCategorySelectActivity :
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Statics.setScreenRotation(this)
+        setScreenRotation(this)
         binding = ItemCategorySelectActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -171,11 +151,11 @@ class ItemCategorySelectActivity :
             }
         binding.category.setOnTouchListener { _, motionEvent ->
             if (motionEvent.action == MotionEvent.ACTION_UP) {
-                Statics.showKeyboard(this)
+                showKeyboard(this)
                 adjustDropDownHeight()
                 return@setOnTouchListener false
             } else if (motionEvent.action == MotionEvent.BUTTON_BACK) {
-                Statics.closeKeyboard(this)
+                closeKeyboard(this)
 
                 setResult(RESULT_CANCELED, null)
                 finish()
@@ -233,8 +213,7 @@ class ItemCategorySelectActivity :
         refreshItemCategoryText(cleanText = false, focus = true)
         thread { fillAdapter() }
 
-        // ESTO SIRVE PARA OCULTAR EL TECLADO EN PANTALLA CUANDO PIERDEN EL FOCO LOS CONTROLES QUE LO NECESITAN
-        setupUI(binding.root)
+        setupUI(binding.root, this)
     }
 
     private fun refreshItemCategoryText(cleanText: Boolean, focus: Boolean) {
@@ -327,20 +306,8 @@ class ItemCategorySelectActivity :
         }
     }
 
-    private fun touchButton(motionEvent: MotionEvent, button: Button) {
-        when (motionEvent.action) {
-            MotionEvent.ACTION_UP -> {
-                button.isPressed = false
-                button.performClick()
-            }
-            MotionEvent.ACTION_DOWN -> {
-                button.isPressed = true
-            }
-        }
-    }
-
     private fun itemSelected() {
-        Statics.closeKeyboard(this)
+        closeKeyboard(this)
 
         when {
             itemCategory != null -> {
@@ -357,7 +324,7 @@ class ItemCategorySelectActivity :
     }
 
     override fun onBackPressed() {
-        Statics.closeKeyboard(this)
+        closeKeyboard(this)
 
         setResult(RESULT_CANCELED)
         finish()

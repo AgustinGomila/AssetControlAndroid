@@ -67,6 +67,12 @@ import com.dacosys.assetControl.ui.common.snackbar.SnackBarEventData
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.dacosys.assetControl.ui.fragments.movement.LocationHeaderFragment
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetStringSet
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsPutBoolean
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsPutStringSet
+import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
+import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.Statics.Companion.INTERNAL_IMAGE_CONTROL_APP_ID
 import com.dacosys.assetControl.utils.Statics.Companion.isRfidRequired
@@ -109,15 +115,18 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     private fun saveSharedPreferences() {
-        Statics.prefsPutBoolean(
+        prefsPutBoolean(
             Preference.assetReviewAddUnknownAssets.key, binding.addUnknownAssetsSwitch.isChecked
         )
-        Statics.prefsPutBoolean(
+        prefsPutBoolean(
             Preference.assetReviewAllowUnknownCodes.key, binding.allowUnknownCodesSwitch.isChecked
         )
         val set = HashSet<String>()
         for (i in visibleStatusArray) set.add(i.id.toString())
-        Statics.prefsPutStringSet(Preference.assetReviewContentVisibleStatus.key, set)
+        prefsPutStringSet(
+            Preference.assetReviewContentVisibleStatus.key,
+            set
+        )
     }
 
     private fun destroyLocals() {
@@ -193,14 +202,14 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
                 )
             }
             ProgressStatus.bigFinished -> {
-                Statics.closeKeyboard(this)
+                closeKeyboard(this)
                 setResult(RESULT_OK)
                 finish()
             }
             ProgressStatus.bigCrashed,
             ProgressStatus.canceled,
             -> {
-                Statics.closeKeyboard(this)
+                closeKeyboard(this)
                 makeText(binding.root, msg, ERROR)
                 ErrorLog.writeLog(
                     this, this::class.java.simpleName, "$progressStatusDesc: $registryDesc ${
@@ -303,14 +312,14 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
             binding.allowUnknownCodesSwitch.isChecked = b.getBoolean("allowUnknownCodes")
         } else {
             binding.allowUnknownCodesSwitch.isChecked =
-                Statics.prefsGetBoolean(Preference.assetReviewAllowUnknownCodes)
+                prefsGetBoolean(Preference.assetReviewAllowUnknownCodes)
         }
 
         if (b.containsKey("addUnknownAssets")) {
             binding.addUnknownAssetsSwitch.isChecked = b.getBoolean("addUnknownAssets")
         } else {
             binding.addUnknownAssetsSwitch.isChecked =
-                Statics.prefsGetBoolean(Preference.assetReviewAddUnknownAssets)
+                prefsGetBoolean(Preference.assetReviewAddUnknownAssets)
         }
 
         currentInventory = b.getStringArrayList("currentInventory")
@@ -345,15 +354,15 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
     private fun loadDefaultValues() {
         tempTitle = getString(R.string.asset_review)
         binding.allowUnknownCodesSwitch.isChecked =
-            Statics.prefsGetBoolean(Preference.assetReviewAllowUnknownCodes)
+            prefsGetBoolean(Preference.assetReviewAllowUnknownCodes)
         binding.addUnknownAssetsSwitch.isChecked =
-            Statics.prefsGetBoolean(Preference.assetReviewAddUnknownAssets)
+            prefsGetBoolean(Preference.assetReviewAddUnknownAssets)
         loadDefaultVisibleStatus()
     }
 
     private fun loadDefaultVisibleStatus() {
         visibleStatusArray.clear()
-        var set = Statics.prefsGetStringSet(
+        var set = prefsGetStringSet(
             Preference.assetReviewContentVisibleStatus.key,
             Preference.assetReviewContentVisibleStatus.defaultValue as ArrayList<String>
         )
@@ -374,7 +383,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Statics.setScreenRotation(this)
+        setScreenRotation(this)
         binding = AssetReviewContentBottomPanelCollapsedBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -443,7 +452,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
             }
         }
         binding.allowUnknownCodesSwitch.isChecked =
-            Statics.prefsGetBoolean(Preference.assetReviewAllowUnknownCodes)
+            prefsGetBoolean(Preference.assetReviewAllowUnknownCodes)
 
         binding.addUnknownAssetsSwitch.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
@@ -451,7 +460,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
             }
         }
         binding.addUnknownAssetsSwitch.isChecked =
-            Statics.prefsGetBoolean(Preference.assetReviewAddUnknownAssets)
+            prefsGetBoolean(Preference.assetReviewAddUnknownAssets)
 
         binding.mantButton.setOnClickListener {
             if (allowClicks) {
@@ -460,7 +469,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
             }
         }
 
-        if (!Statics.prefsGetBoolean(Preference.useAssetControlManteinance)) {
+        if (!prefsGetBoolean(Preference.useAssetControlManteinance)) {
             binding.mantButton.isEnabled = false
         }
 
@@ -625,7 +634,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
             alert.setMessage(getContext().getString(R.string.discard_changes_and_return_to_the_main_menu_question))
             alert.setNegativeButton(R.string.cancel, null)
             alert.setPositiveButton(R.string.accept) { _, _ ->
-                Statics.closeKeyboard(this)
+                closeKeyboard(this)
 
                 setResult(RESULT_CANCELED)
                 finish()
@@ -1140,7 +1149,9 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
                     assetReviewContArray = items,
                     suggestedList = items,
                     listView = binding.assetReviewContentListView,
-                    multiSelect = Statics.prefsGetBoolean(Preference.quickReviews),
+                    multiSelect = prefsGetBoolean(
+                        Preference.quickReviews
+                    ),
                     checkedIdArray = checkedIdArray,
                     visibleStatus = visibleStatusArray
                 )

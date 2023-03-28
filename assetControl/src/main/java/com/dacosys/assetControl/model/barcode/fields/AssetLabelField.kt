@@ -1,6 +1,7 @@
 package com.dacosys.assetControl.model.barcode.fields
 
 import com.dacosys.assetControl.model.asset.Asset
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.settings.entries.ConfEntry
 import java.util.*
@@ -17,7 +18,8 @@ class AssetLabelField(asset: Asset, forReport: Boolean) {
     fun getField(): ArrayList<BarcodeLabelField> {
         var tempCode = ""
         if (asset != null) {
-            val addLabelNumber = Statics.prefsGetBoolean(ConfEntry.acAddLabelNumberOnBarcode)
+            val addLabelNumber =
+                prefsGetBoolean(ConfEntry.acAddLabelNumberOnBarcode)
             tempCode = if (addLabelNumber) {
                 if (forReport) {
                     asset!!.code + Statics.reservedChar + "0"

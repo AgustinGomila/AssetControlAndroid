@@ -10,10 +10,6 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.*
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.EditText
-import android.widget.Switch
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
@@ -51,6 +47,9 @@ import com.dacosys.assetControl.ui.activities.asset.AssetPrintLabelActivity
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.fragments.movement.LocationHeaderFragment
+import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
+import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.Statics.Companion.isRfidRequired
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
@@ -137,26 +136,6 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
     private var panelBottomIsExpanded = false
     private var panelTopIsExpanded = true
 
-    @SuppressLint("ClickableViewAccessibility")
-    private fun setupUI(view: View) {
-        // Set up touch listener for non-text box views to hide keyboard.
-        if (view !is EditText) {
-            view.setOnTouchListener { _, motionEvent ->
-                Statics.closeKeyboard(this)
-                if (view is Button && view !is Switch && view !is CheckBox) {
-                    touchButton(motionEvent, view)
-                    true
-                } else {
-                    false
-                }
-            }
-        }
-
-        //If a layout container, iterate over children and seed recursion.
-        if (view is ViewGroup) {
-            (0 until view.childCount).map { view.getChildAt(it) }.forEach { setupUI(it) }
-        }
-    }
 
     override fun onSaveInstanceState(savedInstanceState: Bundle) {
         super.onSaveInstanceState(savedInstanceState)
@@ -211,7 +190,7 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Statics.setScreenRotation(this)
+        setScreenRotation(this)
         binding = WarehouseMovementContentBottomPanelCollapsedBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -288,8 +267,7 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
         // Llenar la grilla
         setPanels()
 
-        // ESTO SIRVE PARA OCULTAR EL TECLADO EN PANTALLA CUANDO PIERDEN EL FOCO LOS CONTROLES QUE LO NECESITAN
-        setupUI(binding.root)
+        setupUI(binding.root, this)
     }
 
     private fun setHeaderTextBox() {
@@ -561,21 +539,9 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
         }
     }
 
-    private fun touchButton(motionEvent: MotionEvent, button: Button) {
-        when (motionEvent.action) {
-            MotionEvent.ACTION_UP -> {
-                button.isPressed = false
-                button.performClick()
-            }
-            MotionEvent.ACTION_DOWN -> {
-                button.isPressed = true
-            }
-        }
-    }
-
     private fun cancelWarehouseMovement() {
         if (wmContAdapter == null || (wmContAdapter?.count() ?: 0) <= 0) {
-            Statics.closeKeyboard(this)
+            closeKeyboard(this)
 
             setResult(RESULT_CANCELED)
             finish()
@@ -587,7 +553,7 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
                 alert.setMessage(getContext().getString(R.string.discard_changes_and_return_to_the_main_menu_question))
                 alert.setNegativeButton(R.string.cancel, null)
                 alert.setPositiveButton(R.string.accept) { _, _ ->
-                    Statics.closeKeyboard(this)
+                    closeKeyboard(this)
 
                     setResult(RESULT_CANCELED)
                     finish()
@@ -1024,7 +990,7 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
         }
 
         if (taskStatus == ProgressStatus.finished.id) {
-            Statics.closeKeyboard(this)
+            closeKeyboard(this)
             makeText(
                 binding.root,
                 getContext().getString(R.string.movement_performed_correctly),

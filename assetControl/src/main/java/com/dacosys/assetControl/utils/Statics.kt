@@ -8,18 +8,12 @@ import android.bluetooth.BluetoothManager
 import android.content.ContentUris
 import android.content.Context
 import android.content.DialogInterface
-import android.content.SharedPreferences
-import android.content.pm.ActivityInfo
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
-import android.content.res.Configuration
-import android.content.res.Resources
-import android.content.res.TypedArray
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.graphics.Bitmap
 import android.graphics.Color
-import android.graphics.Insets
 import android.graphics.Typeface
 import android.graphics.drawable.InsetDrawable
 import android.net.ConnectivityManager
@@ -33,20 +27,15 @@ import android.provider.OpenableColumns
 import android.text.InputType
 import android.text.TextUtils
 import android.text.method.PasswordTransformationMethod
-import android.util.DisplayMetrics
 import android.util.Log
 import android.view.*
-import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.annotation.ColorInt
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.res.ResourcesCompat
-import androidx.preference.PreferenceManager
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
@@ -74,10 +63,19 @@ import com.dacosys.assetControl.model.user.User
 import com.dacosys.assetControl.network.clientPackages.ClientPackagesProgress
 import com.dacosys.assetControl.network.clientPackages.GetClientPackages
 import com.dacosys.assetControl.network.sync.SyncDownload
-import com.dacosys.assetControl.network.sync.SyncRegistryType
 import com.dacosys.assetControl.network.utils.*
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
+import com.dacosys.assetControl.utils.Preferences.Companion.prefs
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsCleanKey
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetByKey
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetFloat
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetInt
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetLong
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetString
+import com.dacosys.assetControl.utils.Screen.Companion.getScreenHeight
+import com.dacosys.assetControl.utils.Screen.Companion.getScreenWidth
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.utils.scanners.vh75.Vh75Bt
@@ -88,7 +86,6 @@ import com.dacosys.assetControl.utils.settings.QRConfigType.CREATOR.QRConfigClie
 import com.dacosys.assetControl.utils.settings.QRConfigType.CREATOR.QRConfigImageControl
 import com.dacosys.assetControl.utils.settings.QRConfigType.CREATOR.QRConfigWebservice
 import com.dacosys.assetControl.utils.settings.collectorType.CollectorType
-import com.dacosys.assetControl.utils.settings.entries.ConfEntry
 import com.dacosys.assetControl.webservice.common.SessionObject
 import com.dacosys.assetControl.webservice.common.Webservice
 import com.dacosys.imageControl.room.database.IcDatabase.Companion.cleanInstance
@@ -98,7 +95,6 @@ import com.google.android.material.textfield.TextInputLayout.END_ICON_PASSWORD_T
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.WriterException
 import com.google.zxing.qrcode.QRCodeWriter
-import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
@@ -107,7 +103,6 @@ import java.lang.ref.WeakReference
 import java.math.BigDecimal
 import java.util.*
 import kotlin.math.min
-import kotlin.math.roundToInt
 
 /**
  * Created by Agustin on 24/01/2017.
@@ -124,6 +119,8 @@ class Statics {
 
         // region DEBUG DEMO
         const val demoMode = false
+        const val superDemoMode = false
+
         var demoQrConfigCode = """
 {"config":{"client_email":"demo@dacosys.com","client_password":"1234"}}
                     """.trimIndent()
@@ -271,291 +268,6 @@ class Statics {
             }
         }
 
-        //region PREFERENCES
-        private var prefs: SharedPreferences? = null
-        fun startPrefs() {
-            prefs = PreferenceManager.getDefaultSharedPreferences(getContext())
-        }
-
-        fun prefsIsInitialized(): Boolean {
-            return prefs != null
-        }
-
-        fun resetLastUpdateDates(): Boolean {
-            try {
-                for (registryType in SyncRegistryType.getSyncDownload()) {
-                    prefsCleanKey(registryType.confEntry!!.description)
-                }
-            } catch (ex: Exception) {
-                ex.printStackTrace()
-                return false
-            }
-            return true
-        }
-
-        fun cleanPrefs(): Boolean {
-            if (prefs == null) {
-                return false
-            }
-
-            return try {
-                prefs!!.edit().clear().apply()
-                true
-            } catch (ex: java.lang.Exception) {
-                ex.printStackTrace()
-                false
-            }
-        }
-
-        private fun prefsGetByKey(key: String): Any? {
-            if (prefs == null) {
-                return null
-            }
-
-            return prefs!!.all[key]
-        }
-
-        private fun prefsCleanKey(key: String): Boolean {
-            if (prefs == null) {
-                return false
-            }
-
-            return try {
-                with(prefs!!.edit()) {
-                    remove(key).apply()
-                }
-                true
-            } catch (ex: java.lang.Exception) {
-                ex.printStackTrace()
-                false
-            }
-        }
-
-        fun prefsPutLong(key: String, value: Long): Boolean {
-            if (prefs == null) {
-                return false
-            }
-
-            return try {
-                with(prefs!!.edit()) {
-                    putLong(key, value).apply()
-                }
-                true
-            } catch (ex: java.lang.Exception) {
-                ex.printStackTrace()
-                false
-            }
-        }
-
-        fun prefsPutInt(key: String, value: Int): Boolean {
-            if (prefs == null) {
-                return false
-            }
-
-            return try {
-                with(prefs!!.edit()) {
-                    putInt(key, value).apply()
-                }
-                true
-            } catch (ex: java.lang.Exception) {
-                ex.printStackTrace()
-                false
-            }
-        }
-
-        fun prefsPutBoolean(key: String, value: Boolean): Boolean {
-            if (prefs == null) {
-                return false
-            }
-
-            return try {
-                with(prefs!!.edit()) {
-                    putBoolean(key, value).apply()
-                }
-                true
-            } catch (ex: java.lang.Exception) {
-                ex.printStackTrace()
-                false
-            }
-        }
-
-        fun prefsPutString(key: String, value: String): Boolean {
-            if (prefs == null) {
-                return false
-            }
-
-            return try {
-                with(prefs!!.edit()) {
-                    putString(key, value).apply()
-                }
-                true
-            } catch (ex: java.lang.Exception) {
-                ex.printStackTrace()
-                false
-            }
-        }
-
-        fun prefsPutString(key: ArrayList<String>, value: String): Boolean {
-            if (prefs == null) {
-                return false
-            }
-
-            return try {
-                with(prefs!!.edit()) {
-                    for (k in key) {
-                        putString(k, value).apply()
-                    }
-                }
-                true
-            } catch (ex: java.lang.Exception) {
-                ex.printStackTrace()
-                false
-            }
-        }
-
-        fun prefsPutStringSet(key: String, value: Set<String>): Boolean {
-            if (prefs == null) {
-                return false
-            }
-
-            return try {
-                with(prefs!!.edit()) {
-                    putStringSet(key, value).apply()
-                }
-                true
-            } catch (ex: java.lang.Exception) {
-                ex.printStackTrace()
-                false
-            }
-        }
-
-        fun prefsGetStringSet(key: String, value: ArrayList<String>): Set<String>? {
-            if (prefs == null) {
-                return value.toSet()
-            }
-
-            return try {
-                prefs!!.getStringSet(key, value.toSet())
-            } catch (ex: java.lang.Exception) {
-                value.toSet()
-            }
-        }
-
-        fun prefsGetString(p: ConfEntry): String {
-            return privPrefsGetString(p.description, p.defaultValue as String)
-        }
-
-        fun prefsGetString(p: Preference): String {
-            return privPrefsGetString(p.key, p.defaultValue as String)
-        }
-
-        private fun privPrefsGetString(key: String, defValue: String): String {
-            if (prefs == null) {
-                return defValue
-            }
-
-            return try {
-                return when (val pref = prefsGetByKey(key)) {
-                    is String -> pref
-                    else -> pref?.toString() ?: defValue
-                }
-            } catch (ex: java.lang.Exception) {
-                defValue
-            }
-        }
-
-        fun prefsGetInt(p: ConfEntry): Int {
-            return prefsGetInt(p.description, p.defaultValue.toString().toInt())
-        }
-
-        fun prefsGetInt(p: Preference): Int {
-            return prefsGetInt(p.key, p.defaultValue as Int)
-        }
-
-        private fun prefsGetInt(key: String, defValue: Int): Int {
-            if (prefs == null) {
-                return defValue
-            }
-
-            return try {
-                when (val pref = prefsGetByKey(key)) {
-                    is Int -> pref
-                    is Long -> pref.toInt()
-                    is String -> pref.toInt()
-                    else -> defValue
-                }
-            } catch (ex: java.lang.Exception) {
-                return defValue
-            }
-        }
-
-        fun prefsGetLong(p: Preference): Long {
-            return prefsGetLong(p.key, p.defaultValue as Long)
-        }
-
-        private fun prefsGetLong(key: String, defValue: Long): Long {
-            if (prefs == null) {
-                return defValue
-            }
-
-            return try {
-                when (val pref = prefsGetByKey(key)) {
-                    is Long -> pref
-                    is Int -> pref.toLong()
-                    is String -> pref.toInt().toLong()
-                    else -> defValue
-                }
-            } catch (ex: java.lang.Exception) {
-                return defValue
-            }
-        }
-
-        fun prefsGetFloat(p: Preference): Float {
-            return prefsGetFloat(p.key, p.defaultValue as Float)
-        }
-
-        private fun prefsGetFloat(key: String, defValue: Float): Float {
-            if (prefs == null) {
-                return defValue
-            }
-
-            return try {
-                when (val pref = prefsGetByKey(key)) {
-                    is Float -> pref
-                    is String -> pref.toFloat()
-                    else -> defValue
-                }
-            } catch (ex: java.lang.Exception) {
-                return defValue
-            }
-        }
-
-        fun prefsGetBoolean(p: ConfEntry): Boolean {
-            return privPrefsGetBoolean(p.description, p.defaultValue.toString().toBoolean())
-        }
-
-        fun prefsGetBoolean(p: Preference): Boolean {
-            return privPrefsGetBoolean(p.key, p.defaultValue as Boolean)
-        }
-
-        private fun privPrefsGetBoolean(key: String, defValue: Boolean): Boolean {
-            if (prefs == null) {
-                return defValue
-            }
-
-            return try {
-                when (val pref = prefsGetByKey(key)) {
-                    is Boolean -> pref
-                    is Int -> pref == 1
-                    is String -> pref.toBoolean()
-                    else -> defValue
-                }
-            } catch (ex: java.lang.Exception) {
-                return defValue
-            }
-        }
-        //endregion PREFERENCES
-
         // region COLLECTOR TYPE THINGS
 
         val collectorType: CollectorType
@@ -583,197 +295,6 @@ class Statics {
             }
 
         // endregion COLLECTOR TYPE THINGS
-
-        fun getBestContrastColor(color: String): Int {
-            val backColor = Color.parseColor(color)
-            val l =
-                0.2126 * Color.red(backColor) + 0.7152 * Color.green(backColor) + 0.0722 * Color.blue(
-                    backColor
-                )
-            return if (l <= 128) textLightColor()
-            else textDarkColor()
-        }
-
-        fun toStringColorToInt(color: String): Int {
-            val backColor = Color.parseColor(color)
-            return Color.red(backColor) + Color.green(backColor) + Color.blue(backColor)
-        }
-
-        @ColorInt
-        fun textLightColor(): Int {
-            return ResourcesCompat.getColor(getContext().resources, R.color.text_light, null)
-        }
-
-        @ColorInt
-        fun textDarkColor(): Int {
-            return ResourcesCompat.getColor(getContext().resources, R.color.text_dark, null)
-        }
-
-        fun manipulateColor(color: Int, factor: Float): Int {
-            val a = Color.alpha(color)
-            val r = (Color.red(color) * factor).roundToInt()
-            val g = (Color.green(color) * factor).roundToInt()
-            val b = (Color.blue(color) * factor).roundToInt()
-            return Color.argb(
-                a, min(r, 255), min(g, 255), min(b, 255)
-            )
-        }
-
-        fun getColorWithAlpha(colorId: Int, alpha: Int): Int {
-            val color = ResourcesCompat.getColor(getContext().resources, colorId, null)
-
-            val red = Color.red(color)
-            val blue = Color.blue(color)
-            val green = Color.green(color)
-
-            return Color.argb(alpha, red, green, blue)
-        }
-
-        @SuppressLint("SourceLockedOrientationActivity")
-        fun setScreenRotation(activity: AppCompatActivity) {
-            val rotation: Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                val display = activity.display
-                display?.rotation ?: Surface.ROTATION_0
-            } else {
-                @Suppress("DEPRECATION") val display = activity.windowManager.defaultDisplay
-                display.rotation
-            }
-            val height: Int
-            val width: Int
-
-            val displayMetrics = Resources.getSystem().displayMetrics
-            height = displayMetrics.heightPixels
-            width = displayMetrics.widthPixels
-
-            if (prefsGetBoolean(Preference.allowScreenRotation)) {
-                activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-            } else {
-                when (rotation) {
-                    Surface.ROTATION_90 -> when {
-                        width > height -> activity.requestedOrientation =
-                            ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-                        else -> activity.requestedOrientation =
-                            ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT
-                    }
-                    Surface.ROTATION_180 -> when {
-                        height > width -> activity.requestedOrientation =
-                            ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT
-                        else -> activity.requestedOrientation =
-                            ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
-                    }
-                    Surface.ROTATION_270 -> when {
-                        width > height -> activity.requestedOrientation =
-                            ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
-                        else -> activity.requestedOrientation =
-                            ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-                    }
-                    Surface.ROTATION_0 -> activity.requestedOrientation =
-                        ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-                    else -> when {
-                        height > width -> activity.requestedOrientation =
-                            ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-                        else -> activity.requestedOrientation =
-                            ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-                    }
-                }
-            }
-        }
-
-        fun getScreenWidth(activity: Activity): Int {
-            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                val windowMetrics = activity.windowManager.currentWindowMetrics
-                val bounds = windowMetrics.bounds
-                val insets: Insets = windowMetrics.windowInsets.getInsetsIgnoringVisibility(
-                    WindowInsets.Type.systemBars()
-                )
-                if (activity.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE && activity.resources.configuration.smallestScreenWidthDp < 600) { // landscape and phone
-                    val navigationBarSize: Int = insets.right + insets.left
-                    bounds.width() - navigationBarSize
-                } else { // portrait or tablet
-                    bounds.width()
-                }
-            } else {
-                val outMetrics = DisplayMetrics()
-                @Suppress("DEPRECATION") activity.windowManager.defaultDisplay.getMetrics(outMetrics)
-                outMetrics.widthPixels
-            }
-        }
-
-        fun getScreenHeight(activity: Activity): Int {
-            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                val windowMetrics = activity.windowManager.currentWindowMetrics
-                val bounds = windowMetrics.bounds
-                val insets: Insets = windowMetrics.windowInsets.getInsetsIgnoringVisibility(
-                    WindowInsets.Type.systemBars()
-                )
-                if (activity.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE && activity.resources.configuration.smallestScreenWidthDp < 600) { // landscape and phone
-                    bounds.height()
-                } else { // portrait or tablet
-                    val navigationBarSize: Int = insets.bottom
-                    bounds.height() - navigationBarSize
-                }
-            } else {
-                val outMetrics = DisplayMetrics()
-                @Suppress("DEPRECATION") activity.windowManager.defaultDisplay.getMetrics(outMetrics)
-                outMetrics.heightPixels
-            }
-        }
-
-        fun getSystemBarsHeight(activity: AppCompatActivity): Int {
-            // Valores de la pantalla actual
-            // status bar height
-            var statusBarHeight = 0
-            val resourceId1: Int =
-                activity.resources.getIdentifier("status_bar_height", "dimen", "android")
-            if (resourceId1 > 0) {
-                statusBarHeight = activity.resources.getDimensionPixelSize(resourceId1)
-            }
-
-            // action bar height
-            val styledAttributes: TypedArray =
-                activity.theme.obtainStyledAttributes(intArrayOf(android.R.attr.actionBarSize))
-            val actionBarHeight = styledAttributes.getDimension(0, 0f).toInt()
-            styledAttributes.recycle()
-
-            // navigation bar height
-            var navigationBarHeight = 0
-            val resourceId2: Int =
-                activity.resources.getIdentifier("navigation_bar_height", "dimen", "android")
-            if (resourceId2 > 0) {
-                navigationBarHeight = activity.resources.getDimensionPixelSize(resourceId2)
-            }
-
-            return statusBarHeight + actionBarHeight + navigationBarHeight
-        }
-
-        fun isTablet(): Boolean {
-            return getContext().resources.getBoolean(R.bool.isTab)
-        }
-
-        fun isKeyboardVisible(): Boolean {
-            val imm =
-                getContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
-            return imm != null && imm.isActive
-        }
-
-        fun showKeyboard(activity: AppCompatActivity) {
-            if (!KeyboardVisibilityEvent.isKeyboardVisible(activity)) {
-                val imm =
-                    activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                imm.showSoftInput(activity.window.decorView.rootView, 0)
-            }
-        }
-
-        fun closeKeyboard(activity: AppCompatActivity) {
-            if (KeyboardVisibilityEvent.isKeyboardVisible(activity)) {
-                val imm =
-                    activity.getSystemService(AppCompatActivity.INPUT_METHOD_SERVICE) as InputMethodManager
-                val cf = activity.currentFocus
-                if (cf != null) {
-                    imm.hideSoftInputFromWindow(cf.windowToken, 0)
-                }
-            }
-        }
 
         fun deleteTimeFile() {
             val timeFileLocation = File(getContext().cacheDir.absolutePath + "/" + timeFilename)

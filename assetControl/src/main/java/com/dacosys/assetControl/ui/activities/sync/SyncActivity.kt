@@ -38,6 +38,10 @@ import com.dacosys.assetControl.network.sync.*
 import com.dacosys.assetControl.network.utils.*
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetStringSet
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsPutStringSet
+import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.settings.Preference
@@ -62,7 +66,9 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
         // Guardar los valores en las preferencias
         val set = HashSet<String>()
         for (i in visibleRegistryArray) set.add(i.id.toString())
-        Statics.prefsPutStringSet(Preference.syncVisibleRegistry.key, set)
+        prefsPutStringSet(
+            Preference.syncVisibleRegistry.key, set
+        )
     }
 
     private fun destroyLocals() {
@@ -331,7 +337,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
 
     private fun loadDefaultVisibleStatus() {
         visibleRegistryArray.clear()
-        val set = Statics.prefsGetStringSet(
+        val set = prefsGetStringSet(
             Preference.syncVisibleRegistry.key,
             Preference.syncVisibleRegistry.defaultValue as ArrayList<String>
         )
@@ -368,7 +374,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Statics.setScreenRotation(this)
+        setScreenRotation(this)
         binding = SyncActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -409,17 +415,18 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
             downloadData()
         }
 
-        // ESTO SIRVE PARA OCULTAR EL TECLADO EN PANTALLA CUANDO PIERDEN EL FOCO LOS CONTROLES QUE LO NECESITAN
-        setupUI(binding.root)
+        setupUI(binding.root, this)
     }
 
     private fun sendData() {
         if (syncing) return
 
         try {
-            if (Statics.OFFLINE_MODE || !Statics.isOnline()) {
-                makeText(binding.root, getString(R.string.offline_mode), SnackBarType.INFO)
-                return
+            if (!Statics.superDemoMode) {
+                if (Statics.OFFLINE_MODE || !Statics.isOnline()) {
+                    makeText(binding.root, getString(R.string.offline_mode), SnackBarType.INFO)
+                    return
+                }
             }
 
             syncing = true
@@ -770,44 +777,12 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
         }
     }
 
-    @SuppressLint("ClickableViewAccessibility")
-    private fun setupUI(view: View) {
-        // Set up touch listener for non-text box views to hide keyboard.
-        if (view !is EditText) {
-            view.setOnTouchListener { _, motionEvent ->
-                Statics.closeKeyboard(this)
-                if (view is Button && view !is Switch && view !is CheckBox) {
-                    touchButton(motionEvent, view)
-                    true
-                } else {
-                    false
-                }
-            }
-        }
-
-        //If a layout container, iterate over children and seed recursion.
-        if (view is ViewGroup) {
-            (0 until view.childCount).map { view.getChildAt(it) }.forEach { setupUI(it) }
-        }
-    }
 
     companion object {
 
         private var CURRENT_MODE: Int = -1
         private const val MODE_UPLOAD: Int = 0
         private const val MODE_DOWNLOAD = 1
-    }
-
-    private fun touchButton(motionEvent: MotionEvent, button: Button) {
-        when (motionEvent.action) {
-            MotionEvent.ACTION_UP -> {
-                button.isPressed = false
-                button.performClick()
-            }
-            MotionEvent.ACTION_DOWN -> {
-                button.isPressed = true
-            }
-        }
     }
 
     private fun checkConnection() {

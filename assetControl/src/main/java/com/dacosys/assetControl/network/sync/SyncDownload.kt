@@ -31,6 +31,10 @@ import com.dacosys.assetControl.network.serverDate.GetMySqlDate
 import com.dacosys.assetControl.network.serverDate.MySqlDateResult
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.network.utils.SetCurrentSession
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetInt
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetString
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsPutString
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.Statics.Companion.timeFilename
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
@@ -156,7 +160,7 @@ class SyncDownload(
             )
         )
 
-        qty = Statics.prefsGetInt(ConfEntry.acSyncQtyRegistry)
+        qty = prefsGetInt(ConfEntry.acSyncQtyRegistry)
 
         if (Statics.currentSession == null) {
             SetCurrentSession(onSessionCreated = { scope.launch { onSessionEvent(it) } })
@@ -174,7 +178,7 @@ class SyncDownload(
                 async { dataCollectionRule() },
                 async { barcodeLabelCustom() })
 
-            if (Statics.prefsGetBoolean(Preference.useAssetControlManteinance)) {
+            if (prefsGetBoolean(Preference.useAssetControlManteinance)) {
                 t.union(
                     listOf(async { manteinanceType() }, async { manteinanceTypeGroup() })
                 )
@@ -217,7 +221,7 @@ class SyncDownload(
                     )
                     registries.add(registryType.confEntry!!.description)
                 }
-                Statics.prefsPutString(registries, serverTime)
+                prefsPutString(registries, serverTime)
             }
             registryTypeUpdated.clear()
         } catch (ex: Exception) {
@@ -244,7 +248,9 @@ class SyncDownload(
         val ws = AssetWs()
         val aDb = AssetDbHelper()
 
-        val date = Statics.prefsGetString(registryType.confEntry ?: return)
+        val date = prefsGetString(
+            registryType.confEntry ?: return
+        )
 
         val countTotal: Int?
         var errorOccurred = false
@@ -354,7 +360,9 @@ class SyncDownload(
         val ws = ItemCategoryWs()
         val icDb = ItemCategoryDbHelper()
 
-        val date = Statics.prefsGetString(registryType.confEntry ?: return)
+        val date = prefsGetString(
+            registryType.confEntry ?: return
+        )
 
         val countTotal: Int?
         var errorOccurred = false
@@ -469,7 +477,9 @@ class SyncDownload(
         val upDb = UserPermissionDbHelper()
         val uwaDb = UserWarehouseAreaDbHelper()
 
-        val date = Statics.prefsGetString(registryType.confEntry ?: return)
+        val date = prefsGetString(
+            registryType.confEntry ?: return
+        )
 
         val countTotal: Int?
         var errorOccurred = false
@@ -605,7 +615,9 @@ class SyncDownload(
         val ws = WarehouseWs()
         val wDb = WarehouseDbHelper()
 
-        val date = Statics.prefsGetString(registryType.confEntry ?: return)
+        val date = prefsGetString(
+            registryType.confEntry ?: return
+        )
 
         val countTotal: Int?
         var errorOccurred = false
@@ -715,7 +727,9 @@ class SyncDownload(
         val ws = WarehouseAreaWs()
         val waDb = WarehouseAreaDbHelper()
 
-        val date = Statics.prefsGetString(registryType.confEntry ?: return)
+        val date = prefsGetString(
+            registryType.confEntry ?: return
+        )
 
         val countTotal: Int?
         var errorOccurred = false
@@ -828,7 +842,9 @@ class SyncDownload(
         val aDb = AttributeDbHelper()
         val acDb = AttributeCompositionDbHelper()
 
-        val date = Statics.prefsGetString(registryType.confEntry ?: return)
+        val date = prefsGetString(
+            registryType.confEntry ?: return
+        )
 
         val countTotal: Int?
         var errorOccurred = false
@@ -997,7 +1013,9 @@ class SyncDownload(
         val ws = AttributeCategoryWs()
         val acDb = AttributeCategoryDbHelper()
 
-        val date = Statics.prefsGetString(registryType.confEntry ?: return)
+        val date = prefsGetString(
+            registryType.confEntry ?: return
+        )
 
         val countTotal: Int?
         var errorOccurred = false
@@ -1110,7 +1128,9 @@ class SyncDownload(
         val rDb = RouteDbHelper()
         val rcDb = RouteCompositionDbHelper()
 
-        val date = Statics.prefsGetString(registryType.confEntry ?: return)
+        val date = prefsGetString(
+            registryType.confEntry ?: return
+        )
 
         val countTotal: Int?
         var errorOccurred = false
@@ -1288,7 +1308,9 @@ class SyncDownload(
         val dcrcDb = DataCollectionRuleContentDbHelper()
         val dcrtDb = DataCollectionRuleTargetDbHelper()
 
-        val date = Statics.prefsGetString(registryType.confEntry ?: return)
+        val date = prefsGetString(
+            registryType.confEntry ?: return
+        )
 
         val countTotal: Int?
         var errorOccurred = false
@@ -1523,7 +1545,9 @@ class SyncDownload(
         val ws = ManteinanceTypeWs()
         val mtDb = ManteinanceTypeDbHelper()
 
-        val date = Statics.prefsGetString(registryType.confEntry ?: return)
+        val date = prefsGetString(
+            registryType.confEntry ?: return
+        )
 
         val countTotal: Int?
         var errorOccurred = false
@@ -1677,7 +1701,9 @@ class SyncDownload(
         val ws = ManteinanceTypeGroupWs()
         val mtgDb = ManteinanceTypeGroupDbHelper()
 
-        val date = Statics.prefsGetString(registryType.confEntry ?: return)
+        val date = prefsGetString(
+            registryType.confEntry ?: return
+        )
 
         val countTotal: Int?
         var errorOccurred = false
@@ -1830,7 +1856,9 @@ class SyncDownload(
         val ws = BarcodeLabelCustomWs()
         val blcDb = BarcodeLabelCustomDbHelper()
 
-        val date = Statics.prefsGetString(registryType.confEntry ?: return)
+        val date = prefsGetString(
+            registryType.confEntry ?: return
+        )
 
         val countTotal: Int?
         var errorOccurred = false
@@ -1938,7 +1966,7 @@ class SyncDownload(
                 for (registryType in SyncRegistryType.getSyncDownload()) {
                     registries.add(registryType.confEntry!!.description)
                 }
-                Statics.prefsPutString(registries, dbTime)
+                prefsPutString(registries, dbTime)
             } catch (ex: Exception) {
                 ex.printStackTrace()
                 ErrorLog.writeLog(null, this::class.java.simpleName, ex)

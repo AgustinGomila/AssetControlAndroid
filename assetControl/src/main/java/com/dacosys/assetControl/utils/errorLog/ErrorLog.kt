@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.FragmentActivity
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
+import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.misc.UTCDataTime
 import com.dacosys.assetControl.utils.settings.Preference
@@ -79,7 +80,7 @@ class ErrorLog {
             tClassName = className
             Log.e(tClassName, tMsg)
 
-            if (!Statics.prefsGetBoolean(Preference.registryError)) return
+            if (!prefsGetBoolean(Preference.registryError)) return
 
             writeLog(activity as Activity)
         }
@@ -91,7 +92,7 @@ class ErrorLog {
             tClassName = className
             Log.e(tClassName, tMsg)
 
-            if (!Statics.prefsGetBoolean(Preference.registryError)) return
+            if (!prefsGetBoolean(Preference.registryError)) return
 
             writeLog(activity as Activity)
         }
@@ -103,7 +104,7 @@ class ErrorLog {
             tClassName = className
             Log.e(tClassName, tMsg)
 
-            if (!Statics.prefsGetBoolean(Preference.registryError)) return
+            if (!prefsGetBoolean(Preference.registryError)) return
 
             writeLog(activity as Activity)
         }
@@ -117,7 +118,7 @@ class ErrorLog {
             tClassName = className
             Log.e(tClassName, tMsg)
 
-            if (!Statics.prefsGetBoolean(Preference.registryError)) return
+            if (!prefsGetBoolean(Preference.registryError)) return
 
             writeLog(activity as Activity)
         }

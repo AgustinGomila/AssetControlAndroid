@@ -10,7 +10,7 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.res.ResourcesCompat
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.Screen.Companion.getBestContrastColor
 import com.google.android.material.snackbar.BaseTransientBottomBar.ANIMATION_MODE_FADE
 import com.google.android.material.snackbar.Snackbar
 import java.lang.ref.WeakReference
@@ -46,22 +46,22 @@ class MakeText : AppCompatActivity() {
             snackBar.view.layoutParams = params
 
             sbView.background = ResourcesCompat.getDrawable(
-                getContext().resources,
-                snackBarType.backColor,
-                null
+                getContext().resources, snackBarType.backColor, null
             )
             sbView.elevation = 6f
 
             snackBar.animationMode = ANIMATION_MODE_FADE
 
             val fc = ResourcesCompat.getColor(
-                getContext().resources,
-                snackBarType.foreColor,
-                null
+                getContext().resources, snackBarType.foreColor, null
             )
 
             snackBar.setTextColor(
-                Statics.getBestContrastColor("#" + Integer.toHexString(fc))
+                getBestContrastColor(
+                    "#" + Integer.toHexString(
+                        fc
+                    )
+                )
             )
 
             val textView =

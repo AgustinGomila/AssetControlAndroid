@@ -32,9 +32,10 @@ import com.dacosys.assetControl.model.table.Table
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.common.views.custom.AutoResizeTextView
+import com.dacosys.assetControl.utils.Screen.Companion.getColorWithAlpha
+import com.dacosys.assetControl.utils.Screen.Companion.manipulateColor
+import com.dacosys.assetControl.utils.Screen.Companion.textLightColor
 import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.Statics.Companion.getColorWithAlpha
-import com.dacosys.assetControl.utils.Statics.Companion.manipulateColor
 import java.lang.ref.WeakReference
 import java.util.*
 
@@ -43,9 +44,7 @@ import java.util.*
  * Created by Agustin on 18/01/2017.
  */
 
-class WarehouseMovementContentAdapter :
-    ArrayAdapter<WarehouseMovementContent>,
-    Filterable {
+class WarehouseMovementContentAdapter : ArrayAdapter<WarehouseMovementContent>, Filterable {
     private var activity: AppCompatActivity
     private var resource: Int = 0
 
@@ -68,8 +67,7 @@ class WarehouseMovementContentAdapter :
             weakRefCheckedChangedListener = WeakReference(newValue)
         }
 
-    private var weakRefAlbumViewRequiredListener: WeakReference<AlbumViewRequiredListener?>? =
-        null
+    private var weakRefAlbumViewRequiredListener: WeakReference<AlbumViewRequiredListener?>? = null
     private var albumViewRequiredListener: AlbumViewRequiredListener?
         get() {
             return weakRefAlbumViewRequiredListener?.get()
@@ -78,8 +76,7 @@ class WarehouseMovementContentAdapter :
             weakRefAlbumViewRequiredListener = WeakReference(newValue)
         }
 
-    private var weakRefAddPhotoRequiredListener: WeakReference<AddPhotoRequiredListener?>? =
-        null
+    private var weakRefAddPhotoRequiredListener: WeakReference<AddPhotoRequiredListener?>? = null
     private var addPhotoRequiredListener: AddPhotoRequiredListener?
         get() {
             return weakRefAddPhotoRequiredListener?.get()
@@ -88,8 +85,7 @@ class WarehouseMovementContentAdapter :
             weakRefAddPhotoRequiredListener = WeakReference(newValue)
         }
 
-    private var weakRefEditAssetRequiredListener: WeakReference<EditAssetRequiredListener?>? =
-        null
+    private var weakRefEditAssetRequiredListener: WeakReference<EditAssetRequiredListener?>? = null
     private var editAssetRequiredListener: EditAssetRequiredListener?
         get() {
             return weakRefEditAssetRequiredListener?.get()
@@ -229,8 +225,7 @@ class WarehouseMovementContentAdapter :
             }
 
             if (selectItem) selectItem(
-                wmc = wmcAdded.first(),
-                smoothScroll = true
+                wmc = wmcAdded.first(), smoothScroll = true
             )
         }
     }
@@ -378,10 +373,9 @@ class WarehouseMovementContentAdapter :
             res = res.substring(0, res.length - 2)
         }
 
-        res += ": " +
-                if (wmContArray.size > 1)
-                    AssetControlApp.getContext().getString(R.string.added_plural) else
-                    AssetControlApp.getContext().getString(R.string.added)
+        res += ": " + if (wmContArray.size > 1) AssetControlApp.getContext()
+            .getString(R.string.added_plural) else AssetControlApp.getContext()
+            .getString(R.string.added)
 
         makeText(activity, res, SnackBarType.ADD)
         Log.d(this::class.java.simpleName, res)
@@ -407,10 +401,9 @@ class WarehouseMovementContentAdapter :
             res = res.substring(0, res.length - 2)
         }
 
-        res += ": " +
-                if (wmContArray.size > 1)
-                    " ${AssetControlApp.getContext().getString(R.string.removed_plural)}" else
-                    " ${AssetControlApp.getContext().getString(R.string.removed)}"
+        res += ": " + if (wmContArray.size > 1) " ${
+            AssetControlApp.getContext().getString(R.string.removed_plural)
+        }" else " ${AssetControlApp.getContext().getString(R.string.removed)}"
 
         makeText(activity, res, SnackBarType.REMOVE)
         Log.d(this::class.java.simpleName, res)
@@ -503,8 +496,7 @@ class WarehouseMovementContentAdapter :
     private val customComparator =
         Comparator { o1: WarehouseMovementContent?, o2: WarehouseMovementContent? ->
             WarehouseMovementContentComparator().compareNullable(
-                o1,
-                o2
+                o1, o2
             )
         }
 
@@ -602,21 +594,17 @@ class WarehouseMovementContentAdapter :
     }
 
     fun currentWmCont(): WarehouseMovementContent? {
-        return (0 until count)
-            .firstOrNull { isSelected(it) }
-            ?.let {
-                val t = getItem(it)
-                t
-            }
+        return (0 until count).firstOrNull { isSelected(it) }?.let {
+            val t = getItem(it)
+            t
+        }
     }
 
     fun currentAsset(): Asset? {
-        return (0 until count)
-            .firstOrNull { isSelected(it) }
-            ?.let {
-                val t = AssetDbHelper().selectById(getItem(it)?.assetId ?: 0)
-                t
-            }
+        return (0 until count).firstOrNull { isSelected(it) }?.let {
+            val t = AssetDbHelper().selectById(getItem(it)?.assetId ?: 0)
+            t
+        }
     }
 
     fun getToMove(warehouseAreaId: Long): ArrayList<WarehouseMovementContent> {
@@ -624,10 +612,7 @@ class WarehouseMovementContentAdapter :
         for (i in 0 until count) {
             // Tanto los que se van a mover como los que se encontraron en el área
             val tempItem = getItem(i) as WarehouseMovementContent
-            if (tempItem.warehouseAreaId != warehouseAreaId ||
-                tempItem.warehouseAreaId == warehouseAreaId && tempItem
-                    .assetStatusId == AssetStatus.missing.id
-            ) {
+            if (tempItem.warehouseAreaId != warehouseAreaId || tempItem.warehouseAreaId == warehouseAreaId && tempItem.assetStatusId == AssetStatus.missing.id) {
                 r.add(getItem(i) as WarehouseMovementContent)
             }
         }
@@ -657,8 +642,7 @@ class WarehouseMovementContentAdapter :
     }
 
     fun currentPos(): Int {
-        return (0 until count)
-            .firstOrNull { isSelected(it) } ?: -1
+        return (0 until count).firstOrNull { isSelected(it) } ?: -1
     }
 
     fun firstVisiblePos(): Int {
@@ -771,19 +755,18 @@ class WarehouseMovementContentAdapter :
         // Seleccionamos el layout dependiendo si es
         // un row visible u oculto según su AsseStatus.
 
-        val currentLayout: Int =
-            if (listView == null) {
-                // Estamos trabajando en un Dropdown
-                when {
-                    isStatusVisible(position) -> R.layout.asset_simple_row
-                    else -> R.layout.null_row
-                }
-            } else when {
-                // Estamos trabajando en un ListView
-                !isStatusVisible(position) -> R.layout.null_row
-                isSelected(position) -> R.layout.asset_row_expanded
-                else -> R.layout.asset_row
+        val currentLayout: Int = if (listView == null) {
+            // Estamos trabajando en un Dropdown
+            when {
+                isStatusVisible(position) -> R.layout.asset_simple_row
+                else -> R.layout.null_row
             }
+        } else when {
+            // Estamos trabajando en un ListView
+            !isStatusVisible(position) -> R.layout.null_row
+            isSelected(position) -> R.layout.asset_row_expanded
+            else -> R.layout.asset_row
+        }
 
         if (v == null || v.tag == null) {
             // El view todavía no fue creado, crearlo con el layout correspondiente.
@@ -795,13 +778,9 @@ class WarehouseMovementContentAdapter :
             // El view ya existe, comprobar que no necesite cambiar de layout.
             if (
             // Row null cambiando...
-                v.tag is String && currentLayout == R.layout.asset_row ||
-                v.tag is String && currentLayout == R.layout.asset_row_expanded ||
-                v.tag is String && currentLayout == R.layout.asset_simple_row ||
+                v.tag is String && currentLayout == R.layout.asset_row || v.tag is String && currentLayout == R.layout.asset_row_expanded || v.tag is String && currentLayout == R.layout.asset_simple_row ||
 
-                v.tag is CollapsedViewHolder && currentLayout != R.layout.asset_row ||
-                v.tag is ExpandedViewHolder && currentLayout != R.layout.asset_row_expanded ||
-                v.tag is SimpleViewHolder && currentLayout != R.layout.asset_simple_row
+                v.tag is CollapsedViewHolder && currentLayout != R.layout.asset_row || v.tag is ExpandedViewHolder && currentLayout != R.layout.asset_row_expanded || v.tag is SimpleViewHolder && currentLayout != R.layout.asset_simple_row
             ) {
                 // Ya fue creado, si es un row normal que está siendo seleccionada
                 // o un row expandido que está siendo deseleccionado
@@ -959,8 +938,7 @@ class WarehouseMovementContentAdapter :
 
                 // region Category
                 val categoryStr = arC.itemCategoryStr
-                val ownershipStr =
-                    OwnershipStatus.getById(arC.ownershipStatusId)?.description ?: ""
+                val ownershipStr = OwnershipStatus.getById(arC.ownershipStatusId)?.description ?: ""
 
                 if (categoryStr.isEmpty() && ownershipStr.isEmpty()) {
                     holder.divider3?.visibility = GONE
@@ -992,8 +970,7 @@ class WarehouseMovementContentAdapter :
                 holder.editImageView!!.setOnTouchListener { _, event ->
                     if (event.action == MotionEvent.ACTION_DOWN) {
                         editAssetRequiredListener?.onEditAssetRequired(
-                            Table.asset.tableId,
-                            arC.assetId
+                            Table.asset.tableId, arC.assetId
                         )
                     }
                     true
@@ -1005,8 +982,7 @@ class WarehouseMovementContentAdapter :
                         holder.albumImageView!!.setOnTouchListener { _, event ->
                             if (event.action == MotionEvent.ACTION_DOWN) {
                                 albumViewRequiredListener?.onAlbumViewRequired(
-                                    Table.asset.tableId,
-                                    arC.assetId
+                                    Table.asset.tableId, arC.assetId
                                 )
                             }
                             true
@@ -1016,9 +992,7 @@ class WarehouseMovementContentAdapter :
                         holder.addPhotoImageView!!.setOnTouchListener { _, event ->
                             if (event.action == MotionEvent.ACTION_DOWN) {
                                 addPhotoRequiredListener?.onAddPhotoRequired(
-                                    Table.asset.tableId,
-                                    arC.assetId,
-                                    arC.description
+                                    Table.asset.tableId, arC.assetId, arC.description
                                 )
                             }
                             true
@@ -1082,24 +1056,16 @@ class WarehouseMovementContentAdapter :
                     null
                 )
                 val layoutDefault = ResourcesCompat.getDrawable(
-                    AssetControlApp.getContext().resources,
-                    R.drawable.layout_thin_border,
-                    null
+                    AssetControlApp.getContext().resources, R.drawable.layout_thin_border, null
                 )
 
                 // Font colors
-                val white =
-                    ResourcesCompat.getColor(
-                        AssetControlApp.getContext().resources,
-                        R.color.text_light,
-                        null
-                    )
-                val black =
-                    ResourcesCompat.getColor(
-                        AssetControlApp.getContext().resources,
-                        R.color.text_dark,
-                        null
-                    )
+                val white = ResourcesCompat.getColor(
+                    AssetControlApp.getContext().resources, R.color.text_light, null
+                )
+                val black = ResourcesCompat.getColor(
+                    AssetControlApp.getContext().resources, R.color.text_dark, null
+                )
 
                 val backColor: Drawable
                 val foreColor: Int
@@ -1120,12 +1086,13 @@ class WarehouseMovementContentAdapter :
 
                 val darkerColor = when {
                     isSelected -> true
-                    foreColor == Statics.textLightColor() -> true
+                    foreColor == textLightColor() -> true
                     else -> false
                 }
 
-                val titleForeColor: Int =
-                    manipulateColor(foreColor, if (darkerColor) 0.8f else 1.4f)
+                val titleForeColor: Int = manipulateColor(
+                    foreColor, if (darkerColor) 0.8f else 1.4f
+                )
 
                 v.background = backColor
                 holder.descriptionTextView?.setTextColor(foreColor)
@@ -1159,8 +1126,9 @@ class WarehouseMovementContentAdapter :
                 if (isSelected(position)) {
                     v.background.colorFilter =
                         BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-                            getColorWithAlpha(colorId = R.color.lightslategray, alpha = 240),
-                            BlendModeCompat.MODULATE
+                            getColorWithAlpha(
+                                colorId = R.color.lightslategray, alpha = 240
+                            ), BlendModeCompat.MODULATE
                         )
                 } else {
                     v.background.colorFilter = null
@@ -1287,24 +1255,16 @@ class WarehouseMovementContentAdapter :
                     null
                 )
                 val layoutDefault = ResourcesCompat.getDrawable(
-                    AssetControlApp.getContext().resources,
-                    R.drawable.layout_thin_border,
-                    null
+                    AssetControlApp.getContext().resources, R.drawable.layout_thin_border, null
                 )
 
                 // Font colors
-                val white =
-                    ResourcesCompat.getColor(
-                        AssetControlApp.getContext().resources,
-                        R.color.text_light,
-                        null
-                    )
-                val black =
-                    ResourcesCompat.getColor(
-                        AssetControlApp.getContext().resources,
-                        R.color.text_dark,
-                        null
-                    )
+                val white = ResourcesCompat.getColor(
+                    AssetControlApp.getContext().resources, R.color.text_light, null
+                )
+                val black = ResourcesCompat.getColor(
+                    AssetControlApp.getContext().resources, R.color.text_dark, null
+                )
 
                 val backColor: Drawable
                 val foreColor: Int
@@ -1325,12 +1285,13 @@ class WarehouseMovementContentAdapter :
 
                 val darkerColor = when {
                     isSelected -> true
-                    foreColor == Statics.textLightColor() -> true
+                    foreColor == textLightColor() -> true
                     else -> false
                 }
 
-                val titleForeColor: Int =
-                    manipulateColor(foreColor, if (darkerColor) 0.8f else 1.4f)
+                val titleForeColor: Int = manipulateColor(
+                    foreColor, if (darkerColor) 0.8f else 1.4f
+                )
 
                 v.background = backColor
                 holder.descriptionTextView?.setTextColor(foreColor)
@@ -1349,8 +1310,9 @@ class WarehouseMovementContentAdapter :
                 if (isSelected(position)) {
                     v.background.colorFilter =
                         BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-                            getColorWithAlpha(colorId = R.color.lightslategray, alpha = 240),
-                            BlendModeCompat.MODULATE
+                            getColorWithAlpha(
+                                colorId = R.color.lightslategray, alpha = 240
+                            ), BlendModeCompat.MODULATE
                         )
                 } else {
                     v.background.colorFilter = null
@@ -1479,10 +1441,13 @@ class WarehouseMovementContentAdapter :
     }
 
     fun isFilterable(filterableAsset: WarehouseMovementContent, filterString: String): Boolean =
-        (filterableAsset.code.contains(filterString, true) ||
-                filterableAsset.description.contains(filterString, true) ||
-                filterableAsset.serialNumber.contains(filterString, true) ||
-                filterableAsset.ean.contains(filterString, true))
+        (filterableAsset.code.contains(filterString, true) || filterableAsset.description.contains(
+            filterString,
+            true
+        ) || filterableAsset.serialNumber.contains(
+            filterString,
+            true
+        ) || filterableAsset.ean.contains(filterString, true))
 
     companion object {
         class WarehouseMovementContentComparator(private val priorityText: String) :
@@ -1513,51 +1478,73 @@ class WarehouseMovementContentAdapter :
                 val fourthValue2: String = o2.serialNumber
 
                 if (priorityText.isNotEmpty()) {
-                    firstField =
-                        if (fieldValue2.startsWith(priorityText, ignoreCase = true) &&
-                            !fieldValue1.startsWith(priorityText, true)
-                        ) (return 1)
-                        else if (fieldValue1.startsWith(priorityText, true) &&
-                            !fieldValue2.startsWith(priorityText, true)
-                        ) (return -1)
-                        else if (fieldValue1.startsWith(priorityText, true) &&
-                            fieldValue2.startsWith(priorityText, true)
-                        ) (return fieldValue1.compareTo(fieldValue2))
-                        else (fieldValue1.compareTo(fieldValue2))
+                    firstField = if (fieldValue2.startsWith(
+                            priorityText,
+                            ignoreCase = true
+                        ) && !fieldValue1.startsWith(priorityText, true)
+                    ) (return 1)
+                    else if (fieldValue1.startsWith(priorityText, true) && !fieldValue2.startsWith(
+                            priorityText,
+                            true
+                        )
+                    ) (return -1)
+                    else if (fieldValue1.startsWith(priorityText, true) && fieldValue2.startsWith(
+                            priorityText,
+                            true
+                        )
+                    ) (return fieldValue1.compareTo(fieldValue2))
+                    else (fieldValue1.compareTo(fieldValue2))
 
-                    secondField =
-                        if (secondValue2.startsWith(priorityText, ignoreCase = true) &&
-                            !secondValue1.startsWith(priorityText, true)
-                        ) (return 1)
-                        else if (secondValue1.startsWith(priorityText, true) &&
-                            !secondValue2.startsWith(priorityText, true)
-                        ) (return -1)
-                        else if (secondValue1.startsWith(priorityText, true) &&
-                            secondValue2.startsWith(priorityText, true)
-                        ) (return secondValue1.compareTo(secondValue2))
-                        else (secondValue1.compareTo(secondValue2))
+                    secondField = if (secondValue2.startsWith(
+                            priorityText,
+                            ignoreCase = true
+                        ) && !secondValue1.startsWith(priorityText, true)
+                    ) (return 1)
+                    else if (secondValue1.startsWith(
+                            priorityText,
+                            true
+                        ) && !secondValue2.startsWith(priorityText, true)
+                    ) (return -1)
+                    else if (secondValue1.startsWith(priorityText, true) && secondValue2.startsWith(
+                            priorityText,
+                            true
+                        )
+                    ) (return secondValue1.compareTo(secondValue2))
+                    else (secondValue1.compareTo(secondValue2))
 
                     thirdField =
-                        if (thirdValue2.startsWith(priorityText, true) &&
-                            !thirdValue1.startsWith(priorityText, true)
+                        if (thirdValue2.startsWith(priorityText, true) && !thirdValue1.startsWith(
+                                priorityText,
+                                true
+                            )
                         ) (return 1)
-                        else if (thirdValue1.startsWith(priorityText, true) &&
-                            !thirdValue2.startsWith(priorityText, true)
+                        else if (thirdValue1.startsWith(
+                                priorityText,
+                                true
+                            ) && !thirdValue2.startsWith(priorityText, true)
                         ) (return -1)
-                        else if (thirdValue1.startsWith(priorityText, true) &&
-                            thirdValue2.startsWith(priorityText, true)
+                        else if (thirdValue1.startsWith(
+                                priorityText,
+                                true
+                            ) && thirdValue2.startsWith(priorityText, true)
                         ) (return thirdValue1.compareTo(thirdValue2))
                         else thirdValue1.compareTo(thirdValue2)
 
                     fourthField =
-                        if (fourthValue2.startsWith(priorityText, true) &&
-                            !fourthValue1.startsWith(priorityText, true)
+                        if (fourthValue2.startsWith(priorityText, true) && !fourthValue1.startsWith(
+                                priorityText,
+                                true
+                            )
                         ) (return 1)
-                        else if (fourthValue1.startsWith(priorityText, true) &&
-                            !fourthValue2.startsWith(priorityText, true)
+                        else if (fourthValue1.startsWith(
+                                priorityText,
+                                true
+                            ) && !fourthValue2.startsWith(priorityText, true)
                         ) (return -1)
-                        else if (fourthValue1.startsWith(priorityText, true) &&
-                            fourthValue2.startsWith(priorityText, true)
+                        else if (fourthValue1.startsWith(
+                                priorityText,
+                                true
+                            ) && fourthValue2.startsWith(priorityText, true)
                         ) (return fourthValue1.compareTo(fourthValue2))
                         else fourthValue1.compareTo(fourthValue2)
                 } else {
@@ -1583,21 +1570,17 @@ class WarehouseMovementContentAdapter :
 
         fun sortItems(originalList: ArrayList<WarehouseMovementContent>): ArrayList<WarehouseMovementContent> {
             // Get all of the parent groups
-            val groups = originalList
-                .sortedWith(
-                    compareBy(
-                        { it.parentId },
-                        { it.code },
-                        { it.description },
-                        { it.serialNumber },
-                        { it.ean })
-                )
-                .groupBy { it.parentId }
+            val groups = originalList.sortedWith(
+                compareBy({ it.parentId },
+                    { it.code },
+                    { it.description },
+                    { it.serialNumber },
+                    { it.ean })
+            ).groupBy { it.parentId }
 
             // Recursively get the children
             fun follow(wmc: WarehouseMovementContent): List<WarehouseMovementContent> {
-                return listOf(wmc) + (groups[wmc.assetId]
-                    ?: emptyList()).flatMap(::follow)
+                return listOf(wmc) + (groups[wmc.assetId] ?: emptyList()).flatMap(::follow)
             }
 
             // Run the follow method on each of the roots
