@@ -1,6 +1,6 @@
-package com.dacosys.assetControl.webservice.datacollection
+package com.dacosys.assetControl.webservice.dataCollection
 
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.webservice.common.Webservice.Companion.getWebservice
 import com.dacosys.assetControl.webservice.common.WsParam
 import org.ksoap2.serialization.SoapObject
 import java.util.*
@@ -11,7 +11,7 @@ constructor() {
     @Throws(Exception::class)
     fun dataCollectionGetAll(
     ): Array<DataCollectionObject>? {
-        val any = Statics.getWebservice().s(
+        val any = getWebservice().s(
             "DataCollection_GetAll"
         )
         if (any != null) {
@@ -34,10 +34,9 @@ constructor() {
         qty: Int,
         date: String,
     ): Array<DataCollectionObject>? {
-        val any = Statics.getWebservice().s(
+        val any = getWebservice().s(
             "DataCollection_GetAll_Limit",
             arrayOf(
-
                 WsParam("pos", pos),
                 WsParam("qty", qty),
                 WsParam("date", date)
@@ -61,10 +60,9 @@ constructor() {
     fun dataCollectionGet(
         dataCollectionId: Long,
     ): DataCollectionObject {
-        val soapObject = Statics.getWebservice().s(
+        val soapObject = getWebservice().s(
             "DataCollection_Get",
             arrayOf(
-
                 WsParam("data_collection_id", dataCollectionId)
             )
         ) as SoapObject
@@ -77,7 +75,7 @@ constructor() {
         dataCollection: DataCollectionObject,
         dataCollectionContent: ArrayList<DataCollectionContentObject>,
     ): Long {
-        val arSoapObject = SoapObject(Statics.getWebservice().namespace, "data_collection")
+        val arSoapObject = SoapObject(getWebservice().namespace, "data_collection")
         arSoapObject.addProperty("data_collection_id", dataCollection.dataCollectionId)
         arSoapObject.addProperty("asset_id", dataCollection.assetId)
         arSoapObject.addProperty("warehouse_id", dataCollection.warehouseId)
@@ -99,7 +97,7 @@ constructor() {
         var arcArrayObject: ArrayList<SoapObject> = addNullContent()
         if (dataCollectionContent.size > 0) {
             dataCollectionContent.forEach { t ->
-                val arcSoapObject = SoapObject(Statics.getWebservice().namespace, "content")
+                val arcSoapObject = SoapObject(getWebservice().namespace, "content")
 
                 arcSoapObject.addProperty("data_collection_id", t.dataCollectionId)
                 arcSoapObject.addProperty("level", t.level)
@@ -126,7 +124,7 @@ constructor() {
             arcArrayObject = addNullContent()
         }
 
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             "DataCollection_Modify",
             arrayOf(WsParam("user_id", userId)),
             arSoapObject,
@@ -140,7 +138,7 @@ constructor() {
         dataCollection: DataCollectionObject,
         dataCollectionContent: ArrayList<DataCollectionContentObject>,
     ): Long {
-        val arSoapObject = SoapObject(Statics.getWebservice().namespace, "data_collection")
+        val arSoapObject = SoapObject(getWebservice().namespace, "data_collection")
         arSoapObject.addProperty("data_collection_id", dataCollection.dataCollectionId)
         arSoapObject.addProperty("asset_id", dataCollection.assetId)
         arSoapObject.addProperty("warehouse_id", dataCollection.warehouseId)
@@ -162,7 +160,7 @@ constructor() {
         var arcArrayObject: ArrayList<SoapObject> = addNullContent()
         if (dataCollectionContent.size > 0) {
             dataCollectionContent.forEach { t ->
-                val arcSoapObject = SoapObject(Statics.getWebservice().namespace, "content")
+                val arcSoapObject = SoapObject(getWebservice().namespace, "content")
 
                 arcSoapObject.addProperty("data_collection_id", t.dataCollectionId)
                 arcSoapObject.addProperty("level", t.level)
@@ -189,7 +187,7 @@ constructor() {
             arcArrayObject = addNullContent()
         }
 
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             "DataCollection_Add",
             arSoapObject,
             arcArrayObject.toTypedArray()
@@ -200,7 +198,7 @@ constructor() {
 
     private fun addNullContent(): ArrayList<SoapObject> {
         val arcArrayObject: ArrayList<SoapObject> = ArrayList()
-        val arcSoapObject = SoapObject(Statics.getWebservice().namespace, "content")
+        val arcSoapObject = SoapObject(getWebservice().namespace, "content")
 
         arcSoapObject.addProperty("data_collection_id", null)
         arcSoapObject.addProperty("level", null)
@@ -222,7 +220,7 @@ constructor() {
 
     @Throws(Exception::class)
     fun dataCollectionCount(date: String): Int? {
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             methodName = "DataCollection_Count",
             params = arrayOf(WsParam("date", date))
         )

@@ -12,12 +12,12 @@ import com.dacosys.assetControl.dataBase.datacollection.DataCollectionRuleContra
 import com.dacosys.assetControl.dataBase.datacollection.DataCollectionRuleContract.DataCollectionRuleEntry.Companion.DESCRIPTION
 import com.dacosys.assetControl.dataBase.datacollection.DataCollectionRuleContract.DataCollectionRuleEntry.Companion.TABLE_NAME
 import com.dacosys.assetControl.dataBase.datacollection.DataCollectionRuleContract.getAllColumns
-import com.dacosys.assetControl.model.datacollection.DataCollectionRule
+import com.dacosys.assetControl.model.dataCollection.DataCollectionRule
 import com.dacosys.assetControl.network.sync.SyncProgress
 import com.dacosys.assetControl.network.sync.SyncRegistryType
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.webservice.datacollection.DataCollectionRuleObject
+import com.dacosys.assetControl.webservice.dataCollection.DataCollectionRuleObject
 
 /**
  * Created by Agustin on 28/12/2016.

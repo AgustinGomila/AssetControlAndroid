@@ -1,4 +1,4 @@
-package com.dacosys.assetControl.model.datacollection
+package com.dacosys.assetControl.model.dataCollection
 
 import android.content.ContentValues
 import android.os.Parcelable

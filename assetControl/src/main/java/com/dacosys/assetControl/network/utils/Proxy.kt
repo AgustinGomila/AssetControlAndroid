@@ -1,0 +1,149 @@
+package com.dacosys.assetControl.network.utils
+
+import android.app.Activity
+import android.graphics.Typeface
+import android.text.InputType
+import android.text.method.PasswordTransformationMethod
+import android.view.WindowManager
+import android.widget.EditText
+import android.widget.LinearLayout
+import androidx.appcompat.app.AlertDialog
+import com.dacosys.assetControl.AssetControlApp
+import com.dacosys.assetControl.R
+import com.dacosys.assetControl.utils.Preferences
+import com.dacosys.assetControl.utils.settings.Preference
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
+import java.lang.ref.WeakReference
+
+class Proxy {
+    companion object {
+
+        private var avoidSetupProxyDialog = false
+
+        interface TaskSetupProxyEnded {
+            fun onTaskSetupProxyEnded(
+                status: ProgressStatus,
+                email: String,
+                password: String,
+                installationCode: String,
+            )
+        }
+
+        fun setupProxy(
+            callback: TaskSetupProxyEnded,
+            weakAct: WeakReference<Activity>,
+            email: String,
+            password: String,
+            installationCode: String = "",
+        ) {
+            val activity = weakAct.get() ?: return
+            if (activity.isFinishing) return
+
+            if (avoidSetupProxyDialog) {
+                return
+            }
+
+            avoidSetupProxyDialog = true
+
+            val alert: AlertDialog.Builder = AlertDialog.Builder(activity)
+            alert.setTitle(
+                AssetControlApp.getContext().getString(R.string.configure_proxy_question)
+            )
+
+            val proxyEditText = EditText(activity)
+            proxyEditText.hint = AssetControlApp.getContext().getString(R.string.proxy)
+            proxyEditText.isFocusable = true
+            proxyEditText.isFocusableInTouchMode = true
+
+            val proxyPortEditText = EditText(activity)
+            proxyPortEditText.inputType = InputType.TYPE_CLASS_NUMBER
+            proxyPortEditText.hint = AssetControlApp.getContext().getString(R.string.port)
+            proxyPortEditText.isFocusable = true
+            proxyPortEditText.isFocusableInTouchMode = true
+
+            val proxyUserEditText = EditText(activity)
+            proxyUserEditText.inputType = InputType.TYPE_CLASS_TEXT
+            proxyUserEditText.hint = AssetControlApp.getContext().getString(R.string.user)
+            proxyUserEditText.isFocusable = true
+            proxyUserEditText.isFocusableInTouchMode = true
+
+            val proxyPassEditText = TextInputEditText(activity)
+            proxyPassEditText.inputType =
+                InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+            proxyPassEditText.hint = AssetControlApp.getContext().getString(R.string.password)
+            proxyPassEditText.isFocusable = true
+            proxyPassEditText.isFocusableInTouchMode = true
+            proxyPassEditText.typeface = Typeface.DEFAULT
+            proxyPassEditText.transformationMethod = PasswordTransformationMethod()
+
+            val inputLayout = TextInputLayout(AssetControlApp.getContext())
+            inputLayout.endIconMode = TextInputLayout.END_ICON_PASSWORD_TOGGLE
+            inputLayout.addView(proxyPassEditText)
+
+            val layout = LinearLayout(AssetControlApp.getContext())
+            layout.orientation = LinearLayout.VERTICAL
+
+            layout.addView(proxyEditText)
+            layout.addView(proxyPortEditText)
+            layout.addView(proxyUserEditText)
+            layout.addView(inputLayout)
+
+            alert.setView(layout)
+            alert.setNegativeButton(R.string.no) { _, _ ->
+                if (Preferences.prefs == null) {
+                    return@setNegativeButton
+                }
+                val p = (Preferences.prefs ?: return@setNegativeButton).edit()
+                p.putBoolean(Preference.acWsUseProxy.key, false)
+                p.apply()
+            }
+            alert.setPositiveButton(R.string.yes) { _, _ ->
+                if (Preferences.prefs == null) {
+                    return@setPositiveButton
+                }
+                val proxy = proxyEditText.text
+                val port = proxyPortEditText.text
+                val user = proxyUserEditText.text
+                val pass = proxyPassEditText.text
+
+                val p = (Preferences.prefs ?: return@setPositiveButton).edit()
+                if (proxy != null) {
+                    p.putBoolean(Preference.acWsUseProxy.key, true)
+                    p.putString(Preference.acWsProxy.key, proxy.toString())
+                }
+
+                if (port != null) {
+                    p.putInt(Preference.acWsProxyPort.key, Integer.parseInt(port.toString()))
+                }
+
+                if (user.isNotEmpty()) {
+                    p.putString(Preference.acWsProxyUser.key, user.toString())
+                }
+
+                if (pass != null && pass.isNotEmpty()) {
+                    p.putString(Preference.acWsProxyPass.key, pass.toString())
+                }
+
+                p.apply()
+            }
+            alert.setOnDismissListener {
+                callback.onTaskSetupProxyEnded(
+                    status = ProgressStatus.finished,
+                    email = email,
+                    password = password,
+                    installationCode = installationCode
+                )
+                avoidSetupProxyDialog = false
+            }
+
+            val dialog = alert.create()
+            dialog.window?.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
+            dialog.window?.clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
+            dialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
+
+            dialog.show()
+            proxyEditText.requestFocus()
+        }
+    }
+}

@@ -57,11 +57,7 @@ class AssetCollectorObject() : Parcelable {
         original_warehouse_id = asset.originalWarehouseId
         status = asset.assetStatusId
         ownership_status = asset.ownershipStatusId
-        active = if (asset.active) {
-            1
-        } else {
-            0
-        }
+        active = if (asset.active) 1 else 0
         missing_date = if (asset.missingDate == null) {
             ""
         } else {

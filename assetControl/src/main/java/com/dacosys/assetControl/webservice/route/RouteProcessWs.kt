@@ -1,6 +1,6 @@
 package com.dacosys.assetControl.webservice.route
 
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.webservice.common.Webservice.Companion.getWebservice
 import com.dacosys.assetControl.webservice.common.WsParam
 import org.ksoap2.serialization.SoapObject
 import java.util.*
@@ -11,7 +11,7 @@ constructor() {
     @Throws(Exception::class)
     fun routeProcessGetAll(
     ): Array<RouteProcessObject>? {
-        val any = Statics.getWebservice().s(methodName = "RouteProcess_GetAll")
+        val any = getWebservice().s(methodName = "RouteProcess_GetAll")
         if (any != null) {
             val soVector = any as Vector<*>
             val dObjAl: ArrayList<RouteProcessObject> = ArrayList()
@@ -32,7 +32,7 @@ constructor() {
         qty: Int,
         date: String,
     ): Array<RouteProcessObject>? {
-        val any = Statics.getWebservice().s(
+        val any = getWebservice().s(
             methodName = "RouteProcess_GetAll_Limit",
             params = arrayOf(
                 WsParam("pos", pos),
@@ -58,7 +58,7 @@ constructor() {
     fun routeProcessGet(
         routeProcessId: Long,
     ): RouteProcessObject {
-        val soapObject = Statics.getWebservice().s(
+        val soapObject = getWebservice().s(
             methodName = "RouteProcess_Get",
             params = arrayOf(WsParam("route_process_id", routeProcessId))
         ) as SoapObject
@@ -69,7 +69,7 @@ constructor() {
     fun routeProcessDelete(
         routeProcessId: Long,
     ): Boolean {
-        return Statics.getWebservice().s(
+        return getWebservice().s(
             methodName = "RouteProcess_Delete",
             params = arrayOf(WsParam("route_process_id", routeProcessId))
         ) as Boolean
@@ -81,7 +81,7 @@ constructor() {
         routeProcess: RouteProcessObject,
         routeProcessContent: ArrayList<RouteProcessContentObject>,
     ): Long {
-        val arSoapObject = SoapObject(Statics.getWebservice().namespace, "route_process")
+        val arSoapObject = SoapObject(getWebservice().namespace, "route_process")
         arSoapObject.addProperty("user_id", routeProcess.userId)
         arSoapObject.addProperty("route_id", routeProcess.routeId)
         arSoapObject.addProperty("route_process_date", routeProcess.routeProcessDate)
@@ -94,7 +94,7 @@ constructor() {
         var arcArrayObject: ArrayList<SoapObject> = addNullContent()
         if (routeProcessContent.size > 0) {
             routeProcessContent.forEach { t ->
-                val arcSoapObject = SoapObject(Statics.getWebservice().namespace, "content")
+                val arcSoapObject = SoapObject(getWebservice().namespace, "content")
 
                 arcSoapObject.addProperty("route_process_id", t.routeProcessId)
                 arcSoapObject.addProperty("data_collection_rule_id", t.dataCollectionRuleId)
@@ -110,7 +110,7 @@ constructor() {
             arcArrayObject = addNullContent()
         }
 
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             methodName = "RouteProcess_Modify",
             params = arrayOf(WsParam("user_id", userId)),
             soapObjParams1 = arSoapObject,
@@ -124,7 +124,7 @@ constructor() {
         routeProcess: RouteProcessObject,
         routeProcessContent: ArrayList<RouteProcessContentObject>,
     ): Long {
-        val arSoapObject = SoapObject(Statics.getWebservice().namespace, "route_process")
+        val arSoapObject = SoapObject(getWebservice().namespace, "route_process")
         arSoapObject.addProperty("user_id", routeProcess.userId)
         arSoapObject.addProperty("route_id", routeProcess.routeId)
         arSoapObject.addProperty("route_process_date", routeProcess.routeProcessDate)
@@ -137,7 +137,7 @@ constructor() {
         var arcArrayObject: ArrayList<SoapObject> = addNullContent()
         if (routeProcessContent.size > 0) {
             routeProcessContent.forEach { t ->
-                val arcSoapObject = SoapObject(Statics.getWebservice().namespace, "content")
+                val arcSoapObject = SoapObject(getWebservice().namespace, "content")
 
                 arcSoapObject.addProperty("route_process_id", t.routeProcessId)
                 arcSoapObject.addProperty("data_collection_rule_id", t.dataCollectionRuleId)
@@ -153,7 +153,7 @@ constructor() {
             arcArrayObject = addNullContent()
         }
 
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             methodName = "RouteProcess_Add",
             soapObjParams1 = arSoapObject,
             soapObjParams2 = arcArrayObject.toTypedArray()
@@ -163,7 +163,7 @@ constructor() {
 
     private fun addNullContent(): ArrayList<SoapObject> {
         val arcArrayObject: ArrayList<SoapObject> = ArrayList()
-        val arcSoapObject = SoapObject(Statics.getWebservice().namespace, "content")
+        val arcSoapObject = SoapObject(getWebservice().namespace, "content")
 
         arcSoapObject.addProperty("route_process_id", null)
         arcSoapObject.addProperty("data_collection_rule_id", -999)
@@ -180,7 +180,7 @@ constructor() {
 
     @Throws(Exception::class)
     fun routeProcessCount(date: String): Int? {
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             methodName = "RouteProcess_Count",
             params = arrayOf(WsParam("date", date))
         )

@@ -4,6 +4,7 @@ import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarEventData
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
+import com.dacosys.assetControl.utils.ImageControl.Companion.setupImageControl
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.imageControl.moshi.UserAuthResult
@@ -65,7 +66,7 @@ class ImageControlCheckUser(private var onSnackBarEvent: (SnackBarEventData) -> 
 
     private suspend fun suspendFunction(): UserAuthResult? = withContext(Dispatchers.IO) {
         return@withContext try {
-            Statics.setupImageControl()
+            setupImageControl()
             com.dacosys.imageControl.ImageControl.webservice.imageControlUserCheck()
         } catch (ex: Exception) {
             ex.printStackTrace()

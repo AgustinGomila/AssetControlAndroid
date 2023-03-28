@@ -1,6 +1,6 @@
-package com.dacosys.assetControl.webservice.datacollection
+package com.dacosys.assetControl.webservice.dataCollection
 
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.webservice.common.Webservice.Companion.getWebservice
 import com.dacosys.assetControl.webservice.common.WsParam
 import org.ksoap2.serialization.SoapObject
 import java.util.*
@@ -12,10 +12,9 @@ constructor() {
     fun dataCollectionContentGet(
         dataCollectionId: Long,
     ): Array<DataCollectionContentObject>? {
-        val any = Statics.getWebservice().s(
+        val any = getWebservice().s(
             "DataCollectionContent_Get",
             arrayOf(
-
                 WsParam("data_collection_id", dataCollectionId)
             )
         )
@@ -39,10 +38,9 @@ constructor() {
         qty: Int,
         date: String,
     ): Array<DataCollectionContentObject>? {
-        val any = Statics.getWebservice().s(
+        val any = getWebservice().s(
             "DataCollectionContent_GetAll_Limit",
             arrayOf(
-
                 WsParam("pos", pos),
                 WsParam("qty", qty),
                 WsParam("date", date)
@@ -66,10 +64,9 @@ constructor() {
     fun dataCollectionContentDelete(
         dataCollectionId: Long,
     ): Boolean {
-        return Statics.getWebservice().s(
+        return getWebservice().s(
             "DataCollectionContent_Delete_All",
             arrayOf(
-
                 WsParam("data_collection_id", dataCollectionId)
             )
         ) as Boolean
@@ -77,7 +74,7 @@ constructor() {
 
     @Throws(Exception::class)
     fun dataCollectionContentCount(date: String): Int? {
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             methodName = "DataCollectionContent_Count",
             params = arrayOf(WsParam("date", date))
         )

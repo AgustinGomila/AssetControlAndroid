@@ -1,6 +1,6 @@
 package com.dacosys.assetControl.webservice.asset
 
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.webservice.common.Webservice.Companion.getWebservice
 import com.dacosys.assetControl.webservice.common.WsParam
 import org.ksoap2.serialization.SoapObject
 import java.util.*
@@ -11,7 +11,7 @@ constructor() {
     @Throws(Exception::class)
     fun assetCollectorGetAll(
     ): Array<AssetCollectorObject> {
-        val any = Statics.getWebservice().s("Asset_Collector_GetAll")
+        val any = getWebservice().s("Asset_Collector_GetAll")
         val dObjAl: ArrayList<AssetCollectorObject> = ArrayList()
         if (any != null) {
             val soVector = any as Vector<*>
@@ -29,7 +29,7 @@ constructor() {
         qty: Int,
         date: String,
     ): Array<AssetCollectorObject> {
-        val any = Statics.getWebservice().s(
+        val any = getWebservice().s(
             "Asset_Collector_GetAll_Limit",
             arrayOf(
                 WsParam("pos", pos),
@@ -54,7 +54,7 @@ constructor() {
         qty: Int,
         date: String,
     ): Array<AssetObject> {
-        val any = Statics.getWebservice().s(
+        val any = getWebservice().s(
             "Asset_GetAll_Limit",
             arrayOf(
                 WsParam("pos", pos),
@@ -78,7 +78,7 @@ constructor() {
         userId: Long,
         asset: AssetCollectorObject,
     ): Long {
-        val assetSoapObject = SoapObject(Statics.getWebservice().namespace, "asset")
+        val assetSoapObject = SoapObject(getWebservice().namespace, "asset")
         assetSoapObject.addProperty("asset_id", asset.asset_id)
         assetSoapObject.addProperty("parent_id", asset.parent_id)
         assetSoapObject.addProperty("code", asset.code)
@@ -98,7 +98,7 @@ constructor() {
         assetSoapObject.addProperty("condition", asset.condition)
         assetSoapObject.addProperty("last_asset_review_date", asset.last_asset_review_date)
 
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             "Asset_Collector_Modify",
             arrayOf(WsParam("user_id", userId)),
             assetSoapObject
@@ -111,7 +111,7 @@ constructor() {
         userId: Long,
         asset: AssetObject,
     ): Long {
-        val assetSoapObject = SoapObject(Statics.getWebservice().namespace, "asset")
+        val assetSoapObject = SoapObject(getWebservice().namespace, "asset")
 
         /*
         val assetIdPi = PropertyInfo()
@@ -456,7 +456,7 @@ constructor() {
         assetSoapObject.addProperty("asset_ext_id", asset.asset_ext_id)
         assetSoapObject.addProperty("last_asset_review_date", asset.last_asset_review_date)
 
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             "Asset_Add",
             arrayOf(WsParam("user_id", userId)),
             assetSoapObject
@@ -469,7 +469,7 @@ constructor() {
         userId: Long,
         asset: AssetCollectorObject,
     ): Long {
-        val assetSoapObject = SoapObject(Statics.getWebservice().namespace, "asset")
+        val assetSoapObject = SoapObject(getWebservice().namespace, "asset")
         assetSoapObject.addProperty("asset_id", asset.asset_id)
         assetSoapObject.addProperty("parent_id", asset.parent_id)
         assetSoapObject.addProperty("code", asset.code)
@@ -489,7 +489,7 @@ constructor() {
         assetSoapObject.addProperty("condition", asset.condition)
         assetSoapObject.addProperty("last_asset_review_date", asset.last_asset_review_date)
 
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             "Asset_Collector_Add",
             arrayOf(WsParam("user_id", userId)),
             assetSoapObject
@@ -499,7 +499,7 @@ constructor() {
 
     @Throws(Exception::class)
     fun assetCount(date: String): Int? {
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             methodName = "Asset_Count",
             params = arrayOf(WsParam("date", date))
         )

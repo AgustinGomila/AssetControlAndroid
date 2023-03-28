@@ -1,6 +1,6 @@
 package com.dacosys.assetControl.webservice.manteinance
 
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.webservice.common.Webservice.Companion.getMantWebservice
 import com.dacosys.assetControl.webservice.common.WsParam
 import org.ksoap2.serialization.SoapObject
 import java.util.*
@@ -11,7 +11,7 @@ constructor() {
     @Throws(Exception::class)
     fun assetManteinanceGetAll(
     ): Array<AssetManteinanceObject>? {
-        val any = Statics.getMantWebservice().s("Asset_Manteinance_GetAll")
+        val any = getMantWebservice().s("Asset_Manteinance_GetAll")
         if (any != null) {
             val soVector = any as Vector<*>
             val dObjAl: ArrayList<AssetManteinanceObject> = ArrayList()
@@ -32,10 +32,9 @@ constructor() {
         qty: Int,
         date: String,
     ): Array<AssetManteinanceObject>? {
-        val any = Statics.getMantWebservice().s(
+        val any = getMantWebservice().s(
             "Asset_Manteinance_GetAll_Limit_Collector",
             arrayOf(
-
                 WsParam("pos", pos),
                 WsParam("qty", qty),
                 WsParam("date", date)
@@ -102,7 +101,7 @@ constructor() {
         <xsd:element name="repairman_id" type="xsd:int"/>
         */
 
-        val icSoapObject = SoapObject(Statics.getMantWebservice().namespace, "asset_manteinance")
+        val icSoapObject = SoapObject(getMantWebservice().namespace, "asset_manteinance")
         icSoapObject.addProperty("asset_manteinance_id", assetManteinance.asset_manteinance_id)
         icSoapObject.addProperty("manteinance_status_id", assetManteinance.manteinance_status_id)
         //icSoapObject.addProperty("manteinance_start_date", assetManteinance.manteinance_start_date)
@@ -124,7 +123,7 @@ constructor() {
         icSoapObject.addProperty("manteinance_type_id", assetManteinance.manteinance_type_id)
 
         val logSoapObject =
-            SoapObject(Statics.getMantWebservice().namespace, "asset_manteinance_log")
+            SoapObject(getMantWebservice().namespace, "asset_manteinance_log")
         logSoapObject.addProperty("asset_manteinance_id", assetManteinanceLog.asset_manteinance_id)
         logSoapObject.addProperty(
             "manteinance_status_id",
@@ -139,7 +138,7 @@ constructor() {
         soapObjectAl.add(icSoapObject)
         soapObjectAl.add(logSoapObject)
 
-        val result = Statics.getMantWebservice().s(
+        val result = getMantWebservice().s(
             "Asset_Manteinance_Modify_Collector",
             arrayOf(WsParam("user_id", userId)),
             soapObjectAl.toTypedArray()
@@ -159,7 +158,7 @@ constructor() {
         asset_manteinance_log: tns:AssetManteinanceLogObject
         */
 
-        val icSoapObject = SoapObject(Statics.getMantWebservice().namespace, "asset_manteinance")
+        val icSoapObject = SoapObject(getMantWebservice().namespace, "asset_manteinance")
         icSoapObject.addProperty("asset_manteinance_id", assetManteinance.asset_manteinance_id)
         icSoapObject.addProperty("manteinance_status_id", assetManteinance.manteinance_status_id)
         //icSoapObject.addProperty("manteinance_start_date", assetManteinance.manteinance_start_date)
@@ -181,7 +180,7 @@ constructor() {
         icSoapObject.addProperty("manteinance_type_id", assetManteinance.manteinance_type_id)
 
         val logSoapObject =
-            SoapObject(Statics.getMantWebservice().namespace, "asset_manteinance_log")
+            SoapObject(getMantWebservice().namespace, "asset_manteinance_log")
         logSoapObject.addProperty("asset_manteinance_id", assetManteinanceLog.asset_manteinance_id)
         logSoapObject.addProperty(
             "manteinance_status_id",
@@ -196,7 +195,7 @@ constructor() {
         soapObjectAl.add(icSoapObject)
         soapObjectAl.add(logSoapObject)
 
-        val result = Statics.getMantWebservice().s(
+        val result = getMantWebservice().s(
             "Asset_Manteinance_Add_Collector",
             arrayOf(WsParam("user_id", userId)),
             soapObjectAl.toTypedArray()
@@ -208,7 +207,7 @@ constructor() {
     fun assetManteinanceCount(
         date: String,
     ): Int {
-        val result = Statics.getMantWebservice().s(
+        val result = getMantWebservice().s(
             "Asset_Manteinance_Count_Collector",
             arrayOf(WsParam("date", date))
         ) ?: return 0

@@ -35,7 +35,7 @@ import com.dacosys.assetControl.model.asset.UnitType
 import com.dacosys.assetControl.model.attribute.AttributeComposition
 import com.dacosys.assetControl.model.attribute.AttributeCompositionType
 import com.dacosys.assetControl.model.category.ItemCategory
-import com.dacosys.assetControl.model.datacollection.*
+import com.dacosys.assetControl.model.dataCollection.*
 import com.dacosys.assetControl.model.location.WarehouseArea
 import com.dacosys.assetControl.model.route.RouteProcess
 import com.dacosys.assetControl.model.route.RouteProcessContent
@@ -501,7 +501,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         }
     }
 
-    private fun createFragmentCollection(fdArray: ArrayList<GeneralFragment.FragmentData>) {
+    private fun createFragmentCollection(fdArray: ArrayList<FragmentData>) {
         // Limpiar toda la colección de controles
         allFrags.clear()
 
@@ -1603,7 +1603,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private fun saveFragStatus() {
         currentFragment?.saveLastValue()
-        val allFragData: ArrayList<GeneralFragment.FragmentData> =
+        val allFragData: ArrayList<FragmentData> =
             allFrags.mapTo(ArrayList()) { it.getFragmentData() }
         FragmentDataDbHelper().tempTableInsert(allFragData.toTypedArray())
     }

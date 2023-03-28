@@ -5,6 +5,25 @@ import android.util.Log
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.dataBase.DataBaseHelper
+import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.DATABASE_NAME
+import com.dacosys.assetControl.dataBase.asset.AssetDbHelper
+import com.dacosys.assetControl.dataBase.category.ItemCategoryDbHelper
+import com.dacosys.assetControl.dataBase.datacollection.DataCollectionDbHelper
+import com.dacosys.assetControl.dataBase.location.WarehouseAreaDbHelper
+import com.dacosys.assetControl.dataBase.location.WarehouseDbHelper
+import com.dacosys.assetControl.dataBase.manteinance.AssetManteinanceDbHelper
+import com.dacosys.assetControl.dataBase.movement.WarehouseMovementDbHelper
+import com.dacosys.assetControl.dataBase.review.AssetReviewDbHelper
+import com.dacosys.assetControl.dataBase.route.RouteProcessDbHelper
+import com.dacosys.assetControl.model.asset.Asset
+import com.dacosys.assetControl.model.category.ItemCategory
+import com.dacosys.assetControl.model.dataCollection.DataCollection
+import com.dacosys.assetControl.model.location.Warehouse
+import com.dacosys.assetControl.model.location.WarehouseArea
+import com.dacosys.assetControl.model.manteinance.AssetManteinance
+import com.dacosys.assetControl.model.movement.WarehouseMovement
+import com.dacosys.assetControl.model.review.AssetReview
+import com.dacosys.assetControl.model.route.RouteProcess
 import com.dacosys.assetControl.network.serverDate.GetMySqlDate
 import com.dacosys.assetControl.network.serverDate.MySqlDateResult
 import com.dacosys.assetControl.network.sync.*
@@ -16,6 +35,7 @@ import com.dacosys.assetControl.utils.Preferences.Companion.resetLastUpdateDates
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.settings.entries.ConfEntry
+import com.dacosys.assetControl.webservice.common.Webservice.Companion.getWebservice
 import kotlinx.coroutines.*
 import java.io.*
 import java.text.SimpleDateFormat
@@ -25,11 +45,66 @@ class DownloadDb(
     private var onDownloadEvent: (DownloadTask) -> Unit = {},
     private var onSnackBarEvent: (SnackBarEventData) -> Unit = {},
 ) {
+    companion object {
+        fun getPendingAssetReview(): ArrayList<AssetReview> {
+            return AssetReviewDbHelper().selectByCompleted()
+        }
+
+        fun getPendingWarehouseMovement(): ArrayList<WarehouseMovement> {
+            return WarehouseMovementDbHelper().selectByNoTransferred()
+        }
+
+        fun getPendingAsset(): ArrayList<Asset> {
+            return AssetDbHelper().selectNoTransferred()
+        }
+
+        fun getPendingWarehouseArea(): ArrayList<WarehouseArea> {
+            return WarehouseAreaDbHelper().selectNoTransfered()
+        }
+
+        fun getPendingWarehouse(): ArrayList<Warehouse> {
+            return WarehouseDbHelper().selectNoTransfered()
+        }
+
+        fun getPendingItemCategory(): ArrayList<ItemCategory> {
+            return ItemCategoryDbHelper().selectNoTransfered()
+        }
+
+        fun getPendingDataCollection(): ArrayList<DataCollection> {
+            return DataCollectionDbHelper().selectByNoTransferred()
+        }
+
+        fun getPendingRouteProcess(): ArrayList<RouteProcess> {
+            return RouteProcessDbHelper().selectByNoTransferred()
+        }
+
+        fun getPendingAssetManteinance(): ArrayList<AssetManteinance> {
+            return AssetManteinanceDbHelper().selectNoTransfered()
+        }
+
+        private fun pendingDelivery(): Boolean {
+            return when {
+                getPendingAssetReview().any() -> true
+                getPendingWarehouseMovement().any() -> true
+                getPendingAsset().any() -> true
+                getPendingWarehouseArea().any() -> true
+                getPendingWarehouse().any() -> true
+                getPendingItemCategory().any() -> true
+                getPendingDataCollection().any() -> true
+                getPendingRouteProcess().any() -> true
+                getPendingAssetManteinance().any() -> true
+                else -> false
+            }
+        }
+    }
+
 
     private var timeFileLocation: File? = null
     private var dbFileLocation: File? = null
     private var oldDateTimeStr: String = ""
     private var currentDateTimeStr: String = ""
+
+    var downloadDbRequired = false
 
     ///////////////////////
     // region Constantes //
@@ -57,7 +132,7 @@ class DownloadDb(
         dbFileLocation = File(getContext().cacheDir.absolutePath + "/" + dbFileName)
 
         // Antes de iniciar el proceso de descarga...
-        if (Statics.downloadDbRequired) {
+        if (downloadDbRequired) {
             resetLastUpdateDates()
             deleteTimeFile()
         }
@@ -99,7 +174,7 @@ class DownloadDb(
             }
         }
 
-        GetMySqlDate(Statics.getWebservice()) { onConnectionResult(it) }.execute()
+        GetMySqlDate(getWebservice()) { onConnectionResult(it) }.execute()
     }
 
     private fun launchDownload() {
@@ -115,7 +190,7 @@ class DownloadDb(
         }
 
         // Si aún no está loggeado y hay datos por enviar, no descargar la base de datos
-        if (Statics.currentUserId == null && Statics.pendingDelivery()) {
+        if (Statics.currentUserId == null && pendingDelivery()) {
             onDownloadEvent.invoke(
                 DownloadTask(
                     msg = getContext().getString(R.string.the_database_will_not_be_downloaded_because_there_is_data_pending_delivery),
@@ -248,39 +323,45 @@ class DownloadDb(
             SyncInitialUser {
                 onSyncUsersProgress(it)
 
-                if (it.progressStatus == ProgressStatus.finished) {
-                    SyncStatics()
-                    onDownloadEvent.invoke(
-                        DownloadTask(
-                            msg = msg,
-                            fileType = null,
-                            downloadStatus = DownloadStatus.FINISHED,
+                when (it.progressStatus) {
+                    ProgressStatus.finished -> {
+                        SyncStatics()
+                        onDownloadEvent.invoke(
+                            DownloadTask(
+                                msg = msg,
+                                fileType = null,
+                                downloadStatus = DownloadStatus.FINISHED,
+                            )
                         )
-                    )
-                } else if (it.progressStatus == ProgressStatus.starting) {
-                    onDownloadEvent.invoke(
-                        DownloadTask(
-                            msg = it.msg, fileType = null, downloadStatus = DownloadStatus.STARTING
+                    }
+                    ProgressStatus.starting -> {
+                        onDownloadEvent.invoke(
+                            DownloadTask(
+                                msg = it.msg,
+                                fileType = null,
+                                downloadStatus = DownloadStatus.STARTING
+                            )
                         )
-                    )
-                } else if (it.progressStatus == ProgressStatus.running) {
-                    var progress = 0
-                    val completedTask: Long = it.completedTask.toLong()
-                    val totalTask: Long = it.totalTask.toLong()
+                    }
+                    ProgressStatus.running -> {
+                        var progress = 0
+                        val completedTask: Long = it.completedTask.toLong()
+                        val totalTask: Long = it.totalTask.toLong()
 
-                    if (completedTask > 0 && totalTask > 0) progress =
-                        (completedTask * 100 / totalTask).toInt()
+                        if (completedTask > 0 && totalTask > 0) progress =
+                            (completedTask * 100 / totalTask).toInt()
 
-                    onDownloadEvent.invoke(
-                        DownloadTask(
-                            msg = it.msg,
-                            fileType = null,
-                            downloadStatus = DownloadStatus.DOWNLOADING,
-                            progress = progress,
-                            bytesCompleted = completedTask,
-                            bytesTotal = totalTask
+                        onDownloadEvent.invoke(
+                            DownloadTask(
+                                msg = it.msg,
+                                fileType = null,
+                                downloadStatus = DownloadStatus.DOWNLOADING,
+                                progress = progress,
+                                bytesCompleted = completedTask,
+                                bytesTotal = totalTask
+                            )
                         )
-                    )
+                    }
                 }
             }
         } else {
@@ -311,7 +392,7 @@ class DownloadDb(
 
     private fun prepareDataBase() {
         saveLastUpdateDates(currentDateTimeStr)
-        Statics.downloadDbRequired = false
+        downloadDbRequired = false
 
         if (copyDataBase()) {
             SyncInitialUser {
@@ -441,7 +522,7 @@ class DownloadDb(
         val myInput = FileInputStream(dbFileLocation)
 
         // Path to the just created empty db
-        val outFileName = getContext().getDatabasePath(Statics.DATABASE_NAME).toString()
+        val outFileName = getContext().getDatabasePath(DATABASE_NAME).toString()
 
         Log.d(
             this::class.java.simpleName,

@@ -29,11 +29,7 @@ class BarcodeLabelCustomObject() : Parcelable {
         } else {
             barcodeLabelCustom.barcodeLabelTargetId!!
         }
-        active = if (barcodeLabelCustom.active) {
-            1
-        } else {
-            0
-        }
+        active = if (barcodeLabelCustom.active) 1 else 0
         template = barcodeLabelCustom.template
     }
 

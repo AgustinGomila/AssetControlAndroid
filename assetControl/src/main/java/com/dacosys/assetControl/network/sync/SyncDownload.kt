@@ -22,8 +22,8 @@ import com.dacosys.assetControl.dataBase.user.UserDbHelper
 import com.dacosys.assetControl.dataBase.user.UserPermissionDbHelper
 import com.dacosys.assetControl.dataBase.user.UserWarehouseAreaDbHelper
 import com.dacosys.assetControl.model.attribute.AttributeComposition
-import com.dacosys.assetControl.model.datacollection.DataCollectionRuleContent
-import com.dacosys.assetControl.model.datacollection.DataCollectionRuleTarget
+import com.dacosys.assetControl.model.dataCollection.DataCollectionRuleContent
+import com.dacosys.assetControl.model.dataCollection.DataCollectionRuleTarget
 import com.dacosys.assetControl.model.manteinance.ManteinanceType
 import com.dacosys.assetControl.model.manteinance.ManteinanceTypeGroup
 import com.dacosys.assetControl.model.route.RouteComposition
@@ -47,9 +47,10 @@ import com.dacosys.assetControl.webservice.attribute.AttributeObject
 import com.dacosys.assetControl.webservice.attribute.AttributeWs
 import com.dacosys.assetControl.webservice.barcode.BarcodeLabelCustomWs
 import com.dacosys.assetControl.webservice.category.ItemCategoryWs
-import com.dacosys.assetControl.webservice.datacollection.DataCollectionRuleContentWs
-import com.dacosys.assetControl.webservice.datacollection.DataCollectionRuleTargetWs
-import com.dacosys.assetControl.webservice.datacollection.DataCollectionRuleWs
+import com.dacosys.assetControl.webservice.common.Webservice.Companion.getWebservice
+import com.dacosys.assetControl.webservice.dataCollection.DataCollectionRuleContentWs
+import com.dacosys.assetControl.webservice.dataCollection.DataCollectionRuleTargetWs
+import com.dacosys.assetControl.webservice.dataCollection.DataCollectionRuleWs
 import com.dacosys.assetControl.webservice.location.WarehouseAreaWs
 import com.dacosys.assetControl.webservice.location.WarehouseWs
 import com.dacosys.assetControl.webservice.manteinance.ManteinanceTypeGroupWs
@@ -2000,6 +2001,6 @@ class SyncDownload(
     }
 
     init {
-        GetMySqlDate(Statics.getWebservice()) { onConnectionResult(it) }.execute()
+        GetMySqlDate(getWebservice()) { onConnectionResult(it) }.execute()
     }
 }

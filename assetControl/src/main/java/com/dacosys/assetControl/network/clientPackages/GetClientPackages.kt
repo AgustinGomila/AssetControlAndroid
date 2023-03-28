@@ -3,6 +3,7 @@ package com.dacosys.assetControl.network.clientPackages
 import android.util.Log
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
+import com.dacosys.assetControl.network.utils.Connection.Companion.isOnline
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.utils.Statics
 import kotlinx.coroutines.*
@@ -43,7 +44,7 @@ class GetClientPackages(
     }
 
     private suspend fun suspendFunction(): Boolean = withContext(Dispatchers.IO) {
-        if (!Statics.isOnline()) {
+        if (!isOnline()) {
             progressStatus = ProgressStatus.canceled
             msg = getContext().getString(R.string.no_connection)
             return@withContext false

@@ -1,6 +1,6 @@
 package com.dacosys.assetControl.webservice.route
 
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.webservice.common.Webservice.Companion.getWebservice
 import com.dacosys.assetControl.webservice.common.WsParam
 import org.ksoap2.serialization.SoapObject
 import java.util.*
@@ -12,10 +12,9 @@ constructor() {
     fun routeProcessContentGet(
         routeProcessId: Long,
     ): Array<RouteProcessContentObject>? {
-        val any = Statics.getWebservice().s(
+        val any = getWebservice().s(
             "RouteProcessContent_Get",
             arrayOf(
-
                 WsParam("route_process_id", routeProcessId)
             )
         )
@@ -39,10 +38,9 @@ constructor() {
         qty: Int,
         date: String,
     ): Array<RouteProcessContentObject>? {
-        val any = Statics.getWebservice().s(
+        val any = getWebservice().s(
             "RouteProcessContent_GetAll_Limit",
             arrayOf(
-
                 WsParam("pos", pos),
                 WsParam("qty", qty),
                 WsParam("date", date)
@@ -66,10 +64,9 @@ constructor() {
     fun routeProcessContentDelete(
         routeProcessId: Long,
     ): Boolean {
-        return Statics.getWebservice().s(
+        return getWebservice().s(
             "RouteProcessContent_Delete_All",
             arrayOf(
-
                 WsParam("route_process_id", routeProcessId)
             )
         ) as Boolean
@@ -77,7 +74,7 @@ constructor() {
 
     @Throws(Exception::class)
     fun routeProcessContentCount(date: String): Int? {
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             methodName = "RouteProcessContent_Count",
             params = arrayOf(WsParam("date", date))
         )

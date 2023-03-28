@@ -1,6 +1,6 @@
-package com.dacosys.assetControl.webservice.datacollection
+package com.dacosys.assetControl.webservice.dataCollection
 
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.webservice.common.Webservice.Companion.getWebservice
 import com.dacosys.assetControl.webservice.common.WsParam
 import org.ksoap2.serialization.SoapObject
 import java.util.*
@@ -12,10 +12,9 @@ constructor() {
     fun dataCollectionRuleContentGet(
         dataCollectionRuleId: Long,
     ): Array<DataCollectionRuleContentObject>? {
-        val any = Statics.getWebservice().s(
+        val any = getWebservice().s(
             "DataCollectionRuleContent_Get",
             arrayOf(
-
                 WsParam("data_collection_rule_id", dataCollectionRuleId)
             )
         )
@@ -39,7 +38,7 @@ constructor() {
         dataCollectionRuleContent: DataCollectionRuleContentObject,
     ): Long {
         val dcrcSoapObject =
-            SoapObject(Statics.getWebservice().namespace, "data_collection_rule_content")
+            SoapObject(getWebservice().namespace, "data_collection_rule_content")
 
         dcrcSoapObject.addProperty(
             "data_collection_rule_id",
@@ -63,7 +62,7 @@ constructor() {
         dcrcSoapObject.addProperty("mandatory", dataCollectionRuleContent.mandatory)
         dcrcSoapObject.addProperty("active", dataCollectionRuleContent.active)
 
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             "DataCollectionRuleContent_Modify",
             arrayOf(WsParam("user_id", userId)),
             dcrcSoapObject
@@ -76,7 +75,7 @@ constructor() {
         dataCollectionRuleContent: DataCollectionRuleContentObject,
     ): Long {
         val dcrcSoapObject =
-            SoapObject(Statics.getWebservice().namespace, "data_collection_rule_content")
+            SoapObject(getWebservice().namespace, "data_collection_rule_content")
 
         dcrcSoapObject.addProperty(
             "data_collection_rule_id",
@@ -100,7 +99,7 @@ constructor() {
         dcrcSoapObject.addProperty("mandatory", dataCollectionRuleContent.mandatory)
         dcrcSoapObject.addProperty("active", dataCollectionRuleContent.active)
 
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             "DataCollectionRuleContent_Add",
             dcrcSoapObject
         ) ?: return 0

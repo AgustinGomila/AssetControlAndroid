@@ -25,11 +25,7 @@ class WarehouseAreaObject() : Parcelable {
         description = warehouseArea.description
         warehouse_area_id = warehouseArea.warehouseAreaId
         warehouse_id = warehouseArea.warehouseId
-        active = if (warehouseArea.active) {
-            1
-        } else {
-            0
-        }
+        active = if (warehouseArea.active) 1 else 0
     }
 
     fun getBySoapObject(so: SoapObject): WarehouseAreaObject {

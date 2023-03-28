@@ -12,7 +12,7 @@ import com.dacosys.assetControl.dataBase.datacollection.DataCollectionRuleDbHelp
 import com.dacosys.assetControl.databinding.DataCollectionRuleSelectActivityBinding
 import com.dacosys.assetControl.model.asset.Asset
 import com.dacosys.assetControl.model.category.ItemCategory
-import com.dacosys.assetControl.model.datacollection.DataCollectionRule
+import com.dacosys.assetControl.model.dataCollection.DataCollectionRule
 import com.dacosys.assetControl.model.location.WarehouseArea
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType

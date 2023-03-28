@@ -14,8 +14,8 @@ import com.dacosys.assetControl.model.movement.WarehouseMovementContentStatus
 import com.dacosys.assetControl.model.table.Table
 import com.dacosys.assetControl.network.sync.SyncRegistryType
 import com.dacosys.assetControl.network.sync.SyncUpload
+import com.dacosys.assetControl.network.utils.Connection.Companion.autoSend
 import com.dacosys.assetControl.network.utils.ProgressStatus
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.imageControl.room.database.IcDatabase
 import kotlinx.coroutines.*
@@ -57,7 +57,7 @@ class SaveMovement {
             result = deferred?.await() ?: false
         }
 
-        if (result && Statics.autoSend()) {
+        if (result && autoSend()) {
             // Por el momento no se están escuchando los eventos de sincroinización
             SyncUpload(SyncRegistryType.WarehouseMovement)
         }

@@ -19,13 +19,33 @@ import java.util.*
 import java.util.regex.Pattern
 
 
-class Webservice @Throws(Exception::class)
-constructor(private var webServiceType: WebServiceType?) {
+class Webservice @Throws(Exception::class) constructor(private var webServiceType: WebServiceType?) {
+    companion object {
+        private var wsInitialized = false
+        lateinit var ws: Webservice
+
+        fun getWebservice(): Webservice {
+            if (!wsInitialized) {
+                ws = Webservice(WebServiceType.AssetControl)
+                wsInitialized = true
+            }
+            return ws
+        }
+
+        private var wsMantInitialized = false
+        private lateinit var wsMant: Webservice
+
+        fun getMantWebservice(): Webservice {
+            if (!wsMantInitialized) {
+                wsMant = Webservice(WebServiceType.AssetControlManteinance)
+                wsMantInitialized = true
+            }
+            return wsMant
+        }
+    }
+
     enum class WebServiceType(val id: Long) {
-        AssetControl(1),
-        AssetControlManteinance(2),
-        ImageControl(3),
-        Test(4)
+        AssetControl(1), AssetControlManteinance(2), ImageControl(3), Test(4)
     }
 
     var namespace = ""
@@ -149,23 +169,20 @@ constructor(private var webServiceType: WebServiceType?) {
         val soapAction = "$url/$methodName"
         val soapObject = SoapObject(namespace, methodName)
 
-        val sessionSoapObject: SoapObject =
-            when (webServiceType) {
-                WebServiceType.AssetControl,
-                WebServiceType.AssetControlManteinance,
-                -> getSessionObject(useConfSession)
-                else -> return null
-            } ?: return null
+        val sessionSoapObject: SoapObject = when (webServiceType) {
+            WebServiceType.AssetControl,
+            WebServiceType.AssetControlManteinance,
+            -> getSessionObject(useConfSession)
+            else -> return null
+        } ?: return null
 
         soapObject.addSoapObject(sessionSoapObject)
 
-        if (params != null)
-            for (item in params) {
-                soapObject.addProperty(
-                    item.paramName,
-                    item.paramValue.toString()
-                )
-            }
+        if (params != null) for (item in params) {
+            soapObject.addProperty(
+                item.paramName, item.paramValue.toString()
+            )
+        }
 
         if (soapObjParams1 != null) {
             soapObject.addSoapObject(soapObjParams1)
@@ -179,9 +196,7 @@ constructor(private var webServiceType: WebServiceType?) {
 
         val response = getResponse(soapObject, soapAction) ?: return null
 
-        if (webServiceType == WebServiceType.AssetControl ||
-            webServiceType == WebServiceType.AssetControlManteinance
-        ) {
+        if (webServiceType == WebServiceType.AssetControl || webServiceType == WebServiceType.AssetControlManteinance) {
             val respVector = response as Vector<*>
 
             // El último Array del vector siempre es un ResponseObject
@@ -218,8 +233,7 @@ constructor(private var webServiceType: WebServiceType?) {
 
             // Objeto de Validación de Sesión
             sessionSoapObject.addProperty(
-                "session_id",
-                (Statics.currentSession ?: return null).sessionId
+                "session_id", (Statics.currentSession ?: return null).sessionId
             )
             sessionSoapObject.addProperty("user_id", (Statics.currentSession ?: return null).userId)
         } else {
@@ -272,18 +286,17 @@ constructor(private var webServiceType: WebServiceType?) {
         */
 
         val methodName = "Session_Add"
-        val params =
-            arrayOf(
-                WsParam("user_id", userId),
-                WsParam("password", password),
-                WsParam("user_ip", userIp),
-                WsParam("user_mac_address", userMacAddress),
-                WsParam("operating_system", operatingSystem),
-                WsParam("app_name", appName),
-                WsParam("processor_id", processorId),
-                WsParam("pc_name", pcName),
-                WsParam("pc_user_name", pcUserName)
-            )
+        val params = arrayOf(
+            WsParam("user_id", userId),
+            WsParam("password", password),
+            WsParam("user_ip", userIp),
+            WsParam("user_mac_address", userMacAddress),
+            WsParam("operating_system", operatingSystem),
+            WsParam("app_name", appName),
+            WsParam("processor_id", processorId),
+            WsParam("pc_name", pcName),
+            WsParam("pc_user_name", pcUserName)
+        )
 
         val soapAction = "$url/$methodName"
         val soapObject = SoapObject(namespace, methodName)
@@ -371,8 +384,7 @@ constructor(private var webServiceType: WebServiceType?) {
             val authenticator = object : Authenticator() {
                 override fun getPasswordAuthentication(): PasswordAuthentication {
                     return PasswordAuthentication(
-                        proxyUser,
-                        proxyPass.toCharArray()
+                        proxyUser, proxyPass.toCharArray()
                     )
                 }
             }
@@ -393,10 +405,8 @@ constructor(private var webServiceType: WebServiceType?) {
 
             if (proxyUrl.isNotEmpty() && proxyPort > 0) {
                 proxy = Proxy(
-                    Proxy.Type.HTTP,
-                    InetSocketAddress(
-                        proxyUrl,
-                        proxyPort
+                    Proxy.Type.HTTP, InetSocketAddress(
+                        proxyUrl, proxyPort
                     )
                 )
             }
@@ -413,11 +423,7 @@ constructor(private var webServiceType: WebServiceType?) {
             when (wsProtocol) {
                 "https://" -> {
                     val aht = HttpsTransportSE(
-                        proxy,
-                        wsDomain,
-                        wsPort,
-                        "$wsUri$wsQuery",
-                        timeout
+                        proxy, wsDomain, wsPort, "$wsUri$wsQuery", timeout
                     )
                     aht.debug = false
 
@@ -426,9 +432,7 @@ constructor(private var webServiceType: WebServiceType?) {
                 }
                 "http://" -> {
                     val aht = HttpTransportSE(
-                        proxy,
-                        "$url$wsQuery",
-                        timeout
+                        proxy, "$url$wsQuery", timeout
                     )
                     aht.debug = false
 
@@ -474,8 +478,7 @@ constructor(private var webServiceType: WebServiceType?) {
             try {
                 Log.d(
                     this::class.java.simpleName, String.format(
-                        "%s: %s", soapAction, envelope.bodyOut?.toString()
-                            ?: ""
+                        "%s: %s", soapAction, envelope.bodyOut?.toString() ?: ""
                     )
                 )
                 val r = aht.call(soapAction, envelope, headers, null)

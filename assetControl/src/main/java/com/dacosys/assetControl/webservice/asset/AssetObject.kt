@@ -112,11 +112,7 @@ class AssetObject() : Parcelable {
 
         status = asset.assetStatusId
         ownership_status = asset.ownershipStatusId
-        active = if (asset.active) {
-            1
-        } else {
-            0
-        }
+        active = if (asset.active) 1 else 0
 
         // Secondary Information
         manufacturer = if (asset.manufacturer == null) {

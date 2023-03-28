@@ -50,6 +50,7 @@ import com.dacosys.assetControl.utils.scanners.ScannedCode
 import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.utils.scanners.nfc.Nfc
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
+import com.dacosys.assetControl.utils.scanners.rfid.Rfid.Companion.isRfidRequired
 import com.dacosys.assetControl.utils.settings.Preference
 import com.dacosys.imageControl.network.common.ProgramData
 import com.dacosys.imageControl.room.dao.ImageCoroutines
@@ -562,7 +563,7 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
             menu.setOptionalIconsVisible(true)
         }
 
-        if (!Statics.isRfidRequired()) {
+        if (!isRfidRequired()) {
             menu.removeItem(menu.findItem(R.id.action_rfid_connect).itemId)
         }
 

@@ -19,9 +19,14 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.dacosys.assetControl.R
+import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.removeDataBases
 import com.dacosys.assetControl.databinding.InitConfigActivityBinding
 import com.dacosys.assetControl.network.clientPackages.ClientPackagesProgress
+import com.dacosys.assetControl.network.utils.ClientPackage
+import com.dacosys.assetControl.network.utils.ClientPackage.Companion.selectClientPackage
 import com.dacosys.assetControl.network.utils.ProgressStatus
+import com.dacosys.assetControl.network.utils.Proxy
+import com.dacosys.assetControl.network.utils.Proxy.Companion.setupProxy
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
@@ -34,10 +39,10 @@ import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Screen.Companion.showKeyboard
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.Statics.Companion.getConfig
-import com.dacosys.assetControl.utils.Statics.Companion.setupProxy
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.Scanner
+import com.dacosys.assetControl.utils.scanners.rfid.Rfid.Companion.isRfidRequired
 import com.dacosys.assetControl.utils.settings.Preference
 import com.dacosys.assetControl.utils.settings.QRConfigType
 import com.dacosys.assetControl.utils.settings.QRConfigType.CREATOR.QRConfigClientAccount
@@ -47,14 +52,14 @@ import org.json.JSONObject
 import java.lang.ref.WeakReference
 
 class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
-    Statics.Companion.TaskSetupProxyEnded, Statics.Companion.TaskConfigPanelEnded {
+    Proxy.Companion.TaskSetupProxyEnded, ClientPackage.Companion.TaskConfigPanelEnded {
     override fun onTaskConfigPanelEnded(status: ProgressStatus) {
         if (status == ProgressStatus.finished) {
             isConfiguring = false
             makeText(
                 binding.root, getString(R.string.configuration_applied), SnackBarType.SUCCESS
             )
-            Statics.removeDataBases()
+            removeDataBases()
             finish()
         }
     }
@@ -71,7 +76,7 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
         if (status == ProgressStatus.finished) {
             if (result.size > 0) {
                 runOnUiThread {
-                    Statics.selectClientPackage(
+                    selectClientPackage(
                         parentView = binding.root,
                         callback = this,
                         weakAct = WeakReference(this),
@@ -358,10 +363,7 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (permissions.contains(Manifest.permission.BLUETOOTH_CONNECT)) JotterListener.onRequestPermissionsResult(
-            this,
-            requestCode,
-            permissions,
-            grantResults
+            this, requestCode, permissions, grantResults
         )
     }
 
@@ -407,7 +409,7 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
             menu.removeItem(menu.findItem(R.id.action_settings).itemId)
         }
 
-        if (!Statics.isRfidRequired()) {
+        if (!isRfidRequired()) {
             menu.removeItem(menu.findItem(R.id.action_rfid_connect).itemId)
         }
 

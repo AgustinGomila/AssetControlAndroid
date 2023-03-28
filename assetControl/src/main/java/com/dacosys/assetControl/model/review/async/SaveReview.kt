@@ -16,8 +16,8 @@ import com.dacosys.assetControl.model.review.AssetReviewStatus
 import com.dacosys.assetControl.network.sync.SyncProgress
 import com.dacosys.assetControl.network.sync.SyncRegistryType
 import com.dacosys.assetControl.network.sync.SyncUpload
+import com.dacosys.assetControl.network.utils.Connection.Companion.autoSend
 import com.dacosys.assetControl.network.utils.ProgressStatus
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.misc.UTCDataTime
 import kotlinx.coroutines.*
 
@@ -57,7 +57,7 @@ class SaveReview {
             result = deferred?.await() ?: false
         }
 
-        if (result && Statics.autoSend()) {
+        if (result && autoSend()) {
             SyncUpload(
                 registryType = SyncRegistryType.AssetReview,
                 onSyncTaskProgress = { onSyncProgress.invoke(it) })

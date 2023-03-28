@@ -1,5 +1,6 @@
 package com.dacosys.assetControl.network.sync
 
+import com.dacosys.assetControl.network.download.DownloadDb
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.imageControl.room.database.IcDatabase
 import kotlinx.coroutines.*
@@ -26,15 +27,15 @@ class GetPending(
     private suspend fun suspendFunction(): ArrayList<Any> = withContext(Dispatchers.IO) {
         val syncElements: ArrayList<Any> = ArrayList()
 
-        val ar = Statics.pendingAssetReview()
-        val wm = Statics.pendingWarehouseMovement()
-        val a = Statics.pendingAsset()
-        val wa = Statics.pendingWarehouseArea()
-        val w = Statics.pendingWarehouse()
-        val ic = Statics.pendingItemCategory()
-        val dc = Statics.pendingDataCollection()
-        val rp = Statics.pendingRouteProcess()
-        val am = Statics.pendingAssetManteinance()
+        val ar = DownloadDb.getPendingAssetReview()
+        val wm = DownloadDb.getPendingWarehouseMovement()
+        val a = DownloadDb.getPendingAsset()
+        val wa = DownloadDb.getPendingWarehouseArea()
+        val w = DownloadDb.getPendingWarehouse()
+        val ic = DownloadDb.getPendingItemCategory()
+        val dc = DownloadDb.getPendingDataCollection()
+        val rp = DownloadDb.getPendingRouteProcess()
+        val am = DownloadDb.getPendingAssetManteinance()
 
         if (ar.any()) syncElements.addAll(ar)
         if (wm.any()) syncElements.addAll(wm)

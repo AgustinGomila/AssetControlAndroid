@@ -192,13 +192,17 @@ class AutoResizeTextView : AppCompatTextView {
                 - compoundPaddingRight)
         (mAvailableSpaceRect ?: return).right = mWidthLimit.toFloat()
         (mAvailableSpaceRect ?: return).bottom = heightLimit.toFloat()
-        super.setTextSize(
-            TypedValue.COMPLEX_UNIT_PX,
-            efficientTextSizeSearch(
-                startSize, mMaxTextSize.toInt(),
-                mSizeTester, mAvailableSpaceRect ?: return
-            ).toFloat()
-        )
+
+        var s = efficientTextSizeSearch(
+            startSize,
+            mMaxTextSize.toInt(),
+            mSizeTester,
+            mAvailableSpaceRect ?: return
+        ).toFloat()
+
+        if (s < 0) s = 0F
+
+        super.setTextSize(TypedValue.COMPLEX_UNIT_PX, s)
     }
 
     /**

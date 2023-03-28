@@ -21,7 +21,7 @@ import com.dacosys.assetControl.dataBase.datacollection.DataCollectionRuleConten
 import com.dacosys.assetControl.dataBase.datacollection.DataCollectionRuleContentContract.DataCollectionRuleContentEntry.Companion.TABLE_NAME
 import com.dacosys.assetControl.dataBase.datacollection.DataCollectionRuleContentContract.DataCollectionRuleContentEntry.Companion.TRUE_RESULT
 import com.dacosys.assetControl.dataBase.route.RouteCompositionContract
-import com.dacosys.assetControl.model.datacollection.DataCollectionRuleContent
+import com.dacosys.assetControl.model.dataCollection.DataCollectionRuleContent
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 
 /**

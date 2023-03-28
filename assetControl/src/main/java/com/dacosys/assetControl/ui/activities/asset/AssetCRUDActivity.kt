@@ -34,7 +34,6 @@ import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
 import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Screen.Companion.setupUI
-import com.dacosys.assetControl.utils.Statics.Companion.isRfidRequired
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.ParcelLong
 import com.dacosys.assetControl.utils.scanners.JotterListener
@@ -42,6 +41,7 @@ import com.dacosys.assetControl.utils.scanners.ScannedCode
 import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.utils.scanners.nfc.Nfc
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
+import com.dacosys.assetControl.utils.scanners.rfid.Rfid.Companion.isRfidRequired
 import com.dacosys.assetControl.utils.scanners.vh75.Vh75Bt
 import com.dacosys.assetControl.utils.settings.Preference
 import com.dacosys.imageControl.ui.fragments.ImageControlButtonsFragment

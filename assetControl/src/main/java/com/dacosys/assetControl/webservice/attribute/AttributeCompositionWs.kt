@@ -1,6 +1,6 @@
 package com.dacosys.assetControl.webservice.attribute
 
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.webservice.common.Webservice.Companion.getWebservice
 import com.dacosys.assetControl.webservice.common.WsParam
 import org.ksoap2.serialization.SoapObject
 import java.util.*
@@ -12,10 +12,9 @@ constructor() {
     fun attributeCompositionGet(
         attributeId: Long,
     ): Array<AttributeCompositionObject>? {
-        val any = Statics.getWebservice().s(
+        val any = getWebservice().s(
             "AttributeComposition_Get",
             arrayOf(
-
                 WsParam("attribute_id", attributeId)
             )
         )
@@ -37,7 +36,7 @@ constructor() {
     fun attributeCompositionDeleteAll(
         attributeId: Int,
     ): Int {
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             "AttributeComposition_Remove_All",
             arrayOf(WsParam("attribute_id", attributeId))
         ) ?: return 0
@@ -46,7 +45,7 @@ constructor() {
 
     @Throws(Exception::class)
     fun attributeCompositionUpdateIsUsed(): Boolean {
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             "AttributeComposition_Update_IsUsed"
         ) ?: return false
         return result as Boolean

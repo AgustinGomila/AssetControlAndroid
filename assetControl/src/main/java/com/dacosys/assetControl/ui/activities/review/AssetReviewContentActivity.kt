@@ -58,6 +58,7 @@ import com.dacosys.assetControl.model.status.ConfirmStatus.CREATOR.modify
 import com.dacosys.assetControl.network.sync.SyncProgress
 import com.dacosys.assetControl.network.sync.SyncRegistryType
 import com.dacosys.assetControl.network.utils.*
+import com.dacosys.assetControl.network.utils.Connection.Companion.autoSend
 import com.dacosys.assetControl.ui.activities.asset.AssetCRUDActivity
 import com.dacosys.assetControl.ui.activities.asset.AssetDetailActivity
 import com.dacosys.assetControl.ui.activities.asset.AssetPrintLabelActivity
@@ -75,7 +76,6 @@ import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
 import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.Statics.Companion.INTERNAL_IMAGE_CONTROL_APP_ID
-import com.dacosys.assetControl.utils.Statics.Companion.isRfidRequired
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.ParcelLong
 import com.dacosys.assetControl.utils.misc.UTCDataTime
@@ -84,6 +84,7 @@ import com.dacosys.assetControl.utils.scanners.ScannedCode
 import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.utils.scanners.nfc.Nfc
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
+import com.dacosys.assetControl.utils.scanners.rfid.Rfid.Companion.isRfidRequired
 import com.dacosys.assetControl.utils.settings.Preference
 import com.dacosys.assetControl.viewModel.review.SaveReviewViewModel
 import com.dacosys.assetControl.viewModel.sync.SyncViewModel
@@ -2002,7 +2003,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
             intent.putExtra("programObjectId", tableId.toLong())
             intent.putExtra("objectId1", itemId.toString())
             intent.putExtra("description", description)
-            intent.putExtra("addPhoto", Statics.autoSend())
+            intent.putExtra("addPhoto", autoSend())
             resultForPhotoCapture.launch(intent)
         }
     }

@@ -26,7 +26,7 @@ import com.dacosys.assetControl.dataBase.location.WarehouseAreaContract
 import com.dacosys.assetControl.dataBase.location.WarehouseContract
 import com.dacosys.assetControl.dataBase.route.RouteProcessContract
 import com.dacosys.assetControl.model.asset.Asset
-import com.dacosys.assetControl.model.datacollection.DataCollection
+import com.dacosys.assetControl.model.dataCollection.DataCollection
 import com.dacosys.assetControl.model.location.WarehouseArea
 import com.dacosys.assetControl.model.route.RouteProcessContent
 import com.dacosys.assetControl.utils.Statics

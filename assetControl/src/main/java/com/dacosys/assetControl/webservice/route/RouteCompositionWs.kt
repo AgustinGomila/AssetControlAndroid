@@ -1,6 +1,6 @@
 package com.dacosys.assetControl.webservice.route
 
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.webservice.common.Webservice.Companion.getWebservice
 import com.dacosys.assetControl.webservice.common.WsParam
 import org.ksoap2.serialization.SoapObject
 import java.util.*
@@ -12,10 +12,9 @@ constructor() {
     fun routeCompositionGet(
         routeId: Long,
     ): Array<RouteCompositionObject>? {
-        val any = Statics.getWebservice().s(
+        val any = getWebservice().s(
             "RouteComposition_Get",
             arrayOf(
-
                 WsParam("route_id", routeId)
             )
         )
@@ -37,7 +36,7 @@ constructor() {
     fun routeCompositionDeleteAll(
         routeId: Int,
     ): Int {
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             "RouteComposition_Remove_All",
             arrayOf(WsParam("route_id", routeId))
         ) ?: return 0

@@ -13,7 +13,7 @@ import com.dacosys.assetControl.dataBase.asset.AssetDbHelper
 import com.dacosys.assetControl.databinding.DataCollectionRuleTargetActivityBinding
 import com.dacosys.assetControl.model.asset.Asset
 import com.dacosys.assetControl.model.category.ItemCategory
-import com.dacosys.assetControl.model.datacollection.DataCollectionRule
+import com.dacosys.assetControl.model.dataCollection.DataCollectionRule
 import com.dacosys.assetControl.model.location.WarehouseArea
 import com.dacosys.assetControl.network.utils.*
 import com.dacosys.assetControl.ui.activities.asset.AssetPrintLabelActivity

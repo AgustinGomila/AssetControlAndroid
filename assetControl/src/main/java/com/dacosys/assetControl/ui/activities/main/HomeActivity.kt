@@ -46,6 +46,7 @@ import com.dacosys.assetControl.model.user.permission.PermissionEntry
 import com.dacosys.assetControl.network.sync.Sync
 import com.dacosys.assetControl.network.sync.SyncDownload
 import com.dacosys.assetControl.network.sync.SyncProgress
+import com.dacosys.assetControl.network.utils.Connection.Companion.isOnline
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.ui.activities.code.CodeCheckActivity
 import com.dacosys.assetControl.ui.activities.common.CRUDActivity
@@ -59,6 +60,7 @@ import com.dacosys.assetControl.ui.activities.route.RouteSelectActivity
 import com.dacosys.assetControl.ui.activities.sync.SyncActivity
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
+import com.dacosys.assetControl.utils.ImageControl.Companion.setupImageControl
 import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetString
 import com.dacosys.assetControl.utils.Screen.Companion.getBestContrastColor
@@ -70,6 +72,7 @@ import com.dacosys.assetControl.utils.mainButton.MainButton
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.ScannedCode
 import com.dacosys.assetControl.utils.scanners.Scanner
+import com.dacosys.assetControl.utils.scanners.rfid.Rfid.Companion.isRfidRequired
 import com.dacosys.assetControl.utils.settings.Preference
 import com.dacosys.assetControl.viewModel.sync.SyncViewModel
 import com.google.android.material.textfield.TextInputEditText
@@ -178,7 +181,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
             // Vamos a reconstruir el scanner por si cambió la configuración
             JotterListener.autodetectDeviceModel(this)
 
-            Statics.setupImageControl()
+            setupImageControl()
 
             // Todavía no está loggeado
             if (Statics.currentUserId == null) {
@@ -821,7 +824,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
             menu.removeItem(menu.findItem(R.id.action_settings).itemId)
         }
 
-        if (!Statics.isRfidRequired()) {
+        if (!isRfidRequired()) {
             menu.removeItem(menu.findItem(R.id.action_rfid_connect).itemId)
         }
 
@@ -830,7 +833,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
 
     private fun syncDownload() {
         try {
-            if (OFFLINE_MODE || !Statics.isOnline()) {
+            if (OFFLINE_MODE || !isOnline()) {
                 makeText(binding.root, getString(R.string.offline_mode), SnackBarType.INFO)
                 return
             }

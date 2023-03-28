@@ -8,7 +8,7 @@ import com.dacosys.assetControl.dataBase.route.RouteProcessStepsContract.RoutePr
 import com.dacosys.assetControl.dataBase.route.RouteProcessStepsContract.RouteProcessStepsEntry.Companion.ROUTE_PROCESS_CONTENT_ID
 import com.dacosys.assetControl.dataBase.route.RouteProcessStepsContract.RouteProcessStepsEntry.Companion.ROUTE_PROCESS_ID
 import com.dacosys.assetControl.dataBase.route.RouteProcessStepsContract.RouteProcessStepsEntry.Companion.STEP
-import com.dacosys.assetControl.model.datacollection.DataCollection
+import com.dacosys.assetControl.model.dataCollection.DataCollection
 
 class RouteProcessSteps : Parcelable {
     override fun describeContents(): Int {

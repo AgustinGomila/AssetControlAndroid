@@ -1,6 +1,6 @@
 package com.dacosys.assetControl.webservice.review
 
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.webservice.common.Webservice.Companion.getWebservice
 import com.dacosys.assetControl.webservice.common.WsParam
 import org.ksoap2.serialization.SoapObject
 import java.util.*
@@ -11,7 +11,7 @@ constructor() {
     @Throws(Exception::class)
     fun assetReviewGetAll(
     ): Array<AssetReviewObject>? {
-        val any = Statics.getWebservice().s(
+        val any = getWebservice().s(
             "AssetReview_GetAll"
         )
         if (any != null) {
@@ -34,10 +34,9 @@ constructor() {
         qty: Int,
         date: String,
     ): Array<AssetReviewObject>? {
-        val any = Statics.getWebservice().s(
+        val any = getWebservice().s(
             "AssetReview_GetAll_Limit",
             arrayOf(
-
                 WsParam("pos", pos),
                 WsParam("qty", qty),
                 WsParam("date", date)
@@ -61,10 +60,9 @@ constructor() {
     fun assetReviewGet(
         assetReviewId: Long,
     ): AssetReviewObject {
-        val soapObject = Statics.getWebservice().s(
+        val soapObject = getWebservice().s(
             "AssetReview_Get",
             arrayOf(
-
                 WsParam("asset_review_id", assetReviewId)
             )
         ) as SoapObject
@@ -77,7 +75,7 @@ constructor() {
         assetReview: AssetReviewObject,
         assetReviewContent: ArrayList<AssetReviewContentObject>,
     ): Long {
-        val arSoapObject = SoapObject(Statics.getWebservice().namespace, "asset_review")
+        val arSoapObject = SoapObject(getWebservice().namespace, "asset_review")
         arSoapObject.addProperty("asset_review_id", assetReview.assetReviewId)
         arSoapObject.addProperty("asset_review_date", assetReview.assetReviewDate)
         arSoapObject.addProperty("obs", assetReview.obs)
@@ -90,7 +88,7 @@ constructor() {
         var arcArrayObject: ArrayList<SoapObject> = addNullContent()
         if (assetReviewContent.size > 0) {
             assetReviewContent.forEach { t ->
-                val arcSoapObject = SoapObject(Statics.getWebservice().namespace, "content")
+                val arcSoapObject = SoapObject(getWebservice().namespace, "content")
 
                 arcSoapObject.addProperty("asset_review_id", t.assetReviewId)
                 arcSoapObject.addProperty("asset_review_content_id", t.assetReviewContentId)
@@ -105,7 +103,7 @@ constructor() {
             arcArrayObject = addNullContent()
         }
 
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             "AssetReview_Modify",
             arrayOf(WsParam("user_id", userId)),
             arSoapObject,
@@ -119,7 +117,7 @@ constructor() {
         assetReview: AssetReviewObject,
         assetReviewContent: ArrayList<AssetReviewContentObject>,
     ): Long {
-        val arSoapObject = SoapObject(Statics.getWebservice().namespace, "asset_review")
+        val arSoapObject = SoapObject(getWebservice().namespace, "asset_review")
         arSoapObject.addProperty("asset_review_id", assetReview.assetReviewId)
         arSoapObject.addProperty("asset_review_date", assetReview.assetReviewDate)
         arSoapObject.addProperty("obs", assetReview.obs)
@@ -132,7 +130,7 @@ constructor() {
         var arcArrayObject: ArrayList<SoapObject> = addNullContent()
         if (assetReviewContent.size > 0) {
             assetReviewContent.forEach { t ->
-                val arcSoapObject = SoapObject(Statics.getWebservice().namespace, "content")
+                val arcSoapObject = SoapObject(getWebservice().namespace, "content")
 
                 arcSoapObject.addProperty("asset_review_id", t.assetReviewId)
                 arcSoapObject.addProperty("asset_review_content_id", t.assetReviewContentId)
@@ -151,7 +149,7 @@ constructor() {
         // tengo que armar el objeto del contenido de manera
         // diferente que en movimiento (por ejemplo)
 
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             "AssetReview_Add",
             arSoapObject,
             arcArrayObject.toTypedArray()
@@ -162,7 +160,7 @@ constructor() {
 
     private fun addNullContent(): ArrayList<SoapObject> {
         val arcArrayObject: ArrayList<SoapObject> = ArrayList()
-        val arcSoapObject = SoapObject(Statics.getWebservice().namespace, "content")
+        val arcSoapObject = SoapObject(getWebservice().namespace, "content")
 
         arcSoapObject.addProperty("asset_review_id", null)
         arcSoapObject.addProperty("asset_review_content_id", null)
@@ -178,7 +176,7 @@ constructor() {
 
     @Throws(Exception::class)
     fun assetReviewCount(date: String): Int? {
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             methodName = "AssetReview_Count",
             params = arrayOf(WsParam("date", date))
         )

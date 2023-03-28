@@ -20,7 +20,7 @@ import com.dacosys.assetControl.R
 import com.dacosys.assetControl.model.asset.Asset
 import com.dacosys.assetControl.model.asset.AssetStatus
 import com.dacosys.assetControl.model.category.ItemCategory
-import com.dacosys.assetControl.model.datacollection.DataCollection
+import com.dacosys.assetControl.model.dataCollection.DataCollection
 import com.dacosys.assetControl.model.location.Warehouse
 import com.dacosys.assetControl.model.location.WarehouseArea
 import com.dacosys.assetControl.model.manteinance.AssetManteinance

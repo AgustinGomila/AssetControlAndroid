@@ -3,7 +3,7 @@ package com.dacosys.assetControl.model.location
 import com.dacosys.assetControl.dataBase.location.WarehouseAreaDbHelper
 import com.dacosys.assetControl.network.sync.SyncRegistryType
 import com.dacosys.assetControl.network.sync.SyncUpload
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.network.utils.Connection.Companion.autoSend
 import com.dacosys.assetControl.webservice.location.WarehouseAreaObject
 import kotlinx.coroutines.*
 
@@ -61,7 +61,7 @@ class WarehouseAreaCRUD {
             if (warehouseAreaObject != null) {
                 val waObj = warehouseAreaObject!!
                 if (addWarehouseArea(waObj).resultCode == RC_INSERT_OK) {
-                    if (Statics.autoSend()) {
+                    if (autoSend()) {
                         SyncUpload(SyncRegistryType.WarehouseArea)
                     }
                 } else {
@@ -132,7 +132,7 @@ class WarehouseAreaCRUD {
             if (warehouseAreaObject != null) {
                 val waObj = warehouseAreaObject!!
                 if (updateWarehouseArea(waObj).resultCode == RC_UPDATE_OK) {
-                    if (Statics.autoSend()) {
+                    if (autoSend()) {
                         SyncUpload(SyncRegistryType.WarehouseArea)
                     }
                 }

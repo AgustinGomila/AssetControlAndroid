@@ -5,7 +5,3 @@ interface DccFragmentListener {
     fun onFragmentDestroy()
     fun onFragmentOk()
 }
-
-interface OnEnabledChangeListener {
-    fun onEnabledChange(isEnabled: Boolean)
-}

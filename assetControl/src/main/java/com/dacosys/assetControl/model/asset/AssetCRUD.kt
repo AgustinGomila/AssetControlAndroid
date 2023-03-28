@@ -3,7 +3,7 @@ package com.dacosys.assetControl.model.asset
 import com.dacosys.assetControl.dataBase.asset.AssetDbHelper
 import com.dacosys.assetControl.network.sync.SyncRegistryType
 import com.dacosys.assetControl.network.sync.SyncUpload
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.network.utils.Connection.Companion.autoSend
 import com.dacosys.assetControl.webservice.asset.AssetCollectorObject
 import com.dacosys.assetControl.webservice.asset.AssetObject
 import kotlinx.coroutines.*
@@ -62,7 +62,7 @@ class AssetCRUD {
             if (assetObject != null) {
                 val aObj = assetObject!!
                 if (addAsset(aObj).resultCode == RC_INSERT_OK) {
-                    if (Statics.autoSend()) {
+                    if (autoSend()) {
                         SyncUpload(SyncRegistryType.Asset)
                     }
                 } else {
@@ -170,7 +170,7 @@ class AssetCRUD {
             if (assetObject != null) {
                 val aObj = assetObject!!
                 if (updateAsset(aObj).resultCode == RC_UPDATE_OK) {
-                    if (Statics.autoSend()) {
+                    if (autoSend()) {
                         SyncUpload(SyncRegistryType.Asset)
                     }
                 }

@@ -1,4 +1,4 @@
-package com.dacosys.assetControl.webservice.datacollection
+package com.dacosys.assetControl.webservice.dataCollection
 
 import android.os.Parcel
 import android.os.Parcelable

@@ -26,7 +26,7 @@ import com.dacosys.assetControl.dataBase.route.RouteProcessContentContract.Route
 import com.dacosys.assetControl.dataBase.route.RouteProcessContentContract.RouteProcessContentEntry.Companion.WAREHOUSE_AREA_STR
 import com.dacosys.assetControl.dataBase.route.RouteProcessContentContract.RouteProcessContentEntry.Companion.WAREHOUSE_ID
 import com.dacosys.assetControl.dataBase.route.RouteProcessContentContract.RouteProcessContentEntry.Companion.WAREHOUSE_STR
-import com.dacosys.assetControl.model.datacollection.DataCollection
+import com.dacosys.assetControl.model.dataCollection.DataCollection
 import com.dacosys.assetControl.model.route.RouteProcessContent
 import com.dacosys.assetControl.model.route.RouteProcessStatus
 import com.dacosys.assetControl.utils.errorLog.ErrorLog

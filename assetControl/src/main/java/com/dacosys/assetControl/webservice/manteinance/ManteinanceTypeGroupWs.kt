@@ -1,6 +1,6 @@
 package com.dacosys.assetControl.webservice.manteinance
 
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.webservice.common.Webservice.Companion.getMantWebservice
 import com.dacosys.assetControl.webservice.common.WsParam
 import org.ksoap2.serialization.SoapObject
 import java.util.*
@@ -11,7 +11,7 @@ constructor() {
     @Throws(Exception::class)
     fun manteinanceTypeGroupGetAll(
     ): Array<ManteinanceTypeGroupObject> {
-        val any = Statics.getMantWebservice().s(
+        val any = getMantWebservice().s(
             "Manteinance_Type_Group_GetAll"
         )
         val dObjAl: ArrayList<ManteinanceTypeGroupObject> = ArrayList()
@@ -31,7 +31,7 @@ constructor() {
         qty: Int,
         date: String,
     ): Array<ManteinanceTypeGroupObject> {
-        val any = Statics.getMantWebservice().s(
+        val any = getMantWebservice().s(
             "Manteinance_Type_Group_GetAll_Limit",
             arrayOf(
                 WsParam("pos", pos),
@@ -56,7 +56,7 @@ constructor() {
         manteinanceTypeGroup: ManteinanceTypeGroupObject,
     ): Long {
         val acSoapObject =
-            SoapObject(Statics.getMantWebservice().namespace, "manteinance_type_group")
+            SoapObject(getMantWebservice().namespace, "manteinance_type_group")
         acSoapObject.addProperty(
             "manteinance_type_group_id",
             manteinanceTypeGroup.manteinanceTypeGroupId
@@ -64,7 +64,7 @@ constructor() {
         acSoapObject.addProperty("description", manteinanceTypeGroup.description)
         acSoapObject.addProperty("active", manteinanceTypeGroup.active)
 
-        val result = Statics.getMantWebservice().s(
+        val result = getMantWebservice().s(
             "Manteinance_Type_Group_Modify",
             arrayOf(WsParam("user_id", userId)),
             acSoapObject
@@ -78,7 +78,7 @@ constructor() {
         manteinanceTypeGroup: ManteinanceTypeGroupObject,
     ): Long {
         val acSoapObject =
-            SoapObject(Statics.getMantWebservice().namespace, "manteinance_type_group")
+            SoapObject(getMantWebservice().namespace, "manteinance_type_group")
         acSoapObject.addProperty(
             "manteinance_type_group_id",
             manteinanceTypeGroup.manteinanceTypeGroupId
@@ -86,7 +86,7 @@ constructor() {
         acSoapObject.addProperty("description", manteinanceTypeGroup.description)
         acSoapObject.addProperty("active", manteinanceTypeGroup.active)
 
-        val result = Statics.getMantWebservice().s(
+        val result = getMantWebservice().s(
             "Manteinance_Type_Group_Add",
             arrayOf(WsParam("user_id", userId)),
             acSoapObject
@@ -96,7 +96,7 @@ constructor() {
 
     @Throws(Exception::class)
     fun manteinanceTypeGroupCount(date: String): Int? {
-        val result = Statics.getMantWebservice().s(
+        val result = getMantWebservice().s(
             methodName = "Manteinance_Type_Group_Count",
             params = arrayOf(WsParam("date", date))
         )

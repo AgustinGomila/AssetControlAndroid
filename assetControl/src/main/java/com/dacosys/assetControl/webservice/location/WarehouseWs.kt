@@ -1,6 +1,6 @@
 package com.dacosys.assetControl.webservice.location
 
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.webservice.common.Webservice.Companion.getWebservice
 import com.dacosys.assetControl.webservice.common.WsParam
 import org.ksoap2.serialization.SoapObject
 import java.util.*
@@ -11,7 +11,7 @@ constructor() {
     @Throws(Exception::class)
     fun warehouseGetAll(
     ): Array<WarehouseObject> {
-        val any = Statics.getWebservice().s(
+        val any = getWebservice().s(
             "Warehouse_GetAll"
         )
         val dObjAl: ArrayList<WarehouseObject> = ArrayList()
@@ -31,7 +31,7 @@ constructor() {
         qty: Int,
         date: String,
     ): Array<WarehouseObject> {
-        val any = Statics.getWebservice().s(
+        val any = getWebservice().s(
             "Warehouse_GetAll_Limit",
             arrayOf(
                 WsParam("pos", pos),
@@ -55,13 +55,13 @@ constructor() {
         userId: Long,
         warehouse: WarehouseObject,
     ): Long {
-        val wSoapObject = SoapObject(Statics.getWebservice().namespace, "warehouse")
+        val wSoapObject = SoapObject(getWebservice().namespace, "warehouse")
         wSoapObject.addProperty("warehouse_id", warehouse.warehouse_id)
         wSoapObject.addProperty("description", warehouse.description)
         wSoapObject.addProperty("active", warehouse.active)
         wSoapObject.addProperty("warehouse_ext_id", warehouse.warehouse_ext_id)
 
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             "Warehouse_Modify",
             arrayOf(WsParam("user_id", userId)),
             wSoapObject
@@ -74,13 +74,13 @@ constructor() {
         userId: Long,
         warehouse: WarehouseObject,
     ): Long {
-        val wSoapObject = SoapObject(Statics.getWebservice().namespace, "warehouse")
+        val wSoapObject = SoapObject(getWebservice().namespace, "warehouse")
         wSoapObject.addProperty("warehouse_id", warehouse.warehouse_id)
         wSoapObject.addProperty("description", warehouse.description)
         wSoapObject.addProperty("active", warehouse.active)
         wSoapObject.addProperty("warehouse_ext_id", warehouse.warehouse_ext_id)
 
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             methodName = "Warehouse_Add",
             params = arrayOf(WsParam("user_id", userId)),
             soapObjParams1 = wSoapObject
@@ -90,7 +90,7 @@ constructor() {
 
     @Throws(Exception::class)
     fun warehouseCount(date: String): Int? {
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             methodName = "Warehouse_Count",
             params = arrayOf(WsParam("date", date))
         )

@@ -61,11 +61,7 @@ class UserObject() : Parcelable {
         val x = UserObject()
 
         x.user_id = user.userId
-        x.active = if (user.active) {
-            1
-        } else {
-            0
-        }
+        x.active = if (user.active) 1 else 0
         x.name = user.name
         x.external_id = if (user.externalId == null) {
             ""

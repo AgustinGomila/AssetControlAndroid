@@ -29,11 +29,7 @@ class ItemCategoryObject() : Parcelable {
         } else {
             itemCategory.parentId!!
         }
-        active = if (itemCategory.active) {
-            1
-        } else {
-            0
-        }
+        active = if (itemCategory.active) 1 else 0
         item_category_ext_id = ""
     }
 

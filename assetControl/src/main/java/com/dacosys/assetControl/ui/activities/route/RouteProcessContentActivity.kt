@@ -40,8 +40,8 @@ import com.dacosys.assetControl.databinding.ProgressBarDialogBinding
 import com.dacosys.assetControl.databinding.RouteProcessContentActivityBinding
 import com.dacosys.assetControl.model.attribute.AttributeCompositionType
 import com.dacosys.assetControl.model.common.SaveProgress
-import com.dacosys.assetControl.model.datacollection.DataCollection
-import com.dacosys.assetControl.model.datacollection.DcrResult
+import com.dacosys.assetControl.model.dataCollection.DataCollection
+import com.dacosys.assetControl.model.dataCollection.DcrResult
 import com.dacosys.assetControl.model.route.*
 import com.dacosys.assetControl.model.route.common.*
 import com.dacosys.assetControl.model.user.User
@@ -56,13 +56,13 @@ import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
 import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.Statics.Companion.isRfidRequired
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.ScannedCode
 import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.utils.scanners.nfc.Nfc
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
+import com.dacosys.assetControl.utils.scanners.rfid.Rfid.Companion.isRfidRequired
 import com.dacosys.assetControl.viewModel.route.*
 import com.dacosys.assetControl.viewModel.sync.SyncViewModel
 import com.udojava.evalex.Expression

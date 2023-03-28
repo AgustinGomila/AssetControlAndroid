@@ -1,6 +1,6 @@
 package com.dacosys.assetControl.webservice.movement
 
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.webservice.common.Webservice.Companion.getWebservice
 import com.dacosys.assetControl.webservice.common.WsParam
 import org.ksoap2.serialization.SoapObject
 import java.util.*
@@ -11,7 +11,7 @@ constructor() {
     @Throws(Exception::class)
     fun warehouseMovementGetAll(
     ): Array<WarehouseMovementObject>? {
-        val any = Statics.getWebservice().s(
+        val any = getWebservice().s(
             "WarehouseMovement_GetAll"
         )
         if (any != null) {
@@ -34,10 +34,9 @@ constructor() {
         qty: Int,
         date: String,
     ): Array<WarehouseMovementObject>? {
-        val any = Statics.getWebservice().s(
+        val any = getWebservice().s(
             "WarehouseMovement_GetAll_Limit",
             arrayOf(
-
                 WsParam("pos", pos),
                 WsParam("qty", qty),
                 WsParam("date", date)
@@ -61,10 +60,9 @@ constructor() {
     fun warehouseMovementGet(
         warehouseMovementId: Long,
     ): WarehouseMovementObject {
-        val soapObject = Statics.getWebservice().s(
+        val soapObject = getWebservice().s(
             "WarehouseMovement_Get",
             arrayOf(
-
                 WsParam("warehouse_movement_id", warehouseMovementId)
             )
         ) as SoapObject
@@ -77,7 +75,7 @@ constructor() {
         warehouseMovement: WarehouseMovementObject,
         warehouseMovementContent: ArrayList<WarehouseMovementContentObject>,
     ): Long {
-        val arSoapObject = SoapObject(Statics.getWebservice().namespace, "warehouse_movement")
+        val arSoapObject = SoapObject(getWebservice().namespace, "warehouse_movement")
         arSoapObject.addProperty("warehouse_movement_id", warehouseMovement.warehouseMovementId)
         arSoapObject.addProperty("warehouse_movement_date", warehouseMovement.warehouseMovementDate)
         arSoapObject.addProperty("obs", warehouseMovement.obs)
@@ -99,7 +97,7 @@ constructor() {
         var arcArrayObject: ArrayList<SoapObject> = addNullContent()
         if (warehouseMovementContent.size > 0) {
             warehouseMovementContent.forEach { t ->
-                val arcSoapObject = SoapObject(Statics.getWebservice().namespace, "content")
+                val arcSoapObject = SoapObject(getWebservice().namespace, "content")
 
                 arcSoapObject.addProperty("warehouse_movement_id", t.warehouseMovementId)
                 arcSoapObject.addProperty(
@@ -116,7 +114,7 @@ constructor() {
             arcArrayObject = addNullContent()
         }
 
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             "WarehouseMovement_Modify",
             arrayOf(WsParam("user_id", userId)),
             arSoapObject,
@@ -130,7 +128,7 @@ constructor() {
         warehouseMovement: WarehouseMovementObject,
         warehouseMovementContent: ArrayList<WarehouseMovementContentObject>,
     ): Long {
-        val arSoapObject = SoapObject(Statics.getWebservice().namespace, "warehouse_movement")
+        val arSoapObject = SoapObject(getWebservice().namespace, "warehouse_movement")
         arSoapObject.addProperty("warehouse_movement_id", warehouseMovement.warehouseMovementId)
         arSoapObject.addProperty("warehouse_movement_date", warehouseMovement.warehouseMovementDate)
         arSoapObject.addProperty("obs", warehouseMovement.obs)
@@ -152,7 +150,7 @@ constructor() {
         var arcArrayObject: ArrayList<SoapObject> = addNullContent()
         if (warehouseMovementContent.size > 0) {
             warehouseMovementContent.forEach { t ->
-                val arcSoapObject = SoapObject(Statics.getWebservice().namespace, "content")
+                val arcSoapObject = SoapObject(getWebservice().namespace, "content")
 
                 arcSoapObject.addProperty("warehouse_movement_id", t.warehouseMovementId)
                 arcSoapObject.addProperty(
@@ -169,7 +167,7 @@ constructor() {
             arcArrayObject = addNullContent()
         }
 
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             "WarehouseMovement_Add",
             arSoapObject,
             arcArrayObject.toTypedArray()
@@ -180,7 +178,7 @@ constructor() {
 
     private fun addNullContent(): ArrayList<SoapObject> {
         val arcArrayObject: ArrayList<SoapObject> = ArrayList()
-        val arcSoapObject = SoapObject(Statics.getWebservice().namespace, "content")
+        val arcSoapObject = SoapObject(getWebservice().namespace, "content")
 
         arcSoapObject.addProperty("warehouse_movement_id", null)
         arcSoapObject.addProperty("warehouse_movement_content_id", null)
@@ -195,7 +193,7 @@ constructor() {
 
     @Throws(Exception::class)
     fun warehouseMovementCount(date: String): Int? {
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             methodName = "WarehouseMovement_Count",
             params = arrayOf(WsParam("date", date))
         )

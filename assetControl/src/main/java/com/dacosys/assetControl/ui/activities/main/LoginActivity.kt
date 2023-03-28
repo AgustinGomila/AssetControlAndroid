@@ -37,10 +37,14 @@ import com.dacosys.assetControl.network.sync.SyncDownload
 import com.dacosys.assetControl.network.sync.SyncProgress
 import com.dacosys.assetControl.network.sync.SyncRegistryType
 import com.dacosys.assetControl.network.utils.*
+import com.dacosys.assetControl.network.utils.ClientPackage.Companion.selectClientPackage
+import com.dacosys.assetControl.network.utils.Connection.Companion.isOnline
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarEventData
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.fragments.user.UserSpinnerFragment
+import com.dacosys.assetControl.utils.ImageControl.Companion.closeImageControl
+import com.dacosys.assetControl.utils.ImageControl.Companion.setupImageControl
 import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetString
 import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
@@ -54,6 +58,7 @@ import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.Md5
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.Scanner
+import com.dacosys.assetControl.utils.scanners.rfid.Rfid.Companion.isRfidRequired
 import com.dacosys.assetControl.utils.settings.Preference
 import com.dacosys.assetControl.utils.settings.QRConfigType.CREATOR.QRConfigApp
 import com.dacosys.assetControl.utils.settings.QRConfigType.CREATOR.QRConfigClientAccount
@@ -69,7 +74,7 @@ import java.lang.ref.WeakReference
 import kotlin.concurrent.thread
 
 class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedListener,
-    Scanner.ScannerListener, Statics.TaskConfigEnded, Statics.Companion.TaskConfigPanelEnded {
+    Scanner.ScannerListener, Statics.TaskConfigEnded, ClientPackage.Companion.TaskConfigPanelEnded {
     override fun onTaskConfigPanelEnded(status: ProgressStatus) {
         if (status == ProgressStatus.finished) {
             makeText(binding.root, getString(R.string.configuration_applied), SnackBarType.SUCCESS)
@@ -91,7 +96,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         if (status == ProgressStatus.finished) {
             if (result.size > 0) {
                 runOnUiThread {
-                    Statics.selectClientPackage(
+                    selectClientPackage(
                         parentView = binding.login,
                         callback = this,
                         weakAct = WeakReference(this),
@@ -136,8 +141,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         val registryType: SyncRegistryType? = it.registryType
         val progressStatus: ProgressStatus = it.progressStatus
 
-        val percent =
-            if (totalTask > 0) Statics.getPercentage(completedTask, totalTask) else ""
+        val percent = if (totalTask > 0) Statics.getPercentage(completedTask, totalTask) else ""
 
         if (registryType != null) {
             setProgressBarText(registryType.description, percent)
@@ -303,8 +307,8 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
     }
 
     private fun refreshUsers() {
-        if (Statics.downloadDbRequired) {
-            if (!Statics.isOnline()) {
+        if (DownloadDb().downloadDbRequired) {
+            if (!isOnline()) {
                 showSnackBar(
                     SnackBarEventData(
                         getString(R.string.download_db_required_and_no_connection),
@@ -334,7 +338,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
             ex.printStackTrace()
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         } finally {
-            if (!Statics.isOnline()) {
+            if (!isOnline()) {
                 makeText(binding.root, getString(R.string.no_connection), SnackBarType.INFO)
             }
             syncing = false
@@ -585,7 +589,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                Escenario en el que el usuario ha vuelto a esta
                actividad después haber estado loggeado.
              */
-            Statics.closeImageControl()
+            closeImageControl()
 
             // Comprobar validez de la fecha del dispositivo
             if (!Statics.deviceDateIsValid()) {
@@ -637,7 +641,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
             return
         }
 
-        if (!Statics.isOnline()) {
+        if (!isOnline()) {
             refresh()
             syncing = false
             return
@@ -774,7 +778,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
             // perform the user login attempt.
             if (encondedPass == Md5.getMd5(password)) {
                 Statics.currentUserId = userId
-                Statics.setupImageControl()
+                setupImageControl()
 
                 thread {
                     SetCurrentSession { syncViewModel.setSessionCreated(it) }
@@ -848,7 +852,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                             adb.setMessage(getString(R.string.download_database_required_question))
                             adb.setNegativeButton(R.string.cancel, null)
                             adb.setPositiveButton(R.string.accept) { _, _ ->
-                                Statics.downloadDbRequired = true
+                                DownloadDb().downloadDbRequired = true
                                 Statics.getConfigFromScannedCode(
                                     scanCode = scanCode, mode = QRConfigWebservice
                                 ) { onTaskGetPackagesEnded(it) }
@@ -889,7 +893,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
             menu.removeItem(menu.findItem(R.id.action_settings).itemId)
         }
 
-        if (!Statics.isRfidRequired()) {
+        if (!isRfidRequired()) {
             menu.removeItem(menu.findItem(R.id.action_rfid_connect).itemId)
         }
 

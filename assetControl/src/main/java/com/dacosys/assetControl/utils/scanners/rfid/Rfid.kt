@@ -2,9 +2,10 @@ package com.dacosys.assetControl.utils.scanners.rfid
 
 import android.content.Context
 import android.util.Log
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.Preferences
 import com.dacosys.assetControl.utils.scanners.vh75.Utility
 import com.dacosys.assetControl.utils.scanners.vh75.Vh75Bt
+import com.dacosys.assetControl.utils.settings.Preference
 
 /**
  * Created by Agustin on 19/10/2017.
@@ -47,6 +48,27 @@ open class Rfid {
     companion object {
         // region Public methods
         var rfidDevice: Rfid? = null
+
+        fun initRfidRequired(): Boolean {
+            return if (isRfidRequired()) {
+                if (rfidDevice == null) {
+                    true
+                } else {
+                    if ((rfidDevice is Vh75Bt)) {
+                        (rfidDevice as Vh75Bt).mState == Vh75Bt.STATE_NONE
+                    } else false
+                }
+            } else false
+        }
+
+        fun isRfidRequired(): Boolean {
+            if (!Preferences.prefsGetBoolean(Preference.useBtRfid)) {
+                return false
+            }
+
+            val btAddress = Preferences.prefsGetString(Preference.rfidBtAddress)
+            return btAddress.isNotEmpty()
+        }
 
         fun resume(listener: RfidDeviceListener) {
             if (rfidDevice != null) {
@@ -102,7 +124,7 @@ open class Rfid {
         //endregion
 
         fun setListener(listener: RfidDeviceListener, rfidType: RfidType) {
-            if (Statics.initRequired()) {
+            if (initRfidRequired()) {
                 build(listener, listener as Context, rfidType)
             } else {
                 if (rfidDevice != null && rfidDevice is Vh75Bt) {

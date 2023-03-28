@@ -1,6 +1,6 @@
 package com.dacosys.assetControl.webservice.review
 
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.webservice.common.Webservice.Companion.getWebservice
 import com.dacosys.assetControl.webservice.common.WsParam
 import org.ksoap2.serialization.SoapObject
 import java.util.*
@@ -12,10 +12,9 @@ constructor() {
     fun assetReviewContentGet(
         assetReviewId: Long,
     ): Array<AssetReviewContentObject>? {
-        val any = Statics.getWebservice().s(
+        val any = getWebservice().s(
             "AssetReviewContent_Get",
             arrayOf(
-
                 WsParam("asset_review_id", assetReviewId)
             )
         )
@@ -39,10 +38,9 @@ constructor() {
         qty: Int,
         date: String,
     ): Array<AssetReviewContentObject>? {
-        val any = Statics.getWebservice().s(
+        val any = getWebservice().s(
             "AssetReviewContent_GetAll_Limit",
             arrayOf(
-
                 WsParam("pos", pos),
                 WsParam("qty", qty),
                 WsParam("date", date)
@@ -66,10 +64,9 @@ constructor() {
     fun assetReviewContentDelete(
         assetReviewId: Long,
     ): Boolean {
-        return Statics.getWebservice().s(
+        return getWebservice().s(
             "AssetReviewContent_Delete_All",
             arrayOf(
-
                 WsParam("asset_review_id", assetReviewId)
             )
         ) as Boolean
@@ -77,7 +74,7 @@ constructor() {
 
     @Throws(Exception::class)
     fun assetReviewContentCount(date: String): Int? {
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             methodName = "AssetReviewContent_Count",
             params = arrayOf(WsParam("date", date))
         )

@@ -7,6 +7,7 @@ import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.webservice.common.SessionObject
+import com.dacosys.assetControl.webservice.common.Webservice.Companion.getWebservice
 import kotlinx.coroutines.*
 import java.net.NetworkInterface
 import java.util.*
@@ -81,7 +82,7 @@ class SetCurrentSession(private var onSessionCreated: (Boolean) -> Unit = {}) {
             pcUserName:String
         */
 
-        val sessionId = Statics.getWebservice().addSession(
+        val sessionId = getWebservice().addSession(
             userId = user.userId,
             password = user.password,
             userIp = ip,

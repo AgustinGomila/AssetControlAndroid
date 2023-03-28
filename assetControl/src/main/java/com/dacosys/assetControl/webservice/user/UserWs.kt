@@ -1,6 +1,6 @@
 package com.dacosys.assetControl.webservice.user
 
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.webservice.common.Webservice.Companion.getWebservice
 import com.dacosys.assetControl.webservice.common.WsParam
 import org.ksoap2.serialization.SoapObject
 import java.util.*
@@ -11,7 +11,7 @@ constructor() {
     @Throws(Exception::class)
     fun userGetAll(
     ): Array<UserObject> {
-        val any = Statics.getWebservice().s(
+        val any = getWebservice().s(
             "User_GetAll"
         )
         val dObjAl: ArrayList<UserObject> = ArrayList()
@@ -31,7 +31,7 @@ constructor() {
         qty: Int,
         date: String,
     ): Array<UserObject> {
-        val any = Statics.getWebservice().s(
+        val any = getWebservice().s(
             "User_GetAll_Limit",
             arrayOf(
                 WsParam("pos", pos),
@@ -55,13 +55,13 @@ constructor() {
         userId: Long,
         user: UserObject,
     ): Long {
-        val uSoapObject = SoapObject(Statics.getWebservice().namespace, "user")
+        val uSoapObject = SoapObject(getWebservice().namespace, "user")
         uSoapObject.addProperty("user_id", user.user_id)
         uSoapObject.addProperty("name", user.name)
         uSoapObject.addProperty("active", user.active)
         uSoapObject.addProperty("password", user.password)
 
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             "User_Modify",
             arrayOf(WsParam("user_id", userId)),
             uSoapObject
@@ -74,13 +74,13 @@ constructor() {
         userId: Long,
         user: UserObject,
     ): Long {
-        val uSoapObject = SoapObject(Statics.getWebservice().namespace, "user")
+        val uSoapObject = SoapObject(getWebservice().namespace, "user")
         uSoapObject.addProperty("user_id", user.user_id)
         uSoapObject.addProperty("name", user.name)
         uSoapObject.addProperty("active", user.active)
         uSoapObject.addProperty("password", user.password)
 
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             "User_Add",
             arrayOf(WsParam("user_id", userId)),
             uSoapObject
@@ -90,7 +90,7 @@ constructor() {
 
     @Throws(Exception::class)
     fun userCount(date: String): Int? {
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             methodName = "User_Count",
             params = arrayOf(WsParam("date", date))
         )
@@ -102,7 +102,7 @@ constructor() {
 
     @Throws(Exception::class)
     fun initialUserCount(date: String): Int? {
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             methodName = "User_Collector_Count",
             params = arrayOf(WsParam("date", date)),
             soapObjParams1 = null,
@@ -121,7 +121,7 @@ constructor() {
         qty: Int,
         date: String,
     ): Array<UserObject> {
-        val any = Statics.getWebservice().s(
+        val any = getWebservice().s(
             "User_GetCollector_Limit",
             arrayOf(
                 WsParam("pos", pos),

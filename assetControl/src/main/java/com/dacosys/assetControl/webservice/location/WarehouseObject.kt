@@ -22,11 +22,7 @@ class WarehouseObject() : Parcelable {
         // Main Information
         description = warehouse.description
         warehouse_id = warehouse.warehouseId
-        active = if (warehouse.active) {
-            1
-        } else {
-            0
-        }
+        active = if (warehouse.active) 1 else 0
         warehouse_ext_id = ""
     }
 

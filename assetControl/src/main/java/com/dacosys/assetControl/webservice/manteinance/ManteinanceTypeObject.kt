@@ -23,11 +23,7 @@ class ManteinanceTypeObject() : Parcelable {
         description = manteinanceType.description
         manteinance_type_id = manteinanceType.manteinanceTypeId
         manteinance_type_group_id = manteinanceType.manteinanceTypeGroupId
-        active = if (manteinanceType.active) {
-            1
-        } else {
-            0
-        }
+        active = if (manteinanceType.active) 1 else 0
     }
 
     fun getBySoapObject(so: SoapObject): ManteinanceTypeObject {

@@ -12,7 +12,7 @@ import com.dacosys.assetControl.dataBase.datacollection.DataCollectionRuleTarget
 import com.dacosys.assetControl.dataBase.datacollection.DataCollectionRuleTargetContract.DataCollectionRuleTargetEntry.Companion.WAREHOUSE_AREA_ID
 import com.dacosys.assetControl.dataBase.datacollection.DataCollectionRuleTargetContract.DataCollectionRuleTargetEntry.Companion.WAREHOUSE_ID
 import com.dacosys.assetControl.dataBase.datacollection.DataCollectionRuleTargetContract.getAllColumns
-import com.dacosys.assetControl.model.datacollection.DataCollectionRuleTarget
+import com.dacosys.assetControl.model.dataCollection.DataCollectionRuleTarget
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 
 /**

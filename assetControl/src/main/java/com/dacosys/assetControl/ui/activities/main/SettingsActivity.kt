@@ -29,25 +29,29 @@ import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.dataBase.DataBaseHelper
+import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.DATABASE_NAME
 import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.copyDataBase
+import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.removeDataBases
 import com.dacosys.assetControl.databinding.SettingsActivityBinding
 import com.dacosys.assetControl.network.checkConn.CheckWsConnection
 import com.dacosys.assetControl.network.checkConn.ImageControlCheckUser
 import com.dacosys.assetControl.network.clientPackages.ClientPackagesProgress
+import com.dacosys.assetControl.network.download.DownloadDb
 import com.dacosys.assetControl.network.sync.SyncDownload
 import com.dacosys.assetControl.network.utils.*
+import com.dacosys.assetControl.network.utils.ClientPackage.Companion.selectClientPackage
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarEventData
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType.CREATOR.INFO
+import com.dacosys.assetControl.utils.Collector.Companion.collectorTypeChanged
 import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetInt
 import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetString
 import com.dacosys.assetControl.utils.Preferences.Companion.prefsPutString
 import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
 import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.Statics.Companion.DATABASE_NAME
 import com.dacosys.assetControl.utils.Statics.Companion.OFFLINE_MODE
 import com.dacosys.assetControl.utils.Statics.Companion.generateQrCode
 import com.dacosys.assetControl.utils.Statics.Companion.getBarcodeForConfig
@@ -57,6 +61,7 @@ import com.dacosys.assetControl.utils.errorLog.ErrorLog.Companion.getLastErrorLo
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
+import com.dacosys.assetControl.utils.scanners.rfid.Rfid.Companion.isRfidRequired
 import com.dacosys.assetControl.utils.scanners.rfid.RfidType
 import com.dacosys.assetControl.utils.scanners.vh75.Vh75Bt
 import com.dacosys.assetControl.utils.scanners.vh75.Vh75Bt.Companion.STATE_CONNECTED
@@ -96,7 +101,7 @@ import com.dacosys.assetControl.utils.settings.Preference.Companion as Preferenc
 
 class SettingsActivity : AppCompatActivity(),
     PreferenceFragmentCompat.OnPreferenceStartFragmentCallback, Scanner.ScannerListener,
-    Statics.TaskConfigEnded, Statics.Companion.TaskConfigPanelEnded {
+    Statics.TaskConfigEnded, ClientPackage.Companion.TaskConfigPanelEnded {
     class HeaderFragment : PreferenceFragmentCompat() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.pref_headers, rootKey)
@@ -262,7 +267,7 @@ class SettingsActivity : AppCompatActivity(),
             if (url.isEmpty() || namespace.isEmpty()) {
                 showSnackBar(
                     parentView, SnackBarEventData(
-                        getContext().getString(R.string.invalid_webservice_data), SnackBarType.INFO
+                        getContext().getString(R.string.invalid_webservice_data), INFO
                     )
                 )
                 return
@@ -414,9 +419,9 @@ class SettingsActivity : AppCompatActivity(),
     override fun onTaskConfigPanelEnded(status: ProgressStatus) {
         if (status == ProgressStatus.finished) {
             makeText(
-                binding.settings, getString(R.string.configuration_applied), SnackBarType.INFO
+                binding.settings, getString(R.string.configuration_applied), INFO
             )
-            Statics.removeDataBases()
+            removeDataBases()
             finish()
         } else if (status == ProgressStatus.crashed) {
             makeText(
@@ -437,7 +442,7 @@ class SettingsActivity : AppCompatActivity(),
         if (status == ProgressStatus.finished) {
             if (result.size > 0) {
                 runOnUiThread {
-                    Statics.selectClientPackage(
+                    selectClientPackage(
                         parentView = binding.settings,
                         callback = this,
                         weakAct = WeakReference(this),
@@ -447,7 +452,7 @@ class SettingsActivity : AppCompatActivity(),
                     )
                 }
             } else {
-                makeText(binding.settings, msg, SnackBarType.INFO)
+                makeText(binding.settings, msg, INFO)
             }
         } else if (status == ProgressStatus.success) {
             makeText(binding.settings, msg, SnackBarType.SUCCESS)
@@ -609,7 +614,7 @@ class SettingsActivity : AppCompatActivity(),
     }
 
     class AccountPreferenceFragment : PreferenceFragmentCompat(),
-        Statics.Companion.TaskConfigPanelEnded {
+        ClientPackage.Companion.TaskConfigPanelEnded {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             var key = rootKey
             if (arguments != null) {
@@ -822,7 +827,7 @@ class SettingsActivity : AppCompatActivity(),
                     getString(R.string.yes)
                 ) { dialog, _ ->
                     //your deleting code
-                    Statics.downloadDbRequired = true
+                    DownloadDb().downloadDbRequired = true
                     alreadyAnsweredYes = true
 
                     if (email.isNotEmpty() && password.isNotEmpty()) {
@@ -848,7 +853,7 @@ class SettingsActivity : AppCompatActivity(),
                     getString(R.string.yes)
                 ) { dialog, _ ->
                     //your deleting code
-                    Statics.downloadDbRequired = true
+                    DownloadDb().downloadDbRequired = true
                     preference.summary = newValue.toString()
                     alreadyAnsweredYes = true
                     if (newValue is String) {
@@ -976,7 +981,7 @@ class SettingsActivity : AppCompatActivity(),
             if (status == ProgressStatus.finished) {
                 if (result.size > 0) {
                     requireActivity().runOnUiThread {
-                        Statics.selectClientPackage(
+                        selectClientPackage(
                             parentView = requireView(),
                             callback = this,
                             weakAct = WeakReference(requireActivity()),
@@ -987,7 +992,7 @@ class SettingsActivity : AppCompatActivity(),
                     }
                 } else {
                     if (view != null) makeText(
-                        requireView(), msg, SnackBarType.INFO
+                        requireView(), msg, INFO
                     )
                 }
             } else if (status == ProgressStatus.success) {
@@ -1009,10 +1014,10 @@ class SettingsActivity : AppCompatActivity(),
             if (status == ProgressStatus.finished) {
                 if (view != null) showSnackBar(
                     SnackBarEventData(
-                        getString(R.string.configuration_applied), SnackBarType.INFO
+                        getString(R.string.configuration_applied), INFO
                     )
                 )
-                Statics.removeDataBases()
+                removeDataBases()
                 requireActivity().finish()
             } else if (status == ProgressStatus.crashed) {
                 if (view != null) showSnackBar(
@@ -1086,12 +1091,12 @@ class SettingsActivity : AppCompatActivity(),
 
         private fun setupRfidReader() {
             try {
-                if (Statics.isRfidRequired()) {
+                if (isRfidRequired()) {
                     Rfid.setListener(this, RfidType.vh75)
                 }
             } catch (ex: Exception) {
                 ex.printStackTrace()
-                makeText(v, getString(R.string.rfid_reader_not_initialized), SnackBarType.INFO)
+                makeText(v, getString(R.string.rfid_reader_not_initialized), INFO)
                 ErrorLog.writeLog(activity, this::class.java.simpleName, ex)
             }
         }
@@ -1123,7 +1128,7 @@ class SettingsActivity : AppCompatActivity(),
                 Preference.OnPreferenceChangeListener { preference, newValue ->
                     preference.summary =
                         CollectorType.getById(newValue.toString().toInt()).description
-                    Statics.collectorTypeChanged = true
+                    collectorTypeChanged = true
                     true
                 }
         }
@@ -1483,7 +1488,7 @@ class SettingsActivity : AppCompatActivity(),
             if (mBluetoothAdapter == null) {
                 showSnackBar(
                     SnackBarEventData(
-                        getString(R.string.there_are_no_bluetooth_devices), SnackBarType.INFO
+                        getString(R.string.there_are_no_bluetooth_devices), INFO
                     )
                 )
             } else {
@@ -1581,7 +1586,7 @@ class SettingsActivity : AppCompatActivity(),
      * activity is showing a two-pane settings UI.
      */
     class ImageControlPreferenceFragment : PreferenceFragmentCompat(),
-        Statics.Companion.TaskConfigPanelEnded {
+        ClientPackage.Companion.TaskConfigPanelEnded {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             var key = rootKey
             if (arguments != null) {
@@ -1757,7 +1762,7 @@ class SettingsActivity : AppCompatActivity(),
                 if (view != null) showSnackBar(
                     SnackBarEventData(
                         AssetControlApp.getContext().getString(R.string.invalid_webservice_data),
-                        SnackBarType.INFO
+                        INFO
                     )
                 )
                 return
@@ -1769,10 +1774,10 @@ class SettingsActivity : AppCompatActivity(),
             if (status == ProgressStatus.finished) {
                 if (view != null) showSnackBar(
                     SnackBarEventData(
-                        getString(R.string.configuration_applied), SnackBarType.INFO
+                        getString(R.string.configuration_applied), INFO
                     )
                 )
-                Statics.removeDataBases()
+                removeDataBases()
                 requireActivity().finish()
             } else if (status == ProgressStatus.crashed) {
                 if (view != null) showSnackBar(
@@ -2006,7 +2011,7 @@ class SettingsActivity : AppCompatActivity(),
                     cleanPanelWebData()
 
                     //your deleting code
-                    Statics.downloadDbRequired = true
+                    DownloadDb().downloadDbRequired = true
                     preference.summary = newValue.toString()
                     alreadyAnsweredYes = true
                     if (newValue is String) {
@@ -2580,7 +2585,7 @@ class SettingsActivity : AppCompatActivity(),
             } else {
                 if (view != null) showSnackBar(
                     SnackBarEventData(
-                        getString(R.string.no_temporary_bases_found), SnackBarType.INFO
+                        getString(R.string.no_temporary_bases_found), INFO
                     )
                 )
             }
@@ -2595,7 +2600,7 @@ class SettingsActivity : AppCompatActivity(),
                     SnackBarEventData(
                         String.format(
                             "%s: %s", getString(R.string.database_changed), DATABASE_NAME
-                        ), SnackBarType.INFO
+                        ), INFO
                     )
                 )
             } catch (ex: java.lang.Exception) {
@@ -2610,7 +2615,7 @@ class SettingsActivity : AppCompatActivity(),
                 if (view != null) makeText(
                     requireView(), String.format(
                         "%s: %s", getString(R.string.database_changed), DATABASE_NAME
-                    ), SnackBarType.INFO
+                    ), INFO
                 )
 
                 // Reiniciamos la instancia
@@ -2630,11 +2635,11 @@ class SettingsActivity : AppCompatActivity(),
                     getString(R.string.yes)
                 ) { dialog, _ ->
                     // Forzar descarga de la base de datos
-                    Statics.downloadDbRequired = true
+                    DownloadDb().downloadDbRequired = true
                     if (view != null) makeText(
                         requireView(),
                         getString(R.string.the_database_will_be_downloaded_when_you_return_to_the_login_screen),
-                        SnackBarType.INFO
+                        INFO
                     )
                     dialog.dismiss()
                 }.setNegativeButton(

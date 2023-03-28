@@ -34,9 +34,10 @@ import com.dacosys.assetControl.webservice.asset.AssetObject
 import com.dacosys.assetControl.webservice.asset.AssetWs
 import com.dacosys.assetControl.webservice.category.ItemCategoryObject
 import com.dacosys.assetControl.webservice.category.ItemCategoryWs
-import com.dacosys.assetControl.webservice.datacollection.DataCollectionContentObject
-import com.dacosys.assetControl.webservice.datacollection.DataCollectionObject
-import com.dacosys.assetControl.webservice.datacollection.DataCollectionWs
+import com.dacosys.assetControl.webservice.common.Webservice.Companion.getWebservice
+import com.dacosys.assetControl.webservice.dataCollection.DataCollectionContentObject
+import com.dacosys.assetControl.webservice.dataCollection.DataCollectionObject
+import com.dacosys.assetControl.webservice.dataCollection.DataCollectionWs
 import com.dacosys.assetControl.webservice.location.WarehouseAreaObject
 import com.dacosys.assetControl.webservice.location.WarehouseAreaWs
 import com.dacosys.assetControl.webservice.location.WarehouseObject
@@ -82,7 +83,7 @@ class SyncUpload(
                 )
             }
         }
-        GetMySqlDate(Statics.getWebservice()) { onConnectionResult(it) }.execute()
+        GetMySqlDate(getWebservice()) { onConnectionResult(it) }.execute()
     }
 
     private fun onSyncFinish(result: Boolean) {

@@ -1,6 +1,6 @@
 package com.dacosys.assetControl.webservice.category
 
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.webservice.common.Webservice.Companion.getWebservice
 import com.dacosys.assetControl.webservice.common.WsParam
 import org.ksoap2.serialization.SoapObject
 import java.util.*
@@ -11,7 +11,7 @@ constructor() {
     @Throws(Exception::class)
     fun itemCategoryGetAll(
     ): Array<ItemCategoryObject> {
-        val any = Statics.getWebservice().s(
+        val any = getWebservice().s(
             "ItemCategory_GetAll"
         )
         val dObjAl: ArrayList<ItemCategoryObject> = ArrayList()
@@ -31,7 +31,7 @@ constructor() {
         qty: Int,
         date: String,
     ): Array<ItemCategoryObject> {
-        val any = Statics.getWebservice().s(
+        val any = getWebservice().s(
             "ItemCategory_GetAll_Limit",
             arrayOf(
                 WsParam("pos", pos),
@@ -55,14 +55,14 @@ constructor() {
         userId: Long,
         itemCategory: ItemCategoryObject,
     ): Long {
-        val icSoapObject = SoapObject(Statics.getWebservice().namespace, "item_category")
+        val icSoapObject = SoapObject(getWebservice().namespace, "item_category")
         icSoapObject.addProperty("item_category_id", itemCategory.item_category_id)
         icSoapObject.addProperty("parent_id", itemCategory.parent_id)
         icSoapObject.addProperty("description", itemCategory.description)
         icSoapObject.addProperty("active", itemCategory.active)
         icSoapObject.addProperty("item_category_ext_id", itemCategory.item_category_ext_id)
 
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             "ItemCategory_Modify",
             arrayOf(WsParam("user_id", userId)),
             icSoapObject
@@ -75,14 +75,14 @@ constructor() {
         userId: Long,
         itemCategory: ItemCategoryObject,
     ): Long {
-        val icSoapObject = SoapObject(Statics.getWebservice().namespace, "item_category")
+        val icSoapObject = SoapObject(getWebservice().namespace, "item_category")
         icSoapObject.addProperty("item_category_id", itemCategory.item_category_id)
         icSoapObject.addProperty("parent_id", itemCategory.parent_id)
         icSoapObject.addProperty("description", itemCategory.description)
         icSoapObject.addProperty("active", itemCategory.active)
         icSoapObject.addProperty("item_category_ext_id", itemCategory.item_category_ext_id)
 
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             "ItemCategory_Add",
             arrayOf(WsParam("user_id", userId)),
             icSoapObject
@@ -92,7 +92,7 @@ constructor() {
 
     @Throws(Exception::class)
     fun itemCategoryCount(date: String): Int? {
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             methodName = "ItemCategory_Count",
             params = arrayOf(WsParam("date", date))
         )

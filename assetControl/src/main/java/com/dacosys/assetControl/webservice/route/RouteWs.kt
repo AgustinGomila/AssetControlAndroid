@@ -1,6 +1,6 @@
 package com.dacosys.assetControl.webservice.route
 
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.webservice.common.Webservice.Companion.getWebservice
 import com.dacosys.assetControl.webservice.common.WsParam
 import org.ksoap2.serialization.SoapObject
 import java.util.*
@@ -11,7 +11,7 @@ constructor() {
     @Throws(Exception::class)
     fun routeGetAll(
     ): Array<RouteObject> {
-        val any = Statics.getWebservice().s(
+        val any = getWebservice().s(
             "Route_GetAll"
         )
         val dObjAl: ArrayList<RouteObject> = ArrayList()
@@ -31,7 +31,7 @@ constructor() {
         qty: Int,
         date: String,
     ): Array<RouteObject> {
-        val any = Statics.getWebservice().s(
+        val any = getWebservice().s(
             "Route_GetAll_Limit",
             arrayOf(
                 WsParam("pos", pos),
@@ -55,12 +55,12 @@ constructor() {
         userId: Long,
         route: RouteObject,
     ): Long {
-        val waSoapObject = SoapObject(Statics.getWebservice().namespace, "route")
+        val waSoapObject = SoapObject(getWebservice().namespace, "route")
         waSoapObject.addProperty("route_id", route.route_id)
         waSoapObject.addProperty("description", route.description)
         waSoapObject.addProperty("active", route.active)
 
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             "Route_Modify",
             arrayOf(WsParam("user_id", userId)),
             waSoapObject
@@ -73,12 +73,12 @@ constructor() {
         userId: Long,
         route: RouteObject,
     ): Long {
-        val waSoapObject = SoapObject(Statics.getWebservice().namespace, "route")
+        val waSoapObject = SoapObject(getWebservice().namespace, "route")
         waSoapObject.addProperty("route_id", route.route_id)
         waSoapObject.addProperty("description", route.description)
         waSoapObject.addProperty("active", route.active)
 
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             "Route_Add",
             arrayOf(WsParam("user_id", userId)),
             waSoapObject
@@ -88,7 +88,7 @@ constructor() {
 
     @Throws(Exception::class)
     fun routeCount(date: String): Int? {
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             methodName = "Route_Count",
             params = arrayOf(WsParam("date", date))
         )

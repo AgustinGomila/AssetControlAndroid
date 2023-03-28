@@ -3,7 +3,7 @@ package com.dacosys.assetControl.utils.scanners
 import android.os.Build
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.Collector.Companion.collectorType
 import com.dacosys.assetControl.utils.scanners.honeywell.Honeywell
 import com.dacosys.assetControl.utils.scanners.honeywell.HoneywellNative
 import com.dacosys.assetControl.utils.scanners.zebra.Zebra
@@ -33,7 +33,7 @@ open class Scanner {
         Log.i(javaClass.simpleName, "SCANNER CONNECTED Manufacturer: $manufacturer, Model: $model")
 
         try {
-            scannerDevice = when (Statics.collectorType) {
+            scannerDevice = when (collectorType) {
                 CollectorType.honeywell -> Honeywell(activity)
                 CollectorType.honeywellNative -> HoneywellNative(WeakReference(activity))
                 CollectorType.zebra -> Zebra(activity)

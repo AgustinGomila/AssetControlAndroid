@@ -40,6 +40,7 @@ import com.dacosys.assetControl.model.status.ConfirmStatus
 import com.dacosys.assetControl.model.status.ConfirmStatus.CREATOR.cancel
 import com.dacosys.assetControl.model.status.ConfirmStatus.CREATOR.confirm
 import com.dacosys.assetControl.model.status.ConfirmStatus.CREATOR.modify
+import com.dacosys.assetControl.network.utils.Connection.Companion.autoSend
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.ui.activities.asset.AssetCRUDActivity
 import com.dacosys.assetControl.ui.activities.asset.AssetDetailActivity
@@ -51,7 +52,6 @@ import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
 import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.Statics.Companion.isRfidRequired
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.ParcelLong
 import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.getUTCDateTimeAsString
@@ -60,6 +60,7 @@ import com.dacosys.assetControl.utils.scanners.ScannedCode
 import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.utils.scanners.nfc.Nfc
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
+import com.dacosys.assetControl.utils.scanners.rfid.Rfid.Companion.isRfidRequired
 import com.dacosys.assetControl.viewModel.review.SaveReviewViewModel
 import com.dacosys.imageControl.moshi.DocumentContent
 import com.dacosys.imageControl.moshi.DocumentContentRequestResult
@@ -1317,7 +1318,7 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
             intent.putExtra("programObjectId", tableId.toLong())
             intent.putExtra("objectId1", itemId.toString())
             intent.putExtra("description", description)
-            intent.putExtra("addPhoto", Statics.autoSend())
+            intent.putExtra("addPhoto", autoSend())
             resultForPhotoCapture.launch(intent)
         }
     }

@@ -18,16 +18,19 @@ import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
+import com.dacosys.assetControl.utils.Collector.Companion.collectorType
+import com.dacosys.assetControl.utils.Collector.Companion.collectorTypeChanged
+import com.dacosys.assetControl.utils.Collector.Companion.isNfcRequired
 import com.dacosys.assetControl.utils.Preferences.Companion.prefsIsInitialized
 import com.dacosys.assetControl.utils.Preferences.Companion.prefsPutString
 import com.dacosys.assetControl.utils.Preferences.Companion.startPrefs
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.scanners.Scanner.ScannerListener
 import com.dacosys.assetControl.utils.scanners.floatingCamera.FloatingCameraBarcode
 import com.dacosys.assetControl.utils.scanners.nfc.Nfc
 import com.dacosys.assetControl.utils.scanners.nfc.Nfc.enableNfcForegroundDispatch
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
+import com.dacosys.assetControl.utils.scanners.rfid.Rfid.Companion.isRfidRequired
 import com.dacosys.assetControl.utils.scanners.rfid.RfidType
 import com.dacosys.assetControl.utils.settings.Preference
 import com.dacosys.assetControl.utils.settings.collectorType.CollectorType
@@ -190,7 +193,7 @@ object JotterListener : Jotter.Listener {
     }
 
     fun autodetectDeviceModel(activity: AppCompatActivity) {
-        var collectorType: CollectorType? = Statics.collectorType
+        var collectorType: CollectorType? = collectorType
 
         // Sólo si no fue configurado o cambió la configuración
         if (collectorType == null || collectorType == CollectorType.none) {
@@ -226,12 +229,12 @@ object JotterListener : Jotter.Listener {
                     "${getContext().getString(R.string.device)}: $manufacturer $model",
                     SnackBarType.INFO
                 )
-                Statics.collectorTypeChanged = true
+                collectorTypeChanged = true
             }
         }
 
-        if (Statics.collectorTypeChanged) {
-            Statics.collectorTypeChanged = false
+        if (collectorTypeChanged) {
+            collectorTypeChanged = false
 
             // Restart Scanners
             destroyScanner(activity)
@@ -271,9 +274,9 @@ object JotterListener : Jotter.Listener {
             // Creamos y agregamos el escáner de la actividad
             createBarcodeReader(activity)
 
-            if (Statics.isNfcRequired()) Nfc.setupNFCReader(activity)
+            if (isNfcRequired()) Nfc.setupNFCReader(activity)
 
-            if (activity is Rfid.RfidDeviceListener && Statics.isRfidRequired()) {
+            if (activity is Rfid.RfidDeviceListener && isRfidRequired()) {
                 rfidStart(activity)
                 rfidSetup(activity)
             }
@@ -361,9 +364,9 @@ object JotterListener : Jotter.Listener {
     }
 
     fun resumeReaderDevices(activity: AppCompatActivity) {
-        if (Statics.isNfcRequired()) enableNfcForegroundDispatch(activity)
+        if (isNfcRequired()) enableNfcForegroundDispatch(activity)
 
-        if (activity is Rfid.RfidDeviceListener && Statics.isRfidRequired()) Rfid.resume(activity)
+        if (activity is Rfid.RfidDeviceListener && isRfidRequired()) Rfid.resume(activity)
 
         scannerList.firstOrNull { it.activityName() == activity.javaClass.simpleName }?.onResume()
         floatingWindowList.firstOrNull { it.activityName == activity.javaClass.simpleName }
@@ -402,9 +405,9 @@ object JotterListener : Jotter.Listener {
     }
 
     fun pauseReaderDevices(activity: AppCompatActivity) {
-        if (activity is Rfid.RfidDeviceListener && Statics.isRfidRequired()) Rfid.pause()
+        if (activity is Rfid.RfidDeviceListener && isRfidRequired()) Rfid.pause()
 
-        if (Statics.isNfcRequired()) Nfc.disableNfcForegroundDispatch(activity)
+        if (isNfcRequired()) Nfc.disableNfcForegroundDispatch(activity)
 
         scannerList.firstOrNull { it.activityName() == activity.javaClass.simpleName }?.onPause()
         floatingWindowList.firstOrNull { it.activityName == activity.javaClass.simpleName }

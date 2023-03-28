@@ -44,6 +44,7 @@ import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetLong
 import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetString
 import com.dacosys.assetControl.utils.Preferences.Companion.prefsPutLong
+import com.dacosys.assetControl.utils.Printer.Companion.printerBluetoothDevice
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.CounterHandler
@@ -274,7 +275,7 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
         }
 
     private fun initializePrinter() {
-        if (Statics.printerBluetoothDevice != null) {
+        if (printerBluetoothDevice != null) {
             val bluetoothManager = AssetControlApp.getContext()
                 .getSystemService(AppCompatActivity.BLUETOOTH_SERVICE) as BluetoothManager
             val mBluetoothAdapter = bluetoothManager.adapter
@@ -303,7 +304,7 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
                         resultForPrinterConnect.launch(enablePrinter)
                     }
                 } else {
-                    connectToPrinter(Statics.printerBluetoothDevice!!.address)
+                    connectToPrinter(printerBluetoothDevice!!.address)
                 }
             }
         }
@@ -312,7 +313,7 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
     private val resultForPrinterConnect =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it?.resultCode == CommonStatusCodes.SUCCESS || it?.resultCode == CommonStatusCodes.SUCCESS_CACHE) {
-                connectToPrinter(Statics.printerBluetoothDevice!!.address)
+                connectToPrinter(printerBluetoothDevice!!.address)
             }
         }
 

@@ -26,7 +26,7 @@ import com.dacosys.assetControl.adapters.sync.SyncElementAdapter
 import com.dacosys.assetControl.databinding.SyncActivityBinding
 import com.dacosys.assetControl.model.asset.Asset
 import com.dacosys.assetControl.model.category.ItemCategory
-import com.dacosys.assetControl.model.datacollection.DataCollection
+import com.dacosys.assetControl.model.dataCollection.DataCollection
 import com.dacosys.assetControl.model.location.Warehouse
 import com.dacosys.assetControl.model.location.WarehouseArea
 import com.dacosys.assetControl.model.movement.WarehouseMovement
@@ -36,6 +36,7 @@ import com.dacosys.assetControl.network.serverDate.GetMySqlDate
 import com.dacosys.assetControl.network.serverDate.MySqlDateResult
 import com.dacosys.assetControl.network.sync.*
 import com.dacosys.assetControl.network.utils.*
+import com.dacosys.assetControl.network.utils.Connection.Companion.isOnline
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetStringSet
@@ -47,6 +48,7 @@ import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.settings.Preference
 import com.dacosys.assetControl.viewModel.sync.PendingViewModel
 import com.dacosys.assetControl.viewModel.sync.SyncViewModel
+import com.dacosys.assetControl.webservice.common.Webservice.Companion.getWebservice
 import com.dacosys.imageControl.network.upload.UploadImagesProgress
 import com.dacosys.imageControl.room.entity.Image
 import kotlinx.coroutines.*
@@ -423,7 +425,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
 
         try {
             if (!Statics.superDemoMode) {
-                if (Statics.OFFLINE_MODE || !Statics.isOnline()) {
+                if (Statics.OFFLINE_MODE || !isOnline()) {
                     makeText(binding.root, getString(R.string.offline_mode), SnackBarType.INFO)
                     return
                 }
@@ -470,7 +472,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
         if (syncing) return
 
         try {
-            if (Statics.OFFLINE_MODE || !Statics.isOnline()) {
+            if (Statics.OFFLINE_MODE || !isOnline()) {
                 makeText(binding.root, getString(R.string.offline_mode), SnackBarType.INFO)
                 return
             }
@@ -801,7 +803,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
                 }
             }
         }
-        GetMySqlDate(Statics.getWebservice()) { onConnectionResult(it) }.execute()
+        GetMySqlDate(getWebservice()) { onConnectionResult(it) }.execute()
     }
 
     private fun fillPendingData() {

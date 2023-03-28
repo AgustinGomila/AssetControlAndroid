@@ -11,9 +11,9 @@ import com.dacosys.assetControl.network.serverDate.MySqlDateResult
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetInt
 import com.dacosys.assetControl.utils.Preferences.Companion.prefsPutString
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.settings.entries.ConfEntry
+import com.dacosys.assetControl.webservice.common.Webservice.Companion.getWebservice
 import com.dacosys.assetControl.webservice.user.*
 import kotlinx.coroutines.*
 
@@ -168,7 +168,7 @@ class SyncInitialUser(
     }
 
     private fun checkConnection() {
-        GetMySqlDate(Statics.getWebservice()) { onConnectionResult(it) }.execute()
+        GetMySqlDate(getWebservice()) { onConnectionResult(it) }.execute()
     }
 
     private fun onConnectionResult(it: MySqlDateResult) {

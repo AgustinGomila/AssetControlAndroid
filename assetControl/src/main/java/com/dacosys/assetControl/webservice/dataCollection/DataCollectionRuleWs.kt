@@ -1,6 +1,6 @@
-package com.dacosys.assetControl.webservice.datacollection
+package com.dacosys.assetControl.webservice.dataCollection
 
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.webservice.common.Webservice.Companion.getWebservice
 import com.dacosys.assetControl.webservice.common.WsParam
 import org.ksoap2.serialization.SoapObject
 import java.util.*
@@ -11,7 +11,7 @@ constructor() {
     @Throws(Exception::class)
     fun dataCollectionRuleGetAll(
     ): Array<DataCollectionRuleObject> {
-        val any = Statics.getWebservice().s(
+        val any = getWebservice().s(
             "DataCollectionRule_GetAll"
         )
         val dObjAl: ArrayList<DataCollectionRuleObject> = ArrayList()
@@ -31,7 +31,7 @@ constructor() {
         qty: Int,
         date: String,
     ): Array<DataCollectionRuleObject> {
-        val any = Statics.getWebservice().s(
+        val any = getWebservice().s(
             "DataCollectionRule_GetAll_Limit",
             arrayOf(
                 WsParam("pos", pos),
@@ -55,12 +55,12 @@ constructor() {
         userId: Long,
         dataCollectionRule: DataCollectionRuleObject,
     ): Long {
-        val waSoapObject = SoapObject(Statics.getWebservice().namespace, "data_collection_rule")
+        val waSoapObject = SoapObject(getWebservice().namespace, "data_collection_rule")
         waSoapObject.addProperty("data_collection_rule_id", dataCollectionRule.dataCollectionRuleId)
         waSoapObject.addProperty("description", dataCollectionRule.description)
         waSoapObject.addProperty("active", dataCollectionRule.active)
 
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             "DataCollectionRule_Modify",
             arrayOf(WsParam("user_id", userId)),
             waSoapObject
@@ -73,12 +73,12 @@ constructor() {
         userId: Long,
         dataCollectionRule: DataCollectionRuleObject,
     ): Long {
-        val waSoapObject = SoapObject(Statics.getWebservice().namespace, "data_collection_rule")
+        val waSoapObject = SoapObject(getWebservice().namespace, "data_collection_rule")
         waSoapObject.addProperty("data_collection_rule_id", dataCollectionRule.dataCollectionRuleId)
         waSoapObject.addProperty("description", dataCollectionRule.description)
         waSoapObject.addProperty("active", dataCollectionRule.active)
 
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             "DataCollectionRule_Add",
             arrayOf(WsParam("user_id", userId)),
             waSoapObject
@@ -88,7 +88,7 @@ constructor() {
 
     @Throws(Exception::class)
     fun dataCollectionRuleCount(date: String): Int? {
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             methodName = "DataCollectionRule_Count",
             params = arrayOf(WsParam("date", date))
         )

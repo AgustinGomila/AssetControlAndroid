@@ -11,8 +11,8 @@ import com.dacosys.assetControl.model.route.RouteProcessStatus
 import com.dacosys.assetControl.network.sync.SyncProgress
 import com.dacosys.assetControl.network.sync.SyncRegistryType
 import com.dacosys.assetControl.network.sync.SyncUpload
+import com.dacosys.assetControl.network.utils.Connection.Companion.autoSend
 import com.dacosys.assetControl.network.utils.ProgressStatus
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import kotlinx.coroutines.*
 
@@ -55,7 +55,7 @@ class SaveRouteProcess {
         if (result) {
             routeProcess.completed = true
             if (routeProcess.saveChanges()) {
-                if (Statics.autoSend()) {
+                if (autoSend()) {
                     SyncUpload(registryType = SyncRegistryType.RouteProcess,
                         onSyncTaskProgress = { onSyncProgress.invoke(it) })
                 } else {

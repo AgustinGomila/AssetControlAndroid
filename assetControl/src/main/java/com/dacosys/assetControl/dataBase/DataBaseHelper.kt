@@ -30,9 +30,9 @@ import com.dacosys.assetControl.dataBase.movement.WarehouseMovementDbHelper
 import com.dacosys.assetControl.dataBase.review.*
 import com.dacosys.assetControl.dataBase.route.*
 import com.dacosys.assetControl.dataBase.user.*
-import com.dacosys.assetControl.utils.Statics.Companion.DATABASE_NAME
-import com.dacosys.assetControl.utils.Statics.Companion.DATABASE_VERSION
+import com.dacosys.assetControl.network.sync.SyncDownload
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.imageControl.room.database.IcDatabase
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -135,11 +135,23 @@ class DataBaseHelper : SQLiteOpenHelper(
     }
 
     companion object {
+        const val DATABASE_VERSION = 1
+        var DATABASE_NAME = "assetcontroldb.sqlite"
+
         private var myDataBase: SQLiteDatabase? = null
 
         //////////////////////////////////////////////////////////////
         /////////////// INSTANCIA ESTÁTICA (SINGLETON) ///////////////
         private var sInstance: DataBaseHelper? = null
+
+        fun removeDataBases() {
+            SyncDownload.resetSyncDates()
+
+            IcDatabase.cleanInstance()
+            DataBaseHelper().deleteDb()
+
+            SQLiteDatabase.releaseMemory()
+        }
 
         fun beginDataBase() {
             try {

@@ -10,12 +10,12 @@ import com.dacosys.assetControl.dataBase.datacollection.FragmentDataContract.Fra
 import com.dacosys.assetControl.dataBase.datacollection.FragmentDataContract.FragmentDataEntry.Companion.IS_ENABLED
 import com.dacosys.assetControl.dataBase.datacollection.FragmentDataContract.FragmentDataEntry.Companion.TABLE_NAME
 import com.dacosys.assetControl.dataBase.datacollection.FragmentDataContract.FragmentDataEntry.Companion.VALUE_STR
-import com.dacosys.assetControl.ui.fragments.route.GeneralFragment
+import com.dacosys.assetControl.ui.fragments.route.FragmentData
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.splitList
 
 class FragmentDataDbHelper {
-    fun tempTableInsert(itemArray: Array<GeneralFragment.FragmentData>): Boolean {
+    fun tempTableInsert(itemArray: Array<FragmentData>): Boolean {
         var result = false
 
         // Las tablas temporales y los índices se crearán sólo si no existen
@@ -67,7 +67,7 @@ class FragmentDataDbHelper {
         }
     }
 
-    private fun insertTemp(itemArray: Array<GeneralFragment.FragmentData>): Boolean {
+    private fun insertTemp(itemArray: Array<FragmentData>): Boolean {
         if (itemArray.isEmpty()) {
             return false
         }
@@ -118,7 +118,7 @@ class FragmentDataDbHelper {
         return !error
     }
 
-    fun tempTableSelect(): ArrayList<GeneralFragment.FragmentData> {
+    fun tempTableSelect(): ArrayList<FragmentData> {
         Log.d(
             this::class.java.simpleName,
             "SQLITE-SELECT"
@@ -137,8 +137,8 @@ class FragmentDataDbHelper {
         }
     }
 
-    private fun fromCursor(c: Cursor?): ArrayList<GeneralFragment.FragmentData> {
-        val res = ArrayList<GeneralFragment.FragmentData>()
+    private fun fromCursor(c: Cursor?): ArrayList<FragmentData> {
+        val res = ArrayList<FragmentData>()
         c.use {
             if (it != null) {
                 while (it.moveToNext()) {
@@ -150,7 +150,7 @@ class FragmentDataDbHelper {
                     val attrCompTypeId =
                         it.getLong(it.getColumnIndexOrThrow(ATTRIBUTE_COMPOSITION_TYPE_ID))
 
-                    val temp = GeneralFragment.FragmentData(
+                    val temp = FragmentData(
                         dcrContId = dcrContId,
                         attrCompTypeId = attrCompTypeId,
                         valueStr = valueStr,

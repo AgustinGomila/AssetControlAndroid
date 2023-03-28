@@ -1,6 +1,6 @@
 package com.dacosys.assetControl.webservice.barcode
 
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.webservice.common.Webservice.Companion.getWebservice
 import com.dacosys.assetControl.webservice.common.WsParam
 import org.ksoap2.serialization.SoapObject
 import java.util.*
@@ -11,7 +11,7 @@ constructor() {
     @Throws(Exception::class)
     fun barcodeLabelCustomGetAll(
     ): Array<BarcodeLabelCustomObject> {
-        val any = Statics.getWebservice().s(
+        val any = getWebservice().s(
             "BarcodeLabelCustom_GetAll"
         )
         val dObjAl: ArrayList<BarcodeLabelCustomObject> = ArrayList()
@@ -31,7 +31,7 @@ constructor() {
         qty: Int,
         date: String,
     ): Array<BarcodeLabelCustomObject> {
-        val any = Statics.getWebservice().s(
+        val any = getWebservice().s(
             "BarcodeLabelCustom_GetAll_Limit",
             arrayOf(
                 WsParam("pos", pos),
@@ -56,7 +56,7 @@ constructor() {
         barcodeLabelCustom: BarcodeLabelCustomObject,
     ): Long {
         val icSoapObject = SoapObject(
-            Statics.getWebservice().namespace,
+            getWebservice().namespace,
             "barcode_label_custom"
         )
 
@@ -81,7 +81,7 @@ constructor() {
             barcodeLabelCustom.template
         )
 
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             "BarcodeLabelCustom_Modify",
             arrayOf(WsParam("user_id", userId)),
             icSoapObject
@@ -95,7 +95,7 @@ constructor() {
         barcodeLabelCustom: BarcodeLabelCustomObject,
     ): Long {
         val icSoapObject = SoapObject(
-            Statics.getWebservice().namespace,
+            getWebservice().namespace,
             "barcode_label_custom"
         )
 
@@ -120,7 +120,7 @@ constructor() {
             barcodeLabelCustom.template
         )
 
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             "BarcodeLabelCustom_Add",
             arrayOf(WsParam("user_id", userId)),
             icSoapObject
@@ -130,7 +130,7 @@ constructor() {
 
     @Throws(Exception::class)
     fun barcodeLabelCustomCount(date: String): Int? {
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             methodName = "BarcodeLabelCustom_Count",
             params = arrayOf(WsParam("date", date))
         )

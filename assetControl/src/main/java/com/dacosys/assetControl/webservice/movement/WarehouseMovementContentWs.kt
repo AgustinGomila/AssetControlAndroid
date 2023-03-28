@@ -1,6 +1,6 @@
 package com.dacosys.assetControl.webservice.movement
 
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.webservice.common.Webservice.Companion.getWebservice
 import com.dacosys.assetControl.webservice.common.WsParam
 import org.ksoap2.serialization.SoapObject
 import java.util.*
@@ -12,10 +12,9 @@ constructor() {
     fun warehouseMovementContentGet(
         warehouseMovementId: Long,
     ): Array<WarehouseMovementContentObject>? {
-        val any = Statics.getWebservice().s(
+        val any = getWebservice().s(
             "WarehouseMovementContent_Get",
             arrayOf(
-
                 WsParam("warehouse_movement_id", warehouseMovementId)
             )
         )
@@ -39,10 +38,9 @@ constructor() {
         qty: Int,
         date: String,
     ): Array<WarehouseMovementContentObject>? {
-        val any = Statics.getWebservice().s(
+        val any = getWebservice().s(
             "WarehouseMovementContent_GetAll_Limit",
             arrayOf(
-
                 WsParam("pos", pos),
                 WsParam("qty", qty),
                 WsParam("date", date)
@@ -66,10 +64,9 @@ constructor() {
     fun warehouseMovementContentDelete(
         warehouseMovementId: Long,
     ): Boolean {
-        return Statics.getWebservice().s(
+        return getWebservice().s(
             "WarehouseMovementContent_Remove_All",
             arrayOf(
-
                 WsParam("warehouse_movement_id", warehouseMovementId)
             )
         ) as Boolean
@@ -77,7 +74,7 @@ constructor() {
 
     @Throws(Exception::class)
     fun warehouseMovementContentCount(date: String): Int? {
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             methodName = "WarehouseMovementContent_Count",
             params = arrayOf(WsParam("date", date))
         )

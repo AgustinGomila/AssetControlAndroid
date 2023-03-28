@@ -1,6 +1,6 @@
-package com.dacosys.assetControl.webservice.datacollection
+package com.dacosys.assetControl.webservice.dataCollection
 
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.webservice.common.Webservice.Companion.getWebservice
 import com.dacosys.assetControl.webservice.common.WsParam
 import org.ksoap2.serialization.SoapObject
 import java.util.*
@@ -12,10 +12,9 @@ constructor() {
     fun dataCollectionRuleTargetGet(
         dataCollectionRuleId: Long,
     ): Array<DataCollectionRuleTargetObject>? {
-        val any = Statics.getWebservice().s(
+        val any = getWebservice().s(
             "DataCollectionRuleTarget_Get",
             arrayOf(
-
                 WsParam("data_collection_rule_id", dataCollectionRuleId)
             )
         )
@@ -36,7 +35,7 @@ constructor() {
     fun dataCollectionRuleTargetDelete(
         dataCollectionRuleId: Long,
     ): Boolean {
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             "DataCollectionRuleTarget_Remove",
             arrayOf(WsParam("data_collection_rule_id", dataCollectionRuleId))
         ) ?: return false
@@ -49,7 +48,7 @@ constructor() {
         dataCollectionRuleTarget: DataCollectionRuleTargetObject,
     ): Long {
         val icSoapObject =
-            SoapObject(Statics.getWebservice().namespace, "data_collection_rule_target")
+            SoapObject(getWebservice().namespace, "data_collection_rule_target")
         icSoapObject.addProperty(
             "data_collection_rule_id",
             dataCollectionRuleTarget.dataCollectionRuleId
@@ -59,7 +58,7 @@ constructor() {
         icSoapObject.addProperty("warehouse_area_id", dataCollectionRuleTarget.warehouseAreaId)
         icSoapObject.addProperty("item_category_id", dataCollectionRuleTarget.itemCategoryId)
 
-        val result = Statics.getWebservice().s(
+        val result = getWebservice().s(
             "DataCollectionRuleTarget_Add",
             arrayOf(WsParam("user_id", userId)),
             icSoapObject

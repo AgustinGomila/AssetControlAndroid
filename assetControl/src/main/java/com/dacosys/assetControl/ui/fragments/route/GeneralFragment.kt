@@ -6,7 +6,7 @@ import com.dacosys.assetControl.model.asset.UnitType
 import com.dacosys.assetControl.model.asset.UnitTypeCategory
 import com.dacosys.assetControl.model.attribute.AttributeComposition
 import com.dacosys.assetControl.model.attribute.AttributeCompositionType
-import com.dacosys.assetControl.model.datacollection.DataCollectionRuleContent
+import com.dacosys.assetControl.model.dataCollection.DataCollectionRuleContent
 import com.dacosys.assetControl.model.route.common.ExprResultIntString
 import com.dacosys.assetControl.model.route.common.Parameter
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
@@ -458,13 +458,6 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
         )
     }
 
-    data class FragmentData(
-        val dcrContId: Long?,
-        val attrCompTypeId: Long?,
-        val valueStr: String,
-        val isEnabled: Boolean,
-    )
-
     var valueStr: String? = null
         get() {
             if (isAttribute) return null
@@ -606,3 +599,4 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
         }
     }
 }
+

@@ -8,6 +8,7 @@ import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarEventData
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.webservice.common.Webservice.Companion.getWebservice
 
 class CheckWsConnection(
     private var url: String,
@@ -70,6 +71,6 @@ class CheckWsConnection(
                 }
             }
         }
-        GetMySqlDate(Statics.getWebservice()) { onConnectionResult(it) }.execute()
+        GetMySqlDate(getWebservice()) { onConnectionResult(it) }.execute()
     }
 }

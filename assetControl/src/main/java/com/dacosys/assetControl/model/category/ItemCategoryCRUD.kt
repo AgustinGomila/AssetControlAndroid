@@ -3,7 +3,7 @@ package com.dacosys.assetControl.model.category
 import com.dacosys.assetControl.dataBase.category.ItemCategoryDbHelper
 import com.dacosys.assetControl.network.sync.SyncRegistryType
 import com.dacosys.assetControl.network.sync.SyncUpload
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.network.utils.Connection.Companion.autoSend
 import com.dacosys.assetControl.webservice.category.ItemCategoryObject
 import kotlinx.coroutines.*
 
@@ -61,7 +61,7 @@ class ItemCategoryCRUD {
             if (itemCategoryObject != null) {
                 val icObj = itemCategoryObject!!
                 if (addItemCategory(icObj).resultCode == RC_INSERT_OK) {
-                    if (Statics.autoSend()) {
+                    if (autoSend()) {
                         SyncUpload(SyncRegistryType.ItemCategory)
                     }
                 } else {
@@ -132,7 +132,7 @@ class ItemCategoryCRUD {
             if (itemCategoryObject != null) {
                 val icObj = itemCategoryObject!!
                 if (updateItemCategory(icObj).resultCode == RC_UPDATE_OK) {
-                    if (Statics.autoSend()) {
+                    if (autoSend()) {
                         SyncUpload(SyncRegistryType.ItemCategory)
                     }
                 }

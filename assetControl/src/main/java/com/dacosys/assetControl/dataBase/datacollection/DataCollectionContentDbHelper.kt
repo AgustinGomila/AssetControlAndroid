@@ -19,7 +19,7 @@ import com.dacosys.assetControl.dataBase.datacollection.DataCollectionContentCon
 import com.dacosys.assetControl.dataBase.datacollection.DataCollectionContentContract.DataCollectionContentEntry.Companion.TABLE_NAME
 import com.dacosys.assetControl.dataBase.datacollection.DataCollectionContentContract.DataCollectionContentEntry.Companion.VALUE_STR
 import com.dacosys.assetControl.dataBase.datacollection.DataCollectionContentContract.getAllColumns
-import com.dacosys.assetControl.model.datacollection.DataCollectionContent
+import com.dacosys.assetControl.model.dataCollection.DataCollectionContent
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 
 /**

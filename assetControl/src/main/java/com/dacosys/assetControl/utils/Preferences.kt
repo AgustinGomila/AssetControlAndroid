@@ -181,14 +181,14 @@ class Preferences {
         }
 
         fun prefsGetString(p: ConfEntry): String {
-            return privPrefsGetString(p.description, p.defaultValue as String)
+            return prefsGetString(p.description, p.defaultValue as String)
         }
 
         fun prefsGetString(p: Preference): String {
-            return privPrefsGetString(p.key, p.defaultValue as String)
+            return prefsGetString(p.key, p.defaultValue as String)
         }
 
-        private fun privPrefsGetString(key: String, defValue: String): String {
+        private fun prefsGetString(key: String, defValue: String): String {
             if (prefs == null) {
                 return defValue
             }
@@ -270,14 +270,14 @@ class Preferences {
         }
 
         fun prefsGetBoolean(p: ConfEntry): Boolean {
-            return privPrefsGetBoolean(p.description, p.defaultValue.toString().toBoolean())
+            return prefsGetBoolean(p.description, p.defaultValue.toString().toBoolean())
         }
 
         fun prefsGetBoolean(p: Preference): Boolean {
-            return privPrefsGetBoolean(p.key, p.defaultValue as Boolean)
+            return prefsGetBoolean(p.key, p.defaultValue as Boolean)
         }
 
-        private fun privPrefsGetBoolean(key: String, defValue: Boolean): Boolean {
+        private fun prefsGetBoolean(key: String, defValue: Boolean): Boolean {
             if (prefs == null) {
                 return defValue
             }
