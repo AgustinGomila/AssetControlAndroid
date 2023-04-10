@@ -290,7 +290,6 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
     override fun onResume() {
         super.onResume()
 
-        JotterListener.lockScanner(this, false)
         rejectNewInstances = false
         logging = false
 
@@ -304,6 +303,8 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
 
             initialSetup()
         }
+
+        JotterListener.lockScanner(this, false)
     }
 
     private fun refreshUsers() {
@@ -618,12 +619,6 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
             // Acá arranca la base de datos, si no existe se crea // 
             // Si existe una sesión previa se cierra.             //
             DataBaseHelper.beginDataBase()
-
-            // TODO: Eliminar este código cuando ya no se necesite ROOM / SQLite
-            // Acá arranca la base de datos de ImageControl, si no existe se crea.
-            // if (Statics.useImageControl) {
-            //     DbHelper.beginDataBase()
-            // }
             ///////////// FIN INICIALIZACIÓN SQLITE ////////////////
 
         } catch (ex: Exception) {

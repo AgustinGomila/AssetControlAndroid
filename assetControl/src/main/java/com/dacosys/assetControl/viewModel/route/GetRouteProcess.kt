@@ -10,14 +10,6 @@ import com.dacosys.assetControl.model.route.Route
 import com.dacosys.assetControl.model.route.RouteProcess
 import kotlinx.coroutines.*
 
-data class RouteProcessResult(
-    val routeProcess: RouteProcess? = null,
-    val newProcess: Boolean = false,
-    val error: ErrorResult? = null,
-)
-
-data class ErrorResult(val errorMessage: String = "")
-
 class GetRouteProcess(
     private var route: Route,
     private var onProgress: (RouteProcessResult) -> Unit = {},

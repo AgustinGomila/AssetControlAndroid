@@ -8,11 +8,6 @@ import com.dacosys.assetControl.dataBase.route.RouteProcessContentDbHelper
 import com.dacosys.assetControl.model.route.RouteProcessContent
 import kotlinx.coroutines.*
 
-data class GetRouteProcessContentResult(
-    val currentRouteProcessContent: ArrayList<RouteProcessContent> = ArrayList(),
-    val level: Int = 0,
-)
-
 class GetRouteProcessContent(
     private val routeId: Long,
     private val routeProcessId: Long,
