@@ -827,7 +827,7 @@ class SettingsActivity : AppCompatActivity(),
                     getString(R.string.yes)
                 ) { dialog, _ ->
                     //your deleting code
-                    DownloadDb().downloadDbRequired = true
+                    DownloadDb.downloadDbRequired = true
                     alreadyAnsweredYes = true
 
                     if (email.isNotEmpty() && password.isNotEmpty()) {
@@ -853,7 +853,7 @@ class SettingsActivity : AppCompatActivity(),
                     getString(R.string.yes)
                 ) { dialog, _ ->
                     //your deleting code
-                    DownloadDb().downloadDbRequired = true
+                    DownloadDb.downloadDbRequired = true
                     preference.summary = newValue.toString()
                     alreadyAnsweredYes = true
                     if (newValue is String) {
@@ -2011,7 +2011,7 @@ class SettingsActivity : AppCompatActivity(),
                     cleanPanelWebData()
 
                     //your deleting code
-                    DownloadDb().downloadDbRequired = true
+                    DownloadDb.downloadDbRequired = true
                     preference.summary = newValue.toString()
                     alreadyAnsweredYes = true
                     if (newValue is String) {
@@ -2635,7 +2635,7 @@ class SettingsActivity : AppCompatActivity(),
                     getString(R.string.yes)
                 ) { dialog, _ ->
                     // Forzar descarga de la base de datos
-                    DownloadDb().downloadDbRequired = true
+                    DownloadDb.downloadDbRequired = true
                     if (view != null) makeText(
                         requireView(),
                         getString(R.string.the_database_will_be_downloaded_when_you_return_to_the_login_screen),

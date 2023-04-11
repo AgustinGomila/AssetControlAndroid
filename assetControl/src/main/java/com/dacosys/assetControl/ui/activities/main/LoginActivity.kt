@@ -33,7 +33,7 @@ import com.dacosys.assetControl.model.user.User
 import com.dacosys.assetControl.network.clientPackages.ClientPackagesProgress
 import com.dacosys.assetControl.network.download.*
 import com.dacosys.assetControl.network.download.DownloadStatus.*
-import com.dacosys.assetControl.network.sync.SyncDownload
+import com.dacosys.assetControl.network.sync.Sync
 import com.dacosys.assetControl.network.sync.SyncProgress
 import com.dacosys.assetControl.network.sync.SyncRegistryType
 import com.dacosys.assetControl.network.utils.*
@@ -155,7 +155,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                 if (registryType == null) {
                     // Si es un registro ya lo estamos actualizando arriba...
                     setButton(ButtonStyle.BUSY)
-                    setProgressBarText(it.msg, percent)
+                    setProgressBarText(msg, percent)
                 }
             }
             ProgressStatus.bigFinished -> {
@@ -270,7 +270,8 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                 if (Statics.useImageControl) SendPending()
 
                 thread {
-                    SyncDownload(onSyncTaskProgress = { syncViewModel.setSyncDownloadProgress(it) },
+                    Sync.goSync(
+                        onSyncProgress = { syncViewModel.setSyncDownloadProgress(it) },
                         onSessionCreated = { syncViewModel.setSessionCreated(it) })
                 }
             }
@@ -308,7 +309,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
     }
 
     private fun refreshUsers() {
-        if (DownloadDb().downloadDbRequired) {
+        if (DownloadDb.downloadDbRequired) {
             if (!isOnline()) {
                 showSnackBar(
                     SnackBarEventData(
@@ -847,7 +848,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                             adb.setMessage(getString(R.string.download_database_required_question))
                             adb.setNegativeButton(R.string.cancel, null)
                             adb.setPositiveButton(R.string.accept) { _, _ ->
-                                DownloadDb().downloadDbRequired = true
+                                DownloadDb.downloadDbRequired = true
                                 Statics.getConfigFromScannedCode(
                                     scanCode = scanCode, mode = QRConfigWebservice
                                 ) { onTaskGetPackagesEnded(it) }

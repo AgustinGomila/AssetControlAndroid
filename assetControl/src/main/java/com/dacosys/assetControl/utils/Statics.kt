@@ -76,7 +76,8 @@ class Statics {
                     """.trimIndent()
         // endregion DEBUG DEMO
 
-        var appName: String = "${getApplicationName()}M13"
+        val appName: String
+            get() = "${getApplicationName()}M13"
 
         const val defaultDate = "2001-01-01 00:00:00"
 
@@ -303,7 +304,7 @@ class Statics {
             }
         }
 
-        private fun isDebuggable(): Boolean {
+        fun isDebuggable(): Boolean {
             return 0 != getContext().applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE
         }
 

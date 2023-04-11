@@ -176,6 +176,10 @@ class SyncRegistryType : Parcelable {
         var BarcodeLabelTarget = SyncRegistryType(
             103, getContext().getString(R.string.label_target)
         )
+        var UserPermission = SyncRegistryType(
+            104, getContext().getString(R.string.user_permissions)
+        )
+
 
         var Image = SyncRegistryType(
             999, getContext().getString(R.string.images)
@@ -213,6 +217,9 @@ class SyncRegistryType : Parcelable {
                 RouteComposition,
                 DataCollectionRuleContent,
                 DataCollectionRuleTarget,
+
+                // LOCALES
+                UserPermission,
 
                 // ESTATICAS
                 AssetReviewStatus,

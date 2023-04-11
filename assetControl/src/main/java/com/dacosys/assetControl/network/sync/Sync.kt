@@ -15,6 +15,9 @@ class Sync {
         private val handler = Handler(Looper.getMainLooper())
         private var timerTask: TimerTask? = null
 
+        @get:Synchronized
+        private var ticks = 0
+
         private var syncDownload: SyncDownload? = null
         private var syncUpload: SyncUpload? = null
 
@@ -43,32 +46,22 @@ class Sync {
         fun startTimer(
             onSyncProgress: (SyncProgress) -> Unit = {},
             onSessionCreated: (Boolean) -> Unit = {},
+            onTimerTick: (Int) -> Unit = {},
         ) {
             try {
                 cancelPending()
                 cancelTimer()
 
                 timer = Timer()
-                val interval =
-                    prefsGetInt(Preference.acSyncInterval)
+                val interval = prefsGetInt(Preference.acSyncInterval)
 
                 timerTask = object : TimerTask() {
                     override fun run() {
-                        try {
-                            handler.post {
-                                if (autoSend()) {
-                                    syncUpload = SyncUpload(onSyncTaskProgress = onSyncProgress)
-                                }
+                        ticks++
+                        onTimerTick(ticks)
 
-                                syncDownload = SyncDownload(
-                                    onSyncTaskProgress = onSyncProgress,
-                                    onSessionCreated = onSessionCreated
-                                )
-                            }
-                        } catch (ex: Exception) {
-                            ex.printStackTrace()
-                            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
-                        }
+                        if (ticks < interval.toLong()) return
+                        goSync(onSyncProgress, onSessionCreated)
                     }
 
                     override fun cancel(): Boolean {
@@ -78,9 +71,32 @@ class Sync {
                 }
                 (timer ?: return).scheduleAtFixedRate(
                     timerTask,
-                    interval.toLong(),
-                    interval.toLong() * 1000
+                    100,
+                    1000
                 )
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+                ErrorLog.writeLog(null, this::class.java.simpleName, ex)
+            }
+        }
+
+        fun goSync(
+            onSyncProgress: (SyncProgress) -> Unit = {},
+            onSessionCreated: (Boolean) -> Unit = {},
+        ) {
+            ticks = 0
+
+            try {
+                handler.post {
+                    if (autoSend()) {
+                        syncUpload = SyncUpload(onSyncTaskProgress = onSyncProgress)
+                    }
+
+                    syncDownload = SyncDownload(
+                        onSyncTaskProgress = onSyncProgress,
+                        onSessionCreated = onSessionCreated
+                    )
+                }
             } catch (ex: Exception) {
                 ex.printStackTrace()
                 ErrorLog.writeLog(null, this::class.java.simpleName, ex)

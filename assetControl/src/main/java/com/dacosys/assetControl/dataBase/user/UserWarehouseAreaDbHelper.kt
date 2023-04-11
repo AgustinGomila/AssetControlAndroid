@@ -4,6 +4,8 @@ import android.content.ContentValues
 import android.database.Cursor
 import android.database.SQLException
 import android.util.Log
+import com.dacosys.assetControl.AssetControlApp
+import com.dacosys.assetControl.R
 import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.getReadableDb
 import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.getWritableDb
 import com.dacosys.assetControl.dataBase.user.UserWarehouseAreaContract.UserWarehouseAreaEntry.Companion.CHECK
@@ -15,6 +17,9 @@ import com.dacosys.assetControl.dataBase.user.UserWarehouseAreaContract.UserWare
 import com.dacosys.assetControl.dataBase.user.UserWarehouseAreaContract.UserWarehouseAreaEntry.Companion.WAREHOUSE_AREA_ID
 import com.dacosys.assetControl.dataBase.user.UserWarehouseAreaContract.getAllColumns
 import com.dacosys.assetControl.model.user.UserWarehouseArea
+import com.dacosys.assetControl.network.sync.SyncProgress
+import com.dacosys.assetControl.network.sync.SyncRegistryType
+import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.splitList
 import com.dacosys.assetControl.webservice.user.UserWarehouseAreaObject
@@ -75,20 +80,24 @@ class UserWarehouseAreaDbHelper {
         }
     }
 
-    fun insert(uwaArray: Array<UserWarehouseAreaObject>?): Boolean {
+    fun insert(
+        uwaArray: Array<UserWarehouseAreaObject>?,
+        onSyncTaskProgress: (SyncProgress) -> Unit = {},
+    ): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> insert")
 
         if (uwaArray == null || uwaArray.isEmpty()) {
             return false
         }
 
+        val countTotal = uwaArray.size
         val splitList = splitList(uwaArray, 100)
         var error = false
 
         val sqLiteDatabase = getWritableDb()
         sqLiteDatabase.beginTransaction()
         try {
-            for (part in splitList) {
+            for ((index, part) in splitList.withIndex()) {
                 var insertQ = ("INSERT INTO $TABLE_NAME " +
                         "($USER_ID," +
                         "$WAREHOUSE_AREA_ID," +
@@ -97,10 +106,20 @@ class UserWarehouseAreaDbHelper {
                         "[$COUNT]," +
                         "[$CHECK]) VALUES ")
 
-                for (uwa in part) {
+                for ((index2, uwa) in part.withIndex()) {
                     Log.d(
                         this::class.java.simpleName,
                         "SQLITE-QUERY-INSERT-->" + uwa.user_id + "," + uwa.warehouse_area_id
+                    )
+                    onSyncTaskProgress.invoke(
+                        SyncProgress(
+                            totalTask = countTotal,
+                            completedTask = (index * 100) + index2 + 1,
+                            msg = AssetControlApp.getContext()
+                                .getString(R.string.synchronizing_user_areas),
+                            registryType = SyncRegistryType.UserWarehouseArea,
+                            progressStatus = ProgressStatus.running
+                        )
                     )
 
                     val values =

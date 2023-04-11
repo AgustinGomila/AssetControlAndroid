@@ -3,6 +3,8 @@ package com.dacosys.assetControl.dataBase.user
 import android.database.Cursor
 import android.database.SQLException
 import android.util.Log
+import com.dacosys.assetControl.AssetControlApp
+import com.dacosys.assetControl.R
 import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.getReadableDb
 import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.getWritableDb
 import com.dacosys.assetControl.dataBase.user.UserPermissionContract.UserPermissionEntry.Companion.PERMISSION_ID
@@ -10,6 +12,9 @@ import com.dacosys.assetControl.dataBase.user.UserPermissionContract.UserPermiss
 import com.dacosys.assetControl.dataBase.user.UserPermissionContract.UserPermissionEntry.Companion.USER_ID
 import com.dacosys.assetControl.dataBase.user.UserPermissionContract.getAllColumns
 import com.dacosys.assetControl.model.user.UserPermission
+import com.dacosys.assetControl.network.sync.SyncProgress
+import com.dacosys.assetControl.network.sync.SyncRegistryType
+import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.splitList
 import com.dacosys.assetControl.webservice.user.UserPermissionObject
@@ -44,27 +49,41 @@ class UserPermissionDbHelper {
         }
     }
 
-    fun insert(upArray: Array<UserPermissionObject>?): Boolean {
+    fun insert(
+        upArray: Array<UserPermissionObject>?,
+        onSyncTaskProgress: (SyncProgress) -> Unit = {},
+    ): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> insert")
 
         if (upArray == null || upArray.isEmpty()) {
             return false
         }
 
+        val countTotal = upArray.size
         val splitList = splitList(upArray, 100)
 
         val sqLiteDatabase = getWritableDb()
         sqLiteDatabase.beginTransaction()
         return try {
-            for (part in splitList) {
+            for ((index, part) in splitList.withIndex()) {
                 var insertQ = ("INSERT INTO $TABLE_NAME" +
                         "($USER_ID," +
                         "$PERMISSION_ID) VALUES ")
 
-                for (up in part) {
+                for ((index2, up) in part.withIndex()) {
                     Log.d(
                         this::class.java.simpleName,
                         "SQLITE-QUERY-INSERT-->" + up.user_id + "," + up.permission_id
+                    )
+                    onSyncTaskProgress.invoke(
+                        SyncProgress(
+                            totalTask = countTotal,
+                            completedTask = (index * 100) + index2 + 1,
+                            msg = AssetControlApp.getContext()
+                                .getString(R.string.synchronizing_user_permissions),
+                            registryType = SyncRegistryType.UserPermission,
+                            progressStatus = ProgressStatus.running
+                        )
                     )
 
                     val values = "(${up.user_id},${up.permission_id}),"

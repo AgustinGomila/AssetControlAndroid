@@ -266,9 +266,7 @@ class SyncDownload(
                 while (groupCount < countTotal) {
                     if (!scope.isActive) break
 
-                    val objArray = ws.assetGetAllLimit(
-                        pos, qty, date
-                    )
+                    val objArray = ws.assetGetAllLimit(pos, qty, date)
                     if (!objArray.any()) break
 
                     groupCount += objArray.size
@@ -277,7 +275,7 @@ class SyncDownload(
                     try {
                         aDb.sync(
                             objArray = objArray,
-                            onSyncTaskProgress = { onSyncTaskProgress.invoke(it) },
+                            onSyncTaskProgress = { scope.launch { onUiEvent(it) } },
                             currentCount = currentCount,
                             countTotal = countTotal
                         )
@@ -378,9 +376,7 @@ class SyncDownload(
                 while (groupCount < countTotal) {
                     if (!scope.isActive) break
 
-                    val objArray = ws.itemCategoryGetAllLimit(
-                        pos, qty, date
-                    )
+                    val objArray = ws.itemCategoryGetAllLimit(pos, qty, date)
                     if (!objArray.any()) break
 
                     groupCount += objArray.size
@@ -389,7 +385,7 @@ class SyncDownload(
                     try {
                         icDb.sync(
                             objArray = objArray,
-                            onSyncProgress = { onSyncTaskProgress.invoke(it) },
+                            onSyncProgress = { scope.launch { onUiEvent(it) } },
                             currentCount = currentCount,
                             countTotal = countTotal
                         )
@@ -495,9 +491,7 @@ class SyncDownload(
                 while (groupCount < countTotal) {
                     if (!scope.isActive) break
 
-                    val objArray = ws.userGetAllLimit(
-                        pos, qty, date
-                    )
+                    val objArray = ws.userGetAllLimit(pos, qty, date)
                     if (!objArray.any()) break
 
                     groupCount += objArray.size
@@ -507,7 +501,7 @@ class SyncDownload(
                         if (objArray.isNotEmpty()) {
                             db.sync(
                                 objArray = objArray,
-                                onSyncTaskProgress = { onSyncTaskProgress.invoke(it) },
+                                onSyncTaskProgress = { scope.launch { onUiEvent(it) } },
                                 currentCount = currentCount,
                                 countTotal = countTotal
                             )
@@ -517,24 +511,30 @@ class SyncDownload(
                             val total = objArray.count()
                             for ((index, obj) in objArray.withIndex()) {
                                 // user permission
-                                SyncInitialUser().userPermission(
-                                    upWs.userPermissionGet(obj.user_id), upDb, obj.user_id
+                                SyncInitialUser { scope.launch { onUiEvent(it) } }.userPermission(
+                                    objArray = upWs.userPermissionGet(obj.user_id),
+                                    aDb = upDb,
+                                    userId = obj.user_id
                                 )
 
                                 // user warehouse area
-                                SyncInitialUser().userWarehouseArea(
-                                    uwaWs.userWarehouseAreaGet(obj.user_id), uwaDb, obj.user_id
+                                SyncInitialUser { scope.launch { onUiEvent(it) } }.userWarehouseArea(
+                                    objArray = uwaWs.userWarehouseAreaGet(obj.user_id),
+                                    aDb = uwaDb,
+                                    userId = obj.user_id
                                 )
 
-                                onSyncTaskProgress.invoke(
-                                    SyncProgress(
-                                        totalTask = total,
-                                        completedTask = index + 1,
-                                        msg = getContext().getString(R.string.synchronizing_users),
-                                        registryType = SyncRegistryType.User,
-                                        progressStatus = ProgressStatus.running
+                                scope.launch {
+                                    onUiEvent(
+                                        SyncProgress(
+                                            totalTask = total,
+                                            completedTask = index + 1,
+                                            msg = getContext().getString(R.string.synchronizing_users),
+                                            registryType = SyncRegistryType.User,
+                                            progressStatus = ProgressStatus.running
+                                        )
                                     )
-                                )
+                                }
                             }
                         }
                     } catch (ex: Exception) {
@@ -633,9 +633,7 @@ class SyncDownload(
                 while (groupCount < countTotal) {
                     if (!scope.isActive) break
 
-                    val objArray = ws.warehouseGetAllLimit(
-                        pos, qty, date
-                    )
+                    val objArray = ws.warehouseGetAllLimit(pos, qty, date)
                     if (!objArray.any()) break
 
                     groupCount += objArray.size
@@ -644,7 +642,7 @@ class SyncDownload(
                     try {
                         wDb.sync(
                             objArray = objArray,
-                            onSyncProgress = { onSyncTaskProgress.invoke(it) },
+                            onSyncProgress = { scope.launch { onUiEvent(it) } },
                             currentCount = currentCount,
                             countTotal = countTotal
                         )
@@ -745,9 +743,7 @@ class SyncDownload(
                 while (groupCount < countTotal) {
                     if (!scope.isActive) break
 
-                    val objArray = ws.warehouseAreaGetAllLimit(
-                        pos, qty, date
-                    )
+                    val objArray = ws.warehouseAreaGetAllLimit(pos, qty, date)
                     if (!objArray.any()) break
 
                     groupCount += objArray.size
@@ -756,7 +752,7 @@ class SyncDownload(
                     try {
                         waDb.sync(
                             objArray = objArray,
-                            onSyncProgress = { onSyncTaskProgress.invoke(it) },
+                            onSyncProgress = { scope.launch { onUiEvent(it) } },
                             currentCount = currentCount,
                             countTotal = countTotal
                         )
@@ -860,9 +856,7 @@ class SyncDownload(
                 while (groupCount < countTotal) {
                     if (!scope.isActive) break
 
-                    val objArray = ws.attributeGetAllLimit(
-                        pos, qty, date
-                    )
+                    val objArray = ws.attributeGetAllLimit(pos, qty, date)
                     if (!objArray.any()) break
 
                     groupCount += objArray.size
@@ -871,7 +865,7 @@ class SyncDownload(
                     try {
                         aDb.sync(
                             objArray = objArray,
-                            onSyncProgress = { onSyncTaskProgress.invoke(it) },
+                            onSyncProgress = { scope.launch { onUiEvent(it) } },
                             currentCount = currentCount,
                             countTotal = countTotal
                         )
@@ -1031,9 +1025,7 @@ class SyncDownload(
                 while (groupCount < countTotal) {
                     if (!scope.isActive) break
 
-                    val objArray = ws.attributeCategoryGetAllLimit(
-                        pos, qty, date
-                    )
+                    val objArray = ws.attributeCategoryGetAllLimit(pos, qty, date)
                     if (!objArray.any()) break
 
                     groupCount += objArray.size
@@ -1042,7 +1034,7 @@ class SyncDownload(
                     try {
                         acDb.sync(
                             objArray = objArray,
-                            onSyncProgress = { onSyncTaskProgress.invoke(it) },
+                            onSyncProgress = { scope.launch { onUiEvent(it) } },
                             currentCount = currentCount,
                             countTotal = countTotal
                         )
@@ -1146,9 +1138,7 @@ class SyncDownload(
                 while (groupCount < countTotal) {
                     if (!scope.isActive) break
 
-                    val objArray = ws.routeGetAllLimit(
-                        pos, qty, date
-                    )
+                    val objArray = ws.routeGetAllLimit(pos, qty, date)
                     if (!objArray.any()) break
 
                     groupCount += objArray.size
@@ -1157,7 +1147,7 @@ class SyncDownload(
                     try {
                         rDb.sync(
                             objArray = objArray,
-                            onSyncProgress = { onSyncTaskProgress.invoke(it) },
+                            onSyncProgress = { scope.launch { onUiEvent(it) } },
                             currentCount = currentCount,
                             countTotal = countTotal
                         )
@@ -1326,9 +1316,7 @@ class SyncDownload(
                 while (groupCount < countTotal) {
                     if (!scope.isActive) break
 
-                    val objArray = ws.dataCollectionRuleGetAllLimit(
-                        pos, qty, date
-                    )
+                    val objArray = ws.dataCollectionRuleGetAllLimit(pos, qty, date)
                     if (!objArray.any()) break
 
                     groupCount += objArray.size
@@ -1337,7 +1325,7 @@ class SyncDownload(
                     try {
                         dcrDb.sync(
                             objArray = objArray,
-                            onSyncProgress = { onSyncTaskProgress.invoke(it) },
+                            onSyncProgress = { scope.launch { onUiEvent(it) } },
                             currentCount = currentCount,
                             countTotal = countTotal
                         )
@@ -1563,9 +1551,7 @@ class SyncDownload(
                 while (groupCount < countTotal) {
                     if (!scope.isActive) break
 
-                    val objArray = ws.manteinanceTypeGetAllLimit(
-                        pos, qty, date
-                    )
+                    val objArray = ws.manteinanceTypeGetAllLimit(pos, qty, date)
                     if (!objArray.any()) break
 
                     groupCount += objArray.size
@@ -1719,9 +1705,7 @@ class SyncDownload(
                 while (groupCount < countTotal) {
                     if (!scope.isActive) break
 
-                    val objArray = ws.manteinanceTypeGroupGetAllLimit(
-                        pos, qty, date
-                    )
+                    val objArray = ws.manteinanceTypeGroupGetAllLimit(pos, qty, date)
                     if (!objArray.any()) break
 
                     groupCount += objArray.size
@@ -1874,9 +1858,7 @@ class SyncDownload(
                 while (groupCount < countTotal) {
                     if (!scope.isActive) break
 
-                    val objArray = ws.barcodeLabelCustomGetAllLimit(
-                        pos, qty, date
-                    )
+                    val objArray = ws.barcodeLabelCustomGetAllLimit(pos, qty, date)
                     if (!objArray.any()) break
 
                     groupCount += objArray.size
@@ -1885,7 +1867,7 @@ class SyncDownload(
                     try {
                         blcDb.sync(
                             objArray = objArray,
-                            onSyncProgress = { onSyncTaskProgress.invoke(it) },
+                            onSyncProgress = { scope.launch { onUiEvent(it) } },
                             currentCount = currentCount,
                             countTotal = countTotal
                         )

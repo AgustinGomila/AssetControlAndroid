@@ -36,6 +36,7 @@ import androidx.core.graphics.BlendModeCompat
 import androidx.core.splashscreen.SplashScreen
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
+import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.dataBase.asset.AssetDbHelper
 import com.dacosys.assetControl.databinding.HomeActivityBinding
@@ -61,6 +62,7 @@ import com.dacosys.assetControl.ui.activities.sync.SyncActivity
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.utils.ImageControl.Companion.setupImageControl
+import com.dacosys.assetControl.utils.Preferences
 import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetString
 import com.dacosys.assetControl.utils.Screen.Companion.getBestContrastColor
@@ -167,6 +169,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
         // Inicia el hilo de sincronización
         thread {
             Sync.startTimer(onSyncProgress = { syncViewModel.setSyncDownloadProgress(it) },
+                onTimerTick = { syncViewModel.setSyncTimerProgress(it) },
                 onSessionCreated = { syncViewModel.setSessionCreated(it) })
         }
 
@@ -422,6 +425,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
 
         syncViewModel.syncDownloadProgress.observe(this) { if (it != null) onSyncTaskProgress(it) }
         syncViewModel.sessionCreated.observe(this) { if (it != null) onSessionCreated(it) }
+        syncViewModel.syncTimerProgress.observe(this) { if (it != null) onTimerTick(it) }
 
         if (Statics.wsUrl.isEmpty() || Statics.wsNamespace.isEmpty()) {
             makeText(
@@ -537,6 +541,18 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
         }
     }
 
+    private fun onTimerTick(secs: Int) {
+        if (isDestroyed || isFinishing) return
+
+        runOnUiThread {
+            val restSec = Preferences.prefsGetInt(Preference.acSyncInterval) - secs
+            val restMin = restSec / 60
+            val rstSecsInMin = restSec % 60
+            val msg = "$restMin:${String.format("%02d", rstSecsInMin)}"
+            binding.timeTextView.text = msg
+        }
+    }
+
     private fun onSyncTaskProgress(it: SyncProgress) {
         if (isDestroyed || isFinishing) return
 
@@ -591,6 +607,11 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
 
     private fun setupSyncPanel() {
         binding.syncStatusLayout.visibility = GONE
+
+        if (!Statics.isDebuggable() || !BuildConfig.DEBUG) {
+            // Mostramos el Timer sólo en DEBUG
+            binding.timeTextView.visibility = GONE
+        }
     }
     //endregion
 
@@ -838,7 +859,8 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
                 return
             }
             thread {
-                SyncDownload(onSyncTaskProgress = { syncViewModel.setSyncDownloadProgress(it) },
+                Sync.goSync(
+                    onSyncProgress = { syncViewModel.setSyncDownloadProgress(it) },
                     onSessionCreated = { syncViewModel.setSessionCreated(it) })
             }
         } catch (ex: Exception) {

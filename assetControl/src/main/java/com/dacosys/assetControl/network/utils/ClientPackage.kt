@@ -283,7 +283,7 @@ class ClientPackage {
                 run { x.apply() }
             }
 
-            DownloadDb().downloadDbRequired = true
+            DownloadDb.downloadDbRequired = true
             callback.onTaskConfigPanelEnded(ProgressStatus.finished)
         }
         // endregion

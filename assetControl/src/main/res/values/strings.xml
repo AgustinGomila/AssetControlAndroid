@@ -955,4 +955,7 @@
     <string name="image_code">Código de imagen</string>
     <string name="creating_session_">Creando sesión…</string>
     <string name="no_available_option">Opción no disponible</string>
+    <string name="user_permissions">Permisos del usuario</string>
+    <string name="synchronizing_user_permissions">Sincronizando permisos…</string>
+    <string name="synchronizing_user_areas">Sincronizando áreas del usuario…</string>
 </resources>

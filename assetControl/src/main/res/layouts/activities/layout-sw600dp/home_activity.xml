@@ -30,6 +30,20 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/top_appbar">
 
+        <TextView
+            android:id="@+id/timeTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="4dp"
+            android:gravity="center|end"
+            android:maxLines="1"
+            android:text="00:00"
+            android:textSize="14sp"
+            android:textStyle="italic"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/headerGuideline66"
+            app:layout_constraintTop_toBottomOf="@+id/versionTextView" />
+
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/imageView2"
             android:layout_width="0dp"

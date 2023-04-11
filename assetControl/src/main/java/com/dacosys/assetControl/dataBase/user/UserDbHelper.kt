@@ -87,17 +87,15 @@ class UserDbHelper {
                     EMAIL + ")" +
                     " VALUES "
 
-            var count = 0
-            for (obj in objArray) {
+            for ((index, obj) in objArray.withIndex()) {
                 Log.i(
                     this::class.java.simpleName,
                     String.format(": SQLite -> insert: id:%s", obj.user_id)
                 )
-                count++
                 onSyncTaskProgress.invoke(
                     SyncProgress(
                         totalTask = countTotal,
-                        completedTask = currentCount + count,
+                        completedTask = currentCount + index + 1,
                         msg = getContext().getString(R.string.synchronizing_users),
                         registryType = SyncRegistryType.User,
                         progressStatus = ProgressStatus.running

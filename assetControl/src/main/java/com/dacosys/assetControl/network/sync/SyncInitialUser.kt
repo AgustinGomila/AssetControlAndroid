@@ -84,9 +84,7 @@ class SyncInitialUser(
                 while (groupCount < countTotal) {
                     if (!scope.isActive) break
 
-                    val objArray = ws.initialUserGetAllLimit(
-                        pos, qty, date
-                    )
+                    val objArray = ws.initialUserGetAllLimit(pos, qty, date)
                     if (!objArray.any()) break
 
                     groupCount += objArray.size
@@ -96,7 +94,7 @@ class SyncInitialUser(
                         if (objArray.isNotEmpty()) {
                             db.sync(
                                 objArray = objArray,
-                                onSyncTaskProgress = { onSyncTaskProgress.invoke(it) },
+                                onSyncTaskProgress = { scope.launch { onUiEvent(it) } },
                                 currentCount = currentCount,
                                 countTotal = countTotal
                             )
@@ -116,15 +114,17 @@ class SyncInitialUser(
                                     obj.user_id
                                 )
 
-                                onSyncTaskProgress.invoke(
-                                    SyncProgress(
-                                        totalTask = total,
-                                        completedTask = index + 1,
-                                        msg = getContext().getString(R.string.synchronizing_users),
-                                        registryType = SyncRegistryType.User,
-                                        progressStatus = ProgressStatus.running
+                                scope.launch {
+                                    onUiEvent(
+                                        SyncProgress(
+                                            totalTask = total,
+                                            completedTask = index + 1,
+                                            msg = getContext().getString(R.string.synchronizing_users),
+                                            registryType = SyncRegistryType.User,
+                                            progressStatus = ProgressStatus.running
+                                        )
                                     )
-                                )
+                                }
                             }
                         }
                     } catch (ex: Exception) {
@@ -218,7 +218,7 @@ class SyncInitialUser(
         try {
             aDb.deleteByUserId(userId)
             if (objArray != null && objArray.isNotEmpty()) {
-                aDb.insert(objArray)
+                aDb.insert(objArray) { scope.launch { onUiEvent(it) } }
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
@@ -235,7 +235,7 @@ class SyncInitialUser(
         try {
             aDb.deleteByUserId(userId)
             if (objArray != null && objArray.isNotEmpty()) {
-                aDb.insert(objArray)
+                aDb.insert(objArray) { scope.launch { onUiEvent(it) } }
             }
         } catch (ex: Exception) {
             ex.printStackTrace()

@@ -9,6 +9,7 @@ class SyncViewModel : ViewModel() {
     val syncUploadProgress: MutableLiveData<SyncProgress?> = MutableLiveData()
     val uploadImagesProgress: MutableLiveData<UploadImagesProgress?> = MutableLiveData()
     val syncDownloadProgress: MutableLiveData<SyncProgress?> = MutableLiveData()
+    val syncTimerProgress: MutableLiveData<Int?> = MutableLiveData()
     val sessionCreated: MutableLiveData<Boolean?> = MutableLiveData()
 
     @Suppress("unused")
@@ -46,16 +47,13 @@ class SyncViewModel : ViewModel() {
     fun setSessionCreated(it: Boolean) {
         sessionCreated.postValue(it)
     }
+
+    @Suppress("unused")
+    fun getSyncTimerProgress(): Int {
+        return syncTimerProgress.value ?: 0
+    }
+
+    fun setSyncTimerProgress(it: Int) {
+        syncTimerProgress.postValue(it)
+    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
