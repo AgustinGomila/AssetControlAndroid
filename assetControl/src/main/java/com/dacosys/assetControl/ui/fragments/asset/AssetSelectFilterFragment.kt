@@ -17,11 +17,11 @@ import com.dacosys.assetControl.model.location.WarehouseArea
 import com.dacosys.assetControl.ui.activities.asset.CodeSelectDialogActivity
 import com.dacosys.assetControl.ui.activities.category.ItemCategorySelectActivity
 import com.dacosys.assetControl.ui.activities.location.LocationSelectActivity
-import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetBoolean
-import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetStringSet
-import com.dacosys.assetControl.utils.Preferences.Companion.prefsPutBoolean
-import com.dacosys.assetControl.utils.Preferences.Companion.prefsPutStringSet
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetStringSet
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsPutBoolean
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsPutStringSet
 import com.dacosys.assetControl.utils.settings.Preference
 import org.parceler.Parcels
 

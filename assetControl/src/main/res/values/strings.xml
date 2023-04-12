@@ -958,4 +958,5 @@
     <string name="user_permissions">Permisos del usuario</string>
     <string name="synchronizing_user_permissions">Sincronizando permisos…</string>
     <string name="synchronizing_user_areas">Sincronizando áreas del usuario…</string>
+    <string name="_00_00">00:00</string>
 </resources>

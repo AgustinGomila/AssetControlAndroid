@@ -41,13 +41,13 @@ import com.dacosys.assetControl.ui.activities.main.SettingsActivity
 import com.dacosys.assetControl.ui.activities.print.TemplateSelectDialogActivity
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
-import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetLong
-import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetString
-import com.dacosys.assetControl.utils.Preferences.Companion.prefsPutLong
+import com.dacosys.assetControl.utils.ConfigHelper
 import com.dacosys.assetControl.utils.Printer.Companion.printerBluetoothDevice
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.CounterHandler
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetLong
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetString
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsPutLong
 import com.dacosys.assetControl.utils.settings.Preference
 import com.google.android.gms.common.api.CommonStatusCodes
 import com.google.android.material.textfield.TextInputEditText
@@ -518,7 +518,7 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
     private fun attemptEnterConfig(password: String) {
         val realPass = prefsGetString(Preference.confPassword)
         if (password == realPass) {
-            Statics.setDebugConfigValues()
+            ConfigHelper.setDebugConfigValues()
 
             if (!rejectNewInstances) {
                 rejectNewInstances = true

@@ -45,7 +45,6 @@ import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.fragments.asset.AssetSelectFilterFragment
 import com.dacosys.assetControl.ui.fragments.print.PrinterFragment
-import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetLong
 import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
 import com.dacosys.assetControl.utils.Screen.Companion.isKeyboardVisible
 import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
@@ -54,6 +53,8 @@ import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.ParcelLong
 import com.dacosys.assetControl.utils.misc.UTCDataTime
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetLong
+import com.dacosys.assetControl.utils.preferences.Repository
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.ScannedCode
 import com.dacosys.assetControl.utils.scanners.Scanner
@@ -598,7 +599,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
             editAssetRequiredListener = this
         )
 
-        if (Statics.useImageControl) {
+        if (Repository.useImageControl) {
             arrayAdapter?.refreshImageControlListeners(
                 this, this
             )
@@ -860,7 +861,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
     }
 
     override fun onAddPhotoRequired(tableId: Int, itemId: Long, description: String) {
-        if (!Statics.useImageControl) {
+        if (!Repository.useImageControl) {
             return
         }
 
@@ -893,7 +894,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         }
 
     override fun onAlbumViewRequired(tableId: Int, itemId: Long) {
-        if (!Statics.useImageControl) {
+        if (!Repository.useImageControl) {
             return
         }
 

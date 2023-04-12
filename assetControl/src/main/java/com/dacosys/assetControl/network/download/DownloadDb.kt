@@ -30,10 +30,11 @@ import com.dacosys.assetControl.network.sync.*
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarEventData
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
-import com.dacosys.assetControl.utils.Preferences.Companion.prefsPutString
-import com.dacosys.assetControl.utils.Preferences.Companion.resetLastUpdateDates
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsPutString
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.resetLastUpdateDates
+import com.dacosys.assetControl.utils.preferences.Repository
 import com.dacosys.assetControl.utils.settings.entries.ConfEntry
 import com.dacosys.assetControl.webservice.common.Webservice.Companion.getWebservice
 import kotlinx.coroutines.*
@@ -112,8 +113,8 @@ class DownloadDb(
     private val dbFileName = "android.assetcontroldb.sqlite.txt"
     private val dbDirectory = "collectordb"
 
-    private val timeUrl = "${Statics.wsUrlCron}/${dbDirectory}/${timeFilename}"
-    private val dbUrl = "${Statics.wsUrlCron}/${dbDirectory}/${dbFileName}"
+    private val timeUrl = "${Repository.wsUrlCron}/${dbDirectory}/${timeFilename}"
+    private val dbUrl = "${Repository.wsUrlCron}/${dbDirectory}/${dbFileName}"
 
     private val scope = CoroutineScope(Job() + Dispatchers.IO)
 
@@ -178,7 +179,7 @@ class DownloadDb(
     }
 
     private fun launchDownload() {
-        if (Statics.wsUrlCron.isEmpty()) {
+        if (Repository.wsUrlCron.isEmpty()) {
             onDownloadEvent.invoke(
                 DownloadTask(
                     msg = getContext().getString(R.string.webservice_is_not_configured),

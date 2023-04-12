@@ -11,7 +11,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.databinding.FragmentDecimalBinding
 import com.dacosys.assetControl.ui.common.views.filters.DecimalDigitsInputFilter
-import com.dacosys.assetControl.utils.Statics
+import java.math.BigDecimal
 
 
 /**
@@ -119,7 +119,7 @@ class DecimalFragment : Fragment() {
         set(value) {
             if (_binding == null) return
             binding.decimalEditText.setText(
-                Statics.roundToString(
+                roundToString(
                     value ?: defaultValue,
                     _tempDecimalPlaces
                 ), TextView.BufferType.EDITABLE
@@ -155,6 +155,30 @@ class DecimalFragment : Fragment() {
 
         fun equals(a: Any?, b: Any?): Boolean {
             return a != null && a == b
+        }
+
+        private fun roundToString(d: Double, decimalPlaces: Int): String {
+            val r = round(d, decimalPlaces).toString()
+            return if (decimalPlaces == 0 || d % 1 == 0.0) {
+                r.substring(0, r.indexOf('.'))
+            } else {
+                r
+            }
+        }
+
+        fun roundToString(d: Float, decimalPlaces: Int): String {
+            return roundToString(d.toDouble(), decimalPlaces)
+        }
+
+        @Suppress("unused")
+        fun round(d: Float, decimalPlaces: Int): Double {
+            return round(d.toDouble(), decimalPlaces)
+        }
+
+        private fun round(d: Double, decimalPlaces: Int): Double {
+            var bd = BigDecimal(d.toString())
+            bd = bd.setScale(decimalPlaces, BigDecimal.ROUND_HALF_UP)
+            return bd.toDouble()
         }
     }
 }

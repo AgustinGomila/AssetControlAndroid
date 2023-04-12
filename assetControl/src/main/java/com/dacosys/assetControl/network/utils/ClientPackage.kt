@@ -15,8 +15,8 @@ import com.dacosys.assetControl.R
 import com.dacosys.assetControl.network.download.DownloadDb
 import com.dacosys.assetControl.ui.common.snackbar.MakeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
-import com.dacosys.assetControl.utils.Preferences
 import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.preferences.Preferences
 import com.dacosys.assetControl.utils.settings.Preference
 import org.json.JSONObject
 import java.lang.ref.WeakReference

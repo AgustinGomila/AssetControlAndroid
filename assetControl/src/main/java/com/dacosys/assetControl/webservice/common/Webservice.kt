@@ -3,6 +3,7 @@ package com.dacosys.assetControl.webservice.common
 import android.util.Log
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.misc.Md5
+import com.dacosys.assetControl.utils.preferences.Repository
 import org.ksoap2.HeaderProperty
 import org.ksoap2.SoapEnvelope
 import org.ksoap2.serialization.SoapObject
@@ -59,40 +60,40 @@ class Webservice @Throws(Exception::class) constructor(private var webServiceTyp
     private fun confWebservice() {
         when (webServiceType) {
             WebServiceType.AssetControl -> {
-                url = Statics.wsUrl
-                namespace = Statics.wsNamespace
-                proxyUrl = Statics.wsProxy
-                useProxy = Statics.wsUseProxy
-                proxyPort = Statics.wsProxyPort
-                proxyUser = Statics.wsProxyUser
-                proxyPass = Statics.wsProxyPass
+                url = Repository.wsUrl
+                namespace = Repository.wsNamespace
+                proxyUrl = Repository.wsProxy
+                useProxy = Repository.wsUseProxy
+                proxyPort = Repository.wsProxyPort
+                proxyUser = Repository.wsProxyUser
+                proxyPass = Repository.wsProxyPass
             }
             WebServiceType.AssetControlManteinance -> {
-                url = Statics.wsMantUrl
-                namespace = Statics.wsMantNamespace
-                proxyUrl = Statics.wsMantProxy
-                useProxy = Statics.wsMantUseProxy
-                proxyPort = Statics.wsMantProxyPort
-                proxyUser = Statics.wsMantProxyUser
-                proxyPass = Statics.wsMantProxyPass
+                url = Repository.wsMantUrl
+                namespace = Repository.wsMantNamespace
+                proxyUrl = Repository.wsMantProxy
+                useProxy = Repository.wsMantUseProxy
+                proxyPort = Repository.wsMantProxyPort
+                proxyUser = Repository.wsMantProxyUser
+                proxyPass = Repository.wsMantProxyPass
             }
             WebServiceType.ImageControl -> {
-                url = Statics.wsIcUrl
-                namespace = Statics.wsIcNamespace
-                proxyUrl = Statics.wsIcProxy
-                useProxy = Statics.wsIcUseProxy
-                proxyPort = Statics.wsIcProxyPort
-                proxyUser = Statics.wsIcProxyUser
-                proxyPass = Statics.wsIcProxyPass
+                url = Repository.wsIcUrl
+                namespace = Repository.wsIcNamespace
+                proxyUrl = Repository.wsIcProxy
+                useProxy = Repository.wsIcUseProxy
+                proxyPort = Repository.wsIcProxyPort
+                proxyUser = Repository.wsIcProxyUser
+                proxyPass = Repository.wsIcProxyPass
             }
             WebServiceType.Test -> {
-                url = Statics.wsTestUrl
-                namespace = Statics.wsTestNamespace
-                proxyUrl = Statics.wsTestProxyUrl
-                useProxy = Statics.wsTestUseProxy
-                proxyPort = Statics.wsTestProxyPort
-                proxyUser = Statics.wsTestProxyUser
-                proxyPass = Statics.wsTestProxyPass
+                url = Repository.wsTestUrl
+                namespace = Repository.wsTestNamespace
+                proxyUrl = Repository.wsTestProxyUrl
+                useProxy = Repository.wsTestUseProxy
+                proxyPort = Repository.wsTestProxyPort
+                proxyUser = Repository.wsTestProxyUser
+                proxyPass = Repository.wsTestProxyPass
             }
             else -> {}
         }

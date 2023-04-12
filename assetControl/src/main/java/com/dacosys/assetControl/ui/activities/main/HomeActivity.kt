@@ -61,16 +61,18 @@ import com.dacosys.assetControl.ui.activities.route.RouteSelectActivity
 import com.dacosys.assetControl.ui.activities.sync.SyncActivity
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
+import com.dacosys.assetControl.utils.ConfigHelper
 import com.dacosys.assetControl.utils.ImageControl.Companion.setupImageControl
-import com.dacosys.assetControl.utils.Preferences
-import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetBoolean
-import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetString
 import com.dacosys.assetControl.utils.Screen.Companion.getBestContrastColor
 import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.Statics.Companion.OFFLINE_MODE
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.mainButton.MainButton
+import com.dacosys.assetControl.utils.preferences.Preferences
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetString
+import com.dacosys.assetControl.utils.preferences.Repository
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.ScannedCode
 import com.dacosys.assetControl.utils.scanners.Scanner
@@ -384,7 +386,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
     private fun attemptEnterConfig(password: String) {
         val realPass = prefsGetString(Preference.confPassword)
         if (password == realPass) {
-            Statics.setDebugConfigValues()
+            ConfigHelper.setDebugConfigValues()
 
             if (!rejectNewInstances) {
                 rejectNewInstances = true
@@ -427,7 +429,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
         syncViewModel.sessionCreated.observe(this) { if (it != null) onSessionCreated(it) }
         syncViewModel.syncTimerProgress.observe(this) { if (it != null) onTimerTick(it) }
 
-        if (Statics.wsUrl.isEmpty() || Statics.wsNamespace.isEmpty()) {
+        if (Repository.wsUrl.isEmpty() || Repository.wsNamespace.isEmpty()) {
             makeText(
                 binding.root, getString(R.string.webservice_is_not_configured), SnackBarType.ERROR
             )
@@ -454,7 +456,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
     private val resultForInitConfig =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             try {
-                if (Statics.wsUrl.isEmpty() || Statics.wsNamespace.isEmpty()) {
+                if (Repository.wsUrl.isEmpty() || Repository.wsNamespace.isEmpty()) {
                     makeText(
                         binding.root,
                         getString(R.string.webservice_is_not_configured),
@@ -509,10 +511,10 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
         val pInfo = packageManager.getPackageInfo(packageName, 0)
         binding.versionTextView.text =
             String.format("%s %s", getString(R.string.app_milestone), pInfo.versionName)
-        binding.installationCodeTextView.text = Statics.installationCode
-        binding.packageTextView.text = Statics.clientPackage
+        binding.installationCodeTextView.text = Repository.installationCode
+        binding.packageTextView.text = Repository.clientPackage
         when {
-            Statics.clientPackage.isEmpty() -> binding.packageTextView.visibility = GONE
+            Repository.clientPackage.isEmpty() -> binding.packageTextView.visibility = GONE
             else -> binding.packageTextView.visibility = View.VISIBLE
         }
 

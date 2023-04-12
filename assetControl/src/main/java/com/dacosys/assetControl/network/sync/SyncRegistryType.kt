@@ -5,7 +5,7 @@ import android.os.Parcel
 import android.os.Parcelable
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.preferences.Repository
 import com.dacosys.assetControl.utils.settings.entries.ConfEntry
 import java.util.*
 
@@ -228,7 +228,7 @@ class SyncRegistryType : Parcelable {
                 BarcodeLabelTarget,
             )
 
-            if (Statics.useImageControl) allSections.add(Image)
+            if (Repository.useImageControl) allSections.add(Image)
 
             return ArrayList(allSections.sortedWith(compareBy { it.id }))
         }
@@ -271,7 +271,7 @@ class SyncRegistryType : Parcelable {
                 RouteProcess
             )
 
-            if (Statics.useImageControl) allSections.add(Image)
+            if (Repository.useImageControl) allSections.add(Image)
 
             return ArrayList(allSections.sortedWith(compareBy { it.id }))
         }
@@ -291,7 +291,7 @@ class SyncRegistryType : Parcelable {
                 RouteProcess.id.toString()
             )
 
-            if (Statics.useImageControl) allSections.add(Image.id.toString())
+            if (Repository.useImageControl) allSections.add(Image.id.toString())
 
             return ArrayList(allSections.sortedWith(compareBy { it }))
         }

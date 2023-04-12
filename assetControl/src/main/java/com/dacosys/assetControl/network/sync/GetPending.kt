@@ -1,7 +1,7 @@
 package com.dacosys.assetControl.network.sync
 
 import com.dacosys.assetControl.network.download.DownloadDb
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.preferences.Repository
 import com.dacosys.imageControl.room.database.IcDatabase
 import kotlinx.coroutines.*
 
@@ -47,7 +47,7 @@ class GetPending(
         if (rp.any()) syncElements.addAll(rp)
         if (am.any()) syncElements.addAll(am)
 
-        if (Statics.useImageControl) {
+        if (Repository.useImageControl) {
             val pendingImages = IcDatabase.getDatabase().imageDao().getPending()
             if (pendingImages.any()) syncElements.addAll(ArrayList(pendingImages))
         }

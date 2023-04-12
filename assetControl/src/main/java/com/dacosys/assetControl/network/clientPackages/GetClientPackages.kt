@@ -6,6 +6,7 @@ import com.dacosys.assetControl.R
 import com.dacosys.assetControl.network.utils.Connection.Companion.isOnline
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.preferences.Repository
 import kotlinx.coroutines.*
 import org.json.JSONException
 import org.json.JSONObject
@@ -62,12 +63,12 @@ class GetClientPackages(
             //Create connection
             url = URL(urlRequest)
 
-            connection = if (Statics.wsUseProxy) {
+            connection = if (Repository.wsUseProxy) {
                 val authenticator = object : Authenticator() {
                     override fun getPasswordAuthentication(): PasswordAuthentication {
                         return PasswordAuthentication(
-                            Statics.wsProxyUser,
-                            Statics.wsProxyPass.toCharArray()
+                            Repository.wsProxyUser,
+                            Repository.wsProxyPass.toCharArray()
                         )
                     }
                 }
@@ -75,8 +76,8 @@ class GetClientPackages(
 
                 val proxy = Proxy(
                     Proxy.Type.HTTP, InetSocketAddress(
-                        Statics.wsProxy,
-                        Statics.wsProxyPort
+                        Repository.wsProxy,
+                        Repository.wsProxyPort
                     )
                 )
                 url.openConnection(proxy) as HttpsURLConnection

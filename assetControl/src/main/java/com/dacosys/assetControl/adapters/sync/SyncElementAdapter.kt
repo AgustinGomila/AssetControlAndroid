@@ -29,13 +29,13 @@ import com.dacosys.assetControl.model.review.AssetReview
 import com.dacosys.assetControl.model.route.RouteProcess
 import com.dacosys.assetControl.network.sync.SyncRegistryType
 import com.dacosys.assetControl.ui.common.views.custom.AutoResizeTextView
-import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetString
 import com.dacosys.assetControl.utils.Screen.Companion.getBestContrastColor
 import com.dacosys.assetControl.utils.Screen.Companion.getColorWithAlpha
 import com.dacosys.assetControl.utils.Screen.Companion.isTablet
 import com.dacosys.assetControl.utils.Screen.Companion.manipulateColor
 import com.dacosys.assetControl.utils.Screen.Companion.textLightColor
 import com.dacosys.assetControl.utils.misc.Md5.Companion.getMd5
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetString
 import com.dacosys.assetControl.utils.settings.Preference.Companion.lineSeparator
 import com.dacosys.imageControl.room.entity.Image
 import java.lang.ref.WeakReference

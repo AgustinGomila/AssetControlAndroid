@@ -1,6 +1,7 @@
 package com.dacosys.assetControl.utils
 
 import android.util.Log
+import com.dacosys.assetControl.utils.preferences.Preferences
 import com.dacosys.assetControl.utils.settings.Preference
 import com.dacosys.assetControl.utils.settings.collectorType.CollectorType
 

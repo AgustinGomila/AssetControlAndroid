@@ -55,6 +55,7 @@ import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.ParcelLong
 import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.getUTCDateTimeAsString
+import com.dacosys.assetControl.utils.preferences.Repository
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.ScannedCode
 import com.dacosys.assetControl.utils.scanners.Scanner
@@ -523,7 +524,7 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
             editAssetRequiredListener = this
         )
 
-        if (Statics.useImageControl) {
+        if (Repository.useImageControl) {
             wmContAdapter?.refreshImageControlListeners(
                 this, this
             )
@@ -1200,7 +1201,7 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
     // region ImageControl
 
     override fun onAlbumViewRequired(tableId: Int, itemId: Long) {
-        if (!Statics.useImageControl) {
+        if (!Repository.useImageControl) {
             return
         }
 
@@ -1305,7 +1306,7 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
     }
 
     override fun onAddPhotoRequired(tableId: Int, itemId: Long, description: String) {
-        if (!Statics.useImageControl) {
+        if (!Repository.useImageControl) {
             return
         }
 

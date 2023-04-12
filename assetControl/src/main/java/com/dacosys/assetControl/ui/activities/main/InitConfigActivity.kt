@@ -31,15 +31,16 @@ import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType.CREATOR.INFO
-import com.dacosys.assetControl.utils.Preferences.Companion.cleanPrefs
-import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetBoolean
-import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetString
+import com.dacosys.assetControl.utils.ConfigHelper
 import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
 import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Screen.Companion.showKeyboard
 import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.Statics.Companion.getConfig
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.cleanPrefs
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetString
+import com.dacosys.assetControl.utils.preferences.Repository
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid.Companion.isRfidRequired
@@ -106,7 +107,7 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
         installationCode: String,
     ) {
         if (status == ProgressStatus.finished) {
-            getConfig(
+            ConfigHelper.getConfig(
                 email = email, password = password, installationCode = installationCode
             ) { onTaskGetPackagesEnded(it) }
         }
@@ -132,7 +133,7 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
             // Vamos a reconstruir el scanner por si cambió la configuración
             JotterListener.autodetectDeviceModel(this)
 
-            if (Statics.urlPanel.isEmpty()) {
+            if (Repository.urlPanel.isEmpty()) {
                 makeText(
                     binding.root, getString(R.string.server_is_not_configured), ERROR
                 )
@@ -303,7 +304,7 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
     private fun attemptEnterConfig(password: String) {
         val realPass = prefsGetString(Preference.confPassword)
         if (password == realPass) {
-            Statics.setDebugConfigValues()
+            ConfigHelper.setDebugConfigValues()
 
             if (!rejectNewInstances) {
                 rejectNewInstances = true
@@ -332,7 +333,7 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         if (email.trim().isNotEmpty() && password.trim().isNotEmpty()) {
             if (!binding.proxyCheckBox.isChecked) {
-                getConfig(
+                ConfigHelper.getConfig(
                     email = email, password = password, installationCode = ""
                 ) { onTaskGetPackagesEnded(it) }
             } else {
@@ -376,13 +377,13 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
 
             when {
                 mainJson.has("config") -> {
-                    Statics.getConfigFromScannedCode(
+                    ConfigHelper.getConfigFromScannedCode(
                         scanCode = scanCode, mode = QRConfigClientAccount
                     ) { onTaskGetPackagesEnded(it) }
                 }
                 mainJson.has(Statics.appName) -> {
                     if (scanCode.contains(Preference.acWsServer.key)) {
-                        Statics.getConfigFromScannedCode(
+                        ConfigHelper.getConfigFromScannedCode(
                             scanCode = scanCode, mode = QRConfigType.QRConfigWebservice
                         ) { onTaskGetPackagesEnded(it) }
                     }

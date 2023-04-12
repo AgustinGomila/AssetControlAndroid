@@ -39,12 +39,13 @@ import com.dacosys.assetControl.network.utils.*
 import com.dacosys.assetControl.network.utils.Connection.Companion.isOnline
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
-import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetStringSet
-import com.dacosys.assetControl.utils.Preferences.Companion.prefsPutStringSet
 import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetStringSet
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsPutStringSet
+import com.dacosys.assetControl.utils.preferences.Repository
 import com.dacosys.assetControl.utils.settings.Preference
 import com.dacosys.assetControl.viewModel.sync.PendingViewModel
 import com.dacosys.assetControl.viewModel.sync.SyncViewModel
@@ -964,7 +965,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
         colors.add(assetManteinance)
         colors.add(dataCollection)
         colors.add(routeProcess)
-        if (Statics.useImageControl) colors.add(image)
+        if (Repository.useImageControl) colors.add(image)
         //endregion Icon colors
 
         for ((index, i) in SyncRegistryType.getSyncUpload().withIndex()) {

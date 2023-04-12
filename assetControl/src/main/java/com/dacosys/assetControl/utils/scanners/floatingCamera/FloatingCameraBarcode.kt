@@ -23,13 +23,13 @@ import com.dacosys.assetControl.databinding.FloatingCameraActivityBinding
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.common.views.scaleImageView.ScaleImage
-import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetBoolean
-import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetInt
-import com.dacosys.assetControl.utils.Preferences.Companion.prefsPutBoolean
-import com.dacosys.assetControl.utils.Preferences.Companion.prefsPutInt
 import com.dacosys.assetControl.utils.Screen.Companion.getScreenHeight
 import com.dacosys.assetControl.utils.Screen.Companion.getScreenWidth
 import com.dacosys.assetControl.utils.Screen.Companion.getSystemBarsHeight
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetInt
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsPutBoolean
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsPutInt
 import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.utils.settings.Preference
 import com.google.zxing.BarcodeFormat

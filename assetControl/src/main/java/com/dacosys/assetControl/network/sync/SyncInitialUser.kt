@@ -9,9 +9,9 @@ import com.dacosys.assetControl.dataBase.user.UserWarehouseAreaDbHelper
 import com.dacosys.assetControl.network.serverDate.GetMySqlDate
 import com.dacosys.assetControl.network.serverDate.MySqlDateResult
 import com.dacosys.assetControl.network.utils.ProgressStatus
-import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetInt
-import com.dacosys.assetControl.utils.Preferences.Companion.prefsPutString
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetInt
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsPutString
 import com.dacosys.assetControl.utils.settings.entries.ConfEntry
 import com.dacosys.assetControl.webservice.common.Webservice.Companion.getWebservice
 import com.dacosys.assetControl.webservice.user.*

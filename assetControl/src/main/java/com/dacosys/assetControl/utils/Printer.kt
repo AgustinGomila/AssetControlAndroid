@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
 import com.dacosys.assetControl.AssetControlApp
+import com.dacosys.assetControl.utils.preferences.Preferences
 import com.dacosys.assetControl.utils.settings.Preference
 
 class Printer {

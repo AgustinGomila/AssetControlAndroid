@@ -43,10 +43,9 @@ import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarEventData
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.fragments.user.UserSpinnerFragment
+import com.dacosys.assetControl.utils.ConfigHelper
 import com.dacosys.assetControl.utils.ImageControl.Companion.closeImageControl
 import com.dacosys.assetControl.utils.ImageControl.Companion.setupImageControl
-import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetBoolean
-import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetString
 import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
 import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Screen.Companion.setupUI
@@ -56,6 +55,9 @@ import com.dacosys.assetControl.utils.Statics.Companion.OFFLINE_MODE
 import com.dacosys.assetControl.utils.Statics.Companion.appName
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.Md5
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetString
+import com.dacosys.assetControl.utils.preferences.Repository
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid.Companion.isRfidRequired
@@ -74,7 +76,8 @@ import java.lang.ref.WeakReference
 import kotlin.concurrent.thread
 
 class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedListener,
-    Scanner.ScannerListener, Statics.TaskConfigEnded, ClientPackage.Companion.TaskConfigPanelEnded {
+    Scanner.ScannerListener, ConfigHelper.TaskConfigEnded,
+    ClientPackage.Companion.TaskConfigPanelEnded {
     override fun onTaskConfigPanelEnded(status: ProgressStatus) {
         if (status == ProgressStatus.finished) {
             makeText(binding.root, getString(R.string.configuration_applied), SnackBarType.SUCCESS)
@@ -267,11 +270,10 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                 SQLiteDatabase.releaseMemory()
 
                 // Enviar las imágenes pendientes...
-                if (Statics.useImageControl) SendPending()
+                if (Repository.useImageControl) SendPending()
 
                 thread {
-                    Sync.goSync(
-                        onSyncProgress = { syncViewModel.setSyncDownloadProgress(it) },
+                    Sync.goSync(onSyncProgress = { syncViewModel.setSyncDownloadProgress(it) },
                         onSessionCreated = { syncViewModel.setSessionCreated(it) })
                 }
             }
@@ -539,9 +541,9 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                 binding.versionTextView.text = "${getString(R.string.app_milestone)} ${
                     packageManager.getPackageInfo(packageName, 0).versionName
                 }"
-                binding.packageTextView.text = Statics.clientPackage
+                binding.packageTextView.text = Repository.clientPackage
                 when {
-                    Statics.clientPackage.isEmpty() -> binding.packageTextView.visibility =
+                    Repository.clientPackage.isEmpty() -> binding.packageTextView.visibility =
                         View.GONE
                     else -> binding.packageTextView.visibility = View.VISIBLE
                 }
@@ -605,7 +607,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                 return
             }
 
-            if (Statics.wsUrl.isEmpty() || Statics.wsNamespace.isEmpty()) {
+            if (Repository.wsUrl.isEmpty() || Repository.wsNamespace.isEmpty()) {
                 showSnackBar(
                     SnackBarEventData(
                         getString(R.string.webservice_is_not_configured), SnackBarType.ERROR
@@ -709,7 +711,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
     private fun attemptEnterConfig(password: String) {
         val realPass = prefsGetString(Preference.confPassword)
         if (password == realPass) {
-            Statics.setDebugConfigValues()
+            ConfigHelper.setDebugConfigValues()
 
             if (!rejectNewInstances) {
                 rejectNewInstances = true
@@ -836,7 +838,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
 
             when {
                 mainJson.has("config") -> {
-                    Statics.getConfigFromScannedCode(
+                    ConfigHelper.getConfigFromScannedCode(
                         scanCode = scanCode, mode = QRConfigClientAccount
                     ) { onTaskGetPackagesEnded(it) }
                 }
@@ -849,7 +851,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                             adb.setNegativeButton(R.string.cancel, null)
                             adb.setPositiveButton(R.string.accept) { _, _ ->
                                 DownloadDb.downloadDbRequired = true
-                                Statics.getConfigFromScannedCode(
+                                ConfigHelper.getConfigFromScannedCode(
                                     scanCode = scanCode, mode = QRConfigWebservice
                                 ) { onTaskGetPackagesEnded(it) }
                             }
@@ -857,7 +859,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                         }
                         else -> {
                             // APP CONFIGURATION
-                            Statics.getConfigFromScannedCode(
+                            ConfigHelper.getConfigFromScannedCode(
                                 scanCode = scanCode, mode = QRConfigApp
                             ) { onTaskGetPackagesEnded(it) }
                         }

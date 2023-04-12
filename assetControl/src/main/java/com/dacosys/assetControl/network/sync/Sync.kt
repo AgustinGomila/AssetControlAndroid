@@ -3,8 +3,8 @@ package com.dacosys.assetControl.network.sync
 import android.os.Handler
 import android.os.Looper
 import com.dacosys.assetControl.network.utils.Connection.Companion.autoSend
-import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetInt
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetInt
 import com.dacosys.assetControl.utils.settings.Preference
 import java.util.*
 

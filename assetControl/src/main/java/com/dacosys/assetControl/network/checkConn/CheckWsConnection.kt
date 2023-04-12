@@ -7,7 +7,7 @@ import com.dacosys.assetControl.network.serverDate.MySqlDateResult
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarEventData
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.preferences.Repository
 import com.dacosys.assetControl.webservice.common.Webservice.Companion.getWebservice
 
 class CheckWsConnection(
@@ -36,15 +36,15 @@ class CheckWsConnection(
     }
 
     fun execute() {
-        Statics.wsTestUrl = url
-        Statics.wsTestNamespace = namespace
-        Statics.wsTestUseProxy = useProxy
-        Statics.wsTestProxyUrl = proxyUrl
-        Statics.wsTestProxyPort = proxyPort
-        Statics.wsTestProxyUser = proxyUser
-        Statics.wsTestProxyPass = proxyPass
+        Repository.wsTestUrl = url
+        Repository.wsTestNamespace = namespace
+        Repository.wsTestUseProxy = useProxy
+        Repository.wsTestProxyUrl = proxyUrl
+        Repository.wsTestProxyPort = proxyPort
+        Repository.wsTestProxyUser = proxyUser
+        Repository.wsTestProxyPass = proxyPass
 
-        if (Statics.wsTestUrl.isEmpty() || Statics.wsTestNamespace.isEmpty()) {
+        if (Repository.wsTestUrl.isEmpty() || Repository.wsTestNamespace.isEmpty()) {
             return
         }
 

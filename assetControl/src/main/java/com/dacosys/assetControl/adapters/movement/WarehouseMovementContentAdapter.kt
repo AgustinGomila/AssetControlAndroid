@@ -35,7 +35,7 @@ import com.dacosys.assetControl.ui.common.views.custom.AutoResizeTextView
 import com.dacosys.assetControl.utils.Screen.Companion.getColorWithAlpha
 import com.dacosys.assetControl.utils.Screen.Companion.manipulateColor
 import com.dacosys.assetControl.utils.Screen.Companion.textLightColor
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.preferences.Repository
 import java.lang.ref.WeakReference
 import java.util.*
 
@@ -854,7 +854,7 @@ class WarehouseMovementContentAdapter : ArrayAdapter<WarehouseMovementContent>, 
         holder.serialNumberTitleTextView = v.findViewById(R.id.serialNumberTextView)
         holder.eanTitleTextView = v.findViewById(R.id.eanTextView)
 
-        if (Statics.useImageControl) {
+        if (Repository.useImageControl) {
             holder.signImageView?.visibility = GONE
             holder.addPhotoImageView?.visibility = VISIBLE
             holder.albumImageView?.visibility = VISIBLE
@@ -871,7 +871,7 @@ class WarehouseMovementContentAdapter : ArrayAdapter<WarehouseMovementContent>, 
             holder.editImageView?.visibility = VISIBLE
         } else {
             holder.editImageView?.visibility = GONE
-            if (!Statics.useImageControl) {
+            if (!Repository.useImageControl) {
                 holder.divider5?.visibility = GONE
                 holder.imageControlConstraintLayout?.visibility = GONE
             } else {
@@ -977,7 +977,7 @@ class WarehouseMovementContentAdapter : ArrayAdapter<WarehouseMovementContent>, 
                 }
 
                 // region ImageControl
-                if (Statics.useImageControl) {
+                if (Repository.useImageControl) {
                     if (holder.albumImageView != null) {
                         holder.albumImageView!!.setOnTouchListener { _, event ->
                             if (event.action == MotionEvent.ACTION_DOWN) {

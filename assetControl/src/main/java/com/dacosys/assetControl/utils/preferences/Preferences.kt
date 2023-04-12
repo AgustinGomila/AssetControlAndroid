@@ -1,4 +1,4 @@
-package com.dacosys.assetControl.utils
+package com.dacosys.assetControl.utils.preferences
 
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager

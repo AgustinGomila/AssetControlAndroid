@@ -12,9 +12,9 @@ import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.databinding.RouteSelectFilterFragmentBinding
 import com.dacosys.assetControl.ui.activities.route.RouteSelectDialogActivity
-import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetBoolean
-import com.dacosys.assetControl.utils.Preferences.Companion.prefsPutBoolean
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsPutBoolean
 import com.dacosys.assetControl.utils.settings.Preference
 
 /**

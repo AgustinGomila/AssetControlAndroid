@@ -10,7 +10,7 @@ import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
 import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Preferences
+import com.dacosys.assetControl.utils.preferences.Preferences
 import com.dacosys.assetControl.utils.settings.Preference
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout

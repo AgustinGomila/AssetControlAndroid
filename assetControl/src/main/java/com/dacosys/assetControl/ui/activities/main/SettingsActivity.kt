@@ -46,18 +46,17 @@ import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType.CREATOR.INFO
 import com.dacosys.assetControl.utils.Collector.Companion.collectorTypeChanged
-import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetBoolean
-import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetInt
-import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetString
-import com.dacosys.assetControl.utils.Preferences.Companion.prefsPutString
+import com.dacosys.assetControl.utils.ConfigHelper
 import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.Statics.Companion.OFFLINE_MODE
-import com.dacosys.assetControl.utils.Statics.Companion.generateQrCode
-import com.dacosys.assetControl.utils.Statics.Companion.getBarcodeForConfig
-import com.dacosys.assetControl.utils.Statics.Companion.getConfigFromScannedCode
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.errorLog.ErrorLog.Companion.getLastErrorLog
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetInt
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetString
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsPutString
+import com.dacosys.assetControl.utils.preferences.Repository
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
@@ -101,7 +100,7 @@ import com.dacosys.assetControl.utils.settings.Preference.Companion as Preferenc
 
 class SettingsActivity : AppCompatActivity(),
     PreferenceFragmentCompat.OnPreferenceStartFragmentCallback, Scanner.ScannerListener,
-    Statics.TaskConfigEnded, ClientPackage.Companion.TaskConfigPanelEnded {
+    ConfigHelper.TaskConfigEnded, ClientPackage.Companion.TaskConfigPanelEnded {
     class HeaderFragment : PreferenceFragmentCompat() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.pref_headers, rootKey)
@@ -489,7 +488,7 @@ class SettingsActivity : AppCompatActivity(),
                 return
             }
 
-            getConfigFromScannedCode(
+            ConfigHelper.getConfigFromScannedCode(
                 scanCode = scanCode, mode = currentQRConfigType
             ) { onTaskGetPackagesEnded(it) }
         } catch (ex: Exception) {
@@ -575,8 +574,8 @@ class SettingsActivity : AppCompatActivity(),
 
             val qrCodeButton = findPreference<Preference>("ac_qr_code")
             qrCodeButton?.onPreferenceClickListener = OnPreferenceClickListener {
-                generateQrCode(
-                    WeakReference(requireActivity()), getBarcodeForConfig(
+                ConfigHelper.generateQrCode(
+                    WeakReference(requireActivity()), ConfigHelper.getBarcodeForConfig(
                         PreferencesApp.getAppConf(), Statics.appName
                     )
                 )
@@ -696,7 +695,7 @@ class SettingsActivity : AppCompatActivity(),
                         diaBox.show()
                     } else {
                         if (email.isNotEmpty() && password.isNotEmpty()) {
-                            Statics.getConfig(
+                            ConfigHelper.getConfig(
                                 email = email, password = password, installationCode = ""
                             ) { onTaskGetPackagesEnded(it) }
                         }
@@ -737,8 +736,8 @@ class SettingsActivity : AppCompatActivity(),
                     return@OnPreferenceClickListener false
                 }
 
-                generateQrCode(
-                    WeakReference(requireActivity()), getBarcodeForConfig(
+                ConfigHelper.generateQrCode(
+                    WeakReference(requireActivity()), ConfigHelper.getBarcodeForConfig(
                         PreferencesApp.getClient(), "config"
                     )
                 )
@@ -831,7 +830,7 @@ class SettingsActivity : AppCompatActivity(),
                     alreadyAnsweredYes = true
 
                     if (email.isNotEmpty() && password.isNotEmpty()) {
-                        Statics.getConfig(
+                        ConfigHelper.getConfig(
                             email = email, password = password, installationCode = ""
                         ) { onTaskGetPackagesEnded(it) }
                     }
@@ -1698,8 +1697,8 @@ class SettingsActivity : AppCompatActivity(),
                     return@OnPreferenceClickListener false
                 }
 
-                generateQrCode(
-                    WeakReference(requireActivity()), getBarcodeForConfig(
+                ConfigHelper.generateQrCode(
+                    WeakReference(requireActivity()), ConfigHelper.getBarcodeForConfig(
                         PreferencesApp.getImageControl(), Statics.appName
                     )
                 )
@@ -1928,8 +1927,8 @@ class SettingsActivity : AppCompatActivity(),
                     return@OnPreferenceClickListener false
                 }
 
-                generateQrCode(
-                    WeakReference(requireActivity()), getBarcodeForConfig(
+                ConfigHelper.generateQrCode(
+                    WeakReference(requireActivity()), ConfigHelper.getBarcodeForConfig(
                         PreferencesApp.getAcWebserivce(), Statics.appName
                     )
                 )
@@ -2520,9 +2519,9 @@ class SettingsActivity : AppCompatActivity(),
                     "Ver: %s%sInstallation Code: %s%sClient Package: %s",
                     "${getString(R.string.app_milestone)} ${pInfo.versionName}",
                     System.getProperty("line.separator"),
-                    Statics.installationCode,
+                    Repository.installationCode,
                     System.getProperty("line.separator"),
-                    Statics.clientPackage
+                    Repository.clientPackage
                 )
 
                 val extraText = ArrayList<String>()

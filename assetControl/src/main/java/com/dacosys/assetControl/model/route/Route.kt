@@ -7,7 +7,7 @@ import com.dacosys.assetControl.dataBase.route.RouteContract.RouteEntry.Companio
 import com.dacosys.assetControl.dataBase.route.RouteContract.RouteEntry.Companion.DESCRIPTION
 import com.dacosys.assetControl.dataBase.route.RouteContract.RouteEntry.Companion.ROUTE_ID
 import com.dacosys.assetControl.dataBase.route.RouteDbHelper
-import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetString
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetString
 import com.dacosys.assetControl.utils.settings.Preference
 
 class Route : Parcelable {

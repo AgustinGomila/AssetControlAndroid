@@ -68,10 +68,6 @@ import com.dacosys.assetControl.ui.common.snackbar.SnackBarEventData
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.dacosys.assetControl.ui.fragments.movement.LocationHeaderFragment
-import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetBoolean
-import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetStringSet
-import com.dacosys.assetControl.utils.Preferences.Companion.prefsPutBoolean
-import com.dacosys.assetControl.utils.Preferences.Companion.prefsPutStringSet
 import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
 import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Statics
@@ -79,6 +75,11 @@ import com.dacosys.assetControl.utils.Statics.Companion.INTERNAL_IMAGE_CONTROL_A
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.ParcelLong
 import com.dacosys.assetControl.utils.misc.UTCDataTime
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetStringSet
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsPutBoolean
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsPutStringSet
+import com.dacosys.assetControl.utils.preferences.Repository
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.ScannedCode
 import com.dacosys.assetControl.utils.scanners.Scanner
@@ -1194,7 +1195,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
             editAssetRequiredListener = this
         )
 
-        if (Statics.useImageControl) {
+        if (Repository.useImageControl) {
             arContAdapter?.refreshImageControlListeners(this, this)
         }
     }
@@ -1883,7 +1884,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
     // region ImageControl
 
     override fun onAlbumViewRequired(tableId: Int, itemId: Long) {
-        if (!Statics.useImageControl) {
+        if (!Repository.useImageControl) {
             return
         }
 
@@ -1990,7 +1991,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     override fun onAddPhotoRequired(tableId: Int, itemId: Long, description: String) {
-        if (!Statics.useImageControl) {
+        if (!Repository.useImageControl) {
             return
         }
 

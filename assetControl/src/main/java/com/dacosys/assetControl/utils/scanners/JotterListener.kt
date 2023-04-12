@@ -21,10 +21,10 @@ import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.utils.Collector.Companion.collectorType
 import com.dacosys.assetControl.utils.Collector.Companion.collectorTypeChanged
 import com.dacosys.assetControl.utils.Collector.Companion.isNfcRequired
-import com.dacosys.assetControl.utils.Preferences.Companion.prefsIsInitialized
-import com.dacosys.assetControl.utils.Preferences.Companion.prefsPutString
-import com.dacosys.assetControl.utils.Preferences.Companion.startPrefs
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsIsInitialized
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsPutString
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.startPrefs
 import com.dacosys.assetControl.utils.scanners.Scanner.ScannerListener
 import com.dacosys.assetControl.utils.scanners.floatingCamera.FloatingCameraBarcode
 import com.dacosys.assetControl.utils.scanners.nfc.Nfc

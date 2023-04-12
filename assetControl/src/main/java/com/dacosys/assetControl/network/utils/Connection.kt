@@ -6,7 +6,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.util.Log
 import com.dacosys.assetControl.AssetControlApp
-import com.dacosys.assetControl.utils.Preferences
+import com.dacosys.assetControl.utils.preferences.Preferences
 import com.dacosys.assetControl.utils.settings.Preference
 
 class Connection {

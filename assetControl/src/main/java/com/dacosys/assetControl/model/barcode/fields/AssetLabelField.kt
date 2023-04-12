@@ -1,8 +1,8 @@
 package com.dacosys.assetControl.model.barcode.fields
 
 import com.dacosys.assetControl.model.asset.Asset
-import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.utils.settings.entries.ConfEntry
 import java.util.*
 

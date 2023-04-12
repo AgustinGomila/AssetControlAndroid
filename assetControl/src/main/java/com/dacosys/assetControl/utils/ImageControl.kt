@@ -1,5 +1,7 @@
 package com.dacosys.assetControl.utils
 
+import com.dacosys.assetControl.utils.preferences.Preferences
+import com.dacosys.assetControl.utils.preferences.Repository
 import com.dacosys.assetControl.utils.settings.Preference
 
 class ImageControl {
@@ -20,19 +22,19 @@ class ImageControl {
                 com.dacosys.imageControl.Statics.newInstance()
             }
 
-            com.dacosys.imageControl.Statics.useImageControl = Statics.useImageControl
-            com.dacosys.imageControl.Statics.wsIcUrl = Statics.wsIcUrl
-            com.dacosys.imageControl.Statics.wsIcNamespace = Statics.wsIcNamespace
-            com.dacosys.imageControl.Statics.wsIcProxy = Statics.wsIcProxy
-            com.dacosys.imageControl.Statics.wsIcProxyPort = Statics.wsIcProxyPort
-            com.dacosys.imageControl.Statics.wsIcUseProxy = Statics.wsIcUseProxy
-            com.dacosys.imageControl.Statics.wsIcProxyUser = Statics.wsIcProxyUser
-            com.dacosys.imageControl.Statics.wsIcProxyPass = Statics.wsIcProxyPass
-            com.dacosys.imageControl.Statics.icUser = Statics.icUser
-            com.dacosys.imageControl.Statics.icPass = Statics.icPass
-            com.dacosys.imageControl.Statics.wsIcUser = Statics.wsIcUser
-            com.dacosys.imageControl.Statics.wsIcPass = Statics.wsIcPass
-            com.dacosys.imageControl.Statics.maxHeightOrWidth = Statics.maxHeightOrWidth
+            com.dacosys.imageControl.Statics.useImageControl = Repository.useImageControl
+            com.dacosys.imageControl.Statics.wsIcUrl = Repository.wsIcUrl
+            com.dacosys.imageControl.Statics.wsIcNamespace = Repository.wsIcNamespace
+            com.dacosys.imageControl.Statics.wsIcProxy = Repository.wsIcProxy
+            com.dacosys.imageControl.Statics.wsIcProxyPort = Repository.wsIcProxyPort
+            com.dacosys.imageControl.Statics.wsIcUseProxy = Repository.wsIcUseProxy
+            com.dacosys.imageControl.Statics.wsIcProxyUser = Repository.wsIcProxyUser
+            com.dacosys.imageControl.Statics.wsIcProxyPass = Repository.wsIcProxyPass
+            com.dacosys.imageControl.Statics.icUser = Repository.icUser
+            com.dacosys.imageControl.Statics.icPass = Repository.icPass
+            com.dacosys.imageControl.Statics.wsIcUser = Repository.wsIcUser
+            com.dacosys.imageControl.Statics.wsIcPass = Repository.wsIcPass
+            com.dacosys.imageControl.Statics.maxHeightOrWidth = Repository.maxHeightOrWidth
         }
     }
 }

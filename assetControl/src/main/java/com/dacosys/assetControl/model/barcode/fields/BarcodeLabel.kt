@@ -1,9 +1,9 @@
 package com.dacosys.assetControl.model.barcode.fields
 
 import com.dacosys.assetControl.model.barcode.BarcodeLabelPrintOps
-import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetInt
-import com.dacosys.assetControl.utils.Preferences.Companion.prefsGetString
 import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetInt
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetString
 import com.dacosys.assetControl.utils.settings.entries.ConfEntry
 
 class BarcodeLabel(templateStr: String) {

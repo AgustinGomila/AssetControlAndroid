@@ -32,7 +32,7 @@ import com.dacosys.assetControl.utils.Screen.Companion.getColorWithAlpha
 import com.dacosys.assetControl.utils.Screen.Companion.isTablet
 import com.dacosys.assetControl.utils.Screen.Companion.manipulateColor
 import com.dacosys.assetControl.utils.Screen.Companion.textLightColor
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.preferences.Repository
 import java.lang.ref.WeakReference
 import java.util.*
 
@@ -855,7 +855,7 @@ class AssetAdapter : ArrayAdapter<Asset>, Filterable {
         holder.serialNumberTitleTextView = v.findViewById(R.id.serialNumberTextView)
         holder.eanTitleTextView = v.findViewById(R.id.eanTextView)
 
-        if (Statics.useImageControl) {
+        if (Repository.useImageControl) {
             holder.signImageView?.visibility = GONE
             holder.addPhotoImageView?.visibility = VISIBLE
             holder.albumImageView?.visibility = VISIBLE
@@ -963,7 +963,7 @@ class AssetAdapter : ArrayAdapter<Asset>, Filterable {
                 }
 
                 // region ImageControl
-                if (Statics.useImageControl) {
+                if (Repository.useImageControl) {
                     if (holder.albumImageView != null) {
                         holder.albumImageView!!.setOnTouchListener { _, event ->
                             if (event.action == MotionEvent.ACTION_DOWN) {
