@@ -77,11 +77,11 @@ class Proxy {
             proxyPassEditText.typeface = Typeface.DEFAULT
             proxyPassEditText.transformationMethod = PasswordTransformationMethod()
 
-            val inputLayout = TextInputLayout(AssetControlApp.getContext())
+            val inputLayout = TextInputLayout(activity)
             inputLayout.endIconMode = TextInputLayout.END_ICON_PASSWORD_TOGGLE
             inputLayout.addView(proxyPassEditText)
 
-            val layout = LinearLayout(AssetControlApp.getContext())
+            val layout = LinearLayout(activity)
             layout.orientation = LinearLayout.VERTICAL
 
             layout.addView(proxyEditText)
@@ -114,7 +114,12 @@ class Proxy {
                 }
 
                 if (port != null) {
-                    p.putInt(Preference.acWsProxyPort.key, Integer.parseInt(port.toString()))
+                    val portNumber = try {
+                        Integer.parseInt(port.toString())
+                    } catch (ex: java.lang.NumberFormatException) {
+                        0
+                    }
+                    p.putInt(Preference.acWsProxyPort.key, portNumber)
                 }
 
                 if (user.isNotEmpty()) {

@@ -69,7 +69,7 @@ class Sync {
                         return super.cancel()
                     }
                 }
-                (timer ?: return).scheduleAtFixedRate(
+                timer?.scheduleAtFixedRate(
                     timerTask,
                     100,
                     1000
