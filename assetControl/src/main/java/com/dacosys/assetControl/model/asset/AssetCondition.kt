@@ -76,7 +76,7 @@ class AssetCondition : Parcelable {
             5,
             getContext().getString(R.string.asset_condition_bad)
         )
-        var varyBad = AssetCondition(
+        var veryBad = AssetCondition(
             6,
             getContext().getString(R.string.asset_condition_very_bad)
         )
@@ -91,7 +91,7 @@ class AssetCondition : Parcelable {
                 good,
                 regular,
                 bad,
-                varyBad
+                veryBad
             )
 
             return ArrayList(allSections.sortedWith(compareBy { it.id }))

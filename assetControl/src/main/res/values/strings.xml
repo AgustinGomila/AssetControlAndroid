@@ -10,7 +10,8 @@
     <string name="NFC_is_enabled">NFC está activado</string>
     <string name="_0">0</string>
     <string name="ellipsis">…</string>
-    <string name="could_not_send_pending_data">No se pudieron enviar datos pendientes. Vuelva a intentar más adelante.</string>
+    <string name="could_not_send_pending_data">No se pudieron enviar datos pendientes. Vuelva a intentar más adelante.
+    </string>
     <string name="rule_content">Contenido de la regla</string>
     <string name="invalid_client_data">Datos de cliente inválidos</string>
     <string name="to_move">A mover</string>
@@ -62,7 +63,8 @@
     <string name="collector_type">Tipo de colector</string>
     <string name="condition">Condición</string>
     <string name="confirm">Confirmar</string>
-    <string name="an_error_occurred_while_trying_to_add_the_item">Ha ocurrido un error al intentar agregar el ítem</string>
+    <string name="an_error_occurred_while_trying_to_add_the_item">Ha ocurrido un error al intentar agregar el ítem
+    </string>
     <string name="dacosys_logo">Dacosys logo</string>
     <string name="warehouse">Depósito</string>
     <string name="description_code_or_asset_ean">Descripción, código o EAN del activo</string>
@@ -149,7 +151,9 @@
     <string name="wrong_user_password_combination">Combinación de usuario y contraseña incorrecta</string>
     <string name="you_must_select_a_user">Debe seleccionar un usuario</string>
     <string name="without_warehouse">Sin depósito</string>
-    <string name="the_code_does_not_belong_to_any_asset_or_area_in_the_database">El código no pertenece a ningún activo fijo o área de depósito en la base de datos</string>
+    <string name="the_code_does_not_belong_to_any_asset_or_area_in_the_database">El código no pertenece a ningún activo
+        fijo o área de depósito en la base de datos
+    </string>
     <string name="the_code_belongs_to_an_area">El código pertenece a un área</string>
     <string name="the_code_belongs_to_an_asset">El código pertenece a un activo fijo</string>
     <string name="asset_review">Revisión</string>
@@ -171,9 +175,11 @@
     <string name="no">No</string>
     <string name="yes">Sí</string>
     <string name="remove_old_error_registries">Eliminar registros de errores antiguos</string>
-    <string name="pref_header_asset_control_mant_conf">AssetControl Manteinance Webservice</string>
+    <string name="pref_header_asset_control_mant_conf">AssetControl Maintenance Webservice</string>
     <string name="copy_database">Copiar base de datos</string>
-    <string name="copy_db_to_documents">Copia la base de datos al directorio de documentos del almacenamiento interno del dispositivo.</string>
+    <string name="copy_db_to_documents">Copia la base de datos al directorio de documentos del almacenamiento interno
+        del dispositivo.
+    </string>
     <string name="general_configuration">Configuración general</string>
     <string name="synchronization_preference">Sincronización</string>
     <string name="read_barcode">Leer código</string>
@@ -194,10 +200,14 @@
     <string name="copy_ok">Copia OK</string>
     <string name="enter_password">Ingrese contraseña</string>
     <string name="invalid_password">Contraseña incorrecta</string>
-    <string name="place_the_code_in_the_rectangle_of_the_viewer_to_capture_it">Coloque el código en el rectángulo del visor para capturarlo</string>
+    <string name="place_the_code_in_the_rectangle_of_the_viewer_to_capture_it">Coloque el código en el rectángulo del
+        visor para capturarlo
+    </string>
     <string name="webservice_is_not_configured">No está configurado el Webservice</string>
     <string name="offline_mode">Modo desconectado</string>
-    <string name="there_are_no_users_you_must_synchronize_the_database">No hay usuarios. Debe sincronizar la base de datos</string>
+    <string name="there_are_no_users_you_must_synchronize_the_database">No hay usuarios. Debe sincronizar la base de
+        datos
+    </string>
     <string name="unable_to_create_database">Imposible crear la base de datos</string>
     <string name="you_do_not_have_access_to_the_configuration">No tiene acceso a la configuración</string>
     <string name="you_do_not_have_permission_to_print_labels">Usted no tiene permisos para imprimir etiquetas</string>
@@ -215,30 +225,43 @@
     <string name="error_adding_asset">Error al agregar el activo</string>
     <string name="assets_registration_modification">Alta o modificación de activos</string>
     <string name="cancel_asset_registration_modification">Cancelar alta o modificación de activo</string>
-    <string name="discard_changes_and_load_the_scanned_code_question">¿Descartar cambios y cargar el código escaneado?</string>
-    <string name="discard_changes_and_load_the_scanned_asset_question">¿Descartar cambios y cargar el activo escaneado?</string>
-    <string name="discard_changes_and_return_to_the_main_menu_question">¿Descartar cambios y volver al menú principal?</string>
+    <string name="discard_changes_and_load_the_scanned_code_question">¿Descartar cambios y cargar el código escaneado?
+    </string>
+    <string name="discard_changes_and_load_the_scanned_asset_question">¿Descartar cambios y cargar el activo
+        escaneado?
+    </string>
+    <string name="discard_changes_and_return_to_the_main_menu_question">¿Descartar cambios y volver al menú principal?
+    </string>
     <string name="you_do_not_have_permission_to_add_assets">Usted no tiene permisos para agregar activos</string>
     <string name="you_do_not_have_permission_to_modify_assets">Usted no tiene permisos para modificar activos</string>
     <string name="error_creating_the_asset">Error al crear el activo fijo</string>
     <string name="error_creating_the_category">Error al crear la categoría</string>
     <string name="you_must_enter_a_description_for_the_asset">Debe ingresar una descripción para el activo fijo</string>
     <string name="you_must_enter_a_code_for_the_asset">Debe ingresar un código para el activo fijo</string>
-    <string name="the_code_entered_already_exists_for_another_asset">El código ingresado ya existe para otro activo fijo</string>
+    <string name="the_code_entered_already_exists_for_another_asset">El código ingresado ya existe para otro activo
+        fijo
+    </string>
     <string name="you_must_select_a_category_for_the_asset">Debe seleccionar una categoría para el activo fijo</string>
-    <string name="you_must_select_an_original_area_for_the_asset">Debe seleccionar un área de depósito original para el activo fijo</string>
-    <string name="you_must_select_a_current_area_for_the_asset">Debe seleccionar un área de depósito actual para el activo fijo</string>
+    <string name="you_must_select_an_original_area_for_the_asset">Debe seleccionar un área de depósito original para el
+        activo fijo
+    </string>
+    <string name="you_must_select_a_current_area_for_the_asset">Debe seleccionar un área de depósito actual para el
+        activo fijo
+    </string>
     <string name="you_must_select_a_status_for_the_asset">Debe seleccionar un estado para el activo fijo</string>
     <string name="asset_information">Información del activo</string>
     <string name="error_connecting_device">Error al conectar dispositivo</string>
     <string name="there_are_no_bluetooth_devices">No hay dispositivos Bluetooth</string>
     <string name="there_is_no_selected_printer">No hay una impresora seleccionada</string>
     <string name="no_template_selected">No hay una plantilla seleccionada</string>
-    <string name="the_selected_asset_was_not_uploaded_to_the_server_and_does_not_have_a_definitive_id">El activo seleccionado aún no fue subido al servidor y no tiene un identificador definitivo</string>
+    <string name="the_selected_asset_was_not_uploaded_to_the_server_and_does_not_have_a_definitive_id">El activo
+        seleccionado aún no fue subido al servidor y no tiene un identificador definitivo
+    </string>
     <string name="device_connected">Dispositivo conectado</string>
     <string name="select_asset">Seleccionar activo</string>
     <string name="new_maintenance_task">Nueva tarea de mantenimiento</string>
-    <string name="you_must_select_a_type_of_maintenance_task">Debe seleccionar un tipo de tarea de mantenimiento</string>
+    <string name="you_must_select_a_type_of_maintenance_task">Debe seleccionar un tipo de tarea de mantenimiento
+    </string>
     <string name="maintenance_saved_correctly">Mantenimiento guardado correctamente</string>
     <string name="failed_to_save_maintenance">Error al guardar el mantenimiento</string>
     <string name="select_asset_maintenance">Seleccionar mantenimiento</string>
@@ -248,10 +271,17 @@
     <string name="you_must_select_a_maintenance_task">Debe seleccionar una tarea de mantenimiento</string>
     <string name="select_asset_review">Seleccionar revisión</string>
     <string name="remove_review">Eliminar revisión</string>
-    <string name="do_you_want_to_delete_the_selected_revision_question">¿Desea eliminar la revisión seleccionada?</string>
+    <string name="do_you_want_to_delete_the_selected_revision_question">¿Desea eliminar la revisión seleccionada?
+    </string>
     <string name="select_area_to_review">Seleccionar área a revisar</string>
-    <string name="there_are_x_assets_in_the_selected_area_divide_the_area_into_units_of_up_to_1000_assets_to_be_able_to_make_revisions">Existen %1$s activos en el área seleccionada. Divida el área en unidades de hasta 1000 activos para poder realizar revisiones</string>
-    <string name="there_are_assets_in_this_revision_that_belonged_to_another_area_do_you_want_to_make_the_movements_of_these_assets_to_the_current_area_question">Hay activos en esta revisión que pertenecían a otra área. ¿Desea realizar los movimientos de estos activos al área actual?</string>
+    <string name="there_are_x_assets_in_the_selected_area_divide_the_area_into_units_of_up_to_1000_assets_to_be_able_to_make_revisions">
+        Existen %1$s activos en el área seleccionada. Divida el área en unidades de hasta 1000 activos para poder
+        realizar revisiones
+    </string>
+    <string name="there_are_assets_in_this_revision_that_belonged_to_another_area_do_you_want_to_make_the_movements_of_these_assets_to_the_current_area_question">
+        Hay activos en esta revisión que pertenecían a otra área. ¿Desea realizar los movimientos de estos activos al
+        área actual?
+    </string>
     <string name="processing_external_asset">Procesando activo externo</string>
     <string name="processing_revisedasset">Procesando activo revisado</string>
     <string name="processing_appeared_asset">Procesando activo aparecido</string>
@@ -261,22 +291,31 @@
     <string name="failed_to_save_the_revision">Error al guardar la revisión</string>
     <string name="error_updating_asset_status">Error al actualizar el estado de los activos</string>
     <string name="error_making_movements">Error al realizar los movimientos</string>
-    <string name="automatic_movement_during_the_revision_on_date">Movimiento automático durante la revisión con fecha</string>
+    <string name="automatic_movement_during_the_revision_on_date">Movimiento automático durante la revisión con fecha
+    </string>
     <string name="description_required_for">Descripción requerida para</string>
     <string name="confirm_asset_review">Confirmar revisión</string>
-    <string name="failed_to_get_the_db_creation_date_from_the_server">Error al obtener la fecha de creación de la base de datos en el servidor</string>
+    <string name="failed_to_get_the_db_creation_date_from_the_server">Error al obtener la fecha de creación de la base
+        de datos en el servidor
+    </string>
     <string name="is_not_necessary_to_download_the_database">No es necesario descargar la base de datos</string>
-    <string name="error_downloading_the_database_from_the_server">Error al descargar la base de datos desde el servidor</string>
+    <string name="error_downloading_the_database_from_the_server">Error al descargar la base de datos desde el
+        servidor
+    </string>
     <string name="error_downloading_the_database">Error al descargar la base de datos</string>
     <string name="origin">Origen</string>
     <string name="failed_to_get_the_date_from_the_file">Error al obtener la fecha desde el archivo</string>
-    <string name="the_creation_date_of_the_db_on_the_server_is_invalid">La fecha de creación de la base de datos en el servidor es inválida</string>
+    <string name="the_creation_date_of_the_db_on_the_server_is_invalid">La fecha de creación de la base de datos en el
+        servidor es inválida
+    </string>
     <string name="error_connecting_to">Error al conectar a</string>
     <string name="file_length">Largo del archivo</string>
     <string name="exception_when_downloading">Excepción al descargar</string>
     <string name="device">Dispositivo</string>
     <string name="download_finished">Descarga finalizada</string>
-    <string name="do_you_want_to_delete_the_old_error_logs_question">¿Desea eliminar los registros de errores antiguos?</string>
+    <string name="do_you_want_to_delete_the_old_error_logs_question">¿Desea eliminar los registros de errores
+        antiguos?
+    </string>
     <string name="do_you_want_to_delete_the_image_cache_question">¿Desea eliminar el caché de imágenes?</string>
     <string name="invalid_webservice_data">Datos del webservice inválidos</string>
     <string name="connection_error">Error de conexión</string>
@@ -294,11 +333,15 @@
     <string name="select_rule">Seleccionar regla</string>
     <string name="data_collection_target">Objetivo de recolección de datos</string>
     <string name="error_trying_to_add_category">Error al intentar agregar la categoría</string>
-    <string name="you_must_enter_a_description_for_the_category">Debe ingresar una descripción para la categoría</string>
-    <string name="you_do_not_have_permission_to_modify_categories">Usted no tiene permisos para modificar categorías</string>
+    <string name="you_must_enter_a_description_for_the_category">Debe ingresar una descripción para la categoría
+    </string>
+    <string name="you_do_not_have_permission_to_modify_categories">Usted no tiene permisos para modificar categorías
+    </string>
     <string name="you_do_not_have_permission_to_add_categories">Usted no tiene permisos para agregar categorías</string>
     <string name="cancel_category_registration_modification">Cancelar alta o modificación de categoría</string>
-    <string name="discard_changes_and_load_the_selected_category_question">¿Descartar cambios y cargar la categoría seleccionada?</string>
+    <string name="discard_changes_and_load_the_selected_category_question">¿Descartar cambios y cargar la categoría
+        seleccionada?
+    </string>
     <string name="categories_registration_modification">Alta o modificación de categorías</string>
     <string name="error_updating_category">Error al actualizar la categoría</string>
     <string name="error_adding_category">Error al agregar la categoría</string>
@@ -313,17 +356,27 @@
     <string name="select_route">Seleccionar ruta</string>
     <string name="no_processes_started">No hay procesos abiertos</string>
     <string name="remove_started_processes">Eliminar procesos abiertos</string>
-    <string name="are_you_sure_to_cancel_the_process_started_on_this_route_question">¿Está seguro de cancelar el proceso abierto de esta ruta?</string>
+    <string name="are_you_sure_to_cancel_the_process_started_on_this_route_question">¿Está seguro de cancelar el proceso
+        abierto de esta ruta?
+    </string>
     <string name="route_process">Proceso de ruta</string>
     <string name="not_processed">No procesado</string>
     <string name="enter_record_again">Reingresar registro</string>
     <string name="are_you_sure_to_enter_this_record_again_question">¿Está seguro de reingresar este registro?</string>
-    <string name="you_do_not_have_permission_to_enter_collected_data_again">Usted no tiene permisos para reingresar datos recolectados</string>
+    <string name="you_do_not_have_permission_to_enter_collected_data_again">Usted no tiene permisos para reingresar
+        datos recolectados
+    </string>
     <string name="already_processed">Ya procesado</string>
     <string name="do_you_want_to_skip_the_remaining_steps_question">¿Desea omitir los pasos restantes?</string>
     <string name="cancel_route_process">Cancelar proceso de ruta</string>
-    <string name="some_of_the_attributes_required_for_the_route_are_not_found_in_the_collector_database_and_require_synchronization">Algunos de los atributos necesarios para la ruta no se encuentran en la base de datos del colector y requieren una sincronización</string>
-    <string name="the_composition_of_the_route_process_that_you_want_to_continue_is_different_from_the_current_composition_of_the_route_this_process_can_not_be_continued_and_must_be_canceled">La composición del proceso de ruta que se desea continuar es diferente a la composición actual de la ruta. No se puede continuar este proceso y debe ser cancelado</string>
+    <string name="some_of_the_attributes_required_for_the_route_are_not_found_in_the_collector_database_and_require_synchronization">
+        Algunos de los atributos necesarios para la ruta no se encuentran en la base de datos del colector y requieren
+        una sincronización
+    </string>
+    <string name="the_composition_of_the_route_process_that_you_want_to_continue_is_different_from_the_current_composition_of_the_route_this_process_can_not_be_continued_and_must_be_canceled">
+        La composición del proceso de ruta que se desea continuar es diferente a la composición actual de la ruta. No se
+        puede continuar este proceso y debe ser cancelado
+    </string>
     <string name="getting_processed_content">Obteniendo contenido procesado…</string>
     <string name="obtaining_collected_data">Obteniendo datos recolectados…</string>
     <string name="getting_previous_steps">Obteniendo pasos previos…</string>
@@ -335,17 +388,24 @@
     <string name="obtaining_route_composition">Obteniendo composición de ruta…</string>
     <string name="error_updating_registered_data">Error al actualizar los datos registrados</string>
     <string name="finished_route">Ruta finalizada</string>
-    <string name="the_route_is_complete_do_you_want_to_confirm_and_return_to_the_main_menu_question">La ruta está completada, ¿Desea confirmar y volver al menú principal?</string>
+    <string name="the_route_is_complete_do_you_want_to_confirm_and_return_to_the_main_menu_question">La ruta está
+        completada, ¿Desea confirmar y volver al menú principal?
+    </string>
     <string name="error_saving_route">Error al guardar ruta</string>
     <string name="continuing_sequence_of_levels">Continuando secuencia de niveles…</string>
     <string name="returning_to_the_previous_level">Volviendo al nivel anterior…</string>
-    <string name="route_design_error">Error de diseño de ruta. La composición actual de ruta no tiene una EXPRESIÓN de evaluación pero espera un resultado determinado. Debe corregir el diseño de la ruta y agregar la expresión necesaria o cambiar los resultados esperados por el predeterminado CONTINUAR.</string>
+    <string name="route_design_error">Error de diseño de ruta. La composición actual de ruta no tiene una EXPRESIÓN de
+        evaluación pero espera un resultado determinado. Debe corregir el diseño de la ruta y agregar la expresión
+        necesaria o cambiar los resultados esperados por el predeterminado CONTINUAR.
+    </string>
     <string name="invalid_value_does_not_allow_to_continue">Valor inválido no permite continuar</string>
     <string name="value_does_not_allow_to_continue">Valor no permite continuar</string>
     <string name="no_printed_label">Sin etiqueta impresa</string>
     <string name="synchronization_failed">La sincronización ha fallado</string>
     <string name="saving_synchronization_time">Guardando hora de sincronización</string>
-    <string name="remote_error_when_trying_to_get_the_current_date_control_your_internet_connection">Error remoto al intentar obtener la fecha actual. Controle su conexión a Internet.</string>
+    <string name="remote_error_when_trying_to_get_the_current_date_control_your_internet_connection">Error remoto al
+        intentar obtener la fecha actual. Controle su conexión a Internet.
+    </string>
     <string name="starting_asset_synchronization">Sincronizando activos</string>
     <string name="synchronizing_assets">Sincronizando activos</string>
     <string name="canceling_asset_synchronization">Cancelando sincronización de activos</string>
@@ -383,9 +443,14 @@
     <string name="attribute_synchronization_completed">Sincronización de atributos finalizada</string>
     <string name="starting_attribute_category_synchronization">Sincronizando categorías de atributos</string>
     <string name="synchronizing_attribute_categories">Sincronizando categorías de atributos</string>
-    <string name="local_error_in_attribute_category_synchronization">Error local al sincronizar categorías de atributos</string>
-    <string name="remote_error_in_attribute_category_synchronization">Error remoto al sincronizar categorías de atributos</string>
-    <string name="attribute_category_synchronization_completed">Sincronización de categorías de atributos finalizada</string>
+    <string name="local_error_in_attribute_category_synchronization">Error local al sincronizar categorías de
+        atributos
+    </string>
+    <string name="remote_error_in_attribute_category_synchronization">Error remoto al sincronizar categorías de
+        atributos
+    </string>
+    <string name="attribute_category_synchronization_completed">Sincronización de categorías de atributos finalizada
+    </string>
     <string name="starting_route_synchronization">Sincronizando rutas</string>
     <string name="synchronizing_routes">Sincronizando rutas</string>
     <string name="local_error_in_route_synchronization">Error local al sincronizar rutas</string>
@@ -393,11 +458,18 @@
     <string name="route_synchronization_completed">Sincronización de rutas finalizada</string>
     <string name="starting_data_collection_rule_synchronization">Sincronizando reglas de recolección</string>
     <string name="synchronizing_data_collection_rules">Sincronizando reglas de recolección</string>
-    <string name="synchronizing_data_collection_rule_contents">Sincronizando contenido de las reglas de recolección</string>
-    <string name="synchronizing_data_collection_rule_targets">Sincronizando objetivos de las reglas de recolección</string>
-    <string name="local_error_in_data_collection_rule_synchronization">Error local al sincronizar reglas de recolección</string>
-    <string name="remote_error_in_data_collection_rule_synchronization">Error remoto al sincronizar reglas de recolección</string>
-    <string name="data_collection_rule_synchronization_completed">Sincronización de reglas de recolección finalizada</string>
+    <string name="synchronizing_data_collection_rule_contents">Sincronizando contenido de las reglas de recolección
+    </string>
+    <string name="synchronizing_data_collection_rule_targets">Sincronizando objetivos de las reglas de recolección
+    </string>
+    <string name="local_error_in_data_collection_rule_synchronization">Error local al sincronizar reglas de
+        recolección
+    </string>
+    <string name="remote_error_in_data_collection_rule_synchronization">Error remoto al sincronizar reglas de
+        recolección
+    </string>
+    <string name="data_collection_rule_synchronization_completed">Sincronización de reglas de recolección finalizada
+    </string>
     <string name="starting_maintenance_type_synchronization">Sincronizando tareas</string>
     <string name="synchronizing_maintenance_types">Sincronizando tareas</string>
     <string name="canceling_maintenance_type_synchronization">Cancelando sincronización de tareas</string>
@@ -406,10 +478,14 @@
     <string name="maintenance_type_synchronization_completed">Sincronización de tareas finalizada</string>
     <string name="starting_maintenance_type_group_synchronization">Sincronizando grupos de tareas</string>
     <string name="synchronizing_maintenance_type_groups">Sincronizando grupos de tareas</string>
-    <string name="canceling_maintenance_type_group_synchronization">Cancelando sincronización de grupos de tareas</string>
-    <string name="local_error_in_maintenance_type_group_synchronization">Error local al sincronizar grupos de tareas</string>
-    <string name="remote_error_in_maintenance_type_group_synchronization">Error remoto al sincronizar grupos de tareas</string>
-    <string name="maintenance_type_group_synchronization_completed">Sincronización de grupos de tareas finalizada</string>
+    <string name="canceling_maintenance_type_group_synchronization">Cancelando sincronización de grupos de tareas
+    </string>
+    <string name="local_error_in_maintenance_type_group_synchronization">Error local al sincronizar grupos de tareas
+    </string>
+    <string name="remote_error_in_maintenance_type_group_synchronization">Error remoto al sincronizar grupos de tareas
+    </string>
+    <string name="maintenance_type_group_synchronization_completed">Sincronización de grupos de tareas finalizada
+    </string>
     <string name="starting_barcode_label_synchronization">Sincronizando etiquetas</string>
     <string name="synchronizing_barcode_labels">Sincronizando etiquetas</string>
     <string name="local_error_in_barcode_label_synchronization">Error local al sincronizar etiquetas</string>
@@ -422,8 +498,11 @@
     <string name="warehouses_registration_modification">Alta o modificación de depósitos</string>
     <string name="cancel_warehouse_registration_modification">Cancelar alta o modificación de depósito</string>
     <string name="you_do_not_have_permission_to_add_warehouses">Usted no tiene permisos para agregar depósitos</string>
-    <string name="you_do_not_have_permission_to_modify_warehouses">Usted no tiene permisos para modificar depósitos</string>
-    <string name="discard_changes_and_load_the_scanned_warehouse_question">¿Descartar cambios y cargar el depósito escaneado?</string>
+    <string name="you_do_not_have_permission_to_modify_warehouses">Usted no tiene permisos para modificar depósitos
+    </string>
+    <string name="discard_changes_and_load_the_scanned_warehouse_question">¿Descartar cambios y cargar el depósito
+        escaneado?
+    </string>
     <string name="error_trying_to_add_warehouse">Error al intentar agregar el depósito</string>
     <string name="select_warehouse">Seleccionar depósito</string>
     <string name="warehouse_area_modified_correctly">Área modificado correctamente</string>
@@ -432,14 +511,20 @@
     <string name="error_adding_warehouse_area">Error al agregar el área</string>
     <string name="cancel_warehouse_area_registration_modification">Cancelar alta o modificación de área</string>
     <string name="you_do_not_have_permission_to_add_warehouse_areas">Usted no tiene permisos para agregar áreas</string>
-    <string name="you_do_not_have_permission_to_modify_warehouse_areas">Usted no tiene permisos para modificar áreas</string>
+    <string name="you_do_not_have_permission_to_modify_warehouse_areas">Usted no tiene permisos para modificar áreas
+    </string>
     <string name="error_creating_the_warehouse_area">Error al crear el área</string>
-    <string name="you_must_enter_a_description_for_the_warehouse_area">Debe ingresar una descripción para el área</string>
-    <string name="discard_changes_and_load_the_scanned_warehouse_area_question">¿Descartar cambios y cargar el área escaneada?</string>
+    <string name="you_must_enter_a_description_for_the_warehouse_area">Debe ingresar una descripción para el área
+    </string>
+    <string name="discard_changes_and_load_the_scanned_warehouse_area_question">¿Descartar cambios y cargar el área
+        escaneada?
+    </string>
     <string name="you_must_select_a_warehouse_for_the_area">Debe seleccionar un depósito para el área</string>
     <string name="error_trying_to_add_the_area">Error al intentar agregar el área</string>
     <string name="area_information">Información del área</string>
-    <string name="the_selected_warehouse_area_was_not_uploaded_to_the_server_and_does_not_have_a_definitive_id">El área seleccionada aún no fue subida al servidor y no tiene un identificador definitivo</string>
+    <string name="the_selected_warehouse_area_was_not_uploaded_to_the_server_and_does_not_have_a_definitive_id">El área
+        seleccionada aún no fue subida al servidor y no tiene un identificador definitivo
+    </string>
     <string name="select_warehouse_area">Seleccionar área</string>
     <string name="assets_movement">Movimiento</string>
     <string name="cancel_movement">Cancelar movimiento</string>
@@ -465,9 +550,11 @@
     <string name="failed_to_synchronize_the_categories">Error al sincronizar las categorías</string>
     <string name="starting_data_collection_synchronization">Sincronizando recolecciones de datos</string>
     <string name="synchronizing_data_collections">Sincronizando recolecciones de datos</string>
-    <string name="canceling_data_collection_synchronization">Cancelando sincronización de recolecciones de datos</string>
+    <string name="canceling_data_collection_synchronization">Cancelando sincronización de recolecciones de datos
+    </string>
     <string name="failed_to_synchronize_the_data_collections">Error al sincronizar las recolecciones de datos</string>
-    <string name="data_collection_synchronization_completed">Sincronización de recolecciones de datos finalizada</string>
+    <string name="data_collection_synchronization_completed">Sincronización de recolecciones de datos finalizada
+    </string>
     <string name="starting_route_process_synchronization">Sincronizando procesos de ruta</string>
     <string name="synchronizing_route_process">Sincronizando procesos de ruta</string>
     <string name="synchronizing_route_contents">Sincronizando contenidos de ruta</string>
@@ -484,8 +571,11 @@
     <string name="imagecontrol_webservice_settings">Configuración del Webservice de imágenes</string>
     <string name="webservice_settings">Configuración del Webservice principal</string>
     <string name="data_synchronization">Sincronización de datos</string>
-    <string name="device_configuration_summary">Configuración de dispositivos, tipo de lector, impresora, NFC, RFID.</string>
-    <string name="account_configuration_summary">Configuración de la cuenta y otras opciones de configuración automática de la aplicación</string>
+    <string name="device_configuration_summary">Configuración de dispositivos, tipo de lector, impresora, NFC, RFID.
+    </string>
+    <string name="account_configuration_summary">Configuración de la cuenta y otras opciones de configuración automática
+        de la aplicación
+    </string>
     <string name="application_summary">Opciones generales de la aplicación</string>
     <string name="what_is_question">¿Qué es?</string>
     <string name="send_and_receive_data">Enviar y recibir datos</string>
@@ -542,21 +632,35 @@
     //Kilogramo fuerza por metro cuadradro"
     <string name="asset_condition_excellent">Excelente</string>
     <string name="allow_quick_reviews">Permitir revisiones rápidas</string>
-    <string name="allows_to_mark_assets_in_a_revision_by_clicking_on_the_list">Permite marcar activos en una revisión haciendo click sobre la lista</string>
-    <string name="if_you_have_a_configuration_barcode_you_can_capture_it_here">Si dispone de un código de barras de configuración puede carpturarlo aquí</string>
-    <string name="access_password_to_the_application_configuration">Contraseña de acceso a la configuración de la aplicación</string>
+    <string name="allows_to_mark_assets_in_a_revision_by_clicking_on_the_list">Permite marcar activos en una revisión
+        haciendo click sobre la lista
+    </string>
+    <string name="if_you_have_a_configuration_barcode_you_can_capture_it_here">Si dispone de un código de barras de
+        configuración puede carpturarlo aquí
+    </string>
+    <string name="access_password_to_the_application_configuration">Contraseña de acceso a la configuración de la
+        aplicación
+    </string>
     <string name="configuration_password">Contraseña de configuración</string>
-    <string name="if_you_have_a_configuration_code_you_can_enter_it_here">Si dispone de un código de texto de configuración puede ingresarlo aquí</string>
+    <string name="if_you_have_a_configuration_code_you_can_enter_it_here">Si dispone de un código de texto de
+        configuración puede ingresarlo aquí
+    </string>
     <string name="enter_configuration_text_code">Ingresar código de texto de configuración</string>
     <string name="capture_configuration_barcode">Capturar código de barras de configuración</string>
-    <string name="here_you_can_select_and_continue_assets_reviews_not_completed_or_start_a_new_one">Aquí puede seleccionar y continuar revisiones de activos no completadas o comenzar una nueva</string>
+    <string name="here_you_can_select_and_continue_assets_reviews_not_completed_or_start_a_new_one">Aquí puede
+        seleccionar y continuar revisiones de activos no completadas o comenzar una nueva
+    </string>
     <string name="new_review">Nueva revisión</string>
     <string name="continue_review">Continuar revisión</string>
-    <string name="you_want_to_suspend_the_data_collection_process">¿Desea suspender el proceso de recolección de datos? Podrá reaunudarlo posteriormente</string>
+    <string name="you_want_to_suspend_the_data_collection_process">¿Desea suspender el proceso de recolección de datos?
+        Podrá reaunudarlo posteriormente
+    </string>
     <string name="you_want_to_cancel_the_current_data_collection">¿Desea cancelar el registro actual de datos?</string>
     <string name="suspend_the_data_collection">Suspender recolección de datos</string>
     <string name="cancel_the_data_collection">Cancelar registro de datos</string>
-    <string name="the_database_will_not_be_downloaded_because_there_is_data_pending_delivery">No se descargará la base de datos porque hay datos pendiente de envío</string>
+    <string name="the_database_will_not_be_downloaded_because_there_is_data_pending_delivery">No se descargará la base
+        de datos porque hay datos pendiente de envío
+    </string>
     <string name="_assets">activos</string>
     <string name="_asset">activo</string>
     <string name="review_cont_status_new">Nuevo</string>
@@ -581,9 +685,13 @@
     <string name="synchronizing_">Sincronizando…</string>
     <string name="only_active">Sólo activos</string>
     <string name="loading_">Cargando…</string>
-    <string name="you_must_enter_at_least_one_letter_in_the_description">Debe ingresar al menos una letra en la description</string>
+    <string name="you_must_enter_at_least_one_letter_in_the_description">Debe ingresar al menos una letra en la
+        description
+    </string>
     <string name="template">Plantilla</string>
-    <string name="you_must_enter_at_least_one_letter_in_the_description_category_or_warehouse_area">Debe ingresar al menos una letra en la descripción, una categoría o un área</string>
+    <string name="you_must_enter_at_least_one_letter_in_the_description_category_or_warehouse_area">Debe ingresar al
+        menos una letra en la descripción, una categoría o un área
+    </string>
     <string name="unknown_assets_registration">Alta de desconocidos</string>
     <string name="allow_unknown_assets">Aceptar desconocidos</string>
     <string name="selected_review_is_not_in_process">La revisión seleccionada no está en proceso</string>
@@ -594,7 +702,9 @@
     <string name="expand_panel">Expandir panel</string>
     <string name="collapse_panel">Colapsar panel</string>
     <string name="reset">Reiniciar</string>
-    <string name="you_want_to_reset_the_rfid_device_to_its_factory_settings">¿Desea reiniciar el dispositivo RFID a su configuración de fábrica?</string>
+    <string name="you_want_to_reset_the_rfid_device_to_its_factory_settings">¿Desea reiniciar el dispositivo RFID a su
+        configuración de fábrica?
+    </string>
     <string name="there_is_no_rfid_device_connected">No hay un dispositivo RFID conectado</string>
     <string name="failed_rfid_writing">Escritura RFID fallida</string>
     <string name="rfid_writing_ok">Escritura RFID OK</string>
@@ -622,13 +732,17 @@
     <string name="use_proxy">Usar proxy</string>
     <string name="proxy">Proxy</string>
     <string name="port">Puerto</string>
-    <string name="scan_the_code_below_with_another_device_to_copy_the_configuration">Escanee el código a continuación con otro dispositivo para copiar la configuración</string>
+    <string name="scan_the_code_below_with_another_device_to_copy_the_configuration">Escanee el código a continuación
+        con otro dispositivo para copiar la configuración
+    </string>
     <string name="configuration_qr_code">Código QR de configuración</string>
     <string name="enabled">Habilitado</string>
     <string name="disabled">Deshabilitado</string>
     <string name="invalid_warehouse_area_code">Código de área inválido</string>
     <string name="invalid_asset_code">Código de activo inválido</string>
-    <string name="the_selected_revision_has_already_been_completed_and_can_not_be_deleted">La revisión seleccionada ya fue completada y no puede eliminarse</string>
+    <string name="the_selected_revision_has_already_been_completed_and_can_not_be_deleted">La revisión seleccionada ya
+        fue completada y no puede eliminarse
+    </string>
     <string name="no_connection">Sin conexión</string>
     <string name="synchronization_canceled">Sincronización cancelada</string>
     <string name="database_is_not_created_yet">La base de datos aún no fue creada</string>
@@ -642,24 +756,38 @@
     <string name="removed_plural">Eliminados</string>
     <string name="removed">Eliminado</string>
     <string name="empty_route">Ruta vacía</string>
-    <string name="synchronization_dates_restarted_successfully">Fechas de sincronización reiniciadas correctamente</string>
+    <string name="synchronization_dates_restarted_successfully">Fechas de sincronización reiniciadas correctamente
+    </string>
     <string name="error_restarting_sync_dates">Error al reiniciar las fechas de sincronización</string>
-    <string name="reset_the_dates_of_the_last_synchronization_summary">Reinicia las fechas de la última sincronización de las tablas en el dispositivo permitiendo una actualización de datos a partir de la fecha de creación de la base de datos.</string>
+    <string name="reset_the_dates_of_the_last_synchronization_summary">Reinicia las fechas de la última sincronización
+        de las tablas en el dispositivo permitiendo una actualización de datos a partir de la fecha de creación de la
+        base de datos.
+    </string>
     <string name="reset_sync_date">Reiniciar fecha de sincronización</string>
     <string name="download_full_database">Descargar base de datos completa</string>
-    <string name="download_full_database_summary">Descarga la base de datos completa y sobreescribe la base de datos del dispositivo</string>
+    <string name="download_full_database_summary">Descarga la base de datos completa y sobreescribe la base de datos del
+        dispositivo
+    </string>
     <string name="maximum_records_per_request">Máximos registros por solicitud</string>
-    <string name="maximum_records_per_request_summary">Número de registros que se descargarán por vez durante la sincronización</string>
+    <string name="maximum_records_per_request_summary">Número de registros que se descargarán por vez durante la
+        sincronización
+    </string>
     <string name="immediate_data_submission">Envío inmediato de datos</string>
-    <string name="immediate_data_submission_summary">Cuando se dispone de una conexión a internet, se envían al servidor los cambios y los datos registrados de forma inmediata.</string>
+    <string name="immediate_data_submission_summary">Cuando se dispone de una conexión a internet, se envían al servidor
+        los cambios y los datos registrados de forma inmediata.
+    </string>
     <string name="allow_screen_rotation">Permitir rotación de pantalla</string>
-    <string name="change_the_screen_orientation_when_rotating_the_device">Cambia la orientación de la pantalla al rotar el dispositivo</string>
+    <string name="change_the_screen_orientation_when_rotating_the_device">Cambia la orientación de la pantalla al rotar
+        el dispositivo
+    </string>
     <string name="program_options">Opciones del programa</string>
     <string name="success_response">Respuesta correcta</string>
     <string name="client_has_no_software_packages">El cliente no tiene paquetes de software</string>
     <string name="select_package">Seleccionar paquete</string>
     <string name="app_panel_url_can_not_be_obtained">No se puede obtener la URL del panel de la aplicación</string>
-    <string name="there_are_no_valid_products_for_the_selected_client">No hay productos válidos para el cliente seleccionado</string>
+    <string name="there_are_no_valid_products_for_the_selected_client">No hay productos válidos para el cliente
+        seleccionado
+    </string>
     <string name="configuration_not_loaded">Configuración no cargada</string>
     <string name="configuration">Configuración</string>
     <string name="email">Correo electrónico</string>
@@ -671,7 +799,9 @@
     <string name="account">Cuenta</string>
     <string name="account_configuration">Configuración de la cuenta</string>
     <string name="installation_code">Código de instalación</string>
-    <string name="do_you_want_to_download_the_complete_database_changes_not_sent_will_be_lost">¿Desea descarga la base de datos completa? Se perderán los cambios no enviados.</string>
+    <string name="do_you_want_to_download_the_complete_database_changes_not_sent_will_be_lost">¿Desea descarga la base
+        de datos completa? Se perderán los cambios no enviados.
+    </string>
     <string name="skipping_remaining_steps">Omitiendo pasos restantes…</string>
     <string name="saving_route_process">Guardando proceso de ruta…</string>
     <string name="saving_">Guardando…</string>
@@ -700,7 +830,9 @@
     <string name="pref_header_devices">Dispositivos</string>
     <string name="error_setting_user_panel">Error al configurar el panel del usuario</string>
     <string name="download_database_required">Descarga de base de datos</string>
-    <string name="download_database_required_question">Cambios en esta configuración requieren la descarga de la base de datos. Todos los datos no enviados se perderán. ¿Desea continuar?</string>
+    <string name="download_database_required_question">Cambios en esta configuración requieren la descarga de la base de
+        datos. Todos los datos no enviados se perderán. ¿Desea continuar?
+    </string>
     <string name="downloading_starting">Iniciando descarga…</string>
     <string name="synchronization_starting">Iniciando sincronización…</string>
     <string name="synchronization_finished">Sincronización finalizada</string>
@@ -725,9 +857,13 @@
     <string name="unstarted">No iniciada</string>
     <string name="label_print">Impresión de etiquetas</string>
     <string name="start_or_continue_route">Empezar o continuar ruta</string>
-    <string name="here_you_can_select_and_continue_non_complete_routes_or_start_a_new_one">Aquí puede seleccionar y continuar rutas no completadas o comenzar una nueva</string>
+    <string name="here_you_can_select_and_continue_non_complete_routes_or_start_a_new_one">Aquí puede seleccionar y
+        continuar rutas no completadas o comenzar una nueva
+    </string>
     <string name="load_database_from_file">Cargar base de datos desde archivo</string>
-    <string name="load_a_database_from_a_file_in_offline_mode_for_browsing">Carga una base de datos desde un archivo en modo desconectado para exploración</string>
+    <string name="load_a_database_from_a_file_in_offline_mode_for_browsing">Carga una base de datos desde un archivo en
+        modo desconectado para exploración
+    </string>
     <string name="select_db_file">Seleccionar archivo de base de datos</string>
     <string name="database_changed">Base de datos cambiada</string>
     <string name="filter_routes_by_description">Filtrar rutas por descripción</string>
@@ -736,7 +872,9 @@
     <string name="temporary_databases_deleted">Bases de datos temporales eliminadas</string>
     <string name="no_temporary_bases_found">No se encontraron bases temporales</string>
     <string name="code_read_does_not_correspond_to_a_location">El código leído no corresponde a una ubicación</string>
-    <string name="send_the_current_database_to_dacosys_for_analysis">Envía la base de datos actual y el último registro de error a Dacosys para su análisis</string>
+    <string name="send_the_current_database_to_dacosys_for_analysis">Envía la base de datos actual y el último registro
+        de error a Dacosys para su análisis
+    </string>
     <string name="send_database_to_dacosys">Reportar base de datos a Dacosys</string>
     <string name="synchronization">Sincronización</string>
     <string name="sending_mail_">Enviando correo…</string>
@@ -746,11 +884,15 @@
     <string name="none">Ninguno</string>
     <string name="unable_to_open_file">No se puede abrir el archivo</string>
     <string name="action_rfid_connect">Reconectar lector RFID</string>
-    <string name="rfid_reader_use_is_disabled_or_not_configured">El uso del lector RFID está deshabilitado o no está configurado</string>
+    <string name="rfid_reader_use_is_disabled_or_not_configured">El uso del lector RFID está deshabilitado o no está
+        configurado
+    </string>
     <string name="select_location">Seleccionar ubicación</string>
     <string name="search_by_description">Buscar por descripción…</string>
     <string name="search_by_warehouse">Buscar por depósito…</string>
-    <string name="you_must_enter_at_least_one_letter_in_the_area_or_warehouse_description">Debe ingresar al menos una letra en la descripción del área o del depósito</string>
+    <string name="you_must_enter_at_least_one_letter_in_the_area_or_warehouse_description">Debe ingresar al menos una
+        letra en la descripción del área o del depósito
+    </string>
     <string name="rule">Regla</string>
     <string name="no_previous_data">No hay registros previos</string>
     <string name="saving_warehouse_movement">Guardando movimiento…</string>
@@ -775,7 +917,9 @@
     <string name="route_composition">Comp. de ruta</string>
     <string name="search">Buscar</string>
     <string name="clear">Limpiar</string>
-    <string name="the_database_will_be_downloaded_when_you_return_to_the_login_screen">La base de datos se descargará al regresar a la pantalla de ingreso</string>
+    <string name="the_database_will_be_downloaded_when_you_return_to_the_login_screen">La base de datos se descargará al
+        regresar a la pantalla de ingreso
+    </string>
     <string name="retry_connection">Reintentar conexión</string>
     <string name="no_images">No hay imágenes asociadas</string>
     <string name="images_not_yet_processed">Las imágenes aún no fueron procesadas</string>
@@ -879,7 +1023,8 @@
     <string name="plus_symbol">+</string>
     <string name="you_must_select_a_printer">Debe seleccionar una impresora</string>
     <string name="you_must_select_a_template">Debe seleccionar una plantilla</string>
-    <string name="you_must_select_the_amount_of_labels_to_print">Debe seleccionar la cantidad de etiquetas a imprimir</string>
+    <string name="you_must_select_the_amount_of_labels_to_print">Debe seleccionar la cantidad de etiquetas a imprimir
+    </string>
     <string name="select_template">Seleccionar plantilla</string>
     <string name="no_description">Sin descripción</string>
     <string name="imagecontrol_configured">ImageControl configurado</string>
@@ -895,14 +1040,20 @@
     <string name="new_line_char_lf">LF</string>
     <string name="new_line_char_cr">CR</string>
     <string name="printer_preferences">Preferencias de impresión</string>
-    <string name="cancelled_scan_due_to_missing_camera_permission">Escaneo cancelado debido a la falta de permiso de la cámara</string>
+    <string name="cancelled_scan_due_to_missing_camera_permission">Escaneo cancelado debido a la falta de permiso de la
+        cámara
+    </string>
     <string name="cancelled">Cancelado</string>
     <string name="cancelled_scan">Escaneo cancelado</string>
     <string name="use_asset_control_maintenance">Usar AssetControl Maintenance</string>
-    <string name="use_asset_control_maintenance_summary">Habilita el servicio de mantenimiento AssetControl Maintenance</string>
+    <string name="use_asset_control_maintenance_summary">Habilita el servicio de mantenimiento AssetControl
+        Maintenance
+    </string>
     <string name="camera_preview">Vista de cámara</string>
     <string name="close">Cerrar</string>
-    <string name="to_use_the_floating_window_function_you_must_authorize_the_floating_window_permission">Para utilizar la función de ventana flotante, debe autorizar el permiso para esta aplicación.</string>
+    <string name="to_use_the_floating_window_function_you_must_authorize_the_floating_window_permission">Para utilizar
+        la función de ventana flotante, debe autorizar el permiso para esta aplicación.
+    </string>
     <string name="continuous_mode">Modo continuo</string>
     <string name="single_mode">Modo simple</string>
     <string name="flash_off">Flash apagado</string>
@@ -927,7 +1078,9 @@
     <string name="file_not_found">No se puede encontrar el archivo</string>
     <string name="error_opening_the_file">Error al abrir el archivo"</string>
     <string name="download_last_version">Descargar la última versión</string>
-    <string name="this_android_version_not_support_auto_update">Esta versión de Android no soporta la actualización automática</string>
+    <string name="this_android_version_not_support_auto_update">Esta versión de Android no soporta la actualización
+        automática
+    </string>
     <string name="trigger_scan">Disparar escáner</string>
     <string name="supported_symbologies">Simbologías admitidas</string>
     <string name="qr_code">QR Code</string>
@@ -959,4 +1112,5 @@
     <string name="synchronizing_user_permissions">Sincronizando permisos…</string>
     <string name="synchronizing_user_areas">Sincronizando áreas del usuario…</string>
     <string name="_00_00">00:00</string>
+    <string name="generating_qr_">Generando QR…</string>
 </resources>

@@ -1,11 +1,6 @@
 package com.dacosys.assetControl.utils
 
-import android.app.Activity
-import android.graphics.Bitmap
-import android.graphics.Color
 import android.util.Log
-import android.widget.ImageView
-import androidx.appcompat.app.AlertDialog
 import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
@@ -17,11 +12,7 @@ import com.dacosys.assetControl.utils.preferences.Preferences
 import com.dacosys.assetControl.utils.preferences.Repository
 import com.dacosys.assetControl.utils.settings.Preference
 import com.dacosys.assetControl.utils.settings.QRConfigType
-import com.google.zxing.BarcodeFormat
-import com.google.zxing.WriterException
-import com.google.zxing.qrcode.QRCodeWriter
 import org.json.JSONObject
-import java.lang.ref.WeakReference
 
 class ConfigHelper {
     interface TaskConfigEnded {
@@ -120,6 +111,7 @@ class ConfigHelper {
                         )
                     }
                 }
+
                 QRConfigType.QRConfigWebservice, QRConfigType.QRConfigApp, QRConfigType.QRConfigImageControl -> {
                     tryToLoadConfig(confJson)
                     onRequestProgress.invoke(
@@ -131,14 +123,17 @@ class ConfigHelper {
                             msg = when (mode) {
                                 QRConfigType.QRConfigImageControl -> AssetControlApp.getContext()
                                     .getString(R.string.imagecontrol_configured)
+
                                 QRConfigType.QRConfigWebservice -> AssetControlApp.getContext()
                                     .getString(R.string.server_configured)
+
                                 else -> AssetControlApp.getContext()
                                     .getString(R.string.configuration_applied)
                             }
                         )
                     )
                 }
+
                 else -> {
                     onRequestProgress.invoke(
                         ClientPackagesProgress(
@@ -150,53 +145,6 @@ class ConfigHelper {
                         )
                     )
                 }
-            }
-        }
-
-        fun generateQrCode(weakAct: WeakReference<Activity>, data: String) {
-            val activity = weakAct.get() ?: return
-            if (activity.isFinishing) return
-
-            val writer = QRCodeWriter()
-            try {
-                var w: Int = Screen.getScreenWidth(activity)
-                val h: Int = Screen.getScreenHeight(activity)
-                if (h < w) {
-                    w = h
-                }
-
-                // CREAR LA IMAGEN
-                val bitMatrix = writer.encode(data, BarcodeFormat.QR_CODE, w, w)
-                val width = bitMatrix.width
-                val height = bitMatrix.height
-
-                val pixels = IntArray(width * height)
-                for (y in 0 until height) {
-                    val offset = y * width
-                    for (x in 0 until width) {
-                        val color: Int = if (bitMatrix.get(x, y)) {
-                            Color.BLACK
-                        } else {
-                            Color.WHITE
-                        }
-
-                        pixels[offset + x] = color
-                    }
-                }
-
-                val bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-                bmp.setPixels(pixels, 0, width, 0, 0, width, height)
-
-                val imageView = ImageView(activity)
-                imageView.setImageBitmap(bmp)
-                val builder = AlertDialog.Builder(activity).setTitle(R.string.configuration_qr_code)
-                    .setMessage(R.string.scan_the_code_below_with_another_device_to_copy_the_configuration)
-                    .setPositiveButton(R.string.ok) { dialog, _ -> dialog.dismiss() }
-                    .setView(imageView)
-
-                builder.create().show()
-            } catch (e: WriterException) {
-                e.printStackTrace()
             }
         }
 
