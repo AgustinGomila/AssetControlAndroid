@@ -53,9 +53,6 @@ class FloatingCameraBarcode(private var activity: AppCompatActivity) : BarcodeCa
     // Se utiliza exteriormente para conocer la actividad anfitriona de la ventana flotante
     var activityName: String = ""
 
-    // Tag para EasyFloat
-    private fun getEasyFloatTag(): String = activityName
-
     // Controlador de sonido
     private var beepManager: BeepManager? = null
 
@@ -110,7 +107,7 @@ class FloatingCameraBarcode(private var activity: AppCompatActivity) : BarcodeCa
         loadValues()
         if (v == null) v = getView()
 
-        EasyFloat.with(activity).setTag(getEasyFloatTag()).setShowPattern(ShowPattern.FOREGROUND)
+        EasyFloat.with(activity).setTag(activityName).setShowPattern(ShowPattern.FOREGROUND)
             .setLocation(
                 if (getOrientation == Configuration.ORIENTATION_PORTRAIT) flCameraPortraitLoc[0] else flCameraLandscapeLoc[0],
                 if (getOrientation == Configuration.ORIENTATION_PORTRAIT) flCameraPortraitLoc[1] else flCameraLandscapeLoc[1]
@@ -140,7 +137,7 @@ class FloatingCameraBarcode(private var activity: AppCompatActivity) : BarcodeCa
                 }
             }.show()
 
-        floatWindowDisplayed = EasyFloat.isShow(getEasyFloatTag())
+        floatWindowDisplayed = EasyFloat.isShow(activityName)
     }
 
     fun onResume() {
@@ -158,7 +155,7 @@ class FloatingCameraBarcode(private var activity: AppCompatActivity) : BarcodeCa
     fun onDestroy() {
         filterTimer?.cancel()
         saveValues()
-        EasyFloat.dismiss(getEasyFloatTag(), true)
+        EasyFloat.dismiss(activityName, true)
 
         _binding = null
         v = null
@@ -238,7 +235,7 @@ class FloatingCameraBarcode(private var activity: AppCompatActivity) : BarcodeCa
                 // Actualice el tamaño de la ventana flotante para evitar la limitación
                 // de ancho cuando otras aplicaciones se proyectan horizontalmente
                 EasyFloat.updateFloat(
-                    getEasyFloatTag(), width = params.width, height = params.height
+                    activityName, width = params.width, height = params.height
                 )
             }
         }
@@ -315,7 +312,7 @@ class FloatingCameraBarcode(private var activity: AppCompatActivity) : BarcodeCa
             // Actualice el tamaño de la ventana flotante para evitar la limitación
             // de ancho cuando otras aplicaciones se proyectan horizontalmente
             EasyFloat.updateFloat(
-                getEasyFloatTag(), width = params.width, height = params.height
+                activityName, width = params.width, height = params.height
             )
         }
 
@@ -379,85 +376,33 @@ class FloatingCameraBarcode(private var activity: AppCompatActivity) : BarcodeCa
         flCameraMinWidth = Preference.flCameraPortraitWidth.defaultValue as Int
         flCameraMinHeight = Preference.flCameraPortraitHeight.defaultValue as Int
 
-        flCameraPortraitLoc = intArrayOf(
-            prefsGetInt(Preference.flCameraPortraitLocX),
-            prefsGetInt(Preference.flCameraPortraitLocY)
-        )
-        flCameraPortraitWidth =
-            min(
-                prefsGetInt(Preference.flCameraPortraitWidth),
-                screenWidth
-            )
-        flCameraPortraitHeight =
-            min(
-                prefsGetInt(Preference.flCameraPortraitHeight),
-                screenHeight
-            )
-        flCameraLandscapeLoc = intArrayOf(
-            prefsGetInt(Preference.flCameraLandscapeLocX),
-            prefsGetInt(Preference.flCameraLandscapeLocY)
-        )
-        flCameraLandscapeWidth =
-            min(
-                prefsGetInt(Preference.flCameraLandscapeWidth),
-                screenWidth
-            )
-        flCameraLandscapeHeight =
-            min(
-                prefsGetInt(Preference.flCameraLandscapeHeight),
-                screenHeight
-            )
+        flCameraPortraitLoc =
+            intArrayOf(prefsGetInt(Preference.flCameraPortraitLocX), prefsGetInt(Preference.flCameraPortraitLocY))
+        flCameraPortraitWidth = min(prefsGetInt(Preference.flCameraPortraitWidth), screenWidth)
+        flCameraPortraitHeight = min(prefsGetInt(Preference.flCameraPortraitHeight), screenHeight)
+        flCameraLandscapeLoc =
+            intArrayOf(prefsGetInt(Preference.flCameraLandscapeLocX), prefsGetInt(Preference.flCameraLandscapeLocY))
+        flCameraLandscapeWidth = min(prefsGetInt(Preference.flCameraLandscapeWidth), screenWidth)
+        flCameraLandscapeHeight = min(prefsGetInt(Preference.flCameraLandscapeHeight), screenHeight)
 
-        continuousOn =
-            prefsGetBoolean(Preference.flCameraContinuousMode)
-        filterRepeatedReads =
-            prefsGetBoolean(Preference.flCameraFilterRepeatedReads)
+        continuousOn = prefsGetBoolean(Preference.flCameraContinuousMode)
+        filterRepeatedReads = prefsGetBoolean(Preference.flCameraFilterRepeatedReads)
     }
 
     private fun saveValues() {
         if (!floatWindowCreated) return
 
         // Guardar datos de la ventana flotante
-        prefsPutInt(
-            Preference.flCameraPortraitLocX.key,
-            flCameraPortraitLoc[0]
-        )
-        prefsPutInt(
-            Preference.flCameraPortraitLocY.key,
-            flCameraPortraitLoc[1]
-        )
-        prefsPutInt(
-            Preference.flCameraPortraitWidth.key,
-            flCameraPortraitWidth
-        )
-        prefsPutInt(
-            Preference.flCameraPortraitHeight.key,
-            flCameraPortraitHeight
-        )
-        prefsPutInt(
-            Preference.flCameraLandscapeLocX.key,
-            flCameraLandscapeLoc[0]
-        )
-        prefsPutInt(
-            Preference.flCameraLandscapeLocY.key,
-            flCameraLandscapeLoc[1]
-        )
-        prefsPutInt(
-            Preference.flCameraLandscapeWidth.key,
-            flCameraLandscapeWidth
-        )
-        prefsPutInt(
-            Preference.flCameraLandscapeHeight.key,
-            flCameraLandscapeHeight
-        )
-        prefsPutBoolean(
-            Preference.flCameraContinuousMode.key,
-            continuousOn
-        )
-        prefsPutBoolean(
-            Preference.flCameraFilterRepeatedReads.key,
-            filterRepeatedReads
-        )
+        prefsPutInt(Preference.flCameraPortraitLocX.key, flCameraPortraitLoc[0])
+        prefsPutInt(Preference.flCameraPortraitLocY.key, flCameraPortraitLoc[1])
+        prefsPutInt(Preference.flCameraPortraitWidth.key, flCameraPortraitWidth)
+        prefsPutInt(Preference.flCameraPortraitHeight.key, flCameraPortraitHeight)
+        prefsPutInt(Preference.flCameraLandscapeLocX.key, flCameraLandscapeLoc[0])
+        prefsPutInt(Preference.flCameraLandscapeLocY.key, flCameraLandscapeLoc[1])
+        prefsPutInt(Preference.flCameraLandscapeWidth.key, flCameraLandscapeWidth)
+        prefsPutInt(Preference.flCameraLandscapeHeight.key, flCameraLandscapeHeight)
+        prefsPutBoolean(Preference.flCameraContinuousMode.key, continuousOn)
+        prefsPutBoolean(Preference.flCameraFilterRepeatedReads.key, filterRepeatedReads)
     }
 
     private fun checkCameraFloatingPermission() {
@@ -502,23 +447,23 @@ class FloatingCameraBarcode(private var activity: AppCompatActivity) : BarcodeCa
         }
 
     fun hideWindow() {
-        if (floatWindowCreated && EasyFloat.isShow(getEasyFloatTag())) EasyFloat.hide(
-            getEasyFloatTag()
+        if (floatWindowCreated && EasyFloat.isShow(activityName)) EasyFloat.hide(
+            activityName
         )
     }
 
     private fun showWindow() {
-        if (floatWindowCreated && !EasyFloat.isShow(getEasyFloatTag())) EasyFloat.show(
-            getEasyFloatTag()
+        if (floatWindowCreated && !EasyFloat.isShow(activityName)) EasyFloat.show(
+            activityName
         )
     }
 
     fun toggleWindowVisibility() {
         if (floatWindowCreated) {
-            if (EasyFloat.isShow(getEasyFloatTag())) EasyFloat.hide(getEasyFloatTag())
-            else EasyFloat.show(getEasyFloatTag())
+            if (EasyFloat.isShow(activityName)) EasyFloat.hide(activityName)
+            else EasyFloat.show(activityName)
 
-            floatWindowDisplayed = EasyFloat.isShow(getEasyFloatTag())
+            floatWindowDisplayed = EasyFloat.isShow(activityName)
             return
         }
 
@@ -538,54 +483,30 @@ class FloatingCameraBarcode(private var activity: AppCompatActivity) : BarcodeCa
 
         // Barcode camera scanner view
         val formats: ArrayList<BarcodeFormat> = ArrayList()
-        if (prefsGetBoolean(Preference.symbologyPDF417)) formats.add(
-            BarcodeFormat.PDF_417
-        )
-        if (prefsGetBoolean(Preference.symbologyAztec)) formats.add(
-            BarcodeFormat.AZTEC
-        )
-        if (prefsGetBoolean(Preference.symbologyQRCode)) formats.add(
-            BarcodeFormat.QR_CODE
-        )
-        if (prefsGetBoolean(Preference.symbologyCODABAR)) formats.add(
-            BarcodeFormat.CODABAR
-        )
-        if (prefsGetBoolean(Preference.symbologyCode128)) formats.add(
-            BarcodeFormat.CODE_128
-        )
-        if (prefsGetBoolean(Preference.symbologyCode39)) formats.add(
-            BarcodeFormat.CODE_39
-        )
-        if (prefsGetBoolean(Preference.symbologyCode93)) formats.add(
-            BarcodeFormat.CODE_93
-        )
-        if (prefsGetBoolean(Preference.symbologyDataMatrix)) formats.add(
-            BarcodeFormat.DATA_MATRIX
-        )
-        if (prefsGetBoolean(Preference.symbologyEAN13)) formats.add(
-            BarcodeFormat.EAN_13
-        )
-        if (prefsGetBoolean(Preference.symbologyEAN8)) formats.add(
-            BarcodeFormat.EAN_8
-        )
-        if (prefsGetBoolean(Preference.symbologyMaxiCode)) formats.add(
-            BarcodeFormat.MAXICODE
-        )
-        if (prefsGetBoolean(Preference.symbologyRSS14)) formats.add(
-            BarcodeFormat.RSS_14
-        )
-        if (prefsGetBoolean(Preference.symbologyRSSExpanded)) formats.add(
-            BarcodeFormat.RSS_EXPANDED
-        )
-        if (prefsGetBoolean(Preference.symbologyUPCA)) formats.add(
-            BarcodeFormat.UPC_A
-        )
-        if (prefsGetBoolean(Preference.symbologyUPCE)) formats.add(
-            BarcodeFormat.UPC_E
-        )
+        if (prefsGetBoolean(Preference.symbologyPDF417)) formats.add(BarcodeFormat.PDF_417)
+        if (prefsGetBoolean(Preference.symbologyAztec)) formats.add(BarcodeFormat.AZTEC)
+        if (prefsGetBoolean(Preference.symbologyQRCode)) formats.add(BarcodeFormat.QR_CODE)
+        if (prefsGetBoolean(Preference.symbologyCODABAR)) formats.add(BarcodeFormat.CODABAR)
+        if (prefsGetBoolean(Preference.symbologyCode128)) formats.add(BarcodeFormat.CODE_128)
+        if (prefsGetBoolean(Preference.symbologyCode39)) formats.add(BarcodeFormat.CODE_39)
+        if (prefsGetBoolean(Preference.symbologyCode93)) formats.add(BarcodeFormat.CODE_93)
+        if (prefsGetBoolean(Preference.symbologyDataMatrix)) formats.add(BarcodeFormat.DATA_MATRIX)
+        if (prefsGetBoolean(Preference.symbologyEAN13)) formats.add(BarcodeFormat.EAN_13)
+        if (prefsGetBoolean(Preference.symbologyEAN8)) formats.add(BarcodeFormat.EAN_8)
+        if (prefsGetBoolean(Preference.symbologyMaxiCode)) formats.add(BarcodeFormat.MAXICODE)
+        if (prefsGetBoolean(Preference.symbologyRSS14)) formats.add(BarcodeFormat.RSS_14)
+        if (prefsGetBoolean(Preference.symbologyRSSExpanded)) formats.add(BarcodeFormat.RSS_EXPANDED)
+        if (prefsGetBoolean(Preference.symbologyUPCA)) formats.add(BarcodeFormat.UPC_A)
+        if (prefsGetBoolean(Preference.symbologyUPCE)) formats.add(BarcodeFormat.UPC_E)
 
-        // Last scanned code
-        lastCodeScannedTv.text = lastScannedCode
+        // Mostrar último código escaneado en la vista exceptuando códigos de configuración e ingreso.
+        if (!lastScannedCode.contains("config") &&
+            !lastScannedCode.contains("log_user_name") &&
+            !lastScannedCode.contains("log_password")
+        ) {
+            lastCodeScannedTv.text = lastScannedCode
+        }
+
         messageTv.visibility = GONE
 
         // Clean the last image captured at click on the view
@@ -670,8 +591,13 @@ class FloatingCameraBarcode(private var activity: AppCompatActivity) : BarcodeCa
         // Added preview of scanned barcode if not in continuous mode
         if (!continuousOn) binding.barcodePreview.setImageBitmap(result.getBitmapWithResultPoints(R.color.goldenrod))
 
-        // Mostrar último código escaneado en la vista
-        binding.lastCodeScanned.text = lastScannedCode
+        // Mostrar último código escaneado en la vista exceptuando códigos de configuración e ingreso.
+        if (!lastScannedCode.contains("config") &&
+            !lastScannedCode.contains("log_user_name") &&
+            !lastScannedCode.contains("log_password")
+        ) {
+            binding.lastCodeScanned.text = lastScannedCode
+        }
 
         // Bloquear nuevamente si está en Modo de disparo simple
         if (binding.barcodeView.barcodeView.decodeMode == SINGLE) {
