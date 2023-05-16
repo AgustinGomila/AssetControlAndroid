@@ -22,11 +22,13 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat
+import androidx.core.view.size
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.transition.ChangeBounds
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.adapters.asset.AssetAdapter
 import com.dacosys.assetControl.dataBase.asset.AssetDbHelper
@@ -49,11 +51,11 @@ import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
 import com.dacosys.assetControl.utils.Screen.Companion.isKeyboardVisible
 import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Screen.Companion.setupUI
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.ParcelLong
-import com.dacosys.assetControl.utils.misc.UTCDataTime
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetLong
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsPutBoolean
 import com.dacosys.assetControl.utils.preferences.Repository
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.ScannedCode
@@ -65,10 +67,9 @@ import com.dacosys.assetControl.utils.settings.Preference
 import com.dacosys.imageControl.moshi.DocumentContent
 import com.dacosys.imageControl.moshi.DocumentContentRequestResult
 import com.dacosys.imageControl.network.common.ProgramData
-import com.dacosys.imageControl.network.common.StatusObject
+import com.dacosys.imageControl.network.download.GetImages.Companion.toDocumentContentList
 import com.dacosys.imageControl.network.webService.WsFunction
 import com.dacosys.imageControl.room.dao.ImageCoroutines
-import com.dacosys.imageControl.room.entity.Image
 import com.dacosys.imageControl.ui.activities.ImageControlCameraActivity
 import com.dacosys.imageControl.ui.activities.ImageControlGridActivity
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
@@ -144,6 +145,13 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
     private var assetSelectFilterFragment: AssetSelectFilterFragment? = null
     private var printerFragment: PrinterFragment? = null
 
+    private val menuItemShowImages = 9999
+    private var showImages
+        get() = prefsGetBoolean(Preference.printLabelAssetShowImages)
+        set(value) {
+            prefsPutBoolean(Preference.printLabelAssetShowImages.key, value)
+        }
+
     override fun onSaveInstanceState(savedInstanceState: Bundle) {
         super.onSaveInstanceState(savedInstanceState)
         saveBundleValues(savedInstanceState)
@@ -173,7 +181,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
     private fun loadBundleValues(b: Bundle) {
         // region Recuperar el título de la ventana
         val t1 = b.getString("title")
-        tempTitle = if (t1 != null && t1.isNotEmpty()) t1 else getString(R.string.select_asset)
+        tempTitle = if (!t1.isNullOrEmpty()) t1 else getString(R.string.select_asset)
         // endregion
 
         // PANELS
@@ -189,8 +197,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         multiSelect = b.getBoolean("multiSelect", multiSelect)
         lastSelected = b.getParcelable("lastSelected")
         firstVisiblePos = if (b.containsKey("firstVisiblePos")) b.getInt("firstVisiblePos") else -1
-        checkedIdArray =
-            (b.getLongArray("checkedIdArray") ?: longArrayOf()).toCollection(ArrayList())
+        checkedIdArray = (b.getLongArray("checkedIdArray") ?: longArrayOf()).toCollection(ArrayList())
 
         // Cargar la lista desde la DB local
         fixedItemList = b.getBoolean("fixedItemList")
@@ -199,9 +206,12 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
 
     private fun loadDefaultValues() {
         tempTitle = getString(R.string.select_asset)
+
         val id = prefsGetLong(Preference.defaultBarcodeLabelCustomAsset)
         val blc = BarcodeLabelCustomDbHelper().selectById(id)
-        if (blc != null) printerFragment?.barcodeLabelCustom = blc
+        if (blc != null) {
+            printerFragment?.barcodeLabelCustom = blc
+        }
     }
 
     private lateinit var binding: AssetPrintLabelActivityTopPanelCollapsedBinding
@@ -559,8 +569,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
                         listView = binding.assetListView,
                         multiSelect = multiSelect,
                         checkedIdArray = checkedIdArray,
-                        visibleStatus = assetSelectFilterFragment?.visibleStatusArray
-                            ?: AssetStatus.getAll()
+                        visibleStatus = assetSelectFilterFragment?.visibleStatusArray ?: AssetStatus.getAll()
                     )
                     refreshAdapterListeners()
                 } else {
@@ -568,6 +577,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
                     arrayAdapter?.refresh()
                 }
 
+                arrayAdapter?.showImages = showImages
                 arrayAdapter?.refreshFilter(searchText, true)
 
                 while (binding.assetListView.adapter == null) {
@@ -687,13 +697,21 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
             menu.removeItem(menu.findItem(R.id.action_rfid_connect).itemId)
         }
 
+        // Opción de visibilidad de Imágenes
+        menu.add(Menu.NONE, menuItemShowImages, menu.size, getContext().getString(R.string.show_images))
+            .setChecked(showImages).isCheckable = true
+
+        val menuItems = menu.size()
+
         val drawable = ContextCompat.getDrawable(this, R.drawable.ic_visibility)
         binding.topAppbar.overflowIcon = drawable
 
         // Opciones de visibilidad del menú
+        val allStatus = AssetStatus.getAll()
         val s = assetSelectFilterFragment?.visibleStatusArray ?: AssetStatus.getAll()
-        for (i in AssetStatus.getAll()) {
-            menu.add(0, i.id, i.id, i.description).setChecked(s.contains(i)).isCheckable = true
+        for (i in 0 until allStatus.size) {
+            menu.add(0, allStatus[i].id, i + menuItems, allStatus[i].description)
+                .setChecked(s.contains(allStatus[i])).isCheckable = true
         }
 
         //region Icon colors
@@ -709,13 +727,14 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         colors.add(firebrick)     // missing
         //endregion Icon colors
 
-        for ((index, i) in AssetStatus.getAll().withIndex()) {
-            val icon = ResourcesCompat.getDrawable(resources, R.drawable.ic_lens, null)
+        for (i in 0 until allStatus.size) {
+            val icon = ContextCompat.getDrawable(this, R.drawable.ic_lens)
             icon?.mutate()?.colorFilter =
                 BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-                    colors[index], BlendModeCompat.SRC_IN
+                    colors[i], BlendModeCompat.SRC_IN
                 )
-            val item = menu.findItem(i.id)
+
+            val item = menu.getItem(i + menuItems)
             item.icon = icon
 
             // Keep the popup menu open
@@ -745,18 +764,22 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
                 onBackPressed()
                 return true
             }
+
             R.id.action_rfid_connect -> {
                 JotterListener.rfidStart(this)
                 return super.onOptionsItemSelected(item)
             }
+
             R.id.action_trigger_scan -> {
                 JotterListener.trigger(this)
                 return super.onOptionsItemSelected(item)
             }
+
             R.id.action_read_barcode -> {
                 JotterListener.toggleCameraFloatingWindowVisibility(this)
                 return super.onOptionsItemSelected(item)
             }
+
             else -> {
                 return statusItemSelected(item)
             }
@@ -775,35 +798,54 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         item.isChecked = !item.isChecked
 
         when (item.itemId) {
-            AssetStatus.onInventory.id -> if (item.isChecked && !visibleStatus.contains(AssetStatus.onInventory)) {
-                arrayAdapter?.addVisibleStatus(AssetStatus.onInventory)
-                visibleStatus.add(AssetStatus.onInventory)
-            } else if (!item.isChecked && visibleStatus.contains(AssetStatus.onInventory)) {
-                arrayAdapter?.removeVisibleStatus(AssetStatus.onInventory)
-                visibleStatus.remove(AssetStatus.onInventory)
+            AssetStatus.onInventory.id -> {
+                if (item.isChecked && !visibleStatus.contains(AssetStatus.onInventory)) {
+                    arrayAdapter?.addVisibleStatus(AssetStatus.onInventory)
+                    visibleStatus.add(AssetStatus.onInventory)
+                } else if (!item.isChecked && visibleStatus.contains(AssetStatus.onInventory)) {
+                    arrayAdapter?.removeVisibleStatus(AssetStatus.onInventory)
+                    visibleStatus.remove(AssetStatus.onInventory)
+                }
             }
-            AssetStatus.missing.id -> if (item.isChecked && !visibleStatus.contains(AssetStatus.missing)) {
-                arrayAdapter?.addVisibleStatus(AssetStatus.missing)
-                visibleStatus.add(AssetStatus.missing)
-            } else if (!item.isChecked && visibleStatus.contains(AssetStatus.missing)) {
-                arrayAdapter?.removeVisibleStatus(AssetStatus.missing)
-                visibleStatus.remove(AssetStatus.missing)
+
+            AssetStatus.missing.id -> {
+                if (item.isChecked && !visibleStatus.contains(AssetStatus.missing)) {
+                    arrayAdapter?.addVisibleStatus(AssetStatus.missing)
+                    visibleStatus.add(AssetStatus.missing)
+                } else if (!item.isChecked && visibleStatus.contains(AssetStatus.missing)) {
+                    arrayAdapter?.removeVisibleStatus(AssetStatus.missing)
+                    visibleStatus.remove(AssetStatus.missing)
+                }
             }
-            AssetStatus.removed.id -> if (item.isChecked && !visibleStatus.contains(AssetStatus.removed)) {
-                arrayAdapter?.addVisibleStatus(AssetStatus.removed)
-                visibleStatus.add(AssetStatus.removed)
-            } else if (!item.isChecked && visibleStatus.contains(AssetStatus.removed)) {
-                arrayAdapter?.removeVisibleStatus(AssetStatus.removed)
-                visibleStatus.remove(AssetStatus.removed)
+
+            AssetStatus.removed.id -> {
+                if (item.isChecked && !visibleStatus.contains(AssetStatus.removed)) {
+                    arrayAdapter?.addVisibleStatus(AssetStatus.removed)
+                    visibleStatus.add(AssetStatus.removed)
+                } else if (!item.isChecked && visibleStatus.contains(AssetStatus.removed)) {
+                    arrayAdapter?.removeVisibleStatus(AssetStatus.removed)
+                    visibleStatus.remove(AssetStatus.removed)
+                }
             }
-            AssetStatus.unknown.id -> if (item.isChecked && !visibleStatus.contains(AssetStatus.unknown)) {
-                arrayAdapter?.addVisibleStatus(AssetStatus.unknown)
-                visibleStatus.add(AssetStatus.unknown)
-            } else if (!item.isChecked && visibleStatus.contains(AssetStatus.unknown)) {
-                arrayAdapter?.removeVisibleStatus(AssetStatus.unknown)
-                visibleStatus.remove(AssetStatus.unknown)
+
+            AssetStatus.unknown.id -> {
+                if (item.isChecked && !visibleStatus.contains(AssetStatus.unknown)) {
+                    arrayAdapter?.addVisibleStatus(AssetStatus.unknown)
+                    visibleStatus.add(AssetStatus.unknown)
+                } else if (!item.isChecked && visibleStatus.contains(AssetStatus.unknown)) {
+                    arrayAdapter?.removeVisibleStatus(AssetStatus.unknown)
+                    visibleStatus.remove(AssetStatus.unknown)
+                }
             }
-            else -> return super.onOptionsItemSelected(item)
+
+            menuItemShowImages -> {
+                showImages = item.isChecked
+                arrayAdapter?.showImages = item.isChecked
+            }
+
+            else -> {
+                return super.onOptionsItemSelected(item)
+            }
         }
 
         if (arrayAdapter?.isStatusVisible(arrayAdapter?.currentPos() ?: -1) == false) {
@@ -825,13 +867,16 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
             ProgressStatus.starting -> {
                 showProgressBar(true)
             }
+
             ProgressStatus.canceled -> {
                 showProgressBar(false)
             }
+
             ProgressStatus.crashed -> {
                 showProgressBar(false)
                 makeText(binding.root, msg, SnackBarType.ERROR)
             }
+
             ProgressStatus.finished -> {
                 showProgressBar(false)
                 this.completeList = completeList
@@ -870,7 +915,6 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
 
             val intent = Intent(this, ImageControlCameraActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-            intent.putExtra("programId", Statics.INTERNAL_IMAGE_CONTROL_APP_ID)
             intent.putExtra("programObjectId", tableId.toLong())
             intent.putExtra("objectId1", itemId.toString())
             intent.putExtra("description", description)
@@ -905,13 +949,12 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
             tempTableId = tableId
 
             val programData = ProgramData(
-                programId = Statics.INTERNAL_IMAGE_CONTROL_APP_ID.toLong(),
                 programObjectId = tempTableId.toLong(),
                 objId1 = tempObjectId
             )
 
             ImageCoroutines().get(programData = programData) {
-                val allLocal = toDocumentContentList(it)
+                val allLocal = toDocumentContentList(images = it, programData = programData)
                 if (allLocal.isEmpty()) {
                     getFromWebservice()
                 } else {
@@ -923,7 +966,6 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
 
     private fun getFromWebservice() {
         WsFunction().documentContentGetBy12(
-            programId = Statics.INTERNAL_IMAGE_CONTROL_APP_ID,
             programObjectId = tempTableId,
             objectId1 = tempObjectId
         ) { it2 ->
@@ -935,38 +977,9 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         }
     }
 
-    private fun toDocumentContentList(
-        images: ArrayList<Image>,
-    ): ArrayList<DocumentContent> {
-        val list: ArrayList<DocumentContent> = ArrayList()
-        for (i in images) {
-            val x = DocumentContent()
-
-            x.description = i.description ?: ""
-            x.reference = i.reference ?: ""
-            x.obs = i.obs ?: ""
-            x.filenameOriginal = i.filenameOriginal ?: ""
-            x.statusObjectId = StatusObject.Waiting.statusObjectId.toInt()
-            x.statusStr = StatusObject.Waiting.description
-            x.statusDate = UTCDataTime.getUTCDateTimeAsString()
-
-            x.userId = Statics.currentUser()?.userId ?: 0
-            x.userStr = Statics.currentUser()?.name ?: ""
-
-            x.programId = Statics.INTERNAL_IMAGE_CONTROL_APP_ID
-            x.programObjectId = tempTableId
-            x.objectId1 = tempObjectId
-            x.objectId2 = "0"
-
-            list.add(x)
-        }
-        return list
-    }
-
     private fun showPhotoAlbum(images: ArrayList<DocumentContent> = ArrayList()) {
         val intent = Intent(this, ImageControlGridActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-        intent.putExtra("programId", Statics.INTERNAL_IMAGE_CONTROL_APP_ID)
         intent.putExtra("programObjectId", tempTableId.toLong())
         intent.putExtra("objectId1", tempObjectId)
         intent.putExtra("docContObjArrayList", images)
@@ -1046,9 +1059,11 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
                     collapseBottomPanel()
                     collapseTopPanel()
                 }
+
                 resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT && qtyTextViewFocused -> {
                     collapseBottomPanel()
                 }
+
                 resources.configuration.orientation != Configuration.ORIENTATION_PORTRAIT && !qtyTextViewFocused -> {
                     collapseTopPanel()
                 }

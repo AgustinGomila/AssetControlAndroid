@@ -603,6 +603,12 @@ class Preference(key: String, defaultValue: Any, debugValue: Any) {
             debugValue = true
         )
 
+        var printLabelAssetShowImages = Preference(
+            "asset_print_show_images",
+            defaultValue = false,
+            debugValue = false
+        )
+
         var selectAssetOnlyActive = Preference(
             "asset_select_only_active",
             defaultValue = true,
@@ -817,6 +823,7 @@ class Preference(key: String, defaultValue: Any, debugValue: Any) {
                 assetReviewContentVisibleStatus,
                 assetSelectFragmentVisibleStatus,
                 printLabelAssetOnlyActive,
+                printLabelAssetShowImages,
                 printLabelWarehouseAreaOnlyActive,
                 selectAssetMaintenanceOnlyActive,
                 selectAssetOnlyActive,

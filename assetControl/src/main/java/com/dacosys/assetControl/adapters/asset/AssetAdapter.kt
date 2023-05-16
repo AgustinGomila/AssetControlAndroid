@@ -32,7 +32,10 @@ import com.dacosys.assetControl.utils.Screen.Companion.getColorWithAlpha
 import com.dacosys.assetControl.utils.Screen.Companion.isTablet
 import com.dacosys.assetControl.utils.Screen.Companion.manipulateColor
 import com.dacosys.assetControl.utils.Screen.Companion.textLightColor
-import com.dacosys.assetControl.utils.preferences.Repository
+import com.dacosys.assetControl.utils.preferences.Repository.Companion.useImageControl
+import com.dacosys.imageControl.adapter.ImageAdapter.Companion.ImageControlHolder
+import com.dacosys.imageControl.adapter.ImageAdapter.Companion.getImages
+import com.dacosys.imageControl.network.common.ProgramData
 import java.lang.ref.WeakReference
 import java.util.*
 
@@ -129,6 +132,15 @@ class AssetAdapter : ArrayAdapter<Asset>, Filterable {
     private var visibleStatus: ArrayList<AssetStatus> = ArrayList()
     private var checkedIdArray: ArrayList<Long> = ArrayList()
 
+    private var idWithImage: ArrayList<Long> = ArrayList()
+
+    var showImages = false
+        set(value) {
+            field = value
+            if (!field) clearIdWithImage()
+            refresh()
+        }
+
     constructor(
         activity: AppCompatActivity,
         resource: Int,
@@ -152,8 +164,7 @@ class AssetAdapter : ArrayAdapter<Asset>, Filterable {
         multiSelect: Boolean,
         checkedIdArray: ArrayList<Long>,
         visibleStatus: ArrayList<AssetStatus>,
-
-        ) : super(AssetControlApp.getContext(), resource, suggestedList) {
+    ) : super(AssetControlApp.getContext(), resource, suggestedList) {
         this.activity = activity
         this.resource = resource
         this.multiSelect = multiSelect
@@ -303,6 +314,7 @@ class AssetAdapter : ArrayAdapter<Asset>, Filterable {
         activity.runOnUiThread {
             super.clear()
             clearChecked()
+            clearIdWithImage()
 
             dataSetChangedListener?.onDataSetChanged()
         }
@@ -523,8 +535,12 @@ class AssetAdapter : ArrayAdapter<Asset>, Filterable {
         setChecked(checkedItems, true)
     }
 
-    fun clearChecked() {
+    private fun clearChecked() {
         checkedIdArray.clear()
+    }
+
+    private fun clearIdWithImage() {
+        idWithImage.clear()
     }
 
     fun setSelectItemAndScrollPos(a: Asset?, tScrollPos: Int?) {
@@ -663,9 +679,12 @@ class AssetAdapter : ArrayAdapter<Asset>, Filterable {
             // El view ya existe, comprobar que no necesite cambiar de layout.
             if (
             // Row null cambiando...
-                v.tag is String && currentLayout == R.layout.asset_row || v.tag is String && currentLayout == R.layout.asset_row_expanded || v.tag is String && currentLayout == R.layout.asset_simple_row ||
-
-                v.tag is CollapsedViewHolder && currentLayout != R.layout.asset_row || v.tag is ExpandedViewHolder && currentLayout != R.layout.asset_row_expanded || v.tag is SimpleViewHolder && currentLayout != R.layout.asset_simple_row
+                v.tag is String && currentLayout == R.layout.asset_row ||
+                v.tag is String && currentLayout == R.layout.asset_row_expanded ||
+                v.tag is String && currentLayout == R.layout.asset_simple_row ||
+                v.tag is CollapsedViewHolder && currentLayout != R.layout.asset_row ||
+                v.tag is ExpandedViewHolder && currentLayout != R.layout.asset_row_expanded ||
+                v.tag is SimpleViewHolder && currentLayout != R.layout.asset_simple_row
             ) {
                 // Ya fue creado, si es un row normal que está siendo seleccionada
                 // o un row expandido que está siendo deseleccionado
@@ -855,17 +874,26 @@ class AssetAdapter : ArrayAdapter<Asset>, Filterable {
         holder.serialNumberTitleTextView = v.findViewById(R.id.serialNumberTextView)
         holder.eanTitleTextView = v.findViewById(R.id.eanTextView)
 
-        if (Repository.useImageControl) {
-            holder.signImageView?.visibility = GONE
-            holder.addPhotoImageView?.visibility = VISIBLE
-            holder.albumImageView?.visibility = VISIBLE
-        } else {
-            holder.signImageView?.visibility = GONE
-            holder.addPhotoImageView?.visibility = GONE
-            holder.albumImageView?.visibility = GONE
-        }
+        // ImageControl
+        holder.icHolder.imageConstraintLayout = v.findViewById(R.id.imageConstraintLayout)
+        holder.icHolder.imageImageView = v.findViewById(R.id.imageView)
+        holder.icHolder.progressBar = v.findViewById(R.id.progressBar)
+
+        collapseImagePanel(holder.icHolder)
 
         v.tag = holder
+    }
+
+    private fun collapseImagePanel(icHolder: ImageControlHolder) {
+        icHolder.imageConstraintLayout?.visibility = GONE
+        icHolder.imageImageView?.visibility = INVISIBLE
+        icHolder.progressBar?.visibility = GONE
+    }
+
+    private fun expandImagePanel(icHolder: ImageControlHolder) {
+        icHolder.imageImageView?.visibility = INVISIBLE
+        icHolder.progressBar?.visibility = VISIBLE
+        icHolder.imageConstraintLayout?.visibility = VISIBLE
     }
 
     @SuppressLint("ClickableViewAccessibility", "ObsoleteSdkInt")
@@ -962,33 +990,7 @@ class AssetAdapter : ArrayAdapter<Asset>, Filterable {
                     true
                 }
 
-                // region ImageControl
-                if (Repository.useImageControl) {
-                    if (holder.albumImageView != null) {
-                        holder.albumImageView!!.setOnTouchListener { _, event ->
-                            if (event.action == MotionEvent.ACTION_DOWN) {
-                                albumViewRequiredListener?.onAlbumViewRequired(
-                                    Table.asset.tableId, asset.assetId
-                                )
-                            }
-                            true
-                        }
-                    }
-                    if (holder.addPhotoImageView != null) {
-                        holder.addPhotoImageView!!.setOnTouchListener { _, event ->
-                            if (event.action == MotionEvent.ACTION_DOWN) {
-                                addPhotoRequiredListener?.onAddPhotoRequired(
-                                    Table.asset.tableId, asset.assetId, asset.description
-                                )
-                            }
-                            true
-                        }
-                    }
-                }
-                // endregion ImageControl
-
                 // region CheckBox
-
                 if (holder.checkBox != null) {
                     var isSpeakButtonLongPressed = false
 
@@ -1029,6 +1031,59 @@ class AssetAdapter : ArrayAdapter<Asset>, Filterable {
                 }
                 // endregion CheckBox
 
+                // region ImageControl
+                if (useImageControl) {
+                    if (holder.albumImageView != null) {
+                        holder.albumImageView!!.setOnTouchListener { _, event ->
+                            if (event.action == MotionEvent.ACTION_DOWN) {
+                                albumViewRequiredListener?.onAlbumViewRequired(
+                                    Table.asset.tableId, asset.assetId
+                                )
+                            }
+                            true
+                        }
+                    }
+                    if (holder.addPhotoImageView != null) {
+                        holder.addPhotoImageView!!.setOnTouchListener { _, event ->
+                            if (event.action == MotionEvent.ACTION_DOWN) {
+                                addPhotoRequiredListener?.onAddPhotoRequired(
+                                    Table.asset.tableId, asset.assetId, asset.description
+                                )
+                            }
+                            true
+                        }
+                    }
+
+                    if (showImages) {
+                        if (!idWithImage.contains(asset.assetId)) {
+                            collapseImagePanel(holder.icHolder)
+                        } else {
+                            expandImagePanel(holder.icHolder)
+                        }
+
+                        Handler(Looper.getMainLooper()).postDelayed({
+                            run {
+                                getImages(
+                                    activity = activity,
+                                    programData = ProgramData(
+                                        programObjectId = Table.asset.tableId.toLong(),
+                                        objId1 = asset.assetId.toString()
+                                    ),
+                                    holder = holder.icHolder,
+                                    onFinished = {
+                                        if (it && !idWithImage.contains(asset.assetId)) {
+                                            idWithImage.add(asset.assetId)
+                                        }
+                                    }
+                                )
+                            }
+                        }, 0)
+                    } else {
+                        collapseImagePanel(holder.icHolder)
+                    }
+                }
+                // endregion ImageControl
+
                 // Background layouts
                 // Resalta por estado del activo
                 val layoutOnIventory = ResourcesCompat.getDrawable(
@@ -1055,14 +1110,17 @@ class AssetAdapter : ArrayAdapter<Asset>, Filterable {
                         backColor = layoutOnIventory!!
                         foreColor = if (isSelected) selectedForeColor else onInventoryForeColor
                     }
+
                     AssetStatus.missing.id -> {
                         backColor = layoutMissing!!
                         foreColor = if (isSelected) selectedForeColor else missingForeColor
                     }
+
                     AssetStatus.removed.id -> {
                         backColor = layoutRemoved!!
                         foreColor = if (isSelected) selectedForeColor else removedForeColor
                     }
+
                     else -> {
                         backColor = layoutDefault!!
                         foreColor = if (isSelected) selectedForeColor else defaultForeColor
@@ -1148,6 +1206,13 @@ class AssetAdapter : ArrayAdapter<Asset>, Filterable {
         holder.manufacturerTitleTextView = v.findViewById(R.id.manufacturerTextView)
         holder.modelTitleTextView = v.findViewById(R.id.modelTextView)
 
+        // ImageControl
+        holder.icHolder.imageConstraintLayout = v.findViewById(R.id.imageConstraintLayout)
+        holder.icHolder.imageImageView = v.findViewById(R.id.imageView)
+        holder.icHolder.progressBar = v.findViewById(R.id.progressBar)
+
+        collapseImagePanel(holder.icHolder)
+
         v.tag = holder
     }
 
@@ -1228,6 +1293,38 @@ class AssetAdapter : ArrayAdapter<Asset>, Filterable {
                     holder.checkBox!!.setOnCheckedChangeListener(checkChangeListener)
                 }
 
+                // region ImageControl
+                if (useImageControl) {
+                    if (showImages) {
+                        if (!idWithImage.contains(asset.assetId)) {
+                            collapseImagePanel(holder.icHolder)
+                        } else {
+                            expandImagePanel(holder.icHolder)
+                        }
+
+                        Handler(Looper.getMainLooper()).postDelayed({
+                            run {
+                                getImages(
+                                    activity = activity,
+                                    programData = ProgramData(
+                                        programObjectId = Table.asset.tableId.toLong(),
+                                        objId1 = asset.assetId.toString()
+                                    ),
+                                    holder = holder.icHolder,
+                                    onFinished = {
+                                        if (it && !idWithImage.contains(asset.assetId)) {
+                                            idWithImage.add(asset.assetId)
+                                        }
+                                    }
+                                )
+                            }
+                        }, 0)
+                    } else {
+                        collapseImagePanel(holder.icHolder)
+                    }
+                }
+                // endregion ImageControl
+
                 // Background layouts
                 // Resalta por estado del activo
                 val layoutOnIventory = ResourcesCompat.getDrawable(
@@ -1256,14 +1353,17 @@ class AssetAdapter : ArrayAdapter<Asset>, Filterable {
                         backColor = layoutOnIventory!!
                         foreColor = if (isSelected) selectedForeColor else onInventoryForeColor
                     }
+
                     AssetStatus.missing.id -> {
                         backColor = layoutMissing!!
                         foreColor = if (isSelected) selectedForeColor else missingForeColor
                     }
+
                     AssetStatus.removed.id -> {
                         backColor = layoutRemoved!!
                         foreColor = if (isSelected) selectedForeColor else removedForeColor
                     }
+
                     else -> {
                         backColor = layoutDefault!!
                         foreColor = if (isSelected) selectedForeColor else defaultForeColor
@@ -1318,6 +1418,9 @@ class AssetAdapter : ArrayAdapter<Asset>, Filterable {
         // TextView de títulos
         var manufacturerTitleTextView: TextView? = null
         var modelTitleTextView: TextView? = null
+
+        // ImageControl
+        var icHolder: ImageControlHolder = ImageControlHolder()
     }
 
     internal class ExpandedViewHolder {
@@ -1364,6 +1467,9 @@ class AssetAdapter : ArrayAdapter<Asset>, Filterable {
         var ownershipTitleTextView: TextView? = null
         var serialNumberTitleTextView: TextView? = null
         var eanTitleTextView: TextView? = null
+
+        // ImageControl
+        var icHolder: ImageControlHolder = ImageControlHolder()
     }
 
     internal class SimpleViewHolder {
@@ -1601,15 +1707,17 @@ class AssetAdapter : ArrayAdapter<Asset>, Filterable {
                             0 -> fourthField
                             else -> thirdField
                         }
+
                         else -> secondField
                     }
+
                     else -> firstField
                 }
             }
         }
 
         fun sortItems(originalList: ArrayList<Asset>): ArrayList<Asset> {
-            // Get all of the parent groups
+            // Get all the parent groups
             val groups = originalList.sortedWith(
                 compareBy({ it.parentAssetId },
                     { it.code },

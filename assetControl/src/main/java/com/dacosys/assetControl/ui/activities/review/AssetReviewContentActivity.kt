@@ -74,7 +74,6 @@ import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.Statics.Companion.INTERNAL_IMAGE_CONTROL_APP_ID
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.ParcelLong
-import com.dacosys.assetControl.utils.misc.UTCDataTime
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetStringSet
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsPutBoolean
@@ -92,10 +91,9 @@ import com.dacosys.assetControl.viewModel.sync.SyncViewModel
 import com.dacosys.imageControl.moshi.DocumentContent
 import com.dacosys.imageControl.moshi.DocumentContentRequestResult
 import com.dacosys.imageControl.network.common.ProgramData
-import com.dacosys.imageControl.network.common.StatusObject
+import com.dacosys.imageControl.network.download.GetImages.Companion.toDocumentContentList
 import com.dacosys.imageControl.network.webService.WsFunction
 import com.dacosys.imageControl.room.dao.ImageCoroutines
-import com.dacosys.imageControl.room.entity.Image
 import com.dacosys.imageControl.ui.activities.ImageControlCameraActivity
 import com.dacosys.imageControl.ui.activities.ImageControlGridActivity
 import org.parceler.Parcels
@@ -203,11 +201,13 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
                     total = totalTask
                 )
             }
+
             ProgressStatus.bigFinished -> {
                 closeKeyboard(this)
                 setResult(RESULT_OK)
                 finish()
             }
+
             ProgressStatus.bigCrashed,
             ProgressStatus.canceled,
             -> {
@@ -221,6 +221,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
                 setResult(RESULT_OK)
                 finish()
             }
+
             else -> {
                 Log.d(
                     this::class.java.simpleName, "$progressStatusDesc: $registryDesc ${
@@ -302,7 +303,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         // region Recuperar el título de la ventana
         val t1 = b.getString("title")
-        tempTitle = if (t1 != null && t1.isNotEmpty()) t1 else getString(R.string.asset_review)
+        tempTitle = if (!t1.isNullOrEmpty()) t1 else getString(R.string.asset_review)
         // endregion
 
         assetReview = Parcels.unwrap<AssetReview>(b.getParcelable("assetReview"))
@@ -530,6 +531,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
             panelBottomIsExpanded -> {
                 binding.expandBottomPanelButton?.text = getString(R.string.expand_panel)
             }
+
             else -> {
                 binding.expandBottomPanelButton?.text = getString(R.string.more_options)
             }
@@ -539,6 +541,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
             panelTopIsExpanded -> {
                 binding.expandTopPanelButton?.text = getString(R.string.collapse_panel)
             }
+
             else -> {
                 binding.expandTopPanelButton?.text = getString(R.string.area_in_review)
             }
@@ -786,12 +789,14 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
                     )
                 }
             }
+
             AssetReviewContentStatus.external.id,
             AssetReviewContentStatus.appeared.id,
             AssetReviewContentStatus.unknown.id,
             -> {
                 runOnUiThread { arContAdapter?.remove(arCont) }
             }
+
             else -> {
                 return
             }
@@ -873,6 +878,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
                             (assetReview ?: return@registerForActivityResult).obs =
                                 data.getStringExtra("obs") ?: ""
                         }
+
                         confirm -> {
                             val obs = data.getStringExtra("obs") ?: ""
                             val completed = data.getBooleanExtra("completed", true)
@@ -1061,6 +1067,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
 
                     if (!isFinishing) progressDialog?.show()
                 }
+
                 ProgressStatus.running.id -> {
                     //dialog?.setMessage(msg)
                     if (msg != "") alertBinding.messageTextView.text = msg
@@ -1099,6 +1106,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
 
                     if (!isFinishing) progressDialog?.show()
                 }
+
                 ProgressStatus.finished.id, ProgressStatus.canceled.id, ProgressStatus.crashed.id -> {
                     progressDialog?.dismiss()
                     progressDialog = null
@@ -1583,18 +1591,22 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
                 onBackPressed()
                 return true
             }
+
             R.id.action_rfid_connect -> {
                 JotterListener.rfidStart(this)
                 return super.onOptionsItemSelected(item)
             }
+
             R.id.action_trigger_scan -> {
                 JotterListener.trigger(this)
                 return super.onOptionsItemSelected(item)
             }
+
             R.id.action_read_barcode -> {
                 JotterListener.toggleCameraFloatingWindowVisibility(this)
                 return super.onOptionsItemSelected(item)
             }
+
             else -> {
                 return statusItemSelected(item)
             }
@@ -1621,6 +1633,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
             } else if (!item.isChecked && visibleStatus.contains(AssetReviewContentStatus.notInReview)) {
                 arContAdapter!!.removeVisibleStatus(AssetReviewContentStatus.notInReview)
             }
+
             AssetReviewContentStatus.revised.id -> if (item.isChecked && !visibleStatus.contains(
                     AssetReviewContentStatus.revised
                 )
@@ -1629,6 +1642,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
             } else if (!item.isChecked && visibleStatus.contains(AssetReviewContentStatus.revised)) {
                 arContAdapter!!.removeVisibleStatus(AssetReviewContentStatus.revised)
             }
+
             AssetReviewContentStatus.external.id -> if (item.isChecked && !visibleStatus.contains(
                     AssetReviewContentStatus.external
                 )
@@ -1637,6 +1651,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
             } else if (!item.isChecked && visibleStatus.contains(AssetReviewContentStatus.external)) {
                 arContAdapter!!.removeVisibleStatus(AssetReviewContentStatus.external)
             }
+
             AssetReviewContentStatus.unknown.id -> if (item.isChecked && !visibleStatus.contains(
                     AssetReviewContentStatus.unknown
                 )
@@ -1645,6 +1660,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
             } else if (!item.isChecked && visibleStatus.contains(AssetReviewContentStatus.unknown)) {
                 arContAdapter!!.removeVisibleStatus(AssetReviewContentStatus.unknown)
             }
+
             AssetReviewContentStatus.appeared.id -> if (item.isChecked && !visibleStatus.contains(
                     AssetReviewContentStatus.appeared
                 )
@@ -1653,6 +1669,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
             } else if (!item.isChecked && visibleStatus.contains(AssetReviewContentStatus.appeared)) {
                 arContAdapter!!.removeVisibleStatus(AssetReviewContentStatus.appeared)
             }
+
             AssetReviewContentStatus.newAsset.id -> if (item.isChecked && !visibleStatus.contains(
                     AssetReviewContentStatus.newAsset
                 )
@@ -1661,6 +1678,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
             } else if (!item.isChecked && visibleStatus.contains(AssetReviewContentStatus.newAsset)) {
                 arContAdapter!!.removeVisibleStatus(AssetReviewContentStatus.newAsset)
             }
+
             else -> return super.onOptionsItemSelected(item)
         }
 
@@ -1895,13 +1913,12 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
             tempTableId = tableId
 
             val programData = ProgramData(
-                programId = INTERNAL_IMAGE_CONTROL_APP_ID.toLong(),
                 programObjectId = tempTableId.toLong(),
                 objId1 = tempObjectId
             )
 
             ImageCoroutines().get(programData = programData) {
-                val allLocal = toDocumentContentList(it)
+                val allLocal = toDocumentContentList(it, programData)
                 if (allLocal.isEmpty()) {
                     getFromWebservice()
                 } else {
@@ -1913,7 +1930,6 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private fun getFromWebservice() {
         WsFunction().documentContentGetBy12(
-            programId = INTERNAL_IMAGE_CONTROL_APP_ID,
             programObjectId = tempTableId,
             objectId1 = tempObjectId
         ) { it2 ->
@@ -1923,34 +1939,6 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
                 rejectNewInstances = false
             }
         }
-    }
-
-    private fun toDocumentContentList(
-        images: ArrayList<Image>,
-    ): ArrayList<DocumentContent> {
-        val list: ArrayList<DocumentContent> = ArrayList()
-        for (i in images) {
-            val x = DocumentContent()
-
-            x.description = i.description ?: ""
-            x.reference = i.reference ?: ""
-            x.obs = i.obs ?: ""
-            x.filenameOriginal = i.filenameOriginal ?: ""
-            x.statusObjectId = StatusObject.Waiting.statusObjectId.toInt()
-            x.statusStr = StatusObject.Waiting.description
-            x.statusDate = UTCDataTime.getUTCDateTimeAsString()
-
-            x.userId = Statics.currentUser()?.userId ?: 0
-            x.userStr = Statics.currentUser()?.name ?: ""
-
-            x.programId = INTERNAL_IMAGE_CONTROL_APP_ID
-            x.programObjectId = tempTableId
-            x.objectId1 = tempObjectId
-            x.objectId2 = "0"
-
-            list.add(x)
-        }
-        return list
     }
 
     private fun showPhotoAlbum(images: ArrayList<DocumentContent> = ArrayList()) {
@@ -2000,7 +1988,6 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
 
             val intent = Intent(this, ImageControlCameraActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-            intent.putExtra("programId", INTERNAL_IMAGE_CONTROL_APP_ID)
             intent.putExtra("programObjectId", tableId.toLong())
             intent.putExtra("objectId1", itemId.toString())
             intent.putExtra("description", description)

@@ -255,6 +255,7 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
             panelBottomIsExpanded -> {
                 binding.expandBottomPanelButton?.text = getString(R.string.collapse_panel)
             }
+
             else -> {
                 binding.expandBottomPanelButton?.text = getString(R.string.search_options)
             }
@@ -297,6 +298,7 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
                 panelBottomIsExpanded -> {
                     binding.expandBottomPanelButton?.text = getString(R.string.collapse_panel)
                 }
+
                 else -> {
                     binding.expandBottomPanelButton?.text = getString(R.string.search_options)
                 }
@@ -377,7 +379,6 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
 
             try {
                 val programData = ProgramData(
-                    programId = Statics.INTERNAL_IMAGE_CONTROL_APP_ID.toLong(),
                     programObjectId = Table.assetReview.tableId.toLong(),
                     objId1 = ar.collectorAssetReviewId.toString()
                 )
@@ -634,18 +635,22 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
                 onBackPressed()
                 return true
             }
+
             R.id.action_rfid_connect -> {
                 JotterListener.rfidStart(this)
                 return super.onOptionsItemSelected(item)
             }
+
             R.id.action_trigger_scan -> {
                 JotterListener.trigger(this)
                 return super.onOptionsItemSelected(item)
             }
+
             R.id.action_read_barcode -> {
                 JotterListener.toggleCameraFloatingWindowVisibility(this)
                 return super.onOptionsItemSelected(item)
             }
+
             else -> {
                 return statusItemSelected(item)
             }
@@ -672,6 +677,7 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
             } else if (!item.isChecked && visibleStatus.contains(AssetReviewStatus.onProcess)) {
                 arrayAdapter!!.removeVisibleStatus(AssetReviewStatus.onProcess)
             }
+
             AssetReviewStatus.completed.id -> if (item.isChecked && !visibleStatus.contains(
                     AssetReviewStatus.completed
                 )
@@ -680,6 +686,7 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
             } else if (!item.isChecked && visibleStatus.contains(AssetReviewStatus.completed)) {
                 arrayAdapter!!.removeVisibleStatus(AssetReviewStatus.completed)
             }
+
             AssetReviewStatus.transferred.id -> if (item.isChecked && !visibleStatus.contains(
                     AssetReviewStatus.transferred
                 )
@@ -688,6 +695,7 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
             } else if (!item.isChecked && visibleStatus.contains(AssetReviewStatus.transferred)) {
                 arrayAdapter!!.removeVisibleStatus(AssetReviewStatus.transferred)
             }
+
             AssetReviewStatus.unknown.id -> if (item.isChecked && !visibleStatus.contains(
                     AssetReviewStatus.unknown
                 )
@@ -696,6 +704,7 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
             } else if (!item.isChecked && visibleStatus.contains(AssetReviewStatus.unknown)) {
                 arrayAdapter!!.removeVisibleStatus(AssetReviewStatus.unknown)
             }
+
             else -> return super.onOptionsItemSelected(item)
         }
 

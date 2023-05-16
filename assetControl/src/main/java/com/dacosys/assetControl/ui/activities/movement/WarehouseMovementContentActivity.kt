@@ -51,10 +51,8 @@ import com.dacosys.assetControl.ui.fragments.movement.LocationHeaderFragment
 import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
 import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Screen.Companion.setupUI
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.ParcelLong
-import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.getUTCDateTimeAsString
 import com.dacosys.assetControl.utils.preferences.Repository
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.ScannedCode
@@ -66,10 +64,9 @@ import com.dacosys.assetControl.viewModel.review.SaveReviewViewModel
 import com.dacosys.imageControl.moshi.DocumentContent
 import com.dacosys.imageControl.moshi.DocumentContentRequestResult
 import com.dacosys.imageControl.network.common.ProgramData
-import com.dacosys.imageControl.network.common.StatusObject
+import com.dacosys.imageControl.network.download.GetImages.Companion.toDocumentContentList
 import com.dacosys.imageControl.network.webService.WsFunction
 import com.dacosys.imageControl.room.dao.ImageCoroutines
-import com.dacosys.imageControl.room.entity.Image
 import com.dacosys.imageControl.ui.activities.ImageControlCameraActivity
 import com.dacosys.imageControl.ui.activities.ImageControlGridActivity
 import org.parceler.Parcels
@@ -159,7 +156,7 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
     private fun loadBundleValues(b: Bundle) {
         // region Recuperar el título de la ventana
         val t1 = b.getString("title")
-        tempTitle = if (t1 != null && t1.isNotEmpty()) t1 else getString(R.string.assets_movement)
+        tempTitle = if (!t1.isNullOrEmpty()) t1 else getString(R.string.assets_movement)
         // endregion
 
         tempWarehouseArea = Parcels.unwrap<WarehouseArea>(b.getParcelable("warehouseArea"))
@@ -333,6 +330,7 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
                 binding.expandBottomPanelButton?.text =
                     getContext().getString(R.string.collapse_panel)
             }
+
             else -> {
                 binding.expandBottomPanelButton?.text = getString(R.string.more_options)
             }
@@ -342,6 +340,7 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
             panelTopIsExpanded -> {
                 binding.expandTopPanelButton?.text = getString(R.string.collapse_panel)
             }
+
             else -> {
                 binding.expandTopPanelButton?.text =
                     getContext().getString(R.string.select_destination)
@@ -398,6 +397,7 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
                     binding.expandBottomPanelButton?.text =
                         getContext().getString(R.string.collapse_panel)
                 }
+
                 else -> {
                     binding.expandBottomPanelButton?.text =
                         getContext().getString(R.string.more_options)
@@ -456,6 +456,7 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
                     binding.expandTopPanelButton?.text =
                         getContext().getString(R.string.collapse_panel)
                 }
+
                 else -> {
                     binding.expandTopPanelButton?.text =
                         getContext().getString(R.string.select_destination)
@@ -951,18 +952,22 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
                 onBackPressed()
                 return true
             }
+
             R.id.action_rfid_connect -> {
                 JotterListener.rfidStart(this)
                 return super.onOptionsItemSelected(item)
             }
+
             R.id.action_trigger_scan -> {
                 JotterListener.trigger(this)
                 return super.onOptionsItemSelected(item)
             }
+
             R.id.action_read_barcode -> {
                 JotterListener.toggleCameraFloatingWindowVisibility(this)
                 return super.onOptionsItemSelected(item)
             }
+
             else -> {
                 return super.onOptionsItemSelected(item)
             }
@@ -1055,6 +1060,7 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
 
                     if (!isFinishing) progressDialog?.show()
                 }
+
                 ProgressStatus.running.id -> {
                     //dialog?.setMessage(msg)
                     if (msg != "") alertBinding.messageTextView.text = msg
@@ -1093,6 +1099,7 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
 
                     if (!isFinishing) progressDialog?.show()
                 }
+
                 ProgressStatus.finished.id, ProgressStatus.canceled.id, ProgressStatus.crashed.id -> {
                     progressDialog?.dismiss()
                     progressDialog = null
@@ -1212,13 +1219,12 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
             tempTableId = tableId
 
             val programData = ProgramData(
-                programId = Statics.INTERNAL_IMAGE_CONTROL_APP_ID.toLong(),
                 programObjectId = tempTableId.toLong(),
                 objId1 = tempObjectId
             )
 
             ImageCoroutines().get(programData = programData) {
-                val allLocal = toDocumentContentList(it)
+                val allLocal = toDocumentContentList(it, programData)
                 if (allLocal.isEmpty()) {
                     getFromWebservice()
                 } else {
@@ -1230,7 +1236,6 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
 
     private fun getFromWebservice() {
         WsFunction().documentContentGetBy12(
-            programId = Statics.INTERNAL_IMAGE_CONTROL_APP_ID,
             programObjectId = tempTableId,
             objectId1 = tempObjectId
         ) { it2 ->
@@ -1242,38 +1247,9 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
         }
     }
 
-    private fun toDocumentContentList(
-        images: java.util.ArrayList<Image>,
-    ): java.util.ArrayList<DocumentContent> {
-        val list: java.util.ArrayList<DocumentContent> = java.util.ArrayList()
-        for (i in images) {
-            val x = DocumentContent()
-
-            x.description = i.description ?: ""
-            x.reference = i.reference ?: ""
-            x.obs = i.obs ?: ""
-            x.filenameOriginal = i.filenameOriginal ?: ""
-            x.statusObjectId = StatusObject.Waiting.statusObjectId.toInt()
-            x.statusStr = StatusObject.Waiting.description
-            x.statusDate = getUTCDateTimeAsString()
-
-            x.userId = Statics.currentUser()?.userId ?: 0
-            x.userStr = Statics.currentUser()?.name ?: ""
-
-            x.programId = Statics.INTERNAL_IMAGE_CONTROL_APP_ID
-            x.programObjectId = tempTableId
-            x.objectId1 = tempObjectId
-            x.objectId2 = "0"
-
-            list.add(x)
-        }
-        return list
-    }
-
     private fun showPhotoAlbum(images: java.util.ArrayList<DocumentContent> = java.util.ArrayList()) {
         val intent = Intent(this, ImageControlGridActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-        intent.putExtra("programId", Statics.INTERNAL_IMAGE_CONTROL_APP_ID)
         intent.putExtra("programObjectId", tempTableId.toLong())
         intent.putExtra("objectId1", tempObjectId)
         intent.putExtra("docContObjArrayList", images)
@@ -1315,7 +1291,6 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
 
             val intent = Intent(this, ImageControlCameraActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-            intent.putExtra("programId", Statics.INTERNAL_IMAGE_CONTROL_APP_ID)
             intent.putExtra("programObjectId", tableId.toLong())
             intent.putExtra("objectId1", itemId.toString())
             intent.putExtra("description", description)

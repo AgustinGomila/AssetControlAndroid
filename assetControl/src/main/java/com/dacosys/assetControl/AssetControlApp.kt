@@ -13,7 +13,11 @@ class AssetControlApp : Application() {
         sApplication = this
 
         // Setup ImageControl context
-        com.dacosys.imageControl.ImageControl().create(applicationContext, Statics.APP_ROOT_PATH)
+        com.dacosys.imageControl.ImageControl().create(
+            context = applicationContext,
+            appRothPath = Statics.APP_ROOT_PATH,
+            id = com.dacosys.assetControl.utils.Statics.INTERNAL_IMAGE_CONTROL_APP_ID
+        )
 
         // Eventos del ciclo de vida de las actividades
         // que nos interesa interceptar para conectar y
