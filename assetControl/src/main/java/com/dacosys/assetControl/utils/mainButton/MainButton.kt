@@ -80,7 +80,7 @@ class MainButton(
         )
         var PrintLabel = MainButton(
             7,
-            getContext().getString(R.string.print_labels),
+            getContext().getString(R.string.assets_and_areas_catalog),
             R.drawable.ic_printer,
             PermissionEntry.CollButtonPrintLabel
         )

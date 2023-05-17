@@ -84,8 +84,8 @@
     <string name="date">Fecha</string>
     <string name="sign">Firmar</string>
     <string name="save">Guardar</string>
-    <string name="print_asset_labels">Imprimir etiquetas de activos</string>
-    <string name="print_area_labels">Imprimir etiquetas de áreas</string>
+    <string name="assets_catalog">Catálogo de activos</string>
+    <string name="areas_catalog">Catálogo de áreas</string>
     <string name="invalid_code">Código inválido</string>
     <string name="mac_address">MAC Address</string>
     <string name="mant">Mant.</string>
@@ -352,7 +352,8 @@
     <string name="does_not_exist_in_the_database">No existe en la base de datos</string>
     <string name="it_has_a_label_valid_only_in_reports">Tiene una etiqueta sólo válida en reportes</string>
     <string name="it_has_a_disabled_tag">Tiene una etiqueta deshabilitada</string>
-    <string name="print_labels">Imprimir etiquetas</string>
+    <string name="assets_and_areas_catalog">Catálogo de activos y áreas</string>
+    <string name="print_labels">Impresión de etiquetas</string>
     <string name="select_route">Seleccionar ruta</string>
     <string name="no_processes_started">No hay procesos abiertos</string>
     <string name="remove_started_processes">Eliminar procesos abiertos</string>

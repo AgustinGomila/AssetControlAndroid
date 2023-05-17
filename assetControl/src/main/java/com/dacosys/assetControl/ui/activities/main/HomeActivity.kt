@@ -38,6 +38,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
+import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.cleanTemporaryTables
 import com.dacosys.assetControl.dataBase.asset.AssetDbHelper
 import com.dacosys.assetControl.databinding.HomeActivityBinding
 import com.dacosys.assetControl.model.location.WarehouseArea
@@ -198,6 +199,9 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
     @SuppressLint("SetTextI18n")
     @Throws(PackageManager.NameNotFoundException::class)
     private fun initLayoutActivity() {
+        // Limpiamos las tablas temporales que puedan tener datos.
+        cleanTemporaryTables()
+
         setupHeaderPanel()
         setupSyncPanel()
         setupButtons()
@@ -245,6 +249,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
                     startActivity(intent)
                 }
             }
+
             MainButton.SendAndDownload -> {
                 if (!rejectNewInstances) {
                     rejectNewInstances = true
@@ -254,6 +259,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
                     startActivity(intent)
                 }
             }
+
             MainButton.AssetMovement -> {
                 if (!User.hasPermission(PermissionEntry.AddWarehouseMovement)) {
                     makeText(
@@ -272,6 +278,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
                     startActivity(intent)
                 }
             }
+
             MainButton.CheckCode -> {
                 if (!rejectNewInstances) {
                     rejectNewInstances = true
@@ -281,6 +288,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
                     startActivity(intent)
                 }
             }
+
             MainButton.PrintLabel -> {
                 if (!User.hasPermission(PermissionEntry.PrintLabel)) {
                     makeText(
@@ -299,6 +307,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
                     startActivity(intent)
                 }
             }
+
             MainButton.CRUD -> {
                 if (!rejectNewInstances) {
                     rejectNewInstances = true
@@ -308,6 +317,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
                     startActivity(intent)
                 }
             }
+
             MainButton.AssetManteinance -> {
                 if (!rejectNewInstances) {
                     rejectNewInstances = true
@@ -317,6 +327,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
                     startActivity(intent)
                 }
             }
+
             MainButton.Route -> {
                 if (!rejectNewInstances) {
                     rejectNewInstances = true
@@ -326,6 +337,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
                     startActivity(intent)
                 }
             }
+
             MainButton.DataCollection -> {
                 if (!rejectNewInstances) {
                     rejectNewInstances = true
@@ -335,6 +347,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
                     startActivity(intent)
                 }
             }
+
             MainButton.Configuration -> {
                 configApp()
             }
@@ -565,6 +578,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
             -> runOnUiThread {
                 setSyncTextView(it.msg)
             }
+
             ProgressStatus.bigCrashed,
             ProgressStatus.bigFinished,
             ProgressStatus.canceled,
@@ -908,6 +922,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
                 onBackPressed()
                 return true
             }
+
             R.id.action_settings -> {
                 if (User.hasPermission(MainButton.Configuration.permissionEntry!!)) {
                     configApp()
@@ -920,26 +935,32 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
                 }
                 return true
             }
+
             R.id.action_sync_now -> {
                 syncDownload()
                 return true
             }
+
             R.id.action_initial_sync -> {
                 forceSync()
                 return true
             }
+
             R.id.action_rfid_connect -> {
                 JotterListener.rfidStart(this)
                 return super.onOptionsItemSelected(item)
             }
+
             R.id.action_trigger_scan -> {
                 JotterListener.trigger(this)
                 return super.onOptionsItemSelected(item)
             }
+
             R.id.action_read_barcode -> {
                 JotterListener.toggleCameraFloatingWindowVisibility(this)
                 return super.onOptionsItemSelected(item)
             }
+
             else -> {
                 return super.onOptionsItemSelected(item)
             }

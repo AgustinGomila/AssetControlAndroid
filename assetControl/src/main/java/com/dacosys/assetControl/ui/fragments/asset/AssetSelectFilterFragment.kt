@@ -60,7 +60,6 @@ class AssetSelectFilterFragment : Fragment() {
         if (fragmentListener is FragmentListener) {
             fragmentListener = activity as FragmentListener
         }
-        sendMessage()
     }
 
     private fun sendMessage() {

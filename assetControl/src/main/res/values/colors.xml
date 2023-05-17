@@ -62,6 +62,11 @@
     <color name="sync_element_asset_review">#FFF9A825</color>
     <color name="sync_element_image">#FF9800</color>
 
+    <color name="status_on_inventory">#FF009688</color>
+    <color name="status_missing">#FFF44336</color>
+    <color name="status_removed">#FFFFC107</color>
+    <color name="status_default">#FFDFDFDF</color>
+
     <color name="text_dark">#FF1B1B1B</color>
     <color name="text_light">#FFFBFBFB</color>
 </resources>

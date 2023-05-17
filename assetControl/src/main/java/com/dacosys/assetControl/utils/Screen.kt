@@ -230,6 +230,10 @@ class Screen {
             else textDarkColor()
         }
 
+        fun getBestContrastColor(color: Int): Int {
+            return getBestContrastColor("#" + Integer.toHexString(color))
+        }
+
         fun toStringColorToInt(color: String): Int {
             val backColor = Color.parseColor(color)
             return Color.red(backColor) + Color.green(backColor) + Color.blue(backColor)

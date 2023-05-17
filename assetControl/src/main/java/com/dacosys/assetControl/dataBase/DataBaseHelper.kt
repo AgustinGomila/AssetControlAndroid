@@ -201,6 +201,10 @@ class DataBaseHelper : SQLiteOpenHelper(
             }
         }
 
+        fun cleanTemporaryTables() {
+            AssetDbHelper().deleteTemp()
+        }
+
         private val allCommands: ArrayList<String>
             get() {
                 val c: ArrayList<String> = ArrayList()

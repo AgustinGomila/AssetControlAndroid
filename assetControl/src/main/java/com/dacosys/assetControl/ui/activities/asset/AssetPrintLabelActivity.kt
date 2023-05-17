@@ -24,13 +24,16 @@ import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat
 import androidx.core.view.size
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.transition.ChangeBounds
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.adapters.asset.AssetAdapter
+import com.dacosys.assetControl.adapters.asset.AssetRecyclerAdapter
+import com.dacosys.assetControl.adapters.asset.AssetRecyclerAdapter.FilterOptions
 import com.dacosys.assetControl.dataBase.asset.AssetDbHelper
 import com.dacosys.assetControl.dataBase.barcode.BarcodeLabelCustomDbHelper
 import com.dacosys.assetControl.databinding.AssetPrintLabelActivityTopPanelCollapsedBinding
@@ -57,6 +60,7 @@ import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGet
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetLong
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsPutBoolean
 import com.dacosys.assetControl.utils.preferences.Repository
+import com.dacosys.assetControl.utils.preferences.Repository.Companion.useImageControl
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.ScannedCode
 import com.dacosys.assetControl.utils.scanners.Scanner
@@ -80,18 +84,22 @@ import kotlin.concurrent.thread
 class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
     Scanner.ScannerListener, Rfid.RfidDeviceListener, AssetSelectFilterFragment.FragmentListener,
     GetAssetAsync.GetAssetAsyncListener, KeyboardVisibilityEventListener,
-    PrinterFragment.FragmentListener, AssetAdapter.CheckedChangedListener,
-    AssetAdapter.DataSetChangedListener, AssetAdapter.Companion.AddPhotoRequiredListener,
-    AssetAdapter.Companion.AlbumViewRequiredListener,
-    AssetAdapter.Companion.EditAssetRequiredListener {
+    PrinterFragment.FragmentListener, AssetRecyclerAdapter.CheckedChangedListener,
+    AssetRecyclerAdapter.DataSetChangedListener, AssetRecyclerAdapter.AddPhotoRequiredListener,
+    AssetRecyclerAdapter.AlbumViewRequiredListener,
+    AssetRecyclerAdapter.EditAssetRequiredListener {
     override fun onDestroy() {
         destroyLocals()
         super.onDestroy()
     }
 
+    private var isFinishingByUser = false
     private fun destroyLocals() {
-        arrayAdapter?.refreshListeners(null, null, null)
-        arrayAdapter?.refreshImageControlListeners(null, null)
+        // Borramos los Ids temporales que se usaron en la actividad.
+        if (isFinishingByUser) AssetDbHelper().deleteTemp()
+
+        recyclerAdapter?.refreshListeners(null, null, null)
+        recyclerAdapter?.refreshImageControlListeners(null, null)
         assetSelectFilterFragment?.onDestroy()
         printerFragment?.onDestroy()
     }
@@ -100,7 +108,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
     override fun onRefresh() {
         Handler(Looper.getMainLooper()).postDelayed({
             run {
-                binding.swipeRefreshAsset.isRefreshing = false
+                binding.swipeRefresh.isRefreshing = false
             }
         }, 1000)
     }
@@ -115,7 +123,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
 
     override fun onCheckedChanged(isChecked: Boolean, pos: Int) {
         runOnUiThread {
-            binding.selectedTextView.text = arrayAdapter?.countChecked().toString()
+            binding.selectedTextView.text = recyclerAdapter?.countChecked().toString()
         }
     }
 
@@ -124,13 +132,16 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
 
     private var rejectNewInstances = false
 
+    // Se usa para saber si estamos en onStart luego de onCreate
+    private var fillRequired = false
+
     // Configuración guardada de los controles que se ven o no se ven
     private var checkedIdArray: ArrayList<Long> = ArrayList()
     private var onlyActive: Boolean = true
     private var multiSelect = false
-    private var arrayAdapter: AssetAdapter? = null
+    private var recyclerAdapter: AssetRecyclerAdapter? = null
     private var lastSelected: Asset? = null
-    private var firstVisiblePos: Int? = null
+    private var currentScrollPosition: Int = 0
     private var panelBottomIsExpanded = true
     private var panelTopIsExpanded = false
 
@@ -152,6 +163,14 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
             prefsPutBoolean(Preference.printLabelAssetShowImages.key, value)
         }
 
+    private var showCheckBoxes
+        get() =
+            if (!multiSelect) false
+            else prefsGetBoolean(Preference.printLabelAssetShowCheckBoxes)
+        set(value) {
+            prefsPutBoolean(Preference.printLabelAssetShowCheckBoxes.key, value)
+        }
+
     override fun onSaveInstanceState(savedInstanceState: Bundle) {
         super.onSaveInstanceState(savedInstanceState)
         saveBundleValues(savedInstanceState)
@@ -166,14 +185,15 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         b.putBoolean("panelBottomIsExpanded", panelBottomIsExpanded)
         b.putBoolean("fixedItemList", fixedItemList)
 
-        if (arrayAdapter != null) {
-            b.putParcelable("lastSelected", arrayAdapter?.currentAsset())
-            b.putInt("firstVisiblePos", arrayAdapter?.firstVisiblePos() ?: 0)
-            b.putLongArray("checkedIdArray", arrayAdapter?.getAllChecked()?.toLongArray())
+        if (recyclerAdapter != null) {
+            b.putParcelable("lastSelected", recyclerAdapter?.currentAsset())
+            b.putInt("firstVisiblePos", recyclerAdapter?.firstVisiblePos() ?: 0)
+            b.putInt("currentScrollPosition", currentScrollPosition)
+            b.putLongArray("checkedIdArray", recyclerAdapter?.checkedIdArray?.map { it }?.toLongArray())
         }
 
         // Guardar en la DB temporalmente los ítems listados
-        if (fixedItemList) AssetDbHelper().insertTempId(arrayAdapter?.getAllId() ?: ArrayList())
+        AssetDbHelper().insertTempId(ArrayList(recyclerAdapter?.fullList?.map { it.assetId } ?: listOf()))
 
         b.putString("searchText", searchText)
     }
@@ -185,23 +205,25 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         // endregion
 
         // PANELS
-        if (b.containsKey("hideFilterPanel")) hideFilterPanel =
-            b.getBoolean("hideFilterPanel", hideFilterPanel)
-        if (b.containsKey("panelBottomIsExpanded")) panelBottomIsExpanded =
-            b.getBoolean("panelBottomIsExpanded")
-        if (b.containsKey("panelTopIsExpanded")) panelTopIsExpanded =
-            b.getBoolean("panelTopIsExpanded")
+        if (b.containsKey("hideFilterPanel")) hideFilterPanel = b.getBoolean("hideFilterPanel", hideFilterPanel)
+        if (b.containsKey("panelBottomIsExpanded")) panelBottomIsExpanded = b.getBoolean("panelBottomIsExpanded")
+        if (b.containsKey("panelTopIsExpanded")) panelTopIsExpanded = b.getBoolean("panelTopIsExpanded")
 
         // ADAPTER
         if (b.containsKey("onlyActive")) onlyActive = b.getBoolean("onlyActive")
+
         multiSelect = b.getBoolean("multiSelect", multiSelect)
         lastSelected = b.getParcelable("lastSelected")
-        firstVisiblePos = if (b.containsKey("firstVisiblePos")) b.getInt("firstVisiblePos") else -1
+        currentScrollPosition = b.getInt("currentScrollPosition")
         checkedIdArray = (b.getLongArray("checkedIdArray") ?: longArrayOf()).toCollection(ArrayList())
 
-        // Cargar la lista desde la DB local
         fixedItemList = b.getBoolean("fixedItemList")
-        if (fixedItemList) completeList = AssetDbHelper().selectTempId()
+
+        if (b.containsKey("assetArray")) {
+            completeList = b.getParcelableArrayList("assetArray") ?: ArrayList()
+            fixedItemList = true
+            hideFilterPanel = true
+        }
     }
 
     private fun loadDefaultValues() {
@@ -237,7 +259,13 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
             loadBundleValues(savedInstanceState)
 
             searchText = savedInstanceState.getString("searchText") ?: ""
+
+            // Cargar la lista desde la DB local
+            completeList = AssetDbHelper().selectTempId()
         } else {
+            // Borramos los Ids temporales al crear la actividad por primera vez.
+            AssetDbHelper().deleteTemp()
+
             val extras = intent.extras
             if (extras != null) loadBundleValues(extras) else loadDefaultValues()
         }
@@ -250,13 +278,20 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         printerFragment?.setListener(this)
         printerFragment?.barcodeLabelTarget = BarcodeLabelTarget.Asset
 
-        binding.swipeRefreshAsset.setOnRefreshListener(this)
-        binding.swipeRefreshAsset.setColorSchemeResources(
+        binding.swipeRefresh.setOnRefreshListener(this)
+        binding.swipeRefresh.setColorSchemeResources(
             android.R.color.holo_blue_bright,
             android.R.color.holo_green_light,
             android.R.color.holo_orange_light,
             android.R.color.holo_red_light
         )
+
+        binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                currentScrollPosition =
+                    (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+            }
+        })
 
         // Para expandir y colapsar el panel inferior
         setBottomPanelAnimation()
@@ -281,25 +316,21 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
             override fun afterTextChanged(s: Editable) {
             }
 
-            override fun beforeTextChanged(
-                s: CharSequence, start: Int,
-                count: Int, after: Int,
-            ) {
+            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
             }
 
-            override fun onTextChanged(
-                s: CharSequence, start: Int,
-                before: Int, count: Int,
-            ) {
+            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
                 searchText = s.toString()
-                arrayAdapter?.refreshFilter(searchText, true)
+                recyclerAdapter?.refreshFilter(FilterOptions(searchText, true))
             }
         })
         binding.searchEditText.setText(
             searchText, TextView.BufferType.EDITABLE
         )
         binding.searchEditText.setOnKeyListener { _, keyCode, keyEvent ->
-            if (keyCode == EditorInfo.IME_ACTION_DONE || (keyEvent.action == KeyEvent.ACTION_UP && (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_DPAD_CENTER))) {
+            if (keyCode == EditorInfo.IME_ACTION_DONE || keyEvent.action == KeyEvent.ACTION_UP &&
+                (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_DPAD_CENTER)
+            ) {
                 closeKeyboard(this)
             }
             false
@@ -313,16 +344,16 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
 
         setPanels()
 
+        fillRequired = true
+
         setupUI(binding.root, this)
     }
 
     override fun onStart() {
         super.onStart()
 
-        showProgressBar(false)
-
-        // MODO SELECCION A PARTIR DE UNA LISTA FIJA DE ITEMS
-        if (fixedItemList) thread {
+        if (fillRequired) {
+            fillRequired = false
             fillAdapter(completeList)
         }
     }
@@ -330,24 +361,29 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
     private fun itemSelect() {
         closeKeyboard(this)
 
-        val data = Intent()
+        if (recyclerAdapter != null) {
+            val data = Intent()
 
-        if (arrayAdapter != null) {
-            val asset = arrayAdapter?.currentAsset()
-            val assetIdArray = arrayAdapter?.getAllChecked()
+            val asset = recyclerAdapter?.currentAsset()
+            val countChecked = recyclerAdapter?.countChecked() ?: 0
+            var assetArray: java.util.ArrayList<Asset> = ArrayList()
 
             if (!multiSelect && asset != null) {
-                data.putParcelableArrayListExtra(
-                    "ids", arrayListOf(ParcelLong(asset.assetId))
-                )
+                data.putParcelableArrayListExtra("ids", arrayListOf(ParcelLong(asset.assetId)))
                 setResult(RESULT_OK, data)
-            } else if (multiSelect && assetIdArray != null && assetIdArray.size > 0) {
-                val parcelIdArray: ArrayList<ParcelLong> = ArrayList()
-                for (it in assetIdArray) {
-                    parcelIdArray.add(ParcelLong(it))
+            } else if (multiSelect) {
+                if (countChecked > 0 || asset != null) {
+                    if (countChecked > 0) assetArray = recyclerAdapter?.getAllChecked() ?: ArrayList()
+                    else if (recyclerAdapter?.showCheckBoxes == false) {
+                        assetArray = arrayListOf(asset!!)
+                    }
+                    data.putParcelableArrayListExtra(
+                        "ids",
+                        assetArray.map { ParcelLong(it.assetId) } as ArrayList<ParcelLong>)
+                    setResult(RESULT_OK, data)
+                } else {
+                    setResult(RESULT_CANCELED)
                 }
-                data.putParcelableArrayListExtra("ids", parcelIdArray)
-                setResult(RESULT_OK, data)
             } else {
                 setResult(RESULT_CANCELED)
             }
@@ -355,6 +391,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
             setResult(RESULT_CANCELED)
         }
 
+        isFinishingByUser = true
         finish()
     }
 
@@ -364,21 +401,21 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
                 binding.totalLabelTextView.text = getString(R.string.total)
                 binding.selectedLabelTextView.text = getString(R.string.checked)
 
-                if (arrayAdapter != null) {
-                    binding.totalTextView.text = arrayAdapter!!.count.toString()
-                    binding.selectedTextView.text = arrayAdapter!!.countChecked().toString()
+                if (recyclerAdapter != null) {
+                    binding.totalTextView.text = recyclerAdapter?.totalVisible().toString()
+                    binding.selectedTextView.text = recyclerAdapter?.countChecked().toString()
                 }
             } else {
                 binding.totalLabelTextView.text = getString(R.string.total)
                 binding.selectedLabelTextView.text = getString(R.string.assets)
 
-                if (arrayAdapter != null) {
-                    binding.totalTextView.text = arrayAdapter!!.count.toString()
-                    binding.selectedTextView.text = arrayAdapter!!.count.toString()
+                if (recyclerAdapter != null) {
+                    binding.totalTextView.text = recyclerAdapter?.totalVisible().toString()
+                    binding.selectedTextView.text = recyclerAdapter?.totalVisible().toString()
                 }
             }
 
-            if (arrayAdapter == null) {
+            if (recyclerAdapter == null) {
                 binding.totalTextView.text = 0.toString()
                 binding.selectedTextView.text = 0.toString()
             }
@@ -389,19 +426,14 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         val currentLayout = ConstraintSet()
         if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
             if (panelBottomIsExpanded) {
-                if (panelTopIsExpanded) currentLayout.load(
-                    this, R.layout.asset_print_label_activity
-                )
-                else currentLayout.load(
-                    this, R.layout.asset_print_label_activity_top_panel_collapsed
-                )
+                if (panelTopIsExpanded) currentLayout.load(this, R.layout.asset_print_label_activity)
+                else currentLayout.load(this, R.layout.asset_print_label_activity_top_panel_collapsed)
             } else {
                 if (panelTopIsExpanded) currentLayout.load(
-                    this, R.layout.asset_print_label_activity_bottom_panel_collapsed
+                    this,
+                    R.layout.asset_print_label_activity_bottom_panel_collapsed
                 )
-                else currentLayout.load(
-                    this, R.layout.asset_print_label_activity_both_panels_collapsed
-                )
+                else currentLayout.load(this, R.layout.asset_print_label_activity_both_panels_collapsed)
             }
         } else {
             if (panelTopIsExpanded) currentLayout.load(this, R.layout.asset_print_label_activity)
@@ -444,15 +476,15 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
             val nextLayout = ConstraintSet()
             if (panelBottomIsExpanded) {
                 if (panelTopIsExpanded) nextLayout.load(
-                    this, R.layout.asset_print_label_activity_bottom_panel_collapsed
+                    this,
+                    R.layout.asset_print_label_activity_bottom_panel_collapsed
                 )
-                else nextLayout.load(
-                    this, R.layout.asset_print_label_activity_both_panels_collapsed
-                )
-            } else if (panelTopIsExpanded) nextLayout.load(
-                this, R.layout.asset_print_label_activity
-            )
-            else nextLayout.load(this, R.layout.asset_print_label_activity_top_panel_collapsed)
+                else nextLayout.load(this, R.layout.asset_print_label_activity_both_panels_collapsed)
+            } else if (panelTopIsExpanded) {
+                nextLayout.load(this, R.layout.asset_print_label_activity)
+            } else {
+                nextLayout.load(this, R.layout.asset_print_label_activity_top_panel_collapsed)
+            }
 
             panelBottomIsExpanded = !panelBottomIsExpanded
             val transition = ChangeBounds()
@@ -483,21 +515,20 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
             if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                 if (panelBottomIsExpanded) {
                     if (panelTopIsExpanded) nextLayout.load(
-                        this, R.layout.asset_print_label_activity_top_panel_collapsed
+                        this,
+                        R.layout.asset_print_label_activity_top_panel_collapsed
                     )
                     else nextLayout.load(this, R.layout.asset_print_label_activity)
-                } else if (panelTopIsExpanded) nextLayout.load(
-                    this, R.layout.asset_print_label_activity_both_panels_collapsed
-                )
-                else {
-                    nextLayout.load(
-                        this, R.layout.asset_print_label_activity_bottom_panel_collapsed
-                    )
+                } else if (panelTopIsExpanded) {
+                    nextLayout.load(this, R.layout.asset_print_label_activity_both_panels_collapsed)
+                } else {
+                    nextLayout.load(this, R.layout.asset_print_label_activity_bottom_panel_collapsed)
                 }
-            } else if (panelTopIsExpanded) nextLayout.load(
-                this, R.layout.asset_print_label_activity_top_panel_collapsed
-            )
-            else nextLayout.load(this, R.layout.asset_print_label_activity)
+            } else if (panelTopIsExpanded) {
+                nextLayout.load(this, R.layout.asset_print_label_activity_top_panel_collapsed)
+            } else {
+                nextLayout.load(this, R.layout.asset_print_label_activity)
+            }
 
             panelTopIsExpanded = !panelTopIsExpanded
 
@@ -532,7 +563,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
 
     private fun showProgressBar(show: Boolean) {
         runOnUiThread {
-            binding.swipeRefreshAsset.isRefreshing = show
+            binding.swipeRefresh.isRefreshing = show
         }
     }
 
@@ -555,38 +586,44 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
 
         try {
             runOnUiThread {
-                if (arrayAdapter != null) {
-                    lastSelected = arrayAdapter?.currentAsset()
-                    firstVisiblePos = arrayAdapter?.firstVisiblePos()
+                if (recyclerAdapter != null) {
+                    // Si el adapter es NULL es porque aún no fue creado.
+                    // Por lo tanto, puede ser que los valores de [lastSelected]
+                    // sean valores guardados de la instancia anterior y queremos preservarlos.
+                    lastSelected = recyclerAdapter?.currentAsset()
                 }
 
-                if (arrayAdapter == null || assetArray != null) {
-                    arrayAdapter = AssetAdapter(
-                        activity = this,
-                        resource = R.layout.asset_row,
-                        assets = assetArray ?: ArrayList(),
-                        suggestedList = ArrayList(),
-                        listView = binding.assetListView,
-                        multiSelect = multiSelect,
+                if (recyclerAdapter == null || assetArray != null) {
+                    recyclerAdapter = AssetRecyclerAdapter(
+                        recyclerView = binding.recyclerView,
+                        visibleStatus = assetSelectFilterFragment?.visibleStatusArray ?: AssetStatus.getAll(),
+                        fullList = assetArray ?: ArrayList(),
                         checkedIdArray = checkedIdArray,
-                        visibleStatus = assetSelectFilterFragment?.visibleStatusArray ?: AssetStatus.getAll()
+                        multiSelect = multiSelect,
+                        showCheckBoxes = showCheckBoxes,
+                        showCheckBoxesChanged = { showCheckBoxes = it },
+                        showImages = showImages,
+                        showImagesChanged = { showImages = it },
+                        filterOptions = FilterOptions(searchText, true)
                     )
-                    refreshAdapterListeners()
-                } else {
-                    refreshAdapterListeners()
-                    arrayAdapter?.refresh()
                 }
 
-                arrayAdapter?.showImages = showImages
-                arrayAdapter?.refreshFilter(searchText, true)
+                refreshAdapterListeners()
 
-                while (binding.assetListView.adapter == null) {
+                binding.recyclerView.layoutManager = LinearLayoutManager(this)
+                binding.recyclerView.adapter = recyclerAdapter
+
+                while (binding.recyclerView.adapter == null) {
                     // Horrible wait for full load
                 }
 
+                // Estas variables locales evitar posteriores cambios de estado.
+                val ls = lastSelected
+                val cs = currentScrollPosition
                 Handler(Looper.getMainLooper()).postDelayed({
-                    arrayAdapter?.setSelectItemAndScrollPos(lastSelected, firstVisiblePos)
-                }, 120)
+                    recyclerAdapter?.selectItem(ls, false)
+                    recyclerAdapter?.scrollToPos(cs, true)
+                }, 100)
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
@@ -599,19 +636,20 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
 
     private fun refreshAdapterListeners() {
         // IMPORTANTE:
-        // Se deben actualizar los listeners, sino
+        // Se deben actualizar los listeners, si no
         // las variables de esta actividad pueden
         // tener valores antiguos en del adaptador.
 
-        arrayAdapter?.refreshListeners(
+        recyclerAdapter?.refreshListeners(
             checkedChangedListener = this,
             dataSetChangedListener = this,
             editAssetRequiredListener = this
         )
 
         if (Repository.useImageControl) {
-            arrayAdapter?.refreshImageControlListeners(
-                this, this
+            recyclerAdapter?.refreshImageControlListeners(
+                addPhotoListener = this,
+                albumViewListener = this
             )
         }
     }
@@ -621,7 +659,6 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
 
         rejectNewInstances = false
         closeKeyboard(this)
-        refreshTextViews()
     }
 
     override fun onRequestPermissionsResult(
@@ -664,7 +701,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
             }
 
             if (asset != null) {
-                arrayAdapter?.selectItem(asset)
+                recyclerAdapter?.selectItem(asset)
                 printerFragment?.printAsset(arrayListOf(asset))
             }
         } catch (ex: Exception) {
@@ -680,6 +717,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
     override fun onBackPressed() {
         closeKeyboard(this)
 
+        isFinishingByUser = true
         setResult(RESULT_CANCELED)
         finish()
     }
@@ -698,8 +736,9 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         }
 
         // Opción de visibilidad de Imágenes
-        menu.add(Menu.NONE, menuItemShowImages, menu.size, getContext().getString(R.string.show_images))
-            .setChecked(showImages).isCheckable = true
+        if (useImageControl)
+            menu.add(Menu.NONE, menuItemShowImages, menu.size, getContext().getString(R.string.show_images))
+                .setChecked(showImages).isCheckable = true
 
         val menuItems = menu.size()
 
@@ -800,57 +839,51 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         when (item.itemId) {
             AssetStatus.onInventory.id -> {
                 if (item.isChecked && !visibleStatus.contains(AssetStatus.onInventory)) {
-                    arrayAdapter?.addVisibleStatus(AssetStatus.onInventory)
+                    recyclerAdapter?.addVisibleStatus(AssetStatus.onInventory)
                     visibleStatus.add(AssetStatus.onInventory)
                 } else if (!item.isChecked && visibleStatus.contains(AssetStatus.onInventory)) {
-                    arrayAdapter?.removeVisibleStatus(AssetStatus.onInventory)
+                    recyclerAdapter?.removeVisibleStatus(AssetStatus.onInventory)
                     visibleStatus.remove(AssetStatus.onInventory)
                 }
             }
 
             AssetStatus.missing.id -> {
                 if (item.isChecked && !visibleStatus.contains(AssetStatus.missing)) {
-                    arrayAdapter?.addVisibleStatus(AssetStatus.missing)
+                    recyclerAdapter?.addVisibleStatus(AssetStatus.missing)
                     visibleStatus.add(AssetStatus.missing)
                 } else if (!item.isChecked && visibleStatus.contains(AssetStatus.missing)) {
-                    arrayAdapter?.removeVisibleStatus(AssetStatus.missing)
+                    recyclerAdapter?.removeVisibleStatus(AssetStatus.missing)
                     visibleStatus.remove(AssetStatus.missing)
                 }
             }
 
             AssetStatus.removed.id -> {
                 if (item.isChecked && !visibleStatus.contains(AssetStatus.removed)) {
-                    arrayAdapter?.addVisibleStatus(AssetStatus.removed)
+                    recyclerAdapter?.addVisibleStatus(AssetStatus.removed)
                     visibleStatus.add(AssetStatus.removed)
                 } else if (!item.isChecked && visibleStatus.contains(AssetStatus.removed)) {
-                    arrayAdapter?.removeVisibleStatus(AssetStatus.removed)
+                    recyclerAdapter?.removeVisibleStatus(AssetStatus.removed)
                     visibleStatus.remove(AssetStatus.removed)
                 }
             }
 
             AssetStatus.unknown.id -> {
                 if (item.isChecked && !visibleStatus.contains(AssetStatus.unknown)) {
-                    arrayAdapter?.addVisibleStatus(AssetStatus.unknown)
+                    recyclerAdapter?.addVisibleStatus(AssetStatus.unknown)
                     visibleStatus.add(AssetStatus.unknown)
                 } else if (!item.isChecked && visibleStatus.contains(AssetStatus.unknown)) {
-                    arrayAdapter?.removeVisibleStatus(AssetStatus.unknown)
+                    recyclerAdapter?.removeVisibleStatus(AssetStatus.unknown)
                     visibleStatus.remove(AssetStatus.unknown)
                 }
             }
 
             menuItemShowImages -> {
-                showImages = item.isChecked
-                arrayAdapter?.showImages = item.isChecked
+                recyclerAdapter?.showImages(item.isChecked)
             }
 
             else -> {
                 return super.onOptionsItemSelected(item)
             }
-        }
-
-        if (arrayAdapter?.isStatusVisible(arrayAdapter?.currentPos() ?: -1) == false) {
-            // La fila actual está invisible, seleccionar la anterior visible
-            arrayAdapter?.selectNearVisible()
         }
 
         assetSelectFilterFragment!!.visibleStatusArray = visibleStatus
@@ -898,7 +931,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         if (code.isEmpty() && itemCategory == null && warehouseArea == null) {
             // Limpiar el control
             completeList.clear()
-            arrayAdapter?.clear()
+            recyclerAdapter?.clear()
             return
         }
 
@@ -928,7 +961,10 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
             val data = it?.data
             try {
                 if (it?.resultCode == RESULT_OK && data != null) {
-                    arrayAdapter?.currentAsset()?.saveChanges()
+                    val asset = recyclerAdapter?.currentAsset() ?: return@registerForActivityResult
+                    asset.saveChanges()
+                    val pos = recyclerAdapter?.getIndexById(asset.assetId) ?: RecyclerView.NO_POSITION
+                    recyclerAdapter?.notifyItemChanged(pos)
                 }
             } catch (ex: Exception) {
                 ex.printStackTrace()
@@ -1012,7 +1048,37 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
     override fun onFilterChanged(printer: String, template: BarcodeLabelCustom?, qty: Int?) {}
 
     override fun onPrintRequested(printer: String, template: BarcodeLabelCustom, qty: Int) {
-        printerFragment?.printAssetById(arrayAdapter?.getAllChecked() ?: ArrayList())
+        /** Acá seleccionamos siguiendo estos criterios:
+         *
+         * Si NO es multiSelect tomamos el ítem seleccionado de forma simple.
+         *
+         * Si es multiSelect nos fijamos que o bien estén marcados algunos ítems o
+         * bien tengamos un ítem seleccionado de forma simple.
+         *
+         * Si es así, vamos a devolver los ítems marcados si existen como prioridad.
+         *
+         * Si no, nos fijamos que NO sean visibles los CheckBoxes, esto quiere
+         * decir que el usuario está seleccionado el ítem de forma simple y
+         * devolvemos este ítem.
+         *
+         **/
+
+        val asset = recyclerAdapter?.currentAsset()
+        val countChecked = recyclerAdapter?.countChecked() ?: 0
+        var assetArray: java.util.ArrayList<Asset> = ArrayList()
+
+        if (!multiSelect && asset != null) {
+            assetArray = arrayListOf(asset)
+        } else if (multiSelect) {
+            if (countChecked > 0 || asset != null) {
+                if (countChecked > 0) assetArray = recyclerAdapter?.getAllChecked() ?: ArrayList()
+                else if (recyclerAdapter?.showCheckBoxes == false) {
+                    assetArray = arrayListOf(asset!!)
+                }
+            }
+        }
+
+        if (assetArray.isNotEmpty()) printerFragment?.printAssetById(ArrayList(assetArray.map { it.assetId }))
     }
 
     private var qtyTextViewFocused: Boolean = false
@@ -1029,7 +1095,6 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
     }
 
     // region READERS Reception
-
     override fun onNewIntent(intent: Intent) {
         /*
           This method gets called, when a new Intent gets associated with the current activity instance.
@@ -1049,7 +1114,6 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
     override fun onReadCompleted(scanCode: String) {
         scannerCompleted(scanCode)
     }
-
     //endregion READERS Reception
 
     override fun onVisibilityChanged(isOpen: Boolean) {
@@ -1088,7 +1152,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
     }
 
     override fun onEditAssetRequired(tableId: Int, itemId: Long) {
-        val asset = arrayAdapter?.currentAsset()
+        val asset = recyclerAdapter?.currentAsset()
 
         if (!rejectNewInstances && asset != null) {
             rejectNewInstances = true
@@ -1108,7 +1172,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
                 if (it?.resultCode == RESULT_OK && data != null) {
                     val a = Parcels.unwrap<Asset>(data.getParcelableExtra("asset"))
                         ?: return@registerForActivityResult
-                    arrayAdapter!!.updateAsset(a, true)
+                    recyclerAdapter?.updateAsset(a, true)
                 }
             } catch (ex: Exception) {
                 ex.printStackTrace()

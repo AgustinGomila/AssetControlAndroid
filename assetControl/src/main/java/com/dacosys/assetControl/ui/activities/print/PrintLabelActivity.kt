@@ -35,7 +35,7 @@ class PrintLabelActivity : AppCompatActivity() {
         setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        title = getString(R.string.print_labels)
+        title = getString(R.string.assets_and_areas_catalog)
 
         binding.assetButton.setOnClickListener {
             if (!rejectNewInstances) {
@@ -72,6 +72,7 @@ class PrintLabelActivity : AppCompatActivity() {
                 onBackPressed()
                 true
             }
+
             else -> {
                 super.onOptionsItemSelected(item)
             }

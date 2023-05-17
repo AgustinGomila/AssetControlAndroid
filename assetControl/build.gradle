@@ -208,6 +208,9 @@ dependencies {
 
     // HONEYWELL NATIVE DRIVER
     implementation files('libs/honeywell/DataCollection.aar')
+
+    // Version 1.3+ requiere API 33
+    implementation 'androidx.recyclerview:recyclerview:1.2.1'
 }
 
 repositories {

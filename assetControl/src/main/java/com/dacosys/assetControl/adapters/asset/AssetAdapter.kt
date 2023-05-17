@@ -32,10 +32,7 @@ import com.dacosys.assetControl.utils.Screen.Companion.getColorWithAlpha
 import com.dacosys.assetControl.utils.Screen.Companion.isTablet
 import com.dacosys.assetControl.utils.Screen.Companion.manipulateColor
 import com.dacosys.assetControl.utils.Screen.Companion.textLightColor
-import com.dacosys.assetControl.utils.preferences.Repository.Companion.useImageControl
 import com.dacosys.imageControl.adapter.ImageAdapter.Companion.ImageControlHolder
-import com.dacosys.imageControl.adapter.ImageAdapter.Companion.getImages
-import com.dacosys.imageControl.network.common.ProgramData
 import java.lang.ref.WeakReference
 import java.util.*
 
@@ -131,15 +128,6 @@ class AssetAdapter : ArrayAdapter<Asset>, Filterable {
 
     private var visibleStatus: ArrayList<AssetStatus> = ArrayList()
     private var checkedIdArray: ArrayList<Long> = ArrayList()
-
-    private var idWithImage: ArrayList<Long> = ArrayList()
-
-    var showImages = false
-        set(value) {
-            field = value
-            if (!field) clearIdWithImage()
-            refresh()
-        }
 
     constructor(
         activity: AppCompatActivity,
@@ -314,7 +302,6 @@ class AssetAdapter : ArrayAdapter<Asset>, Filterable {
         activity.runOnUiThread {
             super.clear()
             clearChecked()
-            clearIdWithImage()
 
             dataSetChangedListener?.onDataSetChanged()
         }
@@ -539,10 +526,6 @@ class AssetAdapter : ArrayAdapter<Asset>, Filterable {
         checkedIdArray.clear()
     }
 
-    private fun clearIdWithImage() {
-        idWithImage.clear()
-    }
-
     fun setSelectItemAndScrollPos(a: Asset?, tScrollPos: Int?) {
         var pos = -1
         if (a != null) pos = getPosition(a)
@@ -619,12 +602,12 @@ class AssetAdapter : ArrayAdapter<Asset>, Filterable {
         return position >= 0 && listView?.isItemChecked(position) ?: false
     }
 
-    fun isStatusVisible(position: Int): Boolean {
+    private fun isStatusVisible(position: Int): Boolean {
         if (position < 0) return false
         return isStatusVisible(getItem(position))
     }
 
-    fun isStatusVisible(asset: Asset?): Boolean {
+    private fun isStatusVisible(asset: Asset?): Boolean {
         return if (asset != null) {
             (visibleStatus.contains(AssetStatus.getById(asset.assetStatusId)))
         } else false
@@ -1031,58 +1014,8 @@ class AssetAdapter : ArrayAdapter<Asset>, Filterable {
                 }
                 // endregion CheckBox
 
-                // region ImageControl
-                if (useImageControl) {
-                    if (holder.albumImageView != null) {
-                        holder.albumImageView!!.setOnTouchListener { _, event ->
-                            if (event.action == MotionEvent.ACTION_DOWN) {
-                                albumViewRequiredListener?.onAlbumViewRequired(
-                                    Table.asset.tableId, asset.assetId
-                                )
-                            }
-                            true
-                        }
-                    }
-                    if (holder.addPhotoImageView != null) {
-                        holder.addPhotoImageView!!.setOnTouchListener { _, event ->
-                            if (event.action == MotionEvent.ACTION_DOWN) {
-                                addPhotoRequiredListener?.onAddPhotoRequired(
-                                    Table.asset.tableId, asset.assetId, asset.description
-                                )
-                            }
-                            true
-                        }
-                    }
-
-                    if (showImages) {
-                        if (!idWithImage.contains(asset.assetId)) {
-                            collapseImagePanel(holder.icHolder)
-                        } else {
-                            expandImagePanel(holder.icHolder)
-                        }
-
-                        Handler(Looper.getMainLooper()).postDelayed({
-                            run {
-                                getImages(
-                                    activity = activity,
-                                    programData = ProgramData(
-                                        programObjectId = Table.asset.tableId.toLong(),
-                                        objId1 = asset.assetId.toString()
-                                    ),
-                                    holder = holder.icHolder,
-                                    onFinished = {
-                                        if (it && !idWithImage.contains(asset.assetId)) {
-                                            idWithImage.add(asset.assetId)
-                                        }
-                                    }
-                                )
-                            }
-                        }, 0)
-                    } else {
-                        collapseImagePanel(holder.icHolder)
-                    }
-                }
-                // endregion ImageControl
+                // Este adapter nunca muestra las miniaturas
+                collapseImagePanel(holder.icHolder)
 
                 // Background layouts
                 // Resalta por estado del activo
@@ -1293,37 +1226,8 @@ class AssetAdapter : ArrayAdapter<Asset>, Filterable {
                     holder.checkBox!!.setOnCheckedChangeListener(checkChangeListener)
                 }
 
-                // region ImageControl
-                if (useImageControl) {
-                    if (showImages) {
-                        if (!idWithImage.contains(asset.assetId)) {
-                            collapseImagePanel(holder.icHolder)
-                        } else {
-                            expandImagePanel(holder.icHolder)
-                        }
-
-                        Handler(Looper.getMainLooper()).postDelayed({
-                            run {
-                                getImages(
-                                    activity = activity,
-                                    programData = ProgramData(
-                                        programObjectId = Table.asset.tableId.toLong(),
-                                        objId1 = asset.assetId.toString()
-                                    ),
-                                    holder = holder.icHolder,
-                                    onFinished = {
-                                        if (it && !idWithImage.contains(asset.assetId)) {
-                                            idWithImage.add(asset.assetId)
-                                        }
-                                    }
-                                )
-                            }
-                        }, 0)
-                    } else {
-                        collapseImagePanel(holder.icHolder)
-                    }
-                }
-                // endregion ImageControl
+                // Este adapter nunca muestra las miniaturas
+                collapseImagePanel(holder.icHolder)
 
                 // Background layouts
                 // Resalta por estado del activo
@@ -1565,7 +1469,7 @@ class AssetAdapter : ArrayAdapter<Asset>, Filterable {
         selectItem(newPos)
     }
 
-    //region COLORS
+//region COLORS
 
     private var selectedForeColor: Int = 0
     private var onInventoryForeColor: Int = 0
@@ -1596,7 +1500,7 @@ class AssetAdapter : ArrayAdapter<Asset>, Filterable {
         )
     }
 
-    //endregion
+//endregion
 
     companion object {
 
