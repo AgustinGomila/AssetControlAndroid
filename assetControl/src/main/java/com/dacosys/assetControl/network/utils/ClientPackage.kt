@@ -111,7 +111,8 @@ class ClientPackage {
             val client = allProductsArray[0].getString("client")
             val listItems: ArrayList<String> = ArrayList()
 
-            for (pack in allProductsArray) {
+            // Ordenamos la lista para que los diferentes paquetes queden agrupados
+            for (pack in allProductsArray.sortedBy { it.getString("product_version_id") }) {
                 val productVersionId = pack.getString("product_version_id")
 
                 // AssetControl M13 o ImageControl M13
@@ -227,6 +228,7 @@ class ClientPackage {
                 val clientPackage = when {
                     pack.has("client_package_content_description") -> pack.getString("client_package_content_description")
                         ?: ""
+
                     else -> ""
                 }
 

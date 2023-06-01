@@ -2,6 +2,7 @@ package com.dacosys.assetControl
 
 import android.app.Application
 import android.content.Context
+import com.dacosys.assetControl.utils.Statics.Companion.AC_ROOT_PATH
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.imageControl.Statics
 import id.pahlevikun.jotter.Jotter
@@ -15,7 +16,7 @@ class AssetControlApp : Application() {
         // Setup ImageControl context
         com.dacosys.imageControl.ImageControl().create(
             context = applicationContext,
-            appRothPath = Statics.APP_ROOT_PATH,
+            appRothPath = AC_ROOT_PATH,
             id = com.dacosys.assetControl.utils.Statics.INTERNAL_IMAGE_CONTROL_APP_ID
         )
 
