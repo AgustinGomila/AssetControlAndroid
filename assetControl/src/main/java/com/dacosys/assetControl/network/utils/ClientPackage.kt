@@ -74,7 +74,13 @@ class ClientPackage {
                 }
             }
 
-            if (!allProductsArray.any()) {
+            // Comprobamos que el usuario tenga opciones para elegir o podemos configurar el sistema de forma automática.
+            val allMainApp =
+                allProductsArray.mapNotNull { if (it.getString("product_version_id") == Statics.APP_VERSION_ID.toString()) it else null }
+            val allSecondApp =
+                allProductsArray.mapNotNull { if (it.getString("product_version_id") == Statics.APP_VERSION_ID_IMAGECONTROL.toString()) it else null }
+
+            if (allMainApp.isEmpty() && allSecondApp.isEmpty()) {
                 MakeText.makeText(
                     parentView,
                     AssetControlApp.getContext()
@@ -84,55 +90,36 @@ class ClientPackage {
                 return
             }
 
-            if (allProductsArray.size == 1) {
-                val productVersionId = allProductsArray[0].getString("product_version_id")
-                if (productVersionId == Statics.APP_VERSION_ID.toString() || productVersionId == Statics.APP_VERSION_ID_IMAGECONTROL.toString()) {
+            if (allMainApp.isEmpty() || allMainApp.size == 1) {
+                // Disponible UNA o NINGUNA sola aplicación principal
+
+                if (allSecondApp.isEmpty() || allSecondApp.size == 1) {
+                    // Disponible UNA o NINGUNA aplicación secundaria (ImageControl)
+
+                    val apps = when {
+                        allMainApp.any() && allSecondApp.any() -> arrayListOf(allMainApp.first(), allSecondApp.first())
+                        allMainApp.any() -> arrayListOf(allMainApp.first())
+                        else -> arrayListOf(allSecondApp.first())
+                    }
+
                     setConfigPanel(
                         parentView = parentView,
                         callback = callback,
-                        packArray = arrayListOf(allProductsArray[0]),
+                        packArray = apps,
                         email = email,
                         password = password
                     )
                     return
-                } else {
-                    MakeText.makeText(
-                        parentView,
-                        AssetControlApp.getContext()
-                            .getString(R.string.there_are_no_valid_products_for_the_selected_client),
-                        SnackBarType.ERROR
-                    )
-                    return
                 }
             }
 
-            var validProducts = false
-            validProductsArray.clear()
-            val client = allProductsArray[0].getString("client")
+            // Unimos y ordenamos la lista para que los diferentes tipos de paquetes queden agrupados
+            validProductsArray =
+                ArrayList(allMainApp.union(allSecondApp).sortedBy { it.getString("product_version_id") })
             val listItems: ArrayList<String> = ArrayList()
 
-            // Ordenamos la lista para que los diferentes paquetes queden agrupados
-            for (pack in allProductsArray.sortedBy { it.getString("product_version_id") }) {
-                val productVersionId = pack.getString("product_version_id")
-
-                // AssetControl M13 o ImageControl M13
-                if (productVersionId == Statics.APP_VERSION_ID.toString() || productVersionId == Statics.APP_VERSION_ID_IMAGECONTROL.toString()) {
-                    validProducts = true
-                    val clientPackage = pack.getString("client_package_content_description")
-
-                    listItems.add(clientPackage)
-                    validProductsArray.add(pack)
-                }
-            }
-
-            if (!validProducts) {
-                MakeText.makeText(
-                    parentView,
-                    AssetControlApp.getContext()
-                        .getString(R.string.there_are_no_valid_products_for_the_selected_client),
-                    SnackBarType.ERROR
-                )
-                return
+            for (pack in validProductsArray) {
+                listItems.add(pack.getString("client_package_content_description"))
             }
 
             selected = BooleanArray(validProductsArray.size)
@@ -142,7 +129,9 @@ class ClientPackage {
 
             val title = TextView(activity)
             title.text = String.format(
-                "%s - %s", client, AssetControlApp.getContext().getString(R.string.select_package)
+                "%s - %s",
+                allProductsArray.first().getString("client"),
+                AssetControlApp.getContext().getString(R.string.select_package)
             )
             title.textSize = 16F
             title.gravity = Gravity.CENTER_HORIZONTAL
