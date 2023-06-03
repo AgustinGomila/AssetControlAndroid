@@ -35,12 +35,12 @@ class UTCDataTime {
             }
         }
 
-        private fun stringDateToDate(StrDate: String): Date? {
+        private fun stringDateToDate(strDate: String): Date? {
             var dateToReturn: Date? = null
             val dateFormat = SimpleDateFormat(dateFormat, Locale.US)
 
             try {
-                dateToReturn = dateFormat.parse(StrDate) as Date
+                dateToReturn = dateFormat.parse(strDate) as Date
             } catch (e: ParseException) {
                 e.printStackTrace()
             }

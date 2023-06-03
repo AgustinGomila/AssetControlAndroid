@@ -128,8 +128,7 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
     private fun loadBundleValues(b: Bundle) {
         // region Recuperar el título de la ventana
         val t1 = b.getString("title")
-        tempTitle =
-            if (t1 != null && t1.isNotEmpty()) t1 else getString(R.string.select_asset_review)
+        tempTitle = if (!t1.isNullOrEmpty()) t1 else getString(R.string.select_asset_review)
         // endregion
 
         // PANELS

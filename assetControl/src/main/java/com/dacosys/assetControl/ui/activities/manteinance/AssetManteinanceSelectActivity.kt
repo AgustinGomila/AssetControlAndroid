@@ -96,9 +96,7 @@ class AssetManteinanceSelectActivity : AppCompatActivity(),
         amantChecked = (b.getParcelableArrayList("amantChecked") ?: return)
 
         val t1 = b.getString("title")
-        if (t1 != null && t1.isNotEmpty()) {
-            tempTitle = t1
-        }
+        if (!t1.isNullOrEmpty()) tempTitle = t1
     }
 
     private fun loadDefaultValues() {
@@ -265,8 +263,8 @@ class AssetManteinanceSelectActivity : AppCompatActivity(),
             }
         }
 
-    private fun fillListView(_justRefresh: Boolean) {
-        if (_justRefresh && arrayAdapter != null) {
+    private fun fillListView(refresh: Boolean) {
+        if (refresh && arrayAdapter != null) {
             arrayAdapter?.listView = binding.assetManteinanceListView
 
             binding.assetManteinanceListView.adapter = arrayAdapter
@@ -304,6 +302,7 @@ class AssetManteinanceSelectActivity : AppCompatActivity(),
                     description,
                     onlyActive
                 )
+
                 else -> AssetManteinanceDbHelper().select(onlyActive)
             }
 

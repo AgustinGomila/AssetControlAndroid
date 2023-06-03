@@ -515,7 +515,7 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
 
     private fun refreshAdapterListeners() {
         // IMPORTANTE:
-        // Se deben actualizar los listeners, sino
+        // Se deben actualizar los listeners, si no
         // las variables de esta actividad pueden
         // tener valores antiguos en del adaptador.
 

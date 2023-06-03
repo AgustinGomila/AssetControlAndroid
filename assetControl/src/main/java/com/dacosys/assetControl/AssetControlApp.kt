@@ -3,8 +3,8 @@ package com.dacosys.assetControl
 import android.app.Application
 import android.content.Context
 import com.dacosys.assetControl.utils.Statics.Companion.AC_ROOT_PATH
+import com.dacosys.assetControl.utils.Statics.Companion.INTERNAL_IMAGE_CONTROL_APP_ID
 import com.dacosys.assetControl.utils.scanners.JotterListener
-import com.dacosys.imageControl.Statics
 import id.pahlevikun.jotter.Jotter
 import id.pahlevikun.jotter.event.ActivityEvent
 
@@ -17,7 +17,7 @@ class AssetControlApp : Application() {
         com.dacosys.imageControl.ImageControl().create(
             context = applicationContext,
             appRothPath = AC_ROOT_PATH,
-            id = com.dacosys.assetControl.utils.Statics.INTERNAL_IMAGE_CONTROL_APP_ID
+            id = INTERNAL_IMAGE_CONTROL_APP_ID
         )
 
         // Eventos del ciclo de vida de las actividades

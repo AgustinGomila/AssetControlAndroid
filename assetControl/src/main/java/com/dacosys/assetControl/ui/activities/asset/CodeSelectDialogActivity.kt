@@ -103,7 +103,7 @@ class CodeSelectDialogActivity : AppCompatActivity(),
             val extras = intent.extras
             if (extras != null) {
                 val t1 = extras.getString("title")
-                if (t1 != null && t1.isNotEmpty()) tempTitle = t1
+                if (!t1.isNullOrEmpty()) tempTitle = t1
 
                 // Controles de filtrado visibles
                 visibleStatusArray.clear()

@@ -10,7 +10,6 @@ import kotlinx.coroutines.*
 
 class GetLocationAsync {
     interface GetLocationAsyncListener {
-        // Define data you like to return from AysncTask
         fun onGetLocationProgress(
             msg: String,
             progressStatus: ProgressStatus,

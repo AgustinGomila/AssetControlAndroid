@@ -87,9 +87,7 @@ class TemplateSelectDialogActivity : AppCompatActivity(),
             val extras = intent.extras
             if (extras != null) {
                 val t1 = extras.getString("title")
-                if (t1 != null && t1.isNotEmpty()) {
-                    tempTitle = t1
-                }
+                if (!t1.isNullOrEmpty()) tempTitle = t1
 
                 if (extras.containsKey("onlyActive")) onlyActive = extras.getBoolean("onlyActive")
                 barcodeLabelCustom = extras.getParcelable("barcodeLabelCustom")
@@ -369,6 +367,7 @@ class TemplateSelectDialogActivity : AppCompatActivity(),
                 binding.autoCompleteTextView.isPopupShowing -> {
                     adjustAndShowDropDown()
                 }
+
                 else -> {
                     centerLayout()
                 }

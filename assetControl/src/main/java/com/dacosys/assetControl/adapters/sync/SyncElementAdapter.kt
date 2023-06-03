@@ -103,12 +103,10 @@ class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
     }
 
     interface DataSetChangedListener {
-        // Define data you like to return from AysncTask
         fun onDataSetChanged()
     }
 
     interface CheckedChangedListener {
-        // Define data you like to return from AysncTask
         fun onCheckedChanged(
             isChecked: Boolean,
             pos: Int,
@@ -263,38 +261,47 @@ class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
                 regId = SyncRegistryType.Asset.id.toString()
                 itemId = item.assetId.toString()
             }
+
             is ItemCategory -> {
                 regId = SyncRegistryType.ItemCategory.id.toString()
                 itemId = item.itemCategoryId.toString()
             }
+
             is Warehouse -> {
                 regId = SyncRegistryType.Warehouse.id.toString()
                 itemId = item.warehouseId.toString()
             }
+
             is WarehouseArea -> {
                 regId = SyncRegistryType.WarehouseArea.id.toString()
                 itemId = item.warehouseAreaId.toString()
             }
+
             is AssetManteinance -> {
                 regId = SyncRegistryType.AssetManteinance.id.toString()
                 itemId = item.collectorAssetManteinanceId.toString()
             }
+
             is DataCollection -> {
                 regId = SyncRegistryType.DataCollection.id.toString()
                 itemId = item.collectorDataCollectionId.toString()
             }
+
             is RouteProcess -> {
                 regId = SyncRegistryType.RouteProcess.id.toString()
                 itemId = item.collectorRouteProcessId.toString()
             }
+
             is WarehouseMovement -> {
                 regId = SyncRegistryType.WarehouseMovement.id.toString()
                 itemId = item.collectorWarehouseMovementId.toString()
             }
+
             is AssetReview -> {
                 regId = SyncRegistryType.AssetReview.id.toString()
                 itemId = item.collectorAssetReviewId.toString()
             }
+
             is Image -> {
                 regId = SyncRegistryType.Image.id.toString()
                 itemId = md5HashToInt(item.hash ?: getMd5(item.objectId1.toString())).toString()
@@ -535,6 +542,7 @@ class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
                     else -> getLayout(it)
                 }
             }
+
             else -> {
                 when (val it = getItem(pos)) {
                     null -> R.layout.null_row
@@ -858,12 +866,15 @@ class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
                 syncElement.assetCode.isNotEmpty() -> {
                     syncElement.assetCode
                 }
+
                 syncElement.warehouseStr.isNotEmpty() -> {
                     syncElement.warehouseStr
                 }
+
                 syncElement.warehouseAreaStr.isNotEmpty() -> {
                     syncElement.warehouseAreaStr
                 }
+
                 else -> {
                     ""
                 }
@@ -1684,9 +1695,11 @@ class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
                                     0 -> eanComp
                                     else -> serialComp
                                 }
+
                                 else -> codeComp
                             }
                         }
+
                         o1 is ItemCategory && o2 is ItemCategory -> {
                             val descComp = o1.description.compareTo(o2.description, true)
                             val parentIdComp = (o1.parentId ?: 0).compareTo((o2.parentId ?: 0))
@@ -1698,9 +1711,11 @@ class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
                                     0 -> descComp
                                     else -> parentComp
                                 }
+
                                 else -> parentIdComp
                             }
                         }
+
                         o1 is Warehouse && o2 is Warehouse -> {
                             val descComp = o1.description.compareTo(o2.description, true)
 
@@ -1710,6 +1725,7 @@ class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
                                 else -> idcomp
                             }
                         }
+
                         o1 is WarehouseArea && o2 is WarehouseArea -> {
                             val descComp = o1.description.compareTo(o2.description, true)
 
@@ -1719,6 +1735,7 @@ class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
                                 else -> parentIdComp
                             }
                         }
+
                         else -> {
                             0
                         }
@@ -1811,42 +1828,52 @@ class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
                 backColor = layoutAsset!!
                 foreColor = if (isSelected) selectedForeColor else assetForeColor
             }
+
             is ItemCategory -> {
                 backColor = layoutItemCategory!!
                 foreColor = if (isSelected) selectedForeColor else itemCategoryForeColor
             }
+
             is Warehouse -> {
                 backColor = layoutWarehouse!!
                 foreColor = if (isSelected) selectedForeColor else warehouseForeColor
             }
+
             is WarehouseArea -> {
                 backColor = layoutWarehouseArea!!
                 foreColor = if (isSelected) selectedForeColor else warehouseAreaForeColor
             }
+
             is AssetManteinance -> {
                 backColor = layoutAssetManteinance!!
                 foreColor = if (isSelected) selectedForeColor else assetMaintenanceForeColor
             }
+
             is DataCollection -> {
                 backColor = layoutDataCollection!!
                 foreColor = if (isSelected) selectedForeColor else dataCollectionForeColor
             }
+
             is RouteProcess -> {
                 backColor = layoutRouteProcess!!
                 foreColor = if (isSelected) selectedForeColor else routeProcessForeColor
             }
+
             is WarehouseMovement -> {
                 backColor = layoutWarehouseMovement!!
                 foreColor = if (isSelected) selectedForeColor else warehouseMovementForeColor
             }
+
             is AssetReview -> {
                 backColor = layoutAssetReview!!
                 foreColor = if (isSelected) selectedForeColor else assetReviewForeColor
             }
+
             is Image -> {
                 backColor = layoutImage!!
                 foreColor = if (isSelected) selectedForeColor else imageForeColor
             }
+
             else -> {
                 backColor = layoutDefault!!
                 foreColor = if (isSelected) selectedForeColor else defaultForeColor

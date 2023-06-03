@@ -12,7 +12,6 @@ import kotlinx.coroutines.*
 
 class GetAssetAsync {
     interface GetAssetAsyncListener {
-        // Define data you like to return from AysncTask
         fun onGetAssetProgress(
             msg: String,
             progressStatus: ProgressStatus,

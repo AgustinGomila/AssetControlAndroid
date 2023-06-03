@@ -32,7 +32,7 @@ import com.dacosys.assetControl.webservice.user.UserWarehouseAreaObject
 class UserWarehouseAreaDbHelper {
     fun insert(
         userId: Long,
-        warehouse_areaId: Long,
+        warehouseAreaid: Long,
         see: Boolean,
         count: Boolean,
         move: Boolean,
@@ -42,7 +42,7 @@ class UserWarehouseAreaDbHelper {
 
         val newUserWarehouseArea = UserWarehouseArea(
             userId,
-            warehouse_areaId,
+            warehouseAreaid,
             see,
             move,
             count,

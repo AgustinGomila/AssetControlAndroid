@@ -11,13 +11,10 @@ import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.databinding.WarehouseAreaCrudActivityBinding
+import com.dacosys.assetControl.model.common.CrudCompleted
+import com.dacosys.assetControl.model.common.CrudResult
+import com.dacosys.assetControl.model.common.CrudStatus.*
 import com.dacosys.assetControl.model.location.WarehouseArea
-import com.dacosys.assetControl.model.location.WarehouseAreaCRUD
-import com.dacosys.assetControl.model.location.WarehouseAreaCRUD.Companion.RC_ERROR_INSERT
-import com.dacosys.assetControl.model.location.WarehouseAreaCRUD.Companion.RC_ERROR_OBJECT_NULL
-import com.dacosys.assetControl.model.location.WarehouseAreaCRUD.Companion.RC_ERROR_UPDATE
-import com.dacosys.assetControl.model.location.WarehouseAreaCRUD.Companion.RC_INSERT_OK
-import com.dacosys.assetControl.model.location.WarehouseAreaCRUD.Companion.RC_UPDATE_OK
 import com.dacosys.assetControl.model.table.Table
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
@@ -39,7 +36,7 @@ import org.parceler.Parcels
 
 
 class WarehouseAreaCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
-    WarehouseAreaCRUD.Companion.TaskCompleted, Rfid.RfidDeviceListener,
+    CrudCompleted, Rfid.RfidDeviceListener,
     ImageControlButtonsFragment.DescriptionRequired {
     override fun onDestroy() {
         destroyLocals()
@@ -55,17 +52,18 @@ class WarehouseAreaCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
      * Interface que recibe los resultados del alta/modificación
      * del área
      */
-    override fun onTaskCompleted(result: WarehouseAreaCRUD.Companion.WarehouseAreaCRUDResult) {
+    override fun <T> onCompleted(result: CrudResult<T?>) {
         if (isDestroyed || isFinishing) return
 
-        when (result.resultCode) {
-            RC_UPDATE_OK -> {
+        val warehouseArea: WarehouseArea? = (result.itemResult as WarehouseArea?)
+        when (result.status) {
+            UPDATE_OK -> {
                 makeText(
                     binding.root,
                     getString(R.string.warehouse_area_modified_correctly),
                     SnackBarType.SUCCESS
                 )
-                if (imageControlFragment != null && result.warehouseArea != null) {
+                if (imageControlFragment != null && warehouseArea != null) {
                     imageControlFragment?.saveImages(true)
                 }
 
@@ -73,23 +71,22 @@ class WarehouseAreaCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
                     closeKeyboard(this)
 
                     val data = Intent()
-                    data.putExtra("warehouseArea", Parcels.wrap(result.warehouseArea))
+                    data.putExtra("warehouseArea", Parcels.wrap(warehouseArea))
                     setResult(RESULT_OK, data)
                     finish()
                 } else {
                     clearControl()
                 }
             }
-            RC_INSERT_OK -> {
+
+            INSERT_OK -> {
                 makeText(
                     binding.root,
                     getString(R.string.warehouse_area_added_correctly),
                     SnackBarType.SUCCESS
                 )
-                if (imageControlFragment != null && result.warehouseArea != null) {
-                    imageControlFragment?.updateObjectId1(
-                        (result.warehouseArea ?: return).warehouseAreaId
-                    )
+                if (imageControlFragment != null && warehouseArea != null) {
+                    imageControlFragment?.updateObjectId1(warehouseArea.warehouseAreaId)
                     imageControlFragment?.saveImages(false)
                 }
 
@@ -97,20 +94,23 @@ class WarehouseAreaCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
                     closeKeyboard(this)
 
                     val data = Intent()
-                    data.putExtra("warehouseArea", Parcels.wrap(result.warehouseArea))
+                    data.putExtra("warehouseArea", Parcels.wrap(warehouseArea))
                     setResult(RESULT_OK, data)
                     finish()
                 } else {
                     clearControl()
                 }
             }
-            RC_ERROR_OBJECT_NULL -> makeText(
+
+            ERROR_OBJECT_NULL -> makeText(
                 binding.root, getString(R.string.error_null_object), SnackBarType.ERROR
             )
-            RC_ERROR_UPDATE -> makeText(
+
+            ERROR_UPDATE -> makeText(
                 binding.root, getString(R.string.error_updating_warehouse_area), SnackBarType.ERROR
             )
-            RC_ERROR_INSERT -> makeText(
+
+            ERROR_INSERT -> makeText(
                 binding.root, getString(R.string.error_adding_warehouse_area), SnackBarType.ERROR
             )
         }
@@ -429,18 +429,22 @@ class WarehouseAreaCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
                 onBackPressed()
                 return true
             }
+
             R.id.action_rfid_connect -> {
                 JotterListener.rfidStart(this)
                 return super.onOptionsItemSelected(item)
             }
+
             R.id.action_trigger_scan -> {
                 JotterListener.trigger(this)
                 return super.onOptionsItemSelected(item)
             }
+
             R.id.action_read_barcode -> {
                 JotterListener.toggleCameraFloatingWindowVisibility(this)
                 return super.onOptionsItemSelected(item)
             }
+
             else -> {
                 return super.onOptionsItemSelected(item)
             }

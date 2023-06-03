@@ -176,7 +176,7 @@ class LocationSelectActivity : AppCompatActivity(),
 
         if (savedInstanceState != null) {
             val t1 = savedInstanceState.getString("title")
-            if (t1 != null && t1.isNotEmpty()) tempTitle = t1
+            if (!t1.isNullOrEmpty()) tempTitle = t1
 
             onlyActive = savedInstanceState.getBoolean("onlyActive")
             warehouseArray =
@@ -205,7 +205,7 @@ class LocationSelectActivity : AppCompatActivity(),
             val extras = intent.extras
             if (extras != null) {
                 val t1 = extras.getString("title")
-                if (t1 != null && t1.isNotEmpty()) tempTitle = t1
+                if (!t1.isNullOrEmpty()) tempTitle = t1
 
                 if (extras.containsKey("onlyActive")) onlyActive = extras.getBoolean("onlyActive")
                 val t2 = extras.getParcelable("warehouseArea") as WarehouseArea?
@@ -647,6 +647,7 @@ class LocationSelectActivity : AppCompatActivity(),
                 setResult(RESULT_OK, data)
                 finish()
             }
+
             else -> {
                 if (warehouse != null) {
                     val data = Intent()

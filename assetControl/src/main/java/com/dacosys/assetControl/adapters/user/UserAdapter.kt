@@ -20,10 +20,7 @@ import com.dacosys.assetControl.model.user.User
 
 class UserAdapter : ArrayAdapter<User> {
 
-    constructor(CheckedTextViewResourceId: Int) : super(
-        AssetControlApp.getContext(),
-        CheckedTextViewResourceId
-    )
+    constructor(resource: Int) : super(AssetControlApp.getContext(), resource)
 
     constructor(resource: Int, user: List<User>, spinner: Spinner?) : super(
         AssetControlApp.getContext(),

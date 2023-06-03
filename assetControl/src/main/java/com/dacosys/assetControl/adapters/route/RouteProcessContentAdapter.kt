@@ -78,12 +78,10 @@ class RouteProcessContentAdapter :
     }
 
     interface DataSetChangedListener {
-        // Define data you like to return from AysncTask
         fun onDataSetChanged()
     }
 
     interface CheckedChangedListener {
-        // Define data you like to return from AysncTask
         fun onCheckedChanged(
             isChecked: Boolean,
             pos: Int,
@@ -720,6 +718,7 @@ class RouteProcessContentAdapter :
                         foreColor = white
                         titleForeColor = lightgray
                     }
+
                     RouteProcessStatus.skipped.id -> {
                         backColor = layoutSkipped!!
                         foreColor = if (isSelected) {
@@ -733,11 +732,13 @@ class RouteProcessContentAdapter :
                             darkslategray
                         }
                     }
+
                     RouteProcessStatus.notProcessed.id -> {
                         backColor = layoutNotProcessed!!
                         foreColor = white
                         titleForeColor = lightgray
                     }
+
                     else -> {
                         backColor = layoutDefault!!
                         foreColor = if (isSelected) {

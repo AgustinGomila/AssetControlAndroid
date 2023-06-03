@@ -20,10 +20,7 @@ import com.dacosys.assetControl.model.asset.AssetStatus
 
 class AssetStatusAdapter : ArrayAdapter<AssetStatus> {
 
-    constructor(CheckedTextViewResourceId: Int) : super(
-        AssetControlApp.getContext(),
-        CheckedTextViewResourceId
-    )
+    constructor(resource: Int) : super(AssetControlApp.getContext(), resource)
 
     constructor(
         resource: Int,

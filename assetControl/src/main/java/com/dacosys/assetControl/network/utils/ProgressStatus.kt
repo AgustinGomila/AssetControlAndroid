@@ -10,9 +10,9 @@ class ProgressStatus : Parcelable {
     var id: Int = 0
     var description: String = ""
 
-    constructor(ProgressStatusId: Int, description: String) {
+    constructor(statusId: Int, description: String) {
         this.description = description
-        this.id = ProgressStatusId
+        this.id = statusId
     }
 
     override fun toString(): String {
@@ -125,8 +125,8 @@ class ProgressStatus : Parcelable {
             return getAllFinish().contains(getById(id))
         }
 
-        fun getById(ProgressStatusId: Int): ProgressStatus? {
-            return getAll().firstOrNull { it.id == ProgressStatusId }
+        fun getById(statusId: Int): ProgressStatus? {
+            return getAll().firstOrNull { it.id == statusId }
         }
     }
 }

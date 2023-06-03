@@ -101,12 +101,14 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
                 setProgressBarText(msg)
                 showImageProgressBar(true)
             }
+
             ProgressStatus.crashed.id, ProgressStatus.canceled.id -> {
                 showImageProgressBar(false)
                 makeText(this, msg, SnackBarType.ERROR)
 
                 fillPendingData()
             }
+
             ProgressStatus.success.id -> {
                 showImageProgressBar(false)
                 makeText(this, getString(R.string.upload_images_success), SnackBarType.SUCCESS)
@@ -149,6 +151,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
             ProgressStatus.bigStarting -> {
                 changeButtonsEnableState()
             }
+
             ProgressStatus.bigCrashed,
             ProgressStatus.bigFinished,
             ProgressStatus.canceled,
@@ -165,6 +168,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
                 syncing = false
                 checkConnection()
             }
+
             ProgressStatus.success,
             ProgressStatus.finished,
             ProgressStatus.starting,
@@ -289,8 +293,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
     private fun loadBundleValues(b: Bundle) {
         // region Recuperar el título de la ventana
         val t1 = b.getString("title")
-        tempTitle =
-            if (t1 != null && t1.isNotEmpty()) t1 else getString(R.string.select_asset_review)
+        tempTitle = if (!t1.isNullOrEmpty()) t1 else getString(R.string.select_asset_review)
         // endregion
 
         CURRENT_MODE = b.getInt("CURRENT_MODE")
@@ -562,6 +565,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
                     ) and 0x00ffffff
                 )
             }
+
             ProgressStatus.running -> {
                 "#" + Integer.toHexString(
                     ContextCompat.getColor(
@@ -569,6 +573,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
                     ) and 0x00ffffff
                 )
             }
+
             ProgressStatus.success -> {
                 "#" + Integer.toHexString(
                     ContextCompat.getColor(
@@ -576,6 +581,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
                     ) and 0x00ffffff
                 )
             }
+
             ProgressStatus.finished -> {
                 "#" + Integer.toHexString(
                     ContextCompat.getColor(
@@ -583,6 +589,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
                     ) and 0x00ffffff
                 )
             }
+
             else -> {
                 "#" + Integer.toHexString(
                     ContextCompat.getColor(
@@ -643,33 +650,41 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
             SyncRegistryType.User -> {
                 userStatus = message
             }
+
             SyncRegistryType.Asset -> {
                 assetStatus = message
             }
+
             SyncRegistryType.ItemCategory -> {
                 itemCategoryStatus = message
             }
+
             SyncRegistryType.Warehouse -> {
                 warehouseStatus = message
             }
+
             SyncRegistryType.WarehouseArea -> {
                 warehouseAreaStatus = message
             }
+
             SyncRegistryType.Attribute -> {
                 attributeStatus = message
                 if (progressStatus == ProgressStatus.success) {
                     attributeCompStatus = ""
                 }
             }
+
             SyncRegistryType.AttributeCategory -> {
                 attributeCategoryStatus = message
             }
+
             SyncRegistryType.Route -> {
                 routeStatus = message
                 if (progressStatus == ProgressStatus.success) {
                     routeCompStatus = ""
                 }
             }
+
             SyncRegistryType.DataCollectionRule -> {
                 dataCollectionRuleStatus = message
                 if (progressStatus == ProgressStatus.success) {
@@ -677,30 +692,39 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
                     dcrTargetStatus = ""
                 }
             }
+
             SyncRegistryType.BarcodeLabelCustom -> {
                 barcodeLabelCustomStatus = message
             }
+
             SyncRegistryType.AttributeComposition -> {
                 attributeCompStatus = message
             }
+
             SyncRegistryType.RouteComposition -> {
                 routeCompStatus = message
             }
+
             SyncRegistryType.DataCollectionRuleContent -> {
                 dcrContStatus = message
             }
+
             SyncRegistryType.DataCollectionRuleTarget -> {
                 dcrTargetStatus = message
             }
+
             SyncRegistryType.AssetReview -> {
                 assetReviewStatus = message
             }
+
             SyncRegistryType.RouteProcess -> {
                 routeProcessStatus = message
             }
+
             SyncRegistryType.WarehouseMovement -> {
                 warehouseMovementStatus = message
             }
+
             SyncRegistryType.DataCollection -> {
                 dataCollectionStatus = message
             }
@@ -796,6 +820,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
                 ProgressStatus.finished -> {
                     fillPendingData()
                 }
+
                 ProgressStatus.crashed, ProgressStatus.canceled -> {
                     runOnUiThread {
                         binding.uploadTextView.text = it.msg
@@ -851,6 +876,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
                 MODE_DOWNLOAD -> setDownloadText(concatDownloadText())
                 else -> setUploadText(concatUploadText())
             }
+
             else -> setUploadText(t)
         }
 
@@ -883,7 +909,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
                     )
                 } else {
                     // IMPORTANTE:
-                    // Se deben actualizar los listeners, sino
+                    // Se deben actualizar los listeners, si no
                     // las variables de esta actividad pueden
                     // tener valores antiguos en del adaptador.
 

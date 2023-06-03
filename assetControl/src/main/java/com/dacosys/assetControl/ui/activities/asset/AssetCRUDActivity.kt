@@ -18,13 +18,10 @@ import com.dacosys.assetControl.R
 import com.dacosys.assetControl.dataBase.asset.AssetDbHelper
 import com.dacosys.assetControl.databinding.AssetCrudActivityBinding
 import com.dacosys.assetControl.model.asset.Asset
-import com.dacosys.assetControl.model.asset.AssetCRUD
-import com.dacosys.assetControl.model.asset.AssetCRUD.Companion.RC_ERROR_INSERT
-import com.dacosys.assetControl.model.asset.AssetCRUD.Companion.RC_ERROR_OBJECT_NULL
-import com.dacosys.assetControl.model.asset.AssetCRUD.Companion.RC_ERROR_UPDATE
-import com.dacosys.assetControl.model.asset.AssetCRUD.Companion.RC_INSERT_OK
-import com.dacosys.assetControl.model.asset.AssetCRUD.Companion.RC_UPDATE_OK
 import com.dacosys.assetControl.model.asset.AssetStatus
+import com.dacosys.assetControl.model.common.CrudCompleted
+import com.dacosys.assetControl.model.common.CrudResult
+import com.dacosys.assetControl.model.common.CrudStatus.*
 import com.dacosys.assetControl.model.table.Table
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
@@ -48,7 +45,7 @@ import com.dacosys.imageControl.ui.fragments.ImageControlButtonsFragment
 import org.parceler.Parcels
 
 class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
-    AssetStatusSpinnerFragment.OnItemSelectedListener, AssetCRUD.Companion.TaskCompleted,
+    AssetStatusSpinnerFragment.OnItemSelectedListener, CrudCompleted,
     Rfid.RfidDeviceListener, ImageControlButtonsFragment.DescriptionRequired {
     override fun onDestroy() {
         destroyLocals()
@@ -64,15 +61,16 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
      * Interface que recibe los resultados del alta/modificación
      * del activo
      */
-    override fun onTaskCompleted(result: AssetCRUD.Companion.AssetCRUDResult) {
+    override fun <T> onCompleted(result: CrudResult<T?>) {
         if (isDestroyed || isFinishing) return
 
-        when (result.resultCode) {
-            RC_UPDATE_OK -> {
+        val asset: Asset? = (result.itemResult as Asset?)
+        when (result.status) {
+            UPDATE_OK -> {
                 makeText(
                     binding.root, getString(R.string.asset_modified_correctly), SnackBarType.SUCCESS
                 )
-                if (imageControlFragment != null && result.asset != null) {
+                if (imageControlFragment != null && asset != null) {
                     imageControlFragment?.saveImages(true)
                 }
 
@@ -80,21 +78,20 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
                     closeKeyboard(this)
 
                     val data = Intent()
-                    data.putExtra("asset", Parcels.wrap(result.asset))
+                    data.putExtra("asset", Parcels.wrap(asset))
                     setResult(RESULT_OK, data)
                     finish()
                 } else {
                     clearControl()
                 }
             }
-            RC_INSERT_OK -> {
+
+            INSERT_OK -> {
                 makeText(
                     binding.root, getString(R.string.asset_added_correctly), SnackBarType.SUCCESS
                 )
-                if (imageControlFragment != null && result.asset != null) {
-                    imageControlFragment?.updateObjectId1(
-                        (result.asset ?: return).assetId
-                    )
+                if (imageControlFragment != null && asset != null) {
+                    imageControlFragment?.updateObjectId1(asset.assetId)
                     imageControlFragment?.saveImages(false)
                 }
 
@@ -102,20 +99,23 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
                     closeKeyboard(this)
 
                     val data = Intent()
-                    data.putExtra("asset", Parcels.wrap(result.asset))
+                    data.putExtra("asset", Parcels.wrap(asset))
                     setResult(RESULT_OK, data)
                     finish()
                 } else {
                     clearControl()
                 }
             }
-            RC_ERROR_OBJECT_NULL -> makeText(
+
+            ERROR_OBJECT_NULL -> makeText(
                 binding.root, getString(R.string.error_null_object), SnackBarType.ERROR
             )
-            RC_ERROR_UPDATE -> makeText(
+
+            ERROR_UPDATE -> makeText(
                 binding.root, getString(R.string.error_updating_asset), SnackBarType.ERROR
             )
-            RC_ERROR_INSERT -> makeText(
+
+            ERROR_INSERT -> makeText(
                 binding.root, getString(R.string.error_adding_asset), SnackBarType.ERROR
             )
         }
@@ -604,18 +604,22 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
                 onBackPressed()
                 return true
             }
+
             R.id.action_rfid_connect -> {
                 JotterListener.rfidStart(this)
                 return super.onOptionsItemSelected(item)
             }
+
             R.id.action_trigger_scan -> {
                 JotterListener.trigger(this)
                 return super.onOptionsItemSelected(item)
             }
+
             R.id.action_read_barcode -> {
                 JotterListener.toggleCameraFloatingWindowVisibility(this)
                 return super.onOptionsItemSelected(item)
             }
+
             else -> {
                 return super.onOptionsItemSelected(item)
             }

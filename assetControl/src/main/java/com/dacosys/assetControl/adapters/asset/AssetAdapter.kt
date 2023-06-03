@@ -186,12 +186,10 @@ class AssetAdapter : ArrayAdapter<Asset>, Filterable {
     }
 
     interface DataSetChangedListener {
-        // Define data you like to return from AysncTask
         fun onDataSetChanged()
     }
 
     interface CheckedChangedListener {
-        // Define data you like to return from AysncTask
         fun onCheckedChanged(
             isChecked: Boolean,
             pos: Int,
@@ -1642,17 +1640,14 @@ class AssetAdapter : ArrayAdapter<Asset>, Filterable {
         }
 
         interface AlbumViewRequiredListener {
-            // Define data you like to return from AysncTask
             fun onAlbumViewRequired(tableId: Int, itemId: Long)
         }
 
         interface EditAssetRequiredListener {
-            // Define data you like to return from AysncTask
             fun onEditAssetRequired(tableId: Int, itemId: Long)
         }
 
         interface AddPhotoRequiredListener {
-            // Define data you like to return from AysncTask
             fun onAddPhotoRequired(tableId: Int, itemId: Long, description: String)
         }
     }

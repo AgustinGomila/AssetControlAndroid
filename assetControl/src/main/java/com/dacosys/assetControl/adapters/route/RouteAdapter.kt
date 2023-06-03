@@ -94,12 +94,10 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
     }
 
     interface DataSetChangedListener {
-        // Define data you like to return from AysncTask
         fun onDataSetChanged()
     }
 
     interface CheckedChangedListener {
-        // Define data you like to return from AysncTask
         fun onCheckedChanged(
             isChecked: Boolean,
             pos: Int,
@@ -691,16 +689,19 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
                             darkslategray
                         }
                     }
+
                     onProcess -> {
                         v.background = layoutOnProcess!!
                         foreColor = white
                         titleForeColor = lightgray
                     }
+
                     toSend -> {
                         v.background = layoutToSend!!
                         foreColor = if (isSelected) white else black
                         titleForeColor = lightgray
                     }
+
                     else -> {
                         v.setBackgroundColor(whitesmoke)
                         foreColor = if (isSelected) {
@@ -843,6 +844,7 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
                             holder.descriptionTextView?.setTextColor(dimgray)
 
                         }
+
                         else -> {
                             v.setBackgroundColor(whitesmoke)
                             holder.descriptionTextView?.setTextColor(black)
@@ -915,16 +917,19 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
                                 darkslategray
                             }
                         }
+
                         onProcess -> {
                             v.background = layoutOnProcess!!
                             foreColor = white
                             titleForeColor = lightgray
                         }
+
                         toSend -> {
                             v.background = layoutToSend!!
                             foreColor = if (isSelected) white else black
                             titleForeColor = lightgray
                         }
+
                         else -> {
                             v.setBackgroundColor(whitesmoke)
                             foreColor = if (isSelected) {

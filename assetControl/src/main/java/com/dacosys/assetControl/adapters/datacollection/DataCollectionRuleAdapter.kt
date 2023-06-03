@@ -52,7 +52,6 @@ class DataCollectionRuleAdapter : ArrayAdapter<DataCollectionRule> {
     }
 
     interface CustomCheckedChangeListener {
-        // Define data you like to return from AysncTask
         fun onCustomCheckedChangeListener(
             isChecked: Boolean,
             pos: Int,
@@ -299,6 +298,7 @@ class DataCollectionRuleAdapter : ArrayAdapter<DataCollectionRule> {
                             holder.descriptionTextView?.setTextColor(dimgray)
 
                         }
+
                         else -> {
                             v.setBackgroundColor(whitesmoke)
                             holder.descriptionTextView?.setTextColor(black)

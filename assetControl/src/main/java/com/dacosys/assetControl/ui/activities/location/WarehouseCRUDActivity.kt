@@ -10,13 +10,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.databinding.WarehouseCrudActivityBinding
+import com.dacosys.assetControl.model.common.CrudCompleted
+import com.dacosys.assetControl.model.common.CrudResult
+import com.dacosys.assetControl.model.common.CrudStatus.*
 import com.dacosys.assetControl.model.location.Warehouse
-import com.dacosys.assetControl.model.location.WarehouseCRUD
-import com.dacosys.assetControl.model.location.WarehouseCRUD.Companion.RC_ERROR_INSERT
-import com.dacosys.assetControl.model.location.WarehouseCRUD.Companion.RC_ERROR_OBJECT_NULL
-import com.dacosys.assetControl.model.location.WarehouseCRUD.Companion.RC_ERROR_UPDATE
-import com.dacosys.assetControl.model.location.WarehouseCRUD.Companion.RC_INSERT_OK
-import com.dacosys.assetControl.model.location.WarehouseCRUD.Companion.RC_UPDATE_OK
 import com.dacosys.assetControl.model.table.Table
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
@@ -31,7 +28,7 @@ import com.dacosys.imageControl.ui.fragments.ImageControlButtonsFragment
 import org.parceler.Parcels
 
 
-class WarehouseCRUDActivity : AppCompatActivity(), WarehouseCRUD.Companion.TaskCompleted,
+class WarehouseCRUDActivity : AppCompatActivity(), CrudCompleted,
     ImageControlButtonsFragment.DescriptionRequired {
     override fun onDestroy() {
         destroyLocals()
@@ -43,17 +40,18 @@ class WarehouseCRUDActivity : AppCompatActivity(), WarehouseCRUD.Companion.TaskC
         imageControlFragment = null
     }
 
-    override fun onTaskCompleted(result: WarehouseCRUD.Companion.WarehouseCRUDResult) {
+    override fun <T> onCompleted(result: CrudResult<T?>) {
         if (isDestroyed || isFinishing) return
 
-        when (result.resultCode) {
-            RC_UPDATE_OK -> {
+        val warehouse: Warehouse? = (result.itemResult as Warehouse?)
+        when (result.status) {
+            UPDATE_OK -> {
                 makeText(
                     binding.root,
                     getString(R.string.warehouse_modified_correctly),
                     SnackBarType.SUCCESS
                 )
-                if (imageControlFragment != null && result.warehouse != null) {
+                if (imageControlFragment != null && warehouse != null) {
                     imageControlFragment?.saveImages(true)
                 }
 
@@ -61,23 +59,22 @@ class WarehouseCRUDActivity : AppCompatActivity(), WarehouseCRUD.Companion.TaskC
                     closeKeyboard(this)
 
                     val data = Intent()
-                    data.putExtra("warehouse", Parcels.wrap(result.warehouse))
+                    data.putExtra("warehouse", Parcels.wrap(warehouse))
                     setResult(RESULT_OK, data)
                     finish()
                 } else {
                     clearControl()
                 }
             }
-            RC_INSERT_OK -> {
+
+            INSERT_OK -> {
                 makeText(
                     binding.root,
                     getString(R.string.warehouse_added_correctly),
                     SnackBarType.SUCCESS
                 )
-                if (imageControlFragment != null && result.warehouse != null) {
-                    imageControlFragment?.updateObjectId1(
-                        (result.warehouse ?: return).warehouseId
-                    )
+                if (imageControlFragment != null && warehouse != null) {
+                    imageControlFragment?.updateObjectId1(warehouse.warehouseId)
                     imageControlFragment?.saveImages(false)
                 }
 
@@ -85,20 +82,23 @@ class WarehouseCRUDActivity : AppCompatActivity(), WarehouseCRUD.Companion.TaskC
                     closeKeyboard(this)
 
                     val data = Intent()
-                    data.putExtra("warehouse", Parcels.wrap(result.warehouse))
+                    data.putExtra("warehouse", Parcels.wrap(warehouse))
                     setResult(RESULT_OK, data)
                     finish()
                 } else {
                     clearControl()
                 }
             }
-            RC_ERROR_OBJECT_NULL -> makeText(
+
+            ERROR_OBJECT_NULL -> makeText(
                 binding.root, getString(R.string.error_null_object), SnackBarType.ERROR
             )
-            RC_ERROR_UPDATE -> makeText(
+
+            ERROR_UPDATE -> makeText(
                 binding.root, getString(R.string.error_updating_warehouse), SnackBarType.ERROR
             )
-            RC_ERROR_INSERT -> makeText(
+
+            ERROR_INSERT -> makeText(
                 binding.root, getString(R.string.error_adding_warehouse), SnackBarType.ERROR
             )
         }
@@ -373,6 +373,7 @@ class WarehouseCRUDActivity : AppCompatActivity(), WarehouseCRUD.Companion.TaskC
                 onBackPressed()
                 true
             }
+
             else -> {
                 super.onOptionsItemSelected(item)
             }

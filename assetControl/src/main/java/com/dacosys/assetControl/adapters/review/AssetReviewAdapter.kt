@@ -77,12 +77,10 @@ class AssetReviewAdapter :
     }
 
     interface DataSetChangedListener {
-        // Define data you like to return from AysncTask
         fun onDataSetChanged()
     }
 
     interface CheckedChangedListener {
-        // Define data you like to return from AysncTask
         fun onCheckedChanged(
             isChecked: Boolean,
             pos: Int,
@@ -671,11 +669,13 @@ class AssetReviewAdapter :
                         foreColor = white
                         titleForeColor = lightgray
                     }
+
                     AssetReviewStatus.onProcess.id -> {
                         backColor = layoutOnProcess!!
                         foreColor = white
                         titleForeColor = lightgray
                     }
+
                     AssetReviewStatus.completed.id -> {
                         backColor = layoutCompleted!!
                         foreColor = if (isSelected) {
@@ -689,6 +689,7 @@ class AssetReviewAdapter :
                             darkslategray
                         }
                     }
+
                     else -> {
                         backColor = layoutDefault!!
                         foreColor = if (isSelected) {

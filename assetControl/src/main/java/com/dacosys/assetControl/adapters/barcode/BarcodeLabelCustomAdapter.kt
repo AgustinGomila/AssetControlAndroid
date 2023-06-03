@@ -33,12 +33,10 @@ class BarcodeLabelCustomAdapter(
     private var checkedIdArray: ArrayList<Long> = ArrayList()
 
     interface DataSetChangedListener {
-        // Define data you like to return from AysncTask
         fun onDataSetChanged()
     }
 
     interface CheckedChangedListener {
-        // Define data you like to return from AysncTask
         fun onCheckedChanged(
             isChecked: Boolean,
             pos: Int,
@@ -46,7 +44,6 @@ class BarcodeLabelCustomAdapter(
     }
 
     interface SelectedItemChangedListener {
-        // Define data you like to return from AysncTask
         fun onSelectedItemChanged(
             item: BarcodeLabelCustom?,
             pos: Int,
@@ -273,6 +270,7 @@ class BarcodeLabelCustomAdapter(
                         holder.descriptionTextView?.setTextColor(dimgray)
 
                     }
+
                     else -> {
                         v.setBackgroundColor(whitesmoke)
                         holder.descriptionTextView?.setTextColor(black)

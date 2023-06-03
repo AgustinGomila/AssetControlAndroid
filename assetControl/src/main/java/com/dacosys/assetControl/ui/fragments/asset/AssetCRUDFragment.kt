@@ -18,6 +18,7 @@ import com.dacosys.assetControl.dataBase.location.WarehouseDbHelper
 import com.dacosys.assetControl.databinding.AssetCrudFragmentBinding
 import com.dacosys.assetControl.model.asset.*
 import com.dacosys.assetControl.model.category.ItemCategory
+import com.dacosys.assetControl.model.common.CrudCompleted
 import com.dacosys.assetControl.model.location.WarehouseArea
 import com.dacosys.assetControl.model.user.User
 import com.dacosys.assetControl.model.user.permission.PermissionEntry
@@ -434,10 +435,8 @@ class AssetCRUDFragment : Fragment() {
         return true
     }
 
-    fun saveAsset(callback: AssetCRUD.Companion.TaskCompleted) {
-        if (!checkValidData()) {
-            return
-        }
+    fun saveAsset(callback: CrudCompleted) {
+        if (!checkValidData()) return
 
         // 1. El activo es NULL cuando se está agregando uno nuevo.
         // 2. Puede no ser NULL cuando proviene de escanear un código

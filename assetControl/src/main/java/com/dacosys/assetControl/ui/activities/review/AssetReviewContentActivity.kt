@@ -706,24 +706,24 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
                 assetId = arc.assetId,
                 code = arc.code,
                 description = arc.description,
-                warehouse_id = tempReview.warehouseId,
-                warehouse_area_id = tempReview.warehouseAreaId,
+                warehouseId = tempReview.warehouseId,
+                warehouseAreaId = tempReview.warehouseAreaId,
                 active = true,
-                ownership_status = OwnershipStatus.unknown.id,
+                ownershipStatus = OwnershipStatus.unknown.id,
                 status = AssetStatus.unknown.id,
-                missing_date = null,
-                item_category_id = 0,
+                missingDate = null,
+                itemCategoryId = 0,
                 transferred = false,
-                original_warehouse_id = 0,
-                original_warehouse_area_id = 0,
-                label_number = null,
+                originalWarehouseId = 0,
+                originalWarehouseAreaId = 0,
+                labelNumber = null,
                 manufacturer = "",
                 model = "",
-                serial_number = "",
+                serialNumber = "",
                 condition = AssetCondition.unknown.id,
-                parent_id = 0,
+                parentId = 0,
                 ean = "",
-                last_asset_review_date = null
+                lastAssetReviewDate = null
             )
         } else {
             tempAsset = Asset(tempAssetId, false)
@@ -1193,7 +1193,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private fun refreshAdapterListeners() {
         // IMPORTANTE:
-        // Se deben actualizar los listeners, sino
+        // Se deben actualizar los listeners, si no
         // las variables de esta actividad pueden
         // tener valores antiguos en del adaptador.
 

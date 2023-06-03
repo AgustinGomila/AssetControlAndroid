@@ -20,16 +20,13 @@ import com.dacosys.assetControl.model.manteinance.ManteinanceStatus
 
 class ManteinanceStatusAdapter : ArrayAdapter<ManteinanceStatus> {
 
-    constructor(CheckedTextViewResourceId: Int) : super(
-        AssetControlApp.getContext(),
-        CheckedTextViewResourceId
-    )
+    constructor(resource: Int) : super(AssetControlApp.getContext(), resource)
 
     constructor(
         resource: Int,
-        manteinanceStatus: List<ManteinanceStatus>,
+        statusList: List<ManteinanceStatus>,
         spinner: Spinner?,
-    ) : super(AssetControlApp.getContext(), resource, manteinanceStatus) {
+    ) : super(AssetControlApp.getContext(), resource, statusList) {
         this.spinner = spinner
         this.resource = resource
     }

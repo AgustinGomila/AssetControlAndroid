@@ -16,7 +16,6 @@ import org.json.JSONObject
 
 class ConfigHelper {
     interface TaskConfigEnded {
-        // Define data you like to return from AysncTask
         fun onTaskConfigEnded(result: Boolean, msg: String)
     }
 

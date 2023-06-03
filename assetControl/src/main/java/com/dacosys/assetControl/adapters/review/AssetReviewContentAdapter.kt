@@ -158,12 +158,10 @@ class AssetReviewContentAdapter :
     }
 
     interface DataSetChangedListener {
-        // Define data you like to return from AysncTask
         fun onDataSetChanged()
     }
 
     interface CheckedChangedListener {
-        // Define data you like to return from AysncTask
         fun onCheckedChanged(
             isChecked: Boolean,
             pos: Int,
@@ -1112,18 +1110,22 @@ class AssetReviewContentAdapter :
                         backColor = layoutRevised!!
                         foreColor = white
                     }
+
                     AssetReviewContentStatus.appeared -> {
                         backColor = layoutAppeared!!
                         foreColor = white
                     }
+
                     AssetReviewContentStatus.external -> {
                         backColor = layoutExternal!!
                         foreColor = white
                     }
+
                     AssetReviewContentStatus.notInReview -> {
                         backColor = layoutNotInReview!!
                         foreColor = white
                     }
+
                     AssetReviewContentStatus.newAsset -> {
                         backColor = layoutNew!!
                         foreColor = if (isSelected) {
@@ -1132,6 +1134,7 @@ class AssetReviewContentAdapter :
                             black
                         }
                     }
+
                     else -> {
                         backColor = layoutDefault!!
                         foreColor = if (isSelected) {
@@ -1359,18 +1362,22 @@ class AssetReviewContentAdapter :
                         backColor = layoutRevised!!
                         foreColor = white
                     }
+
                     AssetReviewContentStatus.appeared -> {
                         backColor = layoutAppeared!!
                         foreColor = white
                     }
+
                     AssetReviewContentStatus.external -> {
                         backColor = layoutExternal!!
                         foreColor = white
                     }
+
                     AssetReviewContentStatus.notInReview -> {
                         backColor = layoutNotInReview!!
                         foreColor = white
                     }
+
                     AssetReviewContentStatus.newAsset -> {
                         backColor = layoutNew!!
                         foreColor = if (isSelected) {
@@ -1379,6 +1386,7 @@ class AssetReviewContentAdapter :
                             black
                         }
                     }
+
                     else -> {
                         backColor = layoutDefault!!
                         foreColor = if (isSelected) {
@@ -1646,8 +1654,10 @@ class AssetReviewContentAdapter :
                             0 -> fourthField
                             else -> thirdField
                         }
+
                         else -> secondField
                     }
+
                     else -> firstField
                 }
             }

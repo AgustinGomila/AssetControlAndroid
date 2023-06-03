@@ -20,10 +20,7 @@ import com.dacosys.assetControl.model.manteinance.ManteinanceType
 
 class ManteinanceTypeAdapter : ArrayAdapter<ManteinanceType> {
 
-    constructor(CheckedTextViewResourceId: Int) : super(
-        AssetControlApp.getContext(),
-        CheckedTextViewResourceId
-    )
+    constructor(resource: Int) : super(AssetControlApp.getContext(), resource)
 
     constructor(
         resource: Int,

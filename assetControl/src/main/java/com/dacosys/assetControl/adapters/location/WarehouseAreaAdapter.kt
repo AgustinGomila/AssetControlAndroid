@@ -83,12 +83,10 @@ class WarehouseAreaAdapter : ArrayAdapter<WarehouseArea>, Filterable {
     }
 
     interface DataSetChangedListener {
-        // Define data you like to return from AysncTask
         fun onDataSetChanged()
     }
 
     interface CheckedChangedListener {
-        // Define data you like to return from AysncTask
         fun onCheckedChanged(
             isChecked: Boolean,
             pos: Int,
@@ -577,6 +575,7 @@ class WarehouseAreaAdapter : ArrayAdapter<WarehouseArea>, Filterable {
                             darkslategray
                         }
                     }
+
                     else -> {
                         v.setBackgroundColor(whitesmoke)
                         foreColor = if (isSelected) {

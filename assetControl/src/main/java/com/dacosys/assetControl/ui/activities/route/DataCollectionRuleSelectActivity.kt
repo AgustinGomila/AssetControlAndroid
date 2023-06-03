@@ -79,8 +79,7 @@ class DataCollectionRuleSelectActivity : AppCompatActivity() {
     private fun loadBundleValues(b: Bundle) {
         // region Recuperar el título de la ventana
         val t1 = b.getString("title")
-        tempTitle =
-            if (t1 != null && t1.isNotEmpty()) t1 else getString(R.string.select_rule)
+        tempTitle = if (!t1.isNullOrEmpty()) t1 else getString(R.string.select_rule)
         // endregion
 
         binding.onlyActiveSwitch.isChecked = b.getBoolean("onlyActive")
@@ -132,11 +131,13 @@ class DataCollectionRuleSelectActivity : AppCompatActivity() {
                 (warehouseArea ?: return).description,
                 SnackBarType.INFO
             )
+
             itemCategory != null -> makeText(
                 binding.root,
                 (itemCategory ?: return).description,
                 SnackBarType.INFO
             )
+
             asset != null -> makeText(
                 binding.root,
                 (asset ?: return).description,
@@ -248,16 +249,19 @@ class DataCollectionRuleSelectActivity : AppCompatActivity() {
                         desc,
                         binding.onlyActiveSwitch.isChecked
                     )
+
                     warehouseArea != null -> DataCollectionRuleDbHelper().selectByTargetWarehouseAreaIdDescription(
                         (warehouseArea ?: return).warehouseAreaId,
                         desc,
                         binding.onlyActiveSwitch.isChecked
                     )
+
                     itemCategory != null -> DataCollectionRuleDbHelper().selectByTargetItemCategoryIdDescription(
                         (itemCategory ?: return).itemCategoryId,
                         desc,
                         binding.onlyActiveSwitch.isChecked
                     )
+
                     else -> DataCollectionRuleDbHelper().selectByDescription(desc)
                 }
 
@@ -313,6 +317,7 @@ class DataCollectionRuleSelectActivity : AppCompatActivity() {
                 onBackPressed()
                 true
             }
+
             else -> {
                 super.onOptionsItemSelected(item)
             }

@@ -61,7 +61,6 @@ class AssetManteinanceAdapter : ArrayAdapter<AssetManteinance> {
     }
 
     interface CustomCheckedChangeListener {
-        // Define data you like to return from AysncTask
         fun onCustomCheckedChangeListener(
             isChecked: Boolean,
             pos: Int,
@@ -360,10 +359,12 @@ class AssetManteinanceAdapter : ArrayAdapter<AssetManteinance> {
                             backColor = firebrick
                             foreColor = white
                         }
+
                         ManteinanceStatus.income.id -> {
                             backColor = seagreen
                             foreColor = white
                         }
+
                         ManteinanceStatus.underDiagnosis.id -> {
                             backColor = gold
                             foreColor = if (isSelected) {
@@ -372,6 +373,7 @@ class AssetManteinanceAdapter : ArrayAdapter<AssetManteinance> {
                                 black
                             }
                         }
+
                         ManteinanceStatus.diagnosed.id -> {
                             backColor = lightblue
                             foreColor = if (isSelected) {
@@ -380,6 +382,7 @@ class AssetManteinanceAdapter : ArrayAdapter<AssetManteinance> {
                                 black
                             }
                         }
+
                         ManteinanceStatus.cost.id -> {
                             backColor = darkseagreen
                             foreColor = if (isSelected) {
@@ -388,22 +391,27 @@ class AssetManteinanceAdapter : ArrayAdapter<AssetManteinance> {
                                 black
                             }
                         }
+
                         ManteinanceStatus.approvedCost.id -> {
                             backColor = darkslategray
                             foreColor = white
                         }
+
                         ManteinanceStatus.underRepair.id -> {
                             backColor = darkred
                             foreColor = white
                         }
+
                         ManteinanceStatus.repaired.id -> {
                             backColor = dodgerblue
                             foreColor = white
                         }
+
                         ManteinanceStatus.finished.id -> {
                             backColor = darkcyan
                             foreColor = white
                         }
+
                         ManteinanceStatus.repairImposible.id -> {
                             backColor = crimson
                             foreColor = white

@@ -11,12 +11,9 @@ import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.databinding.ItemCategoryCrudActivityBinding
 import com.dacosys.assetControl.model.category.ItemCategory
-import com.dacosys.assetControl.model.category.ItemCategoryCRUD
-import com.dacosys.assetControl.model.category.ItemCategoryCRUD.Companion.RC_ERROR_INSERT
-import com.dacosys.assetControl.model.category.ItemCategoryCRUD.Companion.RC_ERROR_OBJECT_NULL
-import com.dacosys.assetControl.model.category.ItemCategoryCRUD.Companion.RC_ERROR_UPDATE
-import com.dacosys.assetControl.model.category.ItemCategoryCRUD.Companion.RC_INSERT_OK
-import com.dacosys.assetControl.model.category.ItemCategoryCRUD.Companion.RC_UPDATE_OK
+import com.dacosys.assetControl.model.common.CrudCompleted
+import com.dacosys.assetControl.model.common.CrudResult
+import com.dacosys.assetControl.model.common.CrudStatus.*
 import com.dacosys.assetControl.model.table.Table
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
@@ -31,7 +28,7 @@ import com.dacosys.assetControl.utils.settings.Preference
 import com.dacosys.imageControl.ui.fragments.ImageControlButtonsFragment
 import org.parceler.Parcels
 
-class ItemCategoryCRUDActivity : AppCompatActivity(), ItemCategoryCRUD.Companion.TaskCompleted,
+class ItemCategoryCRUDActivity : AppCompatActivity(), CrudCompleted,
     ImageControlButtonsFragment.DescriptionRequired {
     override fun onDestroy() {
         destroyLocals()
@@ -47,17 +44,18 @@ class ItemCategoryCRUDActivity : AppCompatActivity(), ItemCategoryCRUD.Companion
      * Interface que recibe los resultados del alta/modificación
      * de la categoría
      */
-    override fun onTaskCompleted(result: ItemCategoryCRUD.Companion.ItemCategoryCRUDResult) {
+    override fun <T> onCompleted(result: CrudResult<T?>) {
         if (isDestroyed || isFinishing) return
 
-        when (result.resultCode) {
-            RC_UPDATE_OK -> {
+        val itemCategory: ItemCategory? = (result.itemResult as ItemCategory?)
+        when (result.status) {
+            UPDATE_OK -> {
                 makeText(
                     binding.root,
                     getString(R.string.category_modified_correctly),
                     SnackBarType.SUCCESS
                 )
-                if (imageControlFragment != null && result.itemCategory != null) {
+                if (imageControlFragment != null && itemCategory != null) {
                     imageControlFragment?.saveImages(true)
                 }
 
@@ -65,19 +63,20 @@ class ItemCategoryCRUDActivity : AppCompatActivity(), ItemCategoryCRUD.Companion
                     closeKeyboard(this)
 
                     val data = Intent()
-                    data.putExtra("itemCategory", Parcels.wrap(result.itemCategory))
+                    data.putExtra("itemCategory", Parcels.wrap(itemCategory))
                     setResult(RESULT_OK, data)
                     finish()
                 } else {
                     clearControl()
                 }
             }
-            RC_INSERT_OK -> {
+
+            INSERT_OK -> {
                 makeText(
                     binding.root, getString(R.string.category_added_correctly), SnackBarType.SUCCESS
                 )
-                if (imageControlFragment != null && result.itemCategory != null) {
-                    imageControlFragment?.updateObjectId1(result.itemCategory!!.itemCategoryId)
+                if (imageControlFragment != null && itemCategory != null) {
+                    imageControlFragment?.updateObjectId1(itemCategory.itemCategoryId)
                     imageControlFragment?.saveImages(false)
                 }
 
@@ -85,20 +84,23 @@ class ItemCategoryCRUDActivity : AppCompatActivity(), ItemCategoryCRUD.Companion
                     closeKeyboard(this)
 
                     val data = Intent()
-                    data.putExtra("itemCategory", Parcels.wrap(result.itemCategory))
+                    data.putExtra("itemCategory", Parcels.wrap(itemCategory))
                     setResult(RESULT_OK, data)
                     finish()
                 } else {
                     clearControl()
                 }
             }
-            RC_ERROR_OBJECT_NULL -> makeText(
+
+            ERROR_OBJECT_NULL -> makeText(
                 binding.root, getString(R.string.error_null_object), SnackBarType.ERROR
             )
-            RC_ERROR_UPDATE -> makeText(
+
+            ERROR_UPDATE -> makeText(
                 binding.root, getString(R.string.error_updating_category), SnackBarType.ERROR
             )
-            RC_ERROR_INSERT -> makeText(
+
+            ERROR_INSERT -> makeText(
                 binding.root, getString(R.string.error_adding_category), SnackBarType.ERROR
             )
         }
@@ -144,7 +146,7 @@ class ItemCategoryCRUDActivity : AppCompatActivity(), ItemCategoryCRUD.Companion
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         // Permitir escanear códigos dentro de la actividad
-        // Si ya está cargado un categoría preguntar si descartar cambios
+        // Si ya está cargado una categoría preguntar si descartar cambios
 
         title = getString(R.string.edit_category)
 
@@ -374,6 +376,7 @@ class ItemCategoryCRUDActivity : AppCompatActivity(), ItemCategoryCRUD.Companion
                 onBackPressed()
                 true
             }
+
             else -> {
                 super.onOptionsItemSelected(item)
             }

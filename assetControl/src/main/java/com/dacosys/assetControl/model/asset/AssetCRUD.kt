@@ -1,6 +1,9 @@
 package com.dacosys.assetControl.model.asset
 
 import com.dacosys.assetControl.dataBase.asset.AssetDbHelper
+import com.dacosys.assetControl.model.common.CrudCompleted
+import com.dacosys.assetControl.model.common.CrudResult
+import com.dacosys.assetControl.model.common.CrudStatus.*
 import com.dacosys.assetControl.network.sync.SyncRegistryType
 import com.dacosys.assetControl.network.sync.SyncUpload
 import com.dacosys.assetControl.network.utils.Connection.Companion.autoSend
@@ -12,32 +15,14 @@ import kotlinx.coroutines.*
  * Create, Read, Update and Delete
  */
 class AssetCRUD {
-    companion object {
-        class AssetCRUDResult(var resultCode: Int, var asset: Asset?)
-
-        /**
-         * Interface que recibirá el resultado de las tareas asincrónicas
-         */
-        interface TaskCompleted {
-            // Define data you like to return from AysncTask
-            fun onTaskCompleted(result: AssetCRUDResult)
-        }
-
-        const val RC_UPDATE_OK = 1001
-        const val RC_ERROR_UPDATE = 2001
-        const val RC_ERROR_OBJECT_NULL = 3001
-        const val RC_INSERT_OK = 4001
-        const val RC_ERROR_INSERT = 5001
-    }
-
     class AssetAdd {
-        var mCallback: TaskCompleted? = null
+        var mCallback: CrudCompleted? = null
         private var assetObject: AssetObject? = null
-        private var assetCRUDResult = AssetCRUDResult(RC_ERROR_INSERT, null)
+        private var crudResult = CrudResult<Asset?>(ERROR_INSERT, null)
 
-        fun addParams(callback: TaskCompleted, AssetObject: AssetObject) {
+        fun addParams(callback: CrudCompleted, assetObject: AssetObject) {
             // list all the parameters like in normal class define
-            this.assetObject = AssetObject
+            this.assetObject = assetObject
             this.mCallback = callback
         }
 
@@ -54,25 +39,25 @@ class AssetCRUD {
         private suspend fun doInBackground() {
             coroutineScope {
                 suspendFunction()
-                mCallback?.onTaskCompleted(assetCRUDResult)
+                mCallback?.onCompleted(crudResult)
             }
         }
 
         private suspend fun suspendFunction() = withContext(Dispatchers.IO) {
             if (assetObject != null) {
                 val aObj = assetObject!!
-                if (addAsset(aObj).resultCode == RC_INSERT_OK) {
+                if (addAsset(aObj).status == INSERT_OK) {
                     if (autoSend()) {
                         SyncUpload(SyncRegistryType.Asset)
                     }
                 } else {
-                    assetCRUDResult.resultCode = RC_ERROR_INSERT
-                    assetCRUDResult.asset = null
+                    crudResult.status = ERROR_INSERT
+                    crudResult.itemResult = null
                 }
             }
         }
 
-        private fun addAsset(aObj: AssetObject): AssetCRUDResult {
+        private fun addAsset(aObj: AssetObject): CrudResult<Asset?> {
             var description = aObj.description
             if (aObj.description.length > 255) {
                 description = aObj.description.substring(0, 255)
@@ -104,46 +89,46 @@ class AssetCRUD {
                     assetId = newId,
                     code = code,
                     description = description,
-                    warehouse_id = aObj.warehouse_id,
-                    warehouse_area_id = aObj.warehouse_area_id,
+                    warehouseId = aObj.warehouse_id,
+                    warehouseAreaId = aObj.warehouse_area_id,
                     active = aObj.active == 1,
-                    ownership_status = aObj.ownership_status,
+                    ownershipStatus = aObj.ownership_status,
                     status = aObj.status,
-                    missing_date = null,
-                    item_category_id = aObj.item_category_id,
+                    missingDate = null,
+                    itemCategoryId = aObj.item_category_id,
                     transferred = false,
-                    original_warehouse_id = aObj.original_warehouse_id,
-                    original_warehouse_area_id = aObj.original_warehouse_area_id,
-                    label_number = null,
+                    originalWarehouseId = aObj.original_warehouse_id,
+                    originalWarehouseAreaId = aObj.original_warehouse_area_id,
+                    labelNumber = null,
                     manufacturer = aObj.manufacturer,
                     model = aObj.model,
-                    serial_number = serialNumber,
+                    serialNumber = serialNumber,
                     condition = aObj.condition,
-                    parent_id = aObj.parent_id,
+                    parentId = aObj.parent_id,
                     ean = ean,
-                    last_asset_review_date = tempLastAssetReviewDate
+                    lastAssetReviewDate = tempLastAssetReviewDate
                 )
             ) {
                 val a = Asset(aObj)
                 a.assetId = newId
 
-                assetCRUDResult.resultCode = RC_INSERT_OK
-                assetCRUDResult.asset = a
+                crudResult.status = INSERT_OK
+                crudResult.itemResult = a
             } else {
-                assetCRUDResult.resultCode = RC_ERROR_INSERT
-                assetCRUDResult.asset = null
+                crudResult.status = ERROR_INSERT
+                crudResult.itemResult = null
             }
 
-            return assetCRUDResult
+            return crudResult
         }
     }
 
     class AssetUpdate {
-        var mCallback: TaskCompleted? = null
+        var mCallback: CrudCompleted? = null
         private var assetObject: AssetCollectorObject? = null
-        private var assetCRUDResult = AssetCRUDResult(RC_ERROR_UPDATE, null)
+        private var crudResult = CrudResult<Asset?>(ERROR_UPDATE, null)
 
-        fun addParams(callback: TaskCompleted, assetObject: AssetCollectorObject) {
+        fun addParams(callback: CrudCompleted, assetObject: AssetCollectorObject) {
             // list all the parameters like in normal class define
             this.assetObject = assetObject
             this.mCallback = callback
@@ -162,34 +147,34 @@ class AssetCRUD {
         private suspend fun doInBackground() {
             coroutineScope {
                 suspendFunction()
-                mCallback?.onTaskCompleted(assetCRUDResult)
+                mCallback?.onCompleted(crudResult)
             }
         }
 
         private suspend fun suspendFunction() = withContext(Dispatchers.IO) {
             if (assetObject != null) {
                 val aObj = assetObject!!
-                if (updateAsset(aObj).resultCode == RC_UPDATE_OK) {
+                if (updateAsset(aObj).status == UPDATE_OK) {
                     if (autoSend()) {
                         SyncUpload(SyncRegistryType.Asset)
                     }
                 }
             } else {
-                assetCRUDResult.resultCode = RC_ERROR_OBJECT_NULL
-                assetCRUDResult.asset = null
+                crudResult.status = ERROR_OBJECT_NULL
+                crudResult.itemResult = null
             }
         }
 
-        private fun updateAsset(aObj: AssetCollectorObject): AssetCRUDResult {
+        private fun updateAsset(aObj: AssetCollectorObject): CrudResult<Asset?> {
             if (AssetDbHelper().update(aObj)) {
-                assetCRUDResult.resultCode = RC_UPDATE_OK
-                assetCRUDResult.asset = Asset(aObj)
+                crudResult.status = UPDATE_OK
+                crudResult.itemResult = Asset(aObj)
             } else {
-                assetCRUDResult.resultCode = RC_ERROR_UPDATE
-                assetCRUDResult.asset = null
+                crudResult.status = ERROR_UPDATE
+                crudResult.itemResult = null
             }
 
-            return assetCRUDResult
+            return crudResult
         }
     }
 }

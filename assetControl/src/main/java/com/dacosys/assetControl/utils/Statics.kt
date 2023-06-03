@@ -54,8 +54,13 @@ class Statics {
 
         private var IMAGE_CONTROL_DATABASE_NAME = "imagecontrol.sqlite"
 
-        const val APP_VERSION_ID: Int = 12
-        const val APP_VERSION_ID_IMAGECONTROL = 13
+        // Estos números se corresponden con package_id https://manager.dacosys.com/package/index
+        const val APP_VERSION_ID: Int = 12 // AssetControl Milestone13
+        const val APP_VERSION_ID_IMAGECONTROL = 13 // ImageControl Milestone13
+
+        // Este es el valor de program_id (Ver archivo Program.cs en el proyecto Identification)
+        // Lo utiliza internamente ImageControl para identificar la aplicación que lo está usando.
+        // Ver: https://source.cloud.google.com/assetcontrol/libs_windows/+/master:Collector/Identification/Program.cs
         const val INTERNAL_IMAGE_CONTROL_APP_ID: Int = 1
 
         const val reservedChar = "#"

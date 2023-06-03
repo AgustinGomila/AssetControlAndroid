@@ -95,48 +95,48 @@ class Asset : Parcelable {
         assetId: Long,
         code: String,
         description: String,
-        warehouse_id: Long,
-        warehouse_area_id: Long,
+        warehouseId: Long,
+        warehouseAreaId: Long,
         active: Boolean,
-        ownership_status: Int,
+        ownershipStatus: Int,
         status: Int,
-        missing_date: String?,
-        item_category_id: Long,
+        missingDate: String?,
+        itemCategoryId: Long,
         transferred: Boolean,
-        original_warehouse_id: Long,
-        original_warehouse_area_id: Long,
-        label_number: Int?,
+        originalWarehouseId: Long,
+        originalWarehouseAreaId: Long,
+        labelNumber: Int?,
         manufacturer: String?,
         model: String?,
-        serial_number: String?,
+        serialNumber: String?,
         condition: Int,
-        //cost_centre_id: Long,
-        parent_id: Long,
+        //costCentreId: Long,
+        parentId: Long,
         ean: String?,
-        last_asset_review_date: String?,
+        lastAssetReviewDate: String?,
     ) {
         this.assetId = assetId
         this.code = code
         this.description = description
-        this.warehouseId = warehouse_id
-        this.warehouseAreaId = warehouse_area_id
+        this.warehouseId = warehouseId
+        this.warehouseAreaId = warehouseAreaId
         this.active = active
-        this.ownershipStatusId = ownership_status
+        this.ownershipStatusId = ownershipStatus
         this.assetStatusId = status
-        this.missingDate = missing_date
-        this.itemCategoryId = item_category_id
+        this.missingDate = missingDate
+        this.itemCategoryId = itemCategoryId
         this.transferred = transferred
-        this.originalWarehouseId = original_warehouse_id
-        this.originalWarehouseAreaId = original_warehouse_area_id
-        this.labelNumber = label_number
+        this.originalWarehouseId = originalWarehouseId
+        this.originalWarehouseAreaId = originalWarehouseAreaId
+        this.labelNumber = labelNumber
         this.manufacturer = manufacturer
         this.model = model
-        this.serialNumber = serial_number
+        this.serialNumber = serialNumber
         this.assetConditionId = condition
-        //this.costCentreId = cost_centre_id
-        this.parentAssetId = parent_id
+        //this.costCentreId = costCentreId
+        this.parentAssetId = parentId
         this.ean = ean
-        this.lastAssetReviewDate = last_asset_review_date
+        this.lastAssetReviewDate = lastAssetReviewDate
 
         dataRead = true
     }
@@ -755,33 +755,33 @@ class Asset : Parcelable {
             assetId: Long,
             code: String,
             description: String,
-            warehouse_id: Long,
-            warehouse_area_id: Long,
+            warehouseId: Long,
+            warehouseAreaId: Long,
             active: Boolean,
-            ownership_status: Int,
+            ownershipStatus: Int,
             status: Int,
-            missing_date: String?,
-            item_category_id: Long,
+            missingDate: String?,
+            itemCategoryId: Long,
             transferred: Boolean,
-            original_warehouse_id: Long,
-            original_warehouse_area_id: Long,
-            label_number: Int?,
+            originalWarehouseId: Long,
+            originalWarehouseAreaId: Long,
+            labelNumber: Int?,
             manufacturer: String?,
             model: String?,
-            serial_number: String?,
+            serialNumber: String?,
             condition: Int,
-            //cost_centre_id: Long,
-            parent_id: Long,
+            //costCentreId: Long,
+            parentId: Long,
             ean: String,
-            last_asset_review_date: String?,
+            lastAssetReviewDate: String?,
         ): Asset? {
             // Campos obligatorios
             if (description.isEmpty() ||
-                item_category_id < 1 ||
-                warehouse_id < 1 ||
-                warehouse_area_id < 1 ||
-                original_warehouse_id < 1 ||
-                original_warehouse_area_id < 1
+                itemCategoryId < 1 ||
+                warehouseId < 1 ||
+                warehouseAreaId < 1 ||
+                originalWarehouseId < 1 ||
+                originalWarehouseAreaId < 1
             ) {
                 return null
             }
@@ -791,25 +791,25 @@ class Asset : Parcelable {
                 assetId = assetId,
                 code = code,
                 description = description,
-                warehouse_id = warehouse_id,
-                warehouse_area_id = warehouse_area_id,
+                warehouseId = warehouseId,
+                warehouseAreaId = warehouseAreaId,
                 active = active,
-                ownership_status = ownership_status,
+                ownershipStatus = ownershipStatus,
                 status = status,
-                missing_date = missing_date,
-                item_category_id = item_category_id,
+                missingDate = missingDate,
+                itemCategoryId = itemCategoryId,
                 transferred = transferred,
-                original_warehouse_id = original_warehouse_id,
-                original_warehouse_area_id = original_warehouse_area_id,
-                label_number = label_number,
+                originalWarehouseId = originalWarehouseId,
+                originalWarehouseAreaId = originalWarehouseAreaId,
+                labelNumber = labelNumber,
                 manufacturer = manufacturer,
                 model = model,
-                serial_number = serial_number,
+                serialNumber = serialNumber,
                 condition = condition,
-                //cost_centre_id,
-                parent_id = parent_id,
+                //costCentreId,
+                parentId = parentId,
                 ean = ean,
-                last_asset_review_date = last_asset_review_date
+                lastAssetReviewDate = lastAssetReviewDate
             )
             return if (ok) i.selectById(assetId) else null
         }

@@ -154,12 +154,10 @@ class WarehouseMovementContentAdapter : ArrayAdapter<WarehouseMovementContent>, 
     }
 
     interface DataSetChangedListener {
-        // Define data you like to return from AysncTask
         fun onDataSetChanged()
     }
 
     interface CheckedChangedListener {
-        // Define data you like to return from AysncTask
         fun onCheckedChanged(
             isChecked: Boolean,
             pos: Int,
@@ -1074,10 +1072,12 @@ class WarehouseMovementContentAdapter : ArrayAdapter<WarehouseMovementContent>, 
                         backColor = layoutToMove!!
                         foreColor = white
                     }
+
                     WarehouseMovementContentStatus.noNeedToMove -> {
                         backColor = layoutNoNeedToMove!!
                         foreColor = if (isSelected) white else black
                     }
+
                     else -> {
                         backColor = layoutDefault!!
                         foreColor = if (isSelected) white else black
@@ -1273,10 +1273,12 @@ class WarehouseMovementContentAdapter : ArrayAdapter<WarehouseMovementContent>, 
                         backColor = layoutToMove!!
                         foreColor = white
                     }
+
                     WarehouseMovementContentStatus.noNeedToMove -> {
                         backColor = layoutNoNeedToMove!!
                         foreColor = if (isSelected) white else black
                     }
+
                     else -> {
                         backColor = layoutDefault!!
                         foreColor = if (isSelected) white else black
@@ -1561,8 +1563,10 @@ class WarehouseMovementContentAdapter : ArrayAdapter<WarehouseMovementContent>, 
                             0 -> fourthField
                             else -> thirdField
                         }
+
                         else -> secondField
                     }
+
                     else -> firstField
                 }
             }

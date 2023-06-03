@@ -121,8 +121,7 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
     private fun loadBundleValues(b: Bundle) {
         // region Recuperar el título de la ventana
         val t1 = b.getString("title")
-        tempTitle =
-            if (t1 != null && t1.isNotEmpty()) t1 else getString(R.string.select_warehouse_area)
+        tempTitle = if (!t1.isNullOrEmpty()) t1 else getString(R.string.select_warehouse_area)
         // endregion
 
         // PANELS
@@ -307,6 +306,7 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
                 panelBottomIsExpanded -> {
                     binding.expandBottomPanelButton?.text = getString(R.string.collapse_panel)
                 }
+
                 else -> {
                     binding.expandBottomPanelButton?.text = getString(R.string.search_options)
                 }
@@ -317,6 +317,7 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
             panelTopIsExpanded -> {
                 binding.expandTopPanelButton.text = getString(R.string.collapse_panel)
             }
+
             else -> {
                 binding.expandTopPanelButton.text = getString(R.string.label_print)
             }
@@ -374,6 +375,7 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
                 panelBottomIsExpanded -> {
                     binding.expandBottomPanelButton?.text = getString(R.string.collapse_panel)
                 }
+
                 else -> {
                     binding.expandBottomPanelButton?.text = getString(R.string.search_options)
                 }
@@ -440,6 +442,7 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
                 panelTopIsExpanded -> {
                     binding.expandTopPanelButton.text = getString(R.string.collapse_panel)
                 }
+
                 else -> {
                     binding.expandTopPanelButton.text = getString(R.string.label_print)
                 }
@@ -496,7 +499,7 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
                     )
                 } else {
                     // IMPORTANTE:
-                    // Se deben actualizar los listeners, sino
+                    // Se deben actualizar los listeners, si no
                     // las variables de esta actividad pueden
                     // tener valores antiguos en del adaptador.
 
@@ -622,18 +625,22 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
                 onBackPressed()
                 return true
             }
+
             R.id.action_rfid_connect -> {
                 JotterListener.rfidStart(this)
                 return super.onOptionsItemSelected(item)
             }
+
             R.id.action_trigger_scan -> {
                 JotterListener.trigger(this)
                 return super.onOptionsItemSelected(item)
             }
+
             R.id.action_read_barcode -> {
                 JotterListener.toggleCameraFloatingWindowVisibility(this)
                 return super.onOptionsItemSelected(item)
             }
+
             else -> {
                 return super.onOptionsItemSelected(item)
             }
@@ -649,13 +656,16 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
             ProgressStatus.starting -> {
                 showProgressBar(true)
             }
+
             ProgressStatus.canceled -> {
                 showProgressBar(false)
             }
+
             ProgressStatus.crashed -> {
                 showProgressBar(false)
                 makeText(binding.root, msg, SnackBarType.ERROR)
             }
+
             ProgressStatus.finished -> {
                 showProgressBar(false)
                 fillAdapter(completeList)
@@ -726,9 +736,11 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
                     collapseBottomPanel()
                     collapseTopPanel()
                 }
+
                 resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT && qtyTextViewFocused -> {
                     collapseBottomPanel()
                 }
+
                 resources.configuration.orientation != Configuration.ORIENTATION_PORTRAIT && !qtyTextViewFocused -> {
                     collapseTopPanel()
                 }

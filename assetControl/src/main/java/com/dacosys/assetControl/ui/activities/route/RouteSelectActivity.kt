@@ -96,7 +96,7 @@ class RouteSelectActivity : AppCompatActivity(),
     private fun loadBundleValues(b: Bundle) {
         // region Recuperar el título de la ventana
         val t1 = b.getString("title")
-        tempTitle = if (t1 != null && t1.isNotEmpty()) t1 else getString(R.string.select_route)
+        tempTitle = if (!t1.isNullOrEmpty()) t1 else getString(R.string.select_route)
         // endregion
 
         // PANELS
@@ -196,6 +196,7 @@ class RouteSelectActivity : AppCompatActivity(),
                 binding.expandBottomPanelButton?.text =
                     getString(R.string.collapse_panel)
             }
+
             else -> {
                 binding.expandBottomPanelButton?.text =
                     getString(R.string.search_options)
@@ -242,6 +243,7 @@ class RouteSelectActivity : AppCompatActivity(),
                     binding.expandBottomPanelButton?.text =
                         getString(R.string.collapse_panel)
                 }
+
                 else -> {
                     binding.expandBottomPanelButton?.text =
                         getString(R.string.search_options)
@@ -430,7 +432,7 @@ class RouteSelectActivity : AppCompatActivity(),
                     )
                 } else if (routeArray.size <= 0) {
                     // IMPORTANTE:
-                    // Se deben actualizar los listeners, sino
+                    // Se deben actualizar los listeners, si no
                     // las variables de esta actividad pueden
                     // tener valores antiguos en del adaptador.
 
@@ -491,6 +493,7 @@ class RouteSelectActivity : AppCompatActivity(),
                 onBackPressed()
                 true
             }
+
             else -> {
                 super.onOptionsItemSelected(item)
             }

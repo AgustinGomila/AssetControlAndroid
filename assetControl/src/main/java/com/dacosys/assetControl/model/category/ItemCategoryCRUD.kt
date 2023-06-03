@@ -1,6 +1,9 @@
 package com.dacosys.assetControl.model.category
 
 import com.dacosys.assetControl.dataBase.category.ItemCategoryDbHelper
+import com.dacosys.assetControl.model.common.CrudCompleted
+import com.dacosys.assetControl.model.common.CrudResult
+import com.dacosys.assetControl.model.common.CrudStatus.*
 import com.dacosys.assetControl.network.sync.SyncRegistryType
 import com.dacosys.assetControl.network.sync.SyncUpload
 import com.dacosys.assetControl.network.utils.Connection.Companion.autoSend
@@ -11,32 +14,14 @@ import kotlinx.coroutines.*
  * Create, Read, Update and Delete
  */
 class ItemCategoryCRUD {
-    companion object {
-        class ItemCategoryCRUDResult(var resultCode: Int, var itemCategory: ItemCategory?)
-
-        /**
-         * Interface que recibirá el resultado de las tareas asincrónicas
-         */
-        interface TaskCompleted {
-            // Define data you like to return from AysncTask
-            fun onTaskCompleted(result: ItemCategoryCRUDResult)
-        }
-
-        const val RC_UPDATE_OK = 1001
-        const val RC_ERROR_UPDATE = 2001
-        const val RC_ERROR_OBJECT_NULL = 3001
-        const val RC_INSERT_OK = 4001
-        const val RC_ERROR_INSERT = 5001
-    }
-
     class ItemCategoryAdd {
-        private var mCallback: TaskCompleted? = null
+        private var mCallback: CrudCompleted? = null
         private var itemCategoryObject: ItemCategoryObject? = null
-        private var icCRUDResult = ItemCategoryCRUDResult(RC_ERROR_INSERT, null)
+        private var crudResult = CrudResult<ItemCategory?>(ERROR_INSERT, null)
 
-        fun addParams(callback: TaskCompleted, ItemCategoryObject: ItemCategoryObject) {
+        fun addParams(callback: CrudCompleted, categoryObject: ItemCategoryObject) {
             // list all the parameters like in normal class define
-            this.itemCategoryObject = ItemCategoryObject
+            this.itemCategoryObject = categoryObject
             this.mCallback = callback
         }
 
@@ -53,25 +38,25 @@ class ItemCategoryCRUD {
         private suspend fun doInBackground() {
             coroutineScope {
                 suspendFunction()
-                mCallback?.onTaskCompleted(icCRUDResult)
+                mCallback?.onCompleted(crudResult)
             }
         }
 
         private suspend fun suspendFunction() = withContext(Dispatchers.IO) {
             if (itemCategoryObject != null) {
                 val icObj = itemCategoryObject!!
-                if (addItemCategory(icObj).resultCode == RC_INSERT_OK) {
+                if (addItemCategory(icObj).status == INSERT_OK) {
                     if (autoSend()) {
                         SyncUpload(SyncRegistryType.ItemCategory)
                     }
                 } else {
-                    icCRUDResult.resultCode = RC_ERROR_INSERT
-                    icCRUDResult.itemCategory = null
+                    crudResult.status = ERROR_INSERT
+                    crudResult.itemResult = null
                 }
             }
         }
 
-        private fun addItemCategory(icObj: ItemCategoryObject): ItemCategoryCRUDResult {
+        private fun addItemCategory(icObj: ItemCategoryObject): CrudResult<ItemCategory?> {
             var description = icObj.description
             if (icObj.description.length > 255) {
                 description = icObj.description.substring(0, 255)
@@ -79,33 +64,33 @@ class ItemCategoryCRUD {
 
             val newId = ItemCategoryDbHelper().minId
             if (ItemCategoryDbHelper().insert(
-                    newId,
-                    description,
-                    icObj.active == 1,
-                    icObj.parent_id,
-                    false
+                    itemCategoryId = newId,
+                    description = description,
+                    active = icObj.active == 1,
+                    parentId = icObj.parent_id,
+                    transferred = false
                 )
             ) {
                 val ic = ItemCategory(icObj)
                 ic.itemCategoryId = newId
 
-                icCRUDResult.resultCode = RC_INSERT_OK
-                icCRUDResult.itemCategory = ic
+                crudResult.status = INSERT_OK
+                crudResult.itemResult = ic
             } else {
-                icCRUDResult.resultCode = RC_ERROR_INSERT
-                icCRUDResult.itemCategory = null
+                crudResult.status = ERROR_INSERT
+                crudResult.itemResult = null
             }
 
-            return icCRUDResult
+            return crudResult
         }
     }
 
     class ItemCategoryUpdate {
-        private var mCallback: TaskCompleted? = null
+        private var mCallback: CrudCompleted? = null
         private var itemCategoryObject: ItemCategoryObject? = null
-        private var icCRUDResult = ItemCategoryCRUDResult(RC_ERROR_UPDATE, null)
+        private var crudResult = CrudResult<ItemCategory?>(ERROR_UPDATE, null)
 
-        fun addParams(callback: TaskCompleted, itemCategoryObject: ItemCategoryObject) {
+        fun addParams(callback: CrudCompleted, itemCategoryObject: ItemCategoryObject) {
             // list all the parameters like in normal class define
             this.itemCategoryObject = itemCategoryObject
             this.mCallback = callback
@@ -124,34 +109,34 @@ class ItemCategoryCRUD {
         private suspend fun doInBackground() {
             coroutineScope {
                 suspendFunction()
-                mCallback?.onTaskCompleted(icCRUDResult)
+                mCallback?.onCompleted(crudResult)
             }
         }
 
         private suspend fun suspendFunction() = withContext(Dispatchers.IO) {
             if (itemCategoryObject != null) {
                 val icObj = itemCategoryObject!!
-                if (updateItemCategory(icObj).resultCode == RC_UPDATE_OK) {
+                if (updateItemCategory(icObj).status == UPDATE_OK) {
                     if (autoSend()) {
                         SyncUpload(SyncRegistryType.ItemCategory)
                     }
                 }
             } else {
-                icCRUDResult.resultCode = RC_ERROR_OBJECT_NULL
-                icCRUDResult.itemCategory = null
+                crudResult.status = ERROR_OBJECT_NULL
+                crudResult.itemResult = null
             }
         }
 
-        private fun updateItemCategory(icObj: ItemCategoryObject): ItemCategoryCRUDResult {
+        private fun updateItemCategory(icObj: ItemCategoryObject): CrudResult<ItemCategory?> {
             if (ItemCategoryDbHelper().update(icObj)) {
-                icCRUDResult.resultCode = RC_UPDATE_OK
-                icCRUDResult.itemCategory = ItemCategory(icObj)
+                crudResult.status = UPDATE_OK
+                crudResult.itemResult = ItemCategory(icObj)
             } else {
-                icCRUDResult.resultCode = RC_ERROR_UPDATE
-                icCRUDResult.itemCategory = null
+                crudResult.status = ERROR_UPDATE
+                crudResult.itemResult = null
             }
 
-            return icCRUDResult
+            return crudResult
         }
     }
 }

@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.dataBase.location.WarehouseDbHelper
 import com.dacosys.assetControl.databinding.WarehouseAreaCrudFragmentBinding
+import com.dacosys.assetControl.model.common.CrudCompleted
 import com.dacosys.assetControl.model.location.Warehouse
 import com.dacosys.assetControl.model.location.WarehouseArea
 import com.dacosys.assetControl.model.location.WarehouseAreaCRUD
@@ -203,10 +204,8 @@ class WarehouseAreaCRUDFragment : Fragment() {
         return true
     }
 
-    fun saveWarehouseArea(callback: WarehouseAreaCRUD.Companion.TaskCompleted): Boolean {
-        if (!checkValidData()) {
-            return false
-        }
+    fun saveWarehouseArea(callback: CrudCompleted) {
+        if (!checkValidData()) return
 
         // 1. El activo es NULL cuando se está agregando uno nuevo.
         // 2. Puede no ser NULL cuando proviene de escanear un código
@@ -218,7 +217,7 @@ class WarehouseAreaCRUDFragment : Fragment() {
                     getString(R.string.you_do_not_have_permission_to_add_warehouse_areas),
                     SnackBarType.ERROR
                 )
-                return false
+                return
             }
 
             val tempWarehouseArea = createWsWarehouseArea()
@@ -235,7 +234,7 @@ class WarehouseAreaCRUDFragment : Fragment() {
                     getString(R.string.you_do_not_have_permission_to_modify_warehouse_areas),
                     SnackBarType.ERROR
                 )
-                return false
+                return
             }
 
             updateWarehouseArea()
@@ -247,7 +246,6 @@ class WarehouseAreaCRUDFragment : Fragment() {
                 updateWarehouseArea.execute()
             }
         }
-        return false
     }
 
     private fun updateWarehouseArea() {

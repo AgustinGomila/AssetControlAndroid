@@ -15,6 +15,7 @@ import com.dacosys.assetControl.dataBase.category.ItemCategoryDbHelper
 import com.dacosys.assetControl.databinding.ItemCategoryCrudFragmentBinding
 import com.dacosys.assetControl.model.category.ItemCategory
 import com.dacosys.assetControl.model.category.ItemCategoryCRUD
+import com.dacosys.assetControl.model.common.CrudCompleted
 import com.dacosys.assetControl.model.user.User
 import com.dacosys.assetControl.model.user.permission.PermissionEntry
 import com.dacosys.assetControl.ui.activities.category.ItemCategorySelectActivity
@@ -191,10 +192,8 @@ class ItemCategoryCRUDFragment : Fragment() {
         return true
     }
 
-    fun saveItemCategory(callback: ItemCategoryCRUD.Companion.TaskCompleted): Boolean {
-        if (!checkValidData()) {
-            return false
-        }
+    fun saveItemCategory(callback: CrudCompleted) {
+        if (!checkValidData()) return
 
         // 1. El activo es NULL cuando se está agregando uno nuevo.
         // 2. Puede no ser NULL cuando proviene de escanear un código
@@ -206,7 +205,7 @@ class ItemCategoryCRUDFragment : Fragment() {
                     getString(R.string.you_do_not_have_permission_to_add_categories),
                     SnackBarType.ERROR
                 )
-                return false
+                return
             }
 
             val tempItemCategory = createWsItemCategory()
@@ -222,7 +221,7 @@ class ItemCategoryCRUDFragment : Fragment() {
                     getString(R.string.you_do_not_have_permission_to_modify_categories),
                     SnackBarType.ERROR
                 )
-                return false
+                return
             }
 
             updateItemCategory()
@@ -234,7 +233,6 @@ class ItemCategoryCRUDFragment : Fragment() {
                 updateItemCategory.execute()
             }
         }
-        return false
     }
 
     private fun updateItemCategory() {

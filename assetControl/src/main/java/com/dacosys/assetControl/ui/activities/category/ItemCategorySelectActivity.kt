@@ -81,7 +81,7 @@ class ItemCategorySelectActivity :
 
         if (savedInstanceState != null) {
             val t1 = savedInstanceState.getString("title")
-            if (t1 != null && t1.isNotEmpty()) tempTitle = t1
+            if (!t1.isNullOrEmpty()) tempTitle = t1
 
             binding.category.setOnEditorActionListener(null)
             binding.category.onItemClickListener = null
@@ -95,7 +95,7 @@ class ItemCategorySelectActivity :
             val extras = intent.extras
             if (extras != null) {
                 val t1 = extras.getString("title")
-                if (t1 != null && t1.isNotEmpty()) tempTitle = t1
+                if (!t1.isNullOrEmpty()) tempTitle = t1
 
                 val t2 = extras.getParcelable("itemCategory") as ItemCategory?
                 if (t2 != null) itemCategory = t2
@@ -316,6 +316,7 @@ class ItemCategorySelectActivity :
                 setResult(RESULT_OK, data)
                 finish()
             }
+
             else -> {
                 setResult(RESULT_CANCELED, null)
                 finish()
@@ -404,6 +405,7 @@ class ItemCategorySelectActivity :
                 binding.category.isPopupShowing -> {
                     adjustAndShowDropDown()
                 }
+
                 else -> {
                     centerLayout()
                 }
