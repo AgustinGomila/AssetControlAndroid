@@ -237,7 +237,12 @@ class Zebra(private val activity: AppCompatActivity) : Scanner() {
     }
 
     private fun unregisterReceivers() {
-        activity.unregisterReceiver(broadcastReceiver)
+        Log.v(javaClass.simpleName, "Unregistering receiver (${activityName})")
+        try {
+            activity.unregisterReceiver(broadcastReceiver)
+        } catch (e: Exception) {
+            e.message
+        }
         unRegisterScannerStatus()
     }
 
