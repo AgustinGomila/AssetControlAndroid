@@ -10,6 +10,7 @@ import android.os.Looper
 import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
+import android.util.Log
 import android.view.*
 import android.view.View.GONE
 import android.view.inputmethod.EditorInfo
@@ -17,12 +18,13 @@ import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.menu.MenuBuilder
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat
-import androidx.core.view.size
+import androidx.core.view.*
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -75,15 +77,12 @@ import com.dacosys.imageControl.network.webService.WsFunction
 import com.dacosys.imageControl.room.dao.ImageCoroutines
 import com.dacosys.imageControl.ui.activities.ImageControlCameraActivity
 import com.dacosys.imageControl.ui.activities.ImageControlGridActivity
-import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
-import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener
 import org.parceler.Parcels
 import kotlin.concurrent.thread
 
 class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
     Scanner.ScannerListener, Rfid.RfidDeviceListener, AssetSelectFilterFragment.FragmentListener,
-    GetAssetAsync.GetAssetAsyncListener, KeyboardVisibilityEventListener,
-    PrinterFragment.FragmentListener, AssetRecyclerAdapter.CheckedChangedListener,
+    GetAssetAsync.GetAssetAsyncListener, PrinterFragment.FragmentListener, AssetRecyclerAdapter.CheckedChangedListener,
     AssetRecyclerAdapter.DataSetChangedListener, AssetRecyclerAdapter.AddPhotoRequiredListener,
     AssetRecyclerAdapter.AlbumViewRequiredListener,
     AssetRecyclerAdapter.EditAssetRequiredListener {
@@ -247,8 +246,6 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        KeyboardVisibilityEvent.registerEventListener(this, this)
-
         assetSelectFilterFragment =
             supportFragmentManager.findFragmentById(binding.filterFragment.id) as AssetSelectFilterFragment
         printerFragment =
@@ -347,6 +344,115 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
 
         setupUI(binding.root, this)
     }
+
+    // region Inset animation
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        setupWindowInsetsAnimation()
+    }
+
+    private var isKeyboardVisible: Boolean = false
+
+    /**
+     * Change panels state at Ime animation finish
+     *
+     * Estados que recuerdan está pendiente de ejecutar un cambio en estado (colapsado/expandido) de los paneles al
+     * terminar la animación de mostrado/ocultamiento del teclado en pantalla. Esto es para sincronizar los cambios,
+     * ejecutándolos de manera secuencial. A ojos del usuario la vista completa acompaña el desplazamiento de la
+     * animación. Si se ejecutara al mismo tiempo el cambio en los paneles y la animación del teclado la vista no
+     * acompaña correctamente al teclado, ya que cambia durante la animación.
+     */
+    private var changePanelTopStateAtFinish: Boolean = false
+    private var changePanelBottomStateAtFinish: Boolean = false
+
+    private fun setupWindowInsetsAnimation() {
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        val rootView = binding.root
+
+        // Adjust root layout to bottom navigation bar
+        val windowInsets = window.decorView.rootWindowInsets
+        @Suppress("DEPRECATION") rootView.setPadding(
+            windowInsets.systemWindowInsetLeft,
+            windowInsets.systemWindowInsetTop,
+            windowInsets.systemWindowInsetRight,
+            windowInsets.systemWindowInsetBottom
+        )
+
+        implWindowInsetsAnimation()
+    }
+
+    private fun implWindowInsetsAnimation() {
+        val rootView = binding.root
+
+        ViewCompat.setWindowInsetsAnimationCallback(
+            rootView,
+            object : WindowInsetsAnimationCompat.Callback(DISPATCH_MODE_CONTINUE_ON_SUBTREE) {
+                override fun onEnd(animation: WindowInsetsAnimationCompat) {
+                    val isIme = animation.typeMask and WindowInsetsCompat.Type.ime() != 0
+                    if (!isIme) return
+
+                    postExecuteImeAnimation()
+                    super.onEnd(animation)
+                }
+
+                override fun onProgress(
+                    insets: WindowInsetsCompat,
+                    runningAnimations: MutableList<WindowInsetsAnimationCompat>
+                ): WindowInsetsCompat {
+                    paddingBottomView(rootView, insets)
+
+                    return insets
+                }
+            })
+    }
+
+    private fun paddingBottomView(rootView: ConstraintLayout, insets: WindowInsetsCompat) {
+        val imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime())
+        val systemBarInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+        val paddingBottom = imeInsets.bottom.coerceAtLeast(systemBarInsets.bottom)
+
+        isKeyboardVisible = imeInsets.bottom > 0
+
+        rootView.setPadding(
+            rootView.paddingLeft,
+            rootView.paddingTop,
+            rootView.paddingRight,
+            paddingBottom
+        )
+
+        Log.d(javaClass.simpleName, "IME Size: ${imeInsets.bottom}")
+    }
+
+    private fun postExecuteImeAnimation() {
+        // Si estamos mostrando el teclado, colapsamos los paneles.
+        if (isKeyboardVisible) {
+            when {
+                resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT && !qtyTextViewFocused -> {
+                    collapseBottomPanel()
+                    collapseTopPanel()
+                }
+
+                resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT && qtyTextViewFocused -> {
+                    collapseBottomPanel()
+                }
+
+                resources.configuration.orientation != Configuration.ORIENTATION_PORTRAIT && !qtyTextViewFocused -> {
+                    collapseTopPanel()
+                }
+            }
+        }
+
+        // Si estamos esperando que termine la animación para ejecutar un cambio de vista
+        if (changePanelTopStateAtFinish) {
+            changePanelTopStateAtFinish = false
+            binding.expandTopPanelButton.performClick()
+        }
+        if (changePanelBottomStateAtFinish) {
+            changePanelBottomStateAtFinish = false
+            binding.expandBottomPanelButton?.performClick()
+        }
+    }
+    // endregion
 
     override fun onStart() {
         super.onStart()
@@ -472,6 +578,15 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         }
 
         binding.expandBottomPanelButton?.setOnClickListener {
+            val bottomVisible = panelBottomIsExpanded
+            val imeVisible = isKeyboardVisible
+
+            if (!bottomVisible && imeVisible) {
+                // Esperar que se cierre el teclado luego de perder el foco el TextView para expandir el panel
+                changePanelBottomStateAtFinish = true
+                return@setOnClickListener
+            }
+
             val nextLayout = ConstraintSet()
             if (panelBottomIsExpanded) {
                 if (panelTopIsExpanded) nextLayout.load(
@@ -510,6 +625,15 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
 
     private fun setTopPanelAnimation() {
         binding.expandTopPanelButton.setOnClickListener {
+            val topVisible = panelTopIsExpanded
+            val imeVisible = isKeyboardVisible
+
+            if (!topVisible && imeVisible) {
+                // Esperar que se cierre el teclado luego de perder el foco el TextView para expandir el panel
+                changePanelTopStateAtFinish = true
+                return@setOnClickListener
+            }
+
             val nextLayout = ConstraintSet()
             if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                 if (panelBottomIsExpanded) {
@@ -1132,25 +1256,6 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         scannerCompleted(scanCode)
     }
     //endregion READERS Reception
-
-    override fun onVisibilityChanged(isOpen: Boolean) {
-        if (isOpen) {
-            when {
-                resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT && !qtyTextViewFocused -> {
-                    collapseBottomPanel()
-                    collapseTopPanel()
-                }
-
-                resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT && qtyTextViewFocused -> {
-                    collapseBottomPanel()
-                }
-
-                resources.configuration.orientation != Configuration.ORIENTATION_PORTRAIT && !qtyTextViewFocused -> {
-                    collapseTopPanel()
-                }
-            }
-        }
-    }
 
     private fun collapseBottomPanel() {
         if (panelBottomIsExpanded && resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
