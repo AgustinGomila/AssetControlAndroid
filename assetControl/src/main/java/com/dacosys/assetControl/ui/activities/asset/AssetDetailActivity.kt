@@ -10,6 +10,7 @@ import com.dacosys.assetControl.model.asset.Asset
 import com.dacosys.assetControl.model.table.Table
 import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Screen.Companion.setupUI
+import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.utils.settings.Preference
 import com.dacosys.imageControl.ui.fragments.ImageControlButtonsFragment
@@ -106,15 +107,15 @@ class AssetDetailActivity : AppCompatActivity() {
             description.substring(0, 255)
         }
 
+        val obs = "${getString(R.string.user)}: ${Statics.currentUser()?.name}"
+
         if (imageControlFragment == null) {
             imageControlFragment = ImageControlButtonsFragment.newInstance(
                 Table.asset.tableId.toLong(),
                 if (asset?.assetId != null) asset?.assetId.toString() else ""
             )
 
-            if (description.isNotEmpty()) {
-                imageControlFragment?.setDescription(description)
-            }
+            setFragmentValues(description, "", obs)
 
             val fm = supportFragmentManager
 
@@ -140,9 +141,21 @@ class AssetDetailActivity : AppCompatActivity() {
             imageControlFragment?.setObjectId1(asset?.assetId ?: 0)
             imageControlFragment?.setObjectId2(null)
 
-            if (description.isNotEmpty()) {
-                imageControlFragment?.setDescription(description)
-            }
+            setFragmentValues(description, "", obs)
+        }
+    }
+
+    private fun setFragmentValues(description: String, reference: String, obs: String) {
+        if (description.isNotEmpty()) {
+            imageControlFragment?.setDescription(description)
+        }
+
+        if (reference.isNotEmpty()) {
+            imageControlFragment?.setReference(reference)
+        }
+
+        if (obs.isNotEmpty()) {
+            imageControlFragment?.setObs(obs)
         }
     }
 }

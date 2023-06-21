@@ -21,6 +21,7 @@ import com.dacosys.assetControl.ui.fragments.category.ItemCategoryCRUDFragment
 import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
 import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Screen.Companion.setupUI
+import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.preferences.Preferences.*
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
@@ -229,14 +230,14 @@ class ItemCategoryCRUDActivity : AppCompatActivity(), CrudCompleted,
             description.substring(0, 255)
         }
 
+        val obs = "${getString(R.string.user)}: ${Statics.currentUser()?.name}"
+
         if (imageControlFragment == null) {
             imageControlFragment = ImageControlButtonsFragment.newInstance(
                 Table.itemCategory.tableId.toLong(), itemCategoryId.toString()
             )
 
-            if (description.isNotEmpty()) {
-                imageControlFragment?.setDescription(description)
-            }
+            setFragmentValues(description, "", obs)
 
             // Callback para actualizar la descripción
             imageControlFragment?.setListener(this)
@@ -266,9 +267,7 @@ class ItemCategoryCRUDActivity : AppCompatActivity(), CrudCompleted,
             imageControlFragment?.setObjectId1(itemCategoryId)
             imageControlFragment?.setObjectId2(null)
 
-            if (description.isNotEmpty()) {
-                imageControlFragment?.setDescription(description)
-            }
+            setFragmentValues(description, "", obs)
 
             // Callback para actualizar la descripción
             imageControlFragment?.setListener(this)
@@ -276,6 +275,20 @@ class ItemCategoryCRUDActivity : AppCompatActivity(), CrudCompleted,
 
         // OCULTAR BOTÓN DE FIRMA
         imageControlFragment?.showSignButton = false
+    }
+
+    private fun setFragmentValues(description: String, reference: String, obs: String) {
+        if (description.isNotEmpty()) {
+            imageControlFragment?.setDescription(description)
+        }
+
+        if (reference.isNotEmpty()) {
+            imageControlFragment?.setReference(reference)
+        }
+
+        if (obs.isNotEmpty()) {
+            imageControlFragment?.setObs(obs)
+        }
     }
 
     private fun changeItemCategory(tempItemCategory: ItemCategory) {

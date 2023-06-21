@@ -30,6 +30,7 @@ import com.dacosys.assetControl.ui.fragments.asset.AssetStatusSpinnerFragment
 import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
 import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Screen.Companion.setupUI
+import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.ParcelLong
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
@@ -285,14 +286,14 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
             description.substring(0, 255)
         }
 
+        val obs = "${getString(R.string.user)}: ${Statics.currentUser()?.name}"
+
         if (imageControlFragment == null) {
             imageControlFragment = ImageControlButtonsFragment.newInstance(
                 Table.asset.tableId.toLong(), assetId.toString()
             )
 
-            if (description.isNotEmpty()) {
-                imageControlFragment?.setDescription(description)
-            }
+            setFragmentValues(description, "", obs)
 
             // Callback para actualizar la descripción
             imageControlFragment?.setListener(this)
@@ -322,9 +323,7 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
             imageControlFragment?.setObjectId1(assetId)
             imageControlFragment?.setObjectId2(null)
 
-            if (description.isNotEmpty()) {
-                imageControlFragment?.setDescription(description)
-            }
+            setFragmentValues(description, "", obs)
 
             // Callback para actualizar la descripción
             imageControlFragment?.setListener(this)
@@ -332,6 +331,20 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         // OCULTAR BOTÓN DE FIRMA
         imageControlFragment?.showSignButton = false
+    }
+
+    private fun setFragmentValues(description: String, reference: String, obs: String) {
+        if (description.isNotEmpty()) {
+            imageControlFragment?.setDescription(description)
+        }
+
+        if (reference.isNotEmpty()) {
+            imageControlFragment?.setReference(reference)
+        }
+
+        if (obs.isNotEmpty()) {
+            imageControlFragment?.setObs(obs)
+        }
     }
 
     private fun selectAsset() {

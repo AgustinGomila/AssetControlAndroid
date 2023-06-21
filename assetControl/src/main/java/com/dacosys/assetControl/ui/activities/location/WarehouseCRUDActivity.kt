@@ -21,6 +21,7 @@ import com.dacosys.assetControl.ui.fragments.location.WarehouseCRUDFragment
 import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
 import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Screen.Companion.setupUI
+import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.utils.settings.Preference
@@ -270,14 +271,14 @@ class WarehouseCRUDActivity : AppCompatActivity(), CrudCompleted,
             description.substring(0, 255)
         }
 
+        val obs = "${getString(R.string.user)}: ${Statics.currentUser()?.name}"
+
         if (imageControlFragment == null) {
             imageControlFragment = ImageControlButtonsFragment.newInstance(
                 Table.warehouse.tableId.toLong(), warehouseId.toString()
             )
 
-            if (description.isNotEmpty()) {
-                imageControlFragment?.setDescription(description)
-            }
+            setFragmentValues(description, "", obs)
 
             // Callback para actualizar la descripción
             imageControlFragment?.setListener(this)
@@ -307,9 +308,7 @@ class WarehouseCRUDActivity : AppCompatActivity(), CrudCompleted,
             imageControlFragment?.setObjectId1(warehouseId)
             imageControlFragment?.setObjectId2(null)
 
-            if (description.isNotEmpty()) {
-                imageControlFragment?.setDescription(description)
-            }
+            setFragmentValues(description, "", obs)
 
             // Callback para actualizar la descripción
             imageControlFragment?.setListener(this)
@@ -317,6 +316,20 @@ class WarehouseCRUDActivity : AppCompatActivity(), CrudCompleted,
 
         // OCULTAR BOTÓN DE FIRMA
         imageControlFragment?.showSignButton = false
+    }
+
+    private fun setFragmentValues(description: String, reference: String, obs: String) {
+        if (description.isNotEmpty()) {
+            imageControlFragment?.setDescription(description)
+        }
+
+        if (reference.isNotEmpty()) {
+            imageControlFragment?.setReference(reference)
+        }
+
+        if (obs.isNotEmpty()) {
+            imageControlFragment?.setObs(obs)
+        }
     }
 
     private fun changeWarehouse(tempWarehouse: Warehouse) {

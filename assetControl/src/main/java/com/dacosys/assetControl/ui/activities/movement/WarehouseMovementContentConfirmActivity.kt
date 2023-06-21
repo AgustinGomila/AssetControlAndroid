@@ -31,6 +31,7 @@ import com.dacosys.assetControl.ui.fragments.movement.LocationHeaderFragment
 import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
 import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Screen.Companion.setupUI
+import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.utils.settings.Preference
@@ -382,14 +383,14 @@ class WarehouseMovementContentConfirmActivity : AppCompatActivity(),
             description.substring(0, 255)
         }
 
+        val obs = "${getString(R.string.user)}: ${Statics.currentUser()?.name}"
+
         if (imageControlFragment == null) {
             imageControlFragment = ImageControlButtonsFragment.newInstance(
                 Table.warehouseMovement.tableId.toLong(), "0"
             )
 
-            if (description.isNotEmpty()) {
-                imageControlFragment?.setDescription(description)
-            }
+            setFragmentValues(description, "", obs)
 
             val fm = supportFragmentManager
 
@@ -416,9 +417,21 @@ class WarehouseMovementContentConfirmActivity : AppCompatActivity(),
             imageControlFragment?.setObjectId1(0)
             imageControlFragment?.setObjectId2(null)
 
-            if (description.isNotEmpty()) {
-                imageControlFragment?.setDescription(description)
-            }
+            setFragmentValues(description, "", obs)
+        }
+    }
+
+    private fun setFragmentValues(description: String, reference: String, obs: String) {
+        if (description.isNotEmpty()) {
+            imageControlFragment?.setDescription(description)
+        }
+
+        if (reference.isNotEmpty()) {
+            imageControlFragment?.setReference(reference)
+        }
+
+        if (obs.isNotEmpty()) {
+            imageControlFragment?.setObs(obs)
         }
     }
 

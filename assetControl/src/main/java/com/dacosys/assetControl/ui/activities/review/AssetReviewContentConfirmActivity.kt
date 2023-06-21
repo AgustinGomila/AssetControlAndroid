@@ -31,6 +31,7 @@ import com.dacosys.assetControl.ui.fragments.movement.LocationHeaderFragment
 import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
 import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Screen.Companion.setupUI
+import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsPutBoolean
@@ -253,6 +254,7 @@ class AssetReviewContentConfirmActivity : AppCompatActivity(),
             panelBottomIsExpanded -> {
                 binding.expandBottomPanelButton?.text = getString(R.string.collapse_panel)
             }
+
             else -> {
                 binding.expandBottomPanelButton?.text = getString(R.string.more_options)
             }
@@ -262,6 +264,7 @@ class AssetReviewContentConfirmActivity : AppCompatActivity(),
             panelTopIsExpanded -> {
                 binding.expandTopPanelButton?.text = getString(R.string.collapse_panel)
             }
+
             else -> {
                 binding.expandTopPanelButton?.text = getString(R.string.area_in_review)
             }
@@ -316,6 +319,7 @@ class AssetReviewContentConfirmActivity : AppCompatActivity(),
                 panelBottomIsExpanded -> {
                     binding.expandBottomPanelButton?.text = getString(R.string.collapse_panel)
                 }
+
                 else -> {
                     binding.expandBottomPanelButton?.text = getString(R.string.more_options)
                 }
@@ -372,6 +376,7 @@ class AssetReviewContentConfirmActivity : AppCompatActivity(),
                 panelTopIsExpanded -> {
                     binding.expandTopPanelButton?.text = getString(R.string.collapse_panel)
                 }
+
                 else -> {
                     binding.expandTopPanelButton?.text = getString(R.string.area_in_review)
                 }
@@ -389,6 +394,8 @@ class AssetReviewContentConfirmActivity : AppCompatActivity(),
             description.substring(0, 255)
         }
 
+        val obs = "${getString(R.string.user)}: ${Statics.currentUser()?.name}"
+
         if (imageControlFragment == null) {
             imageControlFragment =
                 ImageControlButtonsFragment.newInstance(
@@ -396,9 +403,7 @@ class AssetReviewContentConfirmActivity : AppCompatActivity(),
                 )
         }
 
-        if (description.isNotEmpty()) {
-            imageControlFragment?.setDescription(description)
-        }
+        setFragmentValues(description, "", obs)
 
         val fm = supportFragmentManager
 
@@ -423,9 +428,21 @@ class AssetReviewContentConfirmActivity : AppCompatActivity(),
             imageControlFragment?.setObjectId1(ar.collectorAssetReviewId)
             imageControlFragment?.setObjectId2(null)
 
-            if (description.isNotEmpty()) {
-                imageControlFragment?.setDescription(description)
-            }
+            setFragmentValues(description, "", obs)
+        }
+    }
+
+    private fun setFragmentValues(description: String, reference: String, obs: String) {
+        if (description.isNotEmpty()) {
+            imageControlFragment?.setDescription(description)
+        }
+
+        if (reference.isNotEmpty()) {
+            imageControlFragment?.setReference(reference)
+        }
+
+        if (obs.isNotEmpty()) {
+            imageControlFragment?.setObs(obs)
         }
     }
 
@@ -574,6 +591,7 @@ class AssetReviewContentConfirmActivity : AppCompatActivity(),
                 onBackPressed()
                 true
             }
+
             else -> {
                 super.onOptionsItemSelected(item)
             }

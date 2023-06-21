@@ -226,9 +226,11 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
             targetWarehouseArea != null -> makeText(
                 binding.root, (targetWarehouseArea ?: return).description, SnackBarType.INFO
             )
+
             targetItemCategory != null -> makeText(
                 binding.root, (targetItemCategory ?: return).description, SnackBarType.INFO
             )
+
             targetAsset != null -> makeText(
                 binding.root, (targetAsset ?: return).description, SnackBarType.INFO
             )
@@ -332,6 +334,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
             panelBottomIsExpanded -> {
                 binding.expandHistoricPanelButton?.text = getString(R.string.collapse_panel)
             }
+
             else -> {
                 binding.expandHistoricPanelButton?.text = getString(R.string.previous_records)
             }
@@ -373,6 +376,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
                 panelBottomIsExpanded -> {
                     binding.expandHistoricPanelButton?.text = getString(R.string.collapse_panel)
                 }
+
                 else -> {
                     binding.expandHistoricPanelButton?.text = getString(R.string.previous_records)
                 }
@@ -396,6 +400,9 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
             }
         }"
 
+        val reference = "${getString(R.string.asset)}: ${rpc.assetCode}"
+        val obs = "${getString(R.string.user)}: ${Statics.currentUser()?.name}"
+
         val tableName = Table.routeProcess.tableName
         description = "$tableName: $description"
         if (description.length > 255) {
@@ -407,9 +414,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
                 Table.routeProcess.tableId.toLong(), rpc.routeProcessId.toString()
             )
 
-            if (description.isNotEmpty()) {
-                imageControlFragment?.setDescription(description)
-            }
+            setFragmentValues(description, reference, obs)
 
             val fm = supportFragmentManager
 
@@ -436,9 +441,21 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
             imageControlFragment?.setObjectId1(rpc.routeProcessId)
             imageControlFragment?.setObjectId2(null)
 
-            if (description.isNotEmpty()) {
-                imageControlFragment?.setDescription(description)
-            }
+            setFragmentValues(description, reference, obs)
+        }
+    }
+
+    private fun setFragmentValues(description: String, reference: String, obs: String) {
+        if (description.isNotEmpty()) {
+            imageControlFragment?.setDescription(description)
+        }
+
+        if (reference.isNotEmpty()) {
+            imageControlFragment?.setReference(reference)
+        }
+
+        if (obs.isNotEmpty()) {
+            imageControlFragment?.setObs(obs)
         }
     }
 
@@ -821,6 +838,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
                         ).sortedWith(compareBy { it.dataCollectionDate }).reversed()
                     )
                 }
+
                 rpc.warehouseId != null && (rpc.warehouseId ?: return) > 0 -> {
                     binding.codeTextView.setText(
                         rpc.warehouseId.toString(), TextView.BufferType.EDITABLE
@@ -835,6 +853,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
                         ).sortedWith(compareBy { it.dataCollectionDate }).reversed()
                     )
                 }
+
                 rpc.warehouseAreaId != null && (rpc.warehouseAreaId ?: return) > 0 -> {
                     binding.codeTextView.setText(
                         rpc.warehouseAreaId.toString(), TextView.BufferType.EDITABLE
@@ -1198,6 +1217,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
                     res == DcrResult.cont.id -> {
                         cont(f)
                     }
+
                     res == DcrResult.noContinue.id -> {
                         makeText(
                             binding.root,
@@ -1205,9 +1225,11 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
                             SnackBarType.ERROR
                         )
                     }
+
                     res == DcrResult.end.id -> {
                         saveDataCollection()
                     }
+
                     res > 0 -> {
                         // Agrego el paso a la colección de pasos
                         stepsHistory.add(
@@ -1219,9 +1241,11 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
                         )
                         fillControl(res, 1)
                     }
+
                     res == DcrResult.levelX.id -> {
                         levelX(f, dcrCont)
                     }
+
                     res == DcrResult.back.id -> {
                         goBack()
                     }
@@ -1232,6 +1256,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
                         // En caso de que tanto trueResult como falseResult sean 0
                         cont(f)
                     }
+
                     else -> {
                         // No puede seguir
                         makeText(
@@ -1268,8 +1293,10 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         when {
             rpc != null -> dc =
                 dcDbHelper.insert(rpc ?: return, dataStart, collectorRouteProcessId ?: return)
+
             targetAsset != null -> dc =
                 dcDbHelper.insert(targetAsset ?: return, dataStart, fakeRouteProcessId)
+
             targetWarehouseArea != null -> dc =
                 dcDbHelper.insert(targetWarehouseArea ?: return, dataStart, fakeRouteProcessId)
         }
@@ -1431,15 +1458,19 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
 
                     fillControl(eval.toInt(), 1)
                 }
+
                 eval.toInt() == DcrResult.cont.id -> {
                     cont(tempControl)
                 }
+
                 eval.toInt() == DcrResult.back.id -> {
                     goBack()
                 }
+
                 eval.toInt() == DcrResult.end.id -> {
                     saveDataCollection()
                 }
+
                 eval.toInt() == DcrResult.noContinue.id -> {
                     makeText(
                         binding.root,
@@ -1635,6 +1666,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
                 val random: Int = ThreadLocalRandom.current().nextInt(0, 1)
                 fragment.valueStr = (random > 0).toString()
             }
+
             AttributeCompositionType.TypeDate -> {
                 val calendar = Calendar.getInstance()
 
@@ -1654,6 +1686,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
                 val valueStr = sdf.format(date.time)
                 fragment.valueStr = valueStr
             }
+
             AttributeCompositionType.TypeTime -> {
                 val calendar = Calendar.getInstance()
 
@@ -1673,6 +1706,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
                 val valueStr = sdf.format(time.time)
                 fragment.valueStr = valueStr
             }
+
             AttributeCompositionType.TypeIntNumber,
             AttributeCompositionType.TypeDecimalNumber,
             AttributeCompositionType.TypeCurrency,
@@ -1680,11 +1714,13 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
                 val random: Int = ThreadLocalRandom.current().nextInt(0, 100)
                 fragment.valueStr = random.toString()
             }
+
             AttributeCompositionType.TypeTextLong,
             AttributeCompositionType.TypeTextShort,
             -> {
                 fragment.valueStr = "Texto de prueba"
             }
+
             AttributeCompositionType.TypeOptions -> {
                 val attrComp = AttributeComposition(fragment.attrCompId, true)
                 var composition = ""
@@ -1735,6 +1771,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
                 onBackPressed()
                 true
             }
+
             else -> {
                 super.onOptionsItemSelected(item)
             }
