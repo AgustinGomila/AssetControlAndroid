@@ -287,7 +287,7 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         if (imageControlFragment == null) {
             imageControlFragment = ImageControlButtonsFragment.newInstance(
-                Table.asset.tableId.toLong(), assetId.toString(), null
+                Table.asset.tableId.toLong(), assetId.toString()
             )
 
             if (description.isNotEmpty()) {

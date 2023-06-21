@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.content.res.Resources
-import android.content.res.TypedArray
 import android.graphics.Color
 import android.graphics.Insets
 import android.os.Build
@@ -18,10 +17,11 @@ import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.Switch
 import androidx.annotation.ColorInt
-import androidx.annotation.NonNull
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
@@ -91,7 +91,7 @@ class Screen {
             }
         }
 
-        fun getScreenWidth(@NonNull activity: Activity): Int {
+        fun getScreenWidth(activity: Activity): Int {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 val windowMetrics = activity.windowManager.currentWindowMetrics
                 val bounds = windowMetrics.bounds
@@ -110,7 +110,7 @@ class Screen {
             }
         }
 
-        fun getScreenHeight(@NonNull activity: Activity): Int {
+        fun getScreenHeight(activity: Activity): Int {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 val windowMetrics = activity.windowManager.currentWindowMetrics
                 val bounds = windowMetrics.bounds
@@ -130,30 +130,13 @@ class Screen {
         }
 
         fun getSystemBarsHeight(activity: AppCompatActivity): Int {
-            // Valores de la pantalla actual
-            // status bar height
-            var statusBarHeight = 0
-            val resourceId1: Int =
-                activity.resources.getIdentifier("status_bar_height", "dimen", "android")
-            if (resourceId1 > 0) {
-                statusBarHeight = activity.resources.getDimensionPixelSize(resourceId1)
-            }
+            val insets: WindowInsetsCompat = ViewCompat.getRootWindowInsets(activity.window.decorView) ?: return 0
 
-            // action bar height
-            val styledAttributes: TypedArray =
-                activity.theme.obtainStyledAttributes(intArrayOf(android.R.attr.actionBarSize))
-            val actionBarHeight = styledAttributes.getDimension(0, 0f).toInt()
-            styledAttributes.recycle()
+            val statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
+            val actionBarHeight = activity.supportActionBar?.height ?: 0
+            val navBarHeight = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
 
-            // navigation bar height
-            var navigationBarHeight = 0
-            val resourceId2: Int =
-                activity.resources.getIdentifier("navigation_bar_height", "dimen", "android")
-            if (resourceId2 > 0) {
-                navigationBarHeight = activity.resources.getDimensionPixelSize(resourceId2)
-            }
-
-            return statusBarHeight + actionBarHeight + navigationBarHeight
+            return statusBarHeight + actionBarHeight + navBarHeight
         }
 
         fun isTablet(): Boolean {

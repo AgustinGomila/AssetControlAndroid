@@ -59,7 +59,6 @@ import com.dacosys.assetControl.utils.misc.ParcelLong
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetLong
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsPutBoolean
-import com.dacosys.assetControl.utils.preferences.Repository
 import com.dacosys.assetControl.utils.preferences.Repository.Companion.useImageControl
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.ScannedCode
@@ -623,7 +622,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
                 Handler(Looper.getMainLooper()).postDelayed({
                     recyclerAdapter?.selectItem(ls, false)
                     recyclerAdapter?.scrollToPos(cs, true)
-                }, 100)
+                }, 200)
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
@@ -646,7 +645,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
             editAssetRequiredListener = this
         )
 
-        if (Repository.useImageControl) {
+        if (useImageControl) {
             recyclerAdapter?.refreshImageControlListeners(
                 addPhotoListener = this,
                 albumViewListener = this
@@ -736,9 +735,19 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         }
 
         // Opción de visibilidad de Imágenes
-        if (useImageControl)
+        if (useImageControl) {
             menu.add(Menu.NONE, menuItemShowImages, menu.size, getContext().getString(R.string.show_images))
                 .setChecked(showImages).isCheckable = true
+            val item = menu.findItem(menuItemShowImages)
+            if (showImages)
+                item.icon = ContextCompat.getDrawable(getContext(), R.drawable.ic_photo_library)
+            else
+                item.icon = ContextCompat.getDrawable(getContext(), R.drawable.ic_hide_image)
+            item.icon?.mutate()?.colorFilter =
+                BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
+                    getColor(R.color.dimgray), BlendModeCompat.SRC_IN
+                )
+        }
 
         val menuItems = menu.size()
 
@@ -879,6 +888,14 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
 
             menuItemShowImages -> {
                 recyclerAdapter?.showImages(item.isChecked)
+                if (item.isChecked)
+                    item.icon = ContextCompat.getDrawable(getContext(), R.drawable.ic_photo_library)
+                else
+                    item.icon = ContextCompat.getDrawable(getContext(), R.drawable.ic_hide_image)
+                item.icon?.mutate()?.colorFilter =
+                    BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
+                        getColor(R.color.dimgray), BlendModeCompat.SRC_IN
+                    )
             }
 
             else -> {
@@ -939,7 +956,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
     }
 
     override fun onAddPhotoRequired(tableId: Int, itemId: Long, description: String) {
-        if (!Repository.useImageControl) {
+        if (!useImageControl) {
             return
         }
 
@@ -974,7 +991,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         }
 
     override fun onAlbumViewRequired(tableId: Int, itemId: Long) {
-        if (!Repository.useImageControl) {
+        if (!useImageControl) {
             return
         }
 

@@ -230,6 +230,7 @@ class WarehouseMovementContentConfirmActivity : AppCompatActivity(),
             panelBottomIsExpanded -> {
                 binding.expandBottomPanelButton?.text = getString(R.string.collapse_panel)
             }
+
             else -> {
                 binding.expandBottomPanelButton?.text = getString(R.string.more_options)
             }
@@ -239,6 +240,7 @@ class WarehouseMovementContentConfirmActivity : AppCompatActivity(),
             panelTopIsExpanded -> {
                 binding.expandTopPanelButton?.text = getString(R.string.collapse_panel)
             }
+
             else -> {
                 binding.expandTopPanelButton?.text = getString(R.string.select_destination)
             }
@@ -296,6 +298,7 @@ class WarehouseMovementContentConfirmActivity : AppCompatActivity(),
                 panelBottomIsExpanded -> {
                     binding.expandBottomPanelButton?.text = getString(R.string.collapse_panel)
                 }
+
                 else -> {
                     binding.expandBottomPanelButton?.text = getString(R.string.more_options)
                 }
@@ -355,6 +358,7 @@ class WarehouseMovementContentConfirmActivity : AppCompatActivity(),
                 panelTopIsExpanded -> {
                     binding.expandTopPanelButton?.text = getString(R.string.collapse_panel)
                 }
+
                 else -> {
                     binding.expandTopPanelButton?.text = getString(R.string.select_destination)
                 }
@@ -380,7 +384,7 @@ class WarehouseMovementContentConfirmActivity : AppCompatActivity(),
 
         if (imageControlFragment == null) {
             imageControlFragment = ImageControlButtonsFragment.newInstance(
-                Table.warehouseMovement.tableId.toLong(), "0", null
+                Table.warehouseMovement.tableId.toLong(), "0"
             )
 
             if (description.isNotEmpty()) {
@@ -560,6 +564,7 @@ class WarehouseMovementContentConfirmActivity : AppCompatActivity(),
                 onBackPressed()
                 true
             }
+
             else -> {
                 super.onOptionsItemSelected(item)
             }

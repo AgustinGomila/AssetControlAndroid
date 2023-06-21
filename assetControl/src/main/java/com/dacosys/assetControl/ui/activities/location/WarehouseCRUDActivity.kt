@@ -272,7 +272,7 @@ class WarehouseCRUDActivity : AppCompatActivity(), CrudCompleted,
 
         if (imageControlFragment == null) {
             imageControlFragment = ImageControlButtonsFragment.newInstance(
-                Table.warehouse.tableId.toLong(), warehouseId.toString(), null
+                Table.warehouse.tableId.toLong(), warehouseId.toString()
             )
 
             if (description.isNotEmpty()) {

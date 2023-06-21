@@ -392,7 +392,7 @@ class AssetReviewContentConfirmActivity : AppCompatActivity(),
         if (imageControlFragment == null) {
             imageControlFragment =
                 ImageControlButtonsFragment.newInstance(
-                    Table.assetReview.tableId.toLong(), ar.collectorAssetReviewId.toString(), null
+                    Table.assetReview.tableId.toLong(), ar.collectorAssetReviewId.toString()
                 )
         }
 
