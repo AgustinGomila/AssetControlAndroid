@@ -47,7 +47,7 @@
 
             <androidx.fragment.app.FragmentContainerView
                 android:id="@+id/imageControlFragment"
-                android:name="com.dacosys.imageControl.fragments.ImageControlButtonsFragment"
+                android:name="com.dacosys.imageControl.ui.fragments.ImageControlButtonsFragment"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 tools:layout="@layout/image_control_button_panel_fragment" />
