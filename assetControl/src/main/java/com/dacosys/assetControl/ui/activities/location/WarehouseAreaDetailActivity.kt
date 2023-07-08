@@ -12,8 +12,8 @@ import com.dacosys.assetControl.ui.common.snackbar.MakeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Screen.Companion.setupUI
-import com.dacosys.imageControl.moshi.DocumentContent
-import com.dacosys.imageControl.moshi.DocumentContentRequestResult
+import com.dacosys.imageControl.dto.DocumentContent
+import com.dacosys.imageControl.dto.DocumentContentRequestResult
 import com.dacosys.imageControl.network.webService.WsFunction
 import com.dacosys.imageControl.ui.activities.ImageControlGridActivity
 

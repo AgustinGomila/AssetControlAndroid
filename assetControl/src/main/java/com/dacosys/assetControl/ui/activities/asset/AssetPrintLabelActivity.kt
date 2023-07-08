@@ -69,8 +69,8 @@ import com.dacosys.assetControl.utils.scanners.nfc.Nfc
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid.Companion.isRfidRequired
 import com.dacosys.assetControl.utils.settings.Preference
-import com.dacosys.imageControl.moshi.DocumentContent
-import com.dacosys.imageControl.moshi.DocumentContentRequestResult
+import com.dacosys.imageControl.dto.DocumentContent
+import com.dacosys.imageControl.dto.DocumentContentRequestResult
 import com.dacosys.imageControl.network.common.ProgramData
 import com.dacosys.imageControl.network.download.GetImages.Companion.toDocumentContentList
 import com.dacosys.imageControl.network.webService.WsFunction

@@ -5,9 +5,8 @@ import com.dacosys.assetControl.R
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarEventData
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.utils.ImageControl.Companion.setupImageControl
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.imageControl.moshi.UserAuthResult
+import com.dacosys.imageControl.dto.UserAuthResult
 import kotlinx.coroutines.*
 
 class ImageControlCheckUser(private var onSnackBarEvent: (SnackBarEventData) -> Unit = {}) {
