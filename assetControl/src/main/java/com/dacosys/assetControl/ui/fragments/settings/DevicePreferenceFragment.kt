@@ -21,7 +21,7 @@ import androidx.preference.*
 import androidx.preference.Preference.OnPreferenceClickListener
 import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.ui.activities.main.SettingsActivity
+import com.dacosys.assetControl.ui.activities.main.SettingsActivity.Companion.bindPreferenceSummaryToValue
 import com.dacosys.assetControl.ui.common.snackbar.MakeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarEventData
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
@@ -31,7 +31,6 @@ import com.dacosys.assetControl.utils.preferences.Preferences
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.utils.scanners.rfid.RfidType
 import com.dacosys.assetControl.utils.scanners.vh75.Vh75Bt
-import com.dacosys.assetControl.utils.settings.Preference
 import com.dacosys.assetControl.utils.settings.collectorType.CollectorType
 import com.dacosys.assetControl.utils.settings.collectorType.CollectorTypePreference
 import com.dacosys.assetControl.utils.settings.devices.DevicePreference
@@ -44,7 +43,7 @@ import kotlin.concurrent.thread
  * This fragment shows notification preferences only. It is used when the
  * activity is showing a two-pane settings UI.
  */
-class DevicesPreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceListener {
+class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceListener {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         var key = rootKey
         if (arguments != null) {
@@ -64,13 +63,13 @@ class DevicesPreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceLis
 
             "symbology" -> {}
             else -> {
-                setDevicesPref()
+                setDevicePref()
             }
         }
     }
 
     override fun onNavigateToScreen(preferenceScreen: PreferenceScreen) {
-        val prefFragment = DevicesPreferenceFragment()
+        val prefFragment = DevicePreferenceFragment()
         val args = Bundle()
         args.putString("rootKey", preferenceScreen.key)
         prefFragment.arguments = args
@@ -107,7 +106,7 @@ class DevicesPreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceLis
         }
     }
 
-    private fun setDevicesPref() {
+    private fun setDevicePref() {
         setPrinterPref()
         setCollectorPref()
         setRfidPref()
@@ -115,13 +114,11 @@ class DevicesPreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceLis
 
     private fun setCollectorPref() {
         ////////////////// COLECTOR //////////////////
-        SettingsActivity.bindPreferenceSummaryToValue(
-            this, Preference.collectorType
-        )
+        bindPreferenceSummaryToValue(this, p.collectorType)
 
         // PERMITE ACTUALIZAR EN PANTALLA EL ITEM SELECCIONADO EN EL SUMMARY DEL CONTROL
         val collectorTypeListPreference =
-            findPreference<androidx.preference.Preference>(Preference.collectorType.key) as CollectorTypePreference
+            findPreference<Preference>(p.collectorType.key) as CollectorTypePreference
         if (collectorTypeListPreference.value == null) {
             // to ensure we don't selectByItemId a null value
             // set first value by default
@@ -131,7 +128,7 @@ class DevicesPreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceLis
         collectorTypeListPreference.summary =
             CollectorType.getById(collectorTypeListPreference.value?.toInt() ?: 0).description
         collectorTypeListPreference.onPreferenceChangeListener =
-            androidx.preference.Preference.OnPreferenceChangeListener { preference, newValue ->
+            Preference.OnPreferenceChangeListener { preference, newValue ->
                 preference.summary = CollectorType.getById(newValue.toString().toInt()).description
                 Collector.collectorTypeChanged = true
                 true
@@ -160,6 +157,7 @@ class DevicesPreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceLis
 
     private var useBtPrinter = false
     private var useNetPrinter = false
+    val p = com.dacosys.assetControl.utils.settings.Preference
 
     private fun getPrinterName(
         btPrinterName: CharSequence,
@@ -184,11 +182,11 @@ class DevicesPreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceLis
 
     private fun setPrinterPref() {
         /////// PANTALLA DE CONFIGURACIÓN DE LA IMPRESORA ///////
-        val printerPref = findPreference<androidx.preference.Preference>("printer") as PreferenceScreen
+        val printerPref = findPreference<Preference>("printer") as PreferenceScreen
 
         //region //// DEVICE LIST
         val deviceListPreference =
-            findPreference<androidx.preference.Preference>(Preference.printerBtAddress.key) as DevicePreference
+            findPreference<Preference>(p.printerBtAddress.key) as DevicePreference
         if (deviceListPreference.value == null) {
             // to ensure we don't selectByItemId a null value
             // set first value by default
@@ -198,7 +196,7 @@ class DevicesPreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceLis
             if (deviceListPreference.entry.isNullOrEmpty()) getString(R.string.there_is_no_selected_printer)
             else deviceListPreference.entry
         deviceListPreference.onPreferenceChangeListener =
-            androidx.preference.Preference.OnPreferenceChangeListener { preference, _ ->
+            Preference.OnPreferenceChangeListener { preference, _ ->
                 val pn =
                     if (deviceListPreference.entry.isNullOrEmpty()) getString(R.string.there_is_no_selected_printer)
                     else deviceListPreference.entry.toString()
@@ -210,11 +208,11 @@ class DevicesPreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceLis
 
         //region //// PRINTER IP / PORT
         val portNetPrinterPref =
-            findPreference<androidx.preference.Preference>(Preference.portNetPrinter.key) as EditTextPreference
+            findPreference<Preference>(p.portNetPrinter.key) as EditTextPreference
         portNetPrinterPref.summary = portNetPrinterPref.text
 
         val ipNetPrinterPref =
-            findPreference<androidx.preference.Preference>(Preference.ipNetPrinter.key) as EditTextPreference
+            findPreference<Preference>(p.ipNetPrinter.key) as EditTextPreference
         ipNetPrinterPref.summary = ipNetPrinterPref.text
 
         ipNetPrinterPref.setOnBindEditTextListener {
@@ -244,12 +242,10 @@ class DevicesPreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceLis
         //endregion //// PRINTER IP / PORT
 
         //region //// USE BLUETOOTH / NET PRINTER
-        val swPrefBtPrinter =
-            findPreference<androidx.preference.Preference>(Preference.useBtPrinter.key) as SwitchPreference
+        val swPrefBtPrinter = findPreference<Preference>(p.useBtPrinter.key) as SwitchPreference
         useBtPrinter = swPrefBtPrinter.isChecked
 
-        val swPrefNetPrinter =
-            findPreference<androidx.preference.Preference>(Preference.useNetPrinter.key) as SwitchPreference
+        val swPrefNetPrinter = findPreference<Preference>(p.useNetPrinter.key) as SwitchPreference
         useNetPrinter = swPrefNetPrinter.isChecked
 
         swPrefBtPrinter.setOnPreferenceChangeListener { _, newValue ->
@@ -272,14 +268,14 @@ class DevicesPreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceLis
         //region //// POTENCIA Y VELOCIDAD
         val maxPower = 23
         val printerPowerPref =
-            findPreference<androidx.preference.Preference>(Preference.printerPower.key) as EditTextPreference
+            findPreference<Preference>(p.printerPower.key) as EditTextPreference
         printerPowerPref.summary = printerPowerPref.text
         printerPowerPref.setOnBindEditTextListener {
             val filters = arrayOf(InputFilter { source, _, _, dest, _, _ ->
                 try {
                     val input = (dest.toString() + source.toString()).toInt()
                     if (input in 1 until maxPower) return@InputFilter null
-                } catch (nfe: NumberFormatException) {
+                } catch (ignore: NumberFormatException) {
                 }
                 ""
             })
@@ -288,14 +284,14 @@ class DevicesPreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceLis
 
         val maxSpeed = 10
         val printerSpeedPref =
-            findPreference<androidx.preference.Preference>(Preference.printerSpeed.key) as EditTextPreference
+            findPreference<Preference>(p.printerSpeed.key) as EditTextPreference
         printerSpeedPref.summary = printerSpeedPref.text
         printerSpeedPref.setOnBindEditTextListener {
             val filters = arrayOf(InputFilter { source, _, _, dest, _, _ ->
                 try {
                     val input = (dest.toString() + source.toString()).toInt()
                     if (input in 1 until maxSpeed) return@InputFilter null
-                } catch (nfe: NumberFormatException) {
+                } catch (ignore: NumberFormatException) {
                 }
                 ""
             })
@@ -303,20 +299,20 @@ class DevicesPreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceLis
         }
         //endregion //// POTENCIA Y VELOCIDAD
 
-        //region //// CARACTER DE SALTO DE LÍNEA
+        //region //// CARÁCTER DE SALTO DE LÍNEA
         val swPrefCharLF =
-            findPreference<androidx.preference.Preference>("conf_printer_new_line_char_lf") as SwitchPreference
+            findPreference<Preference>("conf_printer_new_line_char_lf") as SwitchPreference
         val swPrefCharCR =
-            findPreference<androidx.preference.Preference>("conf_printer_new_line_char_cr") as SwitchPreference
+            findPreference<Preference>("conf_printer_new_line_char_cr") as SwitchPreference
 
-        val lineSeparator = Preferences.prefsGetString(Preference.lineSeparator)
+        val lineSeparator = Preferences.prefsGetString(p.lineSeparator)
         if (lineSeparator == Char(10).toString()) swPrefCharLF.isChecked
         else if (lineSeparator == Char(13).toString()) swPrefCharCR.isChecked
 
         swPrefCharLF.setOnPreferenceChangeListener { _, newValue ->
             if (newValue == true) {
                 Preferences.prefsPutString(
-                    Preference.lineSeparator.key, Char(10).toString()
+                    p.lineSeparator.key, Char(10).toString()
                 )
                 swPrefCharCR.isChecked = false
             }
@@ -326,13 +322,13 @@ class DevicesPreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceLis
         swPrefCharCR.setOnPreferenceChangeListener { _, newValue ->
             if (newValue == true) {
                 Preferences.prefsPutString(
-                    Preference.lineSeparator.key, Char(13).toString()
+                    p.lineSeparator.key, Char(13).toString()
                 )
                 swPrefCharLF.isChecked = false
             }
             true
         }
-        //endregion //// CARACTER DE SALTO DE LÍNEA
+        //endregion //// CARÁCTER DE SALTO DE LÍNEA
 
         printerPref.summary = if (!useBtPrinter && !useNetPrinter) getString(R.string.disabled)
         else getPrinterName(
@@ -354,7 +350,7 @@ class DevicesPreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceLis
 
     private val resultForRfidPermissionConnect =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            // returns boolean representind whether the
+            // returns boolean representing whether the
             // permission is granted or not
             if (!isGranted) {
                 MakeText.makeText(
@@ -373,10 +369,10 @@ class DevicesPreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceLis
 
     private fun setRfidPref() {
         ////////////////// RFID DEVICE //////////////////
-        val rfidPref = findPreference<androidx.preference.Preference>("rfid") as PreferenceScreen
+        val rfidPref = findPreference<Preference>("rfid") as PreferenceScreen
 
         //region //// USE RFID
-        val swPrefBtRfid = findPreference<androidx.preference.Preference>(Preference.useBtRfid.key) as SwitchPreference
+        val swPrefBtRfid = findPreference<Preference>(p.useBtRfid.key) as SwitchPreference
         useRfid = swPrefBtRfid.isChecked
 
         swPrefBtRfid.setOnPreferenceChangeListener { _, newValue ->
@@ -391,7 +387,7 @@ class DevicesPreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceLis
 
         //region //// BLUETOOTH NAME
         rfidDeviceNamePreference =
-            findPreference<androidx.preference.Preference>("rfid_bluetooth_name") as EditTextPreference
+            findPreference<Preference>("rfid_bluetooth_name") as EditTextPreference
         if (Rfid.rfidDevice != null && (Rfid.rfidDevice as Vh75Bt).getState() == Vh75Bt.STATE_CONNECTED) {
             (Rfid.rfidDevice as Vh75Bt).getBluetoothName()
         }
@@ -417,14 +413,14 @@ class DevicesPreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceLis
 
         //region //// DEVICE LIST PREFERENCE
         val deviceListPreference =
-            findPreference<androidx.preference.Preference>(Preference.rfidBtAddress.key) as DevicePreference
+            findPreference<Preference>(p.rfidBtAddress.key) as DevicePreference
         if (deviceListPreference.value == null) {
             // to ensure we don't selectByItemId a null value
             // set first value by default
             deviceListPreference.setValueIndex(0)
         }
         deviceListPreference.onPreferenceChangeListener =
-            androidx.preference.Preference.OnPreferenceChangeListener { preference, newValue ->
+            Preference.OnPreferenceChangeListener { preference, newValue ->
                 rfidName = getBluetoothNameFromAddress(
                     newValue, getString(R.string.there_is_no_selected_rfid_scanner)
                 )
@@ -444,17 +440,17 @@ class DevicesPreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceLis
 
         //region //// RFID POWER
         val rfidReadPower =
-            findPreference<androidx.preference.Preference>(Preference.rfidReadPower.key) as SeekBarPreference
+            findPreference<Preference>(p.rfidReadPower.key) as SeekBarPreference
         rfidReadPower.setOnPreferenceChangeListener { _, newValue ->
             rfidReadPower.summary = "$newValue dB"
             true
         }
-        rfidReadPower.summary = "${Preferences.prefsGetInt(Preference.rfidReadPower)} dB"
+        rfidReadPower.summary = "${Preferences.prefsGetInt(p.rfidReadPower)} dB"
         //endregion //// RFID POWER
 
         //region //// RESET TO FACTORY
         val resetButton =
-            findPreference<androidx.preference.Preference>("rfid_reset_to_factory") as androidx.preference.Preference
+            findPreference<Preference>("rfid_reset_to_factory") as Preference
         resetButton.onPreferenceClickListener = OnPreferenceClickListener {
             if (Rfid.rfidDevice != null && (Rfid.rfidDevice as Vh75Bt).getState() == Vh75Bt.STATE_CONNECTED) {
                 val diaBox = askForResetToFactory()
@@ -529,7 +525,7 @@ class DevicesPreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceLis
 
     private val resultForBtPermissionConnect =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            // returns boolean representind whether the
+            // returns boolean representing whether the
             // permission is granted or not
             if (!isGranted) {
                 MakeText.makeText(

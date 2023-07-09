@@ -19,6 +19,7 @@ import com.dacosys.assetControl.network.checkConn.ImageControlCheckUser
 import com.dacosys.assetControl.network.utils.ClientPackage
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.ui.activities.main.SettingsActivity
+import com.dacosys.assetControl.ui.activities.main.SettingsActivity.Companion.bindPreferenceSummaryToValue
 import com.dacosys.assetControl.ui.common.snackbar.MakeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarEventData
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
@@ -57,20 +58,20 @@ class ImageControlPreferenceFragment : PreferenceFragmentCompat(), ClientPackage
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        SettingsActivity.bindPreferenceSummaryToValue(this, p.icPhotoMaxHeightOrWidth)
-        SettingsActivity.bindPreferenceSummaryToValue(this, p.icWsServer)
-        SettingsActivity.bindPreferenceSummaryToValue(this, p.icWsNamespace)
+        bindPreferenceSummaryToValue(this, p.icPhotoMaxHeightOrWidth)
+        bindPreferenceSummaryToValue(this, p.icWsServer)
+        bindPreferenceSummaryToValue(this, p.icWsNamespace)
 
         if (BuildConfig.DEBUG) {
-            SettingsActivity.bindPreferenceSummaryToValue(this, p.icWsUser)
-            SettingsActivity.bindPreferenceSummaryToValue(this, p.icWsPass)
-            SettingsActivity.bindPreferenceSummaryToValue(this, p.icUser)
-            SettingsActivity.bindPreferenceSummaryToValue(this, p.icPass)
+            bindPreferenceSummaryToValue(this, p.icWsUser)
+            bindPreferenceSummaryToValue(this, p.icWsPass)
+            bindPreferenceSummaryToValue(this, p.icUser)
+            bindPreferenceSummaryToValue(this, p.icPass)
         }
 
         findPreference<Preference>(p.icWsUseProxy.key)
-        SettingsActivity.bindPreferenceSummaryToValue(this, p.icWsProxy)
-        SettingsActivity.bindPreferenceSummaryToValue(this, p.icWsProxyPort)
+        bindPreferenceSummaryToValue(this, p.icWsProxy)
+        bindPreferenceSummaryToValue(this, p.icWsProxyPort)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

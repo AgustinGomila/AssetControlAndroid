@@ -21,7 +21,7 @@ import com.dacosys.assetControl.R
 import com.dacosys.assetControl.dataBase.DataBaseHelper
 import com.dacosys.assetControl.network.download.DownloadDb
 import com.dacosys.assetControl.network.sync.SyncDownload
-import com.dacosys.assetControl.ui.activities.main.SettingsActivity
+import com.dacosys.assetControl.ui.activities.main.SettingsActivity.Companion.bindPreferenceSummaryToValue
 import com.dacosys.assetControl.ui.common.snackbar.MakeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarEventData
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
@@ -78,8 +78,8 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
         // updated to reflect the new value, per the Android Design
         // guidelines.
 
-        SettingsActivity.bindPreferenceSummaryToValue(this, ConfEntry.acSyncQtyRegistry)
-        SettingsActivity.bindPreferenceSummaryToValue(this, p.acSyncInterval)
+        bindPreferenceSummaryToValue(this, ConfEntry.acSyncQtyRegistry)
+        bindPreferenceSummaryToValue(this, p.acSyncInterval)
 
         val downloadDbButton = findPreference<Preference>("download_db_data")
         downloadDbButton?.onPreferenceClickListener = OnPreferenceClickListener {
@@ -393,7 +393,7 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
                 )
             }
 
-            // Crear una colección de las URI's de los archivo a adjuntar
+            /* Crear una colección de los URI del archivo a adjuntar */
             val uris = ArrayList<Uri>()
             uris.add(dbFilePath)
             if (lastErrorLogPath != null) {

@@ -13,6 +13,7 @@ import androidx.preference.PreferenceScreen
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.ui.activities.main.SettingsActivity
+import com.dacosys.assetControl.ui.activities.main.SettingsActivity.Companion.bindPreferenceSummaryToValue
 import com.dacosys.assetControl.ui.common.snackbar.MakeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.utils.ConfigHelper
@@ -54,13 +55,13 @@ class GeneralPreferenceFragment : PreferenceFragmentCompat() {
         // to their values. When their values change, their summaries are
         // updated to reflect the new value, per the Android Design
         // guidelines.
-        SettingsActivity.bindPreferenceSummaryToValue(this, p.acFilterRouteDescription)
+        bindPreferenceSummaryToValue(this, p.acFilterRouteDescription)
 
         findPreference<Preference>(p.registryError.key) as Preference
         findPreference<Preference>(p.showConfButton.key) as Preference
 
         if (BuildConfig.DEBUG) {
-            SettingsActivity.bindPreferenceSummaryToValue(this, p.confPassword)
+            bindPreferenceSummaryToValue(this, p.confPassword)
         }
     }
 

@@ -41,6 +41,11 @@ class ErrorLog {
         private val PERMISSIONS_STORAGE = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
 
         private fun verifyPermissions(activity: Activity) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                reallyWriteLog()
+                return
+            }
+
             // Check if we have write permission
             val storagePermission = ActivityCompat.checkSelfPermission(
                 activity,

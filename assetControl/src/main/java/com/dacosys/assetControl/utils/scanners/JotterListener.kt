@@ -178,7 +178,7 @@ object JotterListener : Jotter.Listener {
 
         when (requestCode) {
             REQUEST_BLUETOOTH_CONNECT -> {
-                // If request is cancelled, the result arrays are empty.
+                // If the request is canceled, the result arrays are empty.
                 if (grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
                     makeText(
                         activity.window.decorView,

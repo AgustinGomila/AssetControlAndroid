@@ -174,7 +174,7 @@ class AccountPreferenceFragment : PreferenceFragmentCompat(), ClientPackage.Comp
             true
         }
 
-        // Si ya está loggeado, deshabilitar estas opciones
+        // Si ya está autentificado, deshabilitar estas opciones
         if (Statics.currentUserId != null) {
             passwordEditText?.isEnabled = false
             emailEditText?.isEnabled = false

@@ -8,6 +8,7 @@ import androidx.preference.PreferenceScreen
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.ui.activities.main.SettingsActivity
+import com.dacosys.assetControl.ui.activities.main.SettingsActivity.Companion.bindPreferenceSummaryToValue
 import com.dacosys.assetControl.utils.preferences.Preferences
 
 /**
@@ -36,19 +37,19 @@ class MaintenancePreferenceFragment : PreferenceFragmentCompat() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        SettingsActivity.bindPreferenceSummaryToValue(this, p.acMantWsServer)
-        SettingsActivity.bindPreferenceSummaryToValue(this, p.acMantWsNamespace)
+        bindPreferenceSummaryToValue(this, p.acMantWsServer)
+        bindPreferenceSummaryToValue(this, p.acMantWsNamespace)
 
         if (BuildConfig.DEBUG) {
-            SettingsActivity.bindPreferenceSummaryToValue(this, p.acMantWsUser)
-            SettingsActivity.bindPreferenceSummaryToValue(this, p.acMantWsPass)
-            SettingsActivity.bindPreferenceSummaryToValue(this, p.acMantUser)
-            SettingsActivity.bindPreferenceSummaryToValue(this, p.acMantPass)
+            bindPreferenceSummaryToValue(this, p.acMantWsUser)
+            bindPreferenceSummaryToValue(this, p.acMantWsPass)
+            bindPreferenceSummaryToValue(this, p.acMantUser)
+            bindPreferenceSummaryToValue(this, p.acMantPass)
         }
 
         findPreference<Preference>(p.acMantWsUseProxy.key)
-        SettingsActivity.bindPreferenceSummaryToValue(this, p.acMantWsProxy)
-        SettingsActivity.bindPreferenceSummaryToValue(this, p.acMantWsProxyPort)
+        bindPreferenceSummaryToValue(this, p.acMantWsProxy)
+        bindPreferenceSummaryToValue(this, p.acMantWsProxyPort)
 
         val button = findPreference<Preference>("ac_mant_test")
         button?.onPreferenceClickListener = OnPreferenceClickListener {

@@ -15,6 +15,7 @@ import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.network.download.DownloadDb
 import com.dacosys.assetControl.ui.activities.main.SettingsActivity
+import com.dacosys.assetControl.ui.activities.main.SettingsActivity.Companion.bindPreferenceSummaryToValue
 import com.dacosys.assetControl.ui.common.snackbar.MakeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.utils.ConfigHelper
@@ -52,18 +53,18 @@ class WebservicePreferenceFragment : PreferenceFragmentCompat() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        SettingsActivity.bindPreferenceSummaryToValue(this, p.acWsServer)
-        SettingsActivity.bindPreferenceSummaryToValue(this, p.acWsNamespace)
+        bindPreferenceSummaryToValue(this, p.acWsServer)
+        bindPreferenceSummaryToValue(this, p.acWsNamespace)
 
         if (BuildConfig.DEBUG) {
-            SettingsActivity.bindPreferenceSummaryToValue(this, p.acWsUser)
-            SettingsActivity.bindPreferenceSummaryToValue(this, p.acWsPass)
-            SettingsActivity.bindPreferenceSummaryToValue(this, p.acUser)
-            SettingsActivity.bindPreferenceSummaryToValue(this, p.acPass)
+            bindPreferenceSummaryToValue(this, p.acWsUser)
+            bindPreferenceSummaryToValue(this, p.acWsPass)
+            bindPreferenceSummaryToValue(this, p.acUser)
+            bindPreferenceSummaryToValue(this, p.acPass)
         }
 
-        SettingsActivity.bindPreferenceSummaryToValue(this, p.acWsProxy)
-        SettingsActivity.bindPreferenceSummaryToValue(this, p.acWsProxyPort)
+        bindPreferenceSummaryToValue(this, p.acWsProxy)
+        bindPreferenceSummaryToValue(this, p.acWsProxyPort)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
