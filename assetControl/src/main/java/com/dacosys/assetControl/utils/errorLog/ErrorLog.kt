@@ -35,9 +35,7 @@ class ErrorLog {
         }
 
         var errorLogPath =
-            getContext().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
-                .toString() +
-                    "${Statics.AC_ROOT_PATH}${Statics.ERROR_LOG_PATH}"
+            "${getContext().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)}${Statics.ERROR_LOG_PATH}"
 
         private const val REQUEST_EXTERNAL_STORAGE = 1777
         private val PERMISSIONS_STORAGE = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)

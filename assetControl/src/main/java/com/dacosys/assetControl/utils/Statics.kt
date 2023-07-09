@@ -22,8 +22,12 @@ class Statics {
         const val superDemoMode = false
 
         var demoQrConfigCode = """
-{"config":{"client_email":"demo@dacosys.com","client_password":"1234"}}
-                    """.trimIndent()
+{
+  "config": {
+    "client_email": "demo@dacosys.com",
+    "client_password": "1234"
+  }
+}""".trimIndent()
         // endregion DEBUG DEMO
 
         val appName: String

@@ -16,7 +16,6 @@ class AssetControlApp : Application() {
         // Setup ImageControl context
         com.dacosys.imageControl.ImageControl().create(
             context = applicationContext,
-            appRothPath = AC_ROOT_PATH,
             id = INTERNAL_IMAGE_CONTROL_APP_ID
         )
 
