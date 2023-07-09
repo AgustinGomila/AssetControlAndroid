@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -129,7 +130,11 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
             try {
                 val permissions = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 activity?.let {
-                    if (hasPermissions(activity as Context, permissions)) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R || hasPermissions(
+                            activity as Context,
+                            permissions
+                        )
+                    ) {
                         selectFileDb()
                     } else {
                         NEXT_STEP = REQUEST_EXTERNAL_STORAGE_FOR_CUSTOM_DB
@@ -193,7 +198,11 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
             try {
                 val permissions = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 activity?.let {
-                    if (hasPermissions(activity as Context, permissions)) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R || hasPermissions(
+                            activity as Context,
+                            permissions
+                        )
+                    ) {
                         copyDbToDocuments()
                     } else {
                         NEXT_STEP = REQUEST_EXTERNAL_STORAGE_FOR_COPY_DB_TO_DOC
@@ -281,7 +290,9 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
 
                             val permissions = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                             activity?.let {
-                                if (hasPermissions(activity as Context, permissions)) {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R ||
+                                    hasPermissions(activity as Context, permissions)
+                                ) {
                                     copyDb()
                                 } else {
                                     NEXT_STEP = REQUEST_EXTERNAL_STORAGE_FOR_COPY_DB

@@ -170,18 +170,6 @@ class AccountPreferenceFragment : PreferenceFragmentCompat(), ClientPackage.Comp
         val updateAppButton = findPreference<Preference>("update_app") as Preference
         updateAppButton.isEnabled = false
         updateAppButton.onPreferenceClickListener = OnPreferenceClickListener {
-            // if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !requireContext().packageManager.canRequestPackageInstalls()) {
-            //     val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).setData(
-            //         Uri.parse(
-            //             String.format("package:%s", requireContext().packageName)
-            //         )
-            //     )
-            //     resultForRequestPackageInstall.launch(intent)
-            // } else {
-            //     // check storage permission granted if yes then start downloading file
-            //     checkStoragePermission()
-            // }
-
             MakeText.makeText(requireView(), getString(R.string.no_available_option), SnackBarType.INFO)
             true
         }
@@ -207,47 +195,6 @@ class AccountPreferenceFragment : PreferenceFragmentCompat(), ClientPackage.Comp
 
         builder.create().show()
     }
-
-    // private val resultForRequestPackageInstall =
-    //     registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-    //         if (it?.resultCode == CommonStatusCodes.SUCCESS || it?.resultCode == CommonStatusCodes.SUCCESS_CACHE) {
-    //             // check storage permission granted if yes then start downloading file
-    //             checkStoragePermission()
-    //         }
-    //     }
-    //
-    // private fun checkStoragePermission() {
-    //     // Check if the storage permission has been granted
-    //     if (ActivityCompat.checkSelfPermission(
-    //             requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE
-    //         ) != PackageManager.PERMISSION_GRANTED
-    //     ) {
-    //         // Permission is missing and must be requested.
-    //         resultForStoragePermission.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-    //         return
-    //     }
-    //
-    //     // start downloading
-    //     val downloadController = DownloadController(requireView())
-    //     downloadController.enqueueDownload()
-    // }
-    //
-    // private val resultForStoragePermission =
-    //     registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-    //         // returns boolean representing whether the
-    //         // permission is granted or not
-    //         if (!isGranted) {
-    //             makeText(
-    //                 requireView(),
-    //                 requireContext().getString(R.string.app_dont_have_necessary_permissions),
-    //                 ERROR
-    //             )
-    //         } else {
-    //             // start downloading
-    //             val downloadController = DownloadController(requireView())
-    //             downloadController.enqueueDownload()
-    //         }
-    //     }
 
     private fun askForDownloadDbRequired2(
         email: String,

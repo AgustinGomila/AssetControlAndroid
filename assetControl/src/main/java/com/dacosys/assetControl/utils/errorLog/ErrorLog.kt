@@ -3,6 +3,7 @@ package com.dacosys.assetControl.utils.errorLog
 import android.Manifest
 import android.app.Activity
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Environment
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -48,7 +49,9 @@ class ErrorLog {
                 Manifest.permission.WRITE_EXTERNAL_STORAGE
             )
 
-            if (storagePermission != PackageManager.PERMISSION_GRANTED) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R &&
+                storagePermission != PackageManager.PERMISSION_GRANTED
+            ) {
                 ActivityCompat.requestPermissions(
                     activity,
                     PERMISSIONS_STORAGE,
