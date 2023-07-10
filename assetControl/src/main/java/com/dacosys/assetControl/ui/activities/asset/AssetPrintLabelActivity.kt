@@ -1080,9 +1080,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
     }
 
     override fun onAddPhotoRequired(tableId: Int, itemId: Long, description: String) {
-        if (!useImageControl) {
-            return
-        }
+        if (!useImageControl) return
 
         if (!rejectNewInstances) {
             rejectNewInstances = true
@@ -1115,28 +1113,25 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         }
 
     override fun onAlbumViewRequired(tableId: Int, itemId: Long) {
-        if (!useImageControl) {
-            return
-        }
+        if (!useImageControl) return
 
-        if (!rejectNewInstances) {
-            rejectNewInstances = true
+        if (rejectNewInstances) return
+        rejectNewInstances = true
 
-            tempObjectId = itemId.toString()
-            tempTableId = tableId
+        tempObjectId = itemId.toString()
+        tempTableId = tableId
 
-            val programData = ProgramData(
-                programObjectId = tempTableId.toLong(),
-                objId1 = tempObjectId
-            )
+        val programData = ProgramData(
+            programObjectId = tempTableId.toLong(),
+            objId1 = tempObjectId
+        )
 
-            ImageCoroutines().get(programData = programData) {
-                val allLocal = toDocumentContentList(images = it, programData = programData)
-                if (allLocal.isEmpty()) {
-                    getFromWebservice()
-                } else {
-                    showPhotoAlbum(allLocal)
-                }
+        ImageCoroutines().get(programData = programData) {
+            val allLocal = toDocumentContentList(images = it, programData = programData)
+            if (allLocal.isEmpty()) {
+                getFromWebservice()
+            } else {
+                showPhotoAlbum(allLocal)
             }
         }
     }
@@ -1160,8 +1155,13 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         intent.putExtra("programObjectId", tempTableId.toLong())
         intent.putExtra("objectId1", tempObjectId)
         intent.putExtra("docContObjArrayList", images)
-        startActivity(intent)
+        resultForShowPhotoAlbum.launch(intent)
     }
+
+    private val resultForShowPhotoAlbum =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            rejectNewInstances = false
+        }
 
     private var tempObjectId = ""
     private var tempTableId = 0
