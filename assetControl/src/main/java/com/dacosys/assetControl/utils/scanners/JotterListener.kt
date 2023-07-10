@@ -147,17 +147,20 @@ object JotterListener : Jotter.Listener {
 
         when (event) {
             "CREATE" -> {
-                // Ok, esto sólo se ejecutaría luego de onCreate de HomeActivity
+                // Ok, esto solo se ejecutaría luego de onCreate de HomeActivity
                 if (!prefsIsInitialized()) startPrefs()
 
                 onCreate(tActivity)
             }
+
             "RESUME" -> {
                 onResume(tActivity)
             }
+
             "PAUSE" -> {
                 onPause(tActivity)
             }
+
             "DESTROY" -> {
                 onDestroy(tActivity)
             }
@@ -195,7 +198,7 @@ object JotterListener : Jotter.Listener {
     fun autodetectDeviceModel(activity: AppCompatActivity) {
         var collectorType: CollectorType? = collectorType
 
-        // Sólo si no fue configurado o cambió la configuración
+        // Solo si no fue configurado o cambió la configuración
         if (collectorType == null || collectorType == CollectorType.none) {
             val manufacturer = Build.MANUFACTURER
             val model = Build.MODEL
@@ -206,6 +209,7 @@ object JotterListener : Jotter.Listener {
                 ) || manufacturer.startsWith("Universal Global Scientific Industrial") || manufacturer.startsWith(
                     "Foxconn International Holdings Limited"
                 ) -> collectorType = CollectorType.honeywellNative
+
                 manufacturer.contains("Motorola", true) || manufacturer.contains(
                     "Zebra", true
                 ) || manufacturer.contains("Symbol", true) -> collectorType = CollectorType.zebra
@@ -254,16 +258,16 @@ object JotterListener : Jotter.Listener {
      * FloatingCameraBarcode llama a registerForActivityResult para solicitar
      * los permisos que necesita.
      *
-     * Sólo se pueden registrar las actividades en onCreate().
+     * Solo se pueden registrar las actividades en onCreate().
      *
      * Si la actividad ya fue creada, y estamos recreándola para reconfigurar el
      * escáner luego de volver de Settings, estamos llegando aquí después de onResume(),
-     * por lo tanto tenemos que evitar volver a registrar la actividad porque:
+     * por lo tanto, tenemos que evitar volver a registrar la actividad porque:
      *
-     * java.lang.IllegalStateException:
-     * LifecycleOwner com.dacosys.stockControl.xxx.xxxActivity@cf72429
-     * is attempting to register while current state is STARTED.
-     * LifecycleOwners must call register before they are STARTED.
+     *      java.lang.IllegalStateException:
+     *      LifecycleOwner com.dacosys.stockControl.xxx.xxxActivity@cf72429
+     *      is attempting to register while current state is STARTED.
+     *      LifecycleOwners must call register before they are STARTED.
      */
 
     fun create(activity: AppCompatActivity) {
@@ -285,7 +289,7 @@ object JotterListener : Jotter.Listener {
 
     fun rfidStart(activity: AppCompatActivity) {
         Rfid.destroy()
-        Rfid.build(null, activity, RfidType.vh75)
+        Rfid.build(if (activity is Rfid.RfidDeviceListener) activity else null, RfidType.vh75)
     }
 
     private fun rfidSetup(activity: AppCompatActivity) {
