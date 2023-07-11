@@ -38,6 +38,7 @@ import com.dacosys.assetControl.utils.Screen.Companion.getBestContrastColor
 import com.dacosys.assetControl.utils.Screen.Companion.getColorWithAlpha
 import com.dacosys.assetControl.utils.Screen.Companion.manipulateColor
 import com.dacosys.assetControl.utils.preferences.Repository.Companion.useImageControl
+import com.dacosys.imageControl.Statics
 import com.dacosys.imageControl.adapter.ImageAdapter
 import com.dacosys.imageControl.adapter.ImageAdapter.Companion.GetImageStatus
 import com.dacosys.imageControl.adapter.ImageAdapter.Companion.ImageControlHolder
@@ -81,7 +82,7 @@ class AssetRecyclerAdapter(
     }
 
     /**
-     * Show images panel on the end of layout
+     * Show an images panel on the end of layout
      *
      * @param show
      */
@@ -92,7 +93,7 @@ class AssetRecyclerAdapter(
     }
 
     /**
-     * Change image control panel visibility on the bottom of layout.
+     * Change image control panel visibility on the bottom of the layout.
      * The state is defined by [useImageControl] preference property.
      *
      */
@@ -161,7 +162,13 @@ class AssetRecyclerAdapter(
     }
 
     interface AddPhotoRequiredListener {
-        fun onAddPhotoRequired(tableId: Int, itemId: Long, description: String)
+        fun onAddPhotoRequired(
+            tableId: Int,
+            itemId: Long,
+            description: String,
+            obs: String = "",
+            reference: String = ""
+        )
     }
 
     // El método onCreateViewHolder infla los diseños para cada tipo de vista
@@ -352,7 +359,10 @@ class AssetRecyclerAdapter(
         addPhotoImageView.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_DOWN) {
                 addPhotoRequiredListener?.onAddPhotoRequired(
-                    tableId = Table.asset.tableId, itemId = asset.assetId, description = asset.description
+                    tableId = Table.asset.tableId,
+                    itemId = asset.assetId,
+                    description = asset.description,
+                    obs = "${getContext().getString(R.string.user)}: ${Statics.currentUserName}"
                 )
             }
             true
@@ -654,7 +664,7 @@ class AssetRecyclerAdapter(
      * Scrolls to the given position, making sure the item can be fully displayed.
      *
      * @param position
-     * @param scrollToTop If it is activated the item will scroll until it is at the top of the view
+     * @param scrollToTop If it is activated, the item will scroll until it is at the top of the view
      */
     fun scrollToPos(position: Int, scrollToTop: Boolean = false) {
         val layoutManager = recyclerView.layoutManager as LinearLayoutManager
@@ -817,7 +827,7 @@ class AssetRecyclerAdapter(
          * Bind image visibility
          *
          * @param imageVisibility Visibility of the image panel
-         * @param changingState Only if we are changing the visibility state we expand the panel
+         * @param changingState Only if we are changing the visibility state, we expand the panel
          */
         fun bindImageVisibility(imageVisibility: Int, changingState: Boolean) {
             if (!useImageControl || imageVisibility == GONE) collapseImagePanel(icHolder)
@@ -990,7 +1000,7 @@ class AssetRecyclerAdapter(
          * Bind image visibility
          *
          * @param imageVisibility Visibility of the image panel
-         * @param changingState Only if we are changing the visibility state we expand the panel
+         * @param changingState Only if we are changing the visibility state, we expand the panel
          */
         fun bindImageVisibility(imageVisibility: Int, changingState: Boolean) {
             if (!useImageControl || imageVisibility == GONE) collapseImagePanel(icHolder)

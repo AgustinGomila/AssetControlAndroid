@@ -1079,7 +1079,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         fillListView()
     }
 
-    override fun onAddPhotoRequired(tableId: Int, itemId: Long, description: String) {
+    override fun onAddPhotoRequired(tableId: Int, itemId: Long, description: String, obs: String, reference: String) {
         if (!useImageControl) return
 
         if (!rejectNewInstances) {
@@ -1090,6 +1090,8 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
             intent.putExtra("programObjectId", tableId.toLong())
             intent.putExtra("objectId1", itemId.toString())
             intent.putExtra("description", description)
+            intent.putExtra("obs", obs)
+            intent.putExtra("reference", reference)
             intent.putExtra("addPhoto", autoSend())
             resultForPhotoCapture.launch(intent)
         }
