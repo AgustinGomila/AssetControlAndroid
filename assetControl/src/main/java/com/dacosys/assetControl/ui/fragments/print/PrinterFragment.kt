@@ -45,6 +45,7 @@ import com.dacosys.assetControl.utils.ConfigHelper
 import com.dacosys.assetControl.utils.Printer.Companion.printerBluetoothDevice
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.CounterHandler
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetLong
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetString
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsPutLong
@@ -53,6 +54,9 @@ import com.google.android.gms.common.api.CommonStatusCodes
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import java.io.IOException
+import java.net.ConnectException
+import java.net.Socket
+import java.net.UnknownHostException
 
 /**
  * A simple [Fragment] subclass.
@@ -71,7 +75,7 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
     private var isReturnedFromSettings = false
 
     // Configuración guardada de los controles que se ven o no se ven
-    var printer: String = ""
+    private var printer: String = ""
     var barcodeLabelCustom: BarcodeLabelCustom? = null
     var barcodeLabelTarget: BarcodeLabelTarget? = null
     var qty: Int = 1
@@ -165,8 +169,6 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
             loadBundleValues(requireArguments())
         } else {
             loadPrinterPreferences()
-
-            initializePrinter()
         }
     }
 
@@ -181,7 +183,7 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
         // endregion TARGET
 
         // region PLANTILLA
-        // Seleccionamos la primer plantilla del tipo deseado si existe alguna.
+        // Seleccionamos la primera plantilla del tipo deseado si existe alguna.
         barcodeLabelCustom = when (requireActivity()) {
             is WarehouseAreaPrintLabelActivity -> {
                 val blcId =
@@ -195,6 +197,7 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
                     ).firstOrNull()
                 }
             }
+
             is AssetPrintLabelActivity -> {
                 val blcId =
                     prefsGetLong(Preference.defaultBarcodeLabelCustomAsset)
@@ -207,12 +210,29 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
                     ).firstOrNull()
                 }
             }
+
             else -> null
         }
         // endregion PLANTILLA
 
         // Cantidad inicial 1
         if (qty <= 0) qty = 1
+
+        // Impresora guardada en preferencias
+        val useBtPrinter = prefsGetBoolean(Preference.useBtPrinter)
+        val useNetPrinter = prefsGetBoolean(Preference.useNetPrinter)
+
+        val pBt = prefsGetString(Preference.printerBtAddress)
+        val pIp = prefsGetString(Preference.ipNetPrinter)
+        val port = prefsGetString(Preference.portNetPrinter)
+
+        printer = when {
+            useBtPrinter -> pBt
+            useNetPrinter -> "$pIp (${port})"
+            else -> ""
+        }
+
+        if (useBtPrinter) initializeBtPrinter()
     }
 
     // region PRINTER
@@ -231,7 +251,7 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
                     Manifest.permission.BLUETOOTH_CONNECT
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
-                // here to request the missing permissions, and then overriding
+                // Here to request the missing permissions, and then overriding
                 //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
                 //                                          int[] grantResults)
                 // to handle the case where the user grants the permission. See the documentation
@@ -260,10 +280,10 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
 
     private val requestConnectPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            // returns boolean representind whether the
+            // returns boolean representing whether the
             // permission is granted or not
             if (isGranted) {
-                // permission granted continue the normal workflow of app
+                // permission granted continues the normal workflow of app
                 Log.i("DEBUG", "permission granted")
             } else {
                 // if permission denied then check whether never ask
@@ -274,38 +294,38 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
             }
         }
 
-    private fun initializePrinter() {
-        if (printerBluetoothDevice != null) {
-            val bluetoothManager = AssetControlApp.getContext()
-                .getSystemService(AppCompatActivity.BLUETOOTH_SERVICE) as BluetoothManager
-            val mBluetoothAdapter = bluetoothManager.adapter
-            if (mBluetoothAdapter == null) {
-                makeText(
-                    binding.root,
-                    getString(R.string.there_are_no_bluetooth_devices),
-                    SnackBarType.ERROR
-                )
-            } else {
-                if (!mBluetoothAdapter.isEnabled) {
-                    if (!rejectNewInstances) {
-                        rejectNewInstances = true
-                        val enablePrinter = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-                        enablePrinter.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-                        if (ActivityCompat.checkSelfPermission(
-                                requireActivity(),
-                                Manifest.permission.BLUETOOTH_CONNECT
-                            ) != PackageManager.PERMISSION_GRANTED
-                        ) {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                requestConnectPermission.launch(Manifest.permission.BLUETOOTH_CONNECT)
-                            }
-                            return
+    private fun initializeBtPrinter() {
+        if (printerBluetoothDevice == null) return
+
+        val bluetoothManager = AssetControlApp.getContext()
+            .getSystemService(AppCompatActivity.BLUETOOTH_SERVICE) as BluetoothManager
+        val mBluetoothAdapter = bluetoothManager.adapter
+        if (mBluetoothAdapter == null) {
+            makeText(
+                binding.root,
+                getString(R.string.there_are_no_bluetooth_devices),
+                SnackBarType.ERROR
+            )
+        } else {
+            if (!mBluetoothAdapter.isEnabled) {
+                if (!rejectNewInstances) {
+                    rejectNewInstances = true
+                    val enablePrinter = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+                    enablePrinter.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    if (ActivityCompat.checkSelfPermission(
+                            requireActivity(),
+                            Manifest.permission.BLUETOOTH_CONNECT
+                        ) != PackageManager.PERMISSION_GRANTED
+                    ) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                            requestConnectPermission.launch(Manifest.permission.BLUETOOTH_CONNECT)
                         }
-                        resultForPrinterConnect.launch(enablePrinter)
+                        return
                     }
-                } else {
-                    connectToPrinter(printerBluetoothDevice!!.address)
+                    resultForPrinterConnect.launch(enablePrinter)
                 }
+            } else {
+                connectToPrinter(printerBluetoothDevice!!.address)
             }
         }
     }
@@ -375,7 +395,7 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
             .counterDelay(50) // speed of counter
             .startNumber(qty.toLong())
             .counterStep(1)  // steps e.g. 0,2,4,6...
-            .listener(this) // to listen counter results and show them in app
+            .listener(this) // to listen to counter results and show them in app
             .build()
 
         binding.qtyEditText.addTextChangedListener(object : TextWatcher {
@@ -618,12 +638,12 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
         }
     }
 
-    // region Filtro para aceptar sólo números entre ciertos parámetros
+    // region Filtro para aceptar solo números entre ciertos parámetros
 
     /**
      * Devuelve una cadena de texto formateada que se ajusta a los parámetros.
      * Devuelve una cadena vacía en caso de Exception.
-     * Devuelve null si no es necesario cambiar la cadena ingresada porque ya se ajusta a los parámatros
+     * Devuelve null si no es necesario cambiar la cadena ingresada porque ya se ajusta a los parámetros
      *          o porque es igual que la cadena original.
      */
     private fun getValidValue(
@@ -670,14 +690,14 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
                 integerPart = validText
             }
 
-            // Si la parte entera es más larga que el máximo de digitos permitidos
-            // retorna un caracter vacío.
+            // Si la parte entera es más larga que el máximo de dígitos permitidos
+            // retorna un carácter vacío.
             if (integerPart.length > maxIntegerPlaces) {
                 return ""
             }
 
             // Si la cantidad de espacios decimales permitidos es cero devolver la parte entera
-            // sino, concatenar la parte entera con el separador de decimales y
+            // si no, concatenar la parte entera con el separador de decimales y
             // la cantidad permitida de decimales.
             val result = if (maxDecimalPlaces == 0) {
                 integerPart
@@ -689,7 +709,7 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
                             if (decimalPart.length > maxDecimalPlaces) maxDecimalPlaces else decimalPart.length
                         )
 
-            // Devolver sólo si son valores positivos diferentes a los de originales.
+            // Devolver solo si son valores positivos diferentes a los de originales.
             // NULL si no hay que hacer cambios sobre el texto original.
             return if (result != source) {
                 result
@@ -780,39 +800,34 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
             return
         }
 
+        if (printer.isEmpty() || prefsGetBoolean(Preference.useBtPrinter) && mBluetoothDevice == null) {
+            makeText(binding.root, getString(R.string.there_is_no_selected_printer), SnackBarType.ERROR)
+            return
+        }
+
         val qty = binding.qtyEditText.text.toString().toInt()
         val blType = barcodeLabelCustom
 
-        var code = ""
+        var sendThis = ""
         for (wa in was) {
-//            makeText(binding.printLabel,
-//                    this,
-//                    "${getString(R.string.id)}: " + currentWa.warehouseAreaId + "\n" +
-//                            "${getString(R.string.description)}: " + currentWa.description,
-//                    SnackbarType.INFO)
-
             val waLf = WarehouseAreaLabelField(wa)
-
             val barcodeLabel = BarcodeLabel((blType ?: return).template)
             barcodeLabel.barcodeFields = waLf.getField()
 
-            code += barcodeLabel.getBarcodeLabel(qty)
+            sendThis += barcodeLabel.getBarcodeLabel(qty)
         }
 
-        val t = object : Thread() {
-            override fun run() {
-                try {
-                    val os = (mBluetoothSocket ?: return).outputStream
-                    os.write(code.toByteArray())
+        when {
+            prefsGetBoolean(Preference.useBtPrinter) -> printBtItem(sendThis)
 
-                    os.flush()
-                } catch (ex: Exception) {
-                    ex.printStackTrace()
-                    ErrorLog.writeLog(null, this::class.java.simpleName, ex)
-                }
-            }
+            prefsGetBoolean(Preference.useNetPrinter) -> printNetItem(sendThis)
+
+            else -> makeText(
+                binding.root,
+                getString(R.string.there_is_no_selected_printer),
+                SnackBarType.ERROR
+            )
         }
-        t.start()
     }
 
     fun printAssetById(assetIdArray: ArrayList<Long>) {
@@ -858,15 +873,6 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
             }
         }
 
-        if (mBluetoothDevice == null) {
-            makeText(
-                binding.root,
-                getString(R.string.there_is_no_selected_printer),
-                SnackBarType.ERROR
-            )
-            return
-        }
-
         if (barcodeLabelCustom == null ||
             (barcodeLabelCustom ?: return).barcodeLabelCustomId == 0L
         ) {
@@ -878,27 +884,102 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
             return
         }
 
+        if (printer.isEmpty() || prefsGetBoolean(Preference.useBtPrinter) && mBluetoothDevice == null) {
+            makeText(binding.root, getString(R.string.there_is_no_selected_printer), SnackBarType.ERROR)
+            return
+        }
+
         val qty = binding.qtyEditText.text.toString().toInt()
         val blType = barcodeLabelCustom
 
-        var code = ""
+        var sendThis = ""
         for (asset in assets) {
             val assetLf = AssetLabelField(asset, false)
             val barcodeLabel = BarcodeLabel((blType ?: return).template)
             barcodeLabel.barcodeFields = assetLf.getField()
-            code += barcodeLabel.getBarcodeLabel(qty)
+            sendThis += barcodeLabel.getBarcodeLabel(qty)
         }
+
+        when {
+            prefsGetBoolean(Preference.useBtPrinter) -> printBtItem(sendThis)
+
+            prefsGetBoolean(Preference.useNetPrinter) -> printNetItem(sendThis)
+
+            else -> makeText(
+                binding.root,
+                getString(R.string.there_is_no_selected_printer),
+                SnackBarType.ERROR
+            )
+        }
+    }
+
+    private fun printNetItem(sendThis: String) {
+        val ipPrinter = prefsGetString(Preference.ipNetPrinter)
+        val portPrinter =
+            try {
+                prefsGetString(Preference.portNetPrinter).toInt()
+            } catch (e: NumberFormatException) {
+                0
+            }
+
+        Log.v(this::class.java.simpleName, "Printer IP: $ipPrinter ($portPrinter)")
+        Log.v(this::class.java.simpleName, sendThis)
 
         val t = object : Thread() {
             override fun run() {
                 try {
-                    val os = (mBluetoothSocket ?: return).outputStream
-                    os.write(code.toByteArray())
+                    val sock = Socket(ipPrinter, portPrinter)
+                    val out = sock.getOutputStream()
+                    out.write(sendThis.toByteArray())
+                    out.flush()
+                    sock.close()
+                } catch (e: UnknownHostException) {
+                    e.printStackTrace()
+                    makeText(
+                        binding.root,
+                        "${getString(R.string.unknown_host)}: $ipPrinter ($portPrinter)",
+                        SnackBarType.ERROR
+                    )
+                } catch (e: ConnectException) {
+                    e.printStackTrace()
+                    makeText(
+                        binding.root,
+                        "${getString(R.string.error_connecting_to)}: $ipPrinter ($portPrinter)",
+                        SnackBarType.ERROR
+                    )
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                    makeText(
+                        binding.root,
+                        "${getString(R.string.error_printing_to)} $ipPrinter ($portPrinter)",
+                        SnackBarType.ERROR
+                    )
+                }
+            }
+        }
+        t.start()
+    }
 
+    private fun printBtItem(sendThis: String) {
+        val t = object : Thread() {
+            override fun run() {
+                try {
+                    val os = mBluetoothSocket?.outputStream ?: return
+                    for (i in 0 until qty) {
+                        os.write(sendThis.toByteArray())
+                    }
                     os.flush()
-                } catch (ex: Exception) {
-                    ex.printStackTrace()
-                    ErrorLog.writeLog(null, this::class.java.simpleName, ex)
+                } catch (e: Exception) {
+                    ErrorLog.writeLog(
+                        requireActivity(),
+                        this::class.java.simpleName,
+                        "${getString(R.string.exception_error)}: " + e.message
+                    )
+                    makeText(
+                        binding.root,
+                        "${getString(R.string.error_connecting_to)}: ${prefsGetString(Preference.printerBtAddress)}",
+                        SnackBarType.ERROR
+                    )
                 }
             }
         }

@@ -309,6 +309,8 @@
         servidor es inválida
     </string>
     <string name="error_connecting_to">Error al conectar a</string>
+    <string name="error_printing_to">Error al imprimir en</string>
+    <string name="unknown_host">Host desconocido</string>
     <string name="file_length">Largo del archivo</string>
     <string name="exception_when_downloading">Excepción al descargar</string>
     <string name="device">Dispositivo</string>
