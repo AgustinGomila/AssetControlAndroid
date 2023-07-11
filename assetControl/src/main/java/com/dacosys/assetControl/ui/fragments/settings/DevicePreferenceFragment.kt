@@ -38,12 +38,17 @@ import com.google.android.gms.common.api.CommonStatusCodes
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 import kotlin.concurrent.thread
+import com.dacosys.assetControl.utils.settings.Preference as p
 
 /**
  * This fragment shows notification preferences only. It is used when the
  * activity is showing a two-pane settings UI.
  */
 class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceListener {
+
+    private lateinit var printerPref: PreferenceScreen
+    private lateinit var rfidPref: PreferenceScreen
+
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         var key = rootKey
         if (arguments != null) {
@@ -62,6 +67,7 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
             }
 
             "symbology" -> {}
+
             else -> {
                 setDevicePref()
             }
@@ -106,7 +112,25 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
         }
     }
 
+    /**
+     * Set device preferences
+     * Llena todos los fragmentos de configuración de dispositivos.
+     * Se usa cuando estamos en la pantalla principal de configuración de dispositivos.
+     */
     private fun setDevicePref() {
+        /* Para actualizar el sumario de la preferencia */
+        /* PANTALLA DE CONFIGURACIÓN DE LA IMPRESORA */
+        printerPref = findPreference<Preference>("printer") as PreferenceScreen
+        printerPref.summaryProvider = Preference.SummaryProvider<PreferenceScreen> {
+            getPrinterName()
+        }
+
+        /* RFID DEVICE */
+        rfidPref = findPreference<Preference>("rfid") as PreferenceScreen
+        rfidPref.summaryProvider = Preference.SummaryProvider<PreferenceScreen> {
+            getRfidSummary()
+        }
+
         setPrinterPref()
         setCollectorPref()
         setRfidPref()
@@ -140,14 +164,7 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
 
     private val ipv4Pattern: Pattern = Pattern.compile(ipv4Regex)
 
-    fun filter(
-        source: CharSequence,
-        start: Int,
-        end: Int,
-        dest: Spanned?,
-        dStart: Int,
-        dEnd: Int,
-    ): CharSequence? {
+    fun filter(source: CharSequence, start: Int, end: Int, dest: Spanned?, dStart: Int, dEnd: Int): CharSequence? {
         if (source == "") return null // Para el backspace
         val builder = java.lang.StringBuilder(dest.toString())
         builder.replace(dStart, dEnd, source.subSequence(start, end).toString())
@@ -155,25 +172,23 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
         return if (!matcher.matches()) "" else null
     }
 
-    private var useBtPrinter = false
-    private var useNetPrinter = false
-    val p = com.dacosys.assetControl.utils.settings.Preference
+    private fun getPrinterName(): String {
+        val useBtPrinter = Preferences.prefsGetBoolean(p.useBtPrinter)
+        val useNetPrinter = Preferences.prefsGetBoolean(p.useNetPrinter)
+        val ipNetPrinter = Preferences.prefsGetString(p.ipNetPrinter)
+        val printerBtAddress = Preferences.prefsGetString(p.printerBtAddress)
+        val portNetPrinter = Preferences.prefsGetString(p.portNetPrinter)
 
-    private fun getPrinterName(
-        btPrinterName: CharSequence,
-        netPrinterIp: CharSequence,
-        netPrinterPort: CharSequence,
-    ): String {
         val r = if (!useBtPrinter && !useNetPrinter) {
+            getString(R.string.disabled)
+        } else if (useBtPrinter && (printerBtAddress.isEmpty() || printerBtAddress == "0")) {
             getString(R.string.there_is_no_selected_printer)
-        } else if (useBtPrinter && btPrinterName.isEmpty()) {
-            getString(R.string.there_is_no_selected_printer)
-        } else if (useNetPrinter && (netPrinterIp.isEmpty() || netPrinterPort.isEmpty())) {
+        } else if (useNetPrinter && ipNetPrinter.isEmpty()) {
             getString(R.string.there_is_no_selected_printer)
         } else {
             when {
-                useBtPrinter -> btPrinterName.toString()
-                useNetPrinter -> "$netPrinterIp ($netPrinterPort)"
+                useBtPrinter -> printerBtAddress
+                useNetPrinter -> "$ipNetPrinter ($portNetPrinter)"
                 else -> getString(R.string.there_is_no_selected_printer)
             }
         }
@@ -181,12 +196,8 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
     }
 
     private fun setPrinterPref() {
-        /////// PANTALLA DE CONFIGURACIÓN DE LA IMPRESORA ///////
-        val printerPref = findPreference<Preference>("printer") as PreferenceScreen
-
         //region //// DEVICE LIST
-        val deviceListPreference =
-            findPreference<Preference>(p.printerBtAddress.key) as DevicePreference
+        val deviceListPreference = findPreference<Preference>(p.printerBtAddress.key) as DevicePreference
         if (deviceListPreference.value == null) {
             // to ensure we don't selectByItemId a null value
             // set first value by default
@@ -201,18 +212,15 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
                     if (deviceListPreference.entry.isNullOrEmpty()) getString(R.string.there_is_no_selected_printer)
                     else deviceListPreference.entry.toString()
                 preference.summary = pn
-                if (useBtPrinter) printerPref.summary = pn
                 true
             }
         //endregion //// DEVICE LIST
 
         //region //// PRINTER IP / PORT
-        val portNetPrinterPref =
-            findPreference<Preference>(p.portNetPrinter.key) as EditTextPreference
+        val portNetPrinterPref = findPreference<Preference>(p.portNetPrinter.key) as EditTextPreference
         portNetPrinterPref.summary = portNetPrinterPref.text
 
-        val ipNetPrinterPref =
-            findPreference<Preference>(p.ipNetPrinter.key) as EditTextPreference
+        val ipNetPrinterPref = findPreference<Preference>(p.ipNetPrinter.key) as EditTextPreference
         ipNetPrinterPref.summary = ipNetPrinterPref.text
 
         ipNetPrinterPref.setOnBindEditTextListener {
@@ -223,19 +231,15 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
             it.filters = filters
         }
         ipNetPrinterPref.setOnPreferenceChangeListener { _, newValue ->
-            if (useNetPrinter && newValue != null) {
+            if (Preferences.prefsGetBoolean(p.useNetPrinter) && newValue != null) {
                 ipNetPrinterPref.summary = newValue.toString()
-                val pn = "$newValue (${portNetPrinterPref.text})"
-                printerPref.summary = pn
             }
             true
         }
 
         portNetPrinterPref.setOnPreferenceChangeListener { _, newValue ->
-            if (useNetPrinter && newValue != null) {
+            if (Preferences.prefsGetBoolean(p.useNetPrinter) && newValue != null) {
                 portNetPrinterPref.summary = newValue.toString()
-                val pn = "${ipNetPrinterPref.text} ($newValue)"
-                printerPref.summary = pn
             }
             true
         }
@@ -243,32 +247,23 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
 
         //region //// USE BLUETOOTH / NET PRINTER
         val swPrefBtPrinter = findPreference<Preference>(p.useBtPrinter.key) as SwitchPreference
-        useBtPrinter = swPrefBtPrinter.isChecked
 
         val swPrefNetPrinter = findPreference<Preference>(p.useNetPrinter.key) as SwitchPreference
-        useNetPrinter = swPrefNetPrinter.isChecked
 
         swPrefBtPrinter.setOnPreferenceChangeListener { _, newValue ->
-            useBtPrinter = newValue != null && newValue == true
             if (newValue == true) swPrefNetPrinter.isChecked = false
-            val pn = if (deviceListPreference.entry.isNullOrEmpty()) getString(R.string.there_is_no_selected_printer)
             else deviceListPreference.entry.toString()
-            if (useBtPrinter) printerPref.summary = pn
             true
         }
         swPrefNetPrinter.setOnPreferenceChangeListener { _, newValue ->
-            useNetPrinter = newValue != null && newValue == true
             if (newValue == true) swPrefBtPrinter.isChecked = false
-            val pn = "${ipNetPrinterPref.text} (${portNetPrinterPref.text})"
-            if (useNetPrinter) printerPref.summary = pn
             true
         }
         //endregion //// USE BLUETOOTH / NET PRINTER
 
         //region //// POTENCIA Y VELOCIDAD
         val maxPower = 23
-        val printerPowerPref =
-            findPreference<Preference>(p.printerPower.key) as EditTextPreference
+        val printerPowerPref = findPreference<Preference>(p.printerPower.key) as EditTextPreference
         printerPowerPref.summary = printerPowerPref.text
         printerPowerPref.setOnBindEditTextListener {
             val filters = arrayOf(InputFilter { source, _, _, dest, _, _ ->
@@ -300,10 +295,8 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
         //endregion //// POTENCIA Y VELOCIDAD
 
         //region //// CARÁCTER DE SALTO DE LÍNEA
-        val swPrefCharLF =
-            findPreference<Preference>("conf_printer_new_line_char_lf") as SwitchPreference
-        val swPrefCharCR =
-            findPreference<Preference>("conf_printer_new_line_char_cr") as SwitchPreference
+        val swPrefCharLF = findPreference<Preference>("conf_printer_new_line_char_lf") as SwitchPreference
+        val swPrefCharCR = findPreference<Preference>("conf_printer_new_line_char_cr") as SwitchPreference
 
         val lineSeparator = Preferences.prefsGetString(p.lineSeparator)
         if (lineSeparator == Char(10).toString()) swPrefCharLF.isChecked
@@ -329,18 +322,7 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
             true
         }
         //endregion //// CARÁCTER DE SALTO DE LÍNEA
-
-        printerPref.summary = if (!useBtPrinter && !useNetPrinter) getString(R.string.disabled)
-        else getPrinterName(
-            btPrinterName = deviceListPreference.entry ?: "",
-            netPrinterIp = ipNetPrinterPref.text.toString(),
-            netPrinterPort = portNetPrinterPref.toString()
-        )
     }
-
-    private var useRfid = false
-    private var rfidSummary = ""
-    private var rfidName = ""
 
     private val resultForRfidConnect = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         if (it?.resultCode == CommonStatusCodes.SUCCESS || it?.resultCode == CommonStatusCodes.SUCCESS_CACHE) {
@@ -363,31 +345,33 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
             }
         }
 
+    private fun getRfidSummary(): String {
+        var rfidSummary =
+            if (Preferences.prefsGetBoolean(p.useBtRfid)) getString(R.string.enabled)
+            else getString(R.string.disabled)
+
+        if (Preferences.prefsGetString(p.rfidBtAddress).isNotEmpty())
+            rfidSummary = "$rfidSummary: ${getBluetoothNameFromAddress()}"
+
+        return rfidSummary
+    }
+
     // Esta preferencia se utiliza al recibir el nombre del dispositivo
     // RFID seleccionado para modificar el texto de su sumario.
     private var rfidDeviceNamePreference: EditTextPreference? = null
 
     private fun setRfidPref() {
-        ////////////////// RFID DEVICE //////////////////
-        val rfidPref = findPreference<Preference>("rfid") as PreferenceScreen
-
         //region //// USE RFID
         val swPrefBtRfid = findPreference<Preference>(p.useBtRfid.key) as SwitchPreference
-        useRfid = swPrefBtRfid.isChecked
 
-        swPrefBtRfid.setOnPreferenceChangeListener { _, newValue ->
-            useRfid = newValue != null && newValue == true
-            rfidSummary = (if (useRfid) getString(R.string.enabled) else getString(R.string.disabled)) + ": " + rfidName
-            rfidPref.summary = rfidSummary
-
+        swPrefBtRfid.setOnPreferenceChangeListener { _, _ ->
             thread { connectToRfidDevice() }
             true
         }
         //endregion //// USE RFID
 
         //region //// BLUETOOTH NAME
-        rfidDeviceNamePreference =
-            findPreference<Preference>("rfid_bluetooth_name") as EditTextPreference
+        rfidDeviceNamePreference = findPreference<Preference>("rfid_bluetooth_name") as EditTextPreference
         if (Rfid.rfidDevice != null && (Rfid.rfidDevice as Vh75Bt).getState() == Vh75Bt.STATE_CONNECTED) {
             (Rfid.rfidDevice as Vh75Bt).getBluetoothName()
         }
@@ -412,30 +396,20 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
         //endregion //// BLUETOOTH NAME
 
         //region //// DEVICE LIST PREFERENCE
-        val deviceListPreference =
-            findPreference<Preference>(p.rfidBtAddress.key) as DevicePreference
+        val deviceListPreference = findPreference<Preference>(p.rfidBtAddress.key) as DevicePreference
         if (deviceListPreference.value == null) {
             // to ensure we don't selectByItemId a null value
             // set first value by default
             deviceListPreference.setValueIndex(0)
         }
         deviceListPreference.onPreferenceChangeListener =
-            Preference.OnPreferenceChangeListener { preference, newValue ->
-                rfidName = getBluetoothNameFromAddress(
-                    newValue, getString(R.string.there_is_no_selected_rfid_scanner)
-                )
-
-                preference.summary = rfidName
-
-                rfidSummary =
-                    (if (useRfid) getString(R.string.enabled) else getString(R.string.disabled)) + ": " + rfidName
-                rfidPref.summary = rfidSummary
-
-                // De este modo se actualiza el Summary del PreferenceScreen padre
-                //(preferenceScreen.rootAdapter as BaseAdapter).notifyDataSetChanged()
+            Preference.OnPreferenceChangeListener { preference, _ ->
+                val pn =
+                    if (deviceListPreference.entry.isNullOrEmpty()) getString(R.string.there_is_no_selected_printer)
+                    else deviceListPreference.entry.toString()
+                preference.summary = pn
                 true
             }
-        deviceListPreference.summary = rfidName
         //endregion //// DEVICE LIST PREFERENCE
 
         //region //// RFID POWER
@@ -464,19 +438,11 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
         }
         //endregion //// RESET TO FACTORY
 
-        rfidName = if (deviceListPreference.entry == null || !swPrefBtRfid.isChecked) {
-            getString(R.string.there_is_no_selected_rfid_scanner)
-        } else {
-            deviceListPreference.entry!!.toString()
-        }
-
-        rfidPref.summary = "${if (useRfid) getString(R.string.enabled) else getString(R.string.disabled)}: $rfidName"
-
         thread { connectToRfidDevice() }
     }
 
     private fun connectToRfidDevice() {
-        if (!useRfid) return
+        if (!Preferences.prefsGetBoolean(p.useBtRfid)) return
 
         val bluetoothManager =
             AssetControlApp.getContext().getSystemService(AppCompatActivity.BLUETOOTH_SERVICE) as BluetoothManager
@@ -537,10 +503,10 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
         }
 
     @SuppressLint("MissingPermission")
-    private fun getBluetoothNameFromAddress(address: Any?, summary: String): String {
-        var s = summary
-
-        if (address != null) {
+    private fun getBluetoothNameFromAddress(): String {
+        var s = getString(R.string.there_is_no_selected_rfid_scanner)
+        val address = Preferences.prefsGetString(p.rfidBtAddress)
+        if (address.isNotEmpty()) {
             val bluetoothManager =
                 AssetControlApp.getContext().getSystemService(AppCompatActivity.BLUETOOTH_SERVICE) as BluetoothManager
             val mBluetoothAdapter = bluetoothManager.adapter
@@ -558,7 +524,7 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
             val mPairedDevices = mBluetoothAdapter!!.bondedDevices
             if (mPairedDevices.size > 0) {
                 for (mDevice in mPairedDevices) {
-                    if (mDevice.address == address.toString()) {
+                    if (mDevice.address == address) {
                         s = mDevice.name.toString()
                         break
                     }
