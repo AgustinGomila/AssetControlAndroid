@@ -6,12 +6,12 @@ import android.util.Log
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.network.download.DownloadStatus.*
+import com.dacosys.assetControl.utils.Statics
 import kotlinx.coroutines.*
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
-import java.lang.System.getProperty
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -100,7 +100,7 @@ class DownloadFile(
         Log.d(
             this.javaClass.simpleName, "${
                 getContext().getString(R.string.destination)
-            }: $destination${getProperty("line.separator")}URL: $urlStr"
+            }: $destination${Statics.newLine}URL: $urlStr"
         )
 
         var input: InputStream? = null

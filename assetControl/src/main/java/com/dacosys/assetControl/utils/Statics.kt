@@ -17,6 +17,9 @@ class Statics {
     @Suppress("unused", "MemberVisibilityCanBePrivate")
     companion object {
 
+        val newLine: String
+            get() = System.getProperty("line.separator") ?: "\r\n"
+
         // region DEBUG DEMO
         const val demoMode = false
         const val superDemoMode = false

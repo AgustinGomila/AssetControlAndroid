@@ -434,9 +434,9 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
             val msg = String.format(
                 "Ver: %s%sInstallation Code: %s%sClient Package: %s",
                 "${getString(R.string.app_milestone)} ${pInfo.versionName}",
-                System.getProperty("line.separator"),
+                Statics.newLine,
                 Repository.installationCode,
-                System.getProperty("line.separator"),
+                Statics.newLine,
                 Repository.clientPackage
             )
 
