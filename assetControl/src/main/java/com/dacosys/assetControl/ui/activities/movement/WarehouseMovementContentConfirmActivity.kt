@@ -18,7 +18,9 @@ import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.adapters.movement.WarehouseMovementContentAdapter
+import com.dacosys.assetControl.dataBase.movement.WarehouseMovementContentDbHelper
 import com.dacosys.assetControl.databinding.WarehouseMovementContentConfirmActivityBottomPanelCollapsedBinding
+import com.dacosys.assetControl.model.asset.AssetStatus
 import com.dacosys.assetControl.model.location.WarehouseArea
 import com.dacosys.assetControl.model.movement.WarehouseMovementContent
 import com.dacosys.assetControl.model.movement.WarehouseMovementContentStatus
@@ -89,12 +91,6 @@ class WarehouseMovementContentConfirmActivity : AppCompatActivity(),
             "imageControlFragment",
             imageControlFragment as ImageControlButtonsFragment
         )
-
-        if (wmContAdapter != null) {
-            savedInstanceState.putParcelableArrayList(
-                "wmContArray", wmContAdapter?.getAll()
-            )
-        }
     }
 
     private lateinit var binding: WarehouseMovementContentConfirmActivityBottomPanelCollapsedBinding
@@ -125,28 +121,30 @@ class WarehouseMovementContentConfirmActivity : AppCompatActivity(),
 
             panelBottomIsExpanded = savedInstanceState.getBoolean("panelBottomIsExpanded")
             panelTopIsExpanded = savedInstanceState.getBoolean("panelTopIsExpanded")
-
-            // Adapter
-            wmContArray.clear()
-            val tempCont =
-                savedInstanceState.getParcelableArrayList<WarehouseMovementContent>("wmContArray")
-            if (tempCont != null) {
-                wmContArray = tempCont
-            }
         } else {
             // Inicializar la actividad
 
             // Traer los parámetros que recibe la actividad
             val extras = intent.extras
             if (extras != null) {
-                tempWarehouseArea =
-                    Parcels.unwrap<WarehouseArea>(extras.getParcelable("warehouseArea"))
+                tempWarehouseArea = Parcels.unwrap<WarehouseArea>(extras.getParcelable("warehouseArea"))
+            }
+        }
 
-                val t1 = extras.getParcelableArrayList<WarehouseMovementContent>("wmContArray")
-                if (t1 != null) {
-                    wmContArray = t1
+        // Cargamos la revisión desde la tabla temporal
+        wmContArray.clear()
+        val tempCont = WarehouseMovementContentDbHelper().selectByTempId(1)
+        if (tempCont.any()) {
+            val r: ArrayList<WarehouseMovementContent> = ArrayList()
+            for (tempItem in tempCont) {
+                // Tanto los que se van a mover como los que se encontraron en el área
+                if (tempItem.warehouseAreaId != tempWarehouseArea?.warehouseAreaId ||
+                    tempItem.assetStatusId == AssetStatus.missing.id
+                ) {
+                    r.add(tempItem)
                 }
             }
+            wmContArray = r
         }
 
         setHeaderTextBox(tempWarehouseArea)

@@ -12,6 +12,7 @@ import com.dacosys.assetControl.dataBase.review.AssetReviewContentContract.Asset
 import com.dacosys.assetControl.dataBase.review.AssetReviewContentContract.AssetReviewContentEntry.Companion.QTY
 import com.dacosys.assetControl.dataBase.review.AssetReviewContentDbHelper
 import com.dacosys.assetControl.model.asset.Asset
+import com.dacosys.assetControl.model.asset.AssetStatus
 
 class AssetReviewContent : Parcelable {
     var assetReviewContentId: Long = 0
@@ -25,11 +26,93 @@ class AssetReviewContent : Parcelable {
         assetReviewId: Long,
         assetReviewContentId: Long,
         assetId: Long,
+        assetCode: String,
+        assetDescription: String,
+        qty: Float,
+        contentStatusId: Int,
+        originWarehouseAreaId: Long,
+    ) {
+        this.assetReviewId = assetReviewId
+        this.assetReviewContentId = assetReviewContentId
+        this.qty = qty
+        this.contentStatusId = contentStatusId
+        this.originWarehouseAreaId = originWarehouseAreaId
+        this.assetId = assetId
+        this.code = assetCode
+        this.description = assetDescription
+        this.assetStatusId = AssetStatus.unknown.id
+        this.labelNumber = 0
+        this.parentId = 0L
+        this.warehouseAreaId = 0L
+        this.warehouseAreaStr = ""
+        this.warehouseStr = ""
+        this.itemCategoryId = 0
+        this.itemCategoryStr = ""
+        this.ownershipStatusId = 0
+        this.manufacturer = ""
+        this.model = ""
+        this.serialNumber = ""
+        this.ean = ""
+
+
+        dataRead = true
+    }
+
+    constructor(
+        assetReviewId: Long,
+        assetReviewContentId: Long,
+        asset: Asset,
+        qty: Float,
+        contentStatusId: Int,
+        originWarehouseAreaId: Long,
+    ) {
+        this.assetReviewId = assetReviewId
+        this.assetReviewContentId = assetReviewContentId
+        this.qty = qty
+        this.contentStatusId = contentStatusId
+        this.originWarehouseAreaId = originWarehouseAreaId
+        this.assetId = asset.assetId
+        this.code = asset.code
+        this.description = asset.description
+        this.warehouseAreaId = asset.warehouseAreaId
+        this.ownershipStatusId = asset.ownershipStatusId
+        this.assetStatusId = asset.assetStatusId
+        this.itemCategoryId = asset.itemCategoryId
+        this.labelNumber = asset.labelNumber ?: 0
+        this.manufacturer = asset.manufacturer ?: ""
+        this.model = asset.model ?: ""
+        this.serialNumber = asset.serialNumber ?: ""
+        this.parentId = asset.parentAssetId ?: 0
+        this.ean = asset.ean ?: ""
+        this.itemCategoryStr = asset.itemCategoryStr
+        this.warehouseStr = asset.warehouseStr
+        this.warehouseAreaStr = asset.warehouseAreaStr
+
+        dataRead = true
+    }
+
+    constructor(
+        assetReviewId: Long,
+        assetReviewContentId: Long,
+        assetId: Long,
         code: String,
         description: String,
         qty: Float,
         contentStatusId: Int,
         originWarehouseAreaId: Long,
+        warehouseAreaId: Long,
+        ownershipStatusId: Int,
+        assetStatusId: Int,
+        itemCategoryId: Long,
+        labelNumber: Int,
+        manufacturer: String,
+        model: String,
+        serialNumber: String,
+        parentId: Long,
+        ean: String,
+        itemCategoryStr: String,
+        warehouseStr: String,
+        warehouseAreaStr: String
     ) {
         this.assetReviewId = assetReviewId
         this.assetReviewContentId = assetReviewContentId
@@ -39,6 +122,19 @@ class AssetReviewContent : Parcelable {
         this.qty = qty
         this.contentStatusId = contentStatusId
         this.originWarehouseAreaId = originWarehouseAreaId
+        this.warehouseAreaId = warehouseAreaId
+        this.ownershipStatusId = ownershipStatusId
+        this.assetStatusId = assetStatusId
+        this.itemCategoryId = itemCategoryId
+        this.labelNumber = labelNumber
+        this.manufacturer = manufacturer
+        this.model = model
+        this.serialNumber = serialNumber
+        this.parentId = parentId
+        this.ean = ean
+        this.itemCategoryStr = itemCategoryStr
+        this.warehouseStr = warehouseStr
+        this.warehouseAreaStr = warehouseAreaStr
 
         dataRead = true
     }
@@ -80,6 +176,7 @@ class AssetReviewContent : Parcelable {
 
                 true
             }
+
             else -> false
         }
     }
@@ -87,29 +184,6 @@ class AssetReviewContent : Parcelable {
     override fun toString(): String {
         return description
     }
-
-    /*
-    val assetReview: AssetReview?
-        get() {
-            return if (assetReviewId == 0L) {
-                null
-            } else AssetReview( assetReviewId, false)
-        }
-
-    val asset: Asset?
-        get() {
-            return if (assetId == 0L) {
-                null
-            } else Asset( assetId, false)
-        }
-
-    val originWarehouseArea: WarehouseArea?
-        get() {
-            return if (originWarehouseAreaId == 0L) {
-                null
-            } else WarehouseArea( originWarehouseAreaId, false)
-        }
-    */
 
     var assetReviewId: Long = 0
         get() {
@@ -186,7 +260,6 @@ class AssetReviewContent : Parcelable {
     */
 
     var assetStatusId: Int = 0
-    var collectorContentId: Long = 0
     var labelNumber: Int = 0
     var parentId: Long = 0
     var warehouseAreaId: Long = 0
@@ -209,9 +282,7 @@ class AssetReviewContent : Parcelable {
         this.qty = parcel.readFloat()
         this.contentStatusId = parcel.readInt()
         this.originWarehouseAreaId = parcel.readLong()
-
         this.assetStatusId = parcel.readInt()
-        this.collectorContentId = parcel.readLong()
         this.labelNumber = parcel.readInt()
         this.parentId = parcel.readLong()
         this.warehouseAreaId = parcel.readLong()
@@ -289,9 +360,7 @@ class AssetReviewContent : Parcelable {
         parcel.writeFloat(qty)
         parcel.writeInt(contentStatusId)
         parcel.writeLong(originWarehouseAreaId)
-
         parcel.writeInt(assetStatusId)
-        parcel.writeLong(collectorContentId)
         parcel.writeInt(labelNumber)
         parcel.writeLong(parentId)
         parcel.writeLong(warehouseAreaId)
@@ -319,35 +388,6 @@ class AssetReviewContent : Parcelable {
 
         override fun newArray(size: Int): Array<AssetReviewContent?> {
             return arrayOfNulls(size)
-        }
-
-        fun add(
-            assetReviewId: Long,
-            assetReviewContentId: Long,
-            assetId: Long,
-            code: String,
-            description: String,
-            qty: Float,
-            contentStatusId: Int,
-            originWarehouseAreaId: Long,
-        ): AssetReviewContent? {
-            if (description.isEmpty()) {
-                return null
-            }
-
-            val i = AssetReviewContentDbHelper()
-            val ok = i.insert(
-                assetReviewId,
-                assetReviewContentId,
-                assetId,
-                code,
-                description,
-                qty,
-                contentStatusId,
-                originWarehouseAreaId
-            )
-
-            return if (ok) i.selectById(assetReviewContentId) else null
         }
     }
 }

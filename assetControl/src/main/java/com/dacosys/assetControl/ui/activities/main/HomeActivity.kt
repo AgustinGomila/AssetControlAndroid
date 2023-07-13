@@ -39,7 +39,6 @@ import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.cleanTemporaryTables
-import com.dacosys.assetControl.dataBase.asset.AssetDbHelper
 import com.dacosys.assetControl.databinding.HomeActivityBinding
 import com.dacosys.assetControl.model.location.WarehouseArea
 import com.dacosys.assetControl.model.review.AssetReview
@@ -819,33 +818,23 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
     //endregion
 
     private fun beginAssetReview(warehouseArea: WarehouseArea) {
+        if (rejectNewInstances) return
+        rejectNewInstances = true
+
         makeText(binding.root, warehouseArea.description, SnackBarType.INFO)
 
-        // Contar la cantidad activos del área
-        // Si es mayor a 1000, pedir que divida el área para poder hacer revisiones
-        val qty = AssetDbHelper().countAssets(warehouseArea.warehouseAreaId)
-        if (qty > 1000) {
-            makeText(
-                binding.root, getString(
-                    R.string.there_are_x_assets_in_the_selected_area_divide_the_area_into_units_of_up_to_1000_assets_to_be_able_to_make_revisions,
-                    qty.toString()
-                ), SnackBarType.ERROR
-            )
-        } else {
-            // Agregar un AssetReview del área
-            val ar = AssetReview.add(warehouseArea)
-            if (ar != null) {
-                if (!rejectNewInstances) {
-                    rejectNewInstances = true
-
-                    val intent = Intent(baseContext, AssetReviewContentActivity::class.java)
-                    intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-                    intent.putExtra("isNew", true)
-                    intent.putExtra("assetReview", Parcels.wrap(ar))
-                    resultForReviewSuccess.launch(intent)
-                }
-            }
+        // Agregar un AssetReview del área
+        val ar = AssetReview.add(warehouseArea)
+        if (ar == null) {
+            rejectNewInstances = false
+            return
         }
+
+        val intent = Intent(baseContext, AssetReviewContentActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+        intent.putExtra("isNew", true)
+        intent.putExtra("assetReview", Parcels.wrap(ar))
+        resultForReviewSuccess.launch(intent)
     }
 
     private val resultForReviewSuccess =

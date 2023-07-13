@@ -274,16 +274,12 @@
     <string name="do_you_want_to_delete_the_selected_revision_question">¿Desea eliminar la revisión seleccionada?
     </string>
     <string name="select_area_to_review">Seleccionar área a revisar</string>
-    <string name="there_are_x_assets_in_the_selected_area_divide_the_area_into_units_of_up_to_1000_assets_to_be_able_to_make_revisions">
-        Existen %1$s activos en el área seleccionada. Divida el área en unidades de hasta 1000 activos para poder
-        realizar revisiones
-    </string>
     <string name="there_are_assets_in_this_revision_that_belonged_to_another_area_do_you_want_to_make_the_movements_of_these_assets_to_the_current_area_question">
         Hay activos en esta revisión que pertenecían a otra área. ¿Desea realizar los movimientos de estos activos al
         área actual?
     </string>
     <string name="processing_external_asset">Procesando activo externo</string>
-    <string name="processing_revisedasset">Procesando activo revisado</string>
+    <string name="processing_revised_asset">Procesando activo revisado</string>
     <string name="processing_appeared_asset">Procesando activo aparecido</string>
     <string name="processing_unknown_asset">Procesando activo desconocido</string>
     <string name="processing_missing_asset">Procesando activo faltante</string>

@@ -38,6 +38,7 @@ import com.dacosys.assetControl.R
 import com.dacosys.assetControl.adapters.asset.AssetAdapter
 import com.dacosys.assetControl.adapters.review.AssetReviewContentAdapter
 import com.dacosys.assetControl.dataBase.asset.AssetDbHelper
+import com.dacosys.assetControl.dataBase.review.AssetReviewContentDbHelper
 import com.dacosys.assetControl.databinding.AssetReviewContentBottomPanelCollapsedBinding
 import com.dacosys.assetControl.databinding.ProgressBarDialogBinding
 import com.dacosys.assetControl.model.asset.Asset
@@ -287,7 +288,13 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
             b.putInt("firstVisiblePos", arContAdapter?.firstVisiblePos() ?: 0)
             b.putParcelableArrayList("visibleStatusArray", arContAdapter?.getVisibleStatus())
             b.putLongArray("checkedIdArray", arContAdapter?.getAllChecked()?.toLongArray())
-            b.putParcelableArrayList("arContArray", arContAdapter?.getAll())
+
+            // Guardamos la revisión en una tabla temporal.
+            // Revisiones de miles de artículos no pueden pasarse en el intent.
+            AssetReviewContentDbHelper().insertTempList(
+                arId = assetReview?.collectorAssetReviewId ?: 0,
+                reviewList = arContAdapter?.getAll() ?: ArrayList<AssetReviewContent>()
+            )
         }
     }
 
@@ -339,9 +346,10 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
         checkedIdArray =
             (b.getLongArray("checkedIdArray") ?: longArrayOf()).toCollection(ArrayList())
 
+        // Cargamos la revisión desde la tabla temporal
         arContArray.clear()
-        val tempCont = b.getParcelableArrayList<AssetReviewContent>("arContArray")
-        if (tempCont != null) arContArray = tempCont
+        val tempCont = AssetReviewContentDbHelper().selectByTempId(assetReview?.collectorAssetReviewId ?: 0)
+        if (tempCont.any()) arContArray = tempCont
 
         visibleStatusArray.clear()
         if (b.containsKey("visibleStatusArray")) {
@@ -356,10 +364,8 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private fun loadDefaultValues() {
         tempTitle = getString(R.string.asset_review)
-        binding.allowUnknownCodesSwitch.isChecked =
-            prefsGetBoolean(Preference.assetReviewAllowUnknownCodes)
-        binding.addUnknownAssetsSwitch.isChecked =
-            prefsGetBoolean(Preference.assetReviewAddUnknownAssets)
+        binding.allowUnknownCodesSwitch.isChecked = prefsGetBoolean(Preference.assetReviewAllowUnknownCodes)
+        binding.addUnknownAssetsSwitch.isChecked = prefsGetBoolean(Preference.assetReviewAddUnknownAssets)
         loadDefaultVisibleStatus()
     }
 
@@ -858,12 +864,16 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
             rejectNewInstances = true
             JotterListener.lockScanner(this, true)
 
+            // Guardamos la revisión en una tabla temporal.
+            // Revisiones de miles de artículos no pueden pasarse en el intent.
+            AssetReviewContentDbHelper().insertTempList(
+                arId = assetReview?.collectorAssetReviewId ?: 0,
+                reviewList = arContAdapter?.getAll() ?: ArrayList<AssetReviewContent>()
+            )
+
             val intent = Intent(this, AssetReviewContentConfirmActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
             intent.putExtra("assetReview", Parcels.wrap<AssetReview>(assetReview))
-            intent.putParcelableArrayListExtra(
-                "arContArray", arContAdapter?.getAll() ?: ArrayList<AssetReviewContent>()
-            )
             resultForFinishReview.launch(intent)
         }
     }
@@ -875,8 +885,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
                 if (it?.resultCode == RESULT_OK && data != null) {
                     when (Parcels.unwrap<ConfirmStatus>(data.getParcelableExtra("confirmStatus"))) {
                         modify -> {
-                            (assetReview ?: return@registerForActivityResult).obs =
-                                data.getStringExtra("obs") ?: ""
+                            assetReview?.obs = data.getStringExtra("obs") ?: ""
                         }
 
                         confirm -> {
@@ -938,10 +947,10 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
         }
 
         if (Statics.demoMode) {
-            val margin = ThreadLocalRandom.current().nextInt(0, 6) * if (ThreadLocalRandom.current()
-                    .nextInt(0, 2) == 0
-            ) -1 else 1
-            if ((arContAdapter?.assetsRevised ?: 0) + margin > allCodesInLocation.size) {
+            val assetRevised = arContAdapter?.assetsRevised ?: 0
+            val margin = ThreadLocalRandom.current().nextInt(0, 10) *
+                    if (ThreadLocalRandom.current().nextInt(0, 5) == 0) -1 else 1
+            if (assetRevised + margin > allCodesInLocation.size) {
                 val obs = getString(R.string.test_review)
                 val completed = true
                 confirmAssetReview(obs, completed)
@@ -1264,7 +1273,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
 
             var tempCode = scannedCode
             if (sc.asset != null) {
-                // Si ya se encontró un activo, utilizo su código real
+                // Si ya se encontró un activo, utilizo su código real,
                 // ya que el código escaneado puede contener caractéres especiales
                 // que no aparecen en la lista
                 tempCode = (sc.asset ?: return).code
@@ -1278,9 +1287,9 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
                     if (it != null) {
                         /*
                         * 1 = Asset revised
-                        * 2 = Added a asset from the another warehouse
-                        * 3 = Added a asset does not exist in the database
-                        * 4 = Added a asset that was missing from the current warehouse
+                        * 2 = Added asset from another warehouse
+                        * 3 = Added asset does not exist in the database
+                        * 4 = Added asset that was missing from the current warehouse
                         * 0 = Not in the review
                         */
 
@@ -1344,40 +1353,26 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
                     assetReviewId = tempReview.collectorAssetReviewId,
                     assetReviewContentId = collectorContentId,
                     assetId = unknownAssetId,
-                    code = tempCode.uppercase(Locale.ROOT),
-                    description = getString(R.string.NO_DATA),
+                    assetCode = tempCode.uppercase(Locale.ROOT),
+                    assetDescription = getString(R.string.NO_DATA),
                     qty = 1F,
                     contentStatusId = AssetReviewContentStatus.unknown.id,
                     originWarehouseAreaId = 0L
                 )
-
-                finalArc.assetStatusId = AssetStatus.unknown.id
-                finalArc.collectorContentId = collectorContentId
-                finalArc.labelNumber = 0
-                finalArc.parentId = 0L
-                finalArc.warehouseAreaId = 0L
-                finalArc.warehouseAreaStr = ""
-                finalArc.warehouseStr = ""
-                finalArc.itemCategoryId = 0
-                finalArc.itemCategoryStr = ""
-                finalArc.ownershipStatusId = 0
-                finalArc.manufacturer = ""
-                finalArc.model = ""
-                finalArc.serialNumber = ""
-                finalArc.ean = ""
 
                 runOnUiThread {
                     arContAdapter?.add(finalArc)
                 }
             }
 
-            if (sc.asset != null) {
+            val tempAsset = sc.asset
+            if (tempAsset != null) {
                 val tempReview = assetReview ?: return
 
                 /////////////////////////////////////////////////////////
                 // STATUS 2 = Add an asset belonging to another warehouse
                 var contentStatusId: Int = AssetReviewContentStatus.external.id
-                if ((sc.asset ?: return).warehouseAreaId == (assetReview
+                if (tempAsset.warehouseAreaId == (assetReview
                         ?: return).warehouseAreaId
                 ) {
                     ////////////////////////////////////////////////////////////////
@@ -1390,28 +1385,11 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
                 finalArc = AssetReviewContent(
                     assetReviewId = tempReview.collectorAssetReviewId,
                     assetReviewContentId = collectorContentId,
-                    assetId = (sc.asset ?: return).assetId,
-                    code = (sc.asset ?: return).code,
-                    description = (sc.asset ?: return).description,
+                    asset = tempAsset,
                     qty = 1F,
                     contentStatusId = contentStatusId,
-                    originWarehouseAreaId = (sc.asset ?: return).warehouseAreaId
+                    originWarehouseAreaId = tempAsset.warehouseAreaId
                 )
-
-                finalArc.assetStatusId = sc.asset?.assetStatusId ?: 0
-                finalArc.collectorContentId = collectorContentId
-                finalArc.labelNumber = sc.asset?.labelNumber ?: 0
-                finalArc.parentId = sc.asset?.parentAssetId ?: 0
-                finalArc.warehouseAreaId = sc.asset?.warehouseAreaId ?: 0
-                finalArc.warehouseAreaStr = sc.asset?.warehouseAreaStr ?: ""
-                finalArc.warehouseStr = sc.asset?.warehouseStr ?: ""
-                finalArc.itemCategoryId = sc.asset?.itemCategoryId ?: 0
-                finalArc.itemCategoryStr = sc.asset?.itemCategoryStr ?: ""
-                finalArc.ownershipStatusId = sc.asset?.ownershipStatusId ?: 0
-                finalArc.manufacturer = sc.asset?.manufacturer ?: ""
-                finalArc.model = sc.asset?.model ?: ""
-                finalArc.serialNumber = sc.asset?.serialNumber ?: ""
-                finalArc.ean = sc.asset?.ean ?: ""
 
                 runOnUiThread {
                     arContAdapter?.add(finalArc)

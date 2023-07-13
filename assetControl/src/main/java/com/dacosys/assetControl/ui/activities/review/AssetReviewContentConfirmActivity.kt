@@ -18,6 +18,7 @@ import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.adapters.review.AssetReviewContentAdapter
+import com.dacosys.assetControl.dataBase.review.AssetReviewContentDbHelper
 import com.dacosys.assetControl.databinding.AssetReviewContentConfirmBottomPanelCollapsedBinding
 import com.dacosys.assetControl.model.review.AssetReview
 import com.dacosys.assetControl.model.review.AssetReviewContent
@@ -107,12 +108,6 @@ class AssetReviewContentConfirmActivity : AppCompatActivity(),
             "imageControlFragment",
             imageControlFragment as ImageControlButtonsFragment
         )
-
-        if (arContAdapter != null) {
-            savedInstanceState.putParcelableArrayList(
-                "arContArray", arContAdapter?.getAll()
-            )
-        }
     }
 
     private lateinit var binding: AssetReviewContentConfirmBottomPanelCollapsedBinding
@@ -145,14 +140,6 @@ class AssetReviewContentConfirmActivity : AppCompatActivity(),
 
             panelBottomIsExpanded = savedInstanceState.getBoolean("panelBottomIsExpanded")
             panelTopIsExpanded = savedInstanceState.getBoolean("panelTopIsExpanded")
-
-            // Adapter
-            arContArray.clear()
-            val tempCont =
-                savedInstanceState.getParcelableArrayList<AssetReviewContent>("arContArray")
-            if (tempCont != null) {
-                arContArray = tempCont
-            }
         } else {
             val extras = intent.extras
             if (extras != null) {
@@ -161,13 +148,13 @@ class AssetReviewContentConfirmActivity : AppCompatActivity(),
                 if (assetReview != null) {
                     obs = (assetReview ?: return).obs
                 }
-
-                val t1 = extras.getParcelableArrayList<AssetReviewContent>("arContArray")
-                if (t1 != null) {
-                    arContArray = t1
-                }
             }
         }
+
+        // Cargamos la revisión desde la tabla temporal
+        arContArray.clear()
+        val tempCont = AssetReviewContentDbHelper().selectByTempId(assetReview?.collectorAssetReviewId ?: 0)
+        if (tempCont.any()) arContArray = tempCont
 
         setHeaderTextBox()
 
@@ -184,8 +171,8 @@ class AssetReviewContentConfirmActivity : AppCompatActivity(),
         setTopPanelAnimation()
 
         binding.obsButton.setOnClickListener { addObservations() }
-        binding.completedSwitch.isChecked =
-            prefsGetBoolean(Preference.assetReviewCompletedCheckBox)
+        binding.completedTextView.setOnClickListener { binding.completedSwitch.performClick() }
+        binding.completedSwitch.isChecked = prefsGetBoolean(Preference.assetReviewCompletedCheckBox)
         binding.confirmButton.setOnClickListener { confirmCount() }
 
         setPanels()

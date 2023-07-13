@@ -26,6 +26,7 @@ import com.dacosys.assetControl.R
 import com.dacosys.assetControl.adapters.asset.AssetAdapter
 import com.dacosys.assetControl.adapters.movement.WarehouseMovementContentAdapter
 import com.dacosys.assetControl.dataBase.asset.AssetDbHelper
+import com.dacosys.assetControl.dataBase.movement.WarehouseMovementContentDbHelper
 import com.dacosys.assetControl.databinding.ProgressBarDialogBinding
 import com.dacosys.assetControl.databinding.WarehouseMovementContentBottomPanelCollapsedBinding
 import com.dacosys.assetControl.model.asset.Asset
@@ -149,7 +150,13 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
 
         if (wmContAdapter != null) {
             b.putLongArray("checkedIdArray", wmContAdapter?.getAllChecked()?.toLongArray())
-            b.putParcelableArrayList("wmContArray", wmContArray)
+
+            // Guardamos la revisión en una tabla temporal.
+            // Revisiones de miles de artículos no pueden pasarse en el intent.
+            WarehouseMovementContentDbHelper().insertTempList(
+                wmId = 1,
+                movementList = wmContAdapter?.getAll() ?: ArrayList()
+            )
         }
     }
 
@@ -168,10 +175,10 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
         if (b.containsKey("panelTopIsExpanded")) panelTopIsExpanded =
             b.getBoolean("panelTopIsExpanded")
 
-        // ADAPTER
+        // Cargamos la revisión desde la tabla temporal
         wmContArray.clear()
-        val tempCont = b.getParcelableArrayList<WarehouseMovementContent>("wmContArray")
-        if (tempCont != null) wmContArray = tempCont
+        val tempCont = WarehouseMovementContentDbHelper().selectByTempId(1)
+        if (tempCont.any()) wmContArray = tempCont
 
         lastSelected = b.getParcelable("lastSelected")
         firstVisiblePos = if (b.containsKey("firstVisiblePos")) b.getInt("firstVisiblePos") else -1
@@ -692,16 +699,16 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
             rejectNewInstances = true
             JotterListener.lockScanner(this, true)
 
+            // Guardamos la revisión en una tabla temporal.
+            // Revisiones de miles de artículos no pueden pasarse en el intent.
+            WarehouseMovementContentDbHelper().insertTempList(
+                wmId = 1,
+                movementList = wmContAdapter?.getAll() ?: ArrayList()
+            )
+
             val intent = Intent(this, WarehouseMovementContentConfirmActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-            intent.putExtra(
-                "warehouseArea", Parcels.wrap<WarehouseArea>(headerFragment?.warehouseArea)
-            )
-            intent.putParcelableArrayListExtra(
-                "wmContArray", wmContAdapter?.getToMove(
-                    (headerFragment?.warehouseArea ?: return).warehouseAreaId
-                )
-            )
+            intent.putExtra("warehouseArea", Parcels.wrap<WarehouseArea>(headerFragment?.warehouseArea))
             resultForFinishMovement.launch(intent)
         }
     }
@@ -852,7 +859,7 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
 
                 var tempCode = scannedCode
                 if (sc.asset != null) {
-                    // Si ya se encontró un activo, utilizo su código real
+                    // Si ya se encontró un activo, utilizo su código real,
                     // ya que el código escaneado puede contener caractéres especiales
                     // que no aparecen en la lista
                     tempCode = (sc.asset ?: return).code
@@ -886,15 +893,14 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
                 }
 
                 var contStatus = WarehouseMovementContentStatus.toMove
-                if (sc.asset != null) {
-                    /////////////////////////////////////////////////////////
-                    // STATUS 2 = Si el activo está en el mismo área, dejamos que lo agregue.
-                    if (headerFragment != null && (headerFragment
-                            ?: return).warehouseArea != null
-                    ) {
-                        if ((sc.asset ?: return).warehouseAreaId == ((headerFragment
-                                ?: return).warehouseArea ?: return).warehouseAreaId
-                        ) {
+                val tempAsset = sc.asset
+                val tempWarehouseArea = headerFragment?.warehouseArea
+
+                if (tempAsset != null) {
+                    if (tempWarehouseArea != null) {
+                        /////////////////////////////////////////////////////////
+                        // STATUS 2 = Si el activo está en la misma área, dejamos que lo agregue.
+                        if (tempAsset.warehouseAreaId == tempWarehouseArea.warehouseAreaId) {
                             contStatus = WarehouseMovementContentStatus.noNeedToMove
 
                             val res = getString(R.string.is_already_in_the_area)
@@ -907,7 +913,7 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
                     val finalWmc = WarehouseMovementContent(
                         warehouseMovementId = 0,
                         warehouseMovementContentId = collectorContentId,
-                        asset = sc.asset ?: return,
+                        asset = tempAsset,
                         contentStatusId = contStatus.id
                     )
 

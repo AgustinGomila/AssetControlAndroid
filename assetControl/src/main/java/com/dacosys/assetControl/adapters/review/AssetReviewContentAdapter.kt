@@ -905,18 +905,18 @@ class AssetReviewContentAdapter :
         }
 
         if (position >= 0) {
-            val arC = getItem(position)
+            val content = getItem(position)
             val isSelected = isSelected(position)
 
-            if (arC != null) {
-                holder.descriptionTextView?.text = arC.description
-                holder.codeTextView?.text = arC.code
+            if (content != null) {
+                holder.descriptionTextView?.text = content.description
+                holder.codeTextView?.text = content.code
                 holder.assetStatusTextView?.text =
-                    AssetReviewContentStatus.getById(arC.contentStatusId)?.description ?: ""
+                    AssetReviewContentStatus.getById(content.contentStatusId)?.description ?: ""
 
                 // region Manufacturer
-                val manufacturerStr = arC.manufacturer
-                val modelStr = arC.model
+                val manufacturerStr = content.manufacturer
+                val modelStr = content.model
 
                 if (manufacturerStr.isEmpty() && modelStr.isEmpty()) {
                     holder.divider1?.visibility = GONE
@@ -930,8 +930,8 @@ class AssetReviewContentAdapter :
                 // endregion
 
                 // region Location
-                val wStr = arC.warehouseStr
-                val waStr = arC.warehouseAreaStr
+                val wStr = content.warehouseStr
+                val waStr = content.warehouseAreaStr
 
                 if (wStr.isEmpty() && waStr.isEmpty()) {
                     holder.divider2?.visibility = GONE
@@ -945,9 +945,8 @@ class AssetReviewContentAdapter :
                 // endregion
 
                 // region Category
-                val categoryStr = arC.itemCategoryStr
-                val ownershipStr =
-                    OwnershipStatus.getById(arC.ownershipStatusId)?.description ?: ""
+                val categoryStr = content.itemCategoryStr
+                val ownershipStr = OwnershipStatus.getById(content.ownershipStatusId)?.description ?: ""
 
                 if (categoryStr.isEmpty() && ownershipStr.isEmpty()) {
                     holder.divider3?.visibility = GONE
@@ -961,8 +960,8 @@ class AssetReviewContentAdapter :
                 // endregion
 
                 // region SerialNumber
-                val serialNumberStr = arC.serialNumber
-                val eanStr = arC.ean
+                val serialNumberStr = content.serialNumber
+                val eanStr = content.ean
 
                 if (serialNumberStr.isEmpty() && eanStr.isEmpty()) {
                     holder.divider4?.visibility = GONE
@@ -980,7 +979,7 @@ class AssetReviewContentAdapter :
                     if (event.action == MotionEvent.ACTION_DOWN) {
                         editAssetRequiredListener?.onEditAssetRequired(
                             Table.asset.tableId,
-                            arC.assetId
+                            content.assetId
                         )
                     }
                     true
@@ -993,7 +992,7 @@ class AssetReviewContentAdapter :
                             if (event.action == MotionEvent.ACTION_DOWN) {
                                 albumViewRequiredListener?.onAlbumViewRequired(
                                     Table.asset.tableId,
-                                    arC.assetId
+                                    content.assetId
                                 )
                             }
                             true
@@ -1004,8 +1003,8 @@ class AssetReviewContentAdapter :
                             if (event.action == MotionEvent.ACTION_DOWN) {
                                 addPhotoRequiredListener?.onAddPhotoRequired(
                                     Table.asset.tableId,
-                                    arC.assetId,
-                                    arC.description
+                                    content.assetId,
+                                    content.description
                                 )
                             }
                             true
@@ -1021,7 +1020,7 @@ class AssetReviewContentAdapter :
 
                     val checkChangeListener =
                         CompoundButton.OnCheckedChangeListener { _, isChecked ->
-                            this.setChecked(arC, isChecked)
+                            this.setChecked(content, isChecked)
                             checkedChangedListener?.onCheckedChanged(isChecked, position)
                         }
                     val pressHoldListener =
@@ -1049,7 +1048,7 @@ class AssetReviewContentAdapter :
 
                     //Important to remove previous checkedChangedListener before calling setChecked
                     holder.checkBox!!.setOnCheckedChangeListener(null)
-                    holder.checkBox!!.isChecked = checkedIdArray.contains(arC.assetId)
+                    holder.checkBox!!.isChecked = checkedIdArray.contains(content.assetId)
                     holder.checkBox!!.tag = position
                     holder.checkBox!!.setOnLongClickListener(pressHoldListener)
                     holder.checkBox!!.setOnTouchListener(pressTouchListener)
@@ -1105,7 +1104,7 @@ class AssetReviewContentAdapter :
 
                 val backColor: Drawable
                 val foreColor: Int
-                when (AssetReviewContentStatus.getById(arC.contentStatusId)) {
+                when (AssetReviewContentStatus.getById(content.contentStatusId)) {
                     AssetReviewContentStatus.revised -> {
                         backColor = layoutRevised!!
                         foreColor = white

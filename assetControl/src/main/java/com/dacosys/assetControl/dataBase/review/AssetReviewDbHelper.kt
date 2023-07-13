@@ -712,7 +712,6 @@ class AssetReviewDbHelper {
         sqLiteDatabase.beginTransaction()
         try {
             for (sql in allCommands) {
-                println("$sql;")
                 sqLiteDatabase.execSQL(sql)
             }
             sqLiteDatabase.setTransactionSuccessful()

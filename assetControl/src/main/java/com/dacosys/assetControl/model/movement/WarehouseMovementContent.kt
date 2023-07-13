@@ -24,19 +24,27 @@ class WarehouseMovementContent : Parcelable {
         asset: Asset,
         contentStatusId: Int,
     ) {
-        this.assetId = asset.assetId
-        this.code = asset.code
-        this.description = asset.description
-        this.assetStatusId = asset.assetStatusId
-        this.warehouseAreaId = asset.warehouseAreaId
-        this.labelNumber = asset.labelNumber ?: 0
-        this.parentId = asset.parentAssetId ?: 0
-        this.qty = 1F
-
         this.warehouseMovementId = warehouseMovementId
         this.warehouseMovementContentId = warehouseMovementContentId
         this.collectorContentId = warehouseMovementContentId
         this.contentStatusId = contentStatusId
+        this.assetId = asset.assetId
+        this.code = asset.code
+        this.qty = 1F
+        this.description = asset.description
+        this.warehouseAreaId = asset.warehouseAreaId
+        this.warehouseAreaStr = asset.warehouseAreaStr
+        this.warehouseStr = asset.warehouseStr
+        this.ownershipStatusId = asset.ownershipStatusId
+        this.assetStatusId = asset.assetStatusId
+        this.itemCategoryId = asset.itemCategoryId
+        this.itemCategoryStr = asset.itemCategoryStr
+        this.labelNumber = asset.labelNumber ?: 0
+        this.manufacturer = asset.manufacturer ?: ""
+        this.model = asset.model ?: ""
+        this.serialNumber = asset.serialNumber ?: ""
+        this.parentId = asset.parentAssetId ?: 0
+        this.ean = asset.ean ?: ""
 
         dataRead = true
     }
@@ -54,6 +62,53 @@ class WarehouseMovementContent : Parcelable {
         this.assetId = assetId
         this.code = code
         this.qty = qty
+
+        dataRead = true
+    }
+
+    constructor(
+        warehouseMovementId: Long,
+        warehouseMovementContentId: Long,
+        contentStatus: Int,
+        assetId: Long,
+        code: String,
+        qty: Float,
+        description: String,
+        warehouseAreaId: Long,
+        warehouseAreaStr: String,
+        warehouseStr: String,
+        ownershipStatusId: Int,
+        assetStatusId: Int,
+        itemCategoryId: Long,
+        itemCategoryStr: String,
+        labelNumber: Int,
+        manufacturer: String,
+        model: String,
+        serialNumber: String,
+        parentId: Long,
+        ean: String
+    ) {
+        this.warehouseMovementId = warehouseMovementId
+        this.warehouseMovementContentId = warehouseMovementContentId
+        this.contentStatusId = contentStatus
+        this.collectorContentId = warehouseMovementContentId
+        this.assetId = assetId
+        this.code = code
+        this.qty = qty
+        this.description = description
+        this.warehouseAreaId = warehouseAreaId
+        this.warehouseAreaStr = warehouseAreaStr
+        this.warehouseStr = warehouseStr
+        this.ownershipStatusId = ownershipStatusId
+        this.assetStatusId = assetStatusId
+        this.itemCategoryId = itemCategoryId
+        this.itemCategoryStr = itemCategoryStr
+        this.labelNumber = labelNumber
+        this.manufacturer = manufacturer
+        this.model = model
+        this.serialNumber = serialNumber
+        this.parentId = parentId
+        this.ean = ean
 
         dataRead = true
     }
@@ -89,6 +144,7 @@ class WarehouseMovementContent : Parcelable {
 
                 true
             }
+
             else -> false
         }
     }
@@ -274,24 +330,6 @@ class WarehouseMovementContent : Parcelable {
 
         override fun newArray(size: Int): Array<WarehouseMovementContent?> {
             return arrayOfNulls(size)
-        }
-
-        fun add(
-            warehouseMovementId: Long,
-            warehouseMovementContentId: Long,
-            assetId: Long,
-            code: String,
-            qty: Float,
-        ): WarehouseMovementContent? {
-            val i = WarehouseMovementContentDbHelper()
-            val ok = i.insert(
-                warehouseMovementId,
-                warehouseMovementContentId,
-                assetId,
-                code,
-                qty
-            )
-            return if (ok) i.selectById(warehouseMovementContentId) else null
         }
     }
 }

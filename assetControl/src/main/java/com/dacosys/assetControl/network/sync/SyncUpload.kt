@@ -169,12 +169,14 @@ class SyncUpload(
                     warehouse()
                     warehouseArea()
                 }
+
                 SyncRegistryType.Asset -> {
                     itemCategory()
                     warehouse()
                     warehouseArea()
                     asset()
                 }
+
                 SyncRegistryType.AssetReview -> {
                     itemCategory()
                     warehouse()
@@ -183,6 +185,7 @@ class SyncUpload(
                     assetReview()
                     warehouseMovement()
                 }
+
                 SyncRegistryType.WarehouseMovement -> {
                     itemCategory()
                     warehouse()
@@ -190,6 +193,7 @@ class SyncUpload(
                     asset()
                     warehouseMovement()
                 }
+
                 SyncRegistryType.AssetManteinance -> {
                     if (prefsGetBoolean(Preference.useAssetControlManteinance)) {
                         itemCategory()
@@ -199,6 +203,7 @@ class SyncUpload(
                         assetManteinance()
                     }
                 }
+
                 SyncRegistryType.DataCollection,
                 SyncRegistryType.RouteProcess,
                 -> {
@@ -292,8 +297,6 @@ class SyncUpload(
                     )
                     break
                 }
-
-                //Thread.sleep(250)
 
                 val arcAl = arcDb.selectByAssetReviewCollectorId(ar.collectorAssetReviewId)
                 if (arcAl.size < 1) {
@@ -461,8 +464,6 @@ class SyncUpload(
                     break
                 }
 
-                //Thread.sleep(250)
-
                 val wmcAl =
                     wmcDb.selectByCollectorWarehouseMovementId(wm.collectorWarehouseMovementId)
                 if (wmcAl.size < 1) {
@@ -622,8 +623,6 @@ class SyncUpload(
                     break
                 }
 
-                //Thread.sleep(250)
-
                 var realAssetId: Long
                 if (a.assetId > 0) {
                     realAssetId = assetWs.assetCollectorModify(
@@ -770,8 +769,6 @@ class SyncUpload(
                     )
                     break
                 }
-
-                //Thread.sleep(250)
 
                 var realWarehouseAreaId: Long
                 if (wa.warehouseAreaId > 0) {
@@ -956,8 +953,6 @@ class SyncUpload(
                     break
                 }
 
-                //Thread.sleep(250)
-
                 var realWarehouseId: Long
                 if (w.warehouseId > 0) {
                     realWarehouseId = warehouseWs.warehouseModify(
@@ -1109,8 +1104,6 @@ class SyncUpload(
                     break
                 }
 
-                //Thread.sleep(250)
-
                 var realItemCategoryId: Long
                 if (ic.itemCategoryId > 0) {
                     realItemCategoryId = itemCategoryWs.itemCategoryModify(
@@ -1252,8 +1245,6 @@ class SyncUpload(
                     )
                     break
                 }
-
-                //Thread.sleep(250)
 
                 val dccAl = dccDb.selectByCollectorDataCollectionId(dc.collectorDataCollectionId)
                 if (dccAl.size < 1) {
@@ -1415,8 +1406,6 @@ class SyncUpload(
                     )
                     break
                 }
-
-                //Thread.sleep(250)
 
                 val rpcAl = rpcDb.selectByCollectorRouteProcessId(rp.collectorRouteProcessId)
                 if (rpcAl.size < 1) {
@@ -1591,8 +1580,6 @@ class SyncUpload(
                     )
                     break
                 }
-
-                //Thread.sleep(250)
 
                 val amObj = AssetManteinanceObject()
                 amObj.asset_id = am.assetId

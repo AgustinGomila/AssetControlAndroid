@@ -50,6 +50,7 @@ import com.dacosys.assetControl.model.review.AssetReviewContent
 import com.dacosys.assetControl.network.sync.SyncProgress
 import com.dacosys.assetControl.network.sync.SyncRegistryType
 import com.dacosys.assetControl.network.utils.ProgressStatus
+import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.splitList
 import com.dacosys.assetControl.webservice.asset.AssetCollectorObject
@@ -288,7 +289,7 @@ class AssetDbHelper {
     fun updateWarehouseId(newWarehouseId: Long, oldWarehouseId: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> updateWarehouseId")
 
-        val selection = "$WAREHOUSE_ID = ?" // WHERE code LIKE ?
+        val selection = "$WAREHOUSE_ID = ?"
         val selectionArgs = arrayOf(oldWarehouseId.toString())
         val values = ContentValues()
         values.put(WAREHOUSE_ID, newWarehouseId)
@@ -311,7 +312,7 @@ class AssetDbHelper {
     fun updateWarehouseAreaId(newWarehouseAreaId: Long, oldWarehouseAreaId: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> updateWarehouseAreaId")
 
-        val selection = "$WAREHOUSE_AREA_ID = ?" // WHERE code LIKE ?
+        val selection = "$WAREHOUSE_AREA_ID = ?"
         val selectionArgs = arrayOf(oldWarehouseAreaId.toString())
         val values = ContentValues()
         values.put(WAREHOUSE_AREA_ID, newWarehouseAreaId)
@@ -334,7 +335,7 @@ class AssetDbHelper {
     fun updateItemCategoryId(newItemCategoryId: Long, oldItemCategoryId: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> updateItemCategoryId")
 
-        val selection = "$ITEM_CATEGORY_ID = ?" // WHERE code LIKE ?
+        val selection = "$ITEM_CATEGORY_ID = ?"
         val selectionArgs = arrayOf(oldItemCategoryId.toString())
         val values = ContentValues()
         values.put(ITEM_CATEGORY_ID, newItemCategoryId)
@@ -357,7 +358,7 @@ class AssetDbHelper {
     fun update(asset: AssetCollectorObject): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> update")
 
-        val selection = "$ASSET_ID = ?" // WHERE code LIKE ?
+        val selection = "$ASSET_ID = ?"
         val selectionArgs = arrayOf(asset.asset_id.toString())
 
         val values = ContentValues()
@@ -399,7 +400,7 @@ class AssetDbHelper {
     fun update(asset: Asset): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> update")
 
-        val selection = "$ASSET_ID = ?" // WHERE code LIKE ?
+        val selection = "$ASSET_ID = ?"
         val selectionArgs = arrayOf(asset.assetId.toString())
 
         val sqLiteDatabase = getWritableDb()
@@ -426,7 +427,7 @@ class AssetDbHelper {
     fun updateAssetId(newAssetId: Long, oldAssetId: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> updateAssetId")
 
-        val selection = "$ASSET_ID = ?" // WHERE code LIKE ?
+        val selection = "$ASSET_ID = ?"
         val selectionArgs = arrayOf(oldAssetId.toString())
         val values = ContentValues()
         values.put(ASSET_ID, newAssetId)
@@ -446,148 +447,180 @@ class AssetDbHelper {
         }
     }
 
-    private fun updateOnInventoryRemoved(wId: Long, waId: Long, assetId: Long): Boolean {
+    private fun updateOnInventoryRemoved(itemIdArray: Array<Long>, wId: Long, waId: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> updateOnInventoryRemoved")
 
-        /*
-        UPDATE asset
-        SET
-            warehouse_id = @warehouse_id,
-            warehouse_area_id = @warehouse_area_id,
-            transfered = 0,
-            last_asset_review_date = DATETIME('now', 'localtime')
-        WHERE (asset_id = @asset_id)
-        */
-
-        val updateQ =
-            "UPDATE " + TABLE_NAME +
-                    " SET " +
-                    WAREHOUSE_ID + " = " + wId + ", " +
-                    WAREHOUSE_AREA_ID + " = " + waId + ", " +
-                    TRANSFERED + " = 0, " +
-                    LAST_ASSET_REVIEW_DATE + " = DATETIME('now', 'localtime')" +
-                    " WHERE (" + ASSET_ID + " = " + assetId + ")"
+        if (itemIdArray.isEmpty()) {
+            return false
+        }
 
         val sqLiteDatabase = getWritableDb()
-        val result: Boolean = try {
-            val c = sqLiteDatabase.rawQuery(updateQ, null)
-            c.moveToFirst()
-            c.close()
-            getChangesCount() > 0
+
+        val splitList = splitList(itemIdArray, 20)
+        var error = false
+        try {
+            sqLiteDatabase.beginTransaction()
+            for (part in splitList) {
+                var updateQ = ""
+                for (id in part) {
+                    val tuQ =
+                        "UPDATE " + TABLE_NAME +
+                                " SET " +
+                                WAREHOUSE_ID + " = " + wId + ", " +
+                                WAREHOUSE_AREA_ID + " = " + waId + ", " +
+                                TRANSFERED + " = 0, " +
+                                LAST_ASSET_REVIEW_DATE + " = DATETIME('now', 'localtime')" +
+                                " WHERE (" + ASSET_ID + " = " + id + ");"
+
+                    updateQ = "${updateQ}${Statics.newLine}${tuQ}"
+                }
+
+                Log.i(this.javaClass.simpleName, updateQ)
+
+                sqLiteDatabase.execSQL(updateQ)
+            }
+            sqLiteDatabase.setTransactionSuccessful()
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
-            false
+            error = true
+        } finally {
+            sqLiteDatabase.endTransaction()
         }
-        return result
+
+        return !error
     }
 
-    private fun updateLocation(wId: Long, waId: Long, assetId: Long): Boolean {
+    private fun updateLocation(itemIdArray: Array<Long>, wId: Long, waId: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> updateLocation")
 
-        /*
-        UPDATE asset
-        SET
-            warehouse_id = @warehouse_id,
-            warehouse_area_id = @warehouse_area_id,
-            transfered = 0
-        WHERE (asset_id = @asset_id)
-        */
-
-        val updateQ =
-            "UPDATE " + TABLE_NAME +
-                    " SET " +
-                    WAREHOUSE_ID + " = " + wId + ", " +
-                    WAREHOUSE_AREA_ID + " = " + waId + ", " +
-                    TRANSFERED + " = 0" +
-                    " WHERE (" + ASSET_ID + " = " + assetId + ")"
+        if (itemIdArray.isEmpty()) {
+            return false
+        }
 
         val sqLiteDatabase = getWritableDb()
-        val result: Boolean = try {
-            val c = sqLiteDatabase.rawQuery(updateQ, null)
-            c.moveToFirst()
-            c.close()
-            getChangesCount() > 0
+
+        val splitList = splitList(itemIdArray, 20)
+        var error = false
+        try {
+            sqLiteDatabase.beginTransaction()
+            for (part in splitList) {
+                var updateQ = ""
+                for (id in part) {
+                    val tuQ =
+                        "UPDATE " + TABLE_NAME +
+                                " SET " +
+                                WAREHOUSE_ID + " = " + wId + ", " +
+                                WAREHOUSE_AREA_ID + " = " + waId + ", " +
+                                TRANSFERED + " = 0" +
+                                " WHERE (" + ASSET_ID + " = " + id + ");"
+
+                    updateQ = "${updateQ}${Statics.newLine}${tuQ}"
+                }
+
+                Log.i(this.javaClass.simpleName, updateQ)
+
+                sqLiteDatabase.execSQL(updateQ)
+            }
+            sqLiteDatabase.setTransactionSuccessful()
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
-            false
+            error = true
+        } finally {
+            sqLiteDatabase.endTransaction()
         }
-        return result
+
+        return !error
     }
 
-    private fun updateOnInventory(wId: Long, waId: Long, assetId: Long): Boolean {
+    private fun updateOnInventory(itemIdArray: Array<Long>, wId: Long, waId: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> updateOnInventory")
 
-        /*
-        UPDATE asset
-        SET
-            warehouse_id = @warehouse_id,
-            warehouse_area_id = @warehouse_area_id,
-            transfered = 0,
-            status = 1,
-            missing_date = NULL,
-            last_asset_review_date = DATETIME('now', 'localtime')
-        WHERE (asset_id = @asset_id)
-        */
-
-        val updateQ =
-            "UPDATE " + TABLE_NAME +
-                    " SET " +
-                    WAREHOUSE_ID + " = " + wId + ", " +
-                    WAREHOUSE_AREA_ID + " = " + waId + ", " +
-                    TRANSFERED + " = 0, " +
-                    STATUS + " = " + AssetStatus.onInventory.id + ", " +
-                    MISSING_DATE + " = NULL, " +
-                    LAST_ASSET_REVIEW_DATE + " = DATETIME('now', 'localtime')" +
-                    " WHERE (" + ASSET_ID + " = " + assetId + ")"
+        if (itemIdArray.isEmpty()) {
+            return false
+        }
 
         val sqLiteDatabase = getWritableDb()
-        val result: Boolean = try {
-            val c = sqLiteDatabase.rawQuery(updateQ, null)
-            c.moveToFirst()
-            c.close()
-            getChangesCount() > 0
+
+        val splitList = splitList(itemIdArray, 20)
+        var error = false
+        try {
+            sqLiteDatabase.beginTransaction()
+            for (part in splitList) {
+                var updateQ = ""
+                for (id in part) {
+                    val tuQ =
+                        "UPDATE " + TABLE_NAME +
+                                " SET " +
+                                WAREHOUSE_ID + " = " + wId + ", " +
+                                WAREHOUSE_AREA_ID + " = " + waId + ", " +
+                                TRANSFERED + " = 0, " +
+                                STATUS + " = " + AssetStatus.onInventory.id + ", " +
+                                MISSING_DATE + " = NULL, " +
+                                LAST_ASSET_REVIEW_DATE + " = DATETIME('now', 'localtime')" +
+                                " WHERE (" + ASSET_ID + " = " + id + ");"
+
+                    updateQ = "${updateQ}${Statics.newLine}${tuQ}"
+                }
+
+                Log.i(this.javaClass.simpleName, updateQ)
+
+                sqLiteDatabase.execSQL(updateQ)
+            }
+            sqLiteDatabase.setTransactionSuccessful()
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
-            false
+            error = true
+        } finally {
+            sqLiteDatabase.endTransaction()
         }
-        return result
+
+        return !error
     }
 
-    private fun updateMissing(assetId: Long): Boolean {
+    private fun updateMissing(itemIdArray: Array<Long>): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> updateMissing")
 
-        /*
-        UPDATE asset
-        SET
-            transfered = 0,
-            status = 3,
-            missing_date = DATETIME('now', 'localtime')
-        WHERE (asset_id = @asset_id)
-         */
-
-        val updateQ =
-            "UPDATE " + TABLE_NAME +
-                    " SET " +
-                    TRANSFERED + " = 0, " +
-                    STATUS + " = " + AssetStatus.missing.id + ", " +
-                    MISSING_DATE + " = DATETIME('now', 'localtime')" +
-                    " WHERE (" + ASSET_ID + " = " + assetId + ")"
+        if (itemIdArray.isEmpty()) {
+            return false
+        }
 
         val sqLiteDatabase = getWritableDb()
-        val result: Boolean = try {
-            val c = sqLiteDatabase.rawQuery(updateQ, null)
-            c.moveToFirst()
-            c.close()
-            getChangesCount() > 0
+
+        val splitList = splitList(itemIdArray, 20)
+        var error = false
+        try {
+            sqLiteDatabase.beginTransaction()
+            for (part in splitList) {
+                var updateQ = ""
+                for (id in part) {
+                    val tuQ =
+                        "UPDATE " + TABLE_NAME +
+                                " SET " +
+                                TRANSFERED + " = 0, " +
+                                STATUS + " = " + AssetStatus.missing.id + ", " +
+                                MISSING_DATE + " = DATETIME('now', 'localtime')" +
+                                " WHERE (" + ASSET_ID + " = " + id + ");"
+
+                    updateQ = "${updateQ}${Statics.newLine}${tuQ}"
+                }
+
+                Log.i(this.javaClass.simpleName, updateQ)
+
+                sqLiteDatabase.execSQL(updateQ)
+            }
+            sqLiteDatabase.setTransactionSuccessful()
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
-            false
+            error = true
+        } finally {
+            sqLiteDatabase.endTransaction()
         }
-        return result
+
+        return !error
     }
 
     fun updateTransferred(assetId: Long): Boolean {
@@ -627,7 +660,7 @@ class AssetDbHelper {
     fun deleteById(id: Long?): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> deleteById ($id)")
 
-        val selection = "$ASSET_ID = ?" // WHERE code LIKE ?
+        val selection = "$ASSET_ID = ?"
         val selectionArgs = arrayOf(id!!.toString())
 
         val sqLiteDatabase = getWritableDb()
@@ -1079,6 +1112,317 @@ class AssetDbHelper {
         ).toInt()
     }
 
+    fun setMissing(assets: ArrayList<AssetReviewContent>): Boolean {
+        return try {
+            val assetMissing =
+                ArrayList(assets.mapNotNull { if (it.assetStatusId != AssetStatus.missing.id && it.assetStatusId != AssetStatus.unknown.id) it.assetId else null })
+
+            updateMissing(assetMissing.toTypedArray())
+
+            true
+        } catch (ex: SQLException) {
+            ex.printStackTrace()
+            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
+            false
+        } finally {
+        }
+    }
+
+    fun setOnInventoryFromArCont(
+        ar: AssetReview,
+        assets: ArrayList<AssetReviewContent>,
+    ): Boolean {
+        try {
+            // Si los activos están eliminados (Dados de baja) no vuelven a estar en Inventario,
+            // solo se actualiza su ubicación, pero no cambia su estado.
+            val assetOnInventory =
+                ArrayList(assets.mapNotNull { if (it.assetStatusId != AssetStatus.unknown.id && it.assetStatusId != AssetStatus.removed.id) it.assetId else null })
+            updateOnInventory(assetOnInventory.toTypedArray(), ar.warehouseId, ar.warehouseAreaId)
+
+            val assetRemoved =
+                ArrayList(assets.mapNotNull { if (it.assetStatusId != AssetStatus.unknown.id && it.assetStatusId == AssetStatus.removed.id) it.assetId else null })
+            updateOnInventoryRemoved(assetRemoved.toTypedArray(), ar.warehouseId, ar.warehouseAreaId)
+
+            return true
+        } catch (ex: SQLException) {
+            ex.printStackTrace()
+            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
+            return false
+        } finally {
+        }
+    }
+
+    fun setNewLocationFromArCont(
+        wa: WarehouseArea,
+        assets: ArrayList<AssetReviewContent>,
+    ): Boolean {
+        val w = wa.warehouse!!
+
+        return try {
+            // Actualizando ubicación de los activos
+            val existingAssets =
+                ArrayList(assets.mapNotNull { if (it.assetStatusId != AssetStatus.unknown.id) it.assetId else null })
+
+            updateLocation(existingAssets.toTypedArray(), w.warehouseId, wa.warehouseAreaId)
+
+            true
+        } catch (ex: SQLException) {
+            ex.printStackTrace()
+            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
+            false
+        } finally {
+        }
+    }
+
+    fun setNewLocationFromWmCont(
+        wa: WarehouseArea,
+        assets: ArrayList<WarehouseMovementContent>,
+    ): Boolean {
+        val w = wa.warehouse!!
+
+        return try {
+            // Actualizando ubicación de los activos
+            val existingAssets =
+                ArrayList(assets.mapNotNull { if (it.assetStatusId != AssetStatus.unknown.id) it.assetId else null })
+
+            updateLocation(existingAssets.toTypedArray(), w.warehouseId, wa.warehouseAreaId)
+
+            true
+        } catch (ex: SQLException) {
+            ex.printStackTrace()
+            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
+            false
+        } finally {
+        }
+    }
+
+    fun setOnInventoryFromWmCont(
+        wa: WarehouseArea,
+        assets: ArrayList<WarehouseMovementContent>,
+    ): Boolean {
+        val w = wa.warehouse!!
+
+        try {
+            // Si los activos están eliminados (Dados de baja) no vuelven a estar en Inventario,
+            // solo se actualiza su ubicación, pero no cambia su estado.
+            val assetOnInventory =
+                ArrayList(assets.mapNotNull { if (it.assetStatusId != AssetStatus.unknown.id && it.assetStatusId != AssetStatus.removed.id) it.assetId else null })
+            updateOnInventory(assetOnInventory.toTypedArray(), w.warehouseId, wa.warehouseAreaId)
+
+            val assetRemoved =
+                ArrayList(assets.mapNotNull { if (it.assetStatusId != AssetStatus.unknown.id && it.assetStatusId == AssetStatus.removed.id) it.assetId else null })
+            updateOnInventoryRemoved(assetRemoved.toTypedArray(), w.warehouseId, wa.warehouseAreaId)
+
+            return true
+        } catch (ex: SQLException) {
+            ex.printStackTrace()
+            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
+            return false
+        } finally {
+        }
+    }
+
+    fun setOnInventoryFromArea(
+        warehouseAreaId: Long,
+        assets: ArrayList<WarehouseMovementContent>,
+    ): Boolean {
+        val wa = WarehouseArea(warehouseAreaId, false)
+        val w = wa.warehouse!!
+
+        return try {
+            val assetOnInventory =
+                ArrayList(assets.mapNotNull { if (it.assetStatusId == AssetStatus.missing.id) it.assetId else null })
+            updateOnInventory(assetOnInventory.toTypedArray(), w.warehouseId, wa.warehouseAreaId)
+
+            true
+        } catch (ex: SQLException) {
+            ex.printStackTrace()
+            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
+            false
+        } finally {
+        }
+    }
+
+    fun setOnInventoryFromArCont(
+        wa: WarehouseArea,
+        assets: ArrayList<AssetReviewContent>,
+    ): Boolean {
+        val w = wa.warehouse!!
+
+        try {
+            // Si los activos están eliminados (Dados de baja) no vuelven a estar en Inventario,
+            // solo se actualiza su ubicación, pero no cambia su estado.
+            val assetOnInventory =
+                ArrayList(assets.mapNotNull { if (it.assetStatusId != AssetStatus.unknown.id && it.assetStatusId != AssetStatus.removed.id) it.assetId else null })
+            updateOnInventory(assetOnInventory.toTypedArray(), w.warehouseId, wa.warehouseAreaId)
+
+            val assetRemoved =
+                ArrayList(assets.mapNotNull { if (it.assetStatusId != AssetStatus.unknown.id && it.assetStatusId == AssetStatus.removed.id) it.assetId else null })
+            updateOnInventoryRemoved(assetRemoved.toTypedArray(), w.warehouseId, wa.warehouseAreaId)
+
+            return true
+        } catch (ex: SQLException) {
+            ex.printStackTrace()
+            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
+            return false
+        } finally {
+        }
+    }
+
+    fun setOnInventoryFromWmCont(
+        ar: WarehouseMovement,
+        assets: ArrayList<WarehouseMovementContent>,
+    ): Boolean {
+        val wa = ar.destWarehouseArea!!
+        val w = ar.destWarehouse!!
+
+        try {
+            // Si los activos están eliminados (Dados de baja) no vuelven a estar en Inventario,
+            // solo se actualiza su ubicación, pero no cambia su estado.
+            val assetOnInventory =
+                ArrayList(assets.mapNotNull { if (it.assetStatusId != AssetStatus.unknown.id && it.assetStatusId != AssetStatus.removed.id) it.assetId else null })
+            updateOnInventory(assetOnInventory.toTypedArray(), w.warehouseId, wa.warehouseAreaId)
+
+            val assetRemoved =
+                ArrayList(assets.mapNotNull { if (it.assetStatusId != AssetStatus.unknown.id && it.assetStatusId == AssetStatus.removed.id) it.assetId else null })
+            updateOnInventoryRemoved(assetRemoved.toTypedArray(), w.warehouseId, wa.warehouseAreaId)
+
+            return true
+        } catch (ex: SQLException) {
+            ex.printStackTrace()
+            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
+            return false
+        } finally {
+        }
+    }
+
+    val minId: Long
+        get() {
+            Log.i(this::class.java.simpleName, ": SQLite -> minId")
+
+            val sqLiteDatabase = getReadableDb()
+            return try {
+                val mCount = sqLiteDatabase.rawQuery("SELECT MIN($ASSET_ID) FROM $TABLE_NAME", null)
+                mCount.moveToFirst()
+                val count = mCount.getLong(0)
+                mCount.close()
+                if (count > 0) -1 else count - 1
+            } catch (ex: SQLException) {
+                ex.printStackTrace()
+                ErrorLog.writeLog(null, this::class.java.simpleName, ex)
+                0
+            }
+        }
+
+    // region TABLA E IDS TEMPORALES
+
+    // Funciones que guardan y recuperan ID entre actividades
+    // y, cuando se pasa un objeto demasiado grande, evitar el error:
+    // "FAILED BINDER TRANSACTION !!!"
+    private fun createTempTable() {
+        val allCommands: ArrayList<String> = ArrayList()
+        allCommands.add(CREATE_TEMP_TABLE)
+
+        val sqLiteDatabase = getWritableDb()
+        sqLiteDatabase.beginTransaction()
+        try {
+            for (sql in allCommands) {
+                sqLiteDatabase.execSQL(sql)
+            }
+            sqLiteDatabase.setTransactionSuccessful()
+        } finally {
+            sqLiteDatabase.endTransaction()
+        }
+    }
+
+    fun deleteTemp(): Boolean {
+        createTempTable()
+
+        Log.i(this::class.java.simpleName, ": SQLite -> delete")
+
+        val sqLiteDatabase = getWritableDb()
+        return try {
+            return sqLiteDatabase.delete("$temp$TABLE_NAME", null, null) > 0
+        } catch (ex: SQLException) {
+            ex.printStackTrace()
+            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
+            false
+        }
+    }
+
+    fun selectTempId(): ArrayList<Asset> {
+        createTempTable()
+
+        Log.i(this::class.java.simpleName, ": SQLite -> select")
+
+        val where =
+            " WHERE $TABLE_NAME.$ASSET_ID IN (SELECT $temp$TABLE_NAME.$temp$ASSET_ID FROM $temp$TABLE_NAME)"
+        val rawQuery = basicSelect +
+                "," +
+                basicStrFields +
+                " FROM " + TABLE_NAME +
+                basicLeftJoin +
+                where +
+                " ORDER BY " + TABLE_NAME + "." + ASSET_ID
+
+        val sqLiteDatabase = getReadableDb()
+        return try {
+            val c = sqLiteDatabase.rawQuery(rawQuery, null)
+            fromCursor(c)
+        } catch (ex: SQLException) {
+            ex.printStackTrace()
+            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
+            ArrayList()
+        }
+    }
+
+    fun insertTempId(arrayId: ArrayList<Long>): Boolean {
+        createTempTable()
+
+        Log.i(this::class.java.simpleName, ": SQLite -> insert")
+
+        val splitList = splitList(arrayId.toTypedArray(), 100)
+
+        val sqLiteDatabase = getWritableDb()
+
+        try {
+            sqLiteDatabase.delete("$temp${TABLE_NAME}", null, null)
+        } catch (ex: SQLException) {
+            ex.printStackTrace()
+            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
+            return false
+        }
+
+        try {
+            sqLiteDatabase.beginTransaction()
+            for (part in splitList) {
+                var insertQ =
+                    "INSERT INTO " + temp + TABLE_NAME + " (" + temp + ASSET_ID + ") VALUES "
+
+                for (t in part) {
+                    Log.d(this::class.java.simpleName, "SQLITE-QUERY-INSERT-->$t")
+
+                    val values = "(${t}),"
+                    insertQ = "$insertQ$values"
+                }
+
+                if (insertQ.endsWith(",")) {
+                    insertQ = insertQ.substring(0, insertQ.length - 1)
+                }
+                sqLiteDatabase.execSQL(insertQ)
+            }
+            sqLiteDatabase.setTransactionSuccessful()
+            return true
+        } catch (ex: SQLException) {
+            ex.printStackTrace()
+            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
+            return false
+        } finally {
+            sqLiteDatabase.endTransaction()
+        }
+    }
+    // endregion TABLA E IDS TEMPORALES
+
     private val basicSelect = "SELECT " +
             TABLE_NAME + "." + ASSET_ID + "," +
             TABLE_NAME + "." + CODE + "," +
@@ -1218,448 +1562,4 @@ class AssetDbHelper {
                 + " CONSTRAINT [PK_" + temp + ASSET_ID + "] PRIMARY KEY ([" + temp + ASSET_ID + "]) )")
 
     }
-
-    fun setMissing(assets: ArrayList<AssetReviewContent>): Boolean {
-        try {
-            val assetMissing: ArrayList<AssetReviewContent> = ArrayList()
-            for (a in assets) {
-                // Activos previamente extraviados y no existentes no cambian
-                if (a.assetStatusId != AssetStatus.missing.id &&
-                    a.assetStatusId != AssetStatus.unknown.id
-                ) {
-                    assetMissing.add(a)
-                }
-            }
-
-            for (a in assetMissing) {
-                // Actualizando activo
-                updateMissing(a.assetId)
-            }
-
-            return true
-        } catch (ex: SQLException) {
-            ex.printStackTrace()
-            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
-            return false
-        } finally {
-        }
-    }
-
-    fun setOnInventoryFromArCont(
-        ar: AssetReview,
-        assets: ArrayList<AssetReviewContent>,
-    ): Boolean {
-        try {
-            val assetExists: ArrayList<AssetReviewContent> = ArrayList()
-            for (a in assets) {
-                // Todos los activos, menos los no existentes
-                if (a.assetStatusId != AssetStatus.unknown.id) {
-                    assetExists.add(a)
-                }
-            }
-
-            for (a in assetExists) {
-                // Actualizando activo
-
-                // Si el activo está eliminado (Dado de baja) no vuelve a estar en Inventario,
-                // sólo se actualiza su ubicación pero no cambia su estado.
-                if (a.assetStatusId != AssetStatus.removed.id) {
-                    updateOnInventory(
-                        ar.warehouseId,
-                        ar.warehouseAreaId,
-                        a.assetId
-                    )
-                } else {
-                    updateOnInventoryRemoved(
-                        ar.warehouseId,
-                        ar.warehouseAreaId,
-                        a.assetId
-                    )
-                }
-            }
-            return true
-        } catch (ex: SQLException) {
-            ex.printStackTrace()
-            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
-            return false
-        } finally {
-        }
-    }
-
-    fun setNewLocationFromArCont(
-        wa: WarehouseArea,
-        assets: ArrayList<AssetReviewContent>,
-    ): Boolean {
-        val w = wa.warehouse!!
-
-        try {
-            val assetExists: ArrayList<AssetReviewContent> = ArrayList()
-            for (a in assets) {
-                // Todos los activos, menos los no existentes
-                if (a.assetStatusId != AssetStatus.unknown.id) {
-                    assetExists.add(a)
-                }
-            }
-
-            for (a in assetExists) {
-                // Actualizando ubicación de los activos
-                updateLocation(
-                    w.warehouseId,
-                    wa.warehouseAreaId,
-                    a.assetId
-                )
-            }
-
-            return true
-        } catch (ex: SQLException) {
-            ex.printStackTrace()
-            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
-            return false
-        } finally {
-        }
-    }
-
-    fun setNewLocationFromWmCont(
-        wa: WarehouseArea,
-        assets: ArrayList<WarehouseMovementContent>,
-    ): Boolean {
-        val w = wa.warehouse!!
-
-        try {
-            val assetExists: ArrayList<WarehouseMovementContent> = ArrayList()
-            for (a in assets) {
-                // Todos los activos, menos los no existentes
-                if (a.assetStatusId != AssetStatus.unknown.id) {
-                    assetExists.add(a)
-                }
-            }
-
-            for (a in assetExists) {
-                // Actualizando ubicación de los activos
-                updateLocation(
-                    w.warehouseId,
-                    wa.warehouseAreaId,
-                    a.assetId
-                )
-            }
-
-            return true
-        } catch (ex: SQLException) {
-            ex.printStackTrace()
-            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
-            return false
-        } finally {
-        }
-    }
-
-    fun setOnInventoryFromWmCont(
-        wa: WarehouseArea,
-        assets: ArrayList<WarehouseMovementContent>,
-    ): Boolean {
-        val w = wa.warehouse!!
-
-        try {
-            val assetExists: ArrayList<WarehouseMovementContent> = ArrayList()
-            for (a in assets) {
-                // Todos los activos, menos los no existentes
-                if (a.assetStatusId != AssetStatus.unknown.id) {
-                    assetExists.add(a)
-                }
-            }
-
-            for (a in assetExists) {
-                // Si el activo está eliminado no vuelve a estar en inventario,
-                // sólo se actualiza su ubicación pero no cambia su estado.
-                if (a.assetStatusId != AssetStatus.removed.id) {
-                    updateOnInventory(
-                        w.warehouseId,
-                        wa.warehouseAreaId,
-                        a.assetId
-                    )
-                } else {
-                    updateOnInventoryRemoved(
-                        w.warehouseId,
-                        wa.warehouseAreaId,
-                        a.assetId
-                    )
-                }
-            }
-            return true
-        } catch (ex: SQLException) {
-            ex.printStackTrace()
-            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
-            return false
-        } finally {
-        }
-    }
-
-    fun setOnInventoryFromArea(
-        warehouseAreaId: Long,
-        assets: ArrayList<WarehouseMovementContent>,
-    ): Boolean {
-        val wa = WarehouseArea(warehouseAreaId, false)
-        val w = wa.warehouse!!
-
-        try {
-            val assetExists: ArrayList<WarehouseMovementContent> = ArrayList()
-            for (a in assets) {
-                // Sólo los extraviados
-                if (a.assetStatusId == AssetStatus.missing.id) {
-                    assetExists.add(a)
-                }
-            }
-
-            for (a in assetExists) {
-                // Los activos extraviados vuelven a inventario.
-                updateOnInventory(
-                    w.warehouseId,
-                    wa.warehouseAreaId,
-                    a.assetId
-                )
-            }
-            return true
-        } catch (ex: SQLException) {
-            ex.printStackTrace()
-            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
-            return false
-        } finally {
-        }
-    }
-
-    fun setOnInventoryFromArCont(
-        wa: WarehouseArea,
-        assets: ArrayList<AssetReviewContent>,
-    ): Boolean {
-        val w = wa.warehouse!!
-
-        try {
-            val assetExists: ArrayList<AssetReviewContent> = ArrayList()
-            for (a in assets) {
-                // Todos los activos, menos los no existentes
-                if (a.assetStatusId != AssetStatus.unknown.id) {
-                    assetExists.add(a)
-                }
-            }
-
-            for (a in assetExists) {
-                // Si el activo está eliminado no vuelve a estar en inventario,
-                // sólo se actualiza su ubicación pero no cambia su estado.
-                if (a.assetStatusId != AssetStatus.removed.id) {
-                    updateOnInventory(
-                        w.warehouseId,
-                        wa.warehouseAreaId,
-                        a.assetId
-                    )
-                } else {
-                    updateOnInventoryRemoved(
-                        w.warehouseId,
-                        wa.warehouseAreaId,
-                        a.assetId
-                    )
-                }
-            }
-            return true
-        } catch (ex: SQLException) {
-            ex.printStackTrace()
-            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
-            return false
-        } finally {
-        }
-    }
-
-    fun setOnInventoryFromWmCont(
-        ar: WarehouseMovement,
-        assets: ArrayList<WarehouseMovementContent>,
-    ): Boolean {
-        val wa = ar.destWarehouseArea!!
-        val w = ar.destWarehouse!!
-
-        try {
-            val assetExists: ArrayList<WarehouseMovementContent> = ArrayList()
-            for (a in assets) {
-                // Todos los activos, menos los no existentes
-                if (a.assetStatusId != AssetStatus.unknown.id) {
-                    assetExists.add(a)
-                }
-            }
-
-            for (a in assetExists) {
-                // Si el activo está eliminado no vuelve a estar en inventario,
-                // sólo se actualiza su ubicación pero no cambia su estado.
-                if (a.assetStatusId != AssetStatus.removed.id) {
-                    updateOnInventory(
-                        w.warehouseId,
-                        wa.warehouseAreaId,
-                        a.assetId
-                    )
-                } else {
-                    updateOnInventoryRemoved(
-                        w.warehouseId,
-                        wa.warehouseAreaId,
-                        a.assetId
-                    )
-                }
-            }
-            return true
-        } catch (ex: SQLException) {
-            ex.printStackTrace()
-            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
-            return false
-        } finally {
-        }
-    }
-
-    fun setOnInventory(a: Asset): Boolean {
-        try {
-            // Si el activo está eliminado no vuelve a estar en inventario,
-            // sólo se actualiza su ubicación pero no cambia su estado.
-            if (a.assetStatusId != AssetStatus.removed.id) {
-                updateOnInventory(
-                    a.warehouseId,
-                    a.warehouseAreaId,
-                    a.assetId
-                )
-            } else {
-                updateOnInventoryRemoved(
-                    a.warehouseId,
-                    a.warehouseAreaId,
-                    a.assetId
-                )
-            }
-            return true
-        } catch (ex: SQLException) {
-            ex.printStackTrace()
-            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
-            return false
-        } finally {
-        }
-    }
-
-    val minId: Long
-        get() {
-            Log.i(this::class.java.simpleName, ": SQLite -> minId")
-
-            val sqLiteDatabase = getReadableDb()
-            return try {
-                val mCount = sqLiteDatabase.rawQuery("SELECT MIN($ASSET_ID) FROM $TABLE_NAME", null)
-                mCount.moveToFirst()
-                val count = mCount.getLong(0)
-                mCount.close()
-                if (count > 0) -1 else count - 1
-            } catch (ex: SQLException) {
-                ex.printStackTrace()
-                ErrorLog.writeLog(null, this::class.java.simpleName, ex)
-                0
-            }
-        }
-
-    // region TABLA E IDS TEMPORALES
-
-    // Funciones que guardan y recuperan IDs entre actividades
-    // y evitar el error: !!! FAILED BINDER TRANSACTION !!!
-    // cuando se pasa un objeto demasiado grande
-    private fun createTempTable() {
-        val allCommands: ArrayList<String> = ArrayList()
-        allCommands.add(CREATE_TEMP_TABLE)
-
-        val sqLiteDatabase = getWritableDb()
-        sqLiteDatabase.beginTransaction()
-        try {
-            for (sql in allCommands) {
-                println("$sql;")
-                sqLiteDatabase.execSQL(sql)
-            }
-            sqLiteDatabase.setTransactionSuccessful()
-        } finally {
-            sqLiteDatabase.endTransaction()
-        }
-    }
-
-    fun deleteTemp(): Boolean {
-        createTempTable()
-
-        Log.i(this::class.java.simpleName, ": SQLite -> delete")
-
-        val sqLiteDatabase = getWritableDb()
-        return try {
-            return sqLiteDatabase.delete("$temp$TABLE_NAME", null, null) > 0
-        } catch (ex: SQLException) {
-            ex.printStackTrace()
-            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
-            false
-        }
-    }
-
-    fun selectTempId(): ArrayList<Asset> {
-        createTempTable()
-
-        Log.i(this::class.java.simpleName, ": SQLite -> select")
-
-        val where =
-            " WHERE $TABLE_NAME.$ASSET_ID IN (SELECT $temp$TABLE_NAME.$temp$ASSET_ID FROM $temp$TABLE_NAME)"
-        val rawQuery = basicSelect +
-                "," +
-                basicStrFields +
-                " FROM " + TABLE_NAME +
-                basicLeftJoin +
-                where +
-                " ORDER BY " + TABLE_NAME + "." + ASSET_ID
-
-        val sqLiteDatabase = getReadableDb()
-        return try {
-            val c = sqLiteDatabase.rawQuery(rawQuery, null)
-            fromCursor(c)
-        } catch (ex: SQLException) {
-            ex.printStackTrace()
-            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
-            ArrayList()
-        }
-    }
-
-    fun insertTempId(arrayId: ArrayList<Long>): Boolean {
-        createTempTable()
-
-        Log.i(this::class.java.simpleName, ": SQLite -> insert")
-
-        val splitList = splitList(arrayId.toTypedArray(), 100)
-
-        val sqLiteDatabase = getWritableDb()
-
-        try {
-            sqLiteDatabase.delete("$temp${TABLE_NAME}", null, null)
-        } catch (ex: SQLException) {
-            ex.printStackTrace()
-            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
-            return false
-        }
-
-        try {
-            sqLiteDatabase.beginTransaction()
-            for (part in splitList) {
-                var insertQ =
-                    "INSERT INTO " + temp + TABLE_NAME + " (" + temp + ASSET_ID + ") VALUES "
-
-                for (t in part) {
-                    Log.d(this::class.java.simpleName, "SQLITE-QUERY-INSERT-->$t")
-
-                    val values = "(${t}),"
-                    insertQ = "$insertQ$values"
-                }
-
-                if (insertQ.endsWith(",")) {
-                    insertQ = insertQ.substring(0, insertQ.length - 1)
-                }
-                sqLiteDatabase.execSQL(insertQ)
-            }
-            sqLiteDatabase.setTransactionSuccessful()
-            return true
-        } catch (ex: SQLException) {
-            ex.printStackTrace()
-            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
-            return false
-        } finally {
-            sqLiteDatabase.endTransaction()
-        }
-    }
-    // endregion TABLA E IDS TEMPORALES
 }

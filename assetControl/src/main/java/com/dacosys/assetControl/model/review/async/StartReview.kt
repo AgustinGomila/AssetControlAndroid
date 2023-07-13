@@ -120,10 +120,10 @@ class StartReview {
 
                         val newArCont = AssetReviewContent()
 
-                        newArCont.assetId = asset.assetId
+                        newArCont.assetReviewContentId = lastId
                         newArCont.contentStatusId = AssetReviewContentStatus.notInReview.id
+                        newArCont.assetId = asset.assetId
                         newArCont.code = asset.code
-                        newArCont.collectorContentId = lastId
                         newArCont.description = asset.description
                         newArCont.assetStatusId = asset.assetStatusId
                         newArCont.warehouseAreaId = asset.warehouseAreaId
@@ -171,12 +171,12 @@ class StartReview {
                         lastId--
                         val newArCont = AssetReviewContent()
 
+                        newArCont.assetReviewContentId = lastId
                         newArCont.assetId = asset.assetId
                         newArCont.assetStatusId = asset.assetStatusId
                         newArCont.labelNumber = asset.labelNumber
                         newArCont.contentStatusId = asset.contentStatusId
                         newArCont.code = asset.code
-                        newArCont.collectorContentId = lastId
                         newArCont.description = asset.description
                         newArCont.warehouseAreaId = asset.originWarehouseAreaId
                         newArCont.parentId = asset.parentId

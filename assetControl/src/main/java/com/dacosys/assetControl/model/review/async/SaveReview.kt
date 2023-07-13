@@ -91,25 +91,30 @@ class SaveReview {
                     msg =
                         "${getContext().getString(R.string.processing_external_asset)} ${arCont.code}"
                 }
+
                 AssetReviewContentStatus.revised.id -> {
                     assetOnInventory.add(arCont)
                     msg =
-                        "${getContext().getString(R.string.processing_revisedasset)} ${arCont.code}"
+                        "${getContext().getString(R.string.processing_revised_asset)} ${arCont.code}"
                 }
+
                 AssetReviewContentStatus.newAsset.id -> {
                     assetOnInventory.add(arCont)
                     msg = "${getContext().getString(R.string.processing_new_asset)} ${arCont.code}"
                 }
+
                 AssetReviewContentStatus.appeared.id -> {
                     assetOnInventory.add(arCont)
                     msg =
                         "${getContext().getString(R.string.processing_appeared_asset)} ${arCont.code}"
                 }
+
                 AssetReviewContentStatus.unknown.id -> {
                     assetUnknownList.add(arCont)
                     msg =
                         "${getContext().getString(R.string.processing_unknown_asset)} ${arCont.code}"
                 }
+
                 AssetReviewContentStatus.notInReview.id -> {
                     // Activos faltantes en la revisión
                     assetNotInReviewList.add(arCont)
@@ -137,6 +142,9 @@ class SaveReview {
             // Traer todos los orígenes únicos
             var total = assetExternalList.size
             for ((p, tempAsset) in assetExternalList.withIndex()) {
+                // Omitir activos desconocidos que no tiene área de origen válida
+                if (tempAsset.originWarehouseAreaId <= 0) continue
+
                 if (!waIdList.contains(tempAsset.originWarehouseAreaId)) {
                     waIdList.add(tempAsset.originWarehouseAreaId)
                 }
