@@ -147,7 +147,7 @@ class DataCollectionRuleContentDbHelper {
     fun update(dataCollectionRuleContent: DataCollectionRuleContent): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> update")
 
-        val selection = "$DATA_COLLECTION_RULE_CONTENT_ID = ?" // WHERE code LIKE ?
+        val selection = "$DATA_COLLECTION_RULE_CONTENT_ID = ?"
         val selectionArgs =
             arrayOf(dataCollectionRuleContent.dataCollectionRuleContentId.toString())
 
@@ -173,7 +173,7 @@ class DataCollectionRuleContentDbHelper {
     fun deleteByDataCollectionRuleId(id: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> deleteByDataCollectionRuleId ($id)")
 
-        val selection = "$DATA_COLLECTION_RULE_ID = ?" // WHERE code LIKE ?
+        val selection = "$DATA_COLLECTION_RULE_ID = ?"
         val selectionArgs = arrayOf(id.toString())
 
         val sqLiteDatabase = getWritableDb()
@@ -193,7 +193,7 @@ class DataCollectionRuleContentDbHelper {
     fun deleteById(id: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> deleteById ($id)")
 
-        val selection = "$DATA_COLLECTION_RULE_CONTENT_ID = ?" // WHERE code LIKE ?
+        val selection = "$DATA_COLLECTION_RULE_CONTENT_ID = ?"
         val selectionArgs = arrayOf(id.toString())
 
         val sqLiteDatabase = getWritableDb()

@@ -189,7 +189,7 @@ class WarehouseMovementDbHelper {
     fun updateOriginWarehouseId(newWarehouseId: Long, oldWarehouseId: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> updateOriginWarehouseId")
 
-        val selection = "$ORIGIN_WAREHOUSE_ID = ?" // WHERE code LIKE ?
+        val selection = "$ORIGIN_WAREHOUSE_ID = ?"
         val selectionArgs = arrayOf(oldWarehouseId.toString())
         val values = ContentValues()
         values.put(ORIGIN_WAREHOUSE_ID, newWarehouseId)
@@ -212,7 +212,7 @@ class WarehouseMovementDbHelper {
     fun updateOriginWarehouseAreaId(newWarehouseAreaId: Long, oldWarehouseAreaId: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> updateOriginWarehouseAreaId")
 
-        val selection = "$ORIGIN_WAREHOUSE_AREA_ID = ?" // WHERE code LIKE ?
+        val selection = "$ORIGIN_WAREHOUSE_AREA_ID = ?"
         val selectionArgs = arrayOf(oldWarehouseAreaId.toString())
         val values = ContentValues()
         values.put(ORIGIN_WAREHOUSE_AREA_ID, newWarehouseAreaId)
@@ -235,7 +235,7 @@ class WarehouseMovementDbHelper {
     fun updateDestWarehouseId(newWarehouseId: Long, oldWarehouseId: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> updateDestWarehouseId")
 
-        val selection = "$DESTINATION_WAREHOUSE_ID = ?" // WHERE code LIKE ?
+        val selection = "$DESTINATION_WAREHOUSE_ID = ?"
         val selectionArgs = arrayOf(oldWarehouseId.toString())
         val values = ContentValues()
         values.put(DESTINATION_WAREHOUSE_ID, newWarehouseId)
@@ -258,7 +258,7 @@ class WarehouseMovementDbHelper {
     fun updateDestWarehouseAreaId(newWarehouseAreaId: Long, oldWarehouseAreaId: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> updateDestWarehouseAreaId")
 
-        val selection = "$DESTINATION_WAREHOUSE_AREA_ID = ?" // WHERE code LIKE ?
+        val selection = "$DESTINATION_WAREHOUSE_AREA_ID = ?"
         val selectionArgs = arrayOf(oldWarehouseAreaId.toString())
         val values = ContentValues()
         values.put(DESTINATION_WAREHOUSE_AREA_ID, newWarehouseAreaId)
@@ -281,7 +281,7 @@ class WarehouseMovementDbHelper {
     fun update(warehouseMovement: WarehouseMovement): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> update")
 
-        val selection = "$COLLECTOR_WAREHOUSE_MOVEMENT_ID = ?" // WHERE code LIKE ?
+        val selection = "$COLLECTOR_WAREHOUSE_MOVEMENT_ID = ?"
         val selectionArgs = arrayOf(warehouseMovement.collectorWarehouseMovementId.toString())
 
         val sqLiteDatabase = getWritableDb()
@@ -344,7 +344,7 @@ class WarehouseMovementDbHelper {
     fun deleteById(id: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> deleteById ($id)")
 
-        val selection = "$COLLECTOR_WAREHOUSE_MOVEMENT_ID = ?" // WHERE code LIKE ?
+        val selection = "$COLLECTOR_WAREHOUSE_MOVEMENT_ID = ?"
         val selectionArgs = arrayOf(id.toString())
 
         val sqLiteDatabase = getWritableDb()

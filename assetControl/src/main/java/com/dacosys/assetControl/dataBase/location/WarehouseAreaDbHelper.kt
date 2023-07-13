@@ -166,7 +166,7 @@ class WarehouseAreaDbHelper {
     fun updateWarehouseAreaId(newWarehouseAreaId: Long, oldWarehouseAreaId: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> updateWarehouseAreaId")
 
-        val selection = "$WAREHOUSE_AREA_ID = ?" // WHERE code LIKE ?
+        val selection = "$WAREHOUSE_AREA_ID = ?"
         val selectionArgs = arrayOf(oldWarehouseAreaId.toString())
         val values = ContentValues()
         values.put(WAREHOUSE_AREA_ID, newWarehouseAreaId)
@@ -218,7 +218,7 @@ class WarehouseAreaDbHelper {
     fun updateWarehouseId(newWarehouseId: Long, oldWarehouseId: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> updateWarehouseId")
 
-        val selection = "$WAREHOUSE_ID = ?" // WHERE code LIKE ?
+        val selection = "$WAREHOUSE_ID = ?"
         val selectionArgs = arrayOf(oldWarehouseId.toString())
         val values = ContentValues()
         values.put(WAREHOUSE_ID, newWarehouseId)
@@ -241,7 +241,7 @@ class WarehouseAreaDbHelper {
     fun update(wa: WarehouseAreaObject): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> update")
 
-        val selection = "$WAREHOUSE_AREA_ID = ?" // WHERE code LIKE ?
+        val selection = "$WAREHOUSE_AREA_ID = ?"
         val selectionArgs = arrayOf(wa.warehouse_area_id.toString())
 
         val values = ContentValues()
@@ -269,7 +269,7 @@ class WarehouseAreaDbHelper {
     fun update(warehouseArea: WarehouseArea): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> update")
 
-        val selection = "$WAREHOUSE_AREA_ID = ?" // WHERE code LIKE ?
+        val selection = "$WAREHOUSE_AREA_ID = ?"
         val selectionArgs = arrayOf(warehouseArea.warehouseAreaId.toString())
 
         val sqLiteDatabase = getWritableDb()
@@ -294,7 +294,7 @@ class WarehouseAreaDbHelper {
     fun deleteById(id: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> deleteById ($id)")
 
-        val selection = "$WAREHOUSE_AREA_ID = ?" // WHERE code LIKE ?
+        val selection = "$WAREHOUSE_AREA_ID = ?"
         val selectionArgs = arrayOf(id.toString())
 
         val sqLiteDatabase = getWritableDb()

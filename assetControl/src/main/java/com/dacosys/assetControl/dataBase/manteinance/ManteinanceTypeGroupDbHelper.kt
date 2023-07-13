@@ -64,7 +64,7 @@ class ManteinanceTypeGroupDbHelper {
     fun update(manteinanceTypeGroup: ManteinanceTypeGroup): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> update")
 
-        val selection = "$MANTEINANCE_TYPE_GROUP_ID = ?" // WHERE code LIKE ?
+        val selection = "$MANTEINANCE_TYPE_GROUP_ID = ?"
         val selectionArgs = arrayOf(manteinanceTypeGroup.manteinanceTypeGroupId.toString())
 
         val sqLiteDatabase = getWritableDb()
@@ -89,7 +89,7 @@ class ManteinanceTypeGroupDbHelper {
     fun deleteById(id: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> deleteById ($id)")
 
-        val selection = "$MANTEINANCE_TYPE_GROUP_ID = ?" // WHERE code LIKE ?
+        val selection = "$MANTEINANCE_TYPE_GROUP_ID = ?"
         val selectionArgs = arrayOf(id.toString())
 
         val sqLiteDatabase = getWritableDb()
@@ -156,7 +156,7 @@ class ManteinanceTypeGroupDbHelper {
         Log.i(this::class.java.simpleName, ": SQLite -> selectById ($id)")
 
         val columns = getAllColumns()
-        val selection = "$MANTEINANCE_TYPE_GROUP_ID = ?" // WHERE code LIKE ?
+        val selection = "$MANTEINANCE_TYPE_GROUP_ID = ?"
         val selectionArgs = arrayOf(id.toString())
         val order = DESCRIPTION
 
@@ -191,7 +191,7 @@ class ManteinanceTypeGroupDbHelper {
         Log.i(this::class.java.simpleName, ": SQLite -> selectByDescription ($description)")
 
         val columns = getAllColumns()
-        val selection = "$DESCRIPTION LIKE ?" // WHERE code LIKE ?
+        val selection = "$DESCRIPTION LIKE ?"
         val selectionArgs = arrayOf("%$description%")
         val order = DESCRIPTION
 

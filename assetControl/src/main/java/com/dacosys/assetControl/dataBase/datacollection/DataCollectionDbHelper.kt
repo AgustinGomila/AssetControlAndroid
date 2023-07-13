@@ -287,7 +287,7 @@ class DataCollectionDbHelper {
     fun update(dataCollection: DataCollection): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> update")
 
-        val selection = "$COLLECTOR_DATA_COLLECTION_ID = ?" // WHERE code LIKE ?
+        val selection = "$COLLECTOR_DATA_COLLECTION_ID = ?"
         val selectionArgs = arrayOf(dataCollection.collectorDataCollectionId.toString())
 
         val sqLiteDatabase = getWritableDb()
@@ -351,7 +351,7 @@ class DataCollectionDbHelper {
     fun deleteById(id: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> deleteById ($id)")
 
-        val selection = "$COLLECTOR_DATA_COLLECTION_ID = ?" // WHERE code LIKE ?
+        val selection = "$COLLECTOR_DATA_COLLECTION_ID = ?"
         val selectionArgs = arrayOf(id.toString())
 
         val sqLiteDatabase = getWritableDb()

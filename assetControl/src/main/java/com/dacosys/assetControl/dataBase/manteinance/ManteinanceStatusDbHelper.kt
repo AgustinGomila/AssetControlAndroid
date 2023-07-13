@@ -42,7 +42,7 @@ class ManteinanceStatusDbHelper {
     fun update(manteinanceStatus: ManteinanceStatus): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> update")
 
-        val selection = "$MANTEINANCE_STATUS_ID = ?" // WHERE code LIKE ?
+        val selection = "$MANTEINANCE_STATUS_ID = ?"
         val selectionArgs = arrayOf(manteinanceStatus.id.toString())
 
         val sqLiteDatabase = getWritableDb()
@@ -146,7 +146,7 @@ class ManteinanceStatusDbHelper {
         Log.i(this::class.java.simpleName, ": SQLite -> selectById ($id)")
 
         val columns = getAllColumns()
-        val selection = "$MANTEINANCE_STATUS_ID = ?" // WHERE code LIKE ?
+        val selection = "$MANTEINANCE_STATUS_ID = ?"
         val selectionArgs = arrayOf(id.toString())
         val order = DESCRIPTION
 
@@ -181,7 +181,7 @@ class ManteinanceStatusDbHelper {
         Log.i(this::class.java.simpleName, ": SQLite -> selectByDescription ($description)")
 
         val columns = getAllColumns()
-        val selection = "$DESCRIPTION LIKE ?" // WHERE code LIKE ?
+        val selection = "$DESCRIPTION LIKE ?"
         val selectionArgs = arrayOf("%$description%")
         val order = DESCRIPTION
 

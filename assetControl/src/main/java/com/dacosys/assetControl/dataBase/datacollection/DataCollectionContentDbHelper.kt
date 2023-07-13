@@ -166,7 +166,7 @@ class DataCollectionContentDbHelper {
     fun update(dataCollectionContent: DataCollectionContent): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> update")
 
-        val selection = "$DATA_COLLECTION_CONTENT_ID = ?" // WHERE code LIKE ?
+        val selection = "$DATA_COLLECTION_CONTENT_ID = ?"
         val selectionArgs = arrayOf(dataCollectionContent.dataCollectionContentId.toString())
 
         val sqLiteDatabase = getWritableDb()
@@ -187,7 +187,7 @@ class DataCollectionContentDbHelper {
     fun deleteByDataCollectionId(id: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> deleteByDataCollectionId ($id)")
 
-        val selection = "$DATA_COLLECTION_ID = ?" // WHERE code LIKE ?
+        val selection = "$DATA_COLLECTION_ID = ?"
         val selectionArgs = arrayOf(id.toString())
 
         val sqLiteDatabase = getWritableDb()
@@ -207,7 +207,7 @@ class DataCollectionContentDbHelper {
     fun deleteById(id: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> deleteById ($id)")
 
-        val selection = "$DATA_COLLECTION_CONTENT_ID = ?" // WHERE code LIKE ?
+        val selection = "$DATA_COLLECTION_CONTENT_ID = ?"
         val selectionArgs = arrayOf(id.toString())
 
         val sqLiteDatabase = getWritableDb()
@@ -304,7 +304,7 @@ class DataCollectionContentDbHelper {
         Log.i(this::class.java.simpleName, ": SQLite -> selectById ($id)")
 
         val columns = getAllColumns()
-        val selection = "$DATA_COLLECTION_CONTENT_ID = ?" // WHERE code LIKE ?
+        val selection = "$DATA_COLLECTION_CONTENT_ID = ?"
         val selectionArgs = arrayOf(id.toString())
         val order = LEVEL
 
@@ -625,7 +625,7 @@ class DataCollectionContentDbHelper {
         Log.i(this::class.java.simpleName, ": SQLite -> selectByCollectorDataCollectionId ($id)")
 
         val columns = getAllColumns()
-        val selection = "$DATA_COLLECTION_ID = ?" // WHERE code LIKE ?
+        val selection = "$DATA_COLLECTION_ID = ?"
         val selectionArgs = arrayOf(id.toString())
         val order = LEVEL
 

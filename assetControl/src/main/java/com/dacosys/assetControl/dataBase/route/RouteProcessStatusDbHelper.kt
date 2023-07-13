@@ -39,7 +39,7 @@ class RouteProcessStatusDbHelper {
     fun update(routeProcessStatus: RouteProcessStatus): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> update")
 
-        val selection = "$ROUTE_PROCESS_STATUS_ID = ?" // WHERE code LIKE ?
+        val selection = "$ROUTE_PROCESS_STATUS_ID = ?"
         val selectionArgs = arrayOf(routeProcessStatus.id.toString())
 
         val sqLiteDatabase = getWritableDb()
@@ -143,7 +143,7 @@ class RouteProcessStatusDbHelper {
         Log.i(this::class.java.simpleName, ": SQLite -> selectById ($id)")
 
         val columns = getAllColumns()
-        val selection = "$ROUTE_PROCESS_STATUS_ID = ?" // WHERE code LIKE ?
+        val selection = "$ROUTE_PROCESS_STATUS_ID = ?"
         val selectionArgs = arrayOf(id.toString())
         val order = DESCRIPTION
 
@@ -178,7 +178,7 @@ class RouteProcessStatusDbHelper {
         Log.i(this::class.java.simpleName, ": SQLite -> selectByDescription ($description)")
 
         val columns = getAllColumns()
-        val selection = "$DESCRIPTION LIKE ?" // WHERE code LIKE ?
+        val selection = "$DESCRIPTION LIKE ?"
         val selectionArgs = arrayOf("%$description%")
         val order = DESCRIPTION
 

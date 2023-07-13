@@ -72,7 +72,7 @@ class ManteinanceTypeDbHelper {
     fun update(manteinanceType: ManteinanceType): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> update")
 
-        val selection = "$MANTEINANCE_TYPE_ID = ?" // WHERE code LIKE ?
+        val selection = "$MANTEINANCE_TYPE_ID = ?"
         val selectionArgs = arrayOf(manteinanceType.manteinanceTypeId.toString())
 
         val sqLiteDatabase = getWritableDb()
@@ -97,7 +97,7 @@ class ManteinanceTypeDbHelper {
     fun deleteById(id: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> deleteById ($id)")
 
-        val selection = "$MANTEINANCE_TYPE_ID = ?" // WHERE code LIKE ?
+        val selection = "$MANTEINANCE_TYPE_ID = ?"
         val selectionArgs = arrayOf(id.toString())
 
         val sqLiteDatabase = getWritableDb()
@@ -164,7 +164,7 @@ class ManteinanceTypeDbHelper {
         Log.i(this::class.java.simpleName, ": SQLite -> selectById ($id)")
 
         val columns = getAllColumns()
-        val selection = "$MANTEINANCE_TYPE_ID = ?" // WHERE code LIKE ?
+        val selection = "$MANTEINANCE_TYPE_ID = ?"
         val selectionArgs = arrayOf(id.toString())
         val order = DESCRIPTION
 
@@ -199,7 +199,7 @@ class ManteinanceTypeDbHelper {
         Log.i(this::class.java.simpleName, ": SQLite -> selectByManteinanceTypeGroupId ($wId)")
 
         val columns = getAllColumns()
-        val selection = "$MANTEINANCE_TYPE_GROUP_ID = ?" // WHERE code LIKE ?
+        val selection = "$MANTEINANCE_TYPE_GROUP_ID = ?"
         val selectionArgs = arrayOf(wId.toString())
         val order = DESCRIPTION
 
@@ -230,7 +230,7 @@ class ManteinanceTypeDbHelper {
         Log.i(this::class.java.simpleName, ": SQLite -> selectByDescription ($description)")
 
         val columns = getAllColumns()
-        val selection = "$DESCRIPTION LIKE ?" // WHERE code LIKE ?
+        val selection = "$DESCRIPTION LIKE ?"
         val selectionArgs = arrayOf("%$description%")
         val order = DESCRIPTION
 
@@ -268,7 +268,7 @@ class ManteinanceTypeDbHelper {
 
         val columns = getAllColumns()
         val selection =
-            "$DESCRIPTION LIKE ? AND $MANTEINANCE_TYPE_GROUP_ID = ?" // WHERE code LIKE ?
+            "$DESCRIPTION LIKE ? AND $MANTEINANCE_TYPE_GROUP_ID = ?"
         val selectionArgs = arrayOf("%$description%", manteinanceTypeGroupId.toString())
         val order = DESCRIPTION
 

@@ -152,7 +152,7 @@ class AttributeCategoryDbHelper {
     fun update(attributeCategory: AttributeCategory): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> update")
 
-        val selection = "$ATTRIBUTE_CATEGORY_ID = ?" // WHERE code LIKE ?
+        val selection = "$ATTRIBUTE_CATEGORY_ID = ?"
         val selectionArgs = arrayOf(attributeCategory.attributeCategoryId.toString())
 
         val sqLiteDatabase = getWritableDb()
@@ -177,7 +177,7 @@ class AttributeCategoryDbHelper {
     fun deleteById(id: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> deleteById ($id)")
 
-        val selection = "$ATTRIBUTE_CATEGORY_ID = ?" // WHERE code LIKE ?
+        val selection = "$ATTRIBUTE_CATEGORY_ID = ?"
         val selectionArgs = arrayOf(id.toString())
 
         val sqLiteDatabase = getWritableDb()
@@ -244,7 +244,7 @@ class AttributeCategoryDbHelper {
         Log.i(this::class.java.simpleName, ": SQLite -> selectById ($id)")
 
         val columns = getAllColumns()
-        val selection = "$ATTRIBUTE_CATEGORY_ID = ?" // WHERE code LIKE ?
+        val selection = "$ATTRIBUTE_CATEGORY_ID = ?"
         val selectionArgs = arrayOf(id.toString())
         val order = DESCRIPTION
 
@@ -279,7 +279,7 @@ class AttributeCategoryDbHelper {
         Log.i(this::class.java.simpleName, ": SQLite -> selectByDescription ($description)")
 
         val columns = getAllColumns()
-        val selection = "$DESCRIPTION LIKE ?" // WHERE code LIKE ?
+        val selection = "$DESCRIPTION LIKE ?"
         val selectionArgs = arrayOf("%$description%")
         val order = DESCRIPTION
 

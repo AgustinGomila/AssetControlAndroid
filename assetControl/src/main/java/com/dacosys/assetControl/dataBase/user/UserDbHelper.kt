@@ -153,7 +153,7 @@ class UserDbHelper {
     fun update(user: User): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> update")
 
-        val selection = "$USER_ID = ?" // WHERE code LIKE ?
+        val selection = "$USER_ID = ?"
         val selectionArgs = arrayOf(user.userId.toString())
 
         val sqLiteDatabase = getWritableDb()
@@ -178,7 +178,7 @@ class UserDbHelper {
     fun deleteById(id: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> deleteById ($id)")
 
-        val selection = "$USER_ID = ?" // WHERE code LIKE ?
+        val selection = "$USER_ID = ?"
         val selectionArgs = arrayOf(id.toString())
 
         val sqLiteDatabase = getWritableDb()
@@ -270,7 +270,7 @@ class UserDbHelper {
 
     fun selectById(userId: Long): User? {
         val columns = getAllColumns()
-        val selection = "$USER_ID = ?" // WHERE code LIKE ?
+        val selection = "$USER_ID = ?"
         val selectionArgs = arrayOf(userId.toString())
         val order = NAME
 
@@ -303,7 +303,7 @@ class UserDbHelper {
 
     fun selectUserByNameOrEmail(nameOrEmail: String): User? {
         val columns = getAllColumns()
-        val selection = "$NAME = ? OR $EMAIL = ?" // WHERE code LIKE ?
+        val selection = "$NAME = ? OR $EMAIL = ?"
         val selectionArgs = arrayOf(nameOrEmail)
         val order = NAME
 

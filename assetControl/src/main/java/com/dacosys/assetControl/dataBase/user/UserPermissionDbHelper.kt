@@ -127,7 +127,7 @@ class UserPermissionDbHelper {
     fun deleteByUserId(userId: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> deleteByUserId ($userId)")
 
-        val selection = "$USER_ID = ?" // WHERE code LIKE ?
+        val selection = "$USER_ID = ?"
         val selectionArgs = arrayOf(userId.toString())
 
         val sqLiteDatabase = getWritableDb()
@@ -197,7 +197,7 @@ class UserPermissionDbHelper {
         )
 
         val columns = getAllColumns()
-        val selection = "$USER_ID = ? AND $PERMISSION_ID = ?" // WHERE code LIKE ?
+        val selection = "$USER_ID = ? AND $PERMISSION_ID = ?"
         val selectionArgs = arrayOf(userId.toString(), userPermissionId.toString())
         val order = "$USER_ID, $PERMISSION_ID"
 
@@ -232,7 +232,7 @@ class UserPermissionDbHelper {
         Log.i(this::class.java.simpleName, ": SQLite -> selectByUserId ($userId)")
 
         val columns = getAllColumns()
-        val selection = "$USER_ID = ?" // WHERE code LIKE ?
+        val selection = "$USER_ID = ?"
         val selectionArgs = arrayOf(userId.toString())
         val order = "$USER_ID, $PERMISSION_ID"
 

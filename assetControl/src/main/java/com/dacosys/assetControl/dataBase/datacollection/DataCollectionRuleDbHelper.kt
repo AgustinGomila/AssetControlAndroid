@@ -146,7 +146,7 @@ class DataCollectionRuleDbHelper {
     fun update(dataCollectionRule: DataCollectionRule): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> update")
 
-        val selection = "$DATA_COLLECTION_RULE_ID = ?" // WHERE code LIKE ?
+        val selection = "$DATA_COLLECTION_RULE_ID = ?"
         val selectionArgs = arrayOf(dataCollectionRule.dataCollectionRuleId.toString())
 
         val sqLiteDatabase = getWritableDb()
@@ -171,7 +171,7 @@ class DataCollectionRuleDbHelper {
     fun deleteById(id: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> deleteById ($id)")
 
-        val selection = "$DATA_COLLECTION_RULE_ID = ?" // WHERE code LIKE ?
+        val selection = "$DATA_COLLECTION_RULE_ID = ?"
         val selectionArgs = arrayOf(id.toString())
 
         val sqLiteDatabase = getWritableDb()
@@ -238,7 +238,7 @@ class DataCollectionRuleDbHelper {
         Log.i(this::class.java.simpleName, ": SQLite -> select")
 
         val columns = getAllColumns()
-        val selection = "$ACTIVE = 1" // WHERE code LIKE ?
+        val selection = "$ACTIVE = 1"
         val order = DESCRIPTION
 
         val sqLiteDatabase = getReadableDb()
@@ -268,7 +268,7 @@ class DataCollectionRuleDbHelper {
         Log.i(this::class.java.simpleName, ": SQLite -> selectById ($id)")
 
         val columns = getAllColumns()
-        val selection = "$DATA_COLLECTION_RULE_ID = ?" // WHERE code LIKE ?
+        val selection = "$DATA_COLLECTION_RULE_ID = ?"
         val selectionArgs = arrayOf(id.toString())
         val order = DESCRIPTION
 
@@ -303,7 +303,7 @@ class DataCollectionRuleDbHelper {
         Log.i(this::class.java.simpleName, ": SQLite -> selectByDescription ($description)")
 
         val columns = getAllColumns()
-        val selection = "$DESCRIPTION LIKE ?" // WHERE code LIKE ?
+        val selection = "$DESCRIPTION LIKE ?"
         val selectionArgs = arrayOf("%$description%")
         val order = DESCRIPTION
 

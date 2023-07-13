@@ -158,7 +158,7 @@ class WarehouseDbHelper {
     fun updateWarehouseId(newWarehouseId: Long, oldWarehouseId: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> updateWarehouseId")
 
-        val selection = "$WAREHOUSE_ID = ?" // WHERE code LIKE ?
+        val selection = "$WAREHOUSE_ID = ?"
         val selectionArgs = arrayOf(oldWarehouseId.toString())
         val values = ContentValues()
         values.put(WAREHOUSE_ID, newWarehouseId)
@@ -212,7 +212,7 @@ class WarehouseDbHelper {
         Log.i(this::class.java.simpleName, ": SQLite -> selectNoTransfered")
 
         val columns = getAllColumns()
-        val selection = "$TABLE_NAME.$TRANSFERRED = ?" // WHERE code LIKE ?
+        val selection = "$TABLE_NAME.$TRANSFERRED = ?"
         val selectionArgs = arrayOf(0.toString())
         val order = DESCRIPTION
 
@@ -242,7 +242,7 @@ class WarehouseDbHelper {
     fun update(w: WarehouseObject): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> update")
 
-        val selection = "$WAREHOUSE_ID = ?" // WHERE code LIKE ?
+        val selection = "$WAREHOUSE_ID = ?"
         val selectionArgs = arrayOf(w.warehouse_id.toString())
 
         val values = ContentValues()
@@ -269,7 +269,7 @@ class WarehouseDbHelper {
     fun update(warehouse: Warehouse): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> update")
 
-        val selection = "$WAREHOUSE_ID = ?" // WHERE code LIKE ?
+        val selection = "$WAREHOUSE_ID = ?"
         val selectionArgs = arrayOf(warehouse.warehouseId.toString())
 
         val sqLiteDatabase = getWritableDb()
@@ -294,7 +294,7 @@ class WarehouseDbHelper {
     fun deleteById(id: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> deleteById ($id)")
 
-        val selection = "$WAREHOUSE_ID = ?" // WHERE code LIKE ?
+        val selection = "$WAREHOUSE_ID = ?"
         val selectionArgs = arrayOf(id.toString())
 
         val sqLiteDatabase = getWritableDb()
@@ -365,7 +365,7 @@ class WarehouseDbHelper {
         Log.i(this::class.java.simpleName, ": SQLite -> selectById ($id)")
 
         val columns = getAllColumns()
-        val selection = "$WAREHOUSE_ID = ?" // WHERE code LIKE ?
+        val selection = "$WAREHOUSE_ID = ?"
         val selectionArgs = arrayOf(id.toString())
         val order = DESCRIPTION
 
@@ -400,7 +400,7 @@ class WarehouseDbHelper {
         Log.i(this::class.java.simpleName, ": SQLite -> selectByDescription ($description)")
 
         val columns = getAllColumns()
-        var selection = "$DESCRIPTION LIKE ?" // WHERE code LIKE ?
+        var selection = "$DESCRIPTION LIKE ?"
         if (onlyActive) {
             selection += " AND $ACTIVE = 1"
         }

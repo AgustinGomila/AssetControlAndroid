@@ -148,7 +148,7 @@ class UserWarehouseAreaDbHelper {
     fun updateWarehouseAreaId(newWarehouseAreaId: Long, oldWarehouseAreaId: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> updateWarehouseAreaId")
 
-        val selection = "$WAREHOUSE_AREA_ID = ?" // WHERE code LIKE ?
+        val selection = "$WAREHOUSE_AREA_ID = ?"
         val selectionArgs = arrayOf(oldWarehouseAreaId.toString())
         val values = ContentValues()
         values.put(WAREHOUSE_AREA_ID, newWarehouseAreaId)
@@ -171,7 +171,7 @@ class UserWarehouseAreaDbHelper {
     fun deleteByUserId(userId: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> deleteByUserId ($userId)")
 
-        val selection = "$USER_ID = ?" // WHERE code LIKE ?
+        val selection = "$USER_ID = ?"
         val selectionArgs = arrayOf(userId.toString())
 
         val sqLiteDatabase = getWritableDb()
@@ -238,7 +238,7 @@ class UserWarehouseAreaDbHelper {
         Log.i(this::class.java.simpleName, ": SQLite -> getByUserId")
 
         val columns = getAllColumns()
-        val selection = "$USER_ID = ?" // WHERE code LIKE ?
+        val selection = "$USER_ID = ?"
         val selectionArgs = arrayOf(userId.toString())
         val order = "$USER_ID, $WAREHOUSE_AREA_ID"
 

@@ -110,7 +110,7 @@ class DataCollectionRuleTargetDbHelper {
     fun deleteByDataCollectionRuleId(id: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> deleteByDataCollectionRuleId ($id)")
 
-        val selection = "$DATA_COLLECTION_RULE_ID = ?" // WHERE code LIKE ?
+        val selection = "$DATA_COLLECTION_RULE_ID = ?"
         val selectionArgs = arrayOf(id.toString())
 
         val sqLiteDatabase = getWritableDb()

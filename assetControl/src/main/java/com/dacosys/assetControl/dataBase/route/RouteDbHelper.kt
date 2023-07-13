@@ -147,7 +147,7 @@ class RouteDbHelper {
     fun update(route: Route): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> update")
 
-        val selection = "$ROUTE_ID = ?" // WHERE code LIKE ?
+        val selection = "$ROUTE_ID = ?"
         val selectionArgs = arrayOf(route.routeId.toString())
 
         val sqLiteDatabase = getWritableDb()
@@ -202,7 +202,7 @@ class RouteDbHelper {
         Log.i(this::class.java.simpleName, ": SQLite -> selectById ($id)")
 
         val columns = getAllColumns()
-        val selection = "$ROUTE_ID = ?" // WHERE code LIKE ?
+        val selection = "$ROUTE_ID = ?"
         val selectionArgs = arrayOf(id.toString())
         val order = DESCRIPTION
 

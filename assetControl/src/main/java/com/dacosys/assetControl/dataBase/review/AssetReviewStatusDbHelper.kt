@@ -38,7 +38,7 @@ class AssetReviewStatusDbHelper {
     fun update(assetReviewStatus: AssetReviewStatus): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> update")
 
-        val selection = "$STATUS_ID = ?" // WHERE code LIKE ?
+        val selection = "$STATUS_ID = ?"
         val selectionArgs = arrayOf(assetReviewStatus.id.toString())
 
         val sqLiteDatabase = getWritableDb()
@@ -135,7 +135,7 @@ class AssetReviewStatusDbHelper {
         Log.i(this::class.java.simpleName, ": SQLite -> selectById ($id)")
 
         val columns = getAllColumns()
-        val selection = "$STATUS_ID = ?" // WHERE code LIKE ?
+        val selection = "$STATUS_ID = ?"
         val selectionArgs = arrayOf(id.toString())
         val order = DESCRIPTION
 
@@ -170,7 +170,7 @@ class AssetReviewStatusDbHelper {
         Log.i(this::class.java.simpleName, ": SQLite -> selectByDescription ($description)")
 
         val columns = getAllColumns()
-        val selection = "$DESCRIPTION LIKE ?" // WHERE code LIKE ?
+        val selection = "$DESCRIPTION LIKE ?"
         val selectionArgs = arrayOf("%$description%")
         val order = DESCRIPTION
 

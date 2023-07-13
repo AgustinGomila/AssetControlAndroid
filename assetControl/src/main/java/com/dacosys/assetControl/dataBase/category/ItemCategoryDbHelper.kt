@@ -147,7 +147,7 @@ class ItemCategoryDbHelper {
     fun updateItemCategoryId(newItemCategoryId: Long, oldItemCategoryId: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> updateItemCategoryId")
 
-        val selection = "$ITEM_CATEGORY_ID = ?" // WHERE code LIKE ?
+        val selection = "$ITEM_CATEGORY_ID = ?"
         val selectionArgs = arrayOf(oldItemCategoryId.toString())
         val values = ContentValues()
         values.put(ITEM_CATEGORY_ID, newItemCategoryId)
@@ -241,7 +241,7 @@ class ItemCategoryDbHelper {
     fun update(ic: ItemCategoryObject): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> update")
 
-        val selection = "$ITEM_CATEGORY_ID = ?" // WHERE code LIKE ?
+        val selection = "$ITEM_CATEGORY_ID = ?"
         val selectionArgs = arrayOf(ic.item_category_id.toString())
 
         val values = ContentValues()
@@ -269,7 +269,7 @@ class ItemCategoryDbHelper {
     fun update(itemCategory: ItemCategory): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> update")
 
-        val selection = "$ITEM_CATEGORY_ID = ?" // WHERE code LIKE ?
+        val selection = "$ITEM_CATEGORY_ID = ?"
         val selectionArgs = arrayOf(itemCategory.itemCategoryId.toString())
 
         val sqLiteDatabase = getWritableDb()
@@ -294,7 +294,7 @@ class ItemCategoryDbHelper {
     fun deleteById(id: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> deleteById ($id)")
 
-        val selection = "$ITEM_CATEGORY_ID = ?" // WHERE code LIKE ?
+        val selection = "$ITEM_CATEGORY_ID = ?"
         val selectionArgs = arrayOf(id.toString())
 
         val sqLiteDatabase = getWritableDb()

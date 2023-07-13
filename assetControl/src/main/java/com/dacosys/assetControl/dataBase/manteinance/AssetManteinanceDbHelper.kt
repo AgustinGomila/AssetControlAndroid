@@ -144,7 +144,7 @@ class AssetManteinanceDbHelper {
         Log.i(this::class.java.simpleName, ": SQLite -> selectNoTransfered")
 
         val columns = getAllColumns()
-        val selection = "$TABLE_NAME.$TRANSFERRED = ?" // WHERE code LIKE ?
+        val selection = "$TABLE_NAME.$TRANSFERRED = ?"
         val selectionArgs = arrayOf(0.toString())
         val order = ASSET_ID
 
@@ -191,7 +191,7 @@ class AssetManteinanceDbHelper {
     fun update(assetManteinance: AssetManteinance): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> update")
 
-        val selection = "$COLLECTOR_ASSET_MANTEINANCE_ID = ?" // WHERE code LIKE ?
+        val selection = "$COLLECTOR_ASSET_MANTEINANCE_ID = ?"
         val selectionArgs = arrayOf(assetManteinance.collectorAssetManteinanceId.toString())
 
         val sqLiteDatabase = getWritableDb()
@@ -216,7 +216,7 @@ class AssetManteinanceDbHelper {
     fun deleteById(id: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> deleteById ($id)")
 
-        val selection = "$COLLECTOR_ASSET_MANTEINANCE_ID = ?" // WHERE code LIKE ?
+        val selection = "$COLLECTOR_ASSET_MANTEINANCE_ID = ?"
         val selectionArgs = arrayOf(id.toString())
 
         val sqLiteDatabase = getWritableDb()
@@ -236,7 +236,7 @@ class AssetManteinanceDbHelper {
     fun deleteByAssetId(assetId: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> deleteByAssetId ($assetId)")
 
-        val selection = "$ASSET_ID = ?" // WHERE code LIKE ?
+        val selection = "$ASSET_ID = ?"
         val selectionArgs = arrayOf(assetId.toString())
 
         val sqLiteDatabase = getWritableDb()
@@ -337,7 +337,7 @@ class AssetManteinanceDbHelper {
         Log.i(this::class.java.simpleName, ": SQLite -> selectById ($id)")
 
         val columns = getAllColumns()
-        val selection = "$COLLECTOR_ASSET_MANTEINANCE_ID = ?" // WHERE code LIKE ?
+        val selection = "$COLLECTOR_ASSET_MANTEINANCE_ID = ?"
         val selectionArgs = arrayOf(id.toString())
         val order = ASSET_ID
 

@@ -191,7 +191,7 @@ class AssetReviewDbHelper {
     fun updateWarehouseId(newWarehouseId: Long, oldWarehouseId: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> updateWarehouseId")
 
-        val selection = "$WAREHOUSE_ID = ?" // WHERE code LIKE ?
+        val selection = "$WAREHOUSE_ID = ?"
         val selectionArgs = arrayOf(oldWarehouseId.toString())
         val values = ContentValues()
         values.put(WAREHOUSE_ID, newWarehouseId)
@@ -214,7 +214,7 @@ class AssetReviewDbHelper {
     fun updateWarehouseAreaId(newWarehouseAreaId: Long, oldWarehouseAreaId: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> updateWarehouseAreaId")
 
-        val selection = "$WAREHOUSE_AREA_ID = ?" // WHERE code LIKE ?
+        val selection = "$WAREHOUSE_AREA_ID = ?"
         val selectionArgs = arrayOf(oldWarehouseAreaId.toString())
         val values = ContentValues()
         values.put(WAREHOUSE_AREA_ID, newWarehouseAreaId)
@@ -237,7 +237,7 @@ class AssetReviewDbHelper {
     fun update(assetReview: AssetReview): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> update")
 
-        val selection = "$COLLECTOR_ASSET_REVIEW_ID = ?" // WHERE code LIKE ?
+        val selection = "$COLLECTOR_ASSET_REVIEW_ID = ?"
         val selectionArgs = arrayOf(assetReview.collectorAssetReviewId.toString())
 
         val sqLiteDatabase = getWritableDb()
@@ -322,7 +322,7 @@ class AssetReviewDbHelper {
     fun deleteById(id: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> deleteById ($id)")
 
-        val selection = "$COLLECTOR_ASSET_REVIEW_ID = ?" // WHERE code LIKE ?
+        val selection = "$COLLECTOR_ASSET_REVIEW_ID = ?"
         val selectionArgs = arrayOf(id.toString())
 
         val sqLiteDatabase = getWritableDb()

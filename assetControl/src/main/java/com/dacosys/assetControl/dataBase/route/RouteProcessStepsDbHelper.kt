@@ -93,7 +93,7 @@ class RouteProcessStepsDbHelper {
     fun deleteByRouteProcessId(id: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> deleteByRouteProcessId ($id)")
 
-        val selection = "$ROUTE_PROCESS_ID = ?" // WHERE code LIKE ?
+        val selection = "$ROUTE_PROCESS_ID = ?"
         val selectionArgs = arrayOf(id.toString())
 
         val sqLiteDatabase = getWritableDb()
@@ -113,7 +113,7 @@ class RouteProcessStepsDbHelper {
     fun deleteByRouteProcessIdStep(id: Long, step: Int): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> deleteByRouteProcessIdStep (I:$id/S:$step)")
 
-        val selection = "$ROUTE_PROCESS_ID = ? AND $STEP = ?" // WHERE code LIKE ?
+        val selection = "$ROUTE_PROCESS_ID = ? AND $STEP = ?"
         val selectionArgs = arrayOf(id.toString(), step.toString())
 
         val sqLiteDatabase = getWritableDb()
@@ -133,7 +133,7 @@ class RouteProcessStepsDbHelper {
     fun deleteByCollectorDataCollectionId(id: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> deleteByCollectorDataCollectionId ($id)")
 
-        val selection = "$DATA_COLLECTION_ID = ?" // WHERE code LIKE ?
+        val selection = "$DATA_COLLECTION_ID = ?"
         val selectionArgs = arrayOf(id.toString())
 
         val sqLiteDatabase = getWritableDb()
@@ -240,7 +240,7 @@ class RouteProcessStepsDbHelper {
         Log.i(this::class.java.simpleName, ": SQLite -> selectByRouteProcessId ($routeProcessId)")
 
         val columns = getAllColumns()
-        val selection = "$ROUTE_PROCESS_ID = ?" // WHERE code LIKE ?
+        val selection = "$ROUTE_PROCESS_ID = ?"
         val selectionArgs = arrayOf(routeProcessId.toString())
         val order = LEVEL
 
@@ -315,7 +315,7 @@ class RouteProcessStepsDbHelper {
         )
 
         val columns = getAllColumns()
-        val selection = "$ROUTE_PROCESS_CONTENT_ID = ?" // WHERE code LIKE ?
+        val selection = "$ROUTE_PROCESS_CONTENT_ID = ?"
         val selectionArgs = arrayOf(id.toString())
         val order = LEVEL
 

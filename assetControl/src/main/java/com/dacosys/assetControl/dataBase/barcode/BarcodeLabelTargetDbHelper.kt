@@ -38,7 +38,7 @@ class BarcodeLabelTargetDbHelper {
     fun update(barcodeLabelTarget: BarcodeLabelTarget): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> update")
 
-        val selection = "$BARCODE_LABEL_TARGET_ID = ?" // WHERE code LIKE ?
+        val selection = "$BARCODE_LABEL_TARGET_ID = ?"
         val selectionArgs = arrayOf(barcodeLabelTarget.id.toString())
 
         val sqLiteDatabase = getWritableDb()
@@ -116,7 +116,7 @@ class BarcodeLabelTargetDbHelper {
     fun deleteById(id: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> deleteById ($id)")
 
-        val selection = "$BARCODE_LABEL_TARGET_ID = ?" // WHERE code LIKE ?
+        val selection = "$BARCODE_LABEL_TARGET_ID = ?"
         val selectionArgs = arrayOf(id.toString())
 
         val sqLiteDatabase = getWritableDb()
@@ -183,7 +183,7 @@ class BarcodeLabelTargetDbHelper {
         Log.i(this::class.java.simpleName, ": SQLite -> selectById ($id)")
 
         val columns = getAllColumns()
-        val selection = "$BARCODE_LABEL_TARGET_ID = ?" // WHERE code LIKE ?
+        val selection = "$BARCODE_LABEL_TARGET_ID = ?"
         val selectionArgs = arrayOf(id.toString())
         val order = DESCRIPTION
 
@@ -218,7 +218,7 @@ class BarcodeLabelTargetDbHelper {
         Log.i(this::class.java.simpleName, ": SQLite -> selectByDescription ($description)")
 
         val columns = getAllColumns()
-        val selection = "$DESCRIPTION LIKE ?" // WHERE code LIKE ?
+        val selection = "$DESCRIPTION LIKE ?"
         val selectionArgs = arrayOf("%$description%")
         val order = DESCRIPTION
 

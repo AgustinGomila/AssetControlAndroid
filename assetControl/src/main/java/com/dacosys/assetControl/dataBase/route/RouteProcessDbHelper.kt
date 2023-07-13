@@ -150,7 +150,7 @@ class RouteProcessDbHelper {
     fun update(routeProcess: RouteProcess): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> update")
 
-        val selection = "$COLLECTOR_ROUTE_PROCESS_ID = ?" // WHERE code LIKE ?
+        val selection = "$COLLECTOR_ROUTE_PROCESS_ID = ?"
         val selectionArgs = arrayOf(routeProcess.collectorRouteProcessId.toString())
 
         val sqLiteDatabase = getWritableDb()
@@ -214,7 +214,7 @@ class RouteProcessDbHelper {
     fun deleteById(id: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> deleteById ($id)")
 
-        val selection = "$COLLECTOR_ROUTE_PROCESS_ID = ?" // WHERE code LIKE ?
+        val selection = "$COLLECTOR_ROUTE_PROCESS_ID = ?"
         val selectionArgs = arrayOf(id.toString())
 
         val sqLiteDatabase = getWritableDb()

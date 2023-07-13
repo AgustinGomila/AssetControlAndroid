@@ -163,7 +163,7 @@ class BarcodeLabelCustomDbHelper {
     fun update(barcodeLabelCustom: BarcodeLabelCustom): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> update")
 
-        val selection = "$BARCODE_LABEL_CUSTOM_ID = ?" // WHERE code LIKE ?
+        val selection = "$BARCODE_LABEL_CUSTOM_ID = ?"
         val selectionArgs = arrayOf(barcodeLabelCustom.barcodeLabelCustomId.toString())
 
         val sqLiteDatabase = getWritableDb()
@@ -188,7 +188,7 @@ class BarcodeLabelCustomDbHelper {
     fun deleteById(id: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> deleteById ($id)")
 
-        val selection = "$BARCODE_LABEL_CUSTOM_ID = ?" // WHERE code LIKE ?
+        val selection = "$BARCODE_LABEL_CUSTOM_ID = ?"
         val selectionArgs = arrayOf(id.toString())
 
         val sqLiteDatabase = getWritableDb()
@@ -259,7 +259,7 @@ class BarcodeLabelCustomDbHelper {
         Log.i(this::class.java.simpleName, ": SQLite -> selectById ($id)")
 
         val columns = getAllColumns()
-        val selection = "$BARCODE_LABEL_CUSTOM_ID = ?" // WHERE code LIKE ?
+        val selection = "$BARCODE_LABEL_CUSTOM_ID = ?"
         val selectionArgs = arrayOf(id.toString())
         val order = DESCRIPTION
 
@@ -294,7 +294,7 @@ class BarcodeLabelCustomDbHelper {
         Log.i(this::class.java.simpleName, ": SQLite -> selectByDescription ($description)")
 
         val columns = getAllColumns()
-        val selection = "$DESCRIPTION LIKE ?" // WHERE code LIKE ?
+        val selection = "$DESCRIPTION LIKE ?"
         val selectionArgs = arrayOf("%$description%")
         val order = DESCRIPTION
 
@@ -331,7 +331,7 @@ class BarcodeLabelCustomDbHelper {
         )
 
         val columns = getAllColumns()
-        val selection = "$DESCRIPTION LIKE ? AND $BARCODE_LABEL_TARGET_ID = ?" // WHERE code LIKE ?
+        val selection = "$DESCRIPTION LIKE ? AND $BARCODE_LABEL_TARGET_ID = ?"
         val selectionArgs = arrayOf("%$description%", barcodeLabelTargetId.toString())
         val order = DESCRIPTION
 
@@ -368,7 +368,7 @@ class BarcodeLabelCustomDbHelper {
         )
 
         val columns = getAllColumns()
-        var selection = "$BARCODE_LABEL_TARGET_ID = ?" // WHERE code LIKE ?
+        var selection = "$BARCODE_LABEL_TARGET_ID = ?"
         if (onlyActive) {
             selection += " AND ${TABLE_NAME}.${ACTIVE} = 1"
         }
