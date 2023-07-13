@@ -460,16 +460,16 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
                 binding.addUnknownAssetsSwitch.isChecked = false
             }
         }
-        binding.allowUnknownCodesSwitch.isChecked =
-            prefsGetBoolean(Preference.assetReviewAllowUnknownCodes)
+        binding.allowUnknownCodesSwitch.isChecked = prefsGetBoolean(Preference.assetReviewAllowUnknownCodes)
+        binding.allowUnknownAssetTextView.setOnClickListener { binding.allowUnknownCodesSwitch.performClick() }
 
         binding.addUnknownAssetsSwitch.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 binding.allowUnknownCodesSwitch.isChecked = true
             }
         }
-        binding.addUnknownAssetsSwitch.isChecked =
-            prefsGetBoolean(Preference.assetReviewAddUnknownAssets)
+        binding.addUnknownAssetsSwitch.isChecked = prefsGetBoolean(Preference.assetReviewAddUnknownAssets)
+        binding.unknownAssetRegistrationTextView.setOnClickListener { binding.addUnknownAssetsSwitch.performClick() }
 
         binding.mantButton.setOnClickListener {
             if (allowClicks) {
