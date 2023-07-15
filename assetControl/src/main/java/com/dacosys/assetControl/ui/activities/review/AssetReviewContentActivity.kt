@@ -26,17 +26,20 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.menu.MenuBuilder
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat
+import androidx.core.view.*
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.adapters.asset.AssetAdapter
-import com.dacosys.assetControl.adapters.review.AssetReviewContentAdapter
+import com.dacosys.assetControl.adapters.review.ArcRecyclerAdapter
 import com.dacosys.assetControl.dataBase.asset.AssetDbHelper
 import com.dacosys.assetControl.dataBase.review.AssetReviewContentDbHelper
 import com.dacosys.assetControl.databinding.AssetReviewContentBottomPanelCollapsedBinding
@@ -79,7 +82,7 @@ import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGet
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetStringSet
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsPutBoolean
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsPutStringSet
-import com.dacosys.assetControl.utils.preferences.Repository
+import com.dacosys.assetControl.utils.preferences.Repository.Companion.useImageControl
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.ScannedCode
 import com.dacosys.assetControl.utils.scanners.Scanner
@@ -104,11 +107,11 @@ import kotlin.concurrent.thread
 
 @Suppress("UNCHECKED_CAST")
 class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
-    Rfid.RfidDeviceListener, AssetReviewContentAdapter.CheckedChangedListener,
-    AssetReviewContentAdapter.DataSetChangedListener, SwipeRefreshLayout.OnRefreshListener,
-    AssetAdapter.Companion.EditAssetRequiredListener,
-    AssetAdapter.Companion.AlbumViewRequiredListener,
-    AssetAdapter.Companion.AddPhotoRequiredListener {
+    Rfid.RfidDeviceListener, ArcRecyclerAdapter.CheckedChangedListener,
+    ArcRecyclerAdapter.DataSetChangedListener, SwipeRefreshLayout.OnRefreshListener,
+    ArcRecyclerAdapter.EditAssetRequiredListener,
+    ArcRecyclerAdapter.AlbumViewRequiredListener,
+    ArcRecyclerAdapter.AddPhotoRequiredListener, ArcRecyclerAdapter.UiEventListener {
     override fun onDestroy() {
         saveSharedPreferences()
         destroyLocals()
@@ -116,46 +119,19 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     private fun saveSharedPreferences() {
-        prefsPutBoolean(
-            Preference.assetReviewAddUnknownAssets.key, binding.addUnknownAssetsSwitch.isChecked
-        )
-        prefsPutBoolean(
-            Preference.assetReviewAllowUnknownCodes.key, binding.allowUnknownCodesSwitch.isChecked
-        )
-        val set = HashSet<String>()
-        for (i in visibleStatusArray) set.add(i.id.toString())
-        prefsPutStringSet(
-            Preference.assetReviewContentVisibleStatus.key,
-            set
-        )
+        prefsPutBoolean(Preference.assetReviewAddUnknownAssets.key, binding.addUnknownAssetsSwitch.isChecked)
+        prefsPutBoolean(Preference.assetReviewAllowUnknownCodes.key, binding.allowUnknownCodesSwitch.isChecked)
+        prefsPutStringSet(Preference.assetReviewContentVisibleStatus.key, (adapter?.visibleStatus ?: ArrayList())
+            .map { it.id.toString() }
+            .toSet())
     }
 
     private fun destroyLocals() {
-        arContAdapter?.refreshListeners(null, null, null)
-        arContAdapter?.refreshImageControlListeners(null, null)
+        adapter?.refreshListeners(null, null, null)
+        adapter?.refreshImageControlListeners(null, null)
+        adapter?.refreshUiEventListener(null)
         progressDialog?.dismiss()
         progressDialog = null
-    }
-
-    override fun onCheckedChanged(isChecked: Boolean, pos: Int) {
-        // Selecciona la fila correcta, para que se actualice el currentArCont
-        val arc = arContAdapter?.getItem(pos)
-        if (arc != null) {
-            if (isChecked) {
-                runOnUiThread {
-                    arContAdapter?.updateContent(
-                        arc = arc,
-                        assetReviewContentStatusId = AssetReviewContentStatus.revised.id,
-                        assetStatusId = AssetStatus.onInventory.id,
-                        selectItem = false,
-                        changeCheckedState = false
-                    )
-                }
-                setupTextView()
-            } else {
-                removeFromAdapter(arc)
-            }
-        }
     }
 
     override fun onRefresh() {
@@ -243,13 +219,16 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
     private var _fillAdapter = false
 
     private var assetReview: AssetReview? = null
-    private var arContArray: ArrayList<AssetReviewContent> = ArrayList()
+    private var completeList: ArrayList<AssetReviewContent> = ArrayList()
 
-    private var arContAdapter: AssetReviewContentAdapter? = null
+    private var adapter: ArcRecyclerAdapter? = null
     private var checkedIdArray: ArrayList<Long> = ArrayList()
     private var lastSelected: AssetReviewContent? = null
+    private var currentScrollPosition: Int = 0
     private var firstVisiblePos: Int? = null
+
     private var visibleStatusArray: ArrayList<AssetReviewContentStatus> = ArrayList()
+    private val allowQuickReview: Boolean by lazy { prefsGetBoolean(Preference.quickReviews) }
 
     private var unknownAssetId: Long = 0
     private var collectorContentId: Long = 0
@@ -260,6 +239,21 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
     private var headerFragment: LocationHeaderFragment? = null
     private var panelBottomIsExpanded = false
     private var panelTopIsExpanded = true
+
+    private val menuItemShowImages = 9999
+    private var showImages
+        get() = prefsGetBoolean(Preference.reviewContentShowImages)
+        set(value) {
+            prefsPutBoolean(Preference.reviewContentShowImages.key, value)
+        }
+
+    private var showCheckBoxes
+        get() =
+            if (!allowQuickReview) false
+            else prefsGetBoolean(Preference.reviewContentShowCheckBoxes)
+        set(value) {
+            prefsPutBoolean(Preference.reviewContentShowCheckBoxes.key, value)
+        }
 
     override fun onSaveInstanceState(savedInstanceState: Bundle) {
         super.onSaveInstanceState(savedInstanceState)
@@ -283,17 +277,17 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
         b.putBoolean("panelTopIsExpanded", panelTopIsExpanded)
         b.putBoolean("panelBottomIsExpanded", panelBottomIsExpanded)
 
-        if (arContAdapter != null) {
-            b.putParcelable("lastSelected", arContAdapter?.currentArCont())
-            b.putInt("firstVisiblePos", arContAdapter?.firstVisiblePos() ?: 0)
-            b.putParcelableArrayList("visibleStatusArray", arContAdapter?.getVisibleStatus())
-            b.putLongArray("checkedIdArray", arContAdapter?.getAllChecked()?.toLongArray())
+        if (adapter != null) {
+            b.putParcelable("lastSelected", adapter?.currentItem())
+            b.putInt("firstVisiblePos", adapter?.firstVisiblePos() ?: RecyclerView.NO_POSITION)
+            b.putLongArray("checkedIdArray", adapter?.checkedIdArray?.map { it }?.toLongArray())
+            b.putInt("currentScrollPosition", currentScrollPosition)
 
             // Guardamos la revisión en una tabla temporal.
             // Revisiones de miles de artículos no pueden pasarse en el intent.
             AssetReviewContentDbHelper().insertTempList(
                 arId = assetReview?.collectorAssetReviewId ?: 0,
-                reviewList = arContAdapter?.getAll() ?: ArrayList<AssetReviewContent>()
+                reviewList = adapter?.fullList ?: ArrayList<AssetReviewContent>()
             )
         }
     }
@@ -315,41 +309,31 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         assetReview = Parcels.unwrap<AssetReview>(b.getParcelable("assetReview"))
         isNew = b.getBoolean("isNew")
-
         saving = b.getBoolean("saving")
 
-        if (b.containsKey("allowUnknownCodes")) {
-            binding.allowUnknownCodesSwitch.isChecked = b.getBoolean("allowUnknownCodes")
-        } else {
-            binding.allowUnknownCodesSwitch.isChecked =
-                prefsGetBoolean(Preference.assetReviewAllowUnknownCodes)
-        }
+        if (b.containsKey("allowUnknownCodes")) binding.allowUnknownCodesSwitch.isChecked =
+            b.getBoolean("allowUnknownCodes")
+        else binding.allowUnknownCodesSwitch.isChecked = prefsGetBoolean(Preference.assetReviewAllowUnknownCodes)
 
-        if (b.containsKey("addUnknownAssets")) {
-            binding.addUnknownAssetsSwitch.isChecked = b.getBoolean("addUnknownAssets")
-        } else {
-            binding.addUnknownAssetsSwitch.isChecked =
-                prefsGetBoolean(Preference.assetReviewAddUnknownAssets)
-        }
+        if (b.containsKey("addUnknownAssets")) binding.addUnknownAssetsSwitch.isChecked =
+            b.getBoolean("addUnknownAssets")
+        else binding.addUnknownAssetsSwitch.isChecked = prefsGetBoolean(Preference.assetReviewAddUnknownAssets)
 
         currentInventory = b.getStringArrayList("currentInventory")
 
-        if (b.containsKey("panelBottomIsExpanded")) panelBottomIsExpanded =
-            b.getBoolean("panelBottomIsExpanded")
-        if (b.containsKey("panelTopIsExpanded")) panelTopIsExpanded =
-            b.getBoolean("panelTopIsExpanded")
+        if (b.containsKey("panelBottomIsExpanded")) panelBottomIsExpanded = b.getBoolean("panelBottomIsExpanded")
+        if (b.containsKey("panelTopIsExpanded")) panelTopIsExpanded = b.getBoolean("panelTopIsExpanded")
 
         // Adapter
+        checkedIdArray = (b.getLongArray("checkedIdArray") ?: longArrayOf()).toCollection(ArrayList())
         lastSelected = b.getParcelable("lastSelected")
         firstVisiblePos = if (b.containsKey("firstVisiblePos")) b.getInt("firstVisiblePos") else -1
-
-        checkedIdArray =
-            (b.getLongArray("checkedIdArray") ?: longArrayOf()).toCollection(ArrayList())
+        currentScrollPosition = b.getInt("currentScrollPosition")
 
         // Cargamos la revisión desde la tabla temporal
-        arContArray.clear()
+        completeList.clear()
         val tempCont = AssetReviewContentDbHelper().selectByTempId(assetReview?.collectorAssetReviewId ?: 0)
-        if (tempCont.any()) arContArray = tempCont
+        if (tempCont.any()) completeList = tempCont
 
         visibleStatusArray.clear()
         if (b.containsKey("visibleStatusArray")) {
@@ -423,6 +407,13 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
             android.R.color.holo_red_light
         )
 
+        binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                currentScrollPosition =
+                    (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+            }
+        })
+
         // Para expandir y colapsar el panel inferior
         setBottomPanelAnimation()
         setTopPanelAnimation()
@@ -474,7 +465,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
         binding.mantButton.setOnClickListener {
             if (allowClicks) {
                 allowClicks = false
-                mantAsset()
+                maintenanceAsset()
             }
         }
 
@@ -485,9 +476,156 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
         setHeaderTextBox()
 
         setPanels()
-
-        Handler(Looper.getMainLooper()).postDelayed({ fillListView() }, 500)
     }
+
+    override fun onStart() {
+        super.onStart()
+
+        if (!saving && _startReview) {
+            startReview()
+            return
+        }
+
+        if (_fillAdapter) {
+            _fillAdapter = false
+            fillAdapter(completeList)
+            return
+        }
+
+        rejectNewInstances = false
+    }
+
+    public override fun onResume() {
+        super.onResume()
+
+        rejectNewInstances = false
+        closeKeyboard(this)
+    }
+
+    // region Inset animation
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        setupWindowInsetsAnimation()
+    }
+
+    private var isKeyboardVisible: Boolean = false
+
+    /**
+     * Change panels state at Ime animation finish
+     *
+     * Estados que recuerdan está pendiente de ejecutar un cambio en estado (colapsado/expandido) de los paneles al
+     * terminar la animación de mostrado/ocultamiento del teclado en pantalla. Esto es para sincronizar los cambios,
+     * ejecutándolos de manera secuencial. A ojos del usuario la vista completa acompaña el desplazamiento de la
+     * animación. Si se ejecutara al mismo tiempo el cambio en los paneles y la animación del teclado la vista no
+     * acompaña correctamente al teclado, ya que cambia durante la animación.
+     */
+    private var changePanelTopStateAtFinish: Boolean = false
+    private var changePanelBottomStateAtFinish: Boolean = false
+
+    private fun setupWindowInsetsAnimation() {
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        val rootView = binding.root
+
+        // Adjust root layout to bottom navigation bar
+        val windowInsets = window.decorView.rootWindowInsets
+        @Suppress("DEPRECATION") rootView.setPadding(
+            windowInsets.systemWindowInsetLeft,
+            windowInsets.systemWindowInsetTop,
+            windowInsets.systemWindowInsetRight,
+            windowInsets.systemWindowInsetBottom
+        )
+
+        implWindowInsetsAnimation()
+    }
+
+    private fun implWindowInsetsAnimation() {
+        val rootView = binding.root
+
+        ViewCompat.setWindowInsetsAnimationCallback(
+            rootView,
+            object : WindowInsetsAnimationCompat.Callback(DISPATCH_MODE_CONTINUE_ON_SUBTREE) {
+                override fun onEnd(animation: WindowInsetsAnimationCompat) {
+                    val isIme = animation.typeMask and WindowInsetsCompat.Type.ime() != 0
+                    if (!isIme) return
+
+                    postExecuteImeAnimation()
+                    super.onEnd(animation)
+                }
+
+                override fun onProgress(
+                    insets: WindowInsetsCompat,
+                    runningAnimations: MutableList<WindowInsetsAnimationCompat>
+                ): WindowInsetsCompat {
+                    paddingBottomView(rootView, insets)
+
+                    return insets
+                }
+            })
+    }
+
+    private fun paddingBottomView(rootView: ConstraintLayout, insets: WindowInsetsCompat) {
+        val imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime())
+        val systemBarInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+        val paddingBottom = imeInsets.bottom.coerceAtLeast(systemBarInsets.bottom)
+
+        isKeyboardVisible = imeInsets.bottom > 0
+
+        rootView.setPadding(
+            rootView.paddingLeft,
+            rootView.paddingTop,
+            rootView.paddingRight,
+            paddingBottom
+        )
+
+        Log.d(javaClass.simpleName, "IME Size: ${imeInsets.bottom}")
+    }
+
+    private fun postExecuteImeAnimation() {
+        // Si estamos mostrando el teclado, colapsamos los paneles.
+        if (isKeyboardVisible) {
+            when {
+                resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT /*&& !qtyPrinterIsFocused*/ -> {
+                    collapseBottomPanel()
+                    collapseTopPanel()
+                }
+
+                resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT /*&& !qtyPrinterIsFocused*/ -> {
+                    collapseBottomPanel()
+                }
+
+                resources.configuration.orientation != Configuration.ORIENTATION_PORTRAIT /*&& !qtyPrinterIsFocused*/ -> {
+                    collapseTopPanel()
+                }
+            }
+        }
+
+        // Si estamos esperando que termine la animación para ejecutar un cambio de vista
+        if (changePanelTopStateAtFinish) {
+            changePanelTopStateAtFinish = false
+            binding.expandTopPanelButton?.performClick()
+        }
+        if (changePanelBottomStateAtFinish) {
+            changePanelBottomStateAtFinish = false
+            binding.expandBottomPanelButton?.performClick()
+        }
+    }
+
+    private fun collapseBottomPanel() {
+        if (panelBottomIsExpanded && resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            runOnUiThread {
+                binding.expandBottomPanelButton?.performClick()
+            }
+        }
+    }
+
+    private fun collapseTopPanel() {
+        if (panelTopIsExpanded) {
+            runOnUiThread {
+                binding.expandTopPanelButton?.performClick()
+            }
+        }
+    }
+    // endregion
 
     private fun setHeaderTextBox() {
         headerFragment?.showChangePostButton(false)
@@ -507,17 +645,11 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         val currentLayout = ConstraintSet()
         if (panelBottomIsExpanded) {
-            if (panelTopIsExpanded) {
-                currentLayout.load(this, R.layout.asset_review_content_activity)
-            } else {
-                currentLayout.load(this, R.layout.asset_review_content_top_panel_collapsed)
-            }
+            if (panelTopIsExpanded) currentLayout.load(this, R.layout.asset_review_content_activity)
+            else currentLayout.load(this, R.layout.asset_review_content_top_panel_collapsed)
         } else {
-            if (panelTopIsExpanded) {
-                currentLayout.load(this, R.layout.asset_review_content_bottom_panel_collapsed)
-            } else {
-                currentLayout.load(this, R.layout.asset_review_content_both_panels_collapsed)
-            }
+            if (panelTopIsExpanded) currentLayout.load(this, R.layout.asset_review_content_bottom_panel_collapsed)
+            else currentLayout.load(this, R.layout.asset_review_content_both_panels_collapsed)
         }
 
         val transition = ChangeBounds()
@@ -533,25 +665,11 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
         TransitionManager.beginDelayedTransition(binding.assetReviewContent, transition)
         currentLayout.applyTo(binding.assetReviewContent)
 
-        when {
-            panelBottomIsExpanded -> {
-                binding.expandBottomPanelButton?.text = getString(R.string.expand_panel)
-            }
+        if (panelBottomIsExpanded) binding.expandBottomPanelButton?.text = getString(R.string.expand_panel)
+        else binding.expandBottomPanelButton?.text = getString(R.string.more_options)
 
-            else -> {
-                binding.expandBottomPanelButton?.text = getString(R.string.more_options)
-            }
-        }
-
-        when {
-            panelTopIsExpanded -> {
-                binding.expandTopPanelButton?.text = getString(R.string.collapse_panel)
-            }
-
-            else -> {
-                binding.expandTopPanelButton?.text = getString(R.string.area_in_review)
-            }
-        }
+        if (panelTopIsExpanded) binding.expandTopPanelButton?.text = getString(R.string.collapse_panel)
+        else binding.expandTopPanelButton?.text = getString(R.string.area_in_review)
     }
 
     private fun setBottomPanelAnimation() {
@@ -562,17 +680,11 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
         binding.expandBottomPanelButton?.setOnClickListener {
             val nextLayout = ConstraintSet()
             if (panelBottomIsExpanded) {
-                if (panelTopIsExpanded) {
-                    nextLayout.load(this, R.layout.asset_review_content_bottom_panel_collapsed)
-                } else {
-                    nextLayout.load(this, R.layout.asset_review_content_both_panels_collapsed)
-                }
+                if (panelTopIsExpanded) nextLayout.load(this, R.layout.asset_review_content_bottom_panel_collapsed)
+                else nextLayout.load(this, R.layout.asset_review_content_both_panels_collapsed)
             } else {
-                if (panelTopIsExpanded) {
-                    nextLayout.load(this, R.layout.asset_review_content_activity)
-                } else {
-                    nextLayout.load(this, R.layout.asset_review_content_top_panel_collapsed)
-                }
+                if (panelTopIsExpanded) nextLayout.load(this, R.layout.asset_review_content_activity)
+                else nextLayout.load(this, R.layout.asset_review_content_top_panel_collapsed)
             }
 
             panelBottomIsExpanded = !panelBottomIsExpanded
@@ -589,10 +701,9 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
             TransitionManager.beginDelayedTransition(binding.assetReviewContent, transition)
             nextLayout.applyTo(binding.assetReviewContent)
 
-            if (panelBottomIsExpanded) (binding.expandBottomPanelButton
-                ?: return@setOnClickListener).text = getContext().getString(R.string.collapse_panel)
-            else binding.expandBottomPanelButton?.text =
-                getContext().getString(R.string.more_options)
+            if (panelBottomIsExpanded) (binding.expandBottomPanelButton ?: return@setOnClickListener).text =
+                getContext().getString(R.string.collapse_panel)
+            else binding.expandBottomPanelButton?.text = getContext().getString(R.string.more_options)
         }
     }
 
@@ -604,14 +715,10 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
         binding.expandTopPanelButton?.setOnClickListener {
             val nextLayout = ConstraintSet()
             if (panelBottomIsExpanded) {
-                if (panelTopIsExpanded) nextLayout.load(
-                    this, R.layout.asset_review_content_top_panel_collapsed
-                )
+                if (panelTopIsExpanded) nextLayout.load(this, R.layout.asset_review_content_top_panel_collapsed)
                 else nextLayout.load(this, R.layout.asset_review_content_activity)
             } else {
-                if (panelTopIsExpanded) nextLayout.load(
-                    this, R.layout.asset_review_content_both_panels_collapsed
-                )
+                if (panelTopIsExpanded) nextLayout.load(this, R.layout.asset_review_content_both_panels_collapsed)
                 else nextLayout.load(this, R.layout.asset_review_content_bottom_panel_collapsed)
             }
 
@@ -630,10 +737,9 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
             TransitionManager.beginDelayedTransition(binding.assetReviewContent, transition)
             nextLayout.applyTo(binding.assetReviewContent)
 
-            if (panelTopIsExpanded) (binding.expandTopPanelButton
-                ?: return@setOnClickListener).text = getContext().getString(R.string.collapse_panel)
-            else binding.expandTopPanelButton?.text =
-                getContext().getString(R.string.area_in_review)
+            if (panelTopIsExpanded) (binding.expandTopPanelButton ?: return@setOnClickListener).text =
+                getContext().getString(R.string.collapse_panel)
+            else binding.expandTopPanelButton?.text = getContext().getString(R.string.area_in_review)
         }
     }
 
@@ -664,9 +770,9 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     private fun setupTextView() {
-        val assetsMissed = arContAdapter?.assetsMissed ?: 0
-        val assetsAdded = arContAdapter?.assetsAdded ?: 0
-        val assetsRevised = arContAdapter?.assetsRevised ?: 0
+        val assetsMissed = adapter?.countItemsMissed ?: 0
+        val assetsAdded = adapter?.countItemsAdded ?: 0
+        val assetsRevised = adapter?.countItemsRevised ?: 0
 
         runOnUiThread {
             binding.missedTextView.text = assetsMissed.toString()
@@ -675,8 +781,8 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
         }
     }
 
-    private fun mantAsset() {
-        val arc = arContAdapter?.currentArCont()
+    private fun maintenanceAsset() {
+        val arc = adapter?.currentItem()
         if (arc == null) {
             allowClicks = true
             return
@@ -697,7 +803,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private fun detailAsset() {
         val tempReview = assetReview ?: return
-        val arc = arContAdapter?.currentArCont()
+        val arc = adapter?.currentItem()
         if (arc == null) {
             allowClicks = true
             return
@@ -748,7 +854,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     private fun removeAsset() {
-        val arc = arContAdapter?.currentArCont()
+        val arc = adapter?.currentItem()
         if (arc == null || arc.contentStatusId == AssetReviewContentStatus.notInReview.id) {
             allowClicks = true
             return
@@ -778,36 +884,8 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     private fun removeFromAdapter(arCont: AssetReviewContent) {
-        // Cambiar la fila selecciona sólo cuando la anterior es eliminada de la lista
-        if (arContAdapter == null) return
-
-        when (arCont.contentStatusId) {
-            AssetReviewContentStatus.revised.id,
-            AssetReviewContentStatus.newAsset.id,
-            -> {
-                runOnUiThread {
-                    arContAdapter?.updateContent(
-                        arc = arCont,
-                        assetReviewContentStatusId = AssetReviewContentStatus.notInReview.id,
-                        assetStatusId = arCont.assetStatusId,
-                        selectItem = false,
-                        changeCheckedState = true
-                    )
-                }
-            }
-
-            AssetReviewContentStatus.external.id,
-            AssetReviewContentStatus.appeared.id,
-            AssetReviewContentStatus.unknown.id,
-            -> {
-                runOnUiThread { arContAdapter?.remove(arCont) }
-            }
-
-            else -> {
-                return
-            }
-        }
-
+        if (adapter == null) return
+        adapter?.removeContent(arCont)
         setupTextView()
     }
 
@@ -868,7 +946,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
             // Revisiones de miles de artículos no pueden pasarse en el intent.
             AssetReviewContentDbHelper().insertTempList(
                 arId = assetReview?.collectorAssetReviewId ?: 0,
-                reviewList = arContAdapter?.getAll() ?: ArrayList<AssetReviewContent>()
+                reviewList = adapter?.fullList ?: ArrayList<AssetReviewContent>()
             )
 
             val intent = Intent(this, AssetReviewContentConfirmActivity::class.java)
@@ -907,7 +985,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private fun processAssetReview() {
         val tempReview = assetReview ?: return
-        val all = arContAdapter?.getAll() ?: ArrayList()
+        val all = adapter?.fullList ?: ArrayList()
 
         saving = true
 
@@ -947,7 +1025,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
         }
 
         if (Statics.demoMode) {
-            val assetRevised = arContAdapter?.assetsRevised ?: 0
+            val assetRevised = adapter?.countItemsRevised ?: 0
             val margin = ThreadLocalRandom.current().nextInt(0, 10) *
                     if (ThreadLocalRandom.current().nextInt(0, 5) == 0) -1 else 1
             if (assetRevised + margin > allCodesInLocation.size) {
@@ -997,7 +1075,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
                 dialog.dismiss()
             }
 
-            // if button is clicked, close the custom dialog
+            // if the button is clicked, close the custom dialog
             cancelButton.setOnClickListener {
                 dialog.cancel()
             }
@@ -1012,12 +1090,6 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
         }
     }
 
-    public override fun onResume() {
-        super.onResume()
-
-        rejectNewInstances = false
-    }
-
     override fun onBackPressed() {
         cancelAssetReview()
     }
@@ -1027,7 +1099,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     // region ProgressBar
-    // Aparece mientras se realizan operaciones sobre las bases de datos remota y local
+    // Aparece mientras se realizan operaciones sobre las bases de datos remotos y local
     private var progressDialog: AlertDialog? = null
     private lateinit var alertBinding: ProgressBarDialogBinding
     private fun createProgressDialog() {
@@ -1036,6 +1108,16 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
         //builder.setCancelable(false) // if you want user to wait for some process to finish
         builder.setView(alertBinding.root)
         progressDialog = builder.create()
+    }
+
+    private fun showProgressDialog(it: ArcRecyclerAdapter.AdapterProgress) {
+        showProgressDialog(
+            title = getContext().getString(R.string.processing_asset),
+            msg = it.msg,
+            status = it.progressStatus.id,
+            progress = it.completedTask,
+            total = it.totalTask
+        )
     }
 
     private fun showProgressDialog(
@@ -1052,8 +1134,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
                 createProgressDialog()
             }
 
-            val appColor =
-                ResourcesCompat.getColor(getContext().resources, R.color.assetControl, null)
+            val appColor = ResourcesCompat.getColor(this.resources, R.color.assetControl, null)
 
             when (status) {
                 ProgressStatus.starting.id -> {
@@ -1069,7 +1150,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
                     alertBinding.progressBar.progressTintList = ColorStateList.valueOf(appColor)
 
                     progressDialog?.setButton(DialogInterface.BUTTON_NEGATIVE,
-                        getContext().getString(R.string.cancel),
+                        this.getString(R.string.cancel),
                         DialogInterface.OnClickListener { _, _ ->
                             return@OnClickListener
                         })
@@ -1108,7 +1189,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
                     }
 
                     progressDialog?.setButton(DialogInterface.BUTTON_NEGATIVE,
-                        getContext().getString(R.string.cancel),
+                        this.getString(R.string.cancel),
                         DialogInterface.OnClickListener { _, _ ->
                             return@OnClickListener
                         })
@@ -1125,19 +1206,6 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
     // endregion
 
-    private fun fillListView() {
-        if (!saving && _startReview) {
-            startReview()
-            return
-        }
-
-        if (_fillAdapter) {
-            fillAdapter(arContArray)
-        }
-
-        showProgressBar(false)
-    }
-
     private fun startReview() {
         val ar = assetReview ?: return
 
@@ -1146,75 +1214,82 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
             startReview.addParams(assetReview = ar,
                 isNew = isNew,
                 lastCollectorId = collectorContentId,
-                onProgress = { saveViewModel.setStartReviewProgress(it) },
-                onSaveProgress = { saveViewModel.setSaveProgress(it) })
+                onProgress = { onStartReviewProgress(it) },
+                onSaveProgress = { onSaveProgress(it) })
             startReview.execute()
         }
     }
 
-    private fun fillAdapter(items: ArrayList<AssetReviewContent>) {
+    private fun fillAdapter(contents: ArrayList<AssetReviewContent>) {
         showProgressBar(true)
 
-        try {
-            runOnUiThread {
-                if (arContAdapter != null) {
-                    lastSelected = arContAdapter?.currentArCont()
-                    firstVisiblePos = arContAdapter?.firstVisiblePos()
+        runOnUiThread {
+            try {
+                if (adapter != null) {
+                    // Si el adapter es NULL es porque aún no fue creado.
+                    // Por lo tanto, puede ser que los valores de [lastSelected]
+                    // sean valores guardados de la instancia anterior y queremos preservarlos.
+                    lastSelected = adapter?.currentItem()
                 }
 
-                arContAdapter = AssetReviewContentAdapter(
-                    activity = this,
-                    resource = R.layout.asset_row,
-                    assetReviewContArray = items,
-                    suggestedList = items,
-                    listView = binding.assetReviewContentListView,
-                    multiSelect = prefsGetBoolean(
-                        Preference.quickReviews
-                    ),
+                adapter = ArcRecyclerAdapter(
+                    recyclerView = binding.recyclerView,
+                    fullList = contents,
                     checkedIdArray = checkedIdArray,
+                    allowQuickReview = allowQuickReview,
+                    showCheckBoxes = showCheckBoxes,
+                    showCheckBoxesChanged = { showCheckBoxes = it },
+                    showImages = showImages,
+                    showImagesChanged = { showImages = it },
                     visibleStatus = visibleStatusArray
                 )
+
                 refreshAdapterListeners()
 
-                while (binding.assetReviewContentListView.adapter == null) {
-                    // Horrible wait for full load
+                binding.recyclerView.layoutManager = LinearLayoutManager(this)
+                binding.recyclerView.adapter = adapter
+
+                while (binding.recyclerView.adapter == null) {
+                    // Horrible wait for a full load
                 }
 
-                arContAdapter?.selectItem(
-                    arc = lastSelected, scrollPos = firstVisiblePos ?: 0, smoothScroll = true
-                )
+                // Estas variables locales evitar posteriores cambios de estado.
+                val ls = lastSelected
+                val cs = currentScrollPosition
+                Handler(Looper.getMainLooper()).postDelayed({
+                    adapter?.selectItem(ls, false)
+                    adapter?.scrollToPos(cs, true)
+                }, 200)
 
-                setupTextView()
-
-                if (!saving) {
-                    if (Statics.demoMode) Handler(Looper.getMainLooper()).postDelayed(
+                if (!saving && Statics.demoMode)
+                    Handler(Looper.getMainLooper()).postDelayed(
                         { demo() }, 300
                     )
-                }
+
+                setupTextView()
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+                ErrorLog.writeLog(this, this::class.java.simpleName, ex)
+            } finally {
+                gentlyReturn()
             }
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-            ErrorLog.writeLog(this, this::class.java.simpleName, ex)
-        } finally {
-            showProgressBar(false)
         }
     }
 
     private fun refreshAdapterListeners() {
-        // IMPORTANTE:
-        // Se deben actualizar los listeners, si no
-        // las variables de esta actividad pueden
-        // tener valores antiguos en del adaptador.
+        adapter?.refreshListeners(this, this, this)
+        if (useImageControl) adapter?.refreshListeners(this, this)
+        adapter?.refreshUiEventListener(this)
+    }
 
-        arContAdapter?.refreshListeners(
-            checkedChangedListener = this,
-            dataSetChangedListener = this,
-            editAssetRequiredListener = this
-        )
+    private fun gentlyReturn() {
+        closeKeyboard(this)
+        allowClicks = true
 
-        if (Repository.useImageControl) {
-            arContAdapter?.refreshImageControlListeners(this, this)
-        }
+        JotterListener.lockScanner(this, false)
+        rejectNewInstances = false
+
+        showProgressBar(false)
     }
 
     private fun checkCode(scannedCode: String, manuallyAdded: Boolean, allowUnknownCodes: Boolean) {
@@ -1279,46 +1354,42 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
                 tempCode = (sc.asset ?: return).code
             }
 
-            if (arContAdapter != null && !arContAdapter!!.isEmpty) {
+            val itemCount = adapter?.itemCount ?: 0
+            if (itemCount > 0) {
                 // Buscar primero en el adaptador de la lista
-                (0 until arContAdapter!!.count).map { arContAdapter!!.getItem(it) }.filter {
-                    it != null && it.code == tempCode
-                }.forEach {
-                    if (it != null) {
-                        /*
-                        * 1 = Asset revised
-                        * 2 = Added asset from another warehouse
-                        * 3 = Added asset does not exist in the database
-                        * 4 = Added asset that was missing from the current warehouse
-                        * 0 = Not in the review
-                        */
+                val arCont = adapter?.getContentByCode(tempCode)
+                if (arCont != null) {
+                    /*
+                    * 1 = Asset revised
+                    * 2 = Added asset from another warehouse
+                    * 3 = Added asset does not exist in the database
+                    * 4 = Added asset that was missing from the current warehouse
+                    * 0 = Not in the review
+                    */
 
-                        // Process the ROW
-                        if (it.contentStatusId == AssetReviewContentStatus.notInReview.id) {
-                            runOnUiThread {
-                                arContAdapter?.updateContent(
-                                    arc = it,
-                                    assetReviewContentStatusId = AssetReviewContentStatus.revised.id,
-                                    assetStatusId = sc.asset?.assetStatusId ?: 0,
-                                    selectItem = true,
-                                    changeCheckedState = true
-                                )
-                            }
-
-                            val res = "$scannedCode: ${getString(R.string.ok)}"
-                            makeText(binding.root, res, SnackBarType.SUCCESS)
-                            Log.d(this::class.java.simpleName, res)
-                        } else {
-                            val res = "$scannedCode: ${getString(R.string.already_registered)}"
-                            makeText(binding.root, res, SnackBarType.INFO)
-                            Log.d(this::class.java.simpleName, res)
-
-                            runOnUiThread {
-                                arContAdapter?.forceSelectItem(it)
-                            }
+                    // Process the ROW
+                    if (arCont.contentStatusId == AssetReviewContentStatus.notInReview.id) {
+                        runOnUiThread {
+                            adapter?.updateContent(
+                                assetId = arCont.assetId,
+                                contentStatusId = AssetReviewContentStatus.revised.id,
+                                assetStatusId = sc.asset?.assetStatusId ?: AssetStatus.unknown.id
+                            )
                         }
-                        return
+
+                        val res = "$scannedCode: ${getString(R.string.ok)}"
+                        makeText(binding.root, res, SnackBarType.SUCCESS)
+                        Log.d(this::class.java.simpleName, res)
+                    } else {
+                        val res = "$scannedCode: ${getString(R.string.already_registered)}"
+                        makeText(binding.root, res, SnackBarType.INFO)
+                        Log.d(this::class.java.simpleName, res)
+
+                        runOnUiThread {
+                            adapter?.selectItem(arCont)
+                        }
                     }
+                    return
                 }
             }
 
@@ -1334,8 +1405,8 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
             //    El código no se encuentra en la base de datos
             //    O
             //    El activo existe pero está desactivado
-            if (allowUnknownCodes && (!sc.codeFound || (sc.asset != null && !(sc.asset
-                    ?: return).active))
+            if (allowUnknownCodes &&
+                (!sc.codeFound || (sc.asset != null && !(sc.asset ?: return).active))
             ) {
                 val tempReview = assetReview ?: return
 
@@ -1361,7 +1432,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
                 )
 
                 runOnUiThread {
-                    arContAdapter?.add(finalArc)
+                    adapter?.add(finalArc)
                 }
             }
 
@@ -1392,7 +1463,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
                 )
 
                 runOnUiThread {
-                    arContAdapter?.add(finalArc)
+                    adapter?.add(finalArc)
                 }
             }
         } catch (ex: Exception) {
@@ -1404,7 +1475,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         if (finalArc != null) {
             runOnUiThread {
-                arContAdapter?.selectItem(arc = finalArc, smoothScroll = true)
+                adapter?.selectItem(finalArc, true)
             }
 
             try {
@@ -1467,7 +1538,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
                     val asset = Parcels.unwrap<Asset>(data.getParcelableExtra("asset"))
                         ?: return@registerForActivityResult
 
-                    val arc = arContAdapter?.currentArCont()
+                    val arc = adapter?.currentItem()
                     if (arc != null) {
                         try {
                             runOnUiThread {
@@ -1507,30 +1578,52 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
             menu.removeItem(menu.findItem(R.id.action_rfid_connect).itemId)
         }
 
+        // Opción de visibilidad de Imágenes
+        if (useImageControl) {
+            menu.add(Menu.NONE, menuItemShowImages, menu.size, getContext().getString(R.string.show_images))
+                .setChecked(showImages)
+                .isCheckable = true
+
+            val item = menu.findItem(menuItemShowImages)
+
+            if (showImages) item.icon = ContextCompat.getDrawable(getContext(), R.drawable.ic_photo_library)
+            else item.icon = ContextCompat.getDrawable(getContext(), R.drawable.ic_hide_image)
+
+            item.icon?.mutate()?.colorFilter =
+                BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
+                    getColor(R.color.dimgray), BlendModeCompat.SRC_IN
+                )
+        }
+
         val drawable = ContextCompat.getDrawable(this, R.drawable.ic_visibility)
         binding.topAppbar.overflowIcon = drawable
 
+        val visibleStatus =
+            if (adapter != null) adapter?.visibleStatus ?: ArrayList()
+            else visibleStatusArray
+
         // Opciones de visibilidad del menú
         for (i in AssetReviewContentStatus.getAll()) {
-            menu.add(0, i.id, i.id, i.description)
-                .setChecked(visibleStatusArray.contains(i)).isCheckable = true
+            menu.add(0, i.id, menu.size, i.description)
+                .setChecked(visibleStatus.contains(i))
+                .isCheckable = true
         }
 
         //region Icon colors
-        val gray = ResourcesCompat.getColor(resources, R.color.whitesmoke, null)
-        val seagreen = ResourcesCompat.getColor(resources, R.color.seagreen, null)
-        val orangered = ResourcesCompat.getColor(resources, R.color.orangered, null)
-        val steelblue = ResourcesCompat.getColor(resources, R.color.steelblue, null)
-        val firebrick = ResourcesCompat.getColor(resources, R.color.firebrick, null)
-        val gold = ResourcesCompat.getColor(resources, R.color.gold, null)
+        val colorUnknown = ResourcesCompat.getColor(resources, R.color.status_default, null)
+        val colorRevised = ResourcesCompat.getColor(resources, R.color.status_revised, null)
+        val colorAppeared = ResourcesCompat.getColor(resources, R.color.status_appeared, null)
+        val colorExternal = ResourcesCompat.getColor(resources, R.color.status_external, null)
+        val colorNotInReview = ResourcesCompat.getColor(resources, R.color.status_not_in_review, null)
+        val colorNew = ResourcesCompat.getColor(resources, R.color.status_new, null)
 
         val colors: ArrayList<Int> = ArrayList()
-        colors.add(firebrick)     // notInReview
-        colors.add(seagreen)      // revised
-        colors.add(steelblue)     // external
-        colors.add(gray)          // unknown
-        colors.add(orangered)     // appeared
-        colors.add(gold)          // _new
+        colors.add(colorNotInReview)
+        colors.add(colorRevised)
+        colors.add(colorExternal)
+        colors.add(colorUnknown)
+        colors.add(colorAppeared)
+        colors.add(colorNew)
         //endregion Icon colors
 
         for ((index, i) in AssetReviewContentStatus.getAll().withIndex()) {
@@ -1595,74 +1688,69 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        if (arContAdapter == null) {
-            return false
-        }
+        if (adapter == null) return false
 
-        val visibleStatus = arContAdapter!!.getVisibleStatus()
+        val visibleStatus = adapter?.visibleStatus ?: AssetReviewContentStatus.getAll()
         item.isChecked = !item.isChecked
 
         when (item.itemId) {
-            AssetReviewContentStatus.notInReview.id -> if (item.isChecked && !visibleStatus.contains(
-                    AssetReviewContentStatus.notInReview
-                )
-            ) {
-                arContAdapter!!.addVisibleStatus(AssetReviewContentStatus.notInReview)
-            } else if (!item.isChecked && visibleStatus.contains(AssetReviewContentStatus.notInReview)) {
-                arContAdapter!!.removeVisibleStatus(AssetReviewContentStatus.notInReview)
+            AssetReviewContentStatus.notInReview.id ->
+                if (item.isChecked && !visibleStatus.contains(AssetReviewContentStatus.notInReview)) {
+                    adapter?.addVisibleStatus(AssetReviewContentStatus.notInReview)
+                } else if (!item.isChecked && visibleStatus.contains(AssetReviewContentStatus.notInReview)) {
+                    adapter?.removeVisibleStatus(AssetReviewContentStatus.notInReview)
+                }
+
+            AssetReviewContentStatus.revised.id ->
+                if (item.isChecked && !visibleStatus.contains(AssetReviewContentStatus.revised)) {
+                    adapter?.addVisibleStatus(AssetReviewContentStatus.revised)
+                } else if (!item.isChecked && visibleStatus.contains(AssetReviewContentStatus.revised)) {
+                    adapter?.removeVisibleStatus(AssetReviewContentStatus.revised)
+                }
+
+            AssetReviewContentStatus.external.id ->
+                if (item.isChecked && !visibleStatus.contains(AssetReviewContentStatus.external)) {
+                    adapter?.addVisibleStatus(AssetReviewContentStatus.external)
+                } else if (!item.isChecked && visibleStatus.contains(AssetReviewContentStatus.external)) {
+                    adapter?.removeVisibleStatus(AssetReviewContentStatus.external)
+                }
+
+            AssetReviewContentStatus.unknown.id ->
+                if (item.isChecked && !visibleStatus.contains(AssetReviewContentStatus.unknown)) {
+                    adapter?.addVisibleStatus(AssetReviewContentStatus.unknown)
+                } else if (!item.isChecked && visibleStatus.contains(AssetReviewContentStatus.unknown)) {
+                    adapter?.removeVisibleStatus(AssetReviewContentStatus.unknown)
+                }
+
+            AssetReviewContentStatus.appeared.id ->
+                if (item.isChecked && !visibleStatus.contains(AssetReviewContentStatus.appeared)) {
+                    adapter?.addVisibleStatus(AssetReviewContentStatus.appeared)
+                } else if (!item.isChecked && visibleStatus.contains(AssetReviewContentStatus.appeared)) {
+                    adapter?.removeVisibleStatus(AssetReviewContentStatus.appeared)
+                }
+
+            AssetReviewContentStatus.newAsset.id ->
+                if (item.isChecked && !visibleStatus.contains(AssetReviewContentStatus.newAsset)) {
+                    adapter?.addVisibleStatus(AssetReviewContentStatus.newAsset)
+                } else if (!item.isChecked && visibleStatus.contains(AssetReviewContentStatus.newAsset)) {
+                    adapter?.removeVisibleStatus(AssetReviewContentStatus.newAsset)
+                }
+
+            menuItemShowImages -> {
+                adapter?.showImages(item.isChecked)
+                if (item.isChecked)
+                    item.icon = ContextCompat.getDrawable(getContext(), R.drawable.ic_photo_library)
+                else
+                    item.icon = ContextCompat.getDrawable(getContext(), R.drawable.ic_hide_image)
+                item.icon?.mutate()?.colorFilter =
+                    BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
+                        getColor(R.color.dimgray), BlendModeCompat.SRC_IN
+                    )
             }
 
-            AssetReviewContentStatus.revised.id -> if (item.isChecked && !visibleStatus.contains(
-                    AssetReviewContentStatus.revised
-                )
-            ) {
-                arContAdapter!!.addVisibleStatus(AssetReviewContentStatus.revised)
-            } else if (!item.isChecked && visibleStatus.contains(AssetReviewContentStatus.revised)) {
-                arContAdapter!!.removeVisibleStatus(AssetReviewContentStatus.revised)
+            else -> {
+                return super.onOptionsItemSelected(item)
             }
-
-            AssetReviewContentStatus.external.id -> if (item.isChecked && !visibleStatus.contains(
-                    AssetReviewContentStatus.external
-                )
-            ) {
-                arContAdapter!!.addVisibleStatus(AssetReviewContentStatus.external)
-            } else if (!item.isChecked && visibleStatus.contains(AssetReviewContentStatus.external)) {
-                arContAdapter!!.removeVisibleStatus(AssetReviewContentStatus.external)
-            }
-
-            AssetReviewContentStatus.unknown.id -> if (item.isChecked && !visibleStatus.contains(
-                    AssetReviewContentStatus.unknown
-                )
-            ) {
-                arContAdapter!!.addVisibleStatus(AssetReviewContentStatus.unknown)
-            } else if (!item.isChecked && visibleStatus.contains(AssetReviewContentStatus.unknown)) {
-                arContAdapter!!.removeVisibleStatus(AssetReviewContentStatus.unknown)
-            }
-
-            AssetReviewContentStatus.appeared.id -> if (item.isChecked && !visibleStatus.contains(
-                    AssetReviewContentStatus.appeared
-                )
-            ) {
-                arContAdapter!!.addVisibleStatus(AssetReviewContentStatus.appeared)
-            } else if (!item.isChecked && visibleStatus.contains(AssetReviewContentStatus.appeared)) {
-                arContAdapter!!.removeVisibleStatus(AssetReviewContentStatus.appeared)
-            }
-
-            AssetReviewContentStatus.newAsset.id -> if (item.isChecked && !visibleStatus.contains(
-                    AssetReviewContentStatus.newAsset
-                )
-            ) {
-                arContAdapter!!.addVisibleStatus(AssetReviewContentStatus.newAsset)
-            } else if (!item.isChecked && visibleStatus.contains(AssetReviewContentStatus.newAsset)) {
-                arContAdapter!!.removeVisibleStatus(AssetReviewContentStatus.newAsset)
-            }
-
-            else -> return super.onOptionsItemSelected(item)
-        }
-
-        if (arContAdapter?.isStatusVisible(arContAdapter?.currentPos() ?: -1) == false) {
-            // La fila actual está invisible, seleccionar la anterior visible
-            arContAdapter?.selectNearVisible()
         }
 
         return true
@@ -1674,7 +1762,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
         if (completed) {
             assetReview?.statusId = AssetReviewStatus.completed.id
 
-            if (arContAdapter?.assetsAdded == 0) {
+            if (adapter?.countItemsAdded == 0) {
                 processAssetReview()
             } else {
                 if (Statics.demoMode) {
@@ -1758,6 +1846,8 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
 
             fillAdapter(arContArray)
         } else if (taskStatus == ProgressStatus.crashed.id) {
+            rejectNewInstances = false
+
             progressDialog?.dismiss()
             progressDialog = null
             showProgressBar(false)
@@ -1766,7 +1856,15 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
         }
     }
 
+    override fun onUiEventRequired(it: ArcRecyclerAdapter.AdapterProgress) {
+        showProgressDialog(it)
+    }
+
     override fun onDataSetChanged() {
+        setupTextView()
+    }
+
+    override fun onCheckedChanged(isChecked: Boolean, pos: Int) {
         setupTextView()
     }
 
@@ -1821,13 +1919,6 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
     // region READERS Reception
 
     override fun onNewIntent(intent: Intent) {
-        /*
-          This method gets called, when a new Intent gets associated with the current activity instance.
-          Instead of creating a new activity, onNewIntent will be called. For more information have a look
-          at the documentation.
-
-          In our case this method gets called, when the user attaches a className to the device.
-         */
         super.onNewIntent(intent)
         Nfc.nfcHandleIntent(intent, this)
     }
@@ -1846,11 +1937,13 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
     //endregion READERS Reception
 
     override fun onEditAssetRequired(tableId: Int, itemId: Long) {
-        val asset = arContAdapter?.currentAsset()
+        if (rejectNewInstances) return
+        rejectNewInstances = true
 
-        if (!rejectNewInstances && asset != null) {
+        val asset = AssetDbHelper().selectById(itemId)
+
+        if (asset != null) {
             _fillAdapter = false // Para onResume al regresar de la actividad
-            rejectNewInstances = true
 
             val intent = Intent(baseContext, AssetCRUDActivity::class.java)
             intent.putExtra("asset", asset)
@@ -1867,7 +1960,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
                 if (it?.resultCode == RESULT_OK && data != null) {
                     val a = Parcels.unwrap<Asset>(data.getParcelableExtra("asset"))
                         ?: return@registerForActivityResult
-                    arContAdapter!!.updateAsset(a, true)
+                    adapter?.updateItem(a, true)
                 }
             } catch (ex: Exception) {
                 ex.printStackTrace()
@@ -1880,7 +1973,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
     // region ImageControl
 
     override fun onAlbumViewRequired(tableId: Int, itemId: Long) {
-        if (!Repository.useImageControl) {
+        if (!useImageControl) {
             return
         }
 
@@ -1960,8 +2053,8 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
         showPhotoAlbum()
     }
 
-    override fun onAddPhotoRequired(tableId: Int, itemId: Long, description: String) {
-        if (!Repository.useImageControl) {
+    override fun onAddPhotoRequired(tableId: Int, itemId: Long, description: String, obs: String, reference: String) {
+        if (!useImageControl) {
             return
         }
 
@@ -1973,6 +2066,8 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
             intent.putExtra("programObjectId", tableId.toLong())
             intent.putExtra("objectId1", itemId.toString())
             intent.putExtra("description", description)
+            intent.putExtra("obs", obs)
+            intent.putExtra("reference", reference)
             intent.putExtra("addPhoto", autoSend())
             resultForPhotoCapture.launch(intent)
         }
@@ -1983,7 +2078,9 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
             val data = it?.data
             try {
                 if (it?.resultCode == RESULT_OK && data != null) {
-                    arContAdapter?.currentAsset()?.saveChanges()
+                    val assetId = adapter?.currentItem()?.assetId ?: return@registerForActivityResult
+                    val asset = AssetDbHelper().selectById(assetId)
+                    asset?.saveChanges()
                 }
             } catch (ex: Exception) {
                 ex.printStackTrace()

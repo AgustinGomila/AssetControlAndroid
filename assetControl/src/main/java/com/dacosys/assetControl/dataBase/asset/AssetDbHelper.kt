@@ -623,34 +623,43 @@ class AssetDbHelper {
         return !error
     }
 
-    fun updateTransferred(assetId: Long): Boolean {
+    fun updateTransferred(allId: ArrayList<Long>): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> updateTransferred")
 
-
-        /*
-        UPDATE asset
-        SET transfered = 1
-        WHERE (asset_id = @asset_id)
-         */
-
-        val updateQ =
-            "UPDATE " + TABLE_NAME +
-                    " SET " +
-                    TRANSFERED + " = 1 " +
-                    " WHERE (" + ASSET_ID + " = " + assetId + ")"
-
         val sqLiteDatabase = getWritableDb()
-        val result: Boolean = try {
-            val c = sqLiteDatabase.rawQuery(updateQ, null)
-            c.moveToFirst()
-            c.close()
-            getChangesCount() > 0
+
+        val splitList = splitList(allId.toArray(), 500)
+        var error = false
+        try {
+            sqLiteDatabase.beginTransaction()
+            for (part in splitList) {
+                var where = "("
+                for ((index, id) in part.withIndex()) {
+                    var ending = "OR "
+                    if (index == allId.lastIndex) ending = ")"
+                    where = "$where $ASSET_ID = $id $ending"
+                }
+
+                val updateQ =
+                    "UPDATE " + TABLE_NAME +
+                            " SET " +
+                            TRANSFERED + " = 1 " +
+                            " WHERE " + where
+
+                Log.i(this.javaClass.simpleName, updateQ)
+
+                sqLiteDatabase.execSQL(updateQ)
+            }
+            sqLiteDatabase.setTransactionSuccessful()
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
-            false
+            error = true
+        } finally {
+            sqLiteDatabase.endTransaction()
         }
-        return result
+
+        return !error
     }
 
     fun delete(asset: Asset): Boolean {

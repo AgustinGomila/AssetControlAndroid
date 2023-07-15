@@ -67,6 +67,12 @@
     <color name="status_removed">#FFFFC107</color>
     <color name="status_default">#FFDFDFDF</color>
 
+    <color name="status_revised">#FF009688</color>
+    <color name="status_appeared">#FFF44336</color>
+    <color name="status_not_in_review">#FFC22319</color>
+    <color name="status_external">#FF2196F3</color>
+    <color name="status_new">#FFFFC107</color>
+
     <color name="text_dark">#FF1B1B1B</color>
     <color name="text_light">#FFFBFBFB</color>
 </resources>

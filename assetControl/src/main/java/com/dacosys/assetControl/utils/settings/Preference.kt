@@ -615,6 +615,18 @@ class Preference(key: String, defaultValue: Any, debugValue: Any) {
             debugValue = false
         )
 
+        var reviewContentShowImages = Preference(
+            "review_content_show_images",
+            defaultValue = false,
+            debugValue = false
+        )
+
+        var reviewContentShowCheckBoxes = Preference(
+            "review_content_show_check_boxes",
+            defaultValue = false,
+            debugValue = false
+        )
+
         var selectAssetOnlyActive = Preference(
             "asset_select_only_active",
             defaultValue = true,
@@ -832,6 +844,8 @@ class Preference(key: String, defaultValue: Any, debugValue: Any) {
                 printLabelAssetShowImages,
                 printLabelAssetShowCheckBoxes,
                 printLabelWarehouseAreaOnlyActive,
+                reviewContentShowImages,
+                reviewContentShowCheckBoxes,
                 selectAssetMaintenanceOnlyActive,
                 selectAssetOnlyActive,
                 selectDataCollectionRuleOnlyActive,

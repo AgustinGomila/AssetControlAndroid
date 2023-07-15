@@ -3,7 +3,6 @@ package com.dacosys.assetControl.network.sync
 import android.util.Log
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.getWritableDb
 import com.dacosys.assetControl.dataBase.asset.AssetDbHelper
 import com.dacosys.assetControl.dataBase.category.ItemCategoryDbHelper
 import com.dacosys.assetControl.dataBase.datacollection.DataCollectionContentDbHelper
@@ -137,16 +136,16 @@ class SyncUpload(
             )
         )
 
-        // Enviar imágenes pendientes que tienen IDs reales,
+        // Enviar imágenes pendientes que tienen ID reales,
         // por ejemplo: Activos, categorías, ubicaciones
-        // existentes modificadas desde los CRUDs o desde el
+        // existentes modificadas desde los CRUD o desde el
         // buscador de activos.
 
-        // Las imágenes con IDs locales se enviarán después de
-        // obtener los IDs reales.
+        // Las imágenes con ID locales se enviarán después de
+        // obtener los ID reales.
         SendPending { onUploadProgress.invoke(it) }
 
-        // El orden está dado por la dependencia de los IDs
+        // El orden está dado por la dependencia de los ID
         // en las subsiguientes tablas
         if (registryType == null) {
             itemCategory()
@@ -159,7 +158,7 @@ class SyncUpload(
             routeProcess()
 
             if (prefsGetBoolean(Preference.useAssetControlManteinance)) {
-                assetManteinance()
+                assetMaintenance()
             }
         } else {
             when (registryType) {
@@ -200,7 +199,7 @@ class SyncUpload(
                         warehouse()
                         warehouseArea()
                         asset()
-                        assetManteinance()
+                        assetMaintenance()
                     }
                 }
 
@@ -239,10 +238,6 @@ class SyncUpload(
         val arcDb = AssetReviewContentDbHelper()
 
         var error = false
-
-        ///// Comienzo de una transacción /////
-        val db = getWritableDb()
-        db.beginTransaction()
 
         try {
             if (!scope.isActive) {
@@ -311,7 +306,7 @@ class SyncUpload(
                     }
 
                     // Los activos extraviados no deben aparecer en la revisión,
-                    // pero el estado de los activos sí cambia a extraviado.
+                    // pero el estado de los activos sí cambia al estado extraviado.
                     if (arc.contentStatusId == AssetReviewContentStatus.notInReview.id) {
                         continue
                     }
@@ -358,10 +353,6 @@ class SyncUpload(
                     )
                 }
             }
-
-            // La transacción terminó correctamente
-            db.setTransactionSuccessful()
-
         } catch (ex: Exception) {
             ex.printStackTrace()
             // Error remoto
@@ -378,8 +369,6 @@ class SyncUpload(
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             return
         } finally {
-            db.endTransaction()
-
             registryOnProcess.remove(registryType)
             onSyncTaskProgress.invoke(
                 SyncProgress(
@@ -405,10 +394,6 @@ class SyncUpload(
         val wmcDb = WarehouseMovementContentDbHelper()
 
         var error = false
-
-        ///// Comienzo de una transacción /////
-        val db = getWritableDb()
-        db.beginTransaction()
 
         try {
             if (!scope.isActive) {
@@ -516,10 +501,6 @@ class SyncUpload(
                     )
                 }
             }
-
-            // La transacción terminó correctamente
-            db.setTransactionSuccessful()
-
         } catch (ex: Exception) {
             ex.printStackTrace()
             // Error remoto
@@ -535,8 +516,6 @@ class SyncUpload(
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             return
         } finally {
-            db.endTransaction()
-
             registryOnProcess.remove(registryType)
             onSyncTaskProgress.invoke(
                 SyncProgress(
@@ -563,10 +542,6 @@ class SyncUpload(
         val wmcDb = WarehouseMovementContentDbHelper()
 
         var error = false
-
-        ///// Comienzo de una transacción /////
-        val db = getWritableDb()
-        db.beginTransaction()
 
         try {
             if (!scope.isActive) {
@@ -597,6 +572,7 @@ class SyncUpload(
                 )
             )
 
+            val allRealId: ArrayList<Long> = ArrayList()
             val totalTask = aAl.size
             for ((currentTask, a) in aAl.toTypedArray().withIndex()) {
                 a.setDataRead()
@@ -646,7 +622,7 @@ class SyncUpload(
                 }
 
                 if (realAssetId > 0) {
-                    assetDb.updateTransferred(realAssetId)
+                    allRealId.add(realAssetId)
 
                     // Enviar imágenes si existen
                     SendImages(programObjectId = Table.asset.tableId.toLong(),
@@ -662,9 +638,8 @@ class SyncUpload(
                 }
             }
 
-            // La transacción terminó correctamente
-            db.setTransactionSuccessful()
-
+            // Actualizamos todos los activos en una sola consulta.
+            error = !assetDb.updateTransferred(allRealId)
         } catch (ex: Exception) {
             ex.printStackTrace()
             // Error remoto
@@ -680,8 +655,6 @@ class SyncUpload(
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             return
         } finally {
-            db.endTransaction()
-
             registryOnProcess.remove(registryType)
             onSyncTaskProgress.invoke(
                 SyncProgress(
@@ -710,10 +683,6 @@ class SyncUpload(
         val wmDb = WarehouseMovementDbHelper()
 
         var error = false
-
-        ///// Comienzo de una transacción /////
-        val db = getWritableDb()
-        db.beginTransaction()
 
         try {
             if (!scope.isActive) {
@@ -744,6 +713,7 @@ class SyncUpload(
                 )
             )
 
+            val allRealId: ArrayList<Long> = ArrayList()
             val totalTask = waAl.size
             for ((currentTask, wa) in waAl.toTypedArray().withIndex()) {
                 wa.setDataRead()
@@ -829,7 +799,7 @@ class SyncUpload(
                 }
 
                 if (realWarehouseAreaId > 0) {
-                    waDb.updateTransferred(realWarehouseAreaId)
+                    allRealId.add(realWarehouseAreaId)
 
                     // Enviar imágenes si existen
                     SendImages(programObjectId = Table.warehouseArea.tableId.toLong(),
@@ -845,9 +815,8 @@ class SyncUpload(
                 }
             }
 
-            // La transacción terminó correctamente
-            db.setTransactionSuccessful()
-
+            // Actualizamos todos las áreas en una sola consulta.
+            error = !waDb.updateTransferred(allRealId)
         } catch (ex: Exception) {
             ex.printStackTrace()
             // Error remoto
@@ -863,8 +832,6 @@ class SyncUpload(
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             return
         } finally {
-            db.endTransaction()
-
             registryOnProcess.remove(registryType)
             onSyncTaskProgress.invoke(
                 SyncProgress(
@@ -893,10 +860,6 @@ class SyncUpload(
         val wmDb = WarehouseMovementDbHelper()
 
         var error = false
-
-        ///// Comienzo de una transacción /////
-        val db = getWritableDb()
-        db.beginTransaction()
 
         try {
             if (!scope.isActive) {
@@ -927,6 +890,7 @@ class SyncUpload(
                 )
             )
 
+            val allRealId: ArrayList<Long> = ArrayList()
             val totalTask = wAl.size
             for ((currentTask, w) in wAl.toTypedArray().withIndex()) {
                 w.setDataRead()
@@ -983,7 +947,7 @@ class SyncUpload(
                 }
 
                 if (realWarehouseId > 0) {
-                    wDb.updateTransferred(realWarehouseId)
+                    allRealId.add(realWarehouseId)
 
                     // Enviar imágenes si existen
                     SendImages(programObjectId = Table.warehouse.tableId.toLong(),
@@ -999,9 +963,8 @@ class SyncUpload(
                 }
             }
 
-            // La transacción terminó correctamente
-            db.setTransactionSuccessful()
-
+            // Actualizamos todos las áreas en una sola consulta.
+            error = !wDb.updateTransferred(allRealId)
         } catch (ex: Exception) {
             ex.printStackTrace()
             // Error remoto
@@ -1017,8 +980,6 @@ class SyncUpload(
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             return
         } finally {
-            db.endTransaction()
-
             registryOnProcess.remove(registryType)
             onSyncTaskProgress.invoke(
                 SyncProgress(
@@ -1040,14 +1001,10 @@ class SyncUpload(
 
         val itemCategoryWs = ItemCategoryWs()
 
-        val itemCategoryDb = ItemCategoryDbHelper()
+        val icDb = ItemCategoryDbHelper()
         val aDb = AssetDbHelper()
 
         var error = false
-
-        ///// Comienzo de una transacción /////
-        val db = getWritableDb()
-        db.beginTransaction()
 
         try {
             if (!scope.isActive) {
@@ -1063,7 +1020,7 @@ class SyncUpload(
                 return
             }
 
-            val icAl = itemCategoryDb.selectNoTransfered()
+            val icAl = icDb.selectNoTransfered()
             if (icAl.size < 1) {
                 return
             }
@@ -1078,6 +1035,7 @@ class SyncUpload(
                 )
             )
 
+            val allRealId: ArrayList<Long> = ArrayList()
             val totalTask = icAl.size
             for ((currentTask, ic) in icAl.toTypedArray().withIndex()) {
                 ic.setDataRead()
@@ -1116,7 +1074,7 @@ class SyncUpload(
 
                     if (realItemCategoryId > 0) {
                         // Actualizar la propia categoría
-                        itemCategoryDb.updateItemCategoryId(
+                        icDb.updateItemCategoryId(
                             realItemCategoryId, ic.itemCategoryId
                         )
 
@@ -1126,7 +1084,7 @@ class SyncUpload(
                 }
 
                 if (realItemCategoryId > 0) {
-                    itemCategoryDb.updateTransferred(realItemCategoryId)
+                    allRealId.add(realItemCategoryId)
 
                     // Enviar imágenes si existen
                     SendImages(programObjectId = Table.itemCategory.tableId.toLong(),
@@ -1142,9 +1100,8 @@ class SyncUpload(
                 }
             }
 
-            // La transacción terminó correctamente
-            db.setTransactionSuccessful()
-
+            // Actualizamos todos las áreas en una sola consulta.
+            error = !icDb.updateTransferred(allRealId)
         } catch (ex: Exception) {
             ex.printStackTrace()
             // Error remoto
@@ -1160,8 +1117,6 @@ class SyncUpload(
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             return
         } finally {
-            db.endTransaction()
-
             registryOnProcess.remove(registryType)
             onSyncTaskProgress.invoke(
                 SyncProgress(
@@ -1187,10 +1142,6 @@ class SyncUpload(
         val dccDb = DataCollectionContentDbHelper()
 
         var error = false
-
-        ///// Comienzo de una transacción /////
-        val db = getWritableDb()
-        db.beginTransaction()
 
         try {
             if (!scope.isActive) {
@@ -1302,10 +1253,6 @@ class SyncUpload(
                     )
                 }
             }
-
-            // La transacción terminó correctamente
-            db.setTransactionSuccessful()
-
         } catch (ex: Exception) {
             ex.printStackTrace()
             // Error remoto
@@ -1321,8 +1268,6 @@ class SyncUpload(
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             return
         } finally {
-            db.endTransaction()
-
             registryOnProcess.remove(registryType)
             onSyncTaskProgress.invoke(
                 SyncProgress(
@@ -1348,10 +1293,6 @@ class SyncUpload(
         val rpcDb = RouteProcessContentDbHelper()
 
         var error = false
-
-        ///// Comienzo de una transacción /////
-        val db = getWritableDb()
-        db.beginTransaction()
 
         try {
             if (!scope.isActive) {
@@ -1424,7 +1365,7 @@ class SyncUpload(
                             rpc.dataCollectionId ?: return
                         )
                         if (dc != null && dc.dataCollectionId > 0) {
-                            // Actualizamos todos los Id temporales
+                            // Actualizamos todos los ID temporales
                             dataCollectionId = dc.dataCollectionId
                             rpc.dataCollectionId = dc.dataCollectionId
                         } else {
@@ -1476,10 +1417,6 @@ class SyncUpload(
                     )
                 }
             }
-
-            // La transacción terminó correctamente
-            db.setTransactionSuccessful()
-
         } catch (ex: Exception) {
             ex.printStackTrace()
             // Error remoto
@@ -1495,8 +1432,6 @@ class SyncUpload(
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             return
         } finally {
-            db.endTransaction()
-
             registryOnProcess.remove(registryType)
             onSyncTaskProgress.invoke(
                 SyncProgress(
@@ -1512,7 +1447,7 @@ class SyncUpload(
         }
     }
 
-    private fun assetManteinance() {
+    private fun assetMaintenance() {
         val registryType = SyncRegistryType.AssetManteinance
         registryOnProcess.add(registryType)
 
@@ -1521,10 +1456,6 @@ class SyncUpload(
         val amDb = AssetManteinanceDbHelper()
 
         var error = false
-
-        ///// Comienzo de una transacción /////
-        val db = getWritableDb()
-        db.beginTransaction()
 
         try {
             if (!scope.isActive) {
@@ -1594,7 +1525,7 @@ class SyncUpload(
                 amLogObj.manteinance_status_id = am.manteinanceStatusId
                 amLogObj.repairman_id = (Statics.currentUserId ?: return)
 
-                val assetManteinanceId = if (am.assetManteinanceId == 0L) {
+                val assetMaintenanceId = if (am.assetManteinanceId == 0L) {
                     amWs.assetManteinanceAdd(
                         Statics.currentUserId ?: return, amObj, amLogObj
                     )
@@ -1604,12 +1535,12 @@ class SyncUpload(
                     )
                 }
 
-                if (assetManteinanceId > 0) {
-                    amDb.updateTransferred(assetManteinanceId)
+                if (assetMaintenanceId > 0) {
+                    amDb.updateTransferred(assetMaintenanceId)
 
                     // Enviar imágenes si existen
                     SendImages(programObjectId = Table.assetManteinance.tableId.toLong(),
-                        newObjectId1 = assetManteinanceId,
+                        newObjectId1 = assetMaintenanceId,
                         localObjectId1 = am.assetManteinanceId,
                         onUploadProgress = { onUploadProgress.invoke(it) }).execute()
                 } else {
@@ -1620,10 +1551,6 @@ class SyncUpload(
                     )
                 }
             }
-
-            // La transacción terminó correctamente
-            db.setTransactionSuccessful()
-
         } catch (ex: Exception) {
             ex.printStackTrace()
             // Error remoto
@@ -1639,8 +1566,6 @@ class SyncUpload(
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             return
         } finally {
-            db.endTransaction()
-
             registryOnProcess.remove(registryType)
             onSyncTaskProgress.invoke(
                 SyncProgress(

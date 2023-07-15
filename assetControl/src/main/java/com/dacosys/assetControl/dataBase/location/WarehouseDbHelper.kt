@@ -19,6 +19,7 @@ import com.dacosys.assetControl.network.sync.SyncProgress
 import com.dacosys.assetControl.network.sync.SyncRegistryType
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.misc.splitList
 import com.dacosys.assetControl.webservice.location.WarehouseObject
 
 /**
@@ -178,34 +179,43 @@ class WarehouseDbHelper {
         }
     }
 
-    fun updateTransferred(warehouseId: Long): Boolean {
+    fun updateTransferred(allId: ArrayList<Long>): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> updateTransferred")
 
-        /*
-        UPDATE asset
-        SET transfered = 1
-        WHERE (asset_id = @asset_id)
-         */
-
-        val updateQ =
-            "UPDATE " + TABLE_NAME +
-                    " SET " +
-                    TRANSFERRED + " = 1 " +
-                    " WHERE (" + WAREHOUSE_ID + " = " + warehouseId + ")"
-
         val sqLiteDatabase = getWritableDb()
-        val result: Boolean = try {
-            val c = sqLiteDatabase.rawQuery(updateQ, null)
-            c.moveToFirst()
-            c.close()
-            getChangesCount() > 0
+
+        val splitList = splitList(allId.toArray(), 500)
+        var error = false
+        try {
+            sqLiteDatabase.beginTransaction()
+            for (part in splitList) {
+                var where = "("
+                for ((index, id) in part.withIndex()) {
+                    var ending = "OR "
+                    if (index == allId.lastIndex) ending = ")"
+                    where = "$where $WAREHOUSE_ID = $id $ending"
+                }
+
+                val updateQ =
+                    "UPDATE " + TABLE_NAME +
+                            " SET " +
+                            TRANSFERRED + " = 1 " +
+                            " WHERE " + where
+
+                Log.i(this.javaClass.simpleName, updateQ)
+
+                sqLiteDatabase.execSQL(updateQ)
+            }
+            sqLiteDatabase.setTransactionSuccessful()
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
-            false
+            error = true
+        } finally {
+            sqLiteDatabase.endTransaction()
         }
-        return result
 
+        return !error
     }
 
     fun selectNoTransfered(): ArrayList<Warehouse> {

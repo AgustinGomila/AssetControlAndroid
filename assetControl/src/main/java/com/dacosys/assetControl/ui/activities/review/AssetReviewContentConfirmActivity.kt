@@ -12,12 +12,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.fragment.app.Fragment
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.transition.ChangeBounds
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.adapters.review.AssetReviewContentAdapter
+import com.dacosys.assetControl.adapters.review.ArcRecyclerAdapter
 import com.dacosys.assetControl.dataBase.review.AssetReviewContentDbHelper
 import com.dacosys.assetControl.databinding.AssetReviewContentConfirmBottomPanelCollapsedBinding
 import com.dacosys.assetControl.model.review.AssetReview
@@ -69,7 +71,7 @@ class AssetReviewContentConfirmActivity : AppCompatActivity(),
     }
 
     private fun destroyLocals() {
-        arContAdapter?.refreshListeners(null, null, null)
+        adapter?.refreshListeners(null, null, null)
     }
 
     private var rejectNewInstances = false
@@ -77,20 +79,26 @@ class AssetReviewContentConfirmActivity : AppCompatActivity(),
     private var imageControlFragment: ImageControlButtonsFragment? = null
     private var headerFragment: LocationHeaderFragment? = null
 
-    private var arContAdapter: AssetReviewContentAdapter? = null
-    private var arContArray: ArrayList<AssetReviewContent> = ArrayList()
+    private var adapter: ArcRecyclerAdapter? = null
     private var assetReview: AssetReview? = null
+    private var completeList: java.util.ArrayList<AssetReviewContent> = java.util.ArrayList()
+    private var checkedIdArray: java.util.ArrayList<Long> = java.util.ArrayList()
+    private var lastSelected: AssetReviewContent? = null
+    private var currentScrollPosition: Int = 0
+    private var firstVisiblePos: Int? = null
     private var obs = ""
 
     private var panelBottomIsExpanded = false
     private var panelTopIsExpanded = true
+    private var showImages
+        get() = prefsGetBoolean(Preference.reviewContentShowImages)
+        set(value) {
+            prefsPutBoolean(Preference.reviewContentShowImages.key, value)
+        }
 
-
-    override fun onResume() {
-        super.onResume()
-        rejectNewInstances = false
-
-        fillAdapter()
+    override fun onStart() {
+        super.onStart()
+        fillAdapter(completeList)
     }
 
     override fun onSaveInstanceState(savedInstanceState: Bundle) {
@@ -108,6 +116,13 @@ class AssetReviewContentConfirmActivity : AppCompatActivity(),
             "imageControlFragment",
             imageControlFragment as ImageControlButtonsFragment
         )
+
+        if (adapter != null) {
+            savedInstanceState.putParcelable("lastSelected", adapter?.currentItem())
+            savedInstanceState.putInt("firstVisiblePos", adapter?.firstVisiblePos() ?: RecyclerView.NO_POSITION)
+            savedInstanceState.putLongArray("checkedIdArray", adapter?.checkedIdArray?.map { it }?.toLongArray())
+            savedInstanceState.putInt("currentScrollPosition", currentScrollPosition)
+        }
     }
 
     private lateinit var binding: AssetReviewContentConfirmBottomPanelCollapsedBinding
@@ -128,9 +143,7 @@ class AssetReviewContentConfirmActivity : AppCompatActivity(),
             supportFragmentManager.findFragmentById(binding.headerFragment.id) as LocationHeaderFragment?
         if (savedInstanceState != null) {
             assetReview = savedInstanceState.getParcelable("assetReview")
-            if (assetReview != null) {
-                obs = (assetReview ?: return).obs
-            }
+            if (assetReview != null) obs = assetReview?.obs ?: ""
 
             binding.completedSwitch.isChecked = savedInstanceState.getBoolean("completedSwitch")
 
@@ -140,21 +153,27 @@ class AssetReviewContentConfirmActivity : AppCompatActivity(),
 
             panelBottomIsExpanded = savedInstanceState.getBoolean("panelBottomIsExpanded")
             panelTopIsExpanded = savedInstanceState.getBoolean("panelTopIsExpanded")
+
+            // Adapter
+            checkedIdArray =
+                (savedInstanceState.getLongArray("checkedIdArray") ?: longArrayOf()).toCollection(ArrayList())
+            lastSelected = savedInstanceState.getParcelable("lastSelected")
+            firstVisiblePos =
+                if (savedInstanceState.containsKey("firstVisiblePos")) savedInstanceState.getInt("firstVisiblePos") else -1
+            currentScrollPosition = savedInstanceState.getInt("currentScrollPosition")
         } else {
             val extras = intent.extras
             if (extras != null) {
                 assetReview = Parcels.unwrap<AssetReview>(extras.getParcelable("assetReview"))
 
-                if (assetReview != null) {
-                    obs = (assetReview ?: return).obs
-                }
+                if (assetReview != null) obs = assetReview?.obs ?: ""
             }
         }
 
         // Cargamos la revisión desde la tabla temporal
-        arContArray.clear()
+        completeList.clear()
         val tempCont = AssetReviewContentDbHelper().selectByTempId(assetReview?.collectorAssetReviewId ?: 0)
-        if (tempCont.any()) arContArray = tempCont
+        if (tempCont.any()) completeList = tempCont
 
         setHeaderTextBox()
 
@@ -165,6 +184,13 @@ class AssetReviewContentConfirmActivity : AppCompatActivity(),
             android.R.color.holo_orange_light,
             android.R.color.holo_red_light
         )
+
+        binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                currentScrollPosition =
+                    (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+            }
+        })
 
         // Para expandir y colapsar el panel inferior
         setBottomPanelAnimation()
@@ -202,23 +228,14 @@ class AssetReviewContentConfirmActivity : AppCompatActivity(),
 
         val currentLayout = ConstraintSet()
         if (panelBottomIsExpanded) {
-            if (panelTopIsExpanded) {
-                currentLayout.load(this, R.layout.asset_review_content_confirm_activity)
-            } else {
-                currentLayout.load(
-                    this, R.layout.asset_review_content_confirm_top_panel_collapsed
-                )
-            }
+            if (panelTopIsExpanded) currentLayout.load(this, R.layout.asset_review_content_confirm_activity)
+            else currentLayout.load(this, R.layout.asset_review_content_confirm_top_panel_collapsed)
         } else {
-            if (panelTopIsExpanded) {
-                currentLayout.load(
-                    this, R.layout.asset_review_content_confirm_bottom_panel_collapsed
-                )
-            } else {
-                currentLayout.load(
-                    this, R.layout.asset_review_content_confirm_both_panels_collapsed
-                )
-            }
+            if (panelTopIsExpanded) currentLayout.load(
+                this,
+                R.layout.asset_review_content_confirm_bottom_panel_collapsed
+            )
+            else currentLayout.load(this, R.layout.asset_review_content_confirm_both_panels_collapsed)
         }
 
         val transition = ChangeBounds()
@@ -237,25 +254,11 @@ class AssetReviewContentConfirmActivity : AppCompatActivity(),
 
         currentLayout.applyTo(binding.assetReviewContentConfirm)
 
-        when {
-            panelBottomIsExpanded -> {
-                binding.expandBottomPanelButton?.text = getString(R.string.collapse_panel)
-            }
+        if (panelBottomIsExpanded) binding.expandBottomPanelButton?.text = getString(R.string.collapse_panel)
+        else binding.expandBottomPanelButton?.text = getString(R.string.more_options)
 
-            else -> {
-                binding.expandBottomPanelButton?.text = getString(R.string.more_options)
-            }
-        }
-
-        when {
-            panelTopIsExpanded -> {
-                binding.expandTopPanelButton?.text = getString(R.string.collapse_panel)
-            }
-
-            else -> {
-                binding.expandTopPanelButton?.text = getString(R.string.area_in_review)
-            }
-        }
+        if (panelTopIsExpanded) binding.expandTopPanelButton?.text = getString(R.string.collapse_panel)
+        else binding.expandTopPanelButton?.text = getString(R.string.area_in_review)
     }
 
     private fun setBottomPanelAnimation() {
@@ -266,23 +269,14 @@ class AssetReviewContentConfirmActivity : AppCompatActivity(),
         binding.expandBottomPanelButton?.setOnClickListener {
             val nextLayout = ConstraintSet()
             if (panelBottomIsExpanded) {
-                if (panelTopIsExpanded) {
-                    nextLayout.load(
-                        this, R.layout.asset_review_content_confirm_bottom_panel_collapsed
-                    )
-                } else {
-                    nextLayout.load(
-                        this, R.layout.asset_review_content_confirm_both_panels_collapsed
-                    )
-                }
+                if (panelTopIsExpanded) nextLayout.load(
+                    this,
+                    R.layout.asset_review_content_confirm_bottom_panel_collapsed
+                )
+                else nextLayout.load(this, R.layout.asset_review_content_confirm_both_panels_collapsed)
             } else {
-                if (panelTopIsExpanded) {
-                    nextLayout.load(this, R.layout.asset_review_content_confirm_activity)
-                } else {
-                    nextLayout.load(
-                        this, R.layout.asset_review_content_confirm_top_panel_collapsed
-                    )
-                }
+                if (panelTopIsExpanded) nextLayout.load(this, R.layout.asset_review_content_confirm_activity)
+                else nextLayout.load(this, R.layout.asset_review_content_confirm_top_panel_collapsed)
             }
 
             panelBottomIsExpanded = !panelBottomIsExpanded
@@ -302,15 +296,8 @@ class AssetReviewContentConfirmActivity : AppCompatActivity(),
 
             nextLayout.applyTo(binding.assetReviewContentConfirm)
 
-            when {
-                panelBottomIsExpanded -> {
-                    binding.expandBottomPanelButton?.text = getString(R.string.collapse_panel)
-                }
-
-                else -> {
-                    binding.expandBottomPanelButton?.text = getString(R.string.more_options)
-                }
-            }
+            if (panelBottomIsExpanded) binding.expandBottomPanelButton?.text = getString(R.string.collapse_panel)
+            else binding.expandBottomPanelButton?.text = getString(R.string.more_options)
         }
     }
 
@@ -322,23 +309,14 @@ class AssetReviewContentConfirmActivity : AppCompatActivity(),
         binding.expandTopPanelButton?.setOnClickListener {
             val nextLayout = ConstraintSet()
             if (panelBottomIsExpanded) {
-                if (panelTopIsExpanded) {
-                    nextLayout.load(
-                        this, R.layout.asset_review_content_confirm_top_panel_collapsed
-                    )
-                } else {
-                    nextLayout.load(this, R.layout.asset_review_content_confirm_activity)
-                }
+                if (panelTopIsExpanded) nextLayout.load(this, R.layout.asset_review_content_confirm_top_panel_collapsed)
+                else nextLayout.load(this, R.layout.asset_review_content_confirm_activity)
             } else {
-                if (panelTopIsExpanded) {
-                    nextLayout.load(
-                        this, R.layout.asset_review_content_confirm_both_panels_collapsed
-                    )
-                } else {
-                    nextLayout.load(
-                        this, R.layout.asset_review_content_confirm_bottom_panel_collapsed
-                    )
-                }
+                if (panelTopIsExpanded) nextLayout.load(
+                    this,
+                    R.layout.asset_review_content_confirm_both_panels_collapsed
+                )
+                else nextLayout.load(this, R.layout.asset_review_content_confirm_bottom_panel_collapsed)
             }
 
             panelTopIsExpanded = !panelTopIsExpanded
@@ -359,15 +337,8 @@ class AssetReviewContentConfirmActivity : AppCompatActivity(),
 
             nextLayout.applyTo(binding.assetReviewContentConfirm)
 
-            when {
-                panelTopIsExpanded -> {
-                    binding.expandTopPanelButton?.text = getString(R.string.collapse_panel)
-                }
-
-                else -> {
-                    binding.expandTopPanelButton?.text = getString(R.string.area_in_review)
-                }
-            }
+            if (panelTopIsExpanded) binding.expandTopPanelButton?.text = getString(R.string.collapse_panel)
+            else binding.expandTopPanelButton?.text = getString(R.string.area_in_review)
         }
     }
 
@@ -439,12 +410,12 @@ class AssetReviewContentConfirmActivity : AppCompatActivity(),
     }
 
     private fun setupTextView() {
-        val assetsMissed = arContAdapter?.assetsMissed ?: 0
-        val assetsAdded = arContAdapter?.assetsAdded ?: 0
-        val assetsRevised = arContAdapter?.assetsRevised ?: 0
+        val assetsMissed = adapter?.countItemsMissed ?: 0
+        val assetsAdded = adapter?.countItemsAdded ?: 0
+        val assetsRevised = adapter?.countItemsRevised ?: 0
 
         runOnUiThread {
-            if (arContAdapter != null) {
+            if (adapter != null) {
                 binding.missedTextView.text = assetsMissed.toString()
                 binding.addedTextView.text = assetsAdded.toString()
                 binding.revisedTextView.text = assetsRevised.toString()
@@ -452,51 +423,63 @@ class AssetReviewContentConfirmActivity : AppCompatActivity(),
         }
     }
 
-    private fun fillAdapter() {
-        var lastSelected: AssetReviewContent? = null
-        if (arContAdapter != null) {
-            lastSelected = arContAdapter?.currentArCont()
-        }
-
-        try {
-            runOnUiThread {
-                arContAdapter = AssetReviewContentAdapter(
-                    activity = this,
-                    resource = R.layout.asset_row,
-                    assetReviewContArray = arContArray,
-                    suggestedList = arContArray,
-                    listView = binding.assetReviewContentListView,
-                    multiSelect = false,
-                    checkedIdArray = ArrayList(),
-                    visibleStatus = AssetReviewContentStatus.getAllConfirm()
-                )
-            }
-
-            while (binding.assetReviewContentListView.adapter == null) {
-                // Horrible wait for full load
-            }
-
-            if (arContAdapter != null) {
-                if (lastSelected != null && arContAdapter!!.getItems().contains(lastSelected)) {
-                    arContAdapter?.selectItem(
-                        arc = lastSelected, smoothScroll = true
-                    )
-                } else if (countItems > 0) {
-                    arContAdapter?.selectItem(pos = 0, smoothScroll = true)
-                }
-            }
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-            ErrorLog.writeLog(this, this::class.java.simpleName, ex)
-        } finally {
-            setupTextView()
+    private fun showProgressBar(show: Boolean) {
+        runOnUiThread {
+            binding.swipeRefresh.isRefreshing = show
         }
     }
 
-    private val countItems: Int
-        get() {
-            return arContAdapter?.count() ?: 0
+    private fun fillAdapter(contents: ArrayList<AssetReviewContent>) {
+        showProgressBar(true)
+
+        runOnUiThread {
+            try {
+                if (adapter != null) {
+                    // Si el adapter es NULL es porque aún no fue creado.
+                    // Por lo tanto, puede ser que los valores de [lastSelected]
+                    // sean valores guardados de la instancia anterior y queremos preservarlos.
+                    lastSelected = adapter?.currentItem()
+                }
+
+                adapter = ArcRecyclerAdapter(
+                    recyclerView = binding.recyclerView,
+                    fullList = contents,
+                    checkedIdArray = checkedIdArray,
+                    showImages = showImages,
+                    showImagesChanged = { showImages = it },
+                    visibleStatus = AssetReviewContentStatus.getAllConfirm()
+                )
+
+                binding.recyclerView.layoutManager = LinearLayoutManager(this)
+                binding.recyclerView.adapter = adapter
+
+                while (binding.recyclerView.adapter == null) {
+                    // Horrible wait for a full load
+                }
+
+                // Estas variables locales evitar posteriores cambios de estado.
+                val ls = lastSelected
+                val cs = currentScrollPosition
+                Handler(Looper.getMainLooper()).postDelayed({
+                    adapter?.selectItem(ls, false)
+                    adapter?.scrollToPos(cs, true)
+                }, 200)
+
+                setupTextView()
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+                ErrorLog.writeLog(this, this::class.java.simpleName, ex)
+            } finally {
+                gentlyReturn()
+            }
         }
+    }
+
+    private fun gentlyReturn() {
+        closeKeyboard(this)
+        rejectNewInstances = false
+        showProgressBar(false)
+    }
 
     private fun addObservations() {
         if (!rejectNewInstances) {
@@ -535,9 +518,7 @@ class AssetReviewContentConfirmActivity : AppCompatActivity(),
         } else {
             ///////////////////////////////////////////
             ////////////// IMAGE CONTROL //////////////
-            if (imageControlFragment != null) {
-                imageControlFragment?.saveImages(false)
-            }
+            imageControlFragment?.saveImages(false)
             ///////////////////////////////////////////
 
             closeKeyboard(this)
@@ -556,9 +537,7 @@ class AssetReviewContentConfirmActivity : AppCompatActivity(),
 
         ///////////////////////////////////////////
         ////////////// IMAGE CONTROL //////////////
-        if (imageControlFragment != null) {
-            imageControlFragment?.saveImages(false)
-        }
+        imageControlFragment?.saveImages(false)
         ///////////////////////////////////////////
 
         val data = Intent()

@@ -535,9 +535,7 @@ class WarehouseMovementContentConfirmActivity : AppCompatActivity(),
 
             ///////////////////////////////////////////
             ////////////// IMAGE CONTROL //////////////
-            if (imageControlFragment != null) {
-                imageControlFragment?.saveImages(false)
-            }
+            imageControlFragment?.saveImages(false)
             ///////////////////////////////////////////
 
             val data = Intent()
@@ -553,9 +551,7 @@ class WarehouseMovementContentConfirmActivity : AppCompatActivity(),
 
         ///////////////////////////////////////////
         ////////////// IMAGE CONTROL //////////////
-        if (imageControlFragment != null) {
-            imageControlFragment?.saveImages(false)
-        }
+        imageControlFragment?.saveImages(false)
         ///////////////////////////////////////////
 
         val data = Intent()

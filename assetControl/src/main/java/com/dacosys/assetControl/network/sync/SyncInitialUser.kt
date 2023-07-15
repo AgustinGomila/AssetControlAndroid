@@ -194,6 +194,7 @@ class SyncInitialUser(
                     )
                 }
             }
+
             ProgressStatus.crashed, ProgressStatus.canceled -> {
                 scope.launch {
                     onUiEvent(

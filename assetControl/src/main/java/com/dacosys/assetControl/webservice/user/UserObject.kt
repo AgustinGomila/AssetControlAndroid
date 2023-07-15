@@ -36,18 +36,23 @@ class UserObject() : Parcelable {
                             x.user_id =
                                 (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
                         }
+
                         "password" -> {
                             x.password = soValue as? String ?: ""
                         }
+
                         "active" -> {
                             x.active = soValue as? Int ?: 0
                         }
+
                         "name" -> {
                             x.name = soValue as? String ?: ""
                         }
+
                         "external_id" -> {
                             x.external_id = soValue as? String ?: ""
                         }
+
                         "email" -> {
                             x.email = soValue as? String ?: ""
                         }
@@ -63,11 +68,7 @@ class UserObject() : Parcelable {
         x.user_id = user.userId
         x.active = if (user.active) 1 else 0
         x.name = user.name
-        x.external_id = if (user.externalId == null) {
-            ""
-        } else {
-            user.externalId!!
-        }
+        x.external_id = user.externalId ?: ""
         x.email = user.email
         x.password = user.password
 

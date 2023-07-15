@@ -1333,9 +1333,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         ///////////////////////////////////////////
         ////////////// IMAGE CONTROL //////////////
-        if (imageControlFragment != null) {
-            imageControlFragment?.saveImages(false)
-        }
+        imageControlFragment?.saveImages(false)
         ///////////////////////////////////////////
 
         if (!error) {

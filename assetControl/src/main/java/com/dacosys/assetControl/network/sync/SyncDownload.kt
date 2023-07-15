@@ -326,6 +326,7 @@ class SyncDownload(
                     ProgressStatus.canceled
                 )
             )
+
             else -> {
                 onUiEvent(
                     SyncProgress(
@@ -436,6 +437,7 @@ class SyncDownload(
                     ProgressStatus.canceled
                 )
             )
+
             else -> {
                 onUiEvent(
                     SyncProgress(
@@ -583,6 +585,7 @@ class SyncDownload(
                     ProgressStatus.canceled
                 )
             )
+
             else -> {
                 onUiEvent(
                     SyncProgress(
@@ -693,6 +696,7 @@ class SyncDownload(
                     ProgressStatus.canceled
                 )
             )
+
             else -> {
                 onUiEvent(
                     SyncProgress(
@@ -803,6 +807,7 @@ class SyncDownload(
                     ProgressStatus.canceled
                 )
             )
+
             else -> {
                 onUiEvent(
                     SyncProgress(
@@ -919,6 +924,7 @@ class SyncDownload(
                     ProgressStatus.canceled
                 )
             )
+
             else -> {
                 onUiEvent(
                     SyncProgress(
@@ -1085,6 +1091,7 @@ class SyncDownload(
                     ProgressStatus.canceled
                 )
             )
+
             else -> {
                 onUiEvent(
                     SyncProgress(
@@ -1205,6 +1212,7 @@ class SyncDownload(
                     progressStatus = ProgressStatus.canceled
                 )
             )
+
             else -> {
                 onUiEvent(
                     SyncProgress(
@@ -1392,6 +1400,7 @@ class SyncDownload(
                     ProgressStatus.canceled
                 )
             )
+
             else -> {
                 onUiEvent(
                     SyncProgress(
@@ -1655,6 +1664,7 @@ class SyncDownload(
                     ProgressStatus.canceled
                 )
             )
+
             else -> {
                 onUiEvent(
                     SyncProgress(
@@ -1808,6 +1818,7 @@ class SyncDownload(
                     ProgressStatus.canceled
                 )
             )
+
             else -> {
                 onUiEvent(
                     SyncProgress(
@@ -1918,6 +1929,7 @@ class SyncDownload(
                     ProgressStatus.canceled
                 )
             )
+
             else -> {
                 onUiEvent(
                     SyncProgress(
