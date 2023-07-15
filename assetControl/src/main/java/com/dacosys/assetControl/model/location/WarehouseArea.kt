@@ -44,10 +44,7 @@ class WarehouseArea : Parcelable {
 
     constructor(id: Long, doChecks: Boolean) {
         warehouseAreaId = id
-
-        if (doChecks) {
-            refreshData()
-        }
+        if (doChecks) refreshData()
     }
 
     constructor(wao: WarehouseAreaObject) {
@@ -75,6 +72,7 @@ class WarehouseArea : Parcelable {
 
                 true
             }
+
             else -> false
         }
     }
@@ -85,52 +83,32 @@ class WarehouseArea : Parcelable {
 
     var description: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     var active: Boolean = false
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return false
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) false
+            else field
         }
 
     var warehouseStr: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     var warehouseId: Long = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     var transferred: Boolean? = null
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return null
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) null
+            else field
         }
 
     constructor()
@@ -215,28 +193,6 @@ class WarehouseArea : Parcelable {
 
         override fun newArray(size: Int): Array<WarehouseArea?> {
             return arrayOfNulls(size)
-        }
-
-        fun add(
-            warehouseAreaId: Long,
-            description: String,
-            active: Boolean,
-            parentId: Long,
-            transferred: Boolean,
-        ): WarehouseArea? {
-            if (description.isEmpty()) {
-                return null
-            }
-
-            val i = WarehouseAreaDbHelper()
-            val ok = i.insert(
-                warehouseAreaId,
-                description,
-                active,
-                parentId,
-                transferred
-            )
-            return if (ok) i.selectById(warehouseAreaId) else null
         }
     }
 }

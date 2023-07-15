@@ -109,7 +109,7 @@ class DataBaseHelper : SQLiteOpenHelper(
     }
 
     /**
-     * Esta función elimina físicamente y limpia la instancia de la DB para ser reconstruída la
+     * Esta función elimina físicamente y limpia la instancia de la DB para ser reconstruida
      * la próxima vez que se quiera utilizar.
      */
     fun deleteDb() {
@@ -342,20 +342,20 @@ class DataBaseHelper : SQLiteOpenHelper(
             }
 
         /**
-         * Creates a empty database on the system and rewrites it with your own database.
+         * Creates an empty database on the system and rewrites it with your own database.
          */
         @Throws(IOException::class)
         fun createDataBase() {
             val dbExist = checkDataBase()
             if (!dbExist) {
                 // Llamando a este método se creará un base de datos según el modelo en
-                // la carpeta determinada del sistama para nuestra aplicación.
+                // la carpeta determinada del sistema para nuestra aplicación.
                 getReadableDb()
             }
         }
 
         /**
-         * Check if the database already exist to avoid re-copying the file each time you open the application.
+         * Check if the database already exists to avoid re-copying the file each time you open the application.
          *
          * @return true if it exists, false if it doesn't
          */
@@ -397,7 +397,7 @@ class DataBaseHelper : SQLiteOpenHelper(
                 //Open the empty db as the output stream
                 val myOutput = FileOutputStream(outFile)
 
-                //transfer bytes from the inputfile to the outputfile
+                //transfer bytes from the input file to the outfile
                 val buffer = ByteArray(1024)
                 var length: Int
                 while (run {
@@ -423,7 +423,7 @@ class DataBaseHelper : SQLiteOpenHelper(
         /**
          * Copies your database from your local assets-folder to the just created empty database in the
          * system folder, from where it can be accessed and handled.
-         * This is done by transfering bytestream.
+         * This is done by transferring byte-stream.
          */
         @Throws(IOException::class)
         fun copyDataBase() {
@@ -437,7 +437,7 @@ class DataBaseHelper : SQLiteOpenHelper(
                 //Open the empty db as the output stream
                 val myOutput = FileOutputStream(outFileName)
 
-                //transfer bytes from the inputfile to the outputfile
+                //transfer bytes from the input file to the outfile
                 val buffer = ByteArray(1024)
                 var length: Int
                 while (run {
@@ -469,7 +469,7 @@ class DataBaseHelper : SQLiteOpenHelper(
                 //Open the empty db as the output stream
                 val myOutput = FileOutputStream(outFileName)
 
-                //transfer bytes from the inputfile to the outputfile
+                //transfer bytes from the input file to the outfile
                 val buffer = ByteArray(1024)
                 var length: Int
                 while (run {

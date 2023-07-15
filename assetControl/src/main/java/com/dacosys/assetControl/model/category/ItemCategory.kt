@@ -44,10 +44,7 @@ class ItemCategory : Parcelable {
 
     constructor(id: Long, doChecks: Boolean) {
         itemCategoryId = id
-
-        if (doChecks) {
-            refreshData()
-        }
+        if (doChecks) refreshData()
     }
 
     private fun refreshData(): Boolean {
@@ -64,6 +61,7 @@ class ItemCategory : Parcelable {
 
                 true
             }
+
             else -> false
         }
     }
@@ -74,52 +72,32 @@ class ItemCategory : Parcelable {
 
     var description: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     var active: Boolean = false
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return false
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) false
+            else field
         }
 
     var parentId: Long? = null
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return null
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) null
+            else field
         }
 
     var parentStr: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     var transferred: Boolean? = null
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return null
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) null
+            else field
         }
 
     constructor()
@@ -215,28 +193,6 @@ class ItemCategory : Parcelable {
 
         override fun newArray(size: Int): Array<ItemCategory?> {
             return arrayOfNulls(size)
-        }
-
-        fun add(
-            itemCategoryId: Long,
-            description: String,
-            active: Boolean,
-            parentId: Long,
-            transferred: Boolean,
-        ): ItemCategory? {
-            if (description.isEmpty()) {
-                return null
-            }
-
-            val i = ItemCategoryDbHelper()
-            val ok = i.insert(
-                itemCategoryId,
-                description,
-                active,
-                parentId,
-                transferred
-            )
-            return if (ok) i.selectById(itemCategoryId) else null
         }
     }
 }

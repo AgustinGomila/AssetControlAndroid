@@ -7,7 +7,6 @@ import com.dacosys.assetControl.dataBase.datacollection.DataCollectionRuleTarget
 import com.dacosys.assetControl.dataBase.datacollection.DataCollectionRuleTargetContract.DataCollectionRuleTargetEntry.Companion.ITEM_CATEGORY_ID
 import com.dacosys.assetControl.dataBase.datacollection.DataCollectionRuleTargetContract.DataCollectionRuleTargetEntry.Companion.WAREHOUSE_AREA_ID
 import com.dacosys.assetControl.dataBase.datacollection.DataCollectionRuleTargetContract.DataCollectionRuleTargetEntry.Companion.WAREHOUSE_ID
-import com.dacosys.assetControl.dataBase.datacollection.DataCollectionRuleTargetDbHelper
 import com.dacosys.assetControl.model.asset.Asset
 import com.dacosys.assetControl.model.category.ItemCategory
 import com.dacosys.assetControl.model.location.Warehouse
@@ -112,23 +111,6 @@ class DataCollectionRuleTarget : Parcelable {
 
         override fun newArray(size: Int): Array<DataCollectionRuleTarget?> {
             return arrayOfNulls(size)
-        }
-
-        fun add(
-            dataCollectionRuleId: Long,
-            assetId: Long?,
-            warehouseId: Long?,
-            warehouseAreaId: Long?,
-            itemCategoryId: Long?,
-        ): Boolean {
-            val i = DataCollectionRuleTargetDbHelper()
-            return i.insert(
-                dataCollectionRuleId,
-                assetId,
-                warehouseId,
-                warehouseAreaId,
-                itemCategoryId
-            )
         }
     }
 }

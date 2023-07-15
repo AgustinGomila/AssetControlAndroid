@@ -39,9 +39,9 @@ import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.cleanTemporaryTables
+import com.dacosys.assetControl.dataBase.review.AssetReviewDbHelper
 import com.dacosys.assetControl.databinding.HomeActivityBinding
 import com.dacosys.assetControl.model.location.WarehouseArea
-import com.dacosys.assetControl.model.review.AssetReview
 import com.dacosys.assetControl.model.user.User
 import com.dacosys.assetControl.model.user.permission.PermissionEntry
 import com.dacosys.assetControl.network.sync.Sync
@@ -824,7 +824,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
         makeText(binding.root, warehouseArea.description, SnackBarType.INFO)
 
         // Agregar un AssetReview del área
-        val ar = AssetReview.add(warehouseArea)
+        val ar = AssetReviewDbHelper().insert(warehouseArea)
         if (ar == null) {
             rejectNewInstances = false
             return

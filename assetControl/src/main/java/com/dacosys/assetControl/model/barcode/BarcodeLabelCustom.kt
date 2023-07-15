@@ -43,10 +43,7 @@ class BarcodeLabelCustom : Parcelable {
 
     constructor(id: Long, doChecks: Boolean) {
         barcodeLabelCustomId = id
-
-        if (doChecks) {
-            refreshData()
-        }
+        if (doChecks) refreshData()
     }
 
     private fun refreshData(): Boolean {
@@ -63,6 +60,7 @@ class BarcodeLabelCustom : Parcelable {
 
                 true
             }
+
             else -> false
         }
     }
@@ -73,42 +71,26 @@ class BarcodeLabelCustom : Parcelable {
 
     var description: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     var active: Boolean = false
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return false
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) false
+            else field
         }
 
     var barcodeLabelTargetId: Long? = null
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return null
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) null
+            else field
         }
 
     var template: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     constructor(parcel: android.os.Parcel) {
@@ -185,28 +167,6 @@ class BarcodeLabelCustom : Parcelable {
 
         override fun newArray(size: Int): Array<BarcodeLabelCustom?> {
             return arrayOfNulls(size)
-        }
-
-        fun add(
-            barcodeLabelCustomId: Long,
-            description: String,
-            active: Boolean,
-            barcodeLabelTargetId: Long,
-            template: String,
-        ): BarcodeLabelCustom? {
-            if (description.isEmpty()) {
-                return null
-            }
-
-            val i = BarcodeLabelCustomDbHelper()
-            val ok = i.insert(
-                barcodeLabelCustomId,
-                description,
-                active,
-                barcodeLabelTargetId,
-                template
-            )
-            return if (ok) i.selectById(barcodeLabelCustomId) else null
         }
     }
 }

@@ -39,6 +39,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
+import com.dacosys.assetControl.adapters.interfaces.Interfaces
 import com.dacosys.assetControl.adapters.review.ArcRecyclerAdapter
 import com.dacosys.assetControl.dataBase.asset.AssetDbHelper
 import com.dacosys.assetControl.dataBase.review.AssetReviewContentDbHelper
@@ -107,11 +108,10 @@ import kotlin.concurrent.thread
 
 @Suppress("UNCHECKED_CAST")
 class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
-    Rfid.RfidDeviceListener, ArcRecyclerAdapter.CheckedChangedListener,
-    ArcRecyclerAdapter.DataSetChangedListener, SwipeRefreshLayout.OnRefreshListener,
-    ArcRecyclerAdapter.EditAssetRequiredListener,
-    ArcRecyclerAdapter.AlbumViewRequiredListener,
-    ArcRecyclerAdapter.AddPhotoRequiredListener, ArcRecyclerAdapter.UiEventListener {
+    Rfid.RfidDeviceListener, Interfaces.CheckedChangedListener,
+    Interfaces.DataSetChangedListener, SwipeRefreshLayout.OnRefreshListener,
+    Interfaces.EditAssetRequiredListener, Interfaces.AlbumViewRequiredListener,
+    Interfaces.AddPhotoRequiredListener, Interfaces.UiEventListener {
     override fun onDestroy() {
         saveSharedPreferences()
         destroyLocals()

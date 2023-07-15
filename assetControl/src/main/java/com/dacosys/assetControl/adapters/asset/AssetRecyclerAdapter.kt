@@ -26,6 +26,7 @@ import androidx.recyclerview.widget.*
 import androidx.recyclerview.widget.RecyclerView.*
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
+import com.dacosys.assetControl.adapters.interfaces.Interfaces.*
 import com.dacosys.assetControl.databinding.AssetRowBinding
 import com.dacosys.assetControl.databinding.AssetRowExpandedBinding
 import com.dacosys.assetControl.model.asset.Asset
@@ -143,32 +144,6 @@ class AssetRecyclerAdapter(
     ) {
         addPhotoRequiredListener = addPhotoListener
         albumViewRequiredListener = albumViewListener
-    }
-
-    interface DataSetChangedListener {
-        fun onDataSetChanged()
-    }
-
-    interface CheckedChangedListener {
-        fun onCheckedChanged(isChecked: Boolean, pos: Int)
-    }
-
-    interface AlbumViewRequiredListener {
-        fun onAlbumViewRequired(tableId: Int, itemId: Long)
-    }
-
-    interface EditAssetRequiredListener {
-        fun onEditAssetRequired(tableId: Int, itemId: Long)
-    }
-
-    interface AddPhotoRequiredListener {
-        fun onAddPhotoRequired(
-            tableId: Int,
-            itemId: Long,
-            description: String,
-            obs: String = "",
-            reference: String = ""
-        )
     }
 
     // El método onCreateViewHolder infla los diseños para cada tipo de vista

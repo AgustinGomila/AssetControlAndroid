@@ -32,10 +32,7 @@ class Route : Parcelable {
 
     constructor(id: Long, doChecks: Boolean) {
         routeId = id
-
-        if (doChecks) {
-            refreshData()
-        }
+        if (doChecks) refreshData()
     }
 
     private fun refreshData(): Boolean {
@@ -50,6 +47,7 @@ class Route : Parcelable {
 
                 true
             }
+
             else -> false
         }
     }
@@ -65,22 +63,14 @@ class Route : Parcelable {
 
     var description: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     var active: Boolean = false
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return false
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) false
+            else field
         }
 
     constructor(parcel: android.os.Parcel) {
@@ -152,20 +142,6 @@ class Route : Parcelable {
 
         override fun newArray(size: Int): Array<Route?> {
             return arrayOfNulls(size)
-        }
-
-        fun add(
-            routeId: Long,
-            description: String,
-            active: Boolean,
-        ): Route? {
-            if (description.isEmpty()) {
-                return null
-            }
-
-            val i = RouteDbHelper()
-            val ok = i.insert(routeId, description, active)
-            return if (ok) i.selectById(routeId) else null
         }
 
         fun getAvailableRoutes(routes: ArrayList<Route>): ArrayList<Route> {

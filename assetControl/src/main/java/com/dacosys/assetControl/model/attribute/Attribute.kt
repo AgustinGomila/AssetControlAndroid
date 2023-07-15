@@ -35,10 +35,7 @@ class Attribute : Parcelable {
 
     constructor(id: Long, doChecks: Boolean) {
         attributeId = id
-
-        if (doChecks) {
-            refreshData()
-        }
+        if (doChecks) refreshData()
     }
 
     private fun refreshData(): Boolean {
@@ -55,6 +52,7 @@ class Attribute : Parcelable {
 
                 true
             }
+
             else -> false
         }
     }
@@ -65,59 +63,26 @@ class Attribute : Parcelable {
 
     var description: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     var active: Boolean = false
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return false
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) false
+            else field
         }
-
-    val attributeType: AttributeType?
-        get() =
-            when {
-                attributeTypeId!! > 0 -> AttributeType.getById(attributeTypeId!!)
-                else -> null
-            }
 
     private var attributeTypeId: Long? = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return null
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) null
+            else field
         }
-
-    val attributeCategory: AttributeCategory?
-        get() =
-            when {
-                attributeCategoryId!! > 0 -> AttributeCategory(
-                    attributeCategoryId!!,
-                    false
-                )
-                else -> null
-            }
 
     private var attributeCategoryId: Long? = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return null
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) null
+            else field
         }
 
     constructor(parcel: android.os.Parcel) {
@@ -195,28 +160,6 @@ class Attribute : Parcelable {
 
         override fun newArray(size: Int): Array<Attribute?> {
             return arrayOfNulls(size)
-        }
-
-        fun add(
-            attributeId: Long,
-            description: String,
-            active: Boolean,
-            attributeTypeId: Long,
-            attributeCategoryId: Long,
-        ): Attribute? {
-            if (description.isEmpty()) {
-                return null
-            }
-
-            val i = AttributeDbHelper()
-            val ok = i.insert(
-                attributeId,
-                description,
-                active,
-                attributeTypeId,
-                attributeCategoryId
-            )
-            return if (ok) i.selectById(attributeId) else null
         }
     }
 }

@@ -144,10 +144,7 @@ class Asset : Parcelable {
     constructor(id: Long, doChecks: Boolean) {
         assetId = id
         dataRead = false
-
-        if (doChecks) {
-            refreshData()
-        }
+        if (doChecks) refreshData()
     }
 
     override fun toString(): String {
@@ -156,12 +153,8 @@ class Asset : Parcelable {
 
     var description: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
         set(value) {
             field = if (value.length > 255) {
@@ -173,12 +166,8 @@ class Asset : Parcelable {
 
     var ean: String? = null
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return null
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) null
+            else field
         }
         set(value) {
             field = if (value != null && value.length > 100) {
@@ -190,12 +179,8 @@ class Asset : Parcelable {
 
     var code: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
         set(value) {
             field = if (value.length > 45) {
@@ -207,49 +192,26 @@ class Asset : Parcelable {
 
     var missingDate: String? = null
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return null
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) null
+            else field
         }
 
     var active: Boolean = false
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return false
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) false
+            else field
         }
-
-    /*
-    val itemCategory: ItemCategory?
-    get() {
-        return ItemCategory( itemCategoryId, false)
-    }
-    */
 
     var itemCategoryId: Long = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     var itemCategoryStr: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     val assetStatus: AssetStatus?
@@ -259,12 +221,8 @@ class Asset : Parcelable {
 
     var assetStatusId: Int = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     val ownershipStatus: OwnershipStatus?
@@ -274,162 +232,74 @@ class Asset : Parcelable {
 
     var ownershipStatusId: Int = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
-
-    /*
-    val warehouse: Warehouse?
-    get() {
-        return when {
-            warehouseId == 0 -> null
-            else -> Warehouse( warehouseId, false)
-        }
-    }
-    */
 
     var warehouseId: Long = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     var warehouseStr: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
-
-    /*
-    val warehouseArea: WarehouseArea?
-    get() {
-        return when {
-            warehouseAreaId == 0 -> null
-            else -> WarehouseArea( warehouseAreaId, false)
-        }
-    }
-    */
 
     var warehouseAreaId: Long = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     var warehouseAreaStr: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     var transferred: Boolean? = null
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return null
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) null
+            else field
         }
-
-    /*
-    private val originalWarehouse: Warehouse?
-    get() {
-        return when {
-            originalWarehouseId == 0 -> null
-            else -> Warehouse( originalWarehouseId, false)
-        }
-    }
-    */
 
     var originalWarehouseId: Long = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     var originalWarehouseStr: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
-
-    /*
-    val originalWarehouseArea: WarehouseArea?
-    get() {
-        return when {
-            originalWarehouseAreaId == 0 -> null
-            else -> WarehouseArea( originalWarehouseAreaId, false)
-        }
-    }
-    */
 
     var originalWarehouseAreaId: Long = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     var originalWarehouseAreaStr: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     var labelNumber: Int? = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return null
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) null
+            else field
         }
 
     var serialNumber: String? = null
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return null
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) null
+            else field
         }
         set(value) {
             field = if (value != null && value.length > 100) {
@@ -441,12 +311,8 @@ class Asset : Parcelable {
 
     var manufacturer: String? = null
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return null
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) null
+            else field
         }
         set(value) {
             field = if (value != null && value.length > 255) {
@@ -458,12 +324,8 @@ class Asset : Parcelable {
 
     var model: String? = null
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return null
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) null
+            else field
         }
         set(value) {
             field = if (value != null && value.length > 255) {
@@ -473,24 +335,10 @@ class Asset : Parcelable {
             }
         }
 
-    /*
-    val parentAsset: Asset?
-    get() {
-        return when {
-            parentAssetId == null || parentAssetId == 0 -> null
-            else -> Asset( parentAssetId!!, false)
-        }
-    }
-    */
-
     var parentAssetId: Long? = null
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return null
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) null
+            else field
         }
 
     val assetCondition: AssetCondition?
@@ -500,22 +348,14 @@ class Asset : Parcelable {
 
     var assetConditionId: Int = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     var lastAssetReviewDate: String? = null
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return null
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) null
+            else field
         }
 
     constructor()
@@ -565,46 +405,15 @@ class Asset : Parcelable {
         values.put(EAN, ean)
         values.put(ITEM_CATEGORY_ID, itemCategoryId)
         values.put(LABEL_NUMBER, labelNumber)
-        values.put(
-            LAST_ASSET_REVIEW_DATE, if (lastAssetReviewDate == null) {
-                ""
-            } else {
-                lastAssetReviewDate.toString()
-            }
-        )
-        values.put(
-            MANUFACTURER, if (manufacturer == null) {
-                ""
-            } else {
-                manufacturer
-            }
-        )
-        values.put(
-            MISSING_DATE, if (missingDate == null) {
-                ""
-            } else {
-                missingDate.toString()
-            }
-        )
-        values.put(
-            MODEL, if (model == null) {
-                ""
-            } else {
-                model
-            }
-        )
+        values.put(LAST_ASSET_REVIEW_DATE, if (lastAssetReviewDate == null) "" else lastAssetReviewDate.toString())
+        values.put(MANUFACTURER, if (manufacturer == null) "" else manufacturer)
+        values.put(MISSING_DATE, if (missingDate == null) "" else missingDate.toString())
+        values.put(MODEL, if (model == null) "" else model)
         values.put(ORIGINAL_WAREHOUSE_AREA_ID, originalWarehouseAreaId)
         values.put(ORIGINAL_WAREHOUSE_ID, originalWarehouseId)
         values.put(OWNERSHIP_STATUS, ownershipStatusId)
         values.put(PARENT_ID, parentAssetId)
-        values.put(
-            SERIAL_NUMBER, if (serialNumber == null) {
-                ""
-            } else {
-                serialNumber
-            }
-        )
-
+        values.put(SERIAL_NUMBER, if (serialNumber == null) "" else serialNumber)
         values.put(TRANSFERED, transferred)
         values.put(WAREHOUSE_AREA_ID, warehouseAreaId)
         values.put(WAREHOUSE_ID, warehouseId)
@@ -749,69 +558,6 @@ class Asset : Parcelable {
 
         override fun newArray(size: Int): Array<Asset?> {
             return arrayOfNulls(size)
-        }
-
-        fun add(
-            assetId: Long,
-            code: String,
-            description: String,
-            warehouseId: Long,
-            warehouseAreaId: Long,
-            active: Boolean,
-            ownershipStatus: Int,
-            status: Int,
-            missingDate: String?,
-            itemCategoryId: Long,
-            transferred: Boolean,
-            originalWarehouseId: Long,
-            originalWarehouseAreaId: Long,
-            labelNumber: Int?,
-            manufacturer: String?,
-            model: String?,
-            serialNumber: String?,
-            condition: Int,
-            //costCentreId: Long,
-            parentId: Long,
-            ean: String,
-            lastAssetReviewDate: String?,
-        ): Asset? {
-            // Campos obligatorios
-            if (description.isEmpty() ||
-                itemCategoryId < 1 ||
-                warehouseId < 1 ||
-                warehouseAreaId < 1 ||
-                originalWarehouseId < 1 ||
-                originalWarehouseAreaId < 1
-            ) {
-                return null
-            }
-
-            val i = AssetDbHelper()
-            val ok = i.insert(
-                assetId = assetId,
-                code = code,
-                description = description,
-                warehouseId = warehouseId,
-                warehouseAreaId = warehouseAreaId,
-                active = active,
-                ownershipStatus = ownershipStatus,
-                status = status,
-                missingDate = missingDate,
-                itemCategoryId = itemCategoryId,
-                transferred = transferred,
-                originalWarehouseId = originalWarehouseId,
-                originalWarehouseAreaId = originalWarehouseAreaId,
-                labelNumber = labelNumber,
-                manufacturer = manufacturer,
-                model = model,
-                serialNumber = serialNumber,
-                condition = condition,
-                //costCentreId,
-                parentId = parentId,
-                ean = ean,
-                lastAssetReviewDate = lastAssetReviewDate
-            )
-            return if (ok) i.selectById(assetId) else null
         }
     }
 }

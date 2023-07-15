@@ -73,6 +73,8 @@
     <color name="status_external">#FF2196F3</color>
     <color name="status_new">#FFFFC107</color>
 
+    <color name="status_inactive">#FFC0C0C0</color>
+
     <color name="text_dark">#FF1B1B1B</color>
     <color name="text_light">#FFFBFBFB</color>
 </resources>

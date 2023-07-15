@@ -142,20 +142,14 @@ class AssetReviewContent : Parcelable {
     constructor(id: Long, asset: Asset, doChecks: Boolean) {
         assetReviewContentId = id
         assetId = asset.assetId
-
-        if (doChecks) {
-            refreshData()
-        }
+        if (doChecks) refreshData()
     }
 
     constructor()
 
     constructor(id: Long, doChecks: Boolean) {
         assetReviewContentId = id
-
-        if (doChecks) {
-            refreshData()
-        }
+        if (doChecks) refreshData()
     }
 
     private fun refreshData(): Boolean {
@@ -187,52 +181,32 @@ class AssetReviewContent : Parcelable {
 
     var assetReviewId: Long = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     var assetId: Long = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     var originWarehouseAreaId: Long = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     var code: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     var description: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     var qty: Float = 0F
@@ -247,12 +221,8 @@ class AssetReviewContent : Parcelable {
 
     var contentStatusId: Int = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     /*

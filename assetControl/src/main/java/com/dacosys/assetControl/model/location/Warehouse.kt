@@ -36,10 +36,7 @@ class Warehouse : Parcelable {
 
     constructor(id: Long, doChecks: Boolean) {
         warehouseId = id
-
-        if (doChecks) {
-            refreshData()
-        }
+        if (doChecks) refreshData()
     }
 
     private fun refreshData(): Boolean {
@@ -55,6 +52,7 @@ class Warehouse : Parcelable {
 
                 true
             }
+
             else -> false
         }
     }
@@ -65,32 +63,20 @@ class Warehouse : Parcelable {
 
     var description: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     var active: Boolean = false
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return false
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) false
+            else field
         }
 
     var transferred: Boolean? = null
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return null
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) null
+            else field
         }
 
     constructor(parcel: Parcel) {
@@ -174,26 +160,6 @@ class Warehouse : Parcelable {
 
         override fun newArray(size: Int): Array<Warehouse?> {
             return arrayOfNulls(size)
-        }
-
-        fun add(
-            warehouseId: Long,
-            description: String,
-            active: Boolean,
-            transferred: Boolean,
-        ): Warehouse? {
-            if (description.isEmpty()) {
-                return null
-            }
-
-            val i = WarehouseDbHelper()
-            val ok = i.insert(
-                warehouseId,
-                description,
-                active,
-                transferred
-            )
-            return if (ok) i.selectById(warehouseId) else null
         }
     }
 }

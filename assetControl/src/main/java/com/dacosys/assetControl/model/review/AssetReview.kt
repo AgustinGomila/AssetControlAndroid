@@ -13,7 +13,6 @@ import com.dacosys.assetControl.dataBase.review.AssetReviewContract.AssetReviewE
 import com.dacosys.assetControl.dataBase.review.AssetReviewContract.AssetReviewEntry.Companion.WAREHOUSE_AREA_ID
 import com.dacosys.assetControl.dataBase.review.AssetReviewContract.AssetReviewEntry.Companion.WAREHOUSE_ID
 import com.dacosys.assetControl.dataBase.review.AssetReviewDbHelper
-import com.dacosys.assetControl.model.location.WarehouseArea
 
 class AssetReview : Parcelable {
     var collectorAssetReviewId: Long = 0
@@ -49,10 +48,7 @@ class AssetReview : Parcelable {
 
     constructor(id: Long, doChecks: Boolean) {
         collectorAssetReviewId = id
-
-        if (doChecks) {
-            refreshData()
-        }
+        if (doChecks) refreshData()
     }
 
     private fun refreshData(): Boolean {
@@ -77,6 +73,7 @@ class AssetReview : Parcelable {
 
                 true
             }
+
             else -> false
         }
     }
@@ -90,42 +87,26 @@ class AssetReview : Parcelable {
 
     var assetReviewDate: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     var modificationDate: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     var obs: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     private var assetReviewId: Long = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     /*
@@ -140,22 +121,14 @@ class AssetReview : Parcelable {
 
     var userId: Long = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     var userStr: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     /*
@@ -170,22 +143,14 @@ class AssetReview : Parcelable {
 
     var warehouseAreaId: Long = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     var warehouseAreaStr: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     /*
@@ -200,32 +165,20 @@ class AssetReview : Parcelable {
 
     var warehouseId: Long = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     var warehouseStr: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     var statusId: Int = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     constructor(parcel: android.os.Parcel) {
@@ -330,37 +283,6 @@ class AssetReview : Parcelable {
 
         override fun newArray(size: Int): Array<AssetReview?> {
             return arrayOfNulls(size)
-        }
-
-        fun add(
-            assetReviewId: Long,
-            assetReviewDate: String,
-            obs: String,
-            userId: Long,
-            warehouseAreaId: Long,
-            warehouseId: Long,
-            modificationDate: String,
-            statusId: Int,
-        ): AssetReview? {
-            val i = AssetReviewDbHelper()
-            val newId = i.insert(
-                assetReviewId,
-                assetReviewDate,
-                obs,
-                userId,
-                warehouseAreaId,
-                warehouseId,
-                modificationDate,
-                statusId
-            )
-            return if (newId < 1) null else i.selectById(newId)
-        }
-
-        fun add(
-            warehouseArea: WarehouseArea,
-        ): AssetReview? {
-            val i = AssetReviewDbHelper()
-            return i.insert(warehouseArea)
         }
     }
 }

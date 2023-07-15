@@ -23,7 +23,7 @@ import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.adapters.asset.AssetAdapter
+import com.dacosys.assetControl.adapters.interfaces.Interfaces
 import com.dacosys.assetControl.adapters.movement.WarehouseMovementContentAdapter
 import com.dacosys.assetControl.dataBase.asset.AssetDbHelper
 import com.dacosys.assetControl.dataBase.movement.WarehouseMovementContentDbHelper
@@ -76,11 +76,11 @@ import kotlin.concurrent.thread
 class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerListener,
     Rfid.RfidDeviceListener, SwipeRefreshLayout.OnRefreshListener,
     LocationHeaderFragment.LocationChangedListener,
-    WarehouseMovementContentAdapter.CheckedChangedListener,
-    WarehouseMovementContentAdapter.DataSetChangedListener,
-    AssetAdapter.Companion.EditAssetRequiredListener,
-    AssetAdapter.Companion.AddPhotoRequiredListener,
-    AssetAdapter.Companion.AlbumViewRequiredListener {
+    Interfaces.CheckedChangedListener,
+    Interfaces.DataSetChangedListener,
+    Interfaces.EditAssetRequiredListener,
+    Interfaces.AddPhotoRequiredListener,
+    Interfaces.AlbumViewRequiredListener {
     override fun onDestroy() {
         destroyLocals()
         super.onDestroy()
@@ -1119,13 +1119,6 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
     // region READERS Reception
 
     override fun onNewIntent(intent: Intent) {
-        /*
-          This method gets called, when a new Intent gets associated with the current activity instance.
-          Instead of creating a new activity, onNewIntent will be called. For more information have a look
-          at the documentation.
-
-          In our case this method gets called, when the user attaches a className to the device.
-         */
         super.onNewIntent(intent)
         Nfc.nfcHandleIntent(intent, this)
     }
@@ -1291,7 +1284,7 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
         showPhotoAlbum()
     }
 
-    override fun onAddPhotoRequired(tableId: Int, itemId: Long, description: String) {
+    override fun onAddPhotoRequired(tableId: Int, itemId: Long, description: String, obs: String, reference: String) {
         if (!Repository.useImageControl) {
             return
         }
@@ -1304,6 +1297,8 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
             intent.putExtra("programObjectId", tableId.toLong())
             intent.putExtra("objectId1", itemId.toString())
             intent.putExtra("description", description)
+            intent.putExtra("obs", obs)
+            intent.putExtra("reference", reference)
             intent.putExtra("addPhoto", autoSend())
             resultForPhotoCapture.launch(intent)
         }

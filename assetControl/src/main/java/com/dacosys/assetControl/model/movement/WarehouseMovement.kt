@@ -56,10 +56,7 @@ class WarehouseMovement : Parcelable {
 
     constructor(id: Long, doChecks: Boolean) {
         collectorWarehouseMovementId = id
-
-        if (doChecks) {
-            refreshData()
-        }
+        if (doChecks) refreshData()
     }
 
     private fun refreshData(): Boolean {
@@ -87,188 +84,123 @@ class WarehouseMovement : Parcelable {
 
                 true
             }
+
             else -> false
         }
     }
 
     var warehouseMovementDate: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     var transferedDate: String? = null
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return null
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) null
+            else field
         }
 
     var obs: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     private var warehouseMovementId: Long = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     val user: User?
         get() {
-            return when (userId) {
-                0L -> null
-                else -> User(userId, false)
-            }
+            return if (userId == 0L) null
+            else User(userId, false)
         }
 
     var userId: Long = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     val origWarehouseArea: WarehouseArea?
         get() {
-            return when (origWarehouseAreaId) {
-                0L -> null
-                else -> WarehouseArea(origWarehouseAreaId, false)
-            }
+            return if (origWarehouseAreaId == 0L) null
+            else WarehouseArea(origWarehouseAreaId, false)
         }
 
     var origWarehouseAreaId: Long = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     var origWarehouseAreaStr: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     val origWarehouse: Warehouse?
         get() {
-            return when (origWarehouseId) {
-                0L -> null
-                else -> Warehouse(origWarehouseId, false)
-            }
+            return if (origWarehouseId == 0L) null
+            else Warehouse(origWarehouseId, false)
         }
 
     var origWarehouseId: Long = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     var origWarehouseStr: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     val destWarehouseArea: WarehouseArea?
         get() {
-            return when (destWarehouseAreaId) {
-                0L -> null
-                else -> WarehouseArea(destWarehouseAreaId, false)
-            }
+            return if (destWarehouseAreaId == 0L) null
+            else WarehouseArea(destWarehouseAreaId, false)
         }
 
     var destWarehouseAreaId: Long = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     var destWarehouseAreaStr: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     val destWarehouse: Warehouse?
         get() {
-            return when (destWarehouseId) {
-                0L -> null
-                else -> Warehouse(destWarehouseId, false)
-            }
+            return if (destWarehouseId == 0L) null
+            else Warehouse(destWarehouseId, false)
         }
 
     var destWarehouseId: Long = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     var destWarehouseStr: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     var completed: Boolean = false
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return false
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) false
+            else field
         }
 
     constructor(parcel: android.os.Parcel) {
@@ -376,34 +308,6 @@ class WarehouseMovement : Parcelable {
 
         override fun newArray(size: Int): Array<WarehouseMovement?> {
             return arrayOfNulls(size)
-        }
-
-        fun add(
-            warehouseMovementId: Long,
-            warehouseMovementDate: String,
-            obs: String,
-            userId: Long,
-            origWarehouseAreaId: Long,
-            origWarehouseId: Long,
-            transferredDate: String?,
-            destWarehouseAreaId: Long,
-            destWarehouseId: Long,
-            completed: Boolean,
-        ): WarehouseMovement? {
-            val i = WarehouseMovementDbHelper()
-            val newId = i.insert(
-                warehouseMovementId,
-                warehouseMovementDate,
-                obs,
-                userId,
-                origWarehouseAreaId,
-                origWarehouseId,
-                transferredDate,
-                destWarehouseAreaId,
-                destWarehouseId,
-                completed
-            )
-            return if (newId < 1) null else i.selectById(newId)
         }
     }
 }

@@ -43,10 +43,7 @@ class AttributeComposition : Parcelable {
 
     constructor(id: Long, doChecks: Boolean) {
         attributeCompositionId = id
-
-        if (doChecks) {
-            refreshData()
-        }
+        if (doChecks) refreshData()
     }
 
     private fun refreshData(): Boolean {
@@ -67,6 +64,7 @@ class AttributeComposition : Parcelable {
 
                 true
             }
+
             else -> false
         }
     }
@@ -77,20 +75,14 @@ class AttributeComposition : Parcelable {
 
     val attribute: Attribute?
         get() {
-            return when (attributeId) {
-                0L -> null
-                else -> Attribute(attributeId, false)
-            }
+            return if (attributeId == 0L) null
+            else Attribute(attributeId, false)
         }
 
     var attributeId: Long = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     val attributeCompositionType: AttributeCompositionType?
@@ -100,72 +92,44 @@ class AttributeComposition : Parcelable {
 
     var attributeCompositionTypeId: Long = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     var description: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     var composition: String? = null
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return null
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) null
+            else field
         }
 
     var name: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     var defaultValue: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     var used: Boolean = false
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return false
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) false
+            else field
         }
 
     var readOnly: Boolean = false
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return false
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) false
+            else field
         }
 
     constructor(parcel: android.os.Parcel) {
@@ -248,36 +212,6 @@ class AttributeComposition : Parcelable {
 
         override fun newArray(size: Int): Array<AttributeComposition?> {
             return arrayOfNulls(size)
-        }
-
-        fun add(
-            attributeCompositionId: Long,
-            attributeId: Long,
-            attributeCompositionTypeId: Long,
-            description: String,
-            composition: String,
-            used: Boolean,
-            name: String,
-            readOnly: Boolean,
-            defaultValue: String,
-        ): AttributeComposition? {
-            if (description.isEmpty()) {
-                return null
-            }
-
-            val i = AttributeCompositionDbHelper()
-            val ok = i.insert(
-                attributeCompositionId,
-                attributeId,
-                attributeCompositionTypeId,
-                description,
-                composition,
-                used,
-                name,
-                readOnly,
-                defaultValue
-            )
-            return if (ok) i.selectById(attributeCompositionId) else null
         }
     }
 }

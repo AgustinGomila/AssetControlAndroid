@@ -19,6 +19,7 @@ class ManteinanceType : Parcelable {
                     manteinanceTypeGroupId,
                     false
                 )
+
                 else -> null
             }
 
@@ -42,10 +43,7 @@ class ManteinanceType : Parcelable {
 
     constructor(id: Long, doChecks: Boolean) {
         manteinanceTypeId = id
-
-        if (doChecks) {
-            refreshData()
-        }
+        if (doChecks) refreshData()
     }
 
     private fun refreshData(): Boolean {
@@ -61,6 +59,7 @@ class ManteinanceType : Parcelable {
 
                 true
             }
+
             else -> false
         }
     }
@@ -71,32 +70,20 @@ class ManteinanceType : Parcelable {
 
     var description: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     var active: Boolean = false
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return false
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) false
+            else field
         }
 
     var manteinanceTypeGroupId: Long = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     constructor(parcel: android.os.Parcel) {
@@ -172,26 +159,6 @@ class ManteinanceType : Parcelable {
 
         override fun newArray(size: Int): Array<ManteinanceType?> {
             return arrayOfNulls(size)
-        }
-
-        fun add(
-            manteinanceTypeId: Long,
-            description: String,
-            active: Boolean,
-            manteinanceTypeGroupId: Long,
-        ): ManteinanceType? {
-            if (description.isEmpty()) {
-                return null
-            }
-
-            val i = ManteinanceTypeDbHelper()
-            val ok = i.insert(
-                manteinanceTypeId,
-                description,
-                active,
-                manteinanceTypeGroupId
-            )
-            return if (ok) i.selectById(manteinanceTypeId) else null
         }
     }
 }

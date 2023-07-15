@@ -138,10 +138,12 @@ class ObservationsActivity : AppCompatActivity(), Scanner.ScannerListener {
                     autoText += "|_ ${getString(R.string.does_not_exist_in_the_database)}$newLine"
                     return
                 }
+
                 labelNumber == 0 -> {
                     autoText += "|_ ${getString(R.string.it_has_a_label_valid_only_in_reports)}$newLine"
                     return
                 }
+
                 (labelNumber ?: return) < if (asset.labelNumber == null) {
                     0
                 } else {
@@ -186,13 +188,6 @@ class ObservationsActivity : AppCompatActivity(), Scanner.ScannerListener {
     }
 
     override fun onNewIntent(intent: Intent) {
-        /*
-          This method gets called, when a new Intent gets associated with the current activity instance.
-          Instead of creating a new activity, onNewIntent will be called. For more information have a look
-          at the documentation.
-
-          In our case this method gets called, when the user attaches a className to the device.
-         */
         super.onNewIntent(intent)
         Nfc.nfcHandleIntent(intent, this)
     }

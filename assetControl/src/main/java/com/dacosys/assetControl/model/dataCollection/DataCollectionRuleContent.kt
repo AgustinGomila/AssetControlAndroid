@@ -56,10 +56,7 @@ class DataCollectionRuleContent : Parcelable {
 
     constructor(id: Long, doChecks: Boolean) {
         dataCollectionRuleContentId = id
-
-        if (doChecks) {
-            refreshData()
-        }
+        if (doChecks) refreshData()
     }
 
     fun isAttribute(): Boolean {
@@ -89,6 +86,7 @@ class DataCollectionRuleContent : Parcelable {
 
                 true
             }
+
             else -> false
         }
     }
@@ -100,144 +98,93 @@ class DataCollectionRuleContent : Parcelable {
     /*
     val dataCollectionRule: DataCollectionRule?
         get() {
-            return if (dataCollectionRuleId == 0L) {
-                null
-            } else DataCollectionRule( dataCollectionRuleId, false)
+            return if (dataCollectionRuleId == 0L) null
+else DataCollectionRule( dataCollectionRuleId, false)
         }
 
     val attribute: Attribute?
         get() {
-            return if (attributeId == 0L) {
-                null
-            } else Attribute( attributeId, false)
+            return if (attributeId == 0L) null
+else Attribute( attributeId, false)
         }
 
     val attributeComposition: AttributeComposition?
         get() {
-            return if (attributeCompositionId == 0L) {
-                null
-            } else AttributeComposition( attributeCompositionId, false)
+            return if (attributeCompositionId == 0L) null
+else AttributeComposition( attributeCompositionId, false)
         }
     */
 
     var dataCollectionRuleId: Long = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     var attributeId: Long = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     var attributeStr: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     var attributeCompositionId: Long = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     var trueResult: Int = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     var falseResult: Int = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     var level: Int = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     var position: Int = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     var description: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     var expression: String? = null
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return null
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) null
+            else field
         }
 
     var mandatory: Boolean = false
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return false
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) false
+            else field
         }
 
     var active: Boolean = false
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return false
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) false
+            else field
         }
 
     constructor(parcel: android.os.Parcel) {
@@ -354,42 +301,6 @@ class DataCollectionRuleContent : Parcelable {
 
         override fun newArray(size: Int): Array<DataCollectionRuleContent?> {
             return arrayOfNulls(size)
-        }
-
-        fun add(
-            dataCollectionRuleContentId: Long,
-            description: String,
-            dataCollectionRuleId: Long,
-            level: Int,
-            position: Int,
-            attributeId: Long,
-            attributeCompositionId: Long,
-            expression: String,
-            trueResult: Int,
-            falseResult: Int,
-            active: Boolean,
-            mandatory: Boolean,
-        ): DataCollectionRuleContent? {
-            if (description.isEmpty()) {
-                return null
-            }
-
-            val i = DataCollectionRuleContentDbHelper()
-            val ok = i.insert(
-                dataCollectionRuleContentId,
-                description,
-                dataCollectionRuleId,
-                level,
-                position,
-                attributeId,
-                attributeCompositionId,
-                expression,
-                trueResult,
-                falseResult,
-                active,
-                mandatory
-            )
-            return if (ok) i.selectById(dataCollectionRuleContentId) else null
         }
     }
 }

@@ -43,10 +43,7 @@ class User : Parcelable {
 
     constructor(id: Long, doChecks: Boolean) {
         userId = id
-
-        if (doChecks) {
-            refreshData()
-        }
+        if (doChecks) refreshData()
     }
 
     private fun refreshData(): Boolean {
@@ -64,6 +61,7 @@ class User : Parcelable {
 
                 true
             }
+
             else -> false
         }
     }
@@ -74,52 +72,32 @@ class User : Parcelable {
 
     var name: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     var externalId: String? = null
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return null
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) null
+            else field
         }
 
     var email: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     var active: Boolean = false
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return false
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) false
+            else field
         }
 
     var password: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     constructor(parcel: Parcel) {
@@ -196,30 +174,6 @@ class User : Parcelable {
 
         override fun newArray(size: Int): Array<User?> {
             return arrayOfNulls(size)
-        }
-
-        fun add(
-            userId: Long,
-            name: String,
-            externalId: String?,
-            email: String,
-            active: Boolean,
-            password: String,
-        ): User? {
-            if (name.isEmpty() || password.isEmpty()) {
-                return null
-            }
-
-            val i = UserDbHelper()
-            val ok = i.insert(
-                userId,
-                name,
-                externalId,
-                email,
-                active,
-                password
-            )
-            return if (ok) i.selectById(userId) else null
         }
 
         fun equals(a: Any?, b: Any): Boolean {

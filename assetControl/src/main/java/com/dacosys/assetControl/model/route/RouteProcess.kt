@@ -45,10 +45,7 @@ class RouteProcess : Parcelable {
 
     constructor(id: Long, doChecks: Boolean) {
         collectorRouteProcessId = id
-
-        if (doChecks) {
-            refreshData()
-        }
+        if (doChecks) refreshData()
     }
 
     private fun refreshData(): Boolean {
@@ -71,6 +68,7 @@ class RouteProcess : Parcelable {
 
                 true
             }
+
             else -> false
         }
     }
@@ -84,92 +82,56 @@ class RouteProcess : Parcelable {
 
     var routeId: Long = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     var routeProcessId: Long? = null
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return null
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) null
+            else field
         }
 
     var routeProcessDate: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     var transferedDate: String? = null
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return null
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) null
+            else field
         }
 
     var completed: Boolean = false
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return false
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) false
+            else field
         }
 
     var transfered: Boolean = false
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return false
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) false
+            else field
         }
 
     var userId: Long = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     var userStr: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     var routeStr: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     constructor(parcel: android.os.Parcel) {
@@ -263,30 +225,6 @@ class RouteProcess : Parcelable {
 
         override fun newArray(size: Int): Array<RouteProcess?> {
             return arrayOfNulls(size)
-        }
-
-        fun add(
-            userId: Long,
-            routeId: Long,
-            routeProcessDate: String,
-            completed: Boolean,
-            transferred: Boolean,
-            transferredDate: String?,
-            routeProcessId: Long?,
-            collectorRouteProcessId: Long,
-        ): RouteProcess? {
-            val i = RouteProcessDbHelper()
-            val newId = i.insert(
-                userId,
-                routeId,
-                routeProcessDate,
-                completed,
-                transferred,
-                transferredDate,
-                routeProcessId,
-                collectorRouteProcessId
-            )
-            return if (newId < 1) null else i.selectById(newId)
         }
     }
 }

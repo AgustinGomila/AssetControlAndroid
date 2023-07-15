@@ -29,10 +29,7 @@ class ManteinanceTypeGroup : Parcelable {
 
     constructor(id: Long, doChecks: Boolean) {
         manteinanceTypeGroupId = id
-
-        if (doChecks) {
-            refreshData()
-        }
+        if (doChecks) refreshData()
     }
 
     private fun refreshData(): Boolean {
@@ -47,6 +44,7 @@ class ManteinanceTypeGroup : Parcelable {
 
                 true
             }
+
             else -> false
         }
     }
@@ -57,22 +55,14 @@ class ManteinanceTypeGroup : Parcelable {
 
     var description: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     var active: Boolean = false
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return false
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) false
+            else field
         }
 
     constructor(parcel: android.os.Parcel) {
@@ -144,20 +134,6 @@ class ManteinanceTypeGroup : Parcelable {
 
         override fun newArray(size: Int): Array<ManteinanceTypeGroup?> {
             return arrayOfNulls(size)
-        }
-
-        fun add(
-            manteinanceTypeGroupId: Long,
-            description: String,
-            active: Boolean,
-        ): ManteinanceTypeGroup? {
-            if (description.isEmpty()) {
-                return null
-            }
-
-            val i = ManteinanceTypeGroupDbHelper()
-            val ok = i.insert(manteinanceTypeGroupId, description, active)
-            return if (ok) i.selectById(manteinanceTypeGroupId) else null
         }
     }
 }

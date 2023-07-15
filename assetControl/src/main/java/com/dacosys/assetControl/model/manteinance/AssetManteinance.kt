@@ -42,10 +42,7 @@ class AssetManteinance : Parcelable {
 
     constructor(id: Long, doChecks: Boolean) {
         collectorAssetManteinanceId = id
-
-        if (doChecks) {
-            refreshData()
-        }
+        if (doChecks) refreshData()
     }
 
     private fun refreshData(): Boolean {
@@ -64,6 +61,7 @@ class AssetManteinance : Parcelable {
 
                 true
             }
+
             else -> false
         }
     }
@@ -79,12 +77,8 @@ class AssetManteinance : Parcelable {
 
     var assetId: Long = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     val assetStr: String
@@ -114,12 +108,8 @@ class AssetManteinance : Parcelable {
 
     var manteinanceTypeId: Long = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     val manteinanceTypeStr: String
@@ -139,42 +129,26 @@ class AssetManteinance : Parcelable {
 
     var manteinanceStatusId: Int = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     var assetManteinanceId: Long = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     var observations: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     var transferred: Boolean? = null
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return null
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) null
+            else field
         }
 
     constructor(parcel: android.os.Parcel) {

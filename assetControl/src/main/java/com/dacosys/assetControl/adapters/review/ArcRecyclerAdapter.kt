@@ -26,6 +26,7 @@ import androidx.recyclerview.widget.RecyclerView.*
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.adapters.asset.AssetRecyclerAdapter.FilterOptions
+import com.dacosys.assetControl.adapters.interfaces.Interfaces.*
 import com.dacosys.assetControl.databinding.AssetRowBinding
 import com.dacosys.assetControl.databinding.AssetRowExpandedBinding
 import com.dacosys.assetControl.model.asset.Asset
@@ -149,39 +150,6 @@ class ArcRecyclerAdapter(
 
     // Permiso de edición de activos
     private var userHasPermissionToEdit: Boolean = User.hasPermission(PermissionEntry.ModifyAsset)
-
-    interface DataSetChangedListener {
-        fun onDataSetChanged()
-    }
-
-    interface CheckedChangedListener {
-        fun onCheckedChanged(
-            isChecked: Boolean,
-            pos: Int,
-        )
-    }
-
-    interface EditAssetRequiredListener {
-        fun onEditAssetRequired(tableId: Int, itemId: Long)
-    }
-
-    interface AlbumViewRequiredListener {
-        fun onAlbumViewRequired(tableId: Int, itemId: Long)
-    }
-
-    interface AddPhotoRequiredListener {
-        fun onAddPhotoRequired(
-            tableId: Int,
-            itemId: Long,
-            description: String,
-            obs: String = "",
-            reference: String = ""
-        )
-    }
-
-    interface UiEventListener {
-        fun onUiEventRequired(it: AdapterProgress)
-    }
 
     private object AssetReviewContentDiffUtilCallback : DiffUtil.ItemCallback<AssetReviewContent>() {
         override fun areItemsTheSame(oldItem: AssetReviewContent, newItem: AssetReviewContent): Boolean {

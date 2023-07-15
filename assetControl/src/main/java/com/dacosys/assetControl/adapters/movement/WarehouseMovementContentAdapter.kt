@@ -18,10 +18,8 @@ import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat
 import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.adapters.asset.AssetAdapter.*
-import com.dacosys.assetControl.adapters.asset.AssetAdapter.Companion.AddPhotoRequiredListener
-import com.dacosys.assetControl.adapters.asset.AssetAdapter.Companion.AlbumViewRequiredListener
-import com.dacosys.assetControl.adapters.asset.AssetAdapter.Companion.EditAssetRequiredListener
+import com.dacosys.assetControl.adapters.asset.AssetAdapter
+import com.dacosys.assetControl.adapters.interfaces.Interfaces.*
 import com.dacosys.assetControl.dataBase.asset.AssetDbHelper
 import com.dacosys.assetControl.model.asset.Asset
 import com.dacosys.assetControl.model.asset.AssetStatus
@@ -151,17 +149,6 @@ class WarehouseMovementContentAdapter : ArrayAdapter<WarehouseMovementContent>, 
         this.listView = listView
         this.wmContArray = wmContArray
         this.suggestedList = suggestedList
-    }
-
-    interface DataSetChangedListener {
-        fun onDataSetChanged()
-    }
-
-    interface CheckedChangedListener {
-        fun onCheckedChanged(
-            isChecked: Boolean,
-            pos: Int,
-        )
     }
 
     /**
@@ -776,13 +763,16 @@ class WarehouseMovementContentAdapter : ArrayAdapter<WarehouseMovementContent>, 
             // El view ya existe, comprobar que no necesite cambiar de layout.
             if (
             // Row null cambiando...
-                v.tag is String && currentLayout == R.layout.asset_row || v.tag is String && currentLayout == R.layout.asset_row_expanded || v.tag is String && currentLayout == R.layout.asset_simple_row ||
-
-                v.tag is CollapsedViewHolder && currentLayout != R.layout.asset_row || v.tag is ExpandedViewHolder && currentLayout != R.layout.asset_row_expanded || v.tag is SimpleViewHolder && currentLayout != R.layout.asset_simple_row
+                v.tag is String && currentLayout == R.layout.asset_row ||
+                v.tag is String && currentLayout == R.layout.asset_row_expanded ||
+                v.tag is String && currentLayout == R.layout.asset_simple_row ||
+                v.tag is CollapsedViewHolder && currentLayout != R.layout.asset_row ||
+                v.tag is ExpandedViewHolder && currentLayout != R.layout.asset_row_expanded ||
+                v.tag is AssetAdapter.SimpleViewHolder && currentLayout != R.layout.asset_simple_row
             ) {
                 // Ya fue creado, si es un row normal que está siendo seleccionada
-                // o un row expandido que está siendo deseleccionado
-                // debe cambiar de layout, por lo tanto volver a crearse.
+                // o un row expandido que está perdiendo la selección
+                // debe cambiar de layout, por lo tanto, volver a crearse.
                 val vi = LayoutInflater.from(context)
                 v = vi.inflate(currentLayout, parent, false)
 

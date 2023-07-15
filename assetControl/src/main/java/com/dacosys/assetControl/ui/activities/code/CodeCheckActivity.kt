@@ -156,18 +156,22 @@ class CodeCheckActivity : AppCompatActivity(),
                 onBackPressed()
                 return true
             }
+
             R.id.action_rfid_connect -> {
                 JotterListener.rfidStart(this)
                 return super.onOptionsItemSelected(item)
             }
+
             R.id.action_trigger_scan -> {
                 JotterListener.trigger(this)
                 return super.onOptionsItemSelected(item)
             }
+
             R.id.action_read_barcode -> {
                 JotterListener.toggleCameraFloatingWindowVisibility(this)
                 return super.onOptionsItemSelected(item)
             }
+
             else -> {
                 return super.onOptionsItemSelected(item)
             }
@@ -230,6 +234,7 @@ class CodeCheckActivity : AppCompatActivity(),
                             TextView.BufferType.EDITABLE
                         )
                     }
+
                     sc.asset != null -> {
                         fillPanel(AssetDetailFragment.newInstance(sc.asset ?: return))
                         binding.infoTextView.setText(
@@ -237,6 +242,7 @@ class CodeCheckActivity : AppCompatActivity(),
                             TextView.BufferType.EDITABLE
                         )
                     }
+
                     else -> {
                         fillPanel(null)
                         binding.infoTextView.setText(
@@ -290,13 +296,6 @@ class CodeCheckActivity : AppCompatActivity(),
     // region READERS Reception
 
     override fun onNewIntent(intent: Intent) {
-        /*
-          This method gets called, when a new Intent gets associated with the current activity instance.
-          Instead of creating a new activity, onNewIntent will be called. For more information have a look
-          at the documentation.
-
-          In our case this method gets called, when the user attaches a className to the device.
-         */
         super.onNewIntent(intent)
         Nfc.nfcHandleIntent(intent, this)
     }

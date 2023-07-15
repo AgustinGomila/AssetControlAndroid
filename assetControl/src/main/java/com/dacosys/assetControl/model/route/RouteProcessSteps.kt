@@ -35,27 +35,18 @@ class RouteProcessSteps : Parcelable {
 
     val routeProcess: RouteProcess?
         get() {
-            return if (routeProcessId == 0L) {
-                null
-            } else RouteProcess(routeProcessId, false)
+            return if (routeProcessId == 0L) null
+            else RouteProcess(routeProcessId, false)
         }
 
     var routeProcessContentId: Long = 0
-
-    val routeContentProcess: RouteProcessContent?
-        get() {
-            return if (routeProcessContentId == 0L) {
-                null
-            } else RouteProcessContent(routeProcessContentId, false)
-        }
 
     var dataCollectionId: Long? = null
 
     val dataCollection: DataCollection?
         get() {
-            return if (dataCollectionId == null || dataCollectionId == 0L) {
-                null
-            } else DataCollection(dataCollectionId!!, false)
+            return if (dataCollectionId == null || dataCollectionId == 0L) null
+            else DataCollection(dataCollectionId!!, false)
         }
 
     var step: Int = 0

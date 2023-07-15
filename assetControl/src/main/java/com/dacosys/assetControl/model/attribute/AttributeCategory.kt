@@ -40,10 +40,7 @@ class AttributeCategory : Parcelable {
 
     constructor(id: Long, doChecks: Boolean) {
         attributeCategoryId = id
-
-        if (doChecks) {
-            refreshData()
-        }
+        if (doChecks) refreshData()
     }
 
     private fun refreshData(): Boolean {
@@ -59,6 +56,7 @@ class AttributeCategory : Parcelable {
 
                 true
             }
+
             else -> false
         }
     }
@@ -69,32 +67,20 @@ class AttributeCategory : Parcelable {
 
     var description: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     var active: Boolean = false
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return false
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) false
+            else field
         }
 
     var parentId: Long? = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return null
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) null
+            else field
         }
 
     constructor(parcel: android.os.Parcel) {
@@ -169,21 +155,6 @@ class AttributeCategory : Parcelable {
 
         override fun newArray(size: Int): Array<AttributeCategory?> {
             return arrayOfNulls(size)
-        }
-
-        fun add(
-            attributeCategoryId: Long,
-            description: String,
-            active: Boolean,
-            parentId: Long,
-        ): AttributeCategory? {
-            if (description.isEmpty()) {
-                return null
-            }
-
-            val i = AttributeCategoryDbHelper()
-            val ok = i.insert(attributeCategoryId, description, active, parentId)
-            return if (ok) i.selectById(attributeCategoryId) else null
         }
     }
 }

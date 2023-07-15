@@ -36,6 +36,7 @@ import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.adapters.asset.AssetRecyclerAdapter
 import com.dacosys.assetControl.adapters.asset.AssetRecyclerAdapter.FilterOptions
+import com.dacosys.assetControl.adapters.interfaces.Interfaces
 import com.dacosys.assetControl.dataBase.asset.AssetDbHelper
 import com.dacosys.assetControl.dataBase.barcode.BarcodeLabelCustomDbHelper
 import com.dacosys.assetControl.databinding.AssetPrintLabelActivityTopPanelCollapsedBinding
@@ -82,10 +83,10 @@ import kotlin.concurrent.thread
 
 class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
     Scanner.ScannerListener, Rfid.RfidDeviceListener, AssetSelectFilterFragment.FragmentListener,
-    GetAssetAsync.GetAssetAsyncListener, PrinterFragment.FragmentListener, AssetRecyclerAdapter.CheckedChangedListener,
-    AssetRecyclerAdapter.DataSetChangedListener, AssetRecyclerAdapter.AddPhotoRequiredListener,
-    AssetRecyclerAdapter.AlbumViewRequiredListener,
-    AssetRecyclerAdapter.EditAssetRequiredListener {
+    GetAssetAsync.GetAssetAsyncListener, PrinterFragment.FragmentListener, Interfaces.CheckedChangedListener,
+    Interfaces.DataSetChangedListener, Interfaces.AddPhotoRequiredListener,
+    Interfaces.AlbumViewRequiredListener,
+    Interfaces.EditAssetRequiredListener {
     override fun onDestroy() {
         destroyLocals()
         super.onDestroy()
@@ -1239,13 +1240,6 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
 
     // region READERS Reception
     override fun onNewIntent(intent: Intent) {
-        /*
-          This method gets called, when a new Intent gets associated with the current activity instance.
-          Instead of creating a new activity, onNewIntent will be called. For more information have a look
-          at the documentation.
-
-          In our case this method gets called, when the user attaches a className to the device.
-         */
         super.onNewIntent(intent)
         Nfc.nfcHandleIntent(intent, this)
     }

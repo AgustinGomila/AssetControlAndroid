@@ -29,10 +29,7 @@ class DataCollectionRule : Parcelable {
 
     constructor(id: Long, doChecks: Boolean) {
         dataCollectionRuleId = id
-
-        if (doChecks) {
-            refreshData()
-        }
+        if (doChecks) refreshData()
     }
 
     private fun refreshData(): Boolean {
@@ -47,6 +44,7 @@ class DataCollectionRule : Parcelable {
 
                 true
             }
+
             else -> false
         }
     }
@@ -57,22 +55,14 @@ class DataCollectionRule : Parcelable {
 
     var description: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     var active: Boolean = false
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return false
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) false
+            else field
         }
 
     constructor(parcel: android.os.Parcel) {
@@ -144,24 +134,6 @@ class DataCollectionRule : Parcelable {
 
         override fun newArray(size: Int): Array<DataCollectionRule?> {
             return arrayOfNulls(size)
-        }
-
-        fun add(
-            dataCollectionRuleId: Long,
-            description: String,
-            active: Boolean,
-        ): DataCollectionRule? {
-            if (description.isEmpty()) {
-                return null
-            }
-
-            val i = DataCollectionRuleDbHelper()
-            val ok = i.insert(
-                dataCollectionRuleId,
-                description,
-                active
-            )
-            return if (ok) i.selectById(dataCollectionRuleId) else null
         }
     }
 }

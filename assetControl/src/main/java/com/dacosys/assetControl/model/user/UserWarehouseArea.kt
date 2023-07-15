@@ -9,7 +9,6 @@ import com.dacosys.assetControl.dataBase.user.UserWarehouseAreaContract.UserWare
 import com.dacosys.assetControl.dataBase.user.UserWarehouseAreaContract.UserWarehouseAreaEntry.Companion.SEE
 import com.dacosys.assetControl.dataBase.user.UserWarehouseAreaContract.UserWarehouseAreaEntry.Companion.USER_ID
 import com.dacosys.assetControl.dataBase.user.UserWarehouseAreaContract.UserWarehouseAreaEntry.Companion.WAREHOUSE_AREA_ID
-import com.dacosys.assetControl.dataBase.user.UserWarehouseAreaDbHelper
 
 class UserWarehouseArea : Parcelable {
     constructor(
@@ -89,22 +88,6 @@ class UserWarehouseArea : Parcelable {
 
         override fun newArray(size: Int): Array<UserWarehouseArea?> {
             return arrayOfNulls(size)
-        }
-
-        fun add(
-            userId: Long,
-            warehouseAreaId: Long,
-            see: Boolean,
-            count: Boolean,
-            move: Boolean,
-            check: Boolean,
-        ): Boolean {
-            if (userId < 1 || warehouseAreaId < 1) {
-                return false
-            }
-
-            val i = UserWarehouseAreaDbHelper()
-            return i.insert(userId, warehouseAreaId, see, move, count, check)
         }
 
         fun equals(a: Any?, b: Any): Boolean {

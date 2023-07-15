@@ -116,10 +116,7 @@ class WarehouseMovementContent : Parcelable {
     constructor(id: Long, doChecks: Boolean) {
         warehouseMovementContentId = id
         collectorContentId = id
-
-        if (doChecks) {
-            refreshData()
-        }
+        if (doChecks) refreshData()
     }
 
     private fun refreshData(): Boolean {
@@ -155,46 +152,32 @@ class WarehouseMovementContent : Parcelable {
 
     val warehouseMovement: WarehouseMovement?
         get() {
-            return if (warehouseMovementId == 0L) {
-                null
-            } else WarehouseMovement(warehouseMovementId, false)
+            return if (warehouseMovementId == 0L) null
+            else WarehouseMovement(warehouseMovementId, false)
         }
 
     val asset: Asset?
         get() {
-            return if (assetId == 0L) {
-                null
-            } else Asset(assetId, false)
+            return if (assetId == 0L) null
+            else Asset(assetId, false)
         }
 
     private var warehouseMovementId: Long = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     var assetId: Long = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     var code: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     var qty: Float = 0F

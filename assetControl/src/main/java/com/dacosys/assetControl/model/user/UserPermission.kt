@@ -5,7 +5,6 @@ import android.os.Parcel
 import android.os.Parcelable
 import com.dacosys.assetControl.dataBase.user.UserPermissionContract.UserPermissionEntry.Companion.PERMISSION_ID
 import com.dacosys.assetControl.dataBase.user.UserPermissionContract.UserPermissionEntry.Companion.USER_ID
-import com.dacosys.assetControl.dataBase.user.UserPermissionDbHelper
 import com.dacosys.assetControl.model.user.permission.PermissionEntry
 
 class UserPermission : Parcelable {
@@ -25,13 +24,12 @@ class UserPermission : Parcelable {
     var permissionId: Long = 0
 
     var permissionEntry: PermissionEntry? = null
-        get() = if (field != null)
-            PermissionEntry.getById(permissionId)
-        else null
+        get() {
+            return if (field != null) PermissionEntry.getById(permissionId)
+            else null
+        }
         set(value) {
-            if (value != null) {
-                permissionId = value.id
-            }
+            if (value != null) permissionId = value.id
             field = value
         }
 
@@ -73,18 +71,6 @@ class UserPermission : Parcelable {
 
         override fun newArray(size: Int): Array<UserPermission?> {
             return arrayOfNulls(size)
-        }
-
-        fun add(
-            userId: Long,
-            permissionId: Long,
-        ): Boolean {
-            if (userId < 1 || permissionId < 1) {
-                return false
-            }
-
-            val i = UserPermissionDbHelper()
-            return i.insert(userId, permissionId)
         }
 
         fun equals(a: Any?, b: Any): Boolean {

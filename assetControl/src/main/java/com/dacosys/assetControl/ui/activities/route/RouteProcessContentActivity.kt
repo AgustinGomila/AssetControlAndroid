@@ -182,11 +182,13 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
                     total = totalTask
                 )
             }
+
             ProgressStatus.bigFinished -> {
                 closeKeyboard(this)
                 setResult(RESULT_OK)
                 finish()
             }
+
             ProgressStatus.bigCrashed,
             ProgressStatus.canceled,
             -> {
@@ -199,6 +201,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
                 )
                 saving = false
             }
+
             else -> {
                 Log.d(
                     this::class.java.simpleName, "$progressStatusDesc: $registryDesc ${
@@ -1293,18 +1296,22 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
                 onBackPressed()
                 return true
             }
+
             R.id.action_rfid_connect -> {
                 JotterListener.rfidStart(this)
                 return super.onOptionsItemSelected(item)
             }
+
             R.id.action_trigger_scan -> {
                 JotterListener.trigger(this)
                 return super.onOptionsItemSelected(item)
             }
+
             R.id.action_read_barcode -> {
                 JotterListener.toggleCameraFloatingWindowVisibility(this)
                 return super.onOptionsItemSelected(item)
             }
+
             else -> {
                 return super.onOptionsItemSelected(item)
             }
@@ -1676,9 +1683,11 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
                     rpContAdapter?.selectNext()
                     if (!saving && Statics.demoMode) demo()
                 }
+
                 RouteProcessStatus.notProcessed.id -> {
                     beginProcess()
                 }
+
                 RouteProcessStatus.skipped.id,
                 RouteProcessStatus.unknown.id,
                 -> {
@@ -1773,6 +1782,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
                     if (!isFinishing) progressDialog?.show()
                 }
+
                 ProgressStatus.running.id -> {
                     //dialog?.setMessage(msg)
                     if (msg != "") alertBinding.messageTextView.text = msg
@@ -1811,6 +1821,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
                     if (!isFinishing) progressDialog?.show()
                 }
+
                 ProgressStatus.finished.id, ProgressStatus.canceled.id, ProgressStatus.crashed.id -> {
                     progressDialog?.dismiss()
                     progressDialog = null
@@ -1829,13 +1840,6 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 // region READERS Reception
 
     override fun onNewIntent(intent: Intent) {
-        /*
-          This method gets called, when a new Intent gets associated with the current activity instance.
-          Instead of creating a new activity, onNewIntent will be called. For more information have a look
-          at the documentation.
-
-          In our case this method gets called, when the user attaches a className to the device.
-         */
         super.onNewIntent(intent)
         Nfc.nfcHandleIntent(intent, this)
     }

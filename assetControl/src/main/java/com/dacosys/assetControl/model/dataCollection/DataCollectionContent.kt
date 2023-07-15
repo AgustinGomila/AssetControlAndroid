@@ -90,10 +90,7 @@ class DataCollectionContent : Parcelable {
 
     constructor(id: Long, doChecks: Boolean) {
         collectorDataCollectionContentId = id
-
-        if (doChecks) {
-            refreshData()
-        }
+        if (doChecks) refreshData()
     }
 
     private fun refreshData(): Boolean {
@@ -116,6 +113,7 @@ class DataCollectionContent : Parcelable {
 
                 true
             }
+
             else -> false
         }
     }
@@ -123,128 +121,85 @@ class DataCollectionContent : Parcelable {
     /*
     val dataCollection: DataCollection?
         get() {
-            return if (dataCollectionId == null || dataCollectionId == 0L) {
-                null
-            } else DataCollection( dataCollectionId!!, false)
+            return if (dataCollectionId == null || dataCollectionId == 0L) null
+else DataCollection( dataCollectionId!!, false)
         }
     */
 
     var dataCollectionContentId: Long = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     var dataCollectionRuleContentId: Long = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     var dataCollectionId: Long? = null
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return null
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) null
+            else field
         }
 
     /*
     val attribute: Attribute?
         get() {
-            return if (attributeId == 0L) {
-                null
-            } else Attribute( attributeId, false)
+            return if (attributeId == 0L) null
+else Attribute( attributeId, false)
         }
     */
 
     var attributeId: Long = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     /*
     val attributeComposition: AttributeComposition?
         get() {
-            return if (attributeCompositionId == 0L) {
-                null
-            } else AttributeComposition( attributeCompositionId, false)
+            return if (attributeCompositionId == 0L) null
+else AttributeComposition( attributeCompositionId, false)
         }
     */
 
     var attributeCompositionId: Long = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     var level: Int = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     var position: Int = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     var result: Int = 0
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0
+            else field
         }
 
     var valueStr: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     var dataCollectionDate: String = ""
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return ""
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) ""
+            else field
         }
 
     constructor(parcel: android.os.Parcel) {
@@ -342,34 +297,6 @@ class DataCollectionContent : Parcelable {
 
         override fun newArray(size: Int): Array<DataCollectionContent?> {
             return arrayOfNulls(size)
-        }
-
-        fun add(
-            dataCollectionId: Long,
-            level: Int,
-            position: Int,
-            attributeId: Long,
-            attributeCompositionId: Long,
-            result: Int,
-            valueStr: String,
-            dataCollectionDate: String,
-            dataCollectionContentId: Long,
-            dataCollectionRuleContentId: Long,
-        ): DataCollectionContent? {
-            val i = DataCollectionContentDbHelper()
-            val newId = i.insert(
-                dataCollectionId,
-                level,
-                position,
-                attributeId,
-                attributeCompositionId,
-                result,
-                valueStr,
-                dataCollectionDate,
-                dataCollectionContentId,
-                dataCollectionRuleContentId
-            )
-            return if (newId < 1) null else i.selectById(newId)
         }
     }
 }
