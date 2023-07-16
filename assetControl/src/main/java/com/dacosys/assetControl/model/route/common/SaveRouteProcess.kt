@@ -113,7 +113,7 @@ class SaveRouteProcess {
 
                 if (rpc.routeProcessId == routeProcess.collectorRouteProcessId) {
                     rpc.routeProcessStatusId = statusId
-                    rpcDbHelper.updateStatus(rpc)
+                    rpcDbHelper.updateStatusNew(rpc)
                 } else {
                     rpcDbHelper.insert(
                         routeProcess.collectorRouteProcessId,

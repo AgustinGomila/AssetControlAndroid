@@ -22,6 +22,7 @@ class Statics {
 
         // region DEBUG DEMO
         const val demoMode = false
+        const val demoAutoSend = false
         const val superDemoMode = false
 
         var demoQrConfigCode = """

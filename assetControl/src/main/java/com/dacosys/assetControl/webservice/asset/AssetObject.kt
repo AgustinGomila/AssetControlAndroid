@@ -115,29 +115,13 @@ class AssetObject() : Parcelable {
         active = if (asset.active) 1 else 0
 
         // Secondary Information
-        manufacturer = if (asset.manufacturer == null) {
-            ""
-        } else {
-            asset.manufacturer!!
-        }
-        model = if (asset.model == null) {
-            ""
-        } else {
-            asset.model!!
-        }
-        serial_number = if (asset.serialNumber == null) {
-            ""
-        } else {
-            asset.serialNumber!!
-        }
+        manufacturer = asset.manufacturer ?: ""
+        model = asset.model ?: ""
+        serial_number = asset.serialNumber ?: ""
         condition = asset.assetConditionId
         obs = ""
         provider_id = 0L
-        ean = if (asset.ean == null) {
-            ""
-        } else {
-            asset.ean!!
-        }
+        ean = asset.ean ?: ""
 
         // Insurance Information
         insurance_company = ""
@@ -150,11 +134,7 @@ class AssetObject() : Parcelable {
         reason = ""
 
         // Missed
-        missing_date = if (asset.missingDate == null) {
-            ""
-        } else {
-            asset.missingDate!!
-        }
+        missing_date = asset.missingDate ?: ""
 
         // Purchased
         price = 0.0
@@ -174,11 +154,7 @@ class AssetObject() : Parcelable {
         lease_date = ""
         lease_residual_value = 0.0
         amortization_month = 0
-        last_asset_review_date = if (asset.lastAssetReviewDate == null) {
-            ""
-        } else {
-            asset.lastAssetReviewDate!!
-        }
+        last_asset_review_date = asset.lastAssetReviewDate ?: ""
     }
 
     fun getBySoapObject(so: SoapObject): AssetObject {
@@ -195,134 +171,175 @@ class AssetObject() : Parcelable {
                             x.asset_id =
                                 (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
                         }
+
                         "parent_id" -> {
                             x.parent_id =
                                 (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
                         }
+
                         "code" -> {
                             x.code = soValue as? String ?: ""
                         }
+
                         "price" -> {
                             x.price = soValue as? Double ?: 0.0
                         }
+
                         "warehouse_id" -> {
                             x.warehouse_id =
                                 (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
                         }
+
                         "warehouse_area_id" -> {
                             x.warehouse_area_id =
                                 (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
                         }
+
                         "active" -> {
                             x.active = soValue as? Int ?: 0
                         }
+
                         "reason" -> {
                             x.reason = soValue as? String ?: ""
                         }
+
                         "serial_number" -> {
                             x.serial_number = soValue as? String ?: ""
                         }
+
                         "obs" -> {
                             x.obs = soValue as? String ?: ""
                         }
+
                         "ownership_status" -> {
                             x.ownership_status = soValue as? Int ?: 0
                         }
+
                         "warranty_due" -> {
                             x.warranty_due = soValue as? String ?: ""
                         }
+
                         "status" -> {
                             x.status = soValue as? Int ?: 0
                         }
+
                         "missing_date" -> {
                             x.missing_date = soValue as? String ?: ""
                         }
+
                         "removed_date" -> {
                             x.removed_date = soValue as? String ?: ""
                         }
+
                         "description" -> {
                             x.description = soValue as? String ?: ""
                         }
+
                         "manufacturer" -> {
                             x.manufacturer = soValue as? String ?: ""
                         }
+
                         "ean" -> {
                             x.ean = soValue as? String ?: ""
                         }
+
                         "model" -> {
                             x.model = soValue as? String ?: ""
                         }
+
                         "item_category_id" -> {
                             x.item_category_id =
                                 (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
                         }
+
                         "cost_centre_id" -> {
                             x.cost_centre_id =
                                 (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
                         }
+
                         "invoice_nr" -> {
                             x.invoice_nr = soValue as? String ?: ""
                         }
+
                         "provider_id" -> {
                             x.provider_id =
                                 (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
                         }
+
                         "purchase_date" -> {
                             x.purchase_date = soValue as? String ?: ""
                         }
+
                         "amortization_month" -> {
                             x.amortization_month = soValue as? Int ?: 0
                         }
+
                         "original_warehouse_id" -> {
                             x.original_warehouse_id =
                                 (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
                         }
+
                         "original_warehouse_area_id" -> {
                             x.original_warehouse_area_id =
                                 (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
                         }
+
                         "label_number" -> {
                             x.label_number = soValue as? Int ?: 0
                         }
+
                         "insurance_company" -> {
                             x.insurance_company = soValue as? String ?: ""
                         }
+
                         "insurance_policy" -> {
                             x.insurance_policy = soValue as? String ?: ""
                         }
+
                         "auto_insurance" -> {
                             x.auto_insurance = soValue as? Int ?: 0
                         }
+
                         "sensor_matic" -> {
                             x.sensor_matic = soValue as? Int ?: 0
                         }
+
                         "rental_cost" -> {
                             x.rental_cost = soValue as? Double ?: 0.0
                         }
+
                         "rental_payment_mode" -> {
                             x.rental_payment_mode = soValue as? Int ?: 0
                         }
+
                         "lease_cost =  " -> {
                             x.lease_cost = soValue as? Double ?: 0.0
                         }
+
                         "lease_payment_mode" -> {
                             x.lease_payment_mode = soValue as? Int ?: 0
                         }
+
                         "lease_date" -> {
                             x.lease_date = soValue as? String ?: ""
                         }
+
                         "lease_residual_value" -> {
                             x.lease_residual_value = soValue as? Double ?: 0.0
                         }
+
                         "rental_date" -> {
                             x.rental_date = soValue as? String ?: ""
                         }
+
                         "condition" -> {
                             x.condition = soValue as? Int ?: 0
                         }
+
                         "asset_ext_id" -> {
                             x.asset_ext_id = soValue as? String ?: ""
                         }
+
                         "last_asset_review_date" -> {
                             x.last_asset_review_date = soValue as? String ?: ""
                         }

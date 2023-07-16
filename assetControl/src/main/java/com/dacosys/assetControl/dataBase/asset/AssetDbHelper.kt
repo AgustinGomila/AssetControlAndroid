@@ -6,6 +6,7 @@ import android.database.DatabaseUtils
 import android.database.SQLException
 import android.util.Log
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
+import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.getReadableDb
 import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.getWritableDb
@@ -50,11 +51,11 @@ import com.dacosys.assetControl.model.review.AssetReviewContent
 import com.dacosys.assetControl.network.sync.SyncProgress
 import com.dacosys.assetControl.network.sync.SyncRegistryType
 import com.dacosys.assetControl.network.utils.ProgressStatus
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.splitList
 import com.dacosys.assetControl.webservice.asset.AssetCollectorObject
 import com.dacosys.assetControl.webservice.asset.AssetObject
+import com.dacosys.imageControl.ui.activities.UTCDataTime
 
 /**
  * Created by Agustin on 28/12/2016.
@@ -448,215 +449,171 @@ class AssetDbHelper {
     }
 
     private fun updateOnInventoryRemoved(itemIdArray: Array<Long>, wId: Long, waId: Long): Boolean {
+        if (itemIdArray.isEmpty()) return false
         Log.i(this::class.java.simpleName, ": SQLite -> updateOnInventoryRemoved")
 
-        if (itemIdArray.isEmpty()) {
-            return false
-        }
-
         val sqLiteDatabase = getWritableDb()
-
-        val splitList = splitList(itemIdArray, 20)
+        val date = UTCDataTime.getUTCDateTimeAsString()
         var error = false
         try {
-            sqLiteDatabase.beginTransaction()
-            for (part in splitList) {
-                var updateQ = ""
-                for (id in part) {
-                    val tuQ =
-                        "UPDATE " + TABLE_NAME +
-                                " SET " +
-                                WAREHOUSE_ID + " = " + wId + ", " +
-                                WAREHOUSE_AREA_ID + " = " + waId + ", " +
-                                TRANSFERED + " = 0, " +
-                                LAST_ASSET_REVIEW_DATE + " = DATETIME('now', 'localtime')" +
-                                " WHERE (" + ASSET_ID + " = " + id + ");"
+            for (id in itemIdArray) {
 
-                    updateQ = "${updateQ}${Statics.newLine}${tuQ}"
+                val values = ContentValues()
+                values.put(WAREHOUSE_ID, wId)
+                values.put(WAREHOUSE_AREA_ID, waId)
+                values.put(TRANSFERED, 0)
+                values.put(LAST_ASSET_REVIEW_DATE, date)
+
+                val selection = "$ASSET_ID = ?"
+                val args = arrayOf(id.toString())
+
+                val updatedRows = sqLiteDatabase.update(TABLE_NAME, values, selection, args)
+
+                if (BuildConfig.DEBUG) {
+                    if (updatedRows > 0) Log.d(javaClass.simpleName, "Asset ID: $id Updated")
+                    else Log.e(javaClass.simpleName, "Asset ID: $id NOT Updated!!!")
                 }
-
-                Log.i(this.javaClass.simpleName, updateQ)
-
-                sqLiteDatabase.execSQL(updateQ)
             }
-            sqLiteDatabase.setTransactionSuccessful()
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             error = true
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
 
         return !error
     }
 
     private fun updateLocation(itemIdArray: Array<Long>, wId: Long, waId: Long): Boolean {
+        if (itemIdArray.isEmpty()) return false
         Log.i(this::class.java.simpleName, ": SQLite -> updateLocation")
-
-        if (itemIdArray.isEmpty()) {
-            return false
-        }
 
         val sqLiteDatabase = getWritableDb()
 
-        val splitList = splitList(itemIdArray, 20)
         var error = false
         try {
-            sqLiteDatabase.beginTransaction()
-            for (part in splitList) {
-                var updateQ = ""
-                for (id in part) {
-                    val tuQ =
-                        "UPDATE " + TABLE_NAME +
-                                " SET " +
-                                WAREHOUSE_ID + " = " + wId + ", " +
-                                WAREHOUSE_AREA_ID + " = " + waId + ", " +
-                                TRANSFERED + " = 0" +
-                                " WHERE (" + ASSET_ID + " = " + id + ");"
+            for (id in itemIdArray) {
 
-                    updateQ = "${updateQ}${Statics.newLine}${tuQ}"
+                val values = ContentValues()
+                values.put(WAREHOUSE_ID, wId)
+                values.put(WAREHOUSE_AREA_ID, waId)
+                values.put(TRANSFERED, 0)
+
+                val selection = "$ASSET_ID = ?"
+                val args = arrayOf(id.toString())
+
+                val updatedRows = sqLiteDatabase.update(TABLE_NAME, values, selection, args)
+
+                if (BuildConfig.DEBUG) {
+                    if (updatedRows > 0) Log.d(javaClass.simpleName, "Asset ID: $id Updated")
+                    else Log.e(javaClass.simpleName, "Asset ID: $id NOT Updated!!!")
                 }
-
-                Log.i(this.javaClass.simpleName, updateQ)
-
-                sqLiteDatabase.execSQL(updateQ)
             }
-            sqLiteDatabase.setTransactionSuccessful()
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             error = true
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
 
         return !error
     }
 
     private fun updateOnInventory(itemIdArray: Array<Long>, wId: Long, waId: Long): Boolean {
+        if (itemIdArray.isEmpty()) return false
         Log.i(this::class.java.simpleName, ": SQLite -> updateOnInventory")
 
-        if (itemIdArray.isEmpty()) {
-            return false
-        }
-
         val sqLiteDatabase = getWritableDb()
-
-        val splitList = splitList(itemIdArray, 20)
+        val date = UTCDataTime.getUTCDateTimeAsString()
         var error = false
         try {
-            sqLiteDatabase.beginTransaction()
-            for (part in splitList) {
-                var updateQ = ""
-                for (id in part) {
-                    val tuQ =
-                        "UPDATE " + TABLE_NAME +
-                                " SET " +
-                                WAREHOUSE_ID + " = " + wId + ", " +
-                                WAREHOUSE_AREA_ID + " = " + waId + ", " +
-                                TRANSFERED + " = 0, " +
-                                STATUS + " = " + AssetStatus.onInventory.id + ", " +
-                                MISSING_DATE + " = NULL, " +
-                                LAST_ASSET_REVIEW_DATE + " = DATETIME('now', 'localtime')" +
-                                " WHERE (" + ASSET_ID + " = " + id + ");"
+            for (id in itemIdArray) {
 
-                    updateQ = "${updateQ}${Statics.newLine}${tuQ}"
+                val values = ContentValues()
+                values.put(WAREHOUSE_ID, wId)
+                values.put(WAREHOUSE_AREA_ID, waId)
+                values.put(TRANSFERED, 0)
+                values.put(STATUS, AssetStatus.onInventory.id)
+                values.putNull(MISSING_DATE)
+                values.put(LAST_ASSET_REVIEW_DATE, date)
+
+                val selection = "$ASSET_ID = ?"
+                val args = arrayOf(id.toString())
+
+                val updatedRows = sqLiteDatabase.update(TABLE_NAME, values, selection, args)
+
+                if (BuildConfig.DEBUG) {
+                    if (updatedRows > 0) Log.d(javaClass.simpleName, "Asset ID: $id Updated")
+                    else Log.e(javaClass.simpleName, "Asset ID: $id NOT Updated!!!")
                 }
-
-                Log.i(this.javaClass.simpleName, updateQ)
-
-                sqLiteDatabase.execSQL(updateQ)
             }
-            sqLiteDatabase.setTransactionSuccessful()
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             error = true
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
 
         return !error
     }
 
     private fun updateMissing(itemIdArray: Array<Long>): Boolean {
+        if (itemIdArray.isEmpty()) return false
         Log.i(this::class.java.simpleName, ": SQLite -> updateMissing")
 
-        if (itemIdArray.isEmpty()) {
-            return false
-        }
-
         val sqLiteDatabase = getWritableDb()
-
-        val splitList = splitList(itemIdArray, 20)
+        val date = UTCDataTime.getUTCDateTimeAsString()
         var error = false
         try {
-            sqLiteDatabase.beginTransaction()
-            for (part in splitList) {
-                var updateQ = ""
-                for (id in part) {
-                    val tuQ =
-                        "UPDATE " + TABLE_NAME +
-                                " SET " +
-                                TRANSFERED + " = 0, " +
-                                STATUS + " = " + AssetStatus.missing.id + ", " +
-                                MISSING_DATE + " = DATETIME('now', 'localtime')" +
-                                " WHERE (" + ASSET_ID + " = " + id + ");"
+            for (id in itemIdArray) {
 
-                    updateQ = "${updateQ}${Statics.newLine}${tuQ}"
+                val values = ContentValues()
+                values.put(TRANSFERED, 0)
+                values.put(STATUS, AssetStatus.missing.id)
+                values.put(MISSING_DATE, date)
+
+                val selection = "$ASSET_ID = ?"
+                val args = arrayOf(id.toString())
+
+                val updatedRows = sqLiteDatabase.update(TABLE_NAME, values, selection, args)
+
+                if (BuildConfig.DEBUG) {
+                    if (updatedRows > 0) Log.d(javaClass.simpleName, "Asset ID: $id Updated")
+                    else Log.e(javaClass.simpleName, "Asset ID: $id NOT Updated!!!")
                 }
-
-                Log.i(this.javaClass.simpleName, updateQ)
-
-                sqLiteDatabase.execSQL(updateQ)
             }
-            sqLiteDatabase.setTransactionSuccessful()
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             error = true
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
-
         return !error
     }
 
-    fun updateTransferred(allId: ArrayList<Long>): Boolean {
+    fun updateTransferred(itemIdArray: Array<Long>): Boolean {
+        if (itemIdArray.isEmpty()) return false
         Log.i(this::class.java.simpleName, ": SQLite -> updateTransferred")
 
         val sqLiteDatabase = getWritableDb()
 
-        val splitList = splitList(allId.toArray(), 500)
         var error = false
         try {
-            sqLiteDatabase.beginTransaction()
-            for (part in splitList) {
-                var where = "("
-                for ((index, id) in part.withIndex()) {
-                    var ending = "OR "
-                    if (index == allId.lastIndex) ending = ")"
-                    where = "$where $ASSET_ID = $id $ending"
+            for (id in itemIdArray) {
+
+                val values = ContentValues()
+                values.put(TRANSFERED, 1)
+
+                val selection = "$ASSET_ID = ?"
+                val args = arrayOf(id.toString())
+
+                val updatedRows = sqLiteDatabase.update(TABLE_NAME, values, selection, args)
+
+                if (BuildConfig.DEBUG) {
+                    if (updatedRows > 0) Log.d(javaClass.simpleName, "Asset ID: $id Updated")
+                    else Log.e(javaClass.simpleName, "Asset ID: $id NOT Updated!!!")
                 }
-
-                val updateQ =
-                    "UPDATE " + TABLE_NAME +
-                            " SET " +
-                            TRANSFERED + " = 1 " +
-                            " WHERE " + where
-
-                Log.i(this.javaClass.simpleName, updateQ)
-
-                sqLiteDatabase.execSQL(updateQ)
             }
-            sqLiteDatabase.setTransactionSuccessful()
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             error = true
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
 
         return !error
@@ -1323,11 +1280,11 @@ class AssetDbHelper {
             }
         }
 
-    // region TABLA E IDS TEMPORALES
+// region TABLA E IDS TEMPORALES
 
     // Funciones que guardan y recuperan ID entre actividades
-    // y, cuando se pasa un objeto demasiado grande, evitar el error:
-    // "FAILED BINDER TRANSACTION !!!"
+// y, cuando se pasa un objeto demasiado grande, evitar el error:
+// "FAILED BINDER TRANSACTION !!!"
     private fun createTempTable() {
         val allCommands: ArrayList<String> = ArrayList()
         allCommands.add(CREATE_TEMP_TABLE)
@@ -1430,7 +1387,7 @@ class AssetDbHelper {
             sqLiteDatabase.endTransaction()
         }
     }
-    // endregion TABLA E IDS TEMPORALES
+// endregion TABLA E IDS TEMPORALES
 
     private val basicSelect = "SELECT " +
             TABLE_NAME + "." + ASSET_ID + "," +

@@ -1,5 +1,6 @@
 package com.dacosys.assetControl.dataBase.datacollection
 
+import android.content.ContentValues
 import android.database.Cursor
 import android.database.SQLException
 import android.util.Log
@@ -31,6 +32,7 @@ import com.dacosys.assetControl.model.location.WarehouseArea
 import com.dacosys.assetControl.model.route.RouteProcessContent
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.misc.UTCDataTime
 
 /**
  * Created by Agustin on 28/12/2016.
@@ -342,6 +344,31 @@ class DataCollectionDbHelper {
             false
         }
         return result
+    }
+
+    fun updateTransferredNew(dataCollectionId: Long, collectorDataCollectionId: Long): Boolean {
+        Log.i(this::class.java.simpleName, ": SQLite -> updateTransferredNew")
+
+        val selection = "$COLLECTOR_DATA_COLLECTION_ID = ?"
+        val selectionArgs = arrayOf(collectorDataCollectionId.toString())
+
+        val values = ContentValues()
+        values.put(TRANSFERED_DATE, UTCDataTime.getUTCDateTimeAsString())
+        values.put(DATA_COLLECTION_ID, dataCollectionId)
+
+        val sqLiteDatabase = getWritableDb()
+        return try {
+            return sqLiteDatabase.update(
+                TABLE_NAME,
+                values,
+                selection,
+                selectionArgs
+            ) > 0
+        } catch (ex: SQLException) {
+            ex.printStackTrace()
+            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
+            false
+        }
     }
 
     fun delete(dataCollection: DataCollection): Boolean {

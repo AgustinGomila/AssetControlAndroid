@@ -1,5 +1,6 @@
 package com.dacosys.assetControl.dataBase.manteinance
 
+import android.content.ContentValues
 import android.database.Cursor
 import android.database.SQLException
 import android.util.Log
@@ -111,7 +112,7 @@ class AssetManteinanceDbHelper {
         return statement.simpleQueryForLong()
     }
 
-    fun updateTransferred(assetManteinanceId: Long): Boolean {
+    fun updateTransferred(assetMaintenanceId: Long): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> updateTransferred")
 
         /*
@@ -124,7 +125,7 @@ class AssetManteinanceDbHelper {
             "UPDATE " + TABLE_NAME +
                     " SET " +
                     TRANSFERRED + " = 1 " +
-                    " WHERE (" + ASSET_MANTEINANCE_ID + " = " + assetManteinanceId + ")"
+                    " WHERE (" + ASSET_MANTEINANCE_ID + " = " + assetMaintenanceId + ")"
 
         val sqLiteDatabase = getWritableDb()
         val result: Boolean = try {
@@ -140,8 +141,32 @@ class AssetManteinanceDbHelper {
         return result
     }
 
-    fun selectNoTransfered(): ArrayList<AssetManteinance> {
-        Log.i(this::class.java.simpleName, ": SQLite -> selectNoTransfered")
+    fun updateTransferredNew(assetMaintenanceId: Long): Boolean {
+        Log.i(this::class.java.simpleName, ": SQLite -> updateTransferredNew")
+
+        val selection = "$ASSET_MANTEINANCE_ID = ?"
+        val selectionArgs = arrayOf(assetMaintenanceId.toString())
+
+        val values = ContentValues()
+        values.put(TRANSFERRED, 1)
+
+        val sqLiteDatabase = getWritableDb()
+        return try {
+            return sqLiteDatabase.update(
+                TABLE_NAME,
+                values,
+                selection,
+                selectionArgs
+            ) > 0
+        } catch (ex: SQLException) {
+            ex.printStackTrace()
+            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
+            false
+        }
+    }
+
+    fun selectNoTransferred(): ArrayList<AssetManteinance> {
+        Log.i(this::class.java.simpleName, ": SQLite -> selectNoTransferred")
 
         val columns = getAllColumns()
         val selection = "$TABLE_NAME.$TRANSFERRED = ?"

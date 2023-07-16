@@ -1,5 +1,6 @@
 package com.dacosys.assetControl.dataBase.route
 
+import android.content.ContentValues
 import android.database.Cursor
 import android.database.SQLException
 import android.util.Log
@@ -306,6 +307,38 @@ class RouteProcessStepsDbHelper {
             false
         }
         return result
+    }
+
+    fun updateNew(dataCollectionId: Long?, routeProcessSteps: RouteProcessSteps): Boolean {
+        Log.i(this::class.java.simpleName, ": SQLite -> updateNew")
+
+        val selection =
+            "$ROUTE_PROCESS_ID = ? AND $ROUTE_PROCESS_CONTENT_ID = ? AND $LEVEL = ? AND $POSITION = ? AND $STEP = ?"
+        val selectionArgs = arrayOf(
+            routeProcessSteps.routeProcessId.toString(),
+            routeProcessSteps.routeProcessContentId.toString(),
+            routeProcessSteps.level.toString(),
+            routeProcessSteps.position.toString(),
+            routeProcessSteps.step.toString(),
+        )
+
+        val values = ContentValues()
+        if (dataCollectionId == null) values.putNull(DATA_COLLECTION_ID)
+        else values.put(DATA_COLLECTION_ID, dataCollectionId)
+
+        val sqLiteDatabase = getWritableDb()
+        return try {
+            return sqLiteDatabase.update(
+                TABLE_NAME,
+                values,
+                selection,
+                selectionArgs
+            ) > 0
+        } catch (ex: SQLException) {
+            ex.printStackTrace()
+            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
+            false
+        }
     }
 
     fun selectByCollectorRouteProcessContentId(id: Long): ArrayList<RouteProcessSteps> {

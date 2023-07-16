@@ -680,7 +680,7 @@ class WarehouseAreaAdapter : ArrayAdapter<WarehouseArea>, Filterable {
     companion object {
 
         fun defaultRowHeight(): Int {
-            return if (isTablet()) 58 else 92
+            return if (isTablet()) 58 else 127
         }
 
         class WarehouseAreaComparator(private val priorityText: String) :

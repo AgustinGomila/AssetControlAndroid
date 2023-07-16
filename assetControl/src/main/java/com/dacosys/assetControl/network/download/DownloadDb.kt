@@ -64,7 +64,7 @@ class DownloadDb(
         }
 
         fun getPendingWarehouse(): ArrayList<Warehouse> {
-            return WarehouseDbHelper().selectNoTransfered()
+            return WarehouseDbHelper().selectNoTransferred()
         }
 
         fun getPendingItemCategory(): ArrayList<ItemCategory> {
@@ -80,7 +80,7 @@ class DownloadDb(
         }
 
         fun getPendingAssetManteinance(): ArrayList<AssetManteinance> {
-            return AssetManteinanceDbHelper().selectNoTransfered()
+            return AssetManteinanceDbHelper().selectNoTransferred()
         }
 
         private fun pendingDelivery(): Boolean {
@@ -154,6 +154,7 @@ class DownloadDb(
                 ProgressStatus.finished -> {
                     launchDownload()
                 }
+
                 ProgressStatus.crashed -> {
                     onDownloadEvent.invoke(
                         DownloadTask(
@@ -163,6 +164,7 @@ class DownloadDb(
                         )
                     )
                 }
+
                 ProgressStatus.canceled -> {
                     onDownloadEvent.invoke(
                         DownloadTask(
@@ -279,10 +281,12 @@ class DownloadDb(
                 )
                 return
             }
+
             DownloadStatus.FINISHED -> {
                 // Seguimos con la comparación de fechas y descarga de base de datos
                 downloadDbFile()
             }
+
             else -> {
                 scope.launch { onUiEvent(SnackBarEventData(msg, SnackBarType.INFO)) }
             }
@@ -359,6 +363,7 @@ class DownloadDb(
                     )
                 )
             }
+
             ProgressStatus.finished -> {
                 SyncStatics()
                 onDownloadEvent.invoke(
@@ -369,6 +374,7 @@ class DownloadDb(
                     )
                 )
             }
+
             ProgressStatus.starting -> {
                 onDownloadEvent.invoke(
                     DownloadTask(
@@ -378,6 +384,7 @@ class DownloadDb(
                     )
                 )
             }
+
             ProgressStatus.running -> {
                 var progress = 0
                 val completedTask: Long = it.completedTask.toLong()

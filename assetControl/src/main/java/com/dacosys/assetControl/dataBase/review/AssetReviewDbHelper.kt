@@ -26,6 +26,7 @@ import com.dacosys.assetControl.model.review.AssetReview
 import com.dacosys.assetControl.model.review.AssetReviewStatus
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.misc.UTCDataTime
 import com.dacosys.assetControl.utils.misc.splitList
 import com.dacosys.assetControl.dataBase.location.WarehouseAreaContract.WarehouseAreaEntry.Companion.DESCRIPTION as WA_DESCRIPTION
 import com.dacosys.assetControl.dataBase.location.WarehouseAreaContract.WarehouseAreaEntry.Companion.TABLE_NAME as WA_TABLE_NAME
@@ -293,6 +294,32 @@ class AssetReviewDbHelper {
             false
         }
         return result
+    }
+
+    fun updateTransferredNew(assetReviewId: Long, collectorAssetReviewId: Long): Boolean {
+        Log.i(this::class.java.simpleName, ": SQLite -> updateTransferredNew")
+
+        val selection = "$COLLECTOR_ASSET_REVIEW_ID = ?"
+        val selectionArgs = arrayOf(collectorAssetReviewId.toString())
+
+        val values = ContentValues()
+        values.put(MODIFICATION_DATE, UTCDataTime.getUTCDateTimeAsString())
+        values.put(ASSET_REVIEW_ID, assetReviewId)
+        values.put(STATUS_ID, AssetReviewStatus.transferred.id)
+
+        val sqLiteDatabase = getWritableDb()
+        return try {
+            return sqLiteDatabase.update(
+                TABLE_NAME,
+                values,
+                selection,
+                selectionArgs
+            ) > 0
+        } catch (ex: SQLException) {
+            ex.printStackTrace()
+            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
+            false
+        }
     }
 
     fun delete(assetReview: AssetReview): Boolean {

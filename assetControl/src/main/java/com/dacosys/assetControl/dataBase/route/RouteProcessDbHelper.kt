@@ -1,5 +1,6 @@
 package com.dacosys.assetControl.dataBase.route
 
+import android.content.ContentValues
 import android.database.Cursor
 import android.database.SQLException
 import android.util.Log
@@ -174,8 +175,8 @@ class RouteProcessDbHelper {
         return statement.simpleQueryForLong()
     }
 
-    fun updateTransfered(routeProcessId: Long, collectorRouteProcessId: Long): Boolean {
-        Log.i(this::class.java.simpleName, ": SQLite -> updateTransfered")
+    fun updateTransferred(routeProcessId: Long, collectorRouteProcessId: Long): Boolean {
+        Log.i(this::class.java.simpleName, ": SQLite -> updateTransferred")
 
         /*
         UPDATE route_process
@@ -205,6 +206,31 @@ class RouteProcessDbHelper {
             false
         }
         return result
+    }
+
+    fun updateTransferredNew(routeProcessId: Long, collectorRouteProcessId: Long): Boolean {
+        Log.i(this::class.java.simpleName, ": SQLite -> updateTransferredNew")
+
+        val selection = "$COLLECTOR_ROUTE_PROCESS_ID = ?"
+        val selectionArgs = arrayOf(collectorRouteProcessId.toString())
+
+        val values = ContentValues()
+        values.put(ROUTE_PROCESS_ID, routeProcessId)
+        values.put(TRANSFERED_DATE, UTCDataTime.getUTCDateTimeAsString())
+
+        val sqLiteDatabase = getWritableDb()
+        return try {
+            return sqLiteDatabase.update(
+                TABLE_NAME,
+                values,
+                selection,
+                selectionArgs
+            ) > 0
+        } catch (ex: SQLException) {
+            ex.printStackTrace()
+            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
+            false
+        }
     }
 
     fun delete(routeProcess: RouteProcess): Boolean {

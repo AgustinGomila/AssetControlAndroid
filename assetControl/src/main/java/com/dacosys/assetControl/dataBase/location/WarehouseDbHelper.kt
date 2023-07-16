@@ -5,6 +5,7 @@ import android.database.Cursor
 import android.database.SQLException
 import android.util.Log
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
+import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.getReadableDb
 import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.getWritableDb
@@ -19,7 +20,6 @@ import com.dacosys.assetControl.network.sync.SyncProgress
 import com.dacosys.assetControl.network.sync.SyncRegistryType
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.misc.splitList
 import com.dacosys.assetControl.webservice.location.WarehouseObject
 
 /**
@@ -179,47 +179,40 @@ class WarehouseDbHelper {
         }
     }
 
-    fun updateTransferred(allId: ArrayList<Long>): Boolean {
+    fun updateTransferred(itemIdArray: Array<Long>): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> updateTransferred")
+        if (itemIdArray.isEmpty()) return false
 
         val sqLiteDatabase = getWritableDb()
 
-        val splitList = splitList(allId.toArray(), 500)
         var error = false
         try {
-            sqLiteDatabase.beginTransaction()
-            for (part in splitList) {
-                var where = "("
-                for ((index, id) in part.withIndex()) {
-                    var ending = "OR "
-                    if (index == allId.lastIndex) ending = ")"
-                    where = "$where $WAREHOUSE_ID = $id $ending"
+            for (id in itemIdArray) {
+
+                val values = ContentValues()
+                values.put(TRANSFERRED, 1)
+
+                val selection = "$WAREHOUSE_ID = ?"
+                val args = arrayOf(id.toString())
+
+                val updatedRows = sqLiteDatabase.update(TABLE_NAME, values, selection, args)
+
+                if (BuildConfig.DEBUG) {
+                    if (updatedRows > 0) Log.d(javaClass.simpleName, "Warehouse ID: $id Updated")
+                    else Log.e(javaClass.simpleName, "Warehouse ID: $id NOT Updated!!!")
                 }
-
-                val updateQ =
-                    "UPDATE " + TABLE_NAME +
-                            " SET " +
-                            TRANSFERRED + " = 1 " +
-                            " WHERE " + where
-
-                Log.i(this.javaClass.simpleName, updateQ)
-
-                sqLiteDatabase.execSQL(updateQ)
             }
-            sqLiteDatabase.setTransactionSuccessful()
         } catch (ex: SQLException) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             error = true
-        } finally {
-            sqLiteDatabase.endTransaction()
         }
 
         return !error
     }
 
-    fun selectNoTransfered(): ArrayList<Warehouse> {
-        Log.i(this::class.java.simpleName, ": SQLite -> selectNoTransfered")
+    fun selectNoTransferred(): ArrayList<Warehouse> {
+        Log.i(this::class.java.simpleName, ": SQLite -> selectNoTransferred")
 
         val columns = getAllColumns()
         val selection = "$TABLE_NAME.$TRANSFERRED = ?"

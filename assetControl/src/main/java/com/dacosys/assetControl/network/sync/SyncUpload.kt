@@ -338,7 +338,7 @@ class SyncUpload(
                 )
 
                 if (arId > 0) {
-                    arDb.updateTransferred(arId, ar.collectorAssetReviewId)
+                    arDb.updateTransferredNew(arId, ar.collectorAssetReviewId)
 
                     // Enviar imágenes si existen
                     SendImages(programObjectId = Table.assetReview.tableId.toLong(),
@@ -486,7 +486,7 @@ class SyncUpload(
                 )
 
                 if (wmId > 0) {
-                    wmDb.updateTransferred(wmId, wm.collectorWarehouseMovementId)
+                    wmDb.updateTransferredNew(wmId, wm.collectorWarehouseMovementId)
 
                     // Enviar imágenes si existen
                     SendImages(programObjectId = Table.warehouseMovement.tableId.toLong(),
@@ -639,7 +639,7 @@ class SyncUpload(
             }
 
             // Actualizamos todos los activos en una sola consulta.
-            error = !assetDb.updateTransferred(allRealId)
+            if (!error) error = !assetDb.updateTransferred(allRealId.toTypedArray())
         } catch (ex: Exception) {
             ex.printStackTrace()
             // Error remoto
@@ -816,7 +816,7 @@ class SyncUpload(
             }
 
             // Actualizamos todos las áreas en una sola consulta.
-            error = !waDb.updateTransferred(allRealId)
+            if (!error) error = !waDb.updateTransferred(allRealId.toTypedArray())
         } catch (ex: Exception) {
             ex.printStackTrace()
             // Error remoto
@@ -875,7 +875,7 @@ class SyncUpload(
                 return
             }
 
-            val wAl = wDb.selectNoTransfered()
+            val wAl = wDb.selectNoTransferred()
             if (wAl.size < 1) {
                 return
             }
@@ -964,7 +964,7 @@ class SyncUpload(
             }
 
             // Actualizamos todos las áreas en una sola consulta.
-            error = !wDb.updateTransferred(allRealId)
+            if (!error) error = !wDb.updateTransferred(allRealId.toTypedArray())
         } catch (ex: Exception) {
             ex.printStackTrace()
             // Error remoto
@@ -1101,7 +1101,7 @@ class SyncUpload(
             }
 
             // Actualizamos todos las áreas en una sola consulta.
-            error = !icDb.updateTransferred(allRealId)
+            if (!error) error = !icDb.updateTransferred(allRealId.toTypedArray())
         } catch (ex: Exception) {
             ex.printStackTrace()
             // Error remoto
@@ -1238,7 +1238,7 @@ class SyncUpload(
                 )
 
                 if (dcId > 0) {
-                    dcDb.updateTransferred(dcId, dc.collectorDataCollectionId)
+                    dcDb.updateTransferredNew(dcId, dc.collectorDataCollectionId)
 
                     // Enviar imágenes si existen
                     SendImages(programObjectId = Table.dataCollection.tableId.toLong(),
@@ -1402,7 +1402,7 @@ class SyncUpload(
                 )
 
                 if (rpId > 0) {
-                    rpDb.updateTransfered(rpId, rp.collectorRouteProcessId)
+                    rpDb.updateTransferredNew(rpId, rp.collectorRouteProcessId)
 
                     // Enviar imágenes si existen
                     SendImages(programObjectId = Table.routeProcess.tableId.toLong(),
@@ -1471,7 +1471,7 @@ class SyncUpload(
                 return
             }
 
-            val amAl = amDb.selectNoTransfered()
+            val amAl = amDb.selectNoTransferred()
             if (amAl.size < 1) {
                 return
             }
@@ -1536,7 +1536,7 @@ class SyncUpload(
                 }
 
                 if (assetMaintenanceId > 0) {
-                    amDb.updateTransferred(assetMaintenanceId)
+                    amDb.updateTransferredNew(assetMaintenanceId)
 
                     // Enviar imágenes si existen
                     SendImages(programObjectId = Table.assetManteinance.tableId.toLong(),

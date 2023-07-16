@@ -1,5 +1,6 @@
 package com.dacosys.assetControl.utils.misc
 
+import android.util.Log
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
@@ -21,7 +22,9 @@ class UTCDataTime {
             val date = sdf.parse(sdf.format(Date())) ?: Calendar.getInstance()
 
             sdf.timeZone = TimeZone.getDefault()
-            return sdf.format(date)
+            val r = sdf.format(date)
+            Log.d(this::class.java.simpleName, "Current date: $r")
+            return r
         }
 
         fun dateToStringDate(dateTime: Date): String? {

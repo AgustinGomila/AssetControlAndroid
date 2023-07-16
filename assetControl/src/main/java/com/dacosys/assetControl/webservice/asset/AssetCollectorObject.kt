@@ -58,37 +58,13 @@ class AssetCollectorObject() : Parcelable {
         status = asset.assetStatusId
         ownership_status = asset.ownershipStatusId
         active = if (asset.active) 1 else 0
-        missing_date = if (asset.missingDate == null) {
-            ""
-        } else {
-            asset.missingDate!!
-        }
-        label_number = if (asset.labelNumber == null) {
-            0
-        } else {
-            asset.labelNumber!!
-        }
+        missing_date = asset.missingDate ?: ""
+        label_number = asset.labelNumber ?: 0
         condition = asset.assetConditionId
-        parent_id = if (asset.parentAssetId == null) {
-            0
-        } else {
-            asset.parentAssetId!!
-        }
-        ean = if (asset.ean == null) {
-            ""
-        } else {
-            asset.ean!!
-        }
-        serial_number = if (asset.serialNumber == null) {
-            ""
-        } else {
-            asset.serialNumber!!
-        }
-        last_asset_review_date = if (asset.lastAssetReviewDate == null) {
-            ""
-        } else {
-            asset.lastAssetReviewDate!!
-        }
+        parent_id = asset.parentAssetId ?: 0
+        ean = asset.ean ?: ""
+        serial_number = asset.serialNumber ?: ""
+        last_asset_review_date = asset.lastAssetReviewDate ?: ""
     }
 
     fun getBySoapObject(so: SoapObject): AssetCollectorObject {
@@ -105,60 +81,77 @@ class AssetCollectorObject() : Parcelable {
                             x.asset_id =
                                 (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
                         }
+
                         "parent_id" -> {
                             x.parent_id =
                                 (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
                         }
+
                         "code" -> {
                             x.code = soValue as? String ?: ""
                         }
+
                         "warehouse_id" -> {
                             x.warehouse_id =
                                 (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
                         }
+
                         "warehouse_area_id" -> {
                             x.warehouse_area_id =
                                 (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
                         }
+
                         "active" -> {
                             x.active = soValue as? Int ?: 0
                         }
+
                         "ownership_status" -> {
                             x.ownership_status = soValue as? Int ?: 0
                         }
+
                         "status" -> {
                             x.status = soValue as? Int ?: 0
                         }
+
                         "missing_date" -> {
                             x.missing_date = soValue as? String ?: ""
                         }
+
                         "description" -> {
                             x.description = soValue as? String ?: ""
                         }
+
                         "item_category_id" -> {
                             x.item_category_id =
                                 (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
                         }
+
                         "original_warehouse_id" -> {
                             x.original_warehouse_id =
                                 (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
                         }
+
                         "original_warehouse_area_id" -> {
                             x.original_warehouse_area_id =
                                 (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
                         }
+
                         "label_number" -> {
                             x.label_number = soValue as? Int ?: 0
                         }
+
                         "condition" -> {
                             x.condition = soValue as? Int ?: 0
                         }
+
                         "serial_number" -> {
                             x.serial_number = soValue as? String ?: ""
                         }
+
                         "ean" -> {
                             x.ean = soValue as? String ?: ""
                         }
+
                         "last_asset_review_date" -> {
                             x.last_asset_review_date = soValue as? String ?: ""
                         }

@@ -1,5 +1,6 @@
 package com.dacosys.assetControl.dataBase.route
 
+import android.content.ContentValues
 import android.database.Cursor
 import android.database.SQLException
 import android.util.Log
@@ -137,6 +138,41 @@ class RouteProcessContentDbHelper {
         return statement.simpleQueryForLong()
     }
 
+    fun updateStatusNew(rpc: RouteProcessContent): Boolean {
+        Log.i(this::class.java.simpleName, ": SQLite -> updateStatus")
+
+        val selection =
+            "$ROUTE_PROCESS_ID = ? AND $DATA_COLLECTION_RULE_ID = ? AND $LEVEL = ? AND $POSITION = ? AND $ROUTE_PROCESS_CONTENT_ID = ?"
+        val selectionArgs = arrayOf(
+            rpc.routeProcessId.toString(),
+            rpc.dataCollectionRuleId.toString(),
+            rpc.level.toString(),
+            rpc.position.toString(),
+            rpc.routeProcessContentId.toString()
+        )
+
+        val values = ContentValues()
+        values.put(ROUTE_PROCESS_STATUS_ID, rpc.routeProcessStatusId)
+        if (rpc.dataCollectionId == null) values.putNull(DATA_COLLECTION_ID)
+        else values.put(DATA_COLLECTION_ID, rpc.dataCollectionId)
+
+        val sqLiteDatabase = getWritableDb()
+        return try {
+            val res = sqLiteDatabase.update(
+                TABLE_NAME,
+                values,
+                selection,
+                selectionArgs
+            ) > 0
+            if (!res) false
+            else updateRouteProcessSteps(rpc)
+        } catch (ex: SQLException) {
+            ex.printStackTrace()
+            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
+            false
+        }
+    }
+
     fun updateStatus(rpc: RouteProcessContent): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> updateStatus")
 
@@ -176,29 +212,33 @@ class RouteProcessContentDbHelper {
             false
         }
 
-        if (res) {
-            val rpStepDbH = RouteProcessStepsDbHelper()
-            val x = rpStepDbH.selectByCollectorRouteProcessContentId(rpc.routeProcessContentId)
+        return if (!res) false
+        else updateRouteProcessSteps(rpc)
+    }
 
-            try {
-                if (x.size > 0) {
-                    val rpStep = x[0]
-                    rpStepDbH.update(rpc.dataCollectionId, rpStep)
-                } else {
-                    rpStepDbH.insert(
-                        rpc.routeProcessId,
-                        rpc.routeProcessContentId,
-                        rpc.level,
-                        rpc.position,
-                        rpc.dataCollectionId
-                    )
-                }
-                res = true
-            } catch (ex: Exception) {
-                ex.printStackTrace()
-                ErrorLog.writeLog(null, this::class.java.simpleName, ex)
-                res = false
+    private fun updateRouteProcessSteps(rpc: RouteProcessContent): Boolean {
+        var res: Boolean
+        val rpStepDbH = RouteProcessStepsDbHelper()
+        val x = rpStepDbH.selectByCollectorRouteProcessContentId(rpc.routeProcessContentId)
+
+        try {
+            if (x.size > 0) {
+                val rpStep = x[0]
+                rpStepDbH.updateNew(rpc.dataCollectionId, rpStep)
+            } else {
+                rpStepDbH.insert(
+                    rpc.routeProcessId,
+                    rpc.routeProcessContentId,
+                    rpc.level,
+                    rpc.position,
+                    rpc.dataCollectionId
+                )
             }
+            res = true
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
+            res = false
         }
         return res
     }

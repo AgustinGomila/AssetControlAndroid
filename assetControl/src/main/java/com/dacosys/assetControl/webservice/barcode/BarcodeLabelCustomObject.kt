@@ -24,11 +24,7 @@ class BarcodeLabelCustomObject() : Parcelable {
         // Main Information
         description = barcodeLabelCustom.description
         barcode_label_custom_id = barcodeLabelCustom.barcodeLabelCustomId
-        barcode_label_target_id = if (barcodeLabelCustom.barcodeLabelTargetId == null) {
-            0
-        } else {
-            barcodeLabelCustom.barcodeLabelTargetId!!
-        }
+        barcode_label_target_id = barcodeLabelCustom.barcodeLabelTargetId ?: 0
         active = if (barcodeLabelCustom.active) 1 else 0
         template = barcodeLabelCustom.template
     }
@@ -47,16 +43,20 @@ class BarcodeLabelCustomObject() : Parcelable {
                             x.barcode_label_custom_id =
                                 (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
                         }
+
                         "barcode_label_target_id" -> {
                             x.barcode_label_target_id =
                                 (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
                         }
+
                         "template" -> {
                             x.template = soValue as? String ?: ""
                         }
+
                         "active" -> {
                             x.active = soValue as? Int ?: 0
                         }
+
                         "description" -> {
                             x.description = soValue as? String ?: ""
                         }

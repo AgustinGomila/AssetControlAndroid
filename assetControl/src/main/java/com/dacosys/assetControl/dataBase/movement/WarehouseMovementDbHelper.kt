@@ -27,6 +27,7 @@ import com.dacosys.assetControl.dataBase.movement.WarehouseMovementContract.Ware
 import com.dacosys.assetControl.model.movement.WarehouseMovement
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.misc.UTCDataTime
 
 /**
  * Created by Agustin on 28/12/2016.
@@ -335,6 +336,31 @@ class WarehouseMovementDbHelper {
             false
         }
         return result
+    }
+
+    fun updateTransferredNew(wmId: Long, collectorWmId: Long): Boolean {
+        Log.i(this::class.java.simpleName, ": SQLite -> updateTransferredNew")
+
+        val selection = "$COLLECTOR_WAREHOUSE_MOVEMENT_ID = ?"
+        val selectionArgs = arrayOf(collectorWmId.toString())
+
+        val values = ContentValues()
+        values.put(TRANSFERED_DATE, UTCDataTime.getUTCDateTimeAsString())
+        values.put(WAREHOUSE_MOVEMENT_ID, wmId)
+
+        val sqLiteDatabase = getWritableDb()
+        return try {
+            return sqLiteDatabase.update(
+                TABLE_NAME,
+                values,
+                selection,
+                selectionArgs
+            ) > 0
+        } catch (ex: SQLException) {
+            ex.printStackTrace()
+            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
+            false
+        }
     }
 
     fun delete(warehouseMovement: WarehouseMovement): Boolean {

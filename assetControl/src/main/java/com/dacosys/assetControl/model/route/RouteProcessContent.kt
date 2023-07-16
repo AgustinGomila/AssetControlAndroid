@@ -212,7 +212,7 @@ class RouteProcessContent : Parcelable {
                 return false
             }
         }
-        return RouteProcessContentDbHelper().updateStatus(this)
+        return RouteProcessContentDbHelper().updateStatusNew(this)
     }
 
     override fun equals(other: Any?): Boolean {
