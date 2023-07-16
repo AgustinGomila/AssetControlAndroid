@@ -17,17 +17,10 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
     <uses-permission android:name="android.permission.VIBRATE"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" tools:ignore="ScopedStorage"/>
 
     <!-- Honeywell Broadcast Permission -->
     <uses-permission android:name="com.honeywell.decode.permission.DECODE"/>
-
-    <!-- Necesarios para actualizar la app programáticamente -->
-    <uses-permission
-            android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-            tools:ignore="ScopedStorage"/>
-    <!-- <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" /> -->
-    <!-- <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" /> -->
-    <!-- <permission android:name="android.permission.QUERY_ALL_PACKAGES" /> -->
 
     <queries>
         <intent>
@@ -158,21 +151,21 @@
         </activity>
         <activity android:name=".ui.activities.review.AssetReviewSelectActivity"/>
         <activity
-                android:name=".ui.activities.review.AssetReviewContentActivity"
+                android:name=".ui.activities.review.ArcActivity"
                 android:exported="false"
                 android:windowSoftInputMode="stateAlwaysHidden"/>
         <activity
                 android:name=".ui.activities.asset.AssetPrintLabelActivity"
                 android:windowSoftInputMode="adjustResize"
                 android:exported="false"/>
-        <activity android:name=".ui.activities.review.AssetReviewContentConfirmActivity"/>
+        <activity android:name=".ui.activities.review.ArcConfirmActivity"/>
         <activity
                 android:name=".ui.activities.asset.AssetCRUDActivity"
                 android:exported="false"/>
         <activity
-                android:name=".ui.activities.movement.WarehouseMovementContentActivity"
+                android:name=".ui.activities.movement.WmcActivity"
                 android:exported="false"/>
-        <activity android:name=".ui.activities.movement.WarehouseMovementContentConfirmActivity"/>
+        <activity android:name=".ui.activities.movement.WmcConfirmActivity"/>
         <activity
                 android:name=".ui.activities.common.ObservationsActivity"
                 android:exported="false"/>

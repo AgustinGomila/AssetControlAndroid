@@ -17,6 +17,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.res.ResourcesCompat
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.transition.ChangeBounds
 import androidx.transition.Transition
@@ -24,13 +26,12 @@ import androidx.transition.TransitionManager
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.adapters.interfaces.Interfaces
-import com.dacosys.assetControl.adapters.movement.WarehouseMovementContentAdapter
+import com.dacosys.assetControl.adapters.movement.WmcRecyclerAdapter
 import com.dacosys.assetControl.dataBase.asset.AssetDbHelper
 import com.dacosys.assetControl.dataBase.movement.WarehouseMovementContentDbHelper
 import com.dacosys.assetControl.databinding.ProgressBarDialogBinding
 import com.dacosys.assetControl.databinding.WarehouseMovementContentBottomPanelCollapsedBinding
 import com.dacosys.assetControl.model.asset.Asset
-import com.dacosys.assetControl.model.asset.AssetStatus
 import com.dacosys.assetControl.model.common.SaveProgress
 import com.dacosys.assetControl.model.location.Warehouse
 import com.dacosys.assetControl.model.location.WarehouseArea
@@ -54,13 +55,16 @@ import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.ParcelLong
-import com.dacosys.assetControl.utils.preferences.Repository
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsPutBoolean
+import com.dacosys.assetControl.utils.preferences.Repository.Companion.useImageControl
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.ScannedCode
 import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.utils.scanners.nfc.Nfc
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid.Companion.isRfidRequired
+import com.dacosys.assetControl.utils.settings.Preference
 import com.dacosys.assetControl.viewModel.review.SaveReviewViewModel
 import com.dacosys.imageControl.dto.DocumentContent
 import com.dacosys.imageControl.dto.DocumentContentRequestResult
@@ -73,7 +77,7 @@ import com.dacosys.imageControl.ui.activities.ImageControlGridActivity
 import org.parceler.Parcels
 import kotlin.concurrent.thread
 
-class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerListener,
+class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
     Rfid.RfidDeviceListener, SwipeRefreshLayout.OnRefreshListener,
     LocationHeaderFragment.LocationChangedListener,
     Interfaces.CheckedChangedListener,
@@ -86,24 +90,19 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
         super.onDestroy()
     }
 
+    private var isFinishingByUser = false
     private fun destroyLocals() {
-        wmContAdapter?.refreshListeners(null, null, null)
+        // Borramos los Ids temporales que se usaron en la actividad.
+        if (isFinishingByUser) WarehouseMovementContentDbHelper().deleteTemp()
+
+        adapter?.refreshListeners(null, null, null)
+        adapter?.refreshImageControlListeners(null, null)
         progressDialog?.dismiss()
         progressDialog = null
     }
 
     override fun onLocationChanged(warehouse: Warehouse, warehouseArea: WarehouseArea) {
-        if (wmContAdapter == null) return
-
-        for (wmCont in wmContAdapter?.getAll() ?: ArrayList()) {
-            if (wmCont.warehouseAreaId == warehouseArea.warehouseAreaId) {
-                wmCont.contentStatusId = WarehouseMovementContentStatus.noNeedToMove.id
-            } else {
-                wmCont.contentStatusId = WarehouseMovementContentStatus.toMove.id
-            }
-        }
-
-        fillAdapter()
+        adapter?.locationChange(warehouseArea.warehouseAreaId)
     }
 
     override fun onRefresh() {
@@ -116,13 +115,16 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
 
     private var tempTitle = ""
 
-    private var wmContAdapter: WarehouseMovementContentAdapter? = null
-    private var wmContArray: ArrayList<WarehouseMovementContent> = ArrayList()
-    private var currentInventory: ArrayList<String>? = null
+    private var _fillAdapter = false
 
+    private var adapter: WmcRecyclerAdapter? = null
+    private var checkedIdArray: java.util.ArrayList<Long> = java.util.ArrayList()
     private var lastSelected: WarehouseMovementContent? = null
+    private var currentScrollPosition: Int = 0
     private var firstVisiblePos: Int? = null
-    private var checkedIdArray: ArrayList<Long> = ArrayList()
+
+    private var completeList: ArrayList<WarehouseMovementContent> = ArrayList()
+    private var currentInventory: ArrayList<String>? = null
 
     private var collectorContentId: Long = 0
     private var obs = ""
@@ -136,6 +138,23 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
     private var panelBottomIsExpanded = false
     private var panelTopIsExpanded = true
 
+    private var multiSelect = false
+
+    private val menuItemShowImages = 9999
+    private var showImages
+        get() = prefsGetBoolean(Preference.reviewContentShowImages)
+        set(value) {
+            prefsPutBoolean(Preference.reviewContentShowImages.key, value)
+        }
+
+    private var showCheckBoxes
+        get() =
+            if (!multiSelect) false
+            else prefsGetBoolean(Preference.reviewContentShowCheckBoxes)
+        set(value) {
+            prefsPutBoolean(Preference.reviewContentShowCheckBoxes.key, value)
+        }
+
 
     override fun onSaveInstanceState(savedInstanceState: Bundle) {
         super.onSaveInstanceState(savedInstanceState)
@@ -144,20 +163,22 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
 
     private fun saveBundleValues(b: Bundle) {
         b.putString("title", tempTitle)
-        b.putStringArrayList("currentInventory", currentInventory)
         b.putBoolean("panelTopIsExpanded", panelTopIsExpanded)
         b.putBoolean("panelBottomIsExpanded", panelBottomIsExpanded)
 
-        if (wmContAdapter != null) {
-            b.putLongArray("checkedIdArray", wmContAdapter?.getAllChecked()?.toLongArray())
+        b.putStringArrayList("currentInventory", currentInventory)
 
-            // Guardamos la revisión en una tabla temporal.
-            // Revisiones de miles de artículos no pueden pasarse en el intent.
-            WarehouseMovementContentDbHelper().insertTempList(
-                wmId = 1,
-                movementList = wmContAdapter?.getAll() ?: ArrayList()
-            )
-        }
+        b.putParcelable("lastSelected", adapter?.currentItem())
+        b.putInt("firstVisiblePos", adapter?.firstVisiblePos() ?: RecyclerView.NO_POSITION)
+        b.putLongArray("checkedIdArray", adapter?.checkedIdArray?.map { it }?.toLongArray())
+        b.putInt("currentScrollPosition", currentScrollPosition)
+
+        // Guardamos el movimiento en una tabla temporal.
+        // Movimientos de miles de artículos no pueden pasarse en el intent.
+        WarehouseMovementContentDbHelper().insertTempList(
+            wmId = 1,
+            movementList = adapter?.fullList ?: ArrayList()
+        )
     }
 
     private fun loadBundleValues(b: Bundle) {
@@ -170,20 +191,21 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
         currentInventory = b.getStringArrayList("currentInventory")
 
         // Panels
-        if (b.containsKey("panelBottomIsExpanded")) panelBottomIsExpanded =
-            b.getBoolean("panelBottomIsExpanded")
-        if (b.containsKey("panelTopIsExpanded")) panelTopIsExpanded =
-            b.getBoolean("panelTopIsExpanded")
+        if (b.containsKey("panelBottomIsExpanded")) panelBottomIsExpanded = b.getBoolean("panelBottomIsExpanded")
+        if (b.containsKey("panelTopIsExpanded")) panelTopIsExpanded = b.getBoolean("panelTopIsExpanded")
 
-        // Cargamos la revisión desde la tabla temporal
-        wmContArray.clear()
-        val tempCont = WarehouseMovementContentDbHelper().selectByTempId(1)
-        if (tempCont.any()) wmContArray = tempCont
-
+        // Adapter
+        checkedIdArray = (b.getLongArray("checkedIdArray") ?: longArrayOf()).toCollection(ArrayList())
         lastSelected = b.getParcelable("lastSelected")
         firstVisiblePos = if (b.containsKey("firstVisiblePos")) b.getInt("firstVisiblePos") else -1
-        checkedIdArray =
-            (b.getLongArray("checkedIdArray") ?: longArrayOf()).toCollection(ArrayList())
+        currentScrollPosition = b.getInt("currentScrollPosition")
+
+        // Cargamos el movimiento desde la tabla temporal
+        completeList.clear()
+        val tempCont = WarehouseMovementContentDbHelper().selectByTempId(1)
+        if (tempCont.any()) completeList = tempCont
+
+        _fillAdapter = true
     }
 
     private fun loadDefaultValues() {
@@ -225,16 +247,23 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
             android.R.color.holo_red_light
         )
 
+        binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                currentScrollPosition =
+                    (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+            }
+        })
+
         // Para expandir y colapsar el panel inferior
         setBottomPanelAnimation()
         setTopPanelAnimation()
 
         binding.okButton.setOnClickListener {
             if (allowClicks) {
-                if ((wmContAdapter?.assetsToMove ?: 0) <= 0 && (wmContAdapter?.assetsFounded(
-                        headerFragment?.warehouseArea?.warehouseAreaId ?: 0
-                    ) ?: 0) <= 0
-                ) {
+                val assetToMove = adapter?.assetsToMove ?: 0
+                val assetFounded = adapter?.assetsFounded(headerFragment?.warehouseArea?.warehouseAreaId ?: 0) ?: 0
+
+                if (assetToMove <= 0 && assetFounded <= 0) {
                     makeText(
                         binding.root,
                         getContext().getString(R.string.you_must_add_at_least_one_asset),
@@ -297,23 +326,11 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
 
         val currentLayout = ConstraintSet()
         if (panelBottomIsExpanded) {
-            if (panelTopIsExpanded) {
-                currentLayout.load(this, R.layout.warehouse_movement_content_activity)
-            } else {
-                currentLayout.load(
-                    this, R.layout.warehouse_movement_content_top_panel_collapsed
-                )
-            }
+            if (panelTopIsExpanded) currentLayout.load(this, R.layout.warehouse_movement_content_activity)
+            else currentLayout.load(this, R.layout.warehouse_movement_content_top_panel_collapsed)
         } else {
-            if (panelTopIsExpanded) {
-                currentLayout.load(
-                    this, R.layout.warehouse_movement_content_bottom_panel_collapsed
-                )
-            } else {
-                currentLayout.load(
-                    this, R.layout.warehouse_movement_content_both_panels_collapsed
-                )
-            }
+            if (panelTopIsExpanded) currentLayout.load(this, R.layout.warehouse_movement_content_bottom_panel_collapsed)
+            else currentLayout.load(this, R.layout.warehouse_movement_content_both_panels_collapsed)
         }
 
         val transition = ChangeBounds()
@@ -332,27 +349,12 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
 
         currentLayout.applyTo(binding.warehouseMovementContent)
 
-        when {
-            panelBottomIsExpanded -> {
-                binding.expandBottomPanelButton?.text =
-                    getContext().getString(R.string.collapse_panel)
-            }
+        if (panelBottomIsExpanded) binding.expandBottomPanelButton?.text =
+            getContext().getString(R.string.collapse_panel)
+        else binding.expandBottomPanelButton?.text = getString(R.string.more_options)
 
-            else -> {
-                binding.expandBottomPanelButton?.text = getString(R.string.more_options)
-            }
-        }
-
-        when {
-            panelTopIsExpanded -> {
-                binding.expandTopPanelButton?.text = getString(R.string.collapse_panel)
-            }
-
-            else -> {
-                binding.expandTopPanelButton?.text =
-                    getContext().getString(R.string.select_destination)
-            }
-        }
+        if (panelTopIsExpanded) binding.expandTopPanelButton?.text = getString(R.string.collapse_panel)
+        else binding.expandTopPanelButton?.text = getContext().getString(R.string.select_destination)
     }
 
     private fun setBottomPanelAnimation() {
@@ -363,23 +365,14 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
         binding.expandBottomPanelButton?.setOnClickListener {
             val nextLayout = ConstraintSet()
             if (panelBottomIsExpanded) {
-                if (panelTopIsExpanded) {
-                    nextLayout.load(
-                        this, R.layout.warehouse_movement_content_bottom_panel_collapsed
-                    )
-                } else {
-                    nextLayout.load(
-                        this, R.layout.warehouse_movement_content_both_panels_collapsed
-                    )
-                }
+                if (panelTopIsExpanded) nextLayout.load(
+                    this,
+                    R.layout.warehouse_movement_content_bottom_panel_collapsed
+                )
+                else nextLayout.load(this, R.layout.warehouse_movement_content_both_panels_collapsed)
             } else {
-                if (panelTopIsExpanded) {
-                    nextLayout.load(this, R.layout.warehouse_movement_content_activity)
-                } else {
-                    nextLayout.load(
-                        this, R.layout.warehouse_movement_content_top_panel_collapsed
-                    )
-                }
+                if (panelTopIsExpanded) nextLayout.load(this, R.layout.warehouse_movement_content_activity)
+                else nextLayout.load(this, R.layout.warehouse_movement_content_top_panel_collapsed)
             }
 
             panelBottomIsExpanded = !panelBottomIsExpanded
@@ -399,17 +392,9 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
 
             nextLayout.applyTo(binding.warehouseMovementContent)
 
-            when {
-                panelBottomIsExpanded -> {
-                    binding.expandBottomPanelButton?.text =
-                        getContext().getString(R.string.collapse_panel)
-                }
-
-                else -> {
-                    binding.expandBottomPanelButton?.text =
-                        getContext().getString(R.string.more_options)
-                }
-            }
+            if (panelBottomIsExpanded) binding.expandBottomPanelButton?.text =
+                getContext().getString(R.string.collapse_panel)
+            else binding.expandBottomPanelButton?.text = getContext().getString(R.string.more_options)
         }
     }
 
@@ -421,23 +406,11 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
         binding.expandTopPanelButton?.setOnClickListener {
             val nextLayout = ConstraintSet()
             if (panelBottomIsExpanded) {
-                if (panelTopIsExpanded) {
-                    nextLayout.load(
-                        this, R.layout.warehouse_movement_content_top_panel_collapsed
-                    )
-                } else {
-                    nextLayout.load(this, R.layout.warehouse_movement_content_activity)
-                }
+                if (panelTopIsExpanded) nextLayout.load(this, R.layout.warehouse_movement_content_top_panel_collapsed)
+                else nextLayout.load(this, R.layout.warehouse_movement_content_activity)
             } else {
-                if (panelTopIsExpanded) {
-                    nextLayout.load(
-                        this, R.layout.warehouse_movement_content_both_panels_collapsed
-                    )
-                } else {
-                    nextLayout.load(
-                        this, R.layout.warehouse_movement_content_bottom_panel_collapsed
-                    )
-                }
+                if (panelTopIsExpanded) nextLayout.load(this, R.layout.warehouse_movement_content_both_panels_collapsed)
+                else nextLayout.load(this, R.layout.warehouse_movement_content_bottom_panel_collapsed)
             }
 
             panelTopIsExpanded = !panelTopIsExpanded
@@ -458,17 +431,8 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
 
             nextLayout.applyTo(binding.warehouseMovementContent)
 
-            when {
-                panelTopIsExpanded -> {
-                    binding.expandTopPanelButton?.text =
-                        getContext().getString(R.string.collapse_panel)
-                }
-
-                else -> {
-                    binding.expandTopPanelButton?.text =
-                        getContext().getString(R.string.select_destination)
-                }
-            }
+            if (panelTopIsExpanded) binding.expandTopPanelButton?.text = getContext().getString(R.string.collapse_panel)
+            else binding.expandTopPanelButton?.text = getContext().getString(R.string.select_destination)
         }
     }
 
@@ -478,71 +442,75 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
         }
     }
 
-    private fun fillAdapter(items: ArrayList<WarehouseMovementContent>? = null) {
+    private fun fillAdapter(contents: ArrayList<WarehouseMovementContent>) {
         showProgressBar(true)
 
-        try {
-            runOnUiThread {
-                if (wmContAdapter != null) {
-                    lastSelected = wmContAdapter?.currentWmCont()
-                    firstVisiblePos = wmContAdapter?.firstVisiblePos()
+        runOnUiThread {
+            try {
+                if (adapter != null) {
+                    // Si el adapter es NULL es porque aún no fue creado.
+                    // Por lo tanto, puede ser que los valores de [lastSelected]
+                    // sean valores guardados de la instancia anterior y queremos preservarlos.
+                    lastSelected = adapter?.currentItem()
                 }
 
-                if (items != null) {
-                    wmContAdapter = WarehouseMovementContentAdapter(
-                        activity = this,
-                        resource = R.layout.asset_row,
-                        wmContArray = items,
-                        suggestedList = items,
-                        listView = binding.wmContentListView,
-                        multiSelect = false,
-                        checkedIdArray = checkedIdArray,
-                        visibleStatus = WarehouseMovementContentStatus.getAll()
-                    )
-                }
-                refreshAdapterListeners()
-
-                while (binding.wmContentListView.adapter == null) {
-                    // Horrible wait for full load
-                }
-
-                wmContAdapter?.selectItem(
-                    wmc = lastSelected, scrollPos = firstVisiblePos ?: 0, smoothScroll = true
+                adapter = WmcRecyclerAdapter(
+                    recyclerView = binding.recyclerView,
+                    fullList = contents,
+                    checkedIdArray = checkedIdArray,
+                    multiSelect = multiSelect,
+                    showCheckBoxes = showCheckBoxes,
+                    showCheckBoxesChanged = { showCheckBoxes = it },
+                    showImages = showImages,
+                    showImagesChanged = { showImages = it },
+                    visibleStatus = WarehouseMovementContentStatus.getAll()
                 )
 
+                refreshAdapterListeners()
+
+                binding.recyclerView.layoutManager = LinearLayoutManager(this)
+                binding.recyclerView.adapter = adapter
+
+                while (binding.recyclerView.adapter == null) {
+                    // Horrible wait for a full load
+                }
+
+                // Estas variables locales evitar posteriores cambios de estado.
+                val ls = lastSelected
+                val cs = currentScrollPosition
+                Handler(Looper.getMainLooper()).postDelayed({
+                    adapter?.selectItem(ls, false)
+                    adapter?.scrollToPos(cs, true)
+                }, 200)
+
                 setupTextView()
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+                ErrorLog.writeLog(this, this::class.java.simpleName, ex)
+            } finally {
+                gentlyReturn()
             }
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-            ErrorLog.writeLog(this, this::class.java.simpleName, ex)
-        } finally {
-            showProgressBar(false)
         }
     }
 
     private fun refreshAdapterListeners() {
-        // IMPORTANTE:
-        // Se deben actualizar los listeners, si no
-        // las variables de esta actividad pueden
-        // tener valores antiguos en del adaptador.
+        adapter?.refreshListeners(this, this, this)
+        if (useImageControl) adapter?.refreshListeners(this, this)
+    }
 
-        wmContAdapter?.refreshListeners(
-            checkedChangedListener = this,
-            dataSetChangedListener = this,
-            editAssetRequiredListener = this
-        )
+    private fun gentlyReturn() {
+        closeKeyboard(this)
+        allowClicks = true
 
-        if (Repository.useImageControl) {
-            wmContAdapter?.refreshImageControlListeners(
-                this, this
-            )
-        }
+        JotterListener.lockScanner(this, false)
+        rejectNewInstances = false
+
+        showProgressBar(false)
     }
 
     private fun setupTextView() {
-        val assetToMove = wmContAdapter?.assetsToMove ?: 0
-        val tempText =
-            if (assetToMove == 1) getString(R.string._asset) else getString(R.string._assets)
+        val assetToMove = adapter?.assetsToMove ?: 0
+        val tempText = if (assetToMove == 1) getString(R.string._asset) else getString(R.string._assets)
 
         runOnUiThread {
             binding.toMoveTextView.text = String.format("%s %s", assetToMove.toString(), tempText)
@@ -550,9 +518,10 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
     }
 
     private fun cancelWarehouseMovement() {
-        if (wmContAdapter == null || (wmContAdapter?.count() ?: 0) <= 0) {
+        if ((adapter?.itemCount ?: 0) <= 0) {
             closeKeyboard(this)
 
+            isFinishingByUser = true
             setResult(RESULT_CANCELED)
             finish()
         } else {
@@ -565,6 +534,7 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
                 alert.setPositiveButton(R.string.accept) { _, _ ->
                     closeKeyboard(this)
 
+                    isFinishingByUser = true
                     setResult(RESULT_CANCELED)
                     finish()
                 }
@@ -581,55 +551,51 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
     }
 
     private fun detailAsset() {
-        if (wmContAdapter == null || wmContAdapter?.currentWmCont() == null) {
-            allowClicks = true
-            return
-        }
-
-        val tempAsset = (wmContAdapter?.currentWmCont() ?: return).asset
-        if (tempAsset != null) {
+        val asset = adapter?.currentAsset()
+        if (asset != null) {
             if (!rejectNewInstances) {
                 rejectNewInstances = true
 
                 val intent = Intent(this, AssetDetailActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-                intent.putExtra("asset", tempAsset)
-                startActivity(intent)
+                intent.putExtra("asset", asset)
+                resultForAssetDetails.launch(intent)
             }
-        }
-
-        allowClicks = true
+        } else allowClicks = true
     }
 
+    private val resultForAssetDetails =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            allowClicks = true
+            rejectNewInstances = false
+        }
+
     private fun removeAsset() {
-        if (wmContAdapter == null || wmContAdapter?.currentWmCont() == null) {
-            allowClicks = true
-            return
-        }
+        val content = adapter?.currentItem()
+        if (content != null) {
+            JotterListener.pauseReaderDevices(this)
 
-        JotterListener.pauseReaderDevices(this)
-        try {
-            val wmCont = wmContAdapter?.currentWmCont() ?: return
-
-            val adb = AlertDialog.Builder(this)
-            adb.setTitle(R.string.remove_item)
-            adb.setMessage(
-                String.format(
-                    getContext().getString(R.string.do_you_want_to_remove_the_item), wmCont.code
+            try {
+                val adb = AlertDialog.Builder(this)
+                adb.setTitle(R.string.remove_item)
+                adb.setMessage(
+                    String.format(
+                        getContext().getString(R.string.do_you_want_to_remove_the_item), content.code
+                    )
                 )
-            )
-            adb.setNegativeButton(R.string.cancel, null)
-            adb.setPositiveButton(R.string.accept) { _, _ ->
-                wmContAdapter?.remove(wmCont)
+                adb.setNegativeButton(R.string.cancel, null)
+                adb.setPositiveButton(R.string.accept) { _, _ ->
+                    adapter?.remove(content.assetId)
+                }
+                adb.setOnDismissListener { allowClicks = true }
+                adb.show()
+            } catch (ex: java.lang.Exception) {
+                ex.printStackTrace()
+                ErrorLog.writeLog(this, this::class.java.simpleName, ex)
+            } finally {
+                JotterListener.resumeReaderDevices(this)
             }
-            adb.show()
-        } catch (ex: java.lang.Exception) {
-            ex.printStackTrace()
-            ErrorLog.writeLog(this, this::class.java.simpleName, ex)
-        } finally {
-            JotterListener.resumeReaderDevices(this)
-            allowClicks = true
-        }
+        } else allowClicks = true
     }
 
     private fun addAsset() {
@@ -703,10 +669,10 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
             // Revisiones de miles de artículos no pueden pasarse en el intent.
             WarehouseMovementContentDbHelper().insertTempList(
                 wmId = 1,
-                movementList = wmContAdapter?.getAll() ?: ArrayList()
+                movementList = adapter?.fullList ?: ArrayList()
             )
 
-            val intent = Intent(this, WarehouseMovementContentConfirmActivity::class.java)
+            val intent = Intent(this, WmcConfirmActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
             intent.putExtra("warehouseArea", Parcels.wrap<WarehouseArea>(headerFragment?.warehouseArea))
             resultForFinishMovement.launch(intent)
@@ -742,7 +708,7 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
         val allWmc: ArrayList<WarehouseMovementContent> = ArrayList()
 
         // Procesar la lista, cambiar los estados si son incorrectos.
-        for (wmc in wmContAdapter?.getAll() ?: ArrayList()) {
+        for (wmc in adapter?.fullList ?: ArrayList()) {
             if (wmc.warehouseAreaId == destWaId) {
                 wmc.contentStatusId = WarehouseMovementContentStatus.noNeedToMove.id
             }
@@ -782,11 +748,20 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+
+        if (_fillAdapter) {
+            _fillAdapter = false
+            fillAdapter(completeList)
+        }
+    }
+
     public override fun onResume() {
         super.onResume()
 
         rejectNewInstances = false
-        fillAdapter(wmContArray)
+        closeKeyboard(this)
     }
 
     override fun onBackPressed() {
@@ -819,15 +794,14 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
                 )
 
                 if (sc.warehouseArea != null) {
-                    if (headerFragment != null && (headerFragment
-                            ?: return).warehouseArea != sc.warehouseArea
-                    ) {
+                    val wa = headerFragment?.warehouseArea ?: break
+                    if (wa != sc.warehouseArea) {
                         makeText(
                             binding.root,
                             getContext().getString(R.string.destination_changed),
                             SnackBarType.INFO
                         )
-                        headerFragment?.fill(sc.warehouseArea ?: return)
+                        headerFragment?.fill(wa)
                     }
                     break
                 }
@@ -839,17 +813,15 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
                     continue
                 }
 
-                if (sc.codeFound && (sc.asset != null && (sc.asset
-                        ?: return).labelNumber == null)
-                ) {
+                if (sc.codeFound && sc.asset != null && sc.asset?.labelNumber == null) {
                     val res = getString(R.string.no_printed_label)
                     makeText(binding.root, res, SnackBarType.ERROR)
                     Log.d(this::class.java.simpleName, res)
                     continue
                 }
 
-                if (sc.codeFound && (sc.asset != null && ((sc.asset
-                        ?: return).labelNumber != sc.labelNbr && sc.labelNbr != null) && !manuallyAdded)
+                if (sc.codeFound && sc.asset != null && !manuallyAdded &&
+                    sc.labelNbr != null && sc.asset?.labelNumber != sc.labelNbr
                 ) {
                     val res = getString(R.string.invalid_code)
                     makeText(binding.root, res, SnackBarType.ERROR)
@@ -860,28 +832,24 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
                 var tempCode = scannedCode
                 if (sc.asset != null) {
                     // Si ya se encontró un activo, utilizo su código real,
-                    // ya que el código escaneado puede contener caractéres especiales
+                    // ya que el código escaneado puede contener caracteres especiales
                     // que no aparecen en la lista
-                    tempCode = (sc.asset ?: return).code
+                    tempCode = sc.asset?.code ?: ""
                 }
 
-                if (wmContAdapter != null && !wmContAdapter!!.isEmpty) {
-                    var alreadyRegistered = false
-
+                val itemCount = adapter?.itemCount ?: 0
+                if (itemCount > 0) {
                     // Buscar primero en el adaptador de la lista
-                    (0 until wmContAdapter!!.count).map { wmContAdapter!!.getItem(it) }.filter {
-                        it != null && it.code == tempCode
-                    }.forEach {
-                        val res =
-                            "${(it ?: return@forEach).code} ${getString(R.string.already_registered)}"
+                    val arCont = adapter?.getContentByCode(tempCode)
+                    if (arCont != null) {
+                        val res = "$scannedCode: ${getString(R.string.already_registered)}"
                         makeText(binding.root, res, SnackBarType.INFO)
                         Log.d(this::class.java.simpleName, res)
 
-                        alreadyRegistered = true
-                    }
-
-                    if (alreadyRegistered) {
-                        continue
+                        runOnUiThread {
+                            adapter?.selectItem(arCont)
+                        }
+                        return
                     }
                 }
 
@@ -929,11 +897,15 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
 
         if (allMovements.size > 0) {
             runOnUiThread {
-                wmContAdapter?.add(allMovements, true)
+                if (adapter == null) {
+                    completeList = allMovements
+                    fillAdapter(completeList)
+                } else {
+                    adapter?.add(allMovements, true)
+                }
             }
         }
 
-        setupTextView()
         JotterListener.lockScanner(this, false)
     }
 
@@ -1009,6 +981,8 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
                 getContext().getString(R.string.movement_performed_correctly),
                 SnackBarType.SUCCESS
             )
+
+            isFinishingByUser = true
             setResult(RESULT_OK)
             finish()
         } else if (taskStatus == ProgressStatus.canceled.id || taskStatus == ProgressStatus.crashed.id) {
@@ -1017,7 +991,7 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
     }
 
     // region ProgressBar
-    // Aparece mientras se realizan operaciones sobre las bases de datos remota y local
+    // Aparece mientras se realizan operaciones sobre la base de datos remota y local
     private var progressDialog: AlertDialog? = null
     private lateinit var alertBinding: ProgressBarDialogBinding
     private fun createProgressDialog() {
@@ -1139,34 +1113,7 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
     //endregion READERS Reception
 
     override fun onCheckedChanged(isChecked: Boolean, pos: Int) {
-        // Selecciona la fila correcta, para que se actualice el currentWmCont
-        val arc = wmContAdapter?.getItem(pos)
-        if (arc != null) {
-            if (isChecked) {
-                runOnUiThread {
-                    wmContAdapter?.updateContent(
-                        wmc = arc,
-                        wmcStatusId = WarehouseMovementContentStatus.toMove.id,
-                        assetStatusId = AssetStatus.onInventory.id,
-                        selectItem = false,
-                        changeCheckedState = false
-                    )
-                }
-                setupTextView()
-            } else {
-                removeFromAdapter(arc)
-            }
-        }
-    }
-
-    private fun removeFromAdapter(wmCont: WarehouseMovementContent) {
-        // Cambiar la fila selecciona sólo cuando la anterior es eliminada de la lista
-        if (wmContAdapter == null) return
-
-        runOnUiThread {
-            wmContAdapter?.remove(wmCont)
-            setupTextView()
-        }
+        setupTextView()
     }
 
     override fun onDataSetChanged() {
@@ -1174,7 +1121,7 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
     }
 
     override fun onEditAssetRequired(tableId: Int, itemId: Long) {
-        val asset = wmContAdapter?.currentAsset()
+        val asset = adapter?.currentAsset()
 
         if (!rejectNewInstances && asset != null) {
             rejectNewInstances = true
@@ -1194,7 +1141,7 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
                 if (it?.resultCode == RESULT_OK && data != null) {
                     val a = Parcels.unwrap<Asset>(data.getParcelableExtra("asset"))
                         ?: return@registerForActivityResult
-                    wmContAdapter!!.updateAsset(a, true)
+                    adapter?.updateContent(a, true)
                 }
             } catch (ex: Exception) {
                 ex.printStackTrace()
@@ -1207,7 +1154,7 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
     // region ImageControl
 
     override fun onAlbumViewRequired(tableId: Int, itemId: Long) {
-        if (!Repository.useImageControl) {
+        if (!useImageControl) {
             return
         }
 
@@ -1285,7 +1232,7 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
     }
 
     override fun onAddPhotoRequired(tableId: Int, itemId: Long, description: String, obs: String, reference: String) {
-        if (!Repository.useImageControl) {
+        if (!useImageControl) {
             return
         }
 
@@ -1309,7 +1256,7 @@ class WarehouseMovementContentActivity : AppCompatActivity(), Scanner.ScannerLis
             val data = it?.data
             try {
                 if (it?.resultCode == RESULT_OK && data != null) {
-                    wmContAdapter?.currentAsset()?.saveChanges()
+                    adapter?.currentAsset()?.saveChanges()
                 }
             } catch (ex: Exception) {
                 ex.printStackTrace()

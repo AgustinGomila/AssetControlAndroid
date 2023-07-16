@@ -40,6 +40,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.adapters.interfaces.Interfaces
+import com.dacosys.assetControl.adapters.interfaces.Interfaces.AdapterProgress
 import com.dacosys.assetControl.adapters.review.ArcRecyclerAdapter
 import com.dacosys.assetControl.dataBase.asset.AssetDbHelper
 import com.dacosys.assetControl.dataBase.review.AssetReviewContentDbHelper
@@ -107,7 +108,7 @@ import java.util.concurrent.ThreadLocalRandom
 import kotlin.concurrent.thread
 
 @Suppress("UNCHECKED_CAST")
-class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
+class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
     Rfid.RfidDeviceListener, Interfaces.CheckedChangedListener,
     Interfaces.DataSetChangedListener, SwipeRefreshLayout.OnRefreshListener,
     Interfaces.EditAssetRequiredListener, Interfaces.AlbumViewRequiredListener,
@@ -126,7 +127,12 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
             .toSet())
     }
 
+    private var isFinishingByUser = false
+
     private fun destroyLocals() {
+        // Borramos los Ids temporales que se usaron en la actividad.
+        if (isFinishingByUser) AssetReviewContentDbHelper().deleteTemp()
+
         adapter?.refreshListeners(null, null, null)
         adapter?.refreshImageControlListeners(null, null)
         adapter?.refreshUiEventListener(null)
@@ -181,6 +187,8 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
 
             ProgressStatus.bigFinished -> {
                 closeKeyboard(this)
+
+                isFinishingByUser = true
                 setResult(RESULT_OK)
                 finish()
             }
@@ -195,6 +203,8 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
                         Statics.getPercentage(completedTask, totalTask)
                     }, $msg"
                 )
+
+                isFinishingByUser = true
                 setResult(RESULT_OK)
                 finish()
             }
@@ -277,19 +287,17 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
         b.putBoolean("panelTopIsExpanded", panelTopIsExpanded)
         b.putBoolean("panelBottomIsExpanded", panelBottomIsExpanded)
 
-        if (adapter != null) {
-            b.putParcelable("lastSelected", adapter?.currentItem())
-            b.putInt("firstVisiblePos", adapter?.firstVisiblePos() ?: RecyclerView.NO_POSITION)
-            b.putLongArray("checkedIdArray", adapter?.checkedIdArray?.map { it }?.toLongArray())
-            b.putInt("currentScrollPosition", currentScrollPosition)
+        b.putParcelable("lastSelected", adapter?.currentItem())
+        b.putInt("firstVisiblePos", adapter?.firstVisiblePos() ?: RecyclerView.NO_POSITION)
+        b.putLongArray("checkedIdArray", adapter?.checkedIdArray?.map { it }?.toLongArray())
+        b.putInt("currentScrollPosition", currentScrollPosition)
 
-            // Guardamos la revisión en una tabla temporal.
-            // Revisiones de miles de artículos no pueden pasarse en el intent.
-            AssetReviewContentDbHelper().insertTempList(
-                arId = assetReview?.collectorAssetReviewId ?: 0,
-                reviewList = adapter?.fullList ?: ArrayList<AssetReviewContent>()
-            )
-        }
+        // Guardamos la revisión en una tabla temporal.
+        // Revisiones de miles de artículos no pueden pasarse en el intent.
+        AssetReviewContentDbHelper().insertTempList(
+            arId = assetReview?.collectorAssetReviewId ?: 0,
+            reviewList = adapter?.fullList ?: ArrayList<AssetReviewContent>()
+        )
     }
 
     private fun loadBundleExtrasValues(b: Bundle) {
@@ -483,16 +491,10 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         if (!saving && _startReview) {
             startReview()
-            return
-        }
-
-        if (_fillAdapter) {
+        } else if (_fillAdapter) {
             _fillAdapter = false
             fillAdapter(completeList)
-            return
         }
-
-        rejectNewInstances = false
     }
 
     public override fun onResume() {
@@ -753,6 +755,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
             alert.setPositiveButton(R.string.accept) { _, _ ->
                 closeKeyboard(this)
 
+                isFinishingByUser = true
                 setResult(RESULT_CANCELED)
                 finish()
             }
@@ -847,11 +850,15 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
             val intent = Intent(this, AssetDetailActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
             intent.putExtra("asset", tempAsset)
-            startActivity(intent)
-        }
-
-        allowClicks = true
+            resultForAssetDetails.launch(intent)
+        } else allowClicks = true
     }
+
+    private val resultForAssetDetails =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            allowClicks = true
+            rejectNewInstances = false
+        }
 
     private fun removeAsset() {
         val arc = adapter?.currentItem()
@@ -949,7 +956,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
                 reviewList = adapter?.fullList ?: ArrayList<AssetReviewContent>()
             )
 
-            val intent = Intent(this, AssetReviewContentConfirmActivity::class.java)
+            val intent = Intent(this, ArcConfirmActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
             intent.putExtra("assetReview", Parcels.wrap<AssetReview>(assetReview))
             resultForFinishReview.launch(intent)
@@ -1012,8 +1019,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
         try {
             checkCode(
                 scannedCode = scannedCode,
-                manuallyAdded = manuallyAdded,
-                allowUnknownCodes = binding.allowUnknownCodesSwitch.isChecked
+                manuallyAdded = manuallyAdded
             )
         } catch (ex: Exception) {
             ex.printStackTrace()
@@ -1099,7 +1105,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     // region ProgressBar
-    // Aparece mientras se realizan operaciones sobre las bases de datos remotos y local
+// Aparece mientras se realizan operaciones sobre las bases de datos remotos y local
     private var progressDialog: AlertDialog? = null
     private lateinit var alertBinding: ProgressBarDialogBinding
     private fun createProgressDialog() {
@@ -1110,7 +1116,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
         progressDialog = builder.create()
     }
 
-    private fun showProgressDialog(it: ArcRecyclerAdapter.AdapterProgress) {
+    private fun showProgressDialog(it: AdapterProgress) {
         showProgressDialog(
             title = getContext().getString(R.string.processing_asset),
             msg = it.msg,
@@ -1204,7 +1210,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
             }
         }
     }
-    // endregion
+// endregion
 
     private fun startReview() {
         val ar = assetReview ?: return
@@ -1292,7 +1298,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
         showProgressBar(false)
     }
 
-    private fun checkCode(scannedCode: String, manuallyAdded: Boolean, allowUnknownCodes: Boolean) {
+    private fun checkCode(scannedCode: String, manuallyAdded: Boolean) {
         if (scannedCode.isEmpty()) {
             // Nada que hacer, volver
             val res = "$scannedCode: ${getString(R.string.invalid_code)}"
@@ -1314,7 +1320,6 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
 
             if (sc.warehouseArea != null) {
                 val res = getString(R.string.area_label)
-
                 makeText(binding.root, res, ERROR)
                 Log.d(this::class.java.simpleName, res)
                 return
@@ -1322,25 +1327,22 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
 
             if (sc.codeFound && sc.asset != null && sc.labelNbr == 0) {
                 val res = getString(R.string.report_code)
-
                 makeText(binding.root, res, ERROR)
                 Log.d(this::class.java.simpleName, res)
                 return
             }
 
-            if (sc.codeFound && (sc.asset != null && (sc.asset ?: return).labelNumber == null)) {
-                val res = getString(R.string.without_printed_label)
-
+            if (sc.codeFound && sc.asset != null && sc.asset?.labelNumber == null) {
+                val res = getString(R.string.no_printed_label)
                 makeText(binding.root, res, ERROR)
                 Log.d(this::class.java.simpleName, res)
                 return
             }
 
-            if (sc.codeFound && (sc.asset != null && ((sc.asset
-                    ?: return).labelNumber != sc.labelNbr && sc.labelNbr != null) && !manuallyAdded)
+            if (sc.codeFound && sc.asset != null && !manuallyAdded &&
+                sc.labelNbr != null && sc.asset?.labelNumber != sc.labelNbr
             ) {
                 val res = getString(R.string.invalid_code)
-
                 makeText(binding.root, res, ERROR)
                 Log.d(this::class.java.simpleName, res)
                 return
@@ -1349,7 +1351,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
             var tempCode = scannedCode
             if (sc.asset != null) {
                 // Si ya se encontró un activo, utilizo su código real,
-                // ya que el código escaneado puede contener caractéres especiales
+                // ya que el código escaneado puede contener caracteres especiales
                 // que no aparecen en la lista
                 tempCode = (sc.asset ?: return).code
             }
@@ -1393,6 +1395,9 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
                 }
             }
 
+            val allowUnknownCodes = binding.allowUnknownCodesSwitch.isChecked
+            val addUnknownAssets = binding.addUnknownAssetsSwitch.isChecked
+
             if (sc.asset == null && !allowUnknownCodes) {
                 val res = "$scannedCode: ${getString(R.string.unknown_code)}"
                 makeText(binding.root, res, ERROR)
@@ -1405,9 +1410,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
             //    El código no se encuentra en la base de datos
             //    O
             //    El activo existe pero está desactivado
-            if (allowUnknownCodes &&
-                (!sc.codeFound || (sc.asset != null && !(sc.asset ?: return).active))
-            ) {
+            if (allowUnknownCodes && (!sc.codeFound || sc.asset != null && sc.asset?.active != true)) {
                 val tempReview = assetReview ?: return
 
                 /////////////////////////////////////////////////////////
@@ -1432,8 +1435,36 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
                 )
 
                 runOnUiThread {
-                    adapter?.add(finalArc)
+                    val f = finalArc
+                    if (f != null) {
+                        if (adapter == null) {
+                            completeList = arrayListOf(f)
+                            fillAdapter(completeList)
+                        } else {
+                            adapter?.add(f)
+                        }
+                    }
                 }
+
+                try {
+                    val f = finalArc
+                    if (!Statics.demoMode && addUnknownAssets) {
+                        // Dar de alta el activo
+                        assetCrud(f)
+                        return
+                    }
+
+                    // Pedir una descripción y agregar como desconocido
+                    if (Statics.demoMode) {
+                        f.description = getString(R.string.test_asset)
+                    } else {
+                        runOnUiThread { itemDescriptionDialog(f) }
+                    }
+                } catch (ex: Exception) {
+                    ex.printStackTrace()
+                    ErrorLog.writeLog(this, this::class.java.simpleName, ex)
+                }
+                return
             }
 
             val tempAsset = sc.asset
@@ -1463,7 +1494,12 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
                 )
 
                 runOnUiThread {
-                    adapter?.add(finalArc)
+                    if (adapter == null) {
+                        completeList = arrayListOf(finalArc)
+                        fillAdapter(completeList)
+                    } else {
+                        adapter?.add(finalArc)
+                    }
                 }
             }
         } catch (ex: Exception) {
@@ -1471,34 +1507,6 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
             makeText(binding.root, ex.message.toString(), ERROR)
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
             return
-        }
-
-        if (finalArc != null) {
-            runOnUiThread {
-                adapter?.selectItem(finalArc, true)
-            }
-
-            try {
-                if (finalArc.contentStatusId == AssetReviewContentStatus.unknown.id) {
-                    if (!Statics.demoMode && binding.addUnknownAssetsSwitch.isChecked) {
-                        // Dar de alta el activo
-                        assetCrud(finalArc)
-                        return
-                    }
-
-                    if (binding.allowUnknownCodesSwitch.isChecked) {
-                        // Pedir una descripción y agregar como desconocido
-                        if (Statics.demoMode) {
-                            finalArc.description = getString(R.string.test_asset)
-                        } else {
-                            runOnUiThread { itemDescriptionDialog(finalArc) }
-                        }
-                    }
-                }
-            } catch (ex: Exception) {
-                ex.printStackTrace()
-                ErrorLog.writeLog(this, this::class.java.simpleName, ex)
-            }
         }
     }
 
@@ -1856,7 +1864,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
         }
     }
 
-    override fun onUiEventRequired(it: ArcRecyclerAdapter.AdapterProgress) {
+    override fun onUiEventRequired(it: AdapterProgress) {
         showProgressDialog(it)
     }
 
@@ -1916,7 +1924,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
 
-    // region READERS Reception
+// region READERS Reception
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
@@ -1934,7 +1942,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
         scannerHandleScanCompleted(scannedCode = scanCode, manuallyAdded = false)
     }
 
-    //endregion READERS Reception
+//endregion READERS Reception
 
     override fun onEditAssetRequired(tableId: Int, itemId: Long) {
         if (rejectNewInstances) return
@@ -1970,7 +1978,7 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
             }
         }
 
-    // region ImageControl
+// region ImageControl
 
     override fun onAlbumViewRequired(tableId: Int, itemId: Long) {
         if (!useImageControl) {
@@ -2053,7 +2061,13 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
         showPhotoAlbum()
     }
 
-    override fun onAddPhotoRequired(tableId: Int, itemId: Long, description: String, obs: String, reference: String) {
+    override fun onAddPhotoRequired(
+        tableId: Int,
+        itemId: Long,
+        description: String,
+        obs: String,
+        reference: String
+    ) {
         if (!useImageControl) {
             return
         }
@@ -2089,5 +2103,5 @@ class AssetReviewContentActivity : AppCompatActivity(), Scanner.ScannerListener,
             }
         }
 
-    // endregion IC
+// endregion IC
 }

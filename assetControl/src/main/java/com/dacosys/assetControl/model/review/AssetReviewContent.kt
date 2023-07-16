@@ -211,12 +211,8 @@ class AssetReviewContent : Parcelable {
 
     var qty: Float = 0F
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0F
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0F
+            else field
         }
 
     var contentStatusId: Int = 0

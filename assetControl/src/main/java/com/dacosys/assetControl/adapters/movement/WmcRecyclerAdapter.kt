@@ -1,4 +1,4 @@
-package com.dacosys.assetControl.adapters.review
+package com.dacosys.assetControl.adapters.movement
 
 import android.annotation.SuppressLint
 import android.content.res.ColorStateList
@@ -27,17 +27,17 @@ import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.adapters.asset.AssetRecyclerAdapter.FilterOptions
 import com.dacosys.assetControl.adapters.interfaces.Interfaces.*
+import com.dacosys.assetControl.dataBase.asset.AssetDbHelper
 import com.dacosys.assetControl.databinding.AssetRowBinding
 import com.dacosys.assetControl.databinding.AssetRowExpandedBinding
 import com.dacosys.assetControl.model.asset.Asset
 import com.dacosys.assetControl.model.asset.AssetStatus
 import com.dacosys.assetControl.model.asset.OwnershipStatus
-import com.dacosys.assetControl.model.review.AssetReviewContent
-import com.dacosys.assetControl.model.review.AssetReviewContentStatus
+import com.dacosys.assetControl.model.movement.WarehouseMovementContent
+import com.dacosys.assetControl.model.movement.WarehouseMovementContentStatus
 import com.dacosys.assetControl.model.table.Table
 import com.dacosys.assetControl.model.user.User
 import com.dacosys.assetControl.model.user.permission.PermissionEntry
-import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.utils.Screen.Companion.getBestContrastColor
 import com.dacosys.assetControl.utils.Screen.Companion.getColorWithAlpha
 import com.dacosys.assetControl.utils.Screen.Companion.manipulateColor
@@ -54,19 +54,19 @@ import java.util.*
  * Created by Agustin on 10/03/2023.
  */
 
-class ArcRecyclerAdapter(
+class WmcRecyclerAdapter(
     private val recyclerView: RecyclerView,
-    var fullList: ArrayList<AssetReviewContent>,
+    var fullList: ArrayList<WarehouseMovementContent>,
     var checkedIdArray: ArrayList<Long> = ArrayList(),
-    var allowQuickReview: Boolean = false,
+    var multiSelect: Boolean = false,
     private var allowEditAsset: Boolean = false,
     var showCheckBoxes: Boolean = false,
     private var showCheckBoxesChanged: (Boolean) -> Unit = { },
     private var showImages: Boolean = false,
     private var showImagesChanged: (Boolean) -> Unit = { },
-    var visibleStatus: ArrayList<AssetReviewContentStatus> = AssetReviewContentStatus.getAll(),
+    var visibleStatus: ArrayList<WarehouseMovementContentStatus> = WarehouseMovementContentStatus.getAll(),
     private var filterOptions: FilterOptions = FilterOptions("", true)
-) : ListAdapter<AssetReviewContent, ViewHolder>(AssetReviewContentDiffUtilCallback), Filterable {
+) : ListAdapter<WarehouseMovementContent, ViewHolder>(WarehouseMovementContentDiffUtilCallback), Filterable {
 
     private var currentIndex = NO_POSITION
     private var dataSetChangedListener: DataSetChangedListener? = null
@@ -76,10 +76,6 @@ class ArcRecyclerAdapter(
     // Listeners para los eventos de ImageControl.
     private var addPhotoRequiredListener: AddPhotoRequiredListener? = null
     private var albumViewRequiredListener: AlbumViewRequiredListener? = null
-
-    // Listener para los eventos que requieren que la actividad anfitriona
-    // muestre un mensaje de espera mientras se realiza alguna tarea que demanda más tiempo.
-    private var uiEventListener: UiEventListener? = null
 
     // Clase para distinguir actualizaciones parciales
     private enum class PAYLOADS {
@@ -115,10 +111,6 @@ class ArcRecyclerAdapter(
         albumViewRequiredListener = albumViewListener
     }
 
-    fun refreshUiEventListener(uiEventListener: UiEventListener?) {
-        this.uiEventListener = uiEventListener
-    }
-
     /**
      * Show an images panel on the end of layout
      *
@@ -151,21 +143,23 @@ class ArcRecyclerAdapter(
     // Permiso de edición de activos
     private var userHasPermissionToEdit: Boolean = User.hasPermission(PermissionEntry.ModifyAsset)
 
-    private object AssetReviewContentDiffUtilCallback : DiffUtil.ItemCallback<AssetReviewContent>() {
-        override fun areItemsTheSame(oldItem: AssetReviewContent, newItem: AssetReviewContent): Boolean {
+    private object WarehouseMovementContentDiffUtilCallback : DiffUtil.ItemCallback<WarehouseMovementContent>() {
+        override fun areItemsTheSame(oldItem: WarehouseMovementContent, newItem: WarehouseMovementContent): Boolean {
             return oldItem.assetId == newItem.assetId
         }
 
-        override fun areContentsTheSame(oldItem: AssetReviewContent, newItem: AssetReviewContent): Boolean {
+        override fun areContentsTheSame(oldItem: WarehouseMovementContent, newItem: WarehouseMovementContent): Boolean {
+            if (oldItem.warehouseMovementContentId != newItem.warehouseMovementContentId) return false
+            if (oldItem.collectorContentId != newItem.collectorContentId) return false
             if (oldItem.contentStatusId != newItem.contentStatusId) return false
             if (oldItem.assetId != newItem.assetId) return false
             if (oldItem.code != newItem.code) return false
             if (oldItem.description != newItem.description) return false
             if (oldItem.assetStatusId != newItem.assetStatusId) return false
-            if (oldItem.originWarehouseAreaId != newItem.originWarehouseAreaId) return false
+            if (oldItem.warehouseAreaId != newItem.warehouseAreaId) return false
             if (oldItem.labelNumber != newItem.labelNumber) return false
             if (oldItem.parentId != newItem.parentId) return false
-            if (oldItem.warehouseAreaId != newItem.warehouseAreaId) return false
+            if (oldItem.qty != newItem.qty) return false
             if (oldItem.warehouseAreaStr != newItem.warehouseAreaStr) return false
             if (oldItem.warehouseStr != newItem.warehouseStr) return false
             if (oldItem.itemCategoryId != newItem.itemCategoryId) return false
@@ -174,7 +168,6 @@ class ArcRecyclerAdapter(
             if (oldItem.manufacturer != newItem.manufacturer) return false
             if (oldItem.model != newItem.model) return false
             if (oldItem.serialNumber != newItem.serialNumber) return false
-            if (oldItem.qty != newItem.qty) return false
             return oldItem.ean == newItem.ean
         }
     }
@@ -208,40 +201,26 @@ class ArcRecyclerAdapter(
         const val UNSELECTED_VIEW_TYPE = 2
 
         // region COLORS
-        private var layoutRevisedForeColor: Int = 0
-        private var layoutAppearedForeColor: Int = 0
-        private var layoutNotInReviewForeColor: Int = 0
-        private var layoutExternalForeColor: Int = 0
-        private var layoutNewForeColor: Int = 0
+        private var layoutToMoveForeColor: Int = 0
+        private var layoutNoNeedToMoveForeColor: Int = 0
         private var layoutDefaultForeColor: Int = 0
 
-        private var layoutRevisedSelectedForeColor: Int = 0
-        private var layoutAppearedSelectedForeColor: Int = 0
-        private var layoutNotInReviewSelectedForeColor: Int = 0
-        private var layoutExternalSelectedForeColor: Int = 0
-        private var layoutNewSelectedForeColor: Int = 0
+        private var layoutToMoveSelectedForeColor: Int = 0
+        private var layoutNoNeedToMoveSelectedForeColor: Int = 0
         private var layoutDefaultSelectedForeColor: Int = 0
 
         private fun setupColors() {
             // Color de los diferentes estados
-            layoutRevisedForeColor =
-                getBestContrastColor(getColor(getContext().resources, R.color.status_revised, null))
-            layoutAppearedForeColor =
-                getBestContrastColor(getColor(getContext().resources, R.color.status_appeared, null))
-            layoutNotInReviewForeColor =
-                getBestContrastColor(getColor(getContext().resources, R.color.status_not_in_review, null))
-            layoutExternalForeColor =
-                getBestContrastColor(getColor(getContext().resources, R.color.status_external, null))
-            layoutNewForeColor = getBestContrastColor(getColor(getContext().resources, R.color.status_new, null))
+            layoutToMoveForeColor = getBestContrastColor(getColor(getContext().resources, R.color.status_to_move, null))
+            layoutNoNeedToMoveForeColor =
+                getBestContrastColor(getColor(getContext().resources, R.color.status_no_need_to_move, null))
             layoutDefaultForeColor =
                 getBestContrastColor(getColor(getContext().resources, R.color.status_default, null))
 
             // Mejor contraste para los ítems seleccionados
-            layoutRevisedSelectedForeColor = getBestContrastColor(manipulateColor(layoutRevisedForeColor, 0.5f))
-            layoutAppearedSelectedForeColor = getBestContrastColor(manipulateColor(layoutAppearedForeColor, 0.5f))
-            layoutNotInReviewSelectedForeColor = getBestContrastColor(manipulateColor(layoutNotInReviewForeColor, 0.5f))
-            layoutExternalSelectedForeColor = getBestContrastColor(manipulateColor(layoutExternalForeColor, 0.5f))
-            layoutNewSelectedForeColor = getBestContrastColor(manipulateColor(layoutNewForeColor, 0.5f))
+            layoutToMoveSelectedForeColor = getBestContrastColor(manipulateColor(layoutToMoveForeColor, 0.5f))
+            layoutNoNeedToMoveSelectedForeColor =
+                getBestContrastColor(manipulateColor(layoutNoNeedToMoveForeColor, 0.5f))
             layoutDefaultSelectedForeColor = getBestContrastColor(manipulateColor(layoutDefaultForeColor, 0.5f))
         }
         // endregion
@@ -427,7 +406,7 @@ class ArcRecyclerAdapter(
      */
     @SuppressLint("ClickableViewAccessibility")
     private fun setItemCheckBoxLogic(itemView: View) {
-        if (!allowQuickReview) {
+        if (!multiSelect) {
             showCheckBoxes = false
             return
         }
@@ -497,70 +476,29 @@ class ArcRecyclerAdapter(
     private var ignoreCheckBoxStateChanged = false
 
     /**
-     * Lógica del comportamiento del CheckBox de marcado de ítems cuando [allowQuickReview] es verdadero
+     * Lógica del comportamiento del CheckBox de marcado de ítems cuando [multiSelect] es verdadero
      *
      * @param checkBox Control CheckBox para marcado del ítem
      * @param content Datos del ítem
      * @param position Posición en el adaptador
      */
     @SuppressLint("ClickableViewAccessibility")
-    private fun setCheckBoxLogic(checkBox: CheckBox, content: AssetReviewContent, position: Int) {
+    private fun setCheckBoxLogic(checkBox: CheckBox, content: WarehouseMovementContent, position: Int) {
         val checkChangeListener = OnCheckedChangeListener { _, isChecked ->
             if (!ignoreCheckBoxStateChanged) {
 
                 updateCheckedList(content = content, isChecked = isChecked)
 
-                if (isChecked && content.contentStatusId == AssetReviewContentStatus.notInReview.id) {
-                    updateContent(
-                        content,
-                        contentStatusId = AssetReviewContentStatus.revised.id,
-                        assetStatusId = AssetStatus.onInventory.id
-                    )
-                } else if (!isChecked && content.contentStatusId == AssetReviewContentStatus.revised.id) {
-                    updateContent(
-                        content,
-                        contentStatusId = AssetReviewContentStatus.notInReview.id,
-                        assetStatusId = AssetStatus.missing.id
-                    )
-                }
-
                 notifyItemChanged(position, PAYLOADS.STATUS_CHANGE)
-                checkedChangedListener?.onCheckedChanged(isChecked, position)
+                checkedChangedListener?.onCheckedChanged(true, position)
             }
         }
 
         val longClickListener = OnLongClickListener { _ ->
             val isChecked = !checkBox.isChecked
 
-            if (!isChecked) {
-                // Si el activo seleccionado estaba [revised], desmarcamos y pasamos a [notInReview] todos los [revised].
-                if (content.contentStatusId == AssetReviewContentStatus.revised.id) {
-                    val revised = getCurrentItemsByStatus(content.contentStatusId)
-                    updateContent(
-                        revised,
-                        contentStatusId = AssetReviewContentStatus.notInReview.id,
-                        assetStatusId = AssetStatus.missing.id
-                    )
-                } else {
-                    // En todos los demás casos no cambia el estado, solo el marcado.
-                    checkedIdArray.clear()
-                }
-            } else {
-                // Si el activo seleccionado estaba [notInReview], marcamos y pasamos a [revised] todos los [notInReview].
-                if (content.contentStatusId == AssetReviewContentStatus.notInReview.id) {
-                    val notInReview = getCurrentItemsByStatus(content.contentStatusId)
-                    updateContent(
-                        notInReview,
-                        contentStatusId = AssetReviewContentStatus.revised.id,
-                        assetStatusId = AssetStatus.onInventory.id
-                    )
-                } else {
-                    // En todos los demás casos no cambia el estado, solo desmarcamos.
-                    val all = getCurrentItemsByStatus(content.contentStatusId)
-                    for (tempCont in all) {
-                        updateCheckedList(content = tempCont, isChecked = true)
-                    }
-                }
+            for (tempCont in currentList) {
+                updateCheckedList(content = tempCont, isChecked = isChecked)
             }
 
             notifyItemRangeChanged(0, itemCount, PAYLOADS.STATUS_CHANGE)
@@ -579,32 +517,6 @@ class ArcRecyclerAdapter(
         checkBox.setOnCheckedChangeListener(checkChangeListener)
     }
 
-    fun removeContent(arCont: AssetReviewContent) {
-        when (arCont.contentStatusId) {
-            AssetReviewContentStatus.revised.id,
-            AssetReviewContentStatus.newAsset.id,
-            -> {
-                updateContent(
-                    assetId = arCont.assetId,
-                    contentStatusId = AssetReviewContentStatus.notInReview.id,
-                    assetStatusId = arCont.assetStatusId,
-                    selectItem = false
-                )
-            }
-
-            AssetReviewContentStatus.external.id,
-            AssetReviewContentStatus.appeared.id,
-            AssetReviewContentStatus.unknown.id,
-            -> {
-                remove(arCont.assetId)
-            }
-
-            else -> {
-                return
-            }
-        }
-    }
-
     /**
      * Get images thumbs
      *
@@ -613,7 +525,7 @@ class ArcRecyclerAdapter(
      * @param assetId Asset ID of which we are requesting the image
      */
     private fun getImagesThumbs(
-        adapter: ArcRecyclerAdapter,
+        adapter: WmcRecyclerAdapter,
         holder: ImageControlHolder,
         assetId: Long
     ) {
@@ -663,8 +575,8 @@ class ArcRecyclerAdapter(
     }
 
     override fun getFilter(): Filter {
-        var selected: AssetReviewContent? = null
-        var firstVisible: AssetReviewContent? = null
+        var selected: WarehouseMovementContent? = null
+        var firstVisible: WarehouseMovementContent? = null
 
         return object : Filter() {
             override fun performFiltering(constraint: CharSequence?): FilterResults {
@@ -696,11 +608,11 @@ class ArcRecyclerAdapter(
 
                 // Filtramos los resultados
                 val results = FilterResults()
-                var r: ArrayList<AssetReviewContent> = ArrayList()
+                var r: ArrayList<WarehouseMovementContent> = ArrayList()
                 if (constraint != null) {
                     val filterString = constraint.toString().lowercase(Locale.getDefault())
                     if (filterString.isNotEmpty()) {
-                        var filterableItem: AssetReviewContent
+                        var filterableItem: WarehouseMovementContent
 
                         for (i in 0 until fullList.size) {
                             filterableItem = fullList[i]
@@ -722,7 +634,7 @@ class ArcRecyclerAdapter(
                 return results
             }
 
-            fun isFilterable(content: AssetReviewContent, filterString: String): Boolean =
+            fun isFilterable(content: WarehouseMovementContent, filterString: String): Boolean =
                 content.description.contains(filterString, true) ||
                         content.code.contains(filterString, true) ||
                         content.ean.contains(filterString, true)
@@ -731,9 +643,9 @@ class ArcRecyclerAdapter(
             override fun publishResults(
                 constraint: CharSequence?, results: FilterResults?,
             ) {
-                var contents: ArrayList<AssetReviewContent> = ArrayList()
+                var contents: ArrayList<WarehouseMovementContent> = ArrayList()
                 if (results?.values != null) {
-                    contents = results.values as ArrayList<AssetReviewContent>
+                    contents = results.values as ArrayList<WarehouseMovementContent>
                 }
                 submitList(contents) {
                     run {
@@ -751,7 +663,7 @@ class ArcRecyclerAdapter(
         }
     }
 
-    private fun sortItems(originalList: MutableList<AssetReviewContent>): ArrayList<AssetReviewContent> {
+    private fun sortItems(originalList: MutableList<WarehouseMovementContent>): ArrayList<WarehouseMovementContent> {
         // Run the follow method on each of the roots
         return ArrayList(
             originalList.sortedWith(
@@ -773,13 +685,28 @@ class ArcRecyclerAdapter(
         refreshFilter(filterOptions)
     }
 
-    fun add(content: AssetReviewContent?) {
+    fun add(contents: ArrayList<WarehouseMovementContent>, scrollToPos: Boolean) {
+        for (content in contents) {
+            val position = fullList.lastIndex + 1
+            fullList.add(position, content)
+        }
+        submitList(fullList) {
+            run {
+                // Notificamos al Listener superior
+                dataSetChangedListener?.onDataSetChanged()
+
+                if (scrollToPos) selectItem(fullList.lastIndex)
+            }
+        }
+    }
+
+    fun add(content: WarehouseMovementContent?) {
         if (content == null) return
         val lastPost = fullList.lastIndex + 1
         add(content, lastPost)
     }
 
-    fun add(content: AssetReviewContent, position: Int) {
+    fun add(content: WarehouseMovementContent, position: Int) {
         fullList.add(position, content)
         submitList(fullList) {
             run {
@@ -792,123 +719,49 @@ class ArcRecyclerAdapter(
     }
 
     /**
-     * Se utiliza cuando se edita un ítem y necesita actualizarse
+     * Se utiliza cuando se edita un activo y necesita actualizarse
      */
-    fun updateItem(asset: Asset, scrollToPos: Boolean = false) {
+    fun updateContent(asset: Asset, scrollToPos: Boolean = false) {
         val t = fullList.firstOrNull { it.assetId == asset.assetId } ?: return
 
         t.assetId = asset.assetId
         t.code = asset.code
         t.description = asset.description
-        t.warehouseAreaId = asset.warehouseAreaId
-        t.ownershipStatusId = asset.ownershipStatusId
         t.assetStatusId = asset.assetStatusId
-        t.itemCategoryId = asset.itemCategoryId
+        t.warehouseAreaId = asset.warehouseAreaId
         t.labelNumber = asset.labelNumber ?: 0
+        t.parentId = asset.parentAssetId ?: 0
+        t.qty = 1F
+        t.warehouseAreaStr = asset.warehouseAreaStr
+        t.warehouseStr = asset.warehouseStr
+        t.itemCategoryId = asset.itemCategoryId
+        t.itemCategoryStr = asset.itemCategoryStr
+        t.ownershipStatusId = asset.ownershipStatusId
         t.manufacturer = asset.manufacturer ?: ""
         t.model = asset.model ?: ""
         t.serialNumber = asset.serialNumber ?: ""
-        t.parentId = asset.parentAssetId ?: 0
         t.ean = asset.ean ?: ""
 
         submitList(fullList) {
             run {
-                notifyItemChanged(getIndexById(asset.assetId))
-
                 // Notificamos al Listener superior
                 dataSetChangedListener?.onDataSetChanged()
 
                 // Seleccionamos el ítem y hacemos scroll hasta él.
-                selectItemById(asset.assetId, scrollToPos)
+                selectItemById(t.assetId, scrollToPos)
             }
         }
     }
 
-    /**
-     * ACTUALIZA un contenido.
-     */
-    fun updateContent(
-        assetId: Long,
-        contentStatusId: Int,
-        assetStatusId: Int,
-        selectItem: Boolean = true
-    ) {
-        val t = fullList.firstOrNull { it.assetId == assetId } ?: return
+    fun locationChange(warehouseAreaId: Long) {
+        val all = fullList
+        val noNeedToMove = all.mapNotNull { if (it.warehouseAreaId == warehouseAreaId) it else null }.toList()
+        val toMove = all.mapNotNull { if (it.warehouseAreaId != warehouseAreaId) it else null }.toList()
 
-        t.assetStatusId = assetStatusId
-        t.contentStatusId = contentStatusId
+        for (tempCont in noNeedToMove) tempCont.contentStatusId = WarehouseMovementContentStatus.noNeedToMove.id
+        for (tempCont in toMove) tempCont.contentStatusId = WarehouseMovementContentStatus.toMove.id
 
-        if (contentStatusId == AssetReviewContentStatus.notInReview.id) checkedIdArray.remove(assetId)
-        else if (contentStatusId == AssetReviewContentStatus.revised.id) updateCheckedList(assetId, true)
-
-        submitList(fullList) {
-            run {
-                notifyItemChanged(getIndexById(assetId))
-
-                // Notificamos al Listener superior
-                dataSetChangedListener?.onDataSetChanged()
-
-                // Seleccionamos el ítem y hacemos scroll hasta él.
-                if (selectItem) selectItemById(assetId)
-            }
-        }
-    }
-
-    private fun updateContent(
-        content: AssetReviewContent,
-        contentStatusId: Int,
-        assetStatusId: Int
-    ) {
-        val tempCont = currentList.firstOrNull { it.assetId == content.assetId } ?: return
-        tempCont.contentStatusId = contentStatusId
-        tempCont.assetStatusId = assetStatusId
-    }
-
-    private fun updateContent(
-        list: ArrayList<AssetReviewContent>,
-        contentStatusId: Int,
-        assetStatusId: Int
-    ) {
-        val total = currentList.size
-
-        uiEventListener?.onUiEventRequired(
-            AdapterProgress(
-                totalTask = total,
-                completedTask = 0,
-                msg = getContext().getString(R.string.processing_asset),
-                progressStatus = ProgressStatus.starting
-            )
-        )
-
-        currentList.forEachIndexed { index, content ->
-            uiEventListener?.onUiEventRequired(
-                AdapterProgress(
-                    totalTask = total,
-                    completedTask = index + 1,
-                    msg = getContext().getString(R.string.please_wait),
-                    progressStatus = ProgressStatus.running
-                )
-            )
-
-            val isChecked = contentStatusId == AssetReviewContentStatus.revised.id
-            if (list.any { it.assetId == content.assetId }) {
-                currentList[index].contentStatusId = contentStatusId
-                currentList[index].assetStatusId = assetStatusId
-                updateCheckedList(
-                    content = currentList[index],
-                    isChecked = isChecked
-                )
-            }
-        }
-
-        uiEventListener?.onUiEventRequired(
-            AdapterProgress(
-                totalTask = total,
-                completedTask = total,
-                msg = getContext().getString(R.string.finished),
-                progressStatus = ProgressStatus.finished
-            )
-        )
+        notifyItemRangeChanged(0, itemCount, PAYLOADS.STATUS_CHANGE)
     }
 
     fun remove(position: Int) {
@@ -929,7 +782,7 @@ class ArcRecyclerAdapter(
         remove(getIndex(arC))
     }
 
-    fun selectItem(a: AssetReviewContent?, scroll: Boolean = true) {
+    fun selectItem(a: WarehouseMovementContent?, scroll: Boolean = true) {
         var pos = NO_POSITION
         if (a != null) pos = getIndex(a)
         selectItem(pos, scroll)
@@ -949,30 +802,20 @@ class ArcRecyclerAdapter(
         if (scroll) scrollToPos(currentIndex)
     }
 
-    private fun getCurrentItemsByStatus(statusId: Int): ArrayList<AssetReviewContent> {
+    private fun getCurrentItemsByStatus(statusId: Int): ArrayList<WarehouseMovementContent> {
         return ArrayList(currentList.mapNotNull { if (it.contentStatusId == statusId) it else null })
     }
 
-    @Suppress("unused")
-    private fun getItemsByStatus(statusId: Int): ArrayList<AssetReviewContent> {
-        return ArrayList(fullList.mapNotNull { if (it.contentStatusId == statusId) it else null })
+    private fun getCurrentPos(): ArrayList<Int> {
+        return currentList
+            .map { getIndexById(it.assetId) }
+            .filterTo(ArrayList()) { it > NO_POSITION }
     }
 
-    val countItemsAdded: Int
-        get() = fullList.count {
-            it.contentStatusId == AssetReviewContentStatus.appeared.id ||
-                    it.contentStatusId == AssetReviewContentStatus.unknown.id ||
-                    it.contentStatusId == AssetReviewContentStatus.external.id
-        }
-
-    val countItemsMissed: Int
-        get() = fullList.count { it.contentStatusId == AssetReviewContentStatus.notInReview.id }
-
-    val countItemsRevised: Int
-        get() = fullList.count {
-            it.contentStatusId == AssetReviewContentStatus.revised.id ||
-                    it.contentStatusId == AssetReviewContentStatus.newAsset.id
-        }
+    @Suppress("unused")
+    private fun getItemsByStatus(statusId: Int): ArrayList<WarehouseMovementContent> {
+        return ArrayList(fullList.mapNotNull { if (it.contentStatusId == statusId) it else null })
+    }
 
     /**
      * Scrolls to the given position, making sure the item can be fully displayed.
@@ -1042,7 +885,7 @@ class ArcRecyclerAdapter(
     }
 
     @Suppress("MemberVisibilityCanBePrivate", "unused")
-    private fun getIndex(content: AssetReviewContent): Int {
+    private fun getIndex(content: WarehouseMovementContent): Int {
         return currentList.indexOf(content)
     }
 
@@ -1052,39 +895,65 @@ class ArcRecyclerAdapter(
     }
 
     @Suppress("MemberVisibilityCanBePrivate", "unused")
-    fun getContentByItem(item: Asset): AssetReviewContent? {
+    fun getContentByItem(item: Asset): WarehouseMovementContent? {
         return currentList.firstOrNull { it.assetId == item.assetId }
     }
 
     @Suppress("MemberVisibilityCanBePrivate", "unused")
-    fun getContentByIndex(pos: Int): AssetReviewContent? {
+    fun getContentByIndex(pos: Int): WarehouseMovementContent? {
         return if (currentList.lastIndex > pos) currentList[pos] else null
     }
 
     @Suppress("MemberVisibilityCanBePrivate", "unused")
-    fun getContentByItemId(itemId: Long): AssetReviewContent? {
+    fun getContentByItemId(itemId: Long): WarehouseMovementContent? {
         return currentList.firstOrNull { it.assetId == itemId }
     }
 
     @Suppress("MemberVisibilityCanBePrivate", "unused")
-    fun getContentByCode(code: String): AssetReviewContent? {
+    fun getContentByCode(code: String): WarehouseMovementContent? {
         return currentList.firstOrNull { it.code == code }
     }
 
-    fun getAllChecked(): ArrayList<AssetReviewContent> {
-        val items = ArrayList<AssetReviewContent>()
+    fun getAllChecked(): ArrayList<WarehouseMovementContent> {
+        val items = ArrayList<WarehouseMovementContent>()
         checkedIdArray.mapNotNullTo(items) { getContentByItemId(it) }
         return items
     }
 
-    fun currentItem(): AssetReviewContent? {
+    fun currentItem(): WarehouseMovementContent? {
         if (currentIndex == NO_POSITION) return null
         return if (currentList.any() && itemCount > currentIndex) getItem(currentIndex)
         else null
     }
 
+    fun currentAsset(): Asset? {
+        if (currentIndex == NO_POSITION) return null
+        val item = getItem(currentIndex) ?: return null
+        return AssetDbHelper().selectById(item.assetId)
+    }
+
     fun countChecked(): Int {
         return checkedIdArray.count()
+    }
+
+    val assetsToMove: Int
+        get() = fullList.count {
+            it.contentStatusId == WarehouseMovementContentStatus.toMove.id
+        }
+
+    val assetsNoNeedToMove: Int
+        get() = fullList.count {
+            it.contentStatusId == WarehouseMovementContentStatus.noNeedToMove.id
+        }
+
+    fun assetsFounded(destWaId: Long): Int =
+        fullList.count { it.warehouseAreaId == destWaId && it.assetStatusId == AssetStatus.missing.id }
+
+    fun getToMove(warehouseAreaId: Long): ArrayList<WarehouseMovementContent> {
+        return ArrayList(fullList.mapNotNull {
+            if (it.warehouseAreaId != warehouseAreaId || it.assetStatusId == AssetStatus.missing.id) it
+            else null
+        }.toList())
     }
 
     fun firstVisiblePos(): Int {
@@ -1099,7 +968,7 @@ class ArcRecyclerAdapter(
      * @param isChecked
      * @return Return true if the list is modified
      */
-    private fun updateCheckedList(content: AssetReviewContent, isChecked: Boolean) {
+    private fun updateCheckedList(content: WarehouseMovementContent, isChecked: Boolean) {
         return updateCheckedList(content.assetId, isChecked)
     }
 
@@ -1108,13 +977,13 @@ class ArcRecyclerAdapter(
         if (isChecked) checkedIdArray.add(assetId)
     }
 
-    fun addVisibleStatus(status: AssetReviewContentStatus) {
+    fun addVisibleStatus(status: WarehouseMovementContentStatus) {
         if (visibleStatus.contains(status)) return
         visibleStatus.add(status)
         refreshFilter()
     }
 
-    fun removeVisibleStatus(status: AssetReviewContentStatus) {
+    fun removeVisibleStatus(status: WarehouseMovementContentStatus) {
         if (!visibleStatus.contains(status)) return
         visibleStatus.remove(status)
         refreshFilter()
@@ -1137,8 +1006,9 @@ class ArcRecyclerAdapter(
             binding.checkBox.isChecked = checked
         }
 
-        fun bindStatusChange(content: AssetReviewContent) {
-            binding.assetStatus.text = AssetReviewContentStatus.getById(content.contentStatusId)?.description ?: ""
+        fun bindStatusChange(content: WarehouseMovementContent) {
+            binding.assetStatus.text =
+                WarehouseMovementContentStatus.getById(content.contentStatusId)?.description ?: ""
         }
 
         /**
@@ -1161,7 +1031,7 @@ class ArcRecyclerAdapter(
             binding.imageControlConstraintLayout.visibility = visibility
         }
 
-        fun bind(content: AssetReviewContent, checkBoxVisibility: Int = GONE, imageVisibility: Int = GONE) {
+        fun bind(content: WarehouseMovementContent, checkBoxVisibility: Int = GONE, imageVisibility: Int = GONE) {
             bindCheckBoxVisibility(checkBoxVisibility)
             bindImageControlVisibility(visibility = if (useImageControl) VISIBLE else GONE)
             bindImageVisibility(imageVisibility = imageVisibility, changingState = false)
@@ -1225,43 +1095,25 @@ class ArcRecyclerAdapter(
             setStyle(content)
         }
 
-        fun setStyle(content: AssetReviewContent) {
+        fun setStyle(content: WarehouseMovementContent) {
             val v = itemView
 
             // region Background layouts
-            val layoutRevised = getDrawable(getContext().resources, R.drawable.layout_thin_border_green, null)
-            val layoutAppeared = getDrawable(getContext().resources, R.drawable.layout_thin_border_red, null)
-            val layoutNotInReview = getDrawable(getContext().resources, R.drawable.layout_thin_border_marron, null)
-            val layoutExternal = getDrawable(getContext().resources, R.drawable.layout_thin_border_blue, null)
-            val layoutNew = getDrawable(getContext().resources, R.drawable.layout_thin_border_yellow, null)
+            val layoutToMove = getDrawable(getContext().resources, R.drawable.layout_thin_border_green, null)
+            val layoutNoNeedToMove = getDrawable(getContext().resources, R.drawable.layout_thin_border_yellow, null)
             val layoutDefault = getDrawable(getContext().resources, R.drawable.layout_thin_border, null)
 
             val backColor: Drawable
             val foreColor: Int
             when (content.contentStatusId) {
-                AssetReviewContentStatus.revised.id -> {
-                    backColor = layoutRevised!!
-                    foreColor = layoutRevisedSelectedForeColor
+                WarehouseMovementContentStatus.toMove.id -> {
+                    backColor = layoutToMove!!
+                    foreColor = layoutToMoveSelectedForeColor
                 }
 
-                AssetReviewContentStatus.appeared.id -> {
-                    backColor = layoutAppeared!!
-                    foreColor = layoutAppearedSelectedForeColor
-                }
-
-                AssetReviewContentStatus.notInReview.id -> {
-                    backColor = layoutNotInReview!!
-                    foreColor = layoutNotInReviewSelectedForeColor
-                }
-
-                AssetReviewContentStatus.external.id -> {
-                    backColor = layoutExternal!!
-                    foreColor = layoutExternalSelectedForeColor
-                }
-
-                AssetReviewContentStatus.newAsset.id -> {
-                    backColor = layoutNew!!
-                    foreColor = layoutNewSelectedForeColor
+                WarehouseMovementContentStatus.noNeedToMove.id -> {
+                    backColor = layoutNoNeedToMove!!
+                    foreColor = layoutNoNeedToMoveSelectedForeColor
                 }
 
                 else -> {
@@ -1317,8 +1169,9 @@ class ArcRecyclerAdapter(
             binding.checkBox.isChecked = checked
         }
 
-        fun bindStatusChange(content: AssetReviewContent) {
-            binding.assetStatus.text = AssetReviewContentStatus.getById(content.contentStatusId)?.description ?: ""
+        fun bindStatusChange(content: WarehouseMovementContent) {
+            binding.assetStatus.text =
+                WarehouseMovementContentStatus.getById(content.contentStatusId)?.description ?: ""
         }
 
         /**
@@ -1332,7 +1185,7 @@ class ArcRecyclerAdapter(
             else if (changingState) expandImagePanel(icHolder)
         }
 
-        fun bind(content: AssetReviewContent, checkBoxVisibility: Int = GONE, imageVisibility: Int = GONE) {
+        fun bind(content: WarehouseMovementContent, checkBoxVisibility: Int = GONE, imageVisibility: Int = GONE) {
             bindCheckBoxVisibility(checkBoxVisibility)
             bindImageVisibility(imageVisibility = imageVisibility, changingState = false)
             bindStatusChange(content = content)
@@ -1354,48 +1207,30 @@ class ArcRecyclerAdapter(
             setStyle(content)
         }
 
-        fun setStyle(content: AssetReviewContent) {
+        fun setStyle(content: WarehouseMovementContent) {
             val v = itemView
 
             // region Background layouts
-            val layoutRevised = getDrawable(getContext().resources, R.drawable.layout_thin_border_green, null)
-            val layoutAppeared = getDrawable(getContext().resources, R.drawable.layout_thin_border_red, null)
-            val layoutNotInReview = getDrawable(getContext().resources, R.drawable.layout_thin_border_marron, null)
-            val layoutExternal = getDrawable(getContext().resources, R.drawable.layout_thin_border_blue, null)
-            val layoutNew = getDrawable(getContext().resources, R.drawable.layout_thin_border_yellow, null)
+            val layoutToMove = getDrawable(getContext().resources, R.drawable.layout_thin_border_green, null)
+            val layoutNoNeedToMove = getDrawable(getContext().resources, R.drawable.layout_thin_border_yellow, null)
             val layoutDefault = getDrawable(getContext().resources, R.drawable.layout_thin_border, null)
 
             val backColor: Drawable
             val foreColor: Int
             when (content.contentStatusId) {
-                AssetReviewContentStatus.revised.id -> {
-                    backColor = layoutRevised!!
-                    foreColor = layoutRevisedForeColor
+                WarehouseMovementContentStatus.toMove.id -> {
+                    backColor = layoutToMove!!
+                    foreColor = layoutToMoveSelectedForeColor
                 }
 
-                AssetReviewContentStatus.appeared.id -> {
-                    backColor = layoutAppeared!!
-                    foreColor = layoutAppearedForeColor
-                }
-
-                AssetReviewContentStatus.notInReview.id -> {
-                    backColor = layoutNotInReview!!
-                    foreColor = layoutNotInReviewForeColor
-                }
-
-                AssetReviewContentStatus.external.id -> {
-                    backColor = layoutExternal!!
-                    foreColor = layoutExternalForeColor
-                }
-
-                AssetReviewContentStatus.newAsset.id -> {
-                    backColor = layoutNew!!
-                    foreColor = layoutNewForeColor
+                WarehouseMovementContentStatus.noNeedToMove.id -> {
+                    backColor = layoutNoNeedToMove!!
+                    foreColor = layoutNoNeedToMoveSelectedForeColor
                 }
 
                 else -> {
                     backColor = layoutDefault!!
-                    foreColor = layoutDefaultForeColor
+                    foreColor = layoutDefaultSelectedForeColor
                 }
             }
 
@@ -1448,18 +1283,18 @@ class ArcRecyclerAdapter(
      * @param list
      * @return Lista ordenada con los estados visibles
      */
-    private fun sortedVisibleList(list: MutableList<AssetReviewContent>?): MutableList<AssetReviewContent> {
+    private fun sortedVisibleList(list: MutableList<WarehouseMovementContent>?): MutableList<WarehouseMovementContent> {
         val croppedList = (list
             ?: mutableListOf()).mapNotNull { if (it.contentStatusId in visibleStatus.map { it2 -> it2.id }) it else null }
         return sortItems(croppedList.toMutableList())
     }
 
     // Sobrecargamos estos métodos para suministrar siempre una lista ordenada y filtrada por estado de visibilidad
-    override fun submitList(list: MutableList<AssetReviewContent>?) {
+    override fun submitList(list: MutableList<WarehouseMovementContent>?) {
         super.submitList(sortedVisibleList(list))
     }
 
-    override fun submitList(list: MutableList<AssetReviewContent>?, commitCallback: Runnable?) {
+    override fun submitList(list: MutableList<WarehouseMovementContent>?, commitCallback: Runnable?) {
         super.submitList(sortedVisibleList(list), commitCallback)
     }
 }

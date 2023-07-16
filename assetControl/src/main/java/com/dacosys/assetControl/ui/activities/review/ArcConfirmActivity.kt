@@ -42,7 +42,7 @@ import com.dacosys.assetControl.utils.settings.Preference
 import com.dacosys.imageControl.ui.fragments.ImageControlButtonsFragment
 import org.parceler.Parcels
 
-class AssetReviewContentConfirmActivity : AppCompatActivity(),
+class ArcConfirmActivity : AppCompatActivity(),
     SwipeRefreshLayout.OnRefreshListener {
     override fun onRefresh() {
         Handler(Looper.getMainLooper()).postDelayed({
@@ -117,12 +117,10 @@ class AssetReviewContentConfirmActivity : AppCompatActivity(),
             imageControlFragment as ImageControlButtonsFragment
         )
 
-        if (adapter != null) {
-            savedInstanceState.putParcelable("lastSelected", adapter?.currentItem())
-            savedInstanceState.putInt("firstVisiblePos", adapter?.firstVisiblePos() ?: RecyclerView.NO_POSITION)
-            savedInstanceState.putLongArray("checkedIdArray", adapter?.checkedIdArray?.map { it }?.toLongArray())
-            savedInstanceState.putInt("currentScrollPosition", currentScrollPosition)
-        }
+        savedInstanceState.putParcelable("lastSelected", adapter?.currentItem())
+        savedInstanceState.putInt("firstVisiblePos", adapter?.firstVisiblePos() ?: RecyclerView.NO_POSITION)
+        savedInstanceState.putLongArray("checkedIdArray", adapter?.checkedIdArray?.map { it }?.toLongArray())
+        savedInstanceState.putInt("currentScrollPosition", currentScrollPosition)
     }
 
     private lateinit var binding: AssetReviewContentConfirmBottomPanelCollapsedBinding

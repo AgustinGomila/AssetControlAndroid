@@ -491,6 +491,21 @@ class AssetReviewContentDbHelper {
         }
     }
 
+    fun deleteTemp(): Boolean {
+        createTempTable()
+
+        Log.i(this::class.java.simpleName, ": SQLite -> delete")
+
+        val sqLiteDatabase = getWritableDb()
+        return try {
+            return sqLiteDatabase.delete("$temp$TABLE_NAME", null, null) > 0
+        } catch (ex: SQLException) {
+            ex.printStackTrace()
+            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
+            false
+        }
+    }
+
     private fun deleteTempByAssetReviewId(id: Long): Boolean {
         createTempTable()
 

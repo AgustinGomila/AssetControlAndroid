@@ -21,8 +21,8 @@ import com.dacosys.assetControl.ui.activities.common.ObservationsActivity
 import com.dacosys.assetControl.ui.activities.location.LocationSelectActivity
 import com.dacosys.assetControl.ui.activities.location.WarehouseAreaCRUDActivity
 import com.dacosys.assetControl.ui.activities.location.WarehouseAreaPrintLabelActivity
-import com.dacosys.assetControl.ui.activities.movement.WarehouseMovementContentActivity
-import com.dacosys.assetControl.ui.activities.review.AssetReviewContentActivity
+import com.dacosys.assetControl.ui.activities.movement.WmcActivity
+import com.dacosys.assetControl.ui.activities.review.ArcActivity
 import com.dacosys.assetControl.ui.activities.route.DccActivity
 import com.dacosys.assetControl.ui.activities.route.RouteProcessContentActivity
 import kotlin.experimental.or
@@ -75,42 +75,37 @@ object Nfc {
             when (targetActivity) {
                 is AssetCRUDActivity -> (targetActivity as? AssetCRUDActivity)?.scannerCompleted(id)
                     ?: (targetActivity as? AssetCRUDActivity)?.scannerCompleted(id)
-                is AssetPrintLabelActivity -> (targetActivity as? AssetPrintLabelActivity)?.scannerCompleted(
-                    id
-                )
+
+                is AssetPrintLabelActivity -> (targetActivity as? AssetPrintLabelActivity)?.scannerCompleted(id)
                     ?: (targetActivity as? AssetPrintLabelActivity)?.scannerCompleted(id)
-                is AssetReviewContentActivity -> (targetActivity as? AssetReviewContentActivity)?.scannerCompleted(
-                    id
-                )
-                    ?: (targetActivity as? AssetReviewContentActivity)?.scannerCompleted(id)
+
+                is ArcActivity -> (targetActivity as? ArcActivity)?.scannerCompleted(id)
+                    ?: (targetActivity as? ArcActivity)?.scannerCompleted(id)
+
                 is CodeCheckActivity -> (targetActivity as? CodeCheckActivity)?.scannerCompleted(id)
                     ?: (targetActivity as? CodeCheckActivity)?.scannerCompleted(id)
+
                 is DccActivity -> (targetActivity as? DccActivity)?.scannerCompleted(id)
                     ?: (targetActivity as? DccActivity)?.scannerCompleted(id)
-                is ObservationsActivity -> (targetActivity as? ObservationsActivity)?.scannerCompleted(
-                    id
-                )
+
+                is ObservationsActivity -> (targetActivity as? ObservationsActivity)?.scannerCompleted(id)
                     ?: (targetActivity as? ObservationsActivity)?.scannerCompleted(id)
-                is RouteProcessContentActivity -> (targetActivity as? RouteProcessContentActivity)?.scannerCompleted(
-                    id
-                )
+
+                is RouteProcessContentActivity -> (targetActivity as? RouteProcessContentActivity)?.scannerCompleted(id)
                     ?: (targetActivity as? RouteProcessContentActivity)?.scannerCompleted(id)
-                is WarehouseAreaCRUDActivity -> (targetActivity as? WarehouseAreaCRUDActivity)?.scannerCompleted(
-                    id
-                )
+
+                is WarehouseAreaCRUDActivity -> (targetActivity as? WarehouseAreaCRUDActivity)?.scannerCompleted(id)
                     ?: (targetActivity as? WarehouseAreaCRUDActivity)?.scannerCompleted(id)
-                is LocationSelectActivity -> (targetActivity as? LocationSelectActivity)?.scannerCompleted(
-                    id
-                )
+
+                is LocationSelectActivity -> (targetActivity as? LocationSelectActivity)?.scannerCompleted(id)
                     ?: (targetActivity as? LocationSelectActivity)?.scannerCompleted(id)
-                is WarehouseAreaPrintLabelActivity -> (targetActivity as? WarehouseAreaPrintLabelActivity)?.scannerCompleted(
-                    id
-                )
-                    ?: (targetActivity as? WarehouseAreaPrintLabelActivity)?.scannerCompleted(id)
-                is WarehouseMovementContentActivity -> (targetActivity as? WarehouseMovementContentActivity)?.scannerCompleted(
-                    id
-                )
-                    ?: (targetActivity as? WarehouseMovementContentActivity)?.scannerCompleted(id)
+
+                is WarehouseAreaPrintLabelActivity ->
+                    (targetActivity as? WarehouseAreaPrintLabelActivity)?.scannerCompleted(id)
+                        ?: (targetActivity as? WarehouseAreaPrintLabelActivity)?.scannerCompleted(id)
+
+                is WmcActivity -> (targetActivity as? WmcActivity)?.scannerCompleted(id)
+                    ?: (targetActivity as? WmcActivity)?.scannerCompleted(id)
             }
         }
     }

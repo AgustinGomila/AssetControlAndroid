@@ -1,10 +1,17 @@
 package com.dacosys.assetControl.adapters.interfaces
 
-import com.dacosys.assetControl.adapters.review.ArcRecyclerAdapter
+import com.dacosys.assetControl.network.utils.ProgressStatus
 
 class Interfaces {
+    data class AdapterProgress(
+        var totalTask: Int = 0,
+        var completedTask: Int = 0,
+        var msg: String = "",
+        var progressStatus: ProgressStatus = ProgressStatus.unknown,
+    )
+
     interface UiEventListener {
-        fun onUiEventRequired(it: ArcRecyclerAdapter.AdapterProgress)
+        fun onUiEventRequired(it: AdapterProgress)
     }
 
     interface DataSetChangedListener {

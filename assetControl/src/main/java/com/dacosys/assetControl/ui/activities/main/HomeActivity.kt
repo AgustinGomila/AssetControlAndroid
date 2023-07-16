@@ -52,9 +52,9 @@ import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.ui.activities.code.CodeCheckActivity
 import com.dacosys.assetControl.ui.activities.common.CRUDActivity
 import com.dacosys.assetControl.ui.activities.manteinance.AssetManteinanceSelectActivity
-import com.dacosys.assetControl.ui.activities.movement.WarehouseMovementContentActivity
+import com.dacosys.assetControl.ui.activities.movement.WmcActivity
 import com.dacosys.assetControl.ui.activities.print.PrintLabelActivity
-import com.dacosys.assetControl.ui.activities.review.AssetReviewContentActivity
+import com.dacosys.assetControl.ui.activities.review.ArcActivity
 import com.dacosys.assetControl.ui.activities.review.AssetReviewSelectActivity
 import com.dacosys.assetControl.ui.activities.route.DataCollectionRuleTargetActivity
 import com.dacosys.assetControl.ui.activities.route.RouteSelectActivity
@@ -272,7 +272,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
                 if (!rejectNewInstances) {
                     rejectNewInstances = true
 
-                    val intent = Intent(baseContext, WarehouseMovementContentActivity::class.java)
+                    val intent = Intent(baseContext, WmcActivity::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
                     startActivity(intent)
                 }
@@ -830,7 +830,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
             return
         }
 
-        val intent = Intent(baseContext, AssetReviewContentActivity::class.java)
+        val intent = Intent(baseContext, ArcActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
         intent.putExtra("isNew", true)
         intent.putExtra("assetReview", Parcels.wrap(ar))

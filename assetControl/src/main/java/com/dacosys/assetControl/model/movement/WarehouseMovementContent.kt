@@ -150,12 +150,6 @@ class WarehouseMovementContent : Parcelable {
         return code
     }
 
-    val warehouseMovement: WarehouseMovement?
-        get() {
-            return if (warehouseMovementId == 0L) null
-            else WarehouseMovement(warehouseMovementId, false)
-        }
-
     val asset: Asset?
         get() {
             return if (assetId == 0L) null
@@ -182,12 +176,8 @@ class WarehouseMovementContent : Parcelable {
 
     var qty: Float = 0F
         get() {
-            if (!dataRead) {
-                if (!refreshData()) {
-                    return 0F
-                }
-            }
-            return field
+            return if (!dataRead && !refreshData()) 0F
+            else field
         }
 
     /*

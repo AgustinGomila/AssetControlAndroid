@@ -318,7 +318,7 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
                 if (!rejectNewInstances) {
                     rejectNewInstances = true
 
-                    val intent = Intent(baseContext, AssetReviewContentActivity::class.java)
+                    val intent = Intent(baseContext, ArcActivity::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
                     intent.putExtra("isNew", false)
                     intent.putExtra("assetReview", Parcels.wrap(ar))
@@ -514,7 +514,7 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
             if (!rejectNewInstances) {
                 rejectNewInstances = true
 
-                val intent = Intent(baseContext, AssetReviewContentActivity::class.java)
+                val intent = Intent(baseContext, ArcActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
                 intent.putExtra("isNew", true)
                 intent.putExtra("assetReview", Parcels.wrap(ar))

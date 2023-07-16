@@ -12,12 +12,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.fragment.app.Fragment
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.transition.ChangeBounds
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.adapters.movement.WarehouseMovementContentAdapter
+import com.dacosys.assetControl.adapters.movement.WmcRecyclerAdapter
 import com.dacosys.assetControl.dataBase.movement.WarehouseMovementContentDbHelper
 import com.dacosys.assetControl.databinding.WarehouseMovementContentConfirmActivityBottomPanelCollapsedBinding
 import com.dacosys.assetControl.model.asset.AssetStatus
@@ -40,7 +42,7 @@ import com.dacosys.assetControl.utils.settings.Preference
 import com.dacosys.imageControl.ui.fragments.ImageControlButtonsFragment
 import org.parceler.Parcels
 
-class WarehouseMovementContentConfirmActivity : AppCompatActivity(),
+class WmcConfirmActivity : AppCompatActivity(),
     SwipeRefreshLayout.OnRefreshListener {
     override fun onRefresh() {
         Handler(Looper.getMainLooper()).postDelayed({
@@ -56,7 +58,6 @@ class WarehouseMovementContentConfirmActivity : AppCompatActivity(),
     }
 
     private fun destroyLocals() {
-        wmContAdapter?.refreshListeners(null, null, null)
         imageControlFragment?.onDestroy()
         imageControlFragment = null
     }
@@ -64,21 +65,18 @@ class WarehouseMovementContentConfirmActivity : AppCompatActivity(),
     private var imageControlFragment: ImageControlButtonsFragment? = null
     private var headerFragment: LocationHeaderFragment? = null
 
-    private var wmContAdapter: WarehouseMovementContentAdapter? = null
-    private var wmContArray: ArrayList<WarehouseMovementContent> = ArrayList()
+    private var adapter: WmcRecyclerAdapter? = null
+    private var completeList: ArrayList<WarehouseMovementContent> = ArrayList()
+    private var checkedIdArray: java.util.ArrayList<Long> = ArrayList()
+    private var lastSelected: WarehouseMovementContent? = null
+    private var currentScrollPosition: Int = 0
+    private var firstVisiblePos: Int? = null
+
     private var obs = ""
     private var rejectNewInstances = false
 
     private var panelBottomIsExpanded = false
     private var panelTopIsExpanded = true
-
-
-    override fun onResume() {
-        super.onResume()
-        rejectNewInstances = false
-
-        fillAdapter()
-    }
 
     override fun onSaveInstanceState(savedInstanceState: Bundle) {
         super.onSaveInstanceState(savedInstanceState)
@@ -91,6 +89,11 @@ class WarehouseMovementContentConfirmActivity : AppCompatActivity(),
             "imageControlFragment",
             imageControlFragment as ImageControlButtonsFragment
         )
+
+        savedInstanceState.putParcelable("lastSelected", adapter?.currentItem())
+        savedInstanceState.putInt("firstVisiblePos", adapter?.firstVisiblePos() ?: RecyclerView.NO_POSITION)
+        savedInstanceState.putLongArray("checkedIdArray", adapter?.checkedIdArray?.map { it }?.toLongArray())
+        savedInstanceState.putInt("currentScrollPosition", currentScrollPosition)
     }
 
     private lateinit var binding: WarehouseMovementContentConfirmActivityBottomPanelCollapsedBinding
@@ -121,6 +124,14 @@ class WarehouseMovementContentConfirmActivity : AppCompatActivity(),
 
             panelBottomIsExpanded = savedInstanceState.getBoolean("panelBottomIsExpanded")
             panelTopIsExpanded = savedInstanceState.getBoolean("panelTopIsExpanded")
+
+            // Adapter
+            checkedIdArray =
+                (savedInstanceState.getLongArray("checkedIdArray") ?: longArrayOf()).toCollection(ArrayList())
+            lastSelected = savedInstanceState.getParcelable("lastSelected")
+            firstVisiblePos =
+                if (savedInstanceState.containsKey("firstVisiblePos")) savedInstanceState.getInt("firstVisiblePos") else -1
+            currentScrollPosition = savedInstanceState.getInt("currentScrollPosition")
         } else {
             // Inicializar la actividad
 
@@ -132,7 +143,7 @@ class WarehouseMovementContentConfirmActivity : AppCompatActivity(),
         }
 
         // Cargamos la revisión desde la tabla temporal
-        wmContArray.clear()
+        completeList.clear()
         val tempCont = WarehouseMovementContentDbHelper().selectByTempId(1)
         if (tempCont.any()) {
             val r: ArrayList<WarehouseMovementContent> = ArrayList()
@@ -144,7 +155,7 @@ class WarehouseMovementContentConfirmActivity : AppCompatActivity(),
                     r.add(tempItem)
                 }
             }
-            wmContArray = r
+            completeList = r
         }
 
         setHeaderTextBox(tempWarehouseArea)
@@ -171,6 +182,11 @@ class WarehouseMovementContentConfirmActivity : AppCompatActivity(),
         setupUI(binding.root, this)
     }
 
+    override fun onStart() {
+        super.onStart()
+        fillAdapter(completeList)
+    }
+
     private fun setHeaderTextBox(warehouseArea: WarehouseArea?) {
         headerFragment?.showChangePostButton(false)
         headerFragment?.setTitle(getString(R.string.destination))
@@ -189,24 +205,14 @@ class WarehouseMovementContentConfirmActivity : AppCompatActivity(),
 
         val currentLayout = ConstraintSet()
         if (panelBottomIsExpanded) {
-            if (panelTopIsExpanded) {
-                currentLayout.load(this, R.layout.warehouse_movement_content_confirm_activity)
-            } else {
-                currentLayout.load(
-                    this, R.layout.warehouse_movement_content_confirm_activity_top_panel_collapsed
-                )
-            }
+            if (panelTopIsExpanded) currentLayout.load(this, R.layout.warehouse_movement_content_confirm_activity)
+            else currentLayout.load(this, R.layout.warehouse_movement_content_confirm_activity_top_panel_collapsed)
         } else {
-            if (panelTopIsExpanded) {
-                currentLayout.load(
-                    this,
-                    R.layout.warehouse_movement_content_confirm_activity_bottom_panel_collapsed
-                )
-            } else {
-                currentLayout.load(
-                    this, R.layout.warehouse_movement_content_confirm_activity_both_panels_collapsed
-                )
-            }
+            if (panelTopIsExpanded) currentLayout.load(
+                this,
+                R.layout.warehouse_movement_content_confirm_activity_bottom_panel_collapsed
+            )
+            else currentLayout.load(this, R.layout.warehouse_movement_content_confirm_activity_both_panels_collapsed)
         }
 
         val transition = ChangeBounds()
@@ -225,25 +231,11 @@ class WarehouseMovementContentConfirmActivity : AppCompatActivity(),
 
         currentLayout.applyTo(binding.warehouseMovementContentConfirm)
 
-        when {
-            panelBottomIsExpanded -> {
-                binding.expandBottomPanelButton?.text = getString(R.string.collapse_panel)
-            }
+        if (panelBottomIsExpanded) binding.expandBottomPanelButton?.text = getString(R.string.collapse_panel)
+        else binding.expandBottomPanelButton?.text = getString(R.string.more_options)
 
-            else -> {
-                binding.expandBottomPanelButton?.text = getString(R.string.more_options)
-            }
-        }
-
-        when {
-            panelTopIsExpanded -> {
-                binding.expandTopPanelButton?.text = getString(R.string.collapse_panel)
-            }
-
-            else -> {
-                binding.expandTopPanelButton?.text = getString(R.string.select_destination)
-            }
-        }
+        if (panelTopIsExpanded) binding.expandTopPanelButton?.text = getString(R.string.collapse_panel)
+        else binding.expandTopPanelButton?.text = getString(R.string.select_destination)
     }
 
     private fun setBottomPanelAnimation() {
@@ -254,26 +246,14 @@ class WarehouseMovementContentConfirmActivity : AppCompatActivity(),
         binding.expandBottomPanelButton?.setOnClickListener {
             val nextLayout = ConstraintSet()
             if (panelBottomIsExpanded) {
-                if (panelTopIsExpanded) {
-                    nextLayout.load(
-                        this,
-                        R.layout.warehouse_movement_content_confirm_activity_bottom_panel_collapsed
-                    )
-                } else {
-                    nextLayout.load(
-                        this,
-                        R.layout.warehouse_movement_content_confirm_activity_both_panels_collapsed
-                    )
-                }
+                if (panelTopIsExpanded) nextLayout.load(
+                    this,
+                    R.layout.warehouse_movement_content_confirm_activity_bottom_panel_collapsed
+                )
+                else nextLayout.load(this, R.layout.warehouse_movement_content_confirm_activity_both_panels_collapsed)
             } else {
-                if (panelTopIsExpanded) {
-                    nextLayout.load(this, R.layout.warehouse_movement_content_confirm_activity)
-                } else {
-                    nextLayout.load(
-                        this,
-                        R.layout.warehouse_movement_content_confirm_activity_top_panel_collapsed
-                    )
-                }
+                if (panelTopIsExpanded) nextLayout.load(this, R.layout.warehouse_movement_content_confirm_activity)
+                else nextLayout.load(this, R.layout.warehouse_movement_content_confirm_activity_top_panel_collapsed)
             }
 
             panelBottomIsExpanded = !panelBottomIsExpanded
@@ -293,15 +273,8 @@ class WarehouseMovementContentConfirmActivity : AppCompatActivity(),
 
             nextLayout.applyTo(binding.warehouseMovementContentConfirm)
 
-            when {
-                panelBottomIsExpanded -> {
-                    binding.expandBottomPanelButton?.text = getString(R.string.collapse_panel)
-                }
-
-                else -> {
-                    binding.expandBottomPanelButton?.text = getString(R.string.more_options)
-                }
-            }
+            if (panelBottomIsExpanded) binding.expandBottomPanelButton?.text = getString(R.string.collapse_panel)
+            else binding.expandBottomPanelButton?.text = getString(R.string.more_options)
         }
     }
 
@@ -313,26 +286,17 @@ class WarehouseMovementContentConfirmActivity : AppCompatActivity(),
         binding.expandTopPanelButton?.setOnClickListener {
             val nextLayout = ConstraintSet()
             if (panelBottomIsExpanded) {
-                if (panelTopIsExpanded) {
-                    nextLayout.load(
-                        this,
-                        R.layout.warehouse_movement_content_confirm_activity_top_panel_collapsed
-                    )
-                } else {
-                    nextLayout.load(this, R.layout.warehouse_movement_content_confirm_activity)
-                }
+                if (panelTopIsExpanded) nextLayout.load(
+                    this,
+                    R.layout.warehouse_movement_content_confirm_activity_top_panel_collapsed
+                )
+                else nextLayout.load(this, R.layout.warehouse_movement_content_confirm_activity)
             } else {
-                if (panelTopIsExpanded) {
-                    nextLayout.load(
-                        this,
-                        R.layout.warehouse_movement_content_confirm_activity_both_panels_collapsed
-                    )
-                } else {
-                    nextLayout.load(
-                        this,
-                        R.layout.warehouse_movement_content_confirm_activity_bottom_panel_collapsed
-                    )
-                }
+                if (panelTopIsExpanded) nextLayout.load(
+                    this,
+                    R.layout.warehouse_movement_content_confirm_activity_both_panels_collapsed
+                )
+                else nextLayout.load(this, R.layout.warehouse_movement_content_confirm_activity_bottom_panel_collapsed)
             }
 
             panelTopIsExpanded = !panelTopIsExpanded
@@ -353,15 +317,8 @@ class WarehouseMovementContentConfirmActivity : AppCompatActivity(),
 
             nextLayout.applyTo(binding.warehouseMovementContentConfirm)
 
-            when {
-                panelTopIsExpanded -> {
-                    binding.expandTopPanelButton?.text = getString(R.string.collapse_panel)
-                }
-
-                else -> {
-                    binding.expandTopPanelButton?.text = getString(R.string.select_destination)
-                }
-            }
+            if (panelTopIsExpanded) binding.expandTopPanelButton?.text = getString(R.string.collapse_panel)
+            else binding.expandTopPanelButton?.text = getString(R.string.select_destination)
         }
     }
 
@@ -439,7 +396,7 @@ class WarehouseMovementContentConfirmActivity : AppCompatActivity(),
     }
 
     private fun setupTextView() {
-        val assetToMove = wmContAdapter?.assetsToMove ?: 0
+        val assetToMove = adapter?.assetsToMove ?: 0
         val tempText = if (assetToMove == 1) {
             getString(R.string.asset)
         } else {
@@ -451,51 +408,55 @@ class WarehouseMovementContentConfirmActivity : AppCompatActivity(),
         }
     }
 
-    private fun fillAdapter() {
-        var lastSelected: WarehouseMovementContent? = null
-        if (wmContAdapter != null) {
-            lastSelected = wmContAdapter?.currentWmCont()
-        }
+    private fun fillAdapter(contents: ArrayList<WarehouseMovementContent>) {
+        showProgressBar(true)
 
-        try {
-            runOnUiThread {
-                wmContAdapter = WarehouseMovementContentAdapter(
-                    activity = this,
-                    resource = R.layout.asset_row,
-                    wmContArray = wmContArray,
-                    suggestedList = wmContArray,
-                    listView = binding.wmContentListView,
-                    multiSelect = false,
-                    checkedIdArray = ArrayList(),
+        runOnUiThread {
+            try {
+                if (adapter != null) {
+                    // Si el adapter es NULL es porque aún no fue creado.
+                    // Por lo tanto, puede ser que los valores de [lastSelected]
+                    // sean valores guardados de la instancia anterior y queremos preservarlos.
+                    lastSelected = adapter?.currentItem()
+                }
+
+                adapter = WmcRecyclerAdapter(
+                    recyclerView = binding.recyclerView,
+                    fullList = contents,
+                    checkedIdArray = checkedIdArray,
                     visibleStatus = WarehouseMovementContentStatus.getAll()
                 )
-            }
 
-            while (binding.wmContentListView.adapter == null) {
-                // Horrible wait for full load
-            }
+                binding.recyclerView.layoutManager = LinearLayoutManager(this)
+                binding.recyclerView.adapter = adapter
 
-            if (wmContAdapter != null) {
-                if (lastSelected != null && wmContAdapter!!.getItems().contains(lastSelected)) {
-                    wmContAdapter?.selectItem(
-                        wmc = lastSelected, smoothScroll = true
-                    )
-                } else if (countItems > 0) {
-                    wmContAdapter?.selectItem(pos = 0, smoothScroll = true)
+                while (binding.recyclerView.adapter == null) {
+                    // Horrible wait for a full load
                 }
+
+                // Estas variables locales evitar posteriores cambios de estado.
+                val ls = lastSelected
+                val cs = currentScrollPosition
+                Handler(Looper.getMainLooper()).postDelayed({
+                    adapter?.selectItem(ls, false)
+                    adapter?.scrollToPos(cs, true)
+                }, 200)
+
+                setupTextView()
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+                ErrorLog.writeLog(this, this::class.java.simpleName, ex)
+            } finally {
+                gentlyReturn()
             }
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-            ErrorLog.writeLog(this, this::class.java.simpleName, ex)
-        } finally {
-            setupTextView()
         }
     }
 
-    private val countItems: Int
-        get() {
-            return wmContAdapter?.count() ?: 0
-        }
+    private fun gentlyReturn() {
+        closeKeyboard(this)
+        rejectNewInstances = false
+        showProgressBar(false)
+    }
 
     private fun addObservations() {
         if (!rejectNewInstances) {
