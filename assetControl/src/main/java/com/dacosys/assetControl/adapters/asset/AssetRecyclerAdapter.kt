@@ -396,7 +396,7 @@ class AssetRecyclerAdapter(
     @SuppressLint("ClickableViewAccessibility")
     private fun setCheckBoxLogic(checkBox: CheckBox, asset: Asset, position: Int) {
         val checkChangeListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
-            setChecked(asset = asset, isChecked = isChecked, suspendRefresh = true)
+            setChecked(asset = asset, isChecked = isChecked, suspendRefresh = false)
         }
 
         val longClickListener = OnLongClickListener { _ ->
@@ -721,13 +721,20 @@ class AssetRecyclerAdapter(
         else null
     }
 
-    fun countChecked(): Int {
-        return checkedIdArray.size
-    }
+    val countChecked: Int
+        get() = checkedIdArray.size
 
-    fun totalVisible(): Int {
-        return itemCount
-    }
+    val totalVisible: Int
+        get() = itemCount
+
+    val totalOnInventory: Int
+        get() = fullList.count { it.assetStatusId == AssetStatus.onInventory.id }
+
+    val totalMissing: Int
+        get() = fullList.count { it.assetStatusId == AssetStatus.missing.id }
+
+    val totalRemoved: Int
+        get() = fullList.count { it.assetStatusId == AssetStatus.removed.id }
 
     fun firstVisiblePos(): Int {
         val layoutManager = recyclerView.layoutManager as LinearLayoutManager
@@ -736,32 +743,11 @@ class AssetRecyclerAdapter(
 
     fun setChecked(asset: Asset, isChecked: Boolean, suspendRefresh: Boolean = false) {
         val pos = getIndexById(asset.assetId)
-        if (isChecked) {
-            if (!checkedIdArray.contains(asset.assetId)) {
-                checkedIdArray.add(asset.assetId)
-            }
-        } else {
-            checkedIdArray.remove(asset.assetId)
-        }
-
-        checkedChangedListener?.onCheckedChanged(isChecked, pos)
+        checkedIdArray.remove(asset.assetId)
+        if (isChecked) checkedIdArray.add(asset.assetId)
 
         // Notificamos al Listener superior
-        if (!suspendRefresh) dataSetChangedListener?.onDataSetChanged()
-    }
-
-    private var isFilling = false
-    fun setChecked(items: ArrayList<Asset>, isChecked: Boolean) {
-        if (isFilling) return
-
-        isFilling = true
-        for (i in items) {
-            setChecked(asset = i, isChecked = isChecked, suspendRefresh = true)
-        }
-        isFilling = false
-
-        // Notificamos al Listener superior
-        dataSetChangedListener?.onDataSetChanged()
+        if (!suspendRefresh) checkedChangedListener?.onCheckedChanged(isChecked, pos)
     }
 
     fun addVisibleStatus(status: AssetStatus) {

@@ -83,83 +83,15 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/summaryConstraintLayout"
-                    android:layout_width="match_parent"
+            <androidx.fragment.app.FragmentContainerView
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="2dp"
-                    android:layout_marginEnd="2dp"
-                    android:background="@drawable/layout_thin_border_yellow"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
-
-                <View
-                        android:id="@+id/summaryDividerVert1"
-                        android:layout_width="1dp"
-                        android:layout_height="0dp"
-                        android:background="?android:attr/listDivider"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/guidelineSum50"
-                        app:layout_constraintStart_toStartOf="@+id/guidelineSum50"
-                        app:layout_constraintTop_toTopOf="parent"/>
-
-                <TextView
-                        android:id="@+id/totalLabelTextView"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:text="@string/total"
-                        android:textSize="16sp"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"/>
-
-                <TextView
-                        android:id="@+id/selectedLabelTextView"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:text="@string/checked"
-                        android:textSize="16sp"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="@+id/guidelineSum50"
-                        app:layout_constraintTop_toTopOf="parent"/>
-
-                <androidx.constraintlayout.widget.Guideline
-                        android:id="@+id/guidelineSum50"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        app:layout_constraintGuide_percent="0.5"/>
-
-                <TextView
-                        android:id="@+id/totalTextView"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:layout_marginEnd="4dp"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@+id/guidelineSum50"
-                        app:layout_constraintStart_toEndOf="@+id/totalLabelTextView"
-                        app:layout_constraintTop_toTopOf="parent"/>
-
-                <TextView
-                        android:id="@+id/selectedTextView"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:layout_marginEnd="4dp"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@+id/selectedLabelTextView"
-                        app:layout_constraintTop_toTopOf="parent"/>
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                    android:name="com.dacosys.assetControl.ui.fragments.asset.SummaryFragment"
+                    android:id="@+id/summaryFragment"
+                    tools:layout="@layout/summary_fragment"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toTopOf="@+id/textInputLayout"
+                    app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent"/>
 
             <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/textInputLayout"
@@ -170,7 +102,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/searchTextClearImageView"
                     app:layout_constraintStart_toEndOf="@+id/searchTextImageView"
-                    app:layout_constraintTop_toBottomOf="@+id/summaryConstraintLayout"
+                    app:layout_constraintTop_toBottomOf="@+id/summaryFragment"
                     app:passwordToggleEnabled="false">
 
                 <EditText

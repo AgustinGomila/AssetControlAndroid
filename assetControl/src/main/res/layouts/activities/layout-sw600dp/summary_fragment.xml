@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                                                   xmlns:app="http://schemas.android.com/apk/res-auto"
+                                                   android:background="@drawable/layout_summary_fragment"
+                                                   android:layout_width="match_parent"
+                                                   android:layout_height="wrap_content">
+
+    <View
+            android:id="@+id/summaryDividerVert1"
+            android:layout_width="1dp"
+            android:layout_height="0dp"
+            android:background="?android:attr/listDivider"
+            app:layout_constraintEnd_toStartOf="@+id/guidelineSum50"
+            app:layout_constraintStart_toStartOf="@+id/guidelineSum50"
+            app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toTopOf="@+id/missedTextView"
+            android:layout_marginBottom="2dp" android:layout_marginTop="2dp"/>
+
+    <TextView
+            android:id="@+id/totalLabelTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="@string/total"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+    <TextView
+            android:id="@+id/selectedLabelTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="@string/checked"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="@+id/guidelineSum50"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+    <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guidelineSum50"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.5"/>
+
+    <TextView
+            android:id="@+id/totalTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="4dp"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@+id/guidelineSum50"
+            app:layout_constraintStart_toEndOf="@+id/totalLabelTextView"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+    <TextView
+            android:id="@+id/selectedTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="4dp"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/selectedLabelTextView"
+            app:layout_constraintTop_toTopOf="parent"/>
+    <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guidelineSum66"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.66"/>
+    <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guidelineSum33"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.33"/>
+    <TextView
+            android:text="@string/_0"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" android:id="@+id/onInventoryTextView"
+            app:layout_constraintTop_toBottomOf="@+id/totalTextView"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/guidelineSum33" android:textSize="20sp"
+            android:layout_marginEnd="4dp" android:layout_marginTop="4dp"
+            android:gravity="center_horizontal"
+            android:background="@drawable/rounded_corner_on_inventory"
+            android:textColor="@color/text_light" android:layout_marginBottom="2dp" android:textStyle="normal"/>
+    <TextView
+            android:text="@string/_0"
+            android:id="@+id/missedTextView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:textSize="12sp"
+            android:textStyle="normal"
+            app:layout_constraintEnd_toStartOf="@+id/guidelineSum66"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginEnd="4dp" app:layout_constraintStart_toStartOf="@+id/guidelineSum33"
+            android:layout_marginStart="4dp"
+            android:gravity="center_horizontal"
+            app:layout_constraintTop_toTopOf="@+id/onInventoryTextView"
+            android:background="@drawable/rounded_corner_missing"
+            android:textColor="@color/text_light" android:layout_marginBottom="2dp"/>
+    <TextView
+            android:text="@string/_0"
+            android:id="@+id/removedTextView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:textSize="20sp"
+            android:textStyle="normal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/guidelineSum66" android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:gravity="center_horizontal" app:layout_constraintTop_toTopOf="@+id/missedTextView"
+            android:background="@drawable/rounded_corner_removed" android:textColor="@color/text_dark"
+            android:layout_marginBottom="2dp"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
