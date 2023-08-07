@@ -111,8 +111,8 @@ class AssetDetailActivity : AppCompatActivity() {
 
         if (imageControlFragment == null) {
             imageControlFragment = ImageControlButtonsFragment.newInstance(
-                Table.asset.tableId.toLong(),
-                if (asset?.assetId != null) asset?.assetId.toString() else ""
+                tableId = Table.asset.tableId.toLong(),
+                objectId1 = if (asset?.assetId != null) asset?.assetId.toString() else ""
             )
 
             setFragmentValues(description, "", obs)

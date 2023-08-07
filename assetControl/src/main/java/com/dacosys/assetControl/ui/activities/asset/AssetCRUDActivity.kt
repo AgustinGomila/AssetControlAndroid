@@ -290,7 +290,8 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         if (imageControlFragment == null) {
             imageControlFragment = ImageControlButtonsFragment.newInstance(
-                Table.asset.tableId.toLong(), assetId.toString()
+                tableId = Table.asset.tableId.toLong(),
+                objectId1 = assetId.toString()
             )
 
             setFragmentValues(description, "", obs)

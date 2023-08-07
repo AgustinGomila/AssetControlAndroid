@@ -210,7 +210,8 @@ class WarehouseAreaCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         if (imageControlFragment == null) {
             imageControlFragment = ImageControlButtonsFragment.newInstance(
-                Table.warehouseArea.tableId.toLong(), warehouseAreaId.toString()
+                tableId = Table.warehouseArea.tableId.toLong(),
+                objectId1 = warehouseAreaId.toString()
             )
 
             setFragmentValues(description, "", obs)

@@ -2022,10 +2022,10 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
     private fun showPhotoAlbum(images: ArrayList<DocumentContent> = ArrayList()) {
         val intent = Intent(this, ImageControlGridActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-        intent.putExtra("programId", INTERNAL_IMAGE_CONTROL_APP_ID)
-        intent.putExtra("programObjectId", tempTableId.toLong())
-        intent.putExtra("objectId1", tempObjectId)
-        intent.putExtra("docContObjArrayList", images)
+        intent.putExtra(ImageControlGridActivity.ARG_PROGRAM_ID, INTERNAL_IMAGE_CONTROL_APP_ID)
+        intent.putExtra(ImageControlGridActivity.ARG_PROGRAM_OBJECT_ID, tempTableId.toLong())
+        intent.putExtra(ImageControlGridActivity.ARG_OBJECT_ID_1, tempObjectId)
+        intent.putExtra(ImageControlGridActivity.ARG_DOC_CONT_OBJ_ARRAY_LIST, images)
         resultForShowPhotoAlbum.launch(intent)
     }
 
@@ -2077,12 +2077,12 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
             val intent = Intent(this, ImageControlCameraActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-            intent.putExtra("programObjectId", tableId.toLong())
-            intent.putExtra("objectId1", itemId.toString())
-            intent.putExtra("description", description)
-            intent.putExtra("obs", obs)
-            intent.putExtra("reference", reference)
-            intent.putExtra("addPhoto", autoSend())
+            intent.putExtra(ImageControlCameraActivity.ARG_PROGRAM_OBJECT_ID, tableId.toLong())
+            intent.putExtra(ImageControlCameraActivity.ARG_OBJECT_ID_1, itemId.toString())
+            intent.putExtra(ImageControlCameraActivity.ARG_DESCRIPTION, description)
+            intent.putExtra(ImageControlCameraActivity.ARG_OBS, obs)
+            intent.putExtra(ImageControlCameraActivity.ARG_REFERENCE, reference)
+            intent.putExtra(ImageControlCameraActivity.ARG_ADD_PHOTO, autoSend())
             resultForPhotoCapture.launch(intent)
         }
     }

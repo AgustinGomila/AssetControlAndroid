@@ -70,11 +70,6 @@ class UserDbHelper {
         currentCount: Int,
         countTotal: Int,
     ): Boolean {
-        // Eliminar datos antiguos de los usuarios
-        deleteAll()
-        UserPermissionDbHelper().deleteAll()
-        UserWarehouseAreaDbHelper().deleteAll()
-
         val sqLiteDatabase = getWritableDb()
         sqLiteDatabase.beginTransaction()
         try {

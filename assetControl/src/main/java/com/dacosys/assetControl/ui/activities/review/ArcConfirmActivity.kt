@@ -355,7 +355,8 @@ class ArcConfirmActivity : AppCompatActivity(),
         if (imageControlFragment == null) {
             imageControlFragment =
                 ImageControlButtonsFragment.newInstance(
-                    Table.assetReview.tableId.toLong(), ar.collectorAssetReviewId.toString()
+                    tableId = Table.assetReview.tableId.toLong(),
+                    objectId1 = ar.collectorAssetReviewId.toString()
                 )
         }
 

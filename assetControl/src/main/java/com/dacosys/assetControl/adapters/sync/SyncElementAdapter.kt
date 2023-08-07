@@ -1146,7 +1146,7 @@ class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
         holder.checkBox = v.findViewById(R.id.checkBox)
         holder.titleTextView = v.findViewById(R.id.titleTextView)
         holder.gralConstraintLayout = v.findViewById(R.id.generalDataConstraintLayout)
-        holder.descriptionTextView = v.findViewById(R.id.descriptionAutoSize)
+        holder.descriptionTextView = v.findViewById(R.id.obsArTv)
         holder.codeTextView = v.findViewById(R.id.code)
         holder.assetStatusCheckedTextView = v.findViewById(R.id.assetStatus)
 
@@ -1165,8 +1165,8 @@ class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
         holder.checkBox = v.findViewById(R.id.checkBox)
         holder.titleTextView = v.findViewById(R.id.titleTextView)
         holder.gralConstraintLayout = v.findViewById(R.id.generalDataConstraintLayout)
-        holder.descriptionTextView = v.findViewById(R.id.descriptionAutoSize)
-        holder.codeTextView = v.findViewById(R.id.code)
+        holder.descriptionTv = v.findViewById(R.id.descriptionTv)
+        holder.obsTv = v.findViewById(R.id.obsArTv)
 
         if (multiSelect) {
             holder.checkBox?.visibility = VISIBLE
@@ -1460,11 +1460,9 @@ class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
         val syncElement = getItem(position)
 
         if (syncElement != null && syncElement is Image) {
-            holder.descriptionTextView?.text = syncElement.description
-            val c = syncElement.reference + prefsGetString(
-                lineSeparator
-            ) + syncElement.obs
-            holder.codeTextView?.text = c
+            holder.descriptionTv?.text = syncElement.description
+            val c = "${syncElement.reference}${prefsGetString(lineSeparator)}${syncElement.obs}"
+            holder.obsTv?.text = c
 
             if (holder.checkBox != null) {
                 var isSpeakButtonLongPressed = false
@@ -1510,8 +1508,8 @@ class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
             // Resalta por estado del activo
             val col = getColor(syncElement, position)
             v.background = col.backColor
-            holder.descriptionTextView?.setTextColor(col.foreColor)
-            holder.codeTextView?.setTextColor(col.foreColor)
+            holder.descriptionTv?.setTextColor(col.foreColor)
+            holder.obsTv?.setTextColor(col.foreColor)
             holder.checkBox?.buttonTintList = ColorStateList.valueOf(col.titleForeColor)
             holder.titleTextView?.setTextColor(col.titleForeColor)
         }
@@ -1660,8 +1658,8 @@ class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
         var titleTextView: TextView? = null
 
         var gralConstraintLayout: ConstraintLayout? = null
-        var descriptionTextView: AutoResizeTextView? = null
-        var codeTextView: AutoResizeTextView? = null
+        var descriptionTv: AutoResizeTextView? = null
+        var obsTv: AutoResizeTextView? = null
     }
 
     companion object {

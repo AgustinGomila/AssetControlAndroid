@@ -94,9 +94,9 @@ class WarehouseAreaDetailActivity : AppCompatActivity() {
 
         val intent = Intent(baseContext, ImageControlGridActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-        intent.putExtra("programObjectId", Table.warehouseArea.tableId.toLong())
-        intent.putExtra("objectId1", (warehouseArea ?: return).warehouseAreaId.toString())
-        intent.putExtra("docContObjArrayList", ArrayList<DocumentContent>())
+        intent.putExtra(ImageControlGridActivity.ARG_PROGRAM_OBJECT_ID, Table.warehouseArea.tableId.toLong())
+        intent.putExtra(ImageControlGridActivity.ARG_OBJECT_ID_1,(warehouseArea ?: return).warehouseAreaId.toString())
+        intent.putExtra(ImageControlGridActivity.ARG_DOC_CONT_OBJ_ARRAY_LIST, ArrayList<DocumentContent>())
         startActivity(intent)
     }
 }

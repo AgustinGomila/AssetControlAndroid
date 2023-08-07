@@ -342,7 +342,8 @@ class WmcConfirmActivity : AppCompatActivity(),
 
         if (imageControlFragment == null) {
             imageControlFragment = ImageControlButtonsFragment.newInstance(
-                Table.warehouseMovement.tableId.toLong(), "0"
+                tableId = Table.warehouseMovement.tableId.toLong(),
+                objectId1 = "0"
             )
 
             setFragmentValues(description, "", obs)

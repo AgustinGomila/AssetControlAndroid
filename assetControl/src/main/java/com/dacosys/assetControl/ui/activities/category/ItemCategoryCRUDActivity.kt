@@ -234,7 +234,8 @@ class ItemCategoryCRUDActivity : AppCompatActivity(), CrudCompleted,
 
         if (imageControlFragment == null) {
             imageControlFragment = ImageControlButtonsFragment.newInstance(
-                Table.itemCategory.tableId.toLong(), itemCategoryId.toString()
+                tableId = Table.itemCategory.tableId.toLong(),
+                objectId1 = itemCategoryId.toString()
             )
 
             setFragmentValues(description, "", obs)

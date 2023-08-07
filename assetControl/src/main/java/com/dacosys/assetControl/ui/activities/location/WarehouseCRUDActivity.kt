@@ -275,7 +275,8 @@ class WarehouseCRUDActivity : AppCompatActivity(), CrudCompleted,
 
         if (imageControlFragment == null) {
             imageControlFragment = ImageControlButtonsFragment.newInstance(
-                Table.warehouse.tableId.toLong(), warehouseId.toString()
+                tableId = Table.warehouse.tableId.toLong(),
+                objectId1 = warehouseId.toString()
             )
 
             setFragmentValues(description, "", obs)

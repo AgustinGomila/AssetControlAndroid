@@ -106,14 +106,23 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
                 showImageProgressBar(false)
                 makeText(this, msg, SnackBarType.ERROR)
 
-                fillPendingData()
+                Handler(Looper.getMainLooper()).postDelayed({
+                    run {
+                        fillPendingData()
+                    }
+                }, 200)
             }
 
             ProgressStatus.success.id -> {
                 showImageProgressBar(false)
                 makeText(this, getString(R.string.upload_images_success), SnackBarType.SUCCESS)
 
-                fillPendingData()
+                Handler(Looper.getMainLooper()).postDelayed({
+                    run {
+                        fillPendingData()
+                    }
+                }, 200)
+
             }
         }
     }

@@ -65,6 +65,11 @@ class SyncInitialUser(
         val upDb = UserPermissionDbHelper()
         val uwaDb = UserWarehouseAreaDbHelper()
 
+        // Eliminar datos antiguos de los usuarios
+        db.deleteAll()
+        upDb.deleteAll()
+        uwaDb.deleteAll()
+
         val date = (registryType.confEntry ?: return).defaultValue.toString()
 
         val countTotal: Int?
