@@ -161,12 +161,14 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                     setProgressBarText(msg, percent)
                 }
             }
+
             ProgressStatus.bigFinished -> {
                 setButton(ButtonStyle.READY)
                 showProgressBar(false)
                 logging = false
                 finish()
             }
+
             ProgressStatus.bigCrashed,
             ProgressStatus.crashed,
             ProgressStatus.canceled,
@@ -218,6 +220,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
             STARTING -> {
                 setProgressBarText(msg)
             }
+
             FINISHED -> {
                 // FINISHED = Ok
                 refresh()
@@ -226,6 +229,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                 syncing = false
                 return
             }
+
             DOWNLOADING -> {
                 Log.w(
                     this::class.java.simpleName,
@@ -234,6 +238,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                 val percent = if (bytesTotal > 0) "$progress%" else ""
                 setProgressBarText(getString(R.string.downloading_), percent)
             }
+
             CANCELED,
             CRASHED,
             INFO,
@@ -511,6 +516,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                     binding.loginImageView.performClick()
                     true
                 }
+
                 else -> false
             }
         }
@@ -545,6 +551,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                 when {
                     Repository.clientPackage.isEmpty() -> binding.packageTextView.visibility =
                         View.GONE
+
                     else -> binding.packageTextView.visibility = View.VISIBLE
                 }
             } catch (ex: Exception) {
@@ -842,6 +849,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                         scanCode = scanCode, mode = QRConfigClientAccount
                     ) { onTaskGetPackagesEnded(it) }
                 }
+
                 mainJson.has(appName) -> {
                     when {
                         scanCode.contains(Preference.acWsServer.key) -> {
@@ -857,6 +865,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                             }
                             adb.show()
                         }
+
                         else -> {
                             // APP CONFIGURATION
                             ConfigHelper.getConfigFromScannedCode(
@@ -865,6 +874,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                         }
                     }
                 }
+
                 else -> {
                     makeText(binding.root, getString(R.string.invalid_code), SnackBarType.ERROR)
                 }
@@ -908,14 +918,17 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                 onBackPressed()
                 return true
             }
+
             R.id.action_settings -> {
                 configApp()
                 true
             }
+
             R.id.action_rfid_connect -> {
                 JotterListener.rfidStart(this)
                 return super.onOptionsItemSelected(item)
             }
+
             R.id.action_trigger_scan -> {
                 // /* For Debug */
                 // scannerCompleted(
@@ -926,10 +939,12 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                 JotterListener.trigger(this)
                 return super.onOptionsItemSelected(item)
             }
+
             R.id.action_read_barcode -> {
                 JotterListener.toggleCameraFloatingWindowVisibility(this)
                 return super.onOptionsItemSelected(item)
             }
+
             else -> {
                 super.onOptionsItemSelected(item)
             }

@@ -168,7 +168,7 @@ class SyncDownload(
         }
 
         try {
-            val t = listOf(async { user() },
+            val t = listOf(
                 async { asset() },
                 async { itemCategory() },
                 async { warehouse() },
@@ -520,15 +520,13 @@ class SyncDownload(
                                 // user permission
                                 SyncInitialUser { scope.launch { onUiEvent(it) } }.userPermission(
                                     objArray = upWs.userPermissionGet(obj.user_id),
-                                    aDb = upDb,
-                                    userId = obj.user_id
+                                    aDb = upDb
                                 )
 
                                 // user warehouse area
                                 SyncInitialUser { scope.launch { onUiEvent(it) } }.userWarehouseArea(
                                     objArray = uwaWs.userWarehouseAreaGet(obj.user_id),
-                                    aDb = uwaDb,
-                                    userId = obj.user_id
+                                    aDb = uwaDb
                                 )
 
                                 scope.launch {

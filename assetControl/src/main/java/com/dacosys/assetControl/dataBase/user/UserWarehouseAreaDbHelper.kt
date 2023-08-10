@@ -86,7 +86,7 @@ class UserWarehouseAreaDbHelper {
     ): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> insert")
 
-        if (uwaArray == null || uwaArray.isEmpty()) {
+        if (uwaArray.isNullOrEmpty()) {
             return false
         }
 

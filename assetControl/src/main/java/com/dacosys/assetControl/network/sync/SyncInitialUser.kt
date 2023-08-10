@@ -108,15 +108,12 @@ class SyncInitialUser(
                             currentCount += total
                             for ((index, obj) in objArray.withIndex()) {
                                 // user permission
-                                userPermission(
-                                    upWs.initialUserPermissionGet(obj.user_id), upDb, obj.user_id
-                                )
+                                userPermission(upWs.initialUserPermissionGet(obj.user_id), upDb)
 
                                 // user warehouse area
                                 userWarehouseArea(
                                     uwaWs.initialUserWarehouseAreaGet(obj.user_id),
-                                    uwaDb,
-                                    obj.user_id
+                                    uwaDb
                                 )
 
                                 scope.launch {
@@ -218,12 +215,10 @@ class SyncInitialUser(
 
     fun userPermission(
         objArray: Array<UserPermissionObject>?,
-        aDb: UserPermissionDbHelper,
-        userId: Long,
+        aDb: UserPermissionDbHelper
     ) {
         try {
-            aDb.deleteByUserId(userId)
-            if (objArray != null && objArray.isNotEmpty()) {
+            if (!objArray.isNullOrEmpty()) {
                 aDb.insert(objArray) { scope.launch { onUiEvent(it) } }
             }
         } catch (ex: Exception) {
@@ -235,12 +230,10 @@ class SyncInitialUser(
 
     fun userWarehouseArea(
         objArray: Array<UserWarehouseAreaObject>?,
-        aDb: UserWarehouseAreaDbHelper,
-        userId: Long,
+        aDb: UserWarehouseAreaDbHelper
     ) {
         try {
-            aDb.deleteByUserId(userId)
-            if (objArray != null && objArray.isNotEmpty()) {
+            if (!objArray.isNullOrEmpty()) {
                 aDb.insert(objArray) { scope.launch { onUiEvent(it) } }
             }
         } catch (ex: Exception) {

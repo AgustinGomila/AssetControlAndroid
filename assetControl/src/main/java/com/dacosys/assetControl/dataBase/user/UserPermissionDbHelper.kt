@@ -55,7 +55,7 @@ class UserPermissionDbHelper {
     ): Boolean {
         Log.i(this::class.java.simpleName, ": SQLite -> insert")
 
-        if (upArray == null || upArray.isEmpty()) {
+        if (upArray.isNullOrEmpty()) {
             return false
         }
 
