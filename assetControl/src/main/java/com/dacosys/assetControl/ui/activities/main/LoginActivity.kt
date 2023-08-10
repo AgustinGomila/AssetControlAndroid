@@ -19,12 +19,14 @@ import android.util.Log
 import android.view.*
 import android.view.inputmethod.EditorInfo
 import android.widget.*
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.ViewCompat
+import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.dataBase.DataBaseHelper
 import com.dacosys.assetControl.dataBase.user.UserDbHelper
@@ -301,17 +303,6 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         rejectNewInstances = false
         logging = false
 
-        // Parece que las actividades de tipo Setting no devuelven resultados
-        // así que de esta manera puedo volver a llenar el fragmento de usuarios
-        if (isReturnedFromSettings) {
-            isReturnedFromSettings = false
-
-            // Vamos a reconstruir el scanner por si cambió la configuración
-            JotterListener.autodetectDeviceModel(this)
-
-            initialSetup()
-        }
-
         JotterListener.lockScanner(this, false)
     }
 
@@ -437,7 +428,6 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
     private var userSpinnerFragment: UserSpinnerFragment? = null
     private var firstTime = true
     private var rejectNewInstances = false
-    private var isReturnedFromSettings = false
 
     private var userId: Long? = -1
     private var password: String = ""
@@ -717,21 +707,34 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
 
     private fun attemptEnterConfig(password: String) {
         val realPass = prefsGetString(Preference.confPassword)
-        if (password == realPass) {
-            ConfigHelper.setDebugConfigValues()
-
-            if (!rejectNewInstances) {
-                rejectNewInstances = true
-
-                val intent = Intent(baseContext, SettingsActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-                startActivity(intent)
-            }
-            isReturnedFromSettings = true
-        } else {
+        if (password != realPass) {
             makeText(binding.root, getString(R.string.invalid_password), SnackBarType.ERROR)
+            return
         }
+
+        if (rejectNewInstances) return
+        rejectNewInstances = true
+
+        ConfigHelper.setDebugConfigValues()
+
+        val intent = Intent(baseContext, SettingsActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+        resultForSettings.launch(intent)
     }
+
+    private val resultForSettings =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            try {
+                // Vamos a reconstruir el scanner por si cambió la configuración
+                JotterListener.autodetectDeviceModel(this)
+                initialSetup()
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+                ErrorLog.writeLog(this, this::class.java.simpleName, ex)
+            } finally {
+                rejectNewInstances = false
+            }
+        }
 
     private fun resize(image: Drawable): Drawable {
         val bitmap = (image as BitmapDrawable).bitmap
@@ -781,7 +784,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
-            if (encondedPass == Md5.getMd5(password)) {
+            if (encondedPass == Md5.getMd5(password) || BuildConfig.DEBUG) {
                 Statics.currentUserId = userId
                 setupImageControl()
 

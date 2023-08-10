@@ -1113,4 +1113,5 @@
     <string name="_00_00">00:00</string>
     <string name="generating_qr_">Generando QR…</string>
     <string name="please_wait">Por favor espere…</string>
+    <string name="obtaining_client_packages_">Obteniendo paquetes del cliente…</string>
 </resources>

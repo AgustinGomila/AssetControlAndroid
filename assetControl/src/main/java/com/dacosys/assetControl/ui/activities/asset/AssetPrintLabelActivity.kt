@@ -317,7 +317,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
 
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
                 searchText = s.toString()
-                adapter?.refreshFilter(FilterOptions(searchText, true))
+                adapter?.refreshFilter(FilterOptions(searchText))
             }
         })
         binding.searchEditText.setText(searchText, TextView.BufferType.EDITABLE)
@@ -716,21 +716,22 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
                 }
 
                 if (adapter == null || assetArray != null) {
-                    adapter = AssetRecyclerAdapter(
-                        recyclerView = binding.recyclerView,
-                        visibleStatus = assetSelectFilterFragment?.visibleStatusArray ?: AssetStatus.getAll(),
-                        fullList = assetArray ?: ArrayList(),
-                        checkedIdArray = checkedIdArray,
-                        multiSelect = multiSelect,
-                        showCheckBoxes = showCheckBoxes,
-                        showCheckBoxesChanged = { showCheckBoxes = it },
-                        showImages = showImages,
-                        showImagesChanged = { showImages = it },
-                        filterOptions = FilterOptions(searchText, true)
-                    )
+                    adapter = AssetRecyclerAdapter.Builder()
+                        .recyclerView(binding.recyclerView)
+                        .visibleStatus(assetSelectFilterFragment?.visibleStatusArray ?: AssetStatus.getAll())
+                        .fullList(assetArray ?: ArrayList())
+                        .checkedIdArray(checkedIdArray)
+                        .multiSelect(multiSelect)
+                        .showCheckBoxes(`val` = showCheckBoxes, callback = { showCheckBoxes = it })
+                        .showImages(`val` = showImages, callback = { showImages = it })
+                        .filterOptions(FilterOptions(searchText))
+                        .dataSetChangedListener(this)
+                        .checkedChangedListener(this)
+                        .editAssetRequiredListener(this)
+                        .addPhotoRequiredListener(this)
+                        .albumViewRequiredListener(this)
+                        .build()
                 }
-
-                refreshAdapterListeners()
 
                 binding.recyclerView.layoutManager = LinearLayoutManager(this)
                 binding.recyclerView.adapter = adapter
@@ -753,26 +754,6 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         } finally {
             closeKeyboard(this)
             showProgressBar(false)
-        }
-    }
-
-    private fun refreshAdapterListeners() {
-        // IMPORTANTE:
-        // Se deben actualizar los listeners, si no
-        // las variables de esta actividad pueden
-        // tener valores antiguos en del adaptador.
-
-        adapter?.refreshListeners(
-            checkedChangedListener = this,
-            dataSetChangedListener = this,
-            editAssetRequiredListener = this
-        )
-
-        if (useImageControl) {
-            adapter?.refreshImageControlListeners(
-                addPhotoListener = this,
-                albumViewListener = this
-            )
         }
     }
 

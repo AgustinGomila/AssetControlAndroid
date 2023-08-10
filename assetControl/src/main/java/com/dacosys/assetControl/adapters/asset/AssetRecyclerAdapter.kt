@@ -46,21 +46,18 @@ import com.dacosys.imageControl.adapter.ImageAdapter.Companion.ImageControlHolde
 import com.dacosys.imageControl.network.common.ProgramData
 import java.util.*
 
-class AssetRecyclerAdapter(
-    private val recyclerView: RecyclerView,
-    var fullList: ArrayList<Asset> = ArrayList(),
-    var checkedIdArray: ArrayList<Long> = ArrayList(),
-    private var multiSelect: Boolean = false,
-    var showCheckBoxes: Boolean = false,
-    private var showCheckBoxesChanged: (Boolean) -> Unit = { },
-    private var showImages: Boolean = false,
-    private var showImagesChanged: (Boolean) -> Unit = { },
-    private var visibleStatus: ArrayList<AssetStatus>,
-    private var filterOptions: FilterOptions
-) : ListAdapter<Asset, ViewHolder>(AssetDiffUtilCallback), Filterable {
-
-    // Posición del ítem seleccionado
-    private var currentIndex = NO_POSITION
+class AssetRecyclerAdapter private constructor(builder: Builder) :
+    ListAdapter<Asset, ViewHolder>(AssetDiffUtilCallback), Filterable {
+    private var recyclerView: RecyclerView
+    var fullList: ArrayList<Asset> = ArrayList()
+    var checkedIdArray: ArrayList<Long> = ArrayList()
+    private var multiSelect: Boolean = false
+    var showCheckBoxes: Boolean = false
+    private var showCheckBoxesChanged: (Boolean) -> Unit = { }
+    private var showImages: Boolean = false
+    private var showImagesChanged: (Boolean) -> Unit = { }
+    private var visibleStatus: ArrayList<AssetStatus> = arrayListOf()
+    private var filterOptions: FilterOptions = FilterOptions()
 
     // Este Listener debe usarse para los cambios de cantidad o de ítems marcados de la lista,
     // ya que se utiliza para actualizar los valores sumarios en la actividad.
@@ -72,6 +69,9 @@ class AssetRecyclerAdapter(
     // Listeners para los eventos de ImageControl.
     private var addPhotoRequiredListener: AddPhotoRequiredListener? = null
     private var albumViewRequiredListener: AlbumViewRequiredListener? = null
+
+    // Posición del ítem seleccionado
+    private var currentIndex = NO_POSITION
 
     // Clase para distinguir actualizaciones parciales
     private enum class PAYLOADS {
@@ -112,12 +112,12 @@ class AssetRecyclerAdapter(
     }
 
     // Permiso de edición de activos
-    private var userHasPermissionToEdit: Boolean = User.hasPermission(PermissionEntry.ModifyAsset)
+    private val userHasPermissionToEdit: Boolean by lazy { User.hasPermission(PermissionEntry.ModifyAsset) }
 
     // Parámetros del filtro
     data class FilterOptions(
         var filterString: String = "",
-        var showAllOnFilterEmpty: Boolean = false,
+        var showAllOnFilterEmpty: Boolean = true,
     )
 
     fun clear() {
@@ -1182,6 +1182,24 @@ class AssetRecyclerAdapter(
     }
 
     init {
+        // Set values
+        recyclerView = builder.recyclerView
+        fullList = builder.fullList
+        checkedIdArray = builder.checkedIdArray
+        multiSelect = builder.multiSelect
+        showCheckBoxes = builder.showCheckBoxes
+        showCheckBoxesChanged = builder.showCheckBoxesChanged
+        showImages = builder.showImages
+        showImagesChanged = builder.showImagesChanged
+        visibleStatus = builder.visibleStatus
+        filterOptions = builder.filterOptions
+
+        dataSetChangedListener = builder.dataSetChangedListener
+        checkedChangedListener = builder.checkedChangedListener
+        editAssetRequiredListener = builder.editAssetRequiredListener
+        addPhotoRequiredListener = builder.addPhotoRequiredListener
+        albumViewRequiredListener = builder.albumViewRequiredListener
+
         // Configuramos variables de estilo que se van a reutilizar.
         setupColors()
 
@@ -1227,5 +1245,98 @@ class AssetRecyclerAdapter(
 
     override fun submitList(list: MutableList<Asset>?, commitCallback: Runnable?) {
         super.submitList(sortedVisibleList(list), commitCallback)
+    }
+
+    class Builder {
+        internal lateinit var recyclerView: RecyclerView
+        internal var fullList: ArrayList<Asset> = ArrayList()
+        internal var checkedIdArray: ArrayList<Long> = ArrayList()
+        internal var multiSelect: Boolean = false
+        internal var showCheckBoxes: Boolean = false
+        internal var showCheckBoxesChanged: (Boolean) -> Unit = { }
+        internal var showImages: Boolean = false
+        internal var showImagesChanged: (Boolean) -> Unit = { }
+        internal var visibleStatus: ArrayList<AssetStatus> = arrayListOf()
+        internal var filterOptions: FilterOptions = FilterOptions()
+
+        internal var dataSetChangedListener: DataSetChangedListener? = null
+        internal var checkedChangedListener: CheckedChangedListener? = null
+        internal var editAssetRequiredListener: EditAssetRequiredListener? = null
+        internal var addPhotoRequiredListener: AddPhotoRequiredListener? = null
+        internal var albumViewRequiredListener: AlbumViewRequiredListener? = null
+
+        // Setter methods for variables with chained methods
+        fun recyclerView(`val`: RecyclerView): Builder {
+            recyclerView = `val`
+            return this
+        }
+
+        fun fullList(`val`: ArrayList<Asset>): Builder {
+            fullList = `val`
+            return this
+        }
+
+        fun checkedIdArray(`val`: ArrayList<Long>): Builder {
+            checkedIdArray = `val`
+            return this
+        }
+
+        fun multiSelect(`val`: Boolean): Builder {
+            multiSelect = `val`
+            return this
+        }
+
+        @Suppress("unused")
+        fun showCheckBoxes(`val`: Boolean, callback: (Boolean) -> Unit): Builder {
+            showCheckBoxes = `val`
+            showCheckBoxesChanged = callback
+            return this
+        }
+
+        @Suppress("unused")
+        fun showImages(`val`: Boolean, callback: (Boolean) -> Unit): Builder {
+            showImages = `val`
+            showImagesChanged = callback
+            return this
+        }
+
+        fun visibleStatus(`val`: ArrayList<AssetStatus>): Builder {
+            visibleStatus = `val`
+            return this
+        }
+
+        fun filterOptions(`val`: FilterOptions): Builder {
+            filterOptions = `val`
+            return this
+        }
+
+        fun dataSetChangedListener(listener: DataSetChangedListener?): Builder {
+            dataSetChangedListener = listener
+            return this
+        }
+
+        fun checkedChangedListener(listener: CheckedChangedListener?): Builder {
+            checkedChangedListener = listener
+            return this
+        }
+
+        fun editAssetRequiredListener(listener: EditAssetRequiredListener?): Builder {
+            editAssetRequiredListener = listener
+            return this
+        }
+
+        fun addPhotoRequiredListener(listener: AddPhotoRequiredListener?): Builder {
+            addPhotoRequiredListener = listener
+            return this
+        }
+
+        fun albumViewRequiredListener(listener: AlbumViewRequiredListener?): Builder {
+            albumViewRequiredListener = listener
+            return this
+        }
+
+        fun build(): AssetRecyclerAdapter {
+            return AssetRecyclerAdapter(this)
+        }
     }
 }

@@ -29,6 +29,11 @@ class Repository {
                 return Preferences.prefsGetString(Preference.urlPanel)
             }
 
+        val connectionTimeout: Int
+            get() {
+                return Preferences.prefsGetInt(Preference.connectionTimeout)
+            }
+
         val wsProxy: String
             get() {
                 return Preferences.prefsGetString(Preference.acWsProxy)

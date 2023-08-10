@@ -25,7 +25,7 @@ class AssetAdapter(
     private var activity: AppCompatActivity,
     private var itemList: ArrayList<Asset>,
     private var suggestedList: ArrayList<Asset>,
-    private var filterOptions: FilterOptions = FilterOptions("", true),
+    private var filterOptions: FilterOptions = FilterOptions(),
     private var visibleStatus: ArrayList<AssetStatus>
 ) : ArrayAdapter<Asset>(getContext(), R.layout.asset_simple_row, suggestedList), Filterable {
 

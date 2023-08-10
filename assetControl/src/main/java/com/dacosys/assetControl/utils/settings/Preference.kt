@@ -419,6 +419,12 @@ class Preference(key: String, defaultValue: Any, debugValue: Any) {
             debugValue = "DACOSYS"
         )
 
+        var connectionTimeout = Preference(
+            key = "connection_timeout",
+            defaultValue = 10,
+            debugValue = 10
+        )
+
         var clientPackage = Preference(
             "client_package",
             "",
@@ -932,6 +938,7 @@ class Preference(key: String, defaultValue: Any, debugValue: Any) {
             Collections.addAll(
                 allSections,
                 autoSend,
+                connectionTimeout,
                 collectorType,
                 confPassword,
                 quickReviews,

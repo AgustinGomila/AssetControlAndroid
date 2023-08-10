@@ -17,16 +17,12 @@ import java.net.*
 import javax.net.ssl.HttpsURLConnection
 
 class GetClientPackages(
-    private var email: String,
-    private var password: String,
-    private var installationCode: String,
-    private var onProgress: (ClientPackagesProgress) -> Unit = {},
+    private val email: String,
+    private val password: String,
+    private val installationCode: String,
+    private val onProgress: (ClientPackagesProgress) -> Unit = {},
 ) {
     private val urlRequest = "https://config.dacosys.com/configuration/retrieve"
-
-    private var progressStatus = ProgressStatus.unknown
-    private var jsonObjArray: ArrayList<JSONObject> = ArrayList()
-    private var msg = ""
 
     private val scope = CoroutineScope(Job() + Dispatchers.IO)
 
@@ -34,34 +30,39 @@ class GetClientPackages(
         scope.cancel()
     }
 
-    private var deferred: Deferred<Boolean>? = null
-    private suspend fun doInBackground(): Boolean {
-        var result = false
-        coroutineScope {
-            deferred = async { suspendFunction() }
-            result = deferred?.await() ?: false
-        }
-        return result
+    private suspend fun doInBackground() {
+        coroutineScope { suspendFunction() }
     }
 
-    private suspend fun suspendFunction(): Boolean = withContext(Dispatchers.IO) {
+    private suspend fun suspendFunction() = withContext(Dispatchers.IO) {
+        sendMessage(
+            status = ProgressStatus.starting,
+            msg = getContext().getString(R.string.obtaining_client_packages_)
+        )
+
         if (!isOnline()) {
-            progressStatus = ProgressStatus.canceled
-            msg = getContext().getString(R.string.no_connection)
-            return@withContext false
+            sendMessage(
+                status = ProgressStatus.canceled,
+                msg = getContext().getString(R.string.no_connection)
+            )
+            return@withContext
         }
-        return@withContext getPackages()
+
+        getPackages()
     }
 
-    private fun getPackages(): Boolean {
-        progressStatus = ProgressStatus.running
-
+    private fun getPackages() {
         val url: URL
         var connection: HttpsURLConnection? = null
 
         try {
             //Create connection
             url = URL(urlRequest)
+
+            sendMessage(
+                status = ProgressStatus.running,
+                msg = getContext().getString(R.string.obtaining_client_packages_)
+            )
 
             connection = if (Repository.wsUseProxy) {
                 val authenticator = object : Authenticator() {
@@ -90,6 +91,7 @@ class GetClientPackages(
             //connection.instanceFollowRedirects = false
             connection.requestMethod = "POST"
             connection.setRequestProperty("Content-Type", "application/json; charset=utf-8")
+            connection.connectTimeout = Repository.connectionTimeout * 1000
             //connection.useCaches = false
 
             val authDataCont = JSONObject()
@@ -111,21 +113,20 @@ class GetClientPackages(
             wr.flush()
             wr.close()
 
-            jsonObjArray.clear()
-            jsonObjArray = getResponse(connection)
+            getResponse(connection)
         } catch (ex: Exception) {
-            progressStatus = ProgressStatus.crashed
-            msg = "${
-                getContext().getString(R.string.exception_error)
-            }: ${ex.message}"
-            return false
+            sendMessage(
+                status = ProgressStatus.crashed,
+                msg = "${
+                    getContext().getString(R.string.exception_error)
+                }: ${ex.message}"
+            )
         } finally {
             connection?.disconnect()
         }
-        return true
     }
 
-    private fun getResponse(connection: HttpsURLConnection): ArrayList<JSONObject> {
+    private fun getResponse(connection: HttpsURLConnection) {
         //Get Response
         val result: ArrayList<JSONObject> = ArrayList()
         val inputStream = connection.inputStream
@@ -149,9 +150,11 @@ class GetClientPackages(
                 val name = error.getString("name")
                 val description = error.getString("description")
 
-                progressStatus = ProgressStatus.crashed
-                msg = String.format("%s (%s): %s", name, code, description)
-                return ArrayList()
+                sendMessage(
+                    status = ProgressStatus.crashed,
+                    msg = String.format("%s (%s): %s", name, code, description)
+                )
+                return
             }
 
             if (jsonObj.has("packages")) {
@@ -174,40 +177,52 @@ class GetClientPackages(
                     }
                 }
             }
-            progressStatus = ProgressStatus.finished
-            msg = if (result.size > 0) {
-                getContext().getString(R.string.success_response)
-            } else {
-                getContext()
-                    .getString(R.string.client_has_no_software_packages)
-            }
+
+            sendMessage(
+                status = ProgressStatus.finished,
+                result = result,
+                clientEmail = email,
+                clientPassword = password,
+                msg = if (result.size > 0) {
+                    getContext().getString(R.string.success_response)
+                } else {
+                    getContext()
+                        .getString(R.string.client_has_no_software_packages)
+                }
+            )
         } catch (ex: JSONException) {
             Log.e(this::class.java.simpleName, ex.toString())
 
-            progressStatus = ProgressStatus.crashed
-            msg = "${
-                getContext().getString(R.string.exception_error)
-            }: ${ex.message}"
+            sendMessage(
+                status = ProgressStatus.crashed,
+                msg = "${
+                    getContext().getString(R.string.exception_error)
+                }: ${ex.message}"
+            )
         }
+    }
 
-        return result
+    private fun sendMessage(
+        status: ProgressStatus,
+        result: ArrayList<JSONObject> = ArrayList(),
+        clientEmail: String = "",
+        clientPassword: String = "",
+        msg: String = ""
+    ) {
+        onProgress.invoke(
+            ClientPackagesProgress(
+                status = status,
+                result = result,
+                clientEmail = clientEmail,
+                clientPassword = clientPassword,
+                msg = msg
+            )
+        )
     }
 
     init {
-        progressStatus = ProgressStatus.starting
-
         scope.launch {
             doInBackground()
-
-            onProgress.invoke(
-                ClientPackagesProgress(
-                    status = progressStatus,
-                    result = jsonObjArray,
-                    clientEmail = email,
-                    clientPassword = password,
-                    msg = msg
-                )
-            )
         }
     }
 }

@@ -9,15 +9,14 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.text.InputType
-import android.view.KeyEvent
-import android.view.Menu
-import android.view.MenuItem
-import android.view.WindowManager
+import android.view.*
 import android.view.inputmethod.EditorInfo
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.removeDataBases
 import com.dacosys.assetControl.databinding.InitConfigActivityBinding
@@ -74,29 +73,43 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
         val clientPassword: String = it.clientPassword
         val msg: String = it.msg
 
-        if (status == ProgressStatus.finished) {
-            if (result.size > 0) {
-                runOnUiThread {
-                    selectClientPackage(
-                        parentView = binding.root,
-                        callback = this,
-                        weakAct = WeakReference(this),
-                        allPackage = result,
-                        email = clientEmail,
-                        password = clientPassword
-                    )
-                }
-            } else {
-                isConfiguring = false
-                makeText(binding.root, msg, INFO)
+        if (status in ProgressStatus.getAllFinish()) {
+            showProgressBar(false)
+        }
+
+        when (status) {
+            ProgressStatus.starting, ProgressStatus.running -> {
+                setProgressBarText(msg)
             }
-        } else if (status == ProgressStatus.success) {
-            isConfiguring = false
-            makeText(binding.root, msg, SnackBarType.SUCCESS)
-            finish()
-        } else if (status == ProgressStatus.crashed || status == ProgressStatus.canceled) {
-            isConfiguring = false
-            makeText(binding.root, msg, ERROR)
+
+            ProgressStatus.finished -> {
+                if (result.size > 0) {
+                    runOnUiThread {
+                        selectClientPackage(
+                            parentView = binding.root,
+                            callback = this,
+                            weakAct = WeakReference(this),
+                            allPackage = result,
+                            email = clientEmail,
+                            password = clientPassword
+                        )
+                    }
+                } else {
+                    isConfiguring = false
+                    makeText(binding.root, msg, INFO)
+                }
+            }
+
+            ProgressStatus.success -> {
+                isConfiguring = false
+                makeText(binding.root, msg, SnackBarType.SUCCESS)
+                finish()
+            }
+
+            ProgressStatus.crashed, ProgressStatus.canceled -> {
+                isConfiguring = false
+                makeText(binding.root, msg, ERROR)
+            }
         }
     }
 
@@ -114,7 +127,6 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     private var rejectNewInstances = false
-    private var isReturnedFromSettings = false
 
     private var email: String = ""
     private var password: String = ""
@@ -124,27 +136,6 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         JotterListener.lockScanner(this, false)
         rejectNewInstances = false
-
-        // Parece que las actividades de tipo Setting no devuelven resultados
-        // así que de esta manera puedo volver a llenar el fragmento de usuarios
-        if (isReturnedFromSettings) {
-            isReturnedFromSettings = false
-
-            // Vamos a reconstruir el scanner por si cambió la configuración
-            JotterListener.autodetectDeviceModel(this)
-
-            if (Repository.urlPanel.isEmpty()) {
-                makeText(
-                    binding.root, getString(R.string.server_is_not_configured), ERROR
-                )
-                return
-            }
-
-            closeKeyboard(this)
-
-            setResult(RESULT_OK)
-            finish()
-        }
     }
 
     override fun onBackPressed() {
@@ -224,6 +215,7 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
                     attemptToConfigure()
                     true
                 }
+
                 else -> false
             }
         }
@@ -248,6 +240,7 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
                     binding.passwordEditText.requestFocus()
                     true
                 }
+
                 else -> false
             }
         }
@@ -303,23 +296,43 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private fun attemptEnterConfig(password: String) {
         val realPass = prefsGetString(Preference.confPassword)
-        if (password == realPass) {
-            ConfigHelper.setDebugConfigValues()
-
-            if (!rejectNewInstances) {
-                rejectNewInstances = true
-
-                val intent = Intent(baseContext, SettingsActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-                startActivity(intent)
-            }
-            isReturnedFromSettings = true
-        } else {
-            makeText(
-                binding.root, getString(R.string.invalid_password), ERROR
-            )
+        if (password != realPass) {
+            makeText(binding.root, getString(R.string.invalid_password), SnackBarType.ERROR)
+            return
         }
+
+        if (rejectNewInstances) return
+        rejectNewInstances = true
+
+        ConfigHelper.setDebugConfigValues()
+
+        val intent = Intent(baseContext, SettingsActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+        resultForSettings.launch(intent)
     }
+
+    private val resultForSettings =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            try {
+                // Vamos a reconstruir el scanner por si cambió la configuración
+                JotterListener.autodetectDeviceModel(this)
+
+                if (Repository.urlPanel.isEmpty()) {
+                    makeText(binding.root, getString(R.string.server_is_not_configured), ERROR)
+                    return@registerForActivityResult
+                }
+
+                closeKeyboard(this)
+
+                setResult(RESULT_OK)
+                finish()
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+                ErrorLog.writeLog(this, this::class.java.simpleName, ex)
+            } finally {
+                rejectNewInstances = false
+            }
+        }
 
     private var isConfiguring = false
     private fun attemptToConfigure() {
@@ -348,6 +361,34 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
             isConfiguring = false
         }
     }
+
+    private fun setProgressBarText(text: String = "", percent: String = "") {
+        runOnUiThread {
+            run {
+                if (text.isNotEmpty() || percent.isNotEmpty()) showProgressBar(true)
+
+                binding.syncStatusTextView.text = text
+                binding.syncPercentTextView.text = percent
+            }
+        }
+    }
+
+    private fun showProgressBar(show: Boolean) {
+        runOnUiThread {
+            if (show && binding.progressBarLayout.visibility != View.VISIBLE) {
+                binding.progressBarLayout.bringToFront()
+                binding.progressBarLayout.visibility = View.VISIBLE
+
+                ViewCompat.setZ(binding.progressBarLayout, 0F)
+            } else if (!show && binding.progressBarLayout.visibility != View.GONE) {
+                binding.progressBarLayout.visibility = View.GONE
+
+                // Limpiamos los textos...
+                setProgressBarText()
+            }
+        }
+    }
+
 
     private fun resize(image: Drawable): Drawable {
         val bitmap = (image as BitmapDrawable).bitmap
@@ -381,6 +422,7 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
                         scanCode = scanCode, mode = QRConfigClientAccount
                     ) { onTaskGetPackagesEnded(it) }
                 }
+
                 mainJson.has(Statics.appName) -> {
                     if (scanCode.contains(Preference.acWsServer.key)) {
                         ConfigHelper.getConfigFromScannedCode(
@@ -388,6 +430,7 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
                         ) { onTaskGetPackagesEnded(it) }
                     }
                 }
+
                 else -> {
                     makeText(binding.root, getString(R.string.invalid_code), ERROR)
                 }
@@ -427,14 +470,17 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
                 onBackPressed()
                 return true
             }
+
             R.id.action_settings -> {
                 configApp()
                 true
             }
+
             R.id.action_rfid_connect -> {
                 JotterListener.rfidStart(this)
                 return super.onOptionsItemSelected(item)
             }
+
             R.id.action_trigger_scan -> {
                 ///* For Debug */
                 //scannerCompleted(
@@ -445,10 +491,12 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
                 JotterListener.trigger(this)
                 return super.onOptionsItemSelected(item)
             }
+
             R.id.action_read_barcode -> {
                 JotterListener.toggleCameraFloatingWindowVisibility(this)
                 return super.onOptionsItemSelected(item)
             }
+
             else -> {
                 super.onOptionsItemSelected(item)
             }

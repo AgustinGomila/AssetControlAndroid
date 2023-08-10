@@ -65,7 +65,7 @@ class WmcRecyclerAdapter(
     private var showImages: Boolean = false,
     private var showImagesChanged: (Boolean) -> Unit = { },
     var visibleStatus: ArrayList<WarehouseMovementContentStatus> = WarehouseMovementContentStatus.getAll(),
-    private var filterOptions: FilterOptions = FilterOptions("", true)
+    private var filterOptions: FilterOptions = FilterOptions()
 ) : ListAdapter<WarehouseMovementContent, ViewHolder>(WarehouseMovementContentDiffUtilCallback), Filterable {
 
     private var currentIndex = NO_POSITION

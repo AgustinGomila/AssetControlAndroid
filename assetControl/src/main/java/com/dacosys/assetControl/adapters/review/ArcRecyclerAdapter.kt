@@ -65,7 +65,7 @@ class ArcRecyclerAdapter(
     private var showImages: Boolean = false,
     private var showImagesChanged: (Boolean) -> Unit = { },
     var visibleStatus: ArrayList<AssetReviewContentStatus> = AssetReviewContentStatus.getAll(),
-    private var filterOptions: FilterOptions = FilterOptions("", true)
+    private var filterOptions: FilterOptions = FilterOptions()
 ) : ListAdapter<AssetReviewContent, ViewHolder>(AssetReviewContentDiffUtilCallback), Filterable {
 
     private var currentIndex = NO_POSITION

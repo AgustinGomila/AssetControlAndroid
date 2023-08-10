@@ -44,6 +44,7 @@ import com.dacosys.assetControl.databinding.HomeActivityBinding
 import com.dacosys.assetControl.model.location.WarehouseArea
 import com.dacosys.assetControl.model.user.User
 import com.dacosys.assetControl.model.user.permission.PermissionEntry
+import com.dacosys.assetControl.network.download.DownloadDb
 import com.dacosys.assetControl.network.sync.Sync
 import com.dacosys.assetControl.network.sync.SyncDownload
 import com.dacosys.assetControl.network.sync.SyncProgress
@@ -163,10 +164,24 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
     }
 
     private var rejectNewInstances = false
-    private var isReturnedFromSettings = false
 
     override fun onResume() {
         super.onResume()
+
+        // Parece que las actividades de tipo Setting no devuelven resultados
+        // así que de esta manera puedo volver a llenar el fragmento de usuarios
+        // ¿Ya está autentificado?
+        // Evitar hacer un nuevo login cuando se hace la rotación de la pantalla
+        if (Repository.wsUrl.isEmpty() || Repository.wsNamespace.isEmpty()) {
+            setupInitConfig()
+            return
+        }
+
+        if (Statics.currentUserId == null) {
+            rejectNewInstances = false
+            login()
+            return
+        }
 
         // Inicia el hilo de sincronización
         thread {
@@ -177,22 +192,6 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
 
         JotterListener.lockScanner(this, false)
         rejectNewInstances = false
-
-        // Parece que las actividades de tipo Setting no devuelven resultados
-        // así que de esta manera puedo volver a llenar el fragmento de usuarios
-        if (isReturnedFromSettings) {
-            isReturnedFromSettings = false
-
-            // Vamos a reconstruir el scanner por si cambió la configuración
-            JotterListener.autodetectDeviceModel(this)
-
-            setupImageControl()
-
-            // Todavía no está loggeado
-            if (Statics.currentUserId == null) {
-                login()
-            }
-        }
     }
 
     @SuppressLint("SetTextI18n")
@@ -209,7 +208,10 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
     override fun onBackPressed() {
         Statics.currentUserId = null
 
-        if (isTaskRoot && supportFragmentManager.primaryNavigationFragment?.childFragmentManager?.backStackEntryCount == 0 && supportFragmentManager.backStackEntryCount == 0) {
+        if (isTaskRoot &&
+            supportFragmentManager.primaryNavigationFragment?.childFragmentManager?.backStackEntryCount == 0 &&
+            supportFragmentManager.backStackEntryCount == 0
+        ) {
             finishAfterTransition()
         } else {
             super.onBackPressed()
@@ -397,23 +399,39 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
 
     private fun attemptEnterConfig(password: String) {
         val realPass = prefsGetString(Preference.confPassword)
-        if (password == realPass) {
-            ConfigHelper.setDebugConfigValues()
-
-            if (!rejectNewInstances) {
-                rejectNewInstances = true
-
-                val intent = Intent(baseContext, SettingsActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-                startActivity(intent)
-            }
-            isReturnedFromSettings = true
-        } else {
-            makeText(
-                binding.root, getString(R.string.invalid_password), SnackBarType.ERROR
-            )
+        if (password != realPass) {
+            makeText(binding.root, getString(R.string.invalid_password), SnackBarType.ERROR)
+            return
         }
+
+        if (rejectNewInstances) return
+        rejectNewInstances = true
+
+        ConfigHelper.setDebugConfigValues()
+
+        val intent = Intent(baseContext, SettingsActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+        resultForSettings.launch(intent)
     }
+
+    private val resultForSettings =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            try {
+                if (DownloadDb.downloadDbRequired) {
+                    rejectNewInstances = false
+                    login()
+                } else {
+                    // Vamos a reconstruir el scanner por si cambió la configuración
+                    JotterListener.autodetectDeviceModel(this)
+                    setupImageControl()
+                }
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+                ErrorLog.writeLog(this, this::class.java.simpleName, ex)
+            } finally {
+                rejectNewInstances = false
+            }
+        }
 
     private lateinit var splashScreen: SplashScreen
     private lateinit var binding: HomeActivityBinding
@@ -440,29 +458,15 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
         syncViewModel.syncDownloadProgress.observe(this) { if (it != null) onSyncTaskProgress(it) }
         syncViewModel.sessionCreated.observe(this) { if (it != null) onSessionCreated(it) }
         syncViewModel.syncTimerProgress.observe(this) { if (it != null) onTimerTick(it) }
-
-        if (Repository.wsUrl.isEmpty() || Repository.wsNamespace.isEmpty()) {
-            makeText(
-                binding.root, getString(R.string.webservice_is_not_configured), SnackBarType.ERROR
-            )
-            setupInitConfig()
-        } else {
-            // ¿Ya está loggeado?
-            // Evitar hacer un nuevo login cuando se hace la rotación de la pantalla
-            if (Statics.currentUserId == null) {
-                login()
-            }
-        }
     }
 
     private fun setupInitConfig() {
-        if (!rejectNewInstances) {
-            rejectNewInstances = true
+        if (rejectNewInstances) return
+        rejectNewInstances = true
 
-            val intent = Intent(this, InitConfigActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-            resultForInitConfig.launch(intent)
-        }
+        val intent = Intent(this, InitConfigActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+        resultForInitConfig.launch(intent)
     }
 
     private val resultForInitConfig =
@@ -489,13 +493,12 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
 
     private fun login() {
         ///////////// LOGIN /////////////
-        if (!rejectNewInstances) {
-            rejectNewInstances = true
+        if (rejectNewInstances) return
+        rejectNewInstances = true
 
-            val intent = Intent(this, LoginActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-            resultForLogin.launch(intent)
-        }
+        val intent = Intent(this, LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+        resultForLogin.launch(intent)
     }
 
     private val resultForLogin =
@@ -624,7 +627,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
         binding.syncStatusLayout.visibility = GONE
 
         if (!Statics.isDebuggable() || !BuildConfig.DEBUG) {
-            // Mostramos el Timer sólo en DEBUG
+            // Mostramos el Timer solo en DEBUG
             binding.timeTextView.visibility = GONE
         }
     }

@@ -45,9 +45,6 @@ class ConfigHelper {
                 onRequestProgress.invoke(
                     ClientPackagesProgress(
                         status = ProgressStatus.crashed,
-                        result = ArrayList(),
-                        clientEmail = "",
-                        clientPassword = "",
                         msg = AssetControlApp.getContext()
                             .getString(R.string.configuration_not_loaded)
                     )
@@ -66,9 +63,6 @@ class ConfigHelper {
                 onRequestProgress.invoke(
                     ClientPackagesProgress(
                         status = ProgressStatus.crashed,
-                        result = ArrayList(),
-                        clientEmail = "",
-                        clientPassword = "",
                         msg = AssetControlApp.getContext().getString(R.string.invalid_code)
                     )
                 )
@@ -102,7 +96,6 @@ class ConfigHelper {
                         onRequestProgress.invoke(
                             ClientPackagesProgress(
                                 status = ProgressStatus.crashed,
-                                result = ArrayList(),
                                 clientEmail = email,
                                 clientPassword = password,
                                 msg = AssetControlApp.getContext().getString(R.string.invalid_code)
@@ -116,9 +109,6 @@ class ConfigHelper {
                     onRequestProgress.invoke(
                         ClientPackagesProgress(
                             status = ProgressStatus.success,
-                            result = ArrayList(),
-                            clientEmail = "",
-                            clientPassword = "",
                             msg = when (mode) {
                                 QRConfigType.QRConfigImageControl -> AssetControlApp.getContext()
                                     .getString(R.string.imagecontrol_configured)
@@ -137,9 +127,6 @@ class ConfigHelper {
                     onRequestProgress.invoke(
                         ClientPackagesProgress(
                             status = ProgressStatus.crashed,
-                            result = ArrayList(),
-                            clientEmail = "",
-                            clientPassword = "",
                             msg = AssetControlApp.getContext().getString(R.string.invalid_code)
                         )
                     )

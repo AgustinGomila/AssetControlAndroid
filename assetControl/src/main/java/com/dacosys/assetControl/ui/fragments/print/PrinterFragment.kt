@@ -72,8 +72,6 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
 
     private var ch: CounterHandler? = null
 
-    private var isReturnedFromSettings = false
-
     // Configuración guardada de los controles que se ven o no se ven
     private var printer: String = ""
     var barcodeLabelCustom: BarcodeLabelCustom? = null
@@ -102,13 +100,7 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
     override fun onResume() {
         super.onResume()
 
-        if (isReturnedFromSettings) {
-            rejectNewInstances = false
-            isReturnedFromSettings = false
-
-            loadPrinterPreferences()
-            refreshViews()
-        }
+        rejectNewInstances = false
     }
 
     override fun onStart() {
@@ -537,25 +529,33 @@ class PrinterFragment : Fragment(), Runnable, CounterHandler.CounterListener {
 
     private fun attemptEnterConfig(password: String) {
         val realPass = prefsGetString(Preference.confPassword)
-        if (password == realPass) {
-            ConfigHelper.setDebugConfigValues()
-
-            if (!rejectNewInstances) {
-                rejectNewInstances = true
-
-                val intent = Intent(requireContext(), SettingsActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-                startActivity(intent)
-            }
-            isReturnedFromSettings = true
-        } else {
-            makeText(
-                binding.root,
-                getString(R.string.invalid_password),
-                SnackBarType.ERROR
-            )
+        if (password != realPass) {
+            makeText(binding.root, getString(R.string.invalid_password), SnackBarType.ERROR)
+            return
         }
+
+        if (rejectNewInstances) return
+        rejectNewInstances = true
+
+        ConfigHelper.setDebugConfigValues()
+
+        val intent = Intent(requireContext(), SettingsActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+        resultForSettings.launch(intent)
     }
+
+    private val resultForSettings =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            try {
+                loadPrinterPreferences()
+                refreshViews()
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+                ErrorLog.writeLog(requireActivity(), this::class.java.simpleName, ex)
+            } finally {
+                rejectNewInstances = false
+            }
+        }
 
     private fun showSelectTemplateActivity() {
         val intent = Intent(requireContext(), TemplateSelectDialogActivity::class.java)
