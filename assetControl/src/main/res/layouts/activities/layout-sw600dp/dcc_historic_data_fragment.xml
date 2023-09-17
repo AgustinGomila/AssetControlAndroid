@@ -61,7 +61,8 @@
                 android:textSize="18sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="@+id/historicValuesGuideline"/>
+                app:layout_constraintStart_toStartOf="@+id/historicValuesGuideline" android:elegantTextHeight="true"
+                android:lines="1" android:maxLines="1" android:minLines="1"/>
 
         <TextView
                 android:id="@+id/oldValueTextView4"
@@ -75,7 +76,8 @@
                 android:textSize="18sp"
                 app:layout_constraintEnd_toStartOf="@+id/historicValuesGuideline"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/oldDateTextView4"/>
+                app:layout_constraintTop_toTopOf="@+id/oldDateTextView4" android:elegantTextHeight="true"
+                android:lines="1" android:maxLines="1" android:minLines="1"/>
 
         <TextView
                 android:id="@+id/oldDateTextView3"
@@ -88,7 +90,8 @@
                 android:textSize="18sp"
                 app:layout_constraintBottom_toTopOf="@+id/oldDateTextView4"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="@+id/historicValuesGuideline"/>
+                app:layout_constraintStart_toStartOf="@+id/historicValuesGuideline" android:elegantTextHeight="true"
+                android:lines="1" android:maxLines="1" android:minLines="1"/>
 
         <TextView
                 android:id="@+id/oldValueTextView3"
@@ -102,7 +105,8 @@
                 android:textSize="18sp"
                 app:layout_constraintEnd_toStartOf="@+id/historicValuesGuideline"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/oldDateTextView3"/>
+                app:layout_constraintTop_toTopOf="@+id/oldDateTextView3" android:elegantTextHeight="true"
+                android:lines="1" android:maxLines="1" android:minLines="1"/>
 
         <TextView
                 android:id="@+id/oldDateTextView2"
@@ -117,7 +121,8 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toEndOf="@+id/oldValueTextView2"
-                app:layout_constraintStart_toStartOf="@+id/historicValuesGuideline"/>
+                app:layout_constraintStart_toStartOf="@+id/historicValuesGuideline" android:elegantTextHeight="true"
+                android:lines="1" android:maxLines="1" android:minLines="1"/>
 
         <TextView
                 android:id="@+id/oldValueTextView2"
@@ -131,7 +136,8 @@
                 android:textSize="18sp"
                 app:layout_constraintEnd_toStartOf="@+id/historicValuesGuideline"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/oldDateTextView2"/>
+                app:layout_constraintTop_toTopOf="@+id/oldDateTextView2" android:elegantTextHeight="true"
+                android:lines="1" android:maxLines="1" android:minLines="1"/>
 
         <TextView
                 android:id="@+id/oldDateTextView1"
@@ -145,7 +151,8 @@
                 app:layout_constraintBottom_toTopOf="@+id/oldDateTextView2"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toStartOf="@+id/historicValuesGuideline"/>
+                app:layout_constraintStart_toStartOf="@+id/historicValuesGuideline" android:elegantTextHeight="true"
+                android:lines="1" android:maxLines="1" android:minLines="1"/>
 
         <TextView
                 android:id="@+id/oldValueTextView1"
@@ -159,7 +166,8 @@
                 android:textSize="18sp"
                 app:layout_constraintEnd_toStartOf="@+id/oldDateTextView1"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/oldDateTextView1"/>
+                app:layout_constraintTop_toTopOf="@+id/oldDateTextView1" android:elegantTextHeight="true"
+                android:lines="1" android:maxLines="1" android:minLines="1"/>
 
         <androidx.constraintlayout.widget.Guideline
                 android:id="@+id/historicValuesGuideline"
