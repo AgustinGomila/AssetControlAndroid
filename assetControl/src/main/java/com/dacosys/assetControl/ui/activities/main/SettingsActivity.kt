@@ -33,6 +33,7 @@ import com.dacosys.assetControl.utils.ConfigHelper
 import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.utils.settings.QRConfigType
@@ -222,7 +223,13 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
         )
     }
 
+    private val showScannedCode: Boolean
+        get() {
+            return prefsGetBoolean(com.dacosys.assetControl.utils.settings.Preference.showScannedCode)
+        }
+
     override fun scannerCompleted(scanCode: String) {
+        if (showScannedCode) makeText(binding.root, scanCode, SnackBarType.INFO)
         JotterListener.lockScanner(this, true)
 
         try {
@@ -241,7 +248,6 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
             )
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         } finally {
-            // Unless is blocked, unlock the partial
             JotterListener.lockScanner(this, false)
         }
     }

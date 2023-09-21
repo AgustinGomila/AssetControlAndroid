@@ -143,7 +143,7 @@ class SyncUpload(
 
         // Las imágenes con ID locales se enviarán después de
         // obtener los ID reales.
-        SendPending { onUploadProgress.invoke(it) }
+        SendPending(context = getContext()) { onUploadProgress.invoke(it) }
 
         // El orden está dado por la dependencia de los ID
         // en las subsiguientes tablas
@@ -341,7 +341,7 @@ class SyncUpload(
                     arDb.updateTransferredNew(arId, ar.collectorAssetReviewId)
 
                     // Enviar imágenes si existen
-                    SendImages(programObjectId = Table.assetReview.tableId.toLong(),
+                    SendImages(context = getContext(), programObjectId = Table.assetReview.tableId.toLong(),
                         newObjectId1 = arId,
                         localObjectId1 = ar.collectorAssetReviewId,
                         onUploadProgress = { onUploadProgress.invoke(it) }).execute()
@@ -489,7 +489,7 @@ class SyncUpload(
                     wmDb.updateTransferredNew(wmId, wm.collectorWarehouseMovementId)
 
                     // Enviar imágenes si existen
-                    SendImages(programObjectId = Table.warehouseMovement.tableId.toLong(),
+                    SendImages(context = getContext(), programObjectId = Table.warehouseMovement.tableId.toLong(),
                         newObjectId1 = wmId,
                         localObjectId1 = wm.collectorWarehouseMovementId,
                         onUploadProgress = { onUploadProgress.invoke(it) }).execute()
@@ -625,7 +625,7 @@ class SyncUpload(
                     allRealId.add(realAssetId)
 
                     // Enviar imágenes si existen
-                    SendImages(programObjectId = Table.asset.tableId.toLong(),
+                    SendImages(context = getContext(), programObjectId = Table.asset.tableId.toLong(),
                         newObjectId1 = realAssetId,
                         localObjectId1 = a.assetId,
                         onUploadProgress = { onUploadProgress.invoke(it) }).execute()
@@ -802,7 +802,7 @@ class SyncUpload(
                     allRealId.add(realWarehouseAreaId)
 
                     // Enviar imágenes si existen
-                    SendImages(programObjectId = Table.warehouseArea.tableId.toLong(),
+                    SendImages(context = getContext(), programObjectId = Table.warehouseArea.tableId.toLong(),
                         newObjectId1 = realWarehouseAreaId,
                         localObjectId1 = wa.warehouseAreaId,
                         onUploadProgress = { onUploadProgress.invoke(it) }).execute()
@@ -950,7 +950,7 @@ class SyncUpload(
                     allRealId.add(realWarehouseId)
 
                     // Enviar imágenes si existen
-                    SendImages(programObjectId = Table.warehouse.tableId.toLong(),
+                    SendImages(context = getContext(), programObjectId = Table.warehouse.tableId.toLong(),
                         newObjectId1 = realWarehouseId,
                         localObjectId1 = w.warehouseId,
                         onUploadProgress = { onUploadProgress.invoke(it) }).execute()
@@ -1087,7 +1087,7 @@ class SyncUpload(
                     allRealId.add(realItemCategoryId)
 
                     // Enviar imágenes si existen
-                    SendImages(programObjectId = Table.itemCategory.tableId.toLong(),
+                    SendImages(context = getContext(), programObjectId = Table.itemCategory.tableId.toLong(),
                         newObjectId1 = realItemCategoryId,
                         localObjectId1 = ic.itemCategoryId,
                         onUploadProgress = { onUploadProgress.invoke(it) }).execute()
@@ -1241,7 +1241,7 @@ class SyncUpload(
                     dcDb.updateTransferredNew(dcId, dc.collectorDataCollectionId)
 
                     // Enviar imágenes si existen
-                    SendImages(programObjectId = Table.dataCollection.tableId.toLong(),
+                    SendImages(context = getContext(), programObjectId = Table.dataCollection.tableId.toLong(),
                         newObjectId1 = dcId,
                         localObjectId1 = dc.collectorDataCollectionId,
                         onUploadProgress = { onUploadProgress.invoke(it) }).execute()
@@ -1405,7 +1405,7 @@ class SyncUpload(
                     rpDb.updateTransferredNew(rpId, rp.collectorRouteProcessId)
 
                     // Enviar imágenes si existen
-                    SendImages(programObjectId = Table.routeProcess.tableId.toLong(),
+                    SendImages(context = getContext(), programObjectId = Table.routeProcess.tableId.toLong(),
                         newObjectId1 = rpId,
                         localObjectId1 = rp.collectorRouteProcessId,
                         onUploadProgress = { onUploadProgress.invoke(it) }).execute()
@@ -1539,7 +1539,7 @@ class SyncUpload(
                     amDb.updateTransferredNew(assetMaintenanceId)
 
                     // Enviar imágenes si existen
-                    SendImages(programObjectId = Table.assetManteinance.tableId.toLong(),
+                    SendImages(context = getContext(), programObjectId = Table.assetManteinance.tableId.toLong(),
                         newObjectId1 = assetMaintenanceId,
                         localObjectId1 = am.assetManteinanceId,
                         onUploadProgress = { onUploadProgress.invoke(it) }).execute()

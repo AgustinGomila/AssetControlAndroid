@@ -32,15 +32,19 @@ class WarehouseMovementContentObject() : Parcelable {
                         "warehouse_movement_id" -> {
                             x.warehouseMovementId = soValue as? Long ?: 0L
                         }
+
                         "warehouse_movement_content_id" -> {
                             x.warehouseMovementContentId = soValue as? Long ?: 0L
                         }
+
                         "asset_id" -> {
                             x.assetId = soValue as? Long ?: 0L
                         }
+
                         "code" -> {
                             x.code = soValue as? String ?: ""
                         }
+
                         "qty" -> {
                             x.qty = soValue as? Float ?: 0F
                         }

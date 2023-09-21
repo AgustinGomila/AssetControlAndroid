@@ -40,6 +40,7 @@ class ManteinanceTypeSpinnerFragment : Fragment() {
                         else -> r
                     }
                 }
+
                 else -> null
             }
         }

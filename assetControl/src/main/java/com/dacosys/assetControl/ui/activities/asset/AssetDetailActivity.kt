@@ -27,7 +27,6 @@ class AssetDetailActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        ////////////// IMAGE CONTROL //////////////
         imageControlFragment?.saveImages(true)
         super.onBackPressed()
     }

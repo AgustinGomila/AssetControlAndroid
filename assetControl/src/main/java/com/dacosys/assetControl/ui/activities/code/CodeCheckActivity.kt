@@ -1,15 +1,25 @@
 package com.dacosys.assetControl.ui.activities.code
 
 import android.annotation.SuppressLint
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
+import android.text.InputType
 import android.util.Log
-import android.view.*
+import android.view.KeyEvent
+import android.view.Menu
+import android.view.MenuItem
+import android.view.WindowManager
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
-import android.widget.*
+import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.view.menu.MenuBuilder
+import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
+import com.dacosys.assetControl.dataBase.asset.AssetDbHelper
+import com.dacosys.assetControl.dataBase.location.WarehouseAreaDbHelper
 import com.dacosys.assetControl.databinding.CodeCheckActivityBinding
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
@@ -18,13 +28,18 @@ import com.dacosys.assetControl.ui.fragments.location.WarehouseAreaDetailFragmen
 import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
 import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Screen.Companion.setupUI
+import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.ScannedCode
 import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.utils.scanners.nfc.Nfc
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid.Companion.isRfidRequired
+import com.dacosys.assetControl.utils.settings.Preference
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import java.util.*
 
 class CodeCheckActivity : AppCompatActivity(),
@@ -135,6 +150,7 @@ class CodeCheckActivity : AppCompatActivity(),
         currentFragment = fragment
     }
 
+    @SuppressLint("RestrictedApi")
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_read_activity, menu)
@@ -143,8 +159,25 @@ class CodeCheckActivity : AppCompatActivity(),
             menu.removeItem(menu.findItem(R.id.action_rfid_connect).itemId)
         }
 
+        if (BuildConfig.DEBUG || Statics.demoMode) {
+            menu.add(Menu.NONE, menuItemManualCode, Menu.NONE, "Manual code")
+            menu.add(Menu.NONE, menuItemRandomCode, Menu.NONE, "Random asset code")
+            menu.add(Menu.NONE, menuItemRandomWa, Menu.NONE, "Random área")
+            menu.add(Menu.NONE, menuItemRandomSerial, Menu.NONE, "Random asset serial")
+        }
+
+        if (menu is MenuBuilder) {
+            menu.setOptionalIconsVisible(true)
+        }
+
         return true
     }
+
+    private val menuItemRandomCode = 999001
+    private val menuItemManualCode = 999002
+    private val menuItemRandomWa = 999004
+    private val menuItemRandomSerial = 999005
+
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         // Handle action bar item clicks here. The action bar will
@@ -172,9 +205,76 @@ class CodeCheckActivity : AppCompatActivity(),
                 return super.onOptionsItemSelected(item)
             }
 
+            menuItemRandomCode -> {
+                val allCodes = AssetDbHelper().selectAllCodes()
+                if (allCodes.any()) scannerCompleted(allCodes[Random().nextInt(allCodes.count())])
+                return super.onOptionsItemSelected(item)
+            }
+
+            menuItemManualCode -> {
+                enterCode()
+                return super.onOptionsItemSelected(item)
+            }
+
+            menuItemRandomWa -> {
+                val allWa = WarehouseAreaDbHelper().select(true)
+                val waId = allWa[Random().nextInt(allWa.count())].warehouseAreaId
+                if (allWa.any()) scannerCompleted("#WA#${String.format("%05d", waId)}#")
+                return super.onOptionsItemSelected(item)
+            }
+
+            menuItemRandomSerial -> {
+                val allSerials = AssetDbHelper().selectAllSerials()
+                if (allSerials.any()) scannerCompleted(allSerials[Random().nextInt(allSerials.count())])
+                return super.onOptionsItemSelected(item)
+            }
+
             else -> {
                 return super.onOptionsItemSelected(item)
             }
+        }
+    }
+
+    private fun enterCode() {
+        runOnUiThread {
+            var alertDialog: AlertDialog? = null
+            val builder = AlertDialog.Builder(this)
+            builder.setTitle(getString(R.string.enter_code))
+
+            val inputLayout = TextInputLayout(this)
+            inputLayout.endIconMode = TextInputLayout.END_ICON_CLEAR_TEXT
+
+            val input = TextInputEditText(this)
+            input.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS
+            input.isFocusable = true
+            input.isFocusableInTouchMode = true
+            input.setOnKeyListener { _, keyCode, event ->
+                if (event.action == KeyEvent.ACTION_DOWN) {
+                    when (keyCode) {
+                        KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER -> {
+                            if (alertDialog != null) {
+                                alertDialog!!.getButton(DialogInterface.BUTTON_POSITIVE)
+                                    .performClick()
+                            }
+                        }
+                    }
+                }
+                false
+            }
+
+            inputLayout.addView(input)
+            builder.setView(inputLayout)
+            builder.setPositiveButton(R.string.accept) { _, _ ->
+                scannerCompleted(input.text.toString())
+            }
+            builder.setNegativeButton(R.string.cancel, null)
+            alertDialog = builder.create()
+
+            alertDialog.window?.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
+            alertDialog.window?.clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
+            alertDialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
+            alertDialog.show()
+            input.requestFocus()
         }
     }
 
@@ -266,7 +366,13 @@ class CodeCheckActivity : AppCompatActivity(),
         }
     }
 
+    private val showScannedCode: Boolean
+        get() {
+            return prefsGetBoolean(Preference.showScannedCode)
+        }
+
     override fun scannerCompleted(scanCode: String) {
+        if (showScannedCode) makeText(binding.root, scanCode, SnackBarType.INFO)
         runOnUiThread {
             binding.codeEditText.setText(scanCode)
             binding.codeEditText.dispatchKeyEvent(

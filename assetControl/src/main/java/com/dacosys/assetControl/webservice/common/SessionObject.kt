@@ -26,6 +26,7 @@ class SessionObject() : Parcelable {
                         "session_id" -> {
                             x.sessionId = soValue as? String ?: ""
                         }
+
                         "user_id" -> {
                             x.userId = soValue as? Long ?: 0L
                         }

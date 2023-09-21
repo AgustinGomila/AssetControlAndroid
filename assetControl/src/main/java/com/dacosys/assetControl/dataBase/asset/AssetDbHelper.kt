@@ -669,6 +669,32 @@ class AssetDbHelper {
         return result
     }
 
+    fun selectAllSerials(): ArrayList<String> {
+        Log.i(this::class.java.simpleName, ": SQLite -> select")
+
+        val result = ArrayList<String>()
+        val rawQuery = "SELECT DISTINCT " + TABLE_NAME + "." + SERIAL_NUMBER +
+                " FROM " + TABLE_NAME +
+                " ORDER BY " + TABLE_NAME + "." + SERIAL_NUMBER
+
+        val sqLiteDatabase = getReadableDb()
+        try {
+            val c = sqLiteDatabase.rawQuery(rawQuery, null)
+            c.use {
+                if (it != null) {
+                    while (it.moveToNext()) {
+                        result.add(it.getString(it.getColumnIndexOrThrow(SERIAL_NUMBER)))
+                    }
+                }
+            }
+        } catch (ex: SQLException) {
+            ex.printStackTrace()
+            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
+        }
+
+        return result
+    }
+
     fun selectAllCodesByWarehouseAreaId(waId: Long): ArrayList<String> {
         Log.i(this::class.java.simpleName, ": SQLite -> select")
 

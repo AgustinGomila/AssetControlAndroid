@@ -44,33 +44,43 @@ class DataCollectionContentObject() : Parcelable {
                         "data_collection_id" -> {
                             x.dataCollectionId = soValue as? Long ?: 0L
                         }
+
                         "level" -> {
                             x.level = soValue as? Int ?: 0
                         }
+
                         "position" -> {
                             x.position = soValue as? Int ?: 0
                         }
+
                         "attribute_id" -> {
                             x.attributeId = soValue as? Long ?: 0L
                         }
+
                         "attribute_composition_id" -> {
                             x.attributeCompositionId = soValue as? Long ?: 0L
                         }
+
                         "result" -> {
                             x.result = soValue as? Int ?: 0
                         }
+
                         "value_str" -> {
                             x.valueStr = soValue as? String ?: ""
                         }
+
                         "data_collection_date" -> {
                             x.dataCollectionDate = soValue as? String ?: ""
                         }
+
                         "data_collection_content_id" -> {
                             x.dataCollectionContentId = soValue as? Long ?: 0L
                         }
+
                         "collector_data_collection_content_id" -> {
                             x.collectorDataCollectionContentId = soValue as? Long ?: 0L
                         }
+
                         "data_collection_rule_content_id" -> {
                             x.dataCollectionRuleContentId = soValue as? Long ?: 0L
                         }

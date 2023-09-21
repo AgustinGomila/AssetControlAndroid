@@ -91,23 +91,17 @@ class Proxy {
 
             alert.setView(layout)
             alert.setNegativeButton(R.string.no) { _, _ ->
-                if (Preferences.prefs == null) {
-                    return@setNegativeButton
-                }
-                val p = (Preferences.prefs ?: return@setNegativeButton).edit()
+                val p = Preferences.prefs.edit()
                 p.putBoolean(Preference.acWsUseProxy.key, false)
                 p.apply()
             }
             alert.setPositiveButton(R.string.yes) { _, _ ->
-                if (Preferences.prefs == null) {
-                    return@setPositiveButton
-                }
                 val proxy = proxyEditText.text
                 val port = proxyPortEditText.text
                 val user = proxyUserEditText.text
                 val pass = proxyPassEditText.text
 
-                val p = (Preferences.prefs ?: return@setPositiveButton).edit()
+                val p = Preferences.prefs.edit()
                 if (proxy != null) {
                     p.putBoolean(Preference.acWsUseProxy.key, true)
                     p.putString(Preference.acWsProxy.key, proxy.toString())
@@ -126,7 +120,7 @@ class Proxy {
                     p.putString(Preference.acWsProxyUser.key, user.toString())
                 }
 
-                if (pass != null && pass.isNotEmpty()) {
+                if (!pass.isNullOrEmpty()) {
                     p.putString(Preference.acWsProxyPass.key, pass.toString())
                 }
 

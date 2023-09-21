@@ -1,231 +1,231 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/data_collection_content"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:theme="@style/Theme.AppCompat.Light"
-    android:weightSum="1"
-    tools:context=".ui.activities.route.DccActivity">
+                                                   xmlns:app="http://schemas.android.com/apk/res-auto"
+                                                   xmlns:tools="http://schemas.android.com/tools"
+                                                   android:id="@+id/data_collection_content"
+                                                   android:layout_width="match_parent"
+                                                   android:layout_height="match_parent"
+                                                   android:orientation="vertical"
+                                                   android:theme="@style/Theme.AppCompat.Light"
+                                                   android:weightSum="1"
+                                                   tools:context=".ui.activities.route.DccActivity">
 
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/top_appbar"
-        style="@style/MyActionBar"
-        android:layout_width="match_parent"
-        android:layout_height="?android:attr/actionBarSize"
-        android:elevation="4dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:title="@string/data_collection" />
-
-    <TextView
-        android:id="@+id/codeTextView"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="@color/lightblue"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        android:text="@string/code"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@+id/descriptionTextView"
-        app:layout_constraintEnd_toStartOf="@+id/guideline25"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/top_appbar" />
-
-    <TextView
-        android:id="@+id/descriptionTextView"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:background="@color/lightblue"
-        android:fontFamily="sans-serif-black"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        android:text="@string/description"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toStartOf="@+id/guideline75"
-        app:layout_constraintStart_toStartOf="@+id/guideline25"
-        app:layout_constraintTop_toBottomOf="@+id/top_appbar" />
-
-    <TextView
-        android:id="@+id/positionTextView"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="@color/sync_element_warehouse_movement"
-        android:fontFamily="sans-serif-black"
-        android:gravity="center_vertical|center_horizontal"
-        android:text="@string/pos_total"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@+id/attributeTextView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/guideline75"
-        app:layout_constraintTop_toBottomOf="@+id/top_appbar" />
-
-    <com.dacosys.assetControl.ui.common.views.custom.AutoResizeTextView
-        android:id="@+id/attributeTextView"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:background="@color/lightgoldenrodyellow"
-        android:gravity="center"
-        android:lines="2"
-        android:maxLines="2"
-        android:minLines="1"
-        android:paddingStart="2dp"
-        android:paddingTop="8dp"
-        android:paddingEnd="2dp"
-        android:paddingBottom="8dp"
-        android:text="@string/attribute"
-        android:textSize="20sp"
-        app:autoSizeMaxTextSize="14sp"
-        app:autoSizeMinTextSize="12sp"
-        app:layout_constraintEnd_toStartOf="@+id/guideline75"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/descriptionTextView" />
-
-    <CheckBox
-        android:id="@+id/enableCheckBox"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:checked="true"
-        android:gravity="center"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/attributeTextView" />
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/buttonLayout"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginBottom="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/mainGuideline500"
-        app:layout_constraintTop_toBottomOf="@+id/historicValuesLayout">
-
-        <Button
-            android:id="@+id/prevButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="2dp"
-            android:layout_marginEnd="1dp"
-            android:layout_marginBottom="2dp"
-            android:background="@drawable/rounded_corner_button_dodgerblue"
-            android:clickable="true"
-            android:elevation="1dp"
-            android:focusable="true"
-            android:stateListAnimator="@null"
-            android:text="@string/previous"
-            android:textColor="@color/white"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/buttonGuideline500"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <Button
-            android:id="@+id/nextButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="1dp"
-            android:layout_marginEnd="2dp"
-            android:layout_marginBottom="2dp"
-            android:background="@drawable/rounded_corner_button_seagreen"
-            android:clickable="true"
-            android:elevation="1dp"
-            android:focusable="true"
-            android:stateListAnimator="@null"
-            android:text="@string/next"
-            android:textColor="@color/white"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/buttonGuideline500" />
-
-        <FrameLayout
-            android:id="@+id/imageControlFragment"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            app:layout_constraintBottom_toTopOf="@+id/nextButton"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/buttonGuideline500"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.5" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/historicValuesLayout"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="@+id/mainGuideline500"
-        app:layout_constraintTop_toBottomOf="@+id/attributeTextView">
-
-        <androidx.fragment.app.FragmentContainerView
-            android:id="@+id/historicDataFragment"
-            android:name="com.dacosys.assetControl.ui.fragments.route.HistoricDataFragment"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:id="@+id/top_appbar"
+            style="@style/MyActionBar"
+            android:layout_width="match_parent"
+            android:layout_height="?android:attr/actionBarSize"
+            android:elevation="4dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:layout="@layout/dcc_historic_data_fragment" />
+            app:title="@string/data_collection"/>
+
+    <TextView
+            android:id="@+id/codeTextView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@color/lightblue"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:text="@string/code"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/descriptionTextView"
+            app:layout_constraintEnd_toStartOf="@+id/guideline25"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/top_appbar"/>
+
+    <TextView
+            android:id="@+id/descriptionTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@color/lightblue"
+            android:fontFamily="sans-serif-black"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:text="@string/description"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@+id/guideline75"
+            app:layout_constraintStart_toStartOf="@+id/guideline25"
+            app:layout_constraintTop_toBottomOf="@+id/top_appbar"/>
+
+    <TextView
+            android:id="@+id/positionTextView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@color/sync_element_warehouse_movement"
+            android:fontFamily="sans-serif-black"
+            android:gravity="center_vertical|center_horizontal"
+            android:text="@string/pos_total"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/attributeTextView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/guideline75"
+            app:layout_constraintTop_toBottomOf="@+id/top_appbar"/>
+
+    <com.dacosys.assetControl.ui.common.views.custom.AutoResizeTextView
+            android:id="@+id/attributeTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@color/lightgoldenrodyellow"
+            android:gravity="center"
+            android:lines="2"
+            android:maxLines="2"
+            android:minLines="1"
+            android:paddingStart="2dp"
+            android:paddingTop="8dp"
+            android:paddingEnd="2dp"
+            android:paddingBottom="8dp"
+            android:text="@string/attribute"
+            android:textSize="20sp"
+            app:autoSizeMaxTextSize="14sp"
+            app:autoSizeMinTextSize="12sp"
+            app:layout_constraintEnd_toStartOf="@+id/guideline75"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/descriptionTextView"/>
+
+    <CheckBox
+            android:id="@+id/enableCheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:checked="true"
+            android:gravity="center"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/attributeTextView"/>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/buttonLayout"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginBottom="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/mainGuideline500"
+            app:layout_constraintTop_toBottomOf="@+id/historicValuesLayout">
+
+        <Button
+                android:id="@+id/prevButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="2dp"
+                android:layout_marginEnd="1dp"
+                android:layout_marginBottom="2dp"
+                android:background="@drawable/rounded_corner_button_dodgerblue"
+                android:clickable="true"
+                android:elevation="1dp"
+                android:focusable="true"
+                android:stateListAnimator="@null"
+                android:text="@string/previous"
+                android:textColor="@color/white"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/buttonGuideline500"
+                app:layout_constraintStart_toStartOf="parent"/>
+
+        <Button
+                android:id="@+id/nextButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="1dp"
+                android:layout_marginEnd="2dp"
+                android:layout_marginBottom="2dp"
+                android:background="@drawable/rounded_corner_button_seagreen"
+                android:clickable="true"
+                android:elevation="1dp"
+                android:focusable="true"
+                android:stateListAnimator="@null"
+                android:text="@string/next"
+                android:textColor="@color/white"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/buttonGuideline500"/>
+
+        <FrameLayout
+                android:id="@+id/imageControlFragment"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toTopOf="@+id/nextButton"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"/>
+
+        <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/buttonGuideline500"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.5"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/fragmentLayout"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="2dp"
-        android:layout_marginTop="2dp"
-        android:layout_marginEnd="2dp"
-        android:layout_marginBottom="2dp"
-        android:background="@drawable/listview_border"
-        android:padding="2dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/mainGuideline500"
-        app:layout_constraintStart_toEndOf="@+id/enableCheckBox"
-        app:layout_constraintTop_toBottomOf="@+id/attributeTextView">
+            android:id="@+id/historicValuesLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="@+id/mainGuideline500"
+            app:layout_constraintTop_toBottomOf="@+id/attributeTextView">
 
-        <View
-            android:id="@+id/shadowView"
+        <androidx.fragment.app.FragmentContainerView
+                android:id="@+id/historicDataFragment"
+                android:name="com.dacosys.assetControl.ui.fragments.route.HistoricDataFragment"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:layout="@layout/dcc_historic_data_fragment"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/fragmentLayout"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:background="@color/beige"
-            android:clickable="true"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
+            android:layout_marginStart="2dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginEnd="2dp"
+            android:layout_marginBottom="2dp"
+            android:background="@drawable/listview_border"
+            android:padding="2dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintEnd_toStartOf="@+id/mainGuideline500"
+            app:layout_constraintStart_toEndOf="@+id/enableCheckBox"
+            app:layout_constraintTop_toBottomOf="@+id/attributeTextView">
+
+        <View
+                android:id="@+id/shadowView"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:background="@color/beige"
+                android:clickable="true"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/mainGuideline500"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.5" />
+            android:id="@+id/mainGuideline500"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.5"/>
 
     <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline75"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.85" />
+            android:id="@+id/guideline75"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.85"/>
 
     <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline25"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.25" />
+            android:id="@+id/guideline25"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.25"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

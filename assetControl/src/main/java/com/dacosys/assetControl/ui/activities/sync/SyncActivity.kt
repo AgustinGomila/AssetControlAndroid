@@ -8,8 +8,10 @@ import android.os.Looper
 import android.text.Html
 import android.text.method.ScrollingMovementMethod
 import android.util.Log
-import android.view.*
-import android.widget.*
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
+import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.menu.MenuBuilder
@@ -34,7 +36,10 @@ import com.dacosys.assetControl.model.review.AssetReview
 import com.dacosys.assetControl.model.route.RouteProcess
 import com.dacosys.assetControl.network.serverDate.GetMySqlDate
 import com.dacosys.assetControl.network.serverDate.MySqlDateResult
-import com.dacosys.assetControl.network.sync.*
+import com.dacosys.assetControl.network.sync.SyncDownload
+import com.dacosys.assetControl.network.sync.SyncProgress
+import com.dacosys.assetControl.network.sync.SyncRegistryType
+import com.dacosys.assetControl.network.sync.SyncUpload
 import com.dacosys.assetControl.network.utils.*
 import com.dacosys.assetControl.network.utils.Connection.Companion.isOnline
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
@@ -52,7 +57,6 @@ import com.dacosys.assetControl.viewModel.sync.SyncViewModel
 import com.dacosys.assetControl.webservice.common.Webservice.Companion.getWebservice
 import com.dacosys.imageControl.network.upload.UploadImagesProgress
 import com.dacosys.imageControl.room.entity.Image
-import kotlinx.coroutines.*
 import kotlin.concurrent.thread
 import com.dacosys.imageControl.network.common.ProgressStatus as IcProgressStatus
 
@@ -539,7 +543,8 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 binding.dowloadTextView.text = Html.fromHtml(d, Html.FROM_HTML_MODE_COMPACT)
             } else {
-                @Suppress("DEPRECATION") binding.dowloadTextView.text = Html.fromHtml(d)
+                @Suppress("DEPRECATION")
+                binding.dowloadTextView.text = Html.fromHtml(d)
             }
         }
     }
@@ -549,7 +554,8 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 binding.uploadTextView.text = Html.fromHtml(u, Html.FROM_HTML_MODE_COMPACT)
             } else {
-                @Suppress("DEPRECATION") binding.uploadTextView.text = Html.fromHtml(u)
+                @Suppress("DEPRECATION")
+                binding.uploadTextView.text = Html.fromHtml(u)
             }
         }
     }
@@ -799,7 +805,8 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 textView.text = Html.fromHtml(tempText, Html.FROM_HTML_MODE_COMPACT)
             } else {
-                @Suppress("DEPRECATION") textView.text = Html.fromHtml(tempText)
+                @Suppress("DEPRECATION")
+                textView.text = Html.fromHtml(tempText)
             }
 
             // AUTO SCROLL

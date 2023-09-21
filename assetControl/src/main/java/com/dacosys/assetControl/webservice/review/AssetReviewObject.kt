@@ -40,27 +40,35 @@ class AssetReviewObject() : Parcelable {
                         "asset_review_id" -> {
                             x.assetReviewId = soValue as? Long ?: 0L
                         }
+
                         "asset_review_date" -> {
                             x.assetReviewDate = soValue as? String ?: ""
                         }
+
                         "obs" -> {
                             x.obs = soValue as? String ?: ""
                         }
+
                         "user_id" -> {
                             x.userId = soValue as? Long ?: 0L
                         }
+
                         "warehouse_area_id" -> {
                             x.warehouseAreaId = soValue as? Long ?: 0L
                         }
+
                         "warehouse_id" -> {
                             x.warehouseId = soValue as? Long ?: 0L
                         }
+
                         "modification_date" -> {
                             x.modificationDate = soValue as? String ?: ""
                         }
+
                         "collector_asset_review_id" -> {
                             x.collectorAssetReviewId = soValue as? Long ?: 0L
                         }
+
                         "status_id" -> {
                             x.statusId = soValue as? Int ?: 0
                         }

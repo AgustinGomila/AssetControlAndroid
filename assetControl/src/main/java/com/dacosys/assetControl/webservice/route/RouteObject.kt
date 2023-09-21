@@ -29,9 +29,11 @@ class RouteObject() : Parcelable {
                             x.route_id =
                                 (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
                         }
+
                         "active" -> {
                             x.active = soValue as? Int ?: 0
                         }
+
                         "description" -> {
                             x.description = soValue as? String ?: ""
                         }

@@ -42,30 +42,39 @@ class RouteCompositionObject() : Parcelable {
                         "route_id" -> {
                             x.routeId = soValue as? Long ?: 0L
                         }
+
                         "data_collection_rule_id" -> {
                             x.dataCollectionRuleId = soValue as? Long ?: 0L
                         }
+
                         "level" -> {
                             x.level = soValue as? Int ?: 0
                         }
+
                         "position" -> {
                             x.position = soValue as? Int ?: 0
                         }
+
                         "asset_id" -> {
                             x.assetId = soValue as? Long ?: 0L
                         }
+
                         "warehouse_id" -> {
                             x.warehouseId = soValue as? Long ?: 0L
                         }
+
                         "warehouse_area_id" -> {
                             x.warehouseAreaId = soValue as? Long ?: 0L
                         }
+
                         "expression" -> {
                             x.expression = soValue as? String ?: ""
                         }
+
                         "true_result" -> {
                             x.trueResult = soValue as? Int ?: 0
                         }
+
                         "false_result" -> {
                             x.falseResult = soValue as? Int ?: 0
                         }

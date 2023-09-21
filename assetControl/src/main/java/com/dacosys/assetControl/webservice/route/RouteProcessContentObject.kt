@@ -36,21 +36,27 @@ class RouteProcessContentObject() : Parcelable {
                         "route_process_id" -> {
                             x.routeProcessId = soValue as? Long ?: 0L
                         }
+
                         "data_collection_rule_id" -> {
                             x.dataCollectionRuleId = soValue as? Long ?: 0L
                         }
+
                         "level" -> {
                             x.level = soValue as? Int ?: 0
                         }
+
                         "position" -> {
                             x.position = soValue as? Int ?: 0
                         }
+
                         "route_process_status_id" -> {
                             x.routeProcessStatusId = soValue as? Int ?: 0
                         }
+
                         "data_collection_id" -> {
                             x.dataCollectionId = soValue as? Long ?: 0L
                         }
+
                         "route_process_content_id" -> {
                             x.routeProcessContentId = soValue as? Long ?: 0L
                         }

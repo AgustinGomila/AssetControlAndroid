@@ -1,5 +1,6 @@
 package com.dacosys.assetControl.network.sync
 
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.network.download.DownloadDb
 import com.dacosys.assetControl.utils.preferences.Repository
 import com.dacosys.imageControl.room.database.IcDatabase
@@ -48,7 +49,7 @@ class GetPending(
         if (am.any()) syncElements.addAll(am)
 
         if (Repository.useImageControl) {
-            val pendingImages = IcDatabase.getDatabase().imageDao().getPending()
+            val pendingImages = IcDatabase.getDatabase(context = getContext()).imageDao().getPending()
             if (pendingImages.any()) syncElements.addAll(ArrayList(pendingImages))
         }
 

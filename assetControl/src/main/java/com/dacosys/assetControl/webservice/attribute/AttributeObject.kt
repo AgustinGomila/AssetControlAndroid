@@ -32,15 +32,19 @@ class AttributeObject() : Parcelable {
                         "attribute_id" -> {
                             x.attributeId = soValue as? Long ?: 0L
                         }
+
                         "attribute_type_id" -> {
                             x.attributeTypeId = soValue as? Long ?: 0L
                         }
+
                         "attribute_category_id" -> {
                             x.attributeCategoryId = soValue as? Long ?: 0L
                         }
+
                         "active" -> {
                             x.active = soValue as? Int ?: 0
                         }
+
                         "description" -> {
                             x.description = soValue as? String ?: ""
                         }

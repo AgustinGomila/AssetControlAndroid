@@ -28,9 +28,11 @@ class ResponseObject() : Parcelable {
                         "result_code" -> {
                             x.resultCode = soValue as? Int ?: 0
                         }
+
                         "caption" -> {
                             x.caption = soValue as? String ?: ""
                         }
+
                         "message" -> {
                             x.message = soValue as? String ?: ""
                         }

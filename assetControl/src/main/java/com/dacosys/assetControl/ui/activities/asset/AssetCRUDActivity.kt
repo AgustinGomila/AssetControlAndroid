@@ -33,6 +33,7 @@ import com.dacosys.assetControl.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.ParcelLong
+import com.dacosys.assetControl.utils.preferences.Preferences
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.ScannedCode
@@ -416,8 +417,14 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
         }
     }
 
+    private val showScannedCode: Boolean
+        get() {
+            return prefsGetBoolean(Preference.showScannedCode)
+        }
+
     override fun scannerCompleted(scanCode: String) {
-        JotterListener.pauseReaderDevices(this)
+        if (showScannedCode) makeText(binding.root, scanCode, SnackBarType.INFO)
+        JotterListener.lockScanner(this, true)
 
         try {
             val sc = ScannedCode(this).getFromCode(
@@ -450,7 +457,7 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
             ex.printStackTrace()
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         } finally {
-            JotterListener.resumeReaderDevices(this)
+            JotterListener.lockScanner(this, false)
         }
     }
 
@@ -466,7 +473,7 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
         if (asset != null || (assetCRUDFragment?.getDescription()
                 ?: "").isNotEmpty() || (assetCRUDFragment?.getCode() ?: "").isNotEmpty()
         ) {
-            JotterListener.pauseReaderDevices(this)
+            JotterListener.lockScanner(this, true)
             try {
                 val alert = AlertDialog.Builder(this)
                 alert.setTitle(getString(R.string.cancel_asset_registration_modification))
@@ -486,7 +493,7 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
                 ex.printStackTrace()
                 ErrorLog.writeLog(this, this::class.java.simpleName, ex)
             } finally {
-                JotterListener.resumeReaderDevices(this)
+                JotterListener.lockScanner(this, false)
             }
         } else {
             clearControl()
@@ -500,7 +507,7 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
         if (asset != null || (assetCRUDFragment?.getDescription()
                 ?: "").isNotEmpty() || (assetCRUDFragment?.getCode() ?: "").isNotEmpty()
         ) {
-            JotterListener.pauseReaderDevices(this)
+            JotterListener.lockScanner(this, true)
             try {
                 val alert = AlertDialog.Builder(this)
                 alert.setTitle(getString(R.string.cancel_asset_registration_modification))
@@ -518,7 +525,7 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
                 ex.printStackTrace()
                 ErrorLog.writeLog(this, this::class.java.simpleName, ex)
             } finally {
-                JotterListener.resumeReaderDevices(this)
+                JotterListener.lockScanner(this, false)
             }
         } else {
             asset = tempAsset
@@ -530,7 +537,7 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
         if (asset != null || (assetCRUDFragment?.getDescription()
                 ?: "").isNotEmpty() || (assetCRUDFragment?.getCode() ?: "").isNotEmpty()
         ) {
-            JotterListener.pauseReaderDevices(this)
+            JotterListener.lockScanner(this, true)
             try {
                 val alert = AlertDialog.Builder(this)
                 alert.setTitle(getString(R.string.cancel_asset_registration_modification))
@@ -550,7 +557,7 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
                 ex.printStackTrace()
                 ErrorLog.writeLog(this, this::class.java.simpleName, ex)
             } finally {
-                JotterListener.resumeReaderDevices(this)
+                JotterListener.lockScanner(this, false)
             }
         } else {
             closeKeyboard(this)

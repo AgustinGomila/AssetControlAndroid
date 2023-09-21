@@ -25,7 +25,8 @@
     <queries>
         <intent>
             <action android:name="android.intent.action.SEND"/>
-        </intent>                                        -->
+        </intent>
+        -->
 
         <!-- Camera -->
         <intent>

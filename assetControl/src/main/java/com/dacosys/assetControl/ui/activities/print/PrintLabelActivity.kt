@@ -14,7 +14,6 @@ import com.dacosys.assetControl.utils.Screen.Companion.setupUI
 
 class PrintLabelActivity : AppCompatActivity() {
 
-
     override fun onResume() {
         super.onResume()
 

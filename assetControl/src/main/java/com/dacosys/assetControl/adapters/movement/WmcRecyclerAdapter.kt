@@ -9,10 +9,12 @@ import android.os.Looper
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
-import android.view.View.*
+import android.view.View.OnLongClickListener
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.CheckBox
 import android.widget.CompoundButton.OnCheckedChangeListener
+import android.widget.Filter
+import android.widget.Filterable
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.content.res.ResourcesCompat.getColor
 import androidx.core.content.res.ResourcesCompat.getDrawable
@@ -20,8 +22,10 @@ import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat
 import androidx.core.view.marginBottom
 import androidx.core.view.marginTop
-import androidx.recyclerview.widget.*
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.*
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
@@ -41,12 +45,12 @@ import com.dacosys.assetControl.model.user.permission.PermissionEntry
 import com.dacosys.assetControl.utils.Screen.Companion.getBestContrastColor
 import com.dacosys.assetControl.utils.Screen.Companion.getColorWithAlpha
 import com.dacosys.assetControl.utils.Screen.Companion.manipulateColor
+import com.dacosys.assetControl.utils.Statics.Companion.currentUser
 import com.dacosys.assetControl.utils.preferences.Repository.Companion.useImageControl
-import com.dacosys.imageControl.Statics
-import com.dacosys.imageControl.adapter.ImageAdapter
-import com.dacosys.imageControl.adapter.ImageAdapter.Companion.GetImageStatus
-import com.dacosys.imageControl.adapter.ImageAdapter.Companion.ImageControlHolder
 import com.dacosys.imageControl.network.common.ProgramData
+import com.dacosys.imageControl.ui.adapter.ImageAdapter
+import com.dacosys.imageControl.ui.adapter.ImageAdapter.Companion.GetImageStatus
+import com.dacosys.imageControl.ui.adapter.ImageAdapter.Companion.ImageControlHolder
 import java.util.*
 
 
@@ -465,7 +469,7 @@ class WmcRecyclerAdapter(
                     tableId = Table.asset.tableId,
                     itemId = assetId,
                     description = assetDescription,
-                    obs = "${getContext().getString(R.string.user)}: ${Statics.currentUserName}"
+                    obs = "${getContext().getString(R.string.user)}: ${currentUser()?.name}"
                 )
             }
             true
@@ -533,7 +537,7 @@ class WmcRecyclerAdapter(
 
         Handler(Looper.getMainLooper()).postDelayed({
             adapter.run {
-                ImageAdapter.getImages(programData = ProgramData(
+                ImageAdapter.getImages(context = getContext(), programData = ProgramData(
                     programObjectId = Table.asset.tableId.toLong(), objId1 = assetId.toString()
                 ), onProgress = {
                     when (it.status) {
@@ -712,8 +716,7 @@ class WmcRecyclerAdapter(
             run {
                 // Notificamos al Listener superior
                 dataSetChangedListener?.onDataSetChanged()
-
-                selectItem(position)
+                selectItem(getIndex(content))
             }
         }
     }

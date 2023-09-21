@@ -125,6 +125,7 @@ class WarehouseAdapter(
                             holder.descriptionTextView?.setTextColor(dimgray)
 
                         }
+
                         else -> {
                             v.setBackgroundColor(whitesmoke)
                             holder.descriptionTextView?.setTextColor(black)

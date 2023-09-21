@@ -108,14 +108,17 @@ class HistoricDataFragment : Fragment() {
                             oldDate1 = x.dataCollectionDate
                             oldValue1 = x.valueStr
                         }
+
                         1 -> {
                             oldDate2 = x.dataCollectionDate
                             oldValue2 = x.valueStr
                         }
+
                         2 -> {
                             oldDate3 = x.dataCollectionDate
                             oldValue3 = x.valueStr
                         }
+
                         3 -> {
                             oldDate4 = x.dataCollectionDate
                             oldValue4 = x.valueStr

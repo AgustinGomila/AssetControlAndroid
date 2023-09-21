@@ -7,7 +7,9 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.view.*
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -22,6 +24,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.transition.ChangeBounds
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.adapters.review.AssetReviewAdapter
 import com.dacosys.assetControl.dataBase.location.WarehouseAreaDbHelper
@@ -42,6 +45,7 @@ import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetStringSet
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsPutStringSet
 import com.dacosys.assetControl.utils.scanners.JotterListener
@@ -345,7 +349,7 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
                 return
             }
 
-            JotterListener.pauseReaderDevices(this)
+            JotterListener.lockScanner(this, true)
 
             try {
                 val alert = AlertDialog.Builder(this)
@@ -366,7 +370,7 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
                 ex.printStackTrace()
                 ErrorLog.writeLog(this, this::class.java.simpleName, ex)
             } finally {
-                JotterListener.resumeReaderDevices(this)
+                JotterListener.lockScanner(this, false)
             }
         }
     }
@@ -381,7 +385,7 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
                     objId1 = ar.collectorAssetReviewId.toString()
                 )
 
-                ImageCoroutines().get(programData = programData) {
+                ImageCoroutines().get(context = getContext(), programData = programData) {
                     if (it.isNotEmpty()) {
                         for (t in it) {
                             val file = File(t.filenameOriginal ?: "")
@@ -394,6 +398,7 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
                     // Eliminar las referencias a las imágenes en
                     // la base de datos local de ImageControl
                     ImageCoroutines().delete(
+                        context = getContext(),
                         programObjectId = Table.assetReview.tableId.toLong(),
                         objectId1 = ar.collectorAssetReviewId.toString()
                     )
@@ -744,7 +749,13 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
         )
     }
 
+    private val showScannedCode: Boolean
+        get() {
+            return prefsGetBoolean(Preference.showScannedCode)
+        }
+
     override fun scannerCompleted(scanCode: String) {
+        if (showScannedCode) makeText(binding.root, scanCode, SnackBarType.INFO)
         JotterListener.lockScanner(this, true)
 
         try {
@@ -781,7 +792,6 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
             makeText(binding.root, ex.message.toString(), ERROR)
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         } finally {
-            // Unless is blocked, unlock the partial
             JotterListener.lockScanner(this, false)
             closeKeyboard(this)
         }

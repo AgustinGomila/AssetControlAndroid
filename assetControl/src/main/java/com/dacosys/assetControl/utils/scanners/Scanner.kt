@@ -53,9 +53,11 @@ open class Scanner {
                 Honeywell::class.java -> {
                     r = (scannerDevice as Honeywell).activityName
                 }
+
                 HoneywellNative::class.java -> {
                     r = (scannerDevice as HoneywellNative).activityName
                 }
+
                 Zebra::class.java -> {
                     r = (scannerDevice as Zebra).activityName
                 }
@@ -73,9 +75,11 @@ open class Scanner {
                     Honeywell::class.java -> {
                         (scannerDevice as Honeywell).resume()
                     }
+
                     HoneywellNative::class.java -> {
                         (scannerDevice as HoneywellNative).resume()
                     }
+
                     Zebra::class.java -> {
                         (scannerDevice as Zebra).resume()
                     }
@@ -93,9 +97,11 @@ open class Scanner {
                     Honeywell::class.java -> {
                         (scannerDevice as Honeywell).pause()
                     }
+
                     HoneywellNative::class.java -> {
                         (scannerDevice as HoneywellNative).pause()
                     }
+
                     Zebra::class.java -> {
                         (scannerDevice as Zebra).pause()
                     }
@@ -113,9 +119,11 @@ open class Scanner {
                     Honeywell::class.java -> {
                         //(scannerDevice as Honeywell).destroy()
                     }
+
                     HoneywellNative::class.java -> {
                         (scannerDevice as HoneywellNative).destroy()
                     }
+
                     Zebra::class.java -> {
                         //(scannerDevice as Zebra).destroy()
                     }
@@ -135,9 +143,11 @@ open class Scanner {
                     Honeywell::class.java -> {
                         (scannerDevice as Honeywell).triggerScanner()
                     }
+
                     HoneywellNative::class.java -> {
                         (scannerDevice as HoneywellNative).triggerScanner()
                     }
+
                     Zebra::class.java -> {
                         (scannerDevice as Zebra).triggerScanner()
                     }
@@ -155,9 +165,11 @@ open class Scanner {
                     Honeywell::class.java -> {
                         (scannerDevice as Honeywell).lockScannerEvent = lock
                     }
+
                     HoneywellNative::class.java -> {
                         (scannerDevice as HoneywellNative).lockScannerEvent = lock
                     }
+
                     Zebra::class.java -> {
                         (scannerDevice as Zebra).lockScannerEvent = lock
                     }

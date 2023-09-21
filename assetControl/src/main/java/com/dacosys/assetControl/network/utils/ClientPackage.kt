@@ -245,10 +245,7 @@ class ClientPackage {
                 icPass =
                     if (customOptJsonObj.has("ic_password")) customOptJsonObj.getString("ic_password") else ""
 
-                if (Preferences.prefs == null) {
-                    return
-                }
-                val x = (Preferences.prefs ?: return).edit()
+                val x = Preferences.prefs.edit()
                 if (productId == Statics.APP_VERSION_ID.toString()) {
                     x.putString(Preference.urlPanel.key, appUrl)
                     x.putString(Preference.installationCode.key, installationCode)

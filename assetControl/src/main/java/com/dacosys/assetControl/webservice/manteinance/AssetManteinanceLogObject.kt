@@ -68,24 +68,30 @@ class AssetManteinanceLogObject() : Parcelable {
                             x.asset_manteinance_id =
                                 (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
                         }
+
                         "manteinance_status_id" -> {
                             x.manteinance_status_id =
                                 soValue as? Int ?: (soValue as? Long)?.toInt() ?: 0
                         }
+
                         "description" -> {
                             x.description = soValue as? String ?: ""
                         }
+
                         "log_date" -> {
                             x.log_date = soValue as? String ?: ""
                         }
+
                         "asset_id" -> {
                             x.asset_id =
                                 (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
                         }
+
                         "repairshop_id" -> {
                             x.repairshop_id =
                                 (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
                         }
+
                         "repairman_id" -> {
                             x.repairman_id =
                                 (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L

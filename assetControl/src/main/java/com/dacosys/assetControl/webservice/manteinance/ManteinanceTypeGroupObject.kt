@@ -28,9 +28,11 @@ class ManteinanceTypeGroupObject() : Parcelable {
                         "manteinance_type_group_id" -> {
                             x.manteinanceTypeGroupId = soValue as? Long ?: 0L
                         }
+
                         "active" -> {
                             x.active = soValue as? Int ?: 0
                         }
+
                         "description" -> {
                             x.description = soValue as? String ?: ""
                         }

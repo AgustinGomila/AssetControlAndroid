@@ -7,7 +7,8 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.view.*
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View.GONE
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.menu.MenuBuilder
@@ -37,6 +38,7 @@ import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.ParcelLong
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetLong
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.ScannedCode
@@ -550,7 +552,13 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
         )
     }
 
+    private val showScannedCode: Boolean
+        get() {
+            return prefsGetBoolean(Preference.showScannedCode)
+        }
+
     override fun scannerCompleted(scanCode: String) {
+        if (showScannedCode) makeText(binding.root, scanCode, SnackBarType.INFO)
         JotterListener.lockScanner(this, true)
 
         try {
@@ -587,7 +595,6 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
             makeText(binding.root, ex.message.toString(), SnackBarType.ERROR)
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         } finally {
-            // Unless is blocked, unlock the partial
             JotterListener.lockScanner(this, false)
         }
     }

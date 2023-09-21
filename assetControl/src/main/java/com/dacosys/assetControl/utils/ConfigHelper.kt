@@ -41,17 +41,6 @@ class ConfigHelper {
             mode: QRConfigType,
             onRequestProgress: (ClientPackagesProgress) -> Unit = {},
         ) {
-            if (Preferences.prefs == null) {
-                onRequestProgress.invoke(
-                    ClientPackagesProgress(
-                        status = ProgressStatus.crashed,
-                        msg = AssetControlApp.getContext()
-                            .getString(R.string.configuration_not_loaded)
-                    )
-                )
-                return
-            }
-
             val mainJson = JSONObject(scanCode)
             val mainTag = when {
                 mainJson.has("config") && mode == QRConfigType.QRConfigClientAccount -> "config"
@@ -182,8 +171,8 @@ class ConfigHelper {
                     continue
                 }
 
-                val p = (Preferences.prefs ?: return).edit()
-                val tempPref = (Preferences.prefs ?: return).all[prefName]
+                val p = Preferences.prefs.edit()
+                val tempPref = Preferences.prefs.all[prefName]
                 if (tempPref != null) {
                     try {
                         when (tempPref) {
@@ -230,145 +219,143 @@ class ConfigHelper {
 
         fun setDebugConfigValues() {
             // VALORES POR DEFECTO, SÓLO PARA DEBUG
-            if (Preferences.prefs != null) {
-                if (Statics.isDebuggable() || BuildConfig.DEBUG) {
-                    val x = (Preferences.prefs ?: return).edit()
+            if (Statics.isDebuggable() || BuildConfig.DEBUG) {
+                val x = Preferences.prefs.edit()
 
-                    // region ASSET CONTROL WEBSERVICE
-                    if (Repository.wsUrl.isEmpty()) {
-                        x.putString(
-                            Preference.acWsServer.key, Preference.acWsServer.debugValue as String?
-                        )
-                    }
+                // region ASSET CONTROL WEBSERVICE
+                if (Repository.wsUrl.isEmpty()) {
+                    x.putString(
+                        Preference.acWsServer.key, Preference.acWsServer.debugValue as String?
+                    )
+                }
 
-                    if (Repository.wsNamespace.isEmpty()) {
-                        x.putString(
-                            Preference.acWsNamespace.key,
-                            Preference.acWsNamespace.debugValue as String?
-                        )
-                    }
+                if (Repository.wsNamespace.isEmpty()) {
+                    x.putString(
+                        Preference.acWsNamespace.key,
+                        Preference.acWsNamespace.debugValue as String?
+                    )
+                }
 
-                    if (Preferences.prefsGetString(Preference.acWsUser).isEmpty()) {
-                        x.putString(
-                            Preference.acWsUser.key, Preference.acWsUser.debugValue as String?
-                        )
-                    }
+                if (Preferences.prefsGetString(Preference.acWsUser).isEmpty()) {
+                    x.putString(
+                        Preference.acWsUser.key, Preference.acWsUser.debugValue as String?
+                    )
+                }
 
-                    if (Preferences.prefsGetString(Preference.acWsPass).isEmpty()) {
-                        x.putString(
-                            Preference.acWsPass.key, Preference.acWsPass.debugValue as String?
-                        )
-                    }
+                if (Preferences.prefsGetString(Preference.acWsPass).isEmpty()) {
+                    x.putString(
+                        Preference.acWsPass.key, Preference.acWsPass.debugValue as String?
+                    )
+                }
 
-                    if (Preferences.prefsGetString(Preference.acUser).isEmpty()) {
-                        x.putString(
-                            Preference.acUser.key, Preference.acUser.debugValue as String?
-                        )
-                    }
+                if (Preferences.prefsGetString(Preference.acUser).isEmpty()) {
+                    x.putString(
+                        Preference.acUser.key, Preference.acUser.debugValue as String?
+                    )
+                }
 
-                    if (Preferences.prefsGetString(Preference.acPass).isEmpty()) {
-                        x.putString(
-                            Preference.acPass.key, Preference.acPass.debugValue as String?
-                        )
-                    }
-                    // endregion
+                if (Preferences.prefsGetString(Preference.acPass).isEmpty()) {
+                    x.putString(
+                        Preference.acPass.key, Preference.acPass.debugValue as String?
+                    )
+                }
+                // endregion
 
-                    // region ASSET CONTROL MANTEINANCE WEBSERVICE
-                    if (Repository.wsMantUrl.isEmpty()) {
-                        x.putString(
-                            Preference.acMantWsServer.key,
-                            Preference.acMantWsServer.debugValue as String?
-                        )
-                    }
+                // region ASSET CONTROL MANTEINANCE WEBSERVICE
+                if (Repository.wsMantUrl.isEmpty()) {
+                    x.putString(
+                        Preference.acMantWsServer.key,
+                        Preference.acMantWsServer.debugValue as String?
+                    )
+                }
 
-                    if (Repository.wsMantNamespace.isEmpty()) {
-                        x.putString(
-                            Preference.acMantWsNamespace.key,
-                            Preference.acMantWsNamespace.debugValue as String?
-                        )
-                    }
+                if (Repository.wsMantNamespace.isEmpty()) {
+                    x.putString(
+                        Preference.acMantWsNamespace.key,
+                        Preference.acMantWsNamespace.debugValue as String?
+                    )
+                }
 
-                    if (Preferences.prefsGetString(Preference.acMantWsUser).isEmpty()) {
-                        x.putString(
-                            Preference.acMantWsUser.key,
-                            Preference.acMantWsUser.debugValue as String?
-                        )
-                    }
+                if (Preferences.prefsGetString(Preference.acMantWsUser).isEmpty()) {
+                    x.putString(
+                        Preference.acMantWsUser.key,
+                        Preference.acMantWsUser.debugValue as String?
+                    )
+                }
 
-                    if (Preferences.prefsGetString(Preference.acMantWsPass).isEmpty()) {
-                        x.putString(
-                            Preference.acMantWsPass.key,
-                            Preference.acMantWsPass.debugValue as String?
-                        )
-                    }
+                if (Preferences.prefsGetString(Preference.acMantWsPass).isEmpty()) {
+                    x.putString(
+                        Preference.acMantWsPass.key,
+                        Preference.acMantWsPass.debugValue as String?
+                    )
+                }
 
-                    if (Preferences.prefsGetString(Preference.acMantUser).isEmpty()) {
-                        x.putString(
-                            Preference.acMantUser.key, Preference.acMantUser.debugValue as String?
-                        )
-                    }
+                if (Preferences.prefsGetString(Preference.acMantUser).isEmpty()) {
+                    x.putString(
+                        Preference.acMantUser.key, Preference.acMantUser.debugValue as String?
+                    )
+                }
 
-                    if (Preferences.prefsGetString(Preference.acMantPass).isEmpty()) {
-                        x.putString(
-                            Preference.acMantPass.key, Preference.acMantPass.debugValue as String?
-                        )
-                    }
-                    // endregion
+                if (Preferences.prefsGetString(Preference.acMantPass).isEmpty()) {
+                    x.putString(
+                        Preference.acMantPass.key, Preference.acMantPass.debugValue as String?
+                    )
+                }
+                // endregion
 
-                    // region IMAGE CONTROL WEBSERVICE
-                    if (Repository.wsIcUrl.isEmpty()) {
-                        x.putString(
-                            Preference.icWsServer.key, Preference.icWsServer.debugValue as String?
-                        )
-                    }
+                // region IMAGE CONTROL WEBSERVICE
+                if (Repository.wsIcUrl.isEmpty()) {
+                    x.putString(
+                        Preference.icWsServer.key, Preference.icWsServer.debugValue as String?
+                    )
+                }
 
-                    if (Repository.wsIcNamespace.isEmpty()) {
-                        x.putString(
-                            Preference.icWsNamespace.key,
-                            Preference.icWsNamespace.debugValue as String?
-                        )
-                    }
+                if (Repository.wsIcNamespace.isEmpty()) {
+                    x.putString(
+                        Preference.icWsNamespace.key,
+                        Preference.icWsNamespace.debugValue as String?
+                    )
+                }
 
-                    if (Repository.wsIcUser.isEmpty()) {
-                        x.putString(
-                            Preference.icWsUser.key, Preference.icWsUser.debugValue as String?
-                        )
-                    }
+                if (Repository.wsIcUser.isEmpty()) {
+                    x.putString(
+                        Preference.icWsUser.key, Preference.icWsUser.debugValue as String?
+                    )
+                }
 
-                    if (Repository.wsIcPass.isEmpty()) {
-                        x.putString(
-                            Preference.icWsPass.key, Preference.icWsPass.debugValue as String?
-                        )
-                    }
+                if (Repository.wsIcPass.isEmpty()) {
+                    x.putString(
+                        Preference.icWsPass.key, Preference.icWsPass.debugValue as String?
+                    )
+                }
 
-                    if (Repository.icUser.isEmpty()) {
-                        x.putString(
-                            Preference.icUser.key, Preference.icUser.debugValue as String?
-                        )
-                    }
+                if (Repository.icUser.isEmpty()) {
+                    x.putString(
+                        Preference.icUser.key, Preference.icUser.debugValue as String?
+                    )
+                }
 
-                    if (Repository.icPass.isEmpty()) {
-                        x.putString(
-                            Preference.icPass.key, Preference.icPass.debugValue as String?
-                        )
-                    }
+                if (Repository.icPass.isEmpty()) {
+                    x.putString(
+                        Preference.icPass.key, Preference.icPass.debugValue as String?
+                    )
+                }
 
-                    if (Preferences.prefsGetString(Preference.icUser).isEmpty()) {
-                        x.putString(
-                            Preference.icUser.key, Preference.icUser.debugValue as String?
-                        )
-                    }
+                if (Preferences.prefsGetString(Preference.icUser).isEmpty()) {
+                    x.putString(
+                        Preference.icUser.key, Preference.icUser.debugValue as String?
+                    )
+                }
 
-                    if (Preferences.prefsGetString(Preference.icPass).isEmpty()) {
-                        x.putString(
-                            Preference.icPass.key, Preference.icPass.debugValue as String?
-                        )
-                    }
-                    // endregion
+                if (Preferences.prefsGetString(Preference.icPass).isEmpty()) {
+                    x.putString(
+                        Preference.icPass.key, Preference.icPass.debugValue as String?
+                    )
+                }
+                // endregion
 
-                    run {
-                        x.apply()
-                    }
+                run {
+                    x.apply()
                 }
             }
         }

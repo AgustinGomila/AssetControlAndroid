@@ -44,33 +44,43 @@ class WarehouseMovementObject() : Parcelable {
                         "warehouse_movement_id" -> {
                             x.warehouseMovementId = soValue as? Long ?: 0L
                         }
+
                         "warehouse_movement_date" -> {
                             x.warehouseMovementDate = soValue as? String ?: ""
                         }
+
                         "obs" -> {
                             x.obs = soValue as? String ?: ""
                         }
+
                         "user_id" -> {
                             x.userId = soValue as? Long ?: 0L
                         }
+
                         "origin_warehouse_area_id" -> {
                             x.origWarehouseAreaId = soValue as? Long ?: 0L
                         }
+
                         "origin_warehouse_id" -> {
                             x.origWarehouseId = soValue as? Long ?: 0L
                         }
+
                         "destination_warehouse_area_id" -> {
                             x.destWarehouseAreaId = soValue as? Long ?: 0L
                         }
+
                         "destination_warehouse_id" -> {
                             x.destWarehouseId = soValue as? Long ?: 0L
                         }
+
                         "transfered_date" -> {
                             x.transferedDate = soValue as? String ?: ""
                         }
+
                         "completed" -> {
                             x.completed = soValue as? Int ?: 0
                         }
+
                         "collector_warehouse_movement_id" -> {
                             x.collectorWarehouseMovementId = soValue as? Long ?: 0L
                         }

@@ -633,6 +633,12 @@ class Preference(key: String, defaultValue: Any, debugValue: Any) {
             debugValue = false
         )
 
+        var showScannedCode = Preference(
+            "show_scanned_code",
+            defaultValue = false,
+            debugValue = false
+        )
+
         var selectAssetOnlyActive = Preference(
             "asset_select_only_active",
             defaultValue = true,
@@ -948,7 +954,8 @@ class Preference(key: String, defaultValue: Any, debugValue: Any) {
                 acSyncInterval,
                 acFilterRouteDescription,
                 allowScreenRotation,
-                sendBarcodeCheckDigit
+                sendBarcodeCheckDigit,
+                showScannedCode
             )
 
             return ArrayList(allSections.sortedWith(compareBy { it.key }))

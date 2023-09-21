@@ -18,7 +18,7 @@ import android.text.TextWatcher
 import android.util.Log
 import android.view.*
 import android.view.inputmethod.EditorInfo
-import android.widget.*
+import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
@@ -26,6 +26,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.ViewCompat
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.dataBase.DataBaseHelper
@@ -33,14 +34,19 @@ import com.dacosys.assetControl.dataBase.user.UserDbHelper
 import com.dacosys.assetControl.databinding.LoginActivityBinding
 import com.dacosys.assetControl.model.user.User
 import com.dacosys.assetControl.network.clientPackages.ClientPackagesProgress
-import com.dacosys.assetControl.network.download.*
+import com.dacosys.assetControl.network.download.DownloadDb
+import com.dacosys.assetControl.network.download.DownloadStatus
 import com.dacosys.assetControl.network.download.DownloadStatus.*
+import com.dacosys.assetControl.network.download.DownloadTask
+import com.dacosys.assetControl.network.download.FileType
 import com.dacosys.assetControl.network.sync.Sync
 import com.dacosys.assetControl.network.sync.SyncProgress
 import com.dacosys.assetControl.network.sync.SyncRegistryType
-import com.dacosys.assetControl.network.utils.*
+import com.dacosys.assetControl.network.utils.ClientPackage
 import com.dacosys.assetControl.network.utils.ClientPackage.Companion.selectClientPackage
 import com.dacosys.assetControl.network.utils.Connection.Companion.isOnline
+import com.dacosys.assetControl.network.utils.ProgressStatus
+import com.dacosys.assetControl.network.utils.SetCurrentSession
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarEventData
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
@@ -123,7 +129,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
             // Error de conexión
             makeText(binding.root, msg, SnackBarType.ERROR)
             syncing = false
-            JotterListener.resumeReaderDevices(this)
+            JotterListener.lockScanner(this, false)
             setButton(ButtonStyle.REFRESH)
         }
     }
@@ -277,7 +283,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                 SQLiteDatabase.releaseMemory()
 
                 // Enviar las imágenes pendientes...
-                if (Repository.useImageControl) SendPending()
+                if (Repository.useImageControl) SendPending(context = getContext())
 
                 thread {
                     Sync.goSync(onSyncProgress = { syncViewModel.setSyncDownloadProgress(it) },
@@ -813,7 +819,13 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         )
     }
 
+    private val showScannedCode: Boolean
+        get() {
+            return prefsGetBoolean(Preference.showScannedCode)
+        }
+
     override fun scannerCompleted(scanCode: String) {
+        if (showScannedCode) makeText(binding.root, scanCode, SnackBarType.INFO)
         JotterListener.lockScanner(this, true)
         JotterListener.hideWindow(this)
 
@@ -887,7 +899,6 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
             makeText(binding.root, ex.message.toString(), SnackBarType.ERROR)
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         } finally {
-            // Unless is blocked, unlock the partial
             JotterListener.lockScanner(this, false)
         }
     }

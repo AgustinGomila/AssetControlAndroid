@@ -40,27 +40,35 @@ class AttributeCompositionObject() : Parcelable {
                         "attribute_composition_id" -> {
                             x.attributeCompositionId = soValue as? Long ?: 0L
                         }
+
                         "attribute_id" -> {
                             x.attributeId = soValue as? Long ?: 0L
                         }
+
                         "attribute_composition_type_id" -> {
                             x.attributeCompositionTypeId = soValue as? Long ?: 0L
                         }
+
                         "used" -> {
                             x.used = soValue as? Int ?: 0
                         }
+
                         "read_only" -> {
                             x.readOnly = soValue as? Int ?: 0
                         }
+
                         "description" -> {
                             x.description = soValue as? String ?: ""
                         }
+
                         "composition" -> {
                             x.composition = soValue as? String ?: ""
                         }
+
                         "name" -> {
                             x.name = soValue as? String ?: ""
                         }
+
                         "default_value" -> {
                             x.defaultValue = soValue as? String ?: ""
                         }

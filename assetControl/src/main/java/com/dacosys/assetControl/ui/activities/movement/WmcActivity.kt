@@ -8,12 +8,14 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.text.InputType
 import android.util.Log
 import android.view.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.view.menu.MenuBuilder
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.res.ResourcesCompat
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator
@@ -24,10 +26,12 @@ import androidx.transition.ChangeBounds
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
+import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.adapters.interfaces.Interfaces
 import com.dacosys.assetControl.adapters.movement.WmcRecyclerAdapter
 import com.dacosys.assetControl.dataBase.asset.AssetDbHelper
+import com.dacosys.assetControl.dataBase.location.WarehouseAreaDbHelper
 import com.dacosys.assetControl.dataBase.movement.WarehouseMovementContentDbHelper
 import com.dacosys.assetControl.databinding.ProgressBarDialogBinding
 import com.dacosys.assetControl.databinding.WarehouseMovementContentBottomPanelCollapsedBinding
@@ -53,6 +57,7 @@ import com.dacosys.assetControl.ui.fragments.movement.LocationHeaderFragment
 import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
 import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Screen.Companion.setupUI
+import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.ParcelLong
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
@@ -74,7 +79,10 @@ import com.dacosys.imageControl.network.webService.WsFunction
 import com.dacosys.imageControl.room.dao.ImageCoroutines
 import com.dacosys.imageControl.ui.activities.ImageControlCameraActivity
 import com.dacosys.imageControl.ui.activities.ImageControlGridActivity
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import org.parceler.Parcels
+import java.util.*
 import kotlin.concurrent.thread
 
 class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
@@ -118,7 +126,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
     private var _fillAdapter = false
 
     private var adapter: WmcRecyclerAdapter? = null
-    private var checkedIdArray: java.util.ArrayList<Long> = java.util.ArrayList()
+    private var checkedIdArray: ArrayList<Long> = ArrayList()
     private var lastSelected: WarehouseMovementContent? = null
     private var currentScrollPosition: Int = 0
     private var firstVisiblePos: Int? = null
@@ -154,7 +162,6 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
         set(value) {
             prefsPutBoolean(Preference.reviewContentShowCheckBoxes.key, value)
         }
-
 
     override fun onSaveInstanceState(savedInstanceState: Bundle) {
         super.onSaveInstanceState(savedInstanceState)
@@ -476,7 +483,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
                 }
 
                 // Estas variables locales evitar posteriores cambios de estado.
-                val ls = lastSelected
+                val ls = lastSelected ?: contents.firstOrNull()
                 val cs = currentScrollPosition
                 Handler(Looper.getMainLooper()).postDelayed({
                     adapter?.selectItem(ls, false)
@@ -525,7 +532,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
             setResult(RESULT_CANCELED)
             finish()
         } else {
-            JotterListener.pauseReaderDevices(this)
+            JotterListener.lockScanner(this, true)
             try {
                 val alert = AlertDialog.Builder(this)
                 alert.setTitle(getContext().getString(R.string.cancel_movement))
@@ -544,7 +551,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
                 ex.printStackTrace()
                 ErrorLog.writeLog(this, this::class.java.simpleName, ex)
             } finally {
-                JotterListener.resumeReaderDevices(this)
+                JotterListener.lockScanner(this, false)
                 allowClicks = true
             }
         }
@@ -573,7 +580,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
     private fun removeAsset() {
         val content = adapter?.currentItem()
         if (content != null) {
-            JotterListener.pauseReaderDevices(this)
+            JotterListener.lockScanner(this, true)
 
             try {
                 val adb = AlertDialog.Builder(this)
@@ -593,7 +600,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
                 ex.printStackTrace()
                 ErrorLog.writeLog(this, this::class.java.simpleName, ex)
             } finally {
-                JotterListener.resumeReaderDevices(this)
+                JotterListener.lockScanner(this, false)
             }
         } else allowClicks = true
     }
@@ -618,7 +625,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
                     val idParcel = data.getParcelableArrayListExtra<ParcelLong>("ids")
                         ?: return@registerForActivityResult
 
-                    val ids: java.util.ArrayList<Long?> = java.util.ArrayList()
+                    val ids: ArrayList<Long?> = ArrayList()
                     for (i in idParcel) {
                         ids.add(i.value)
                     }
@@ -743,7 +750,6 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
             makeText(binding.root, ex.message.toString(), SnackBarType.ERROR)
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         } finally {
-            // Unless is blocked, unlock the partial
             JotterListener.lockScanner(this, false)
         }
     }
@@ -768,7 +774,13 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
         cancelWarehouseMovement()
     }
 
+    private val showScannedCode: Boolean
+        get() {
+            return prefsGetBoolean(Preference.showScannedCode)
+        }
+
     override fun scannerCompleted(scanCode: String) {
+        if (showScannedCode) makeText(binding.root, scanCode, SnackBarType.INFO)
         scannerHandleScanCompleted(arrayListOf(scanCode), false)
     }
 
@@ -793,15 +805,18 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
                     validateId = true
                 )
 
-                if (sc.warehouseArea != null) {
-                    val wa = headerFragment?.warehouseArea ?: break
-                    if (wa != sc.warehouseArea) {
+                val scWa = sc.warehouseArea
+                if (scWa != null) {
+                    val wa = headerFragment?.warehouseArea
+                    if (wa != scWa) {
                         makeText(
                             binding.root,
                             getContext().getString(R.string.destination_changed),
                             SnackBarType.INFO
                         )
-                        headerFragment?.fill(wa)
+                        runOnUiThread {
+                            headerFragment?.fill(scWa)
+                        }
                     }
                     break
                 }
@@ -909,6 +924,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
         JotterListener.lockScanner(this, false)
     }
 
+    @SuppressLint("RestrictedApi")
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_read_activity, menu)
@@ -917,8 +933,26 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
             menu.removeItem(menu.findItem(R.id.action_rfid_connect).itemId)
         }
 
+        if (BuildConfig.DEBUG || Statics.demoMode) {
+            menu.add(Menu.NONE, menuItemManualCode, Menu.NONE, "Manual code")
+            menu.add(Menu.NONE, menuItemRandomCode, Menu.NONE, "Random asset code")
+            menu.add(Menu.NONE, menuItemRandomOnListL, Menu.NONE, "Random asset on list")
+            menu.add(Menu.NONE, menuItemRandomWa, Menu.NONE, "Random área")
+            menu.add(Menu.NONE, menuItemRandomSerial, Menu.NONE, "Random asset serial")
+        }
+
+        if (menu is MenuBuilder) {
+            menu.setOptionalIconsVisible(true)
+        }
+
         return true
     }
+
+    private val menuItemRandomCode = 999001
+    private val menuItemManualCode = 999002
+    private val menuItemRandomOnListL = 999003
+    private val menuItemRandomWa = 999004
+    private val menuItemRandomSerial = 999005
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         // Handle action bar item clicks here. The action bar will
@@ -946,9 +980,87 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
                 return super.onOptionsItemSelected(item)
             }
 
+            menuItemRandomOnListL -> {
+                val codes: ArrayList<String> = ArrayList()
+
+                (adapter?.fullList ?: ArrayList<WarehouseMovementContent>()
+                    .filter { it.code.isNotEmpty() })
+                    .mapTo(codes) { it.code }
+
+                if (codes.any()) scannerCompleted(codes[Random().nextInt(codes.count())])
+                return super.onOptionsItemSelected(item)
+            }
+
+            menuItemRandomCode -> {
+                val allCodes = AssetDbHelper().selectAllCodes()
+                if (allCodes.any()) scannerCompleted(allCodes[Random().nextInt(allCodes.count())])
+                return super.onOptionsItemSelected(item)
+            }
+
+            menuItemManualCode -> {
+                enterCode()
+                return super.onOptionsItemSelected(item)
+            }
+
+            menuItemRandomWa -> {
+                val allWa = WarehouseAreaDbHelper().select(true)
+                val waId = allWa[Random().nextInt(allWa.count())].warehouseAreaId
+                if (allWa.any()) scannerCompleted("#WA#${String.format("%05d", waId)}#")
+                return super.onOptionsItemSelected(item)
+            }
+
+            menuItemRandomSerial -> {
+                val allSerials = AssetDbHelper().selectAllSerials()
+                if (allSerials.any()) scannerCompleted(allSerials[Random().nextInt(allSerials.count())])
+                return super.onOptionsItemSelected(item)
+            }
+
             else -> {
                 return super.onOptionsItemSelected(item)
             }
+        }
+    }
+
+    private fun enterCode() {
+        runOnUiThread {
+            var alertDialog: AlertDialog? = null
+            val builder = AlertDialog.Builder(this)
+            builder.setTitle(getString(R.string.enter_code))
+
+            val inputLayout = TextInputLayout(this)
+            inputLayout.endIconMode = TextInputLayout.END_ICON_CLEAR_TEXT
+
+            val input = TextInputEditText(this)
+            input.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS
+            input.isFocusable = true
+            input.isFocusableInTouchMode = true
+            input.setOnKeyListener { _, keyCode, event ->
+                if (event.action == KeyEvent.ACTION_DOWN) {
+                    when (keyCode) {
+                        KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER -> {
+                            if (alertDialog != null) {
+                                alertDialog!!.getButton(DialogInterface.BUTTON_POSITIVE)
+                                    .performClick()
+                            }
+                        }
+                    }
+                }
+                false
+            }
+
+            inputLayout.addView(input)
+            builder.setView(inputLayout)
+            builder.setPositiveButton(R.string.accept) { _, _ ->
+                scannerCompleted(input.text.toString())
+            }
+            builder.setNegativeButton(R.string.cancel, null)
+            alertDialog = builder.create()
+
+            alertDialog.window?.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
+            alertDialog.window?.clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
+            alertDialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
+            alertDialog.show()
+            input.requestFocus()
         }
     }
 
@@ -1169,7 +1281,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
             objId1 = tempObjectId
         )
 
-        ImageCoroutines().get(programData = programData) {
+        ImageCoroutines().get(context = getContext(), programData = programData) {
             val allLocal = toDocumentContentList(it, programData)
             if (allLocal.isEmpty()) {
                 getFromWebservice()
@@ -1192,7 +1304,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
         }
     }
 
-    private fun showPhotoAlbum(images: java.util.ArrayList<DocumentContent> = java.util.ArrayList()) {
+    private fun showPhotoAlbum(images: ArrayList<DocumentContent> = ArrayList()) {
         val intent = Intent(this, ImageControlGridActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
         intent.putExtra(ImageControlGridActivity.ARG_PROGRAM_OBJECT_ID, tempTableId.toLong())

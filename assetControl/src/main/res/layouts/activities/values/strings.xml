@@ -779,6 +779,8 @@
     <string name="change_the_screen_orientation_when_rotating_the_device">Cambia la orientación de la pantalla al rotar
         el dispositivo
     </string>
+    <string name="show_scanned_code">Mostrar código escaneado</string>
+    <string name="show_scanned_code_in_screen">Mostrar en pantalla el código escaneado</string>
     <string name="program_options">Opciones del programa</string>
     <string name="success_response">Respuesta correcta</string>
     <string name="client_has_no_software_packages">El cliente no tiene paquetes de software</string>
@@ -1114,4 +1116,5 @@
     <string name="generating_qr_">Generando QR…</string>
     <string name="please_wait">Por favor espere…</string>
     <string name="obtaining_client_packages_">Obteniendo paquetes del cliente…</string>
+    <string name="enter_code">Ingrese un código</string>
 </resources>

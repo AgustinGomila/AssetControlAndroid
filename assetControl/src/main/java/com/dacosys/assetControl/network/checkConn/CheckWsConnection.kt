@@ -57,9 +57,11 @@ class CheckWsConnection(
                 ProgressStatus.crashed -> {
                     onSnackBarEvent.invoke(SnackBarEventData(it.msg, SnackBarType.ERROR))
                 }
+
                 ProgressStatus.canceled -> {
                     onSnackBarEvent.invoke(SnackBarEventData(it.msg, SnackBarType.INFO))
                 }
+
                 ProgressStatus.finished -> {
                     onSnackBarEvent.invoke(
                         SnackBarEventData(

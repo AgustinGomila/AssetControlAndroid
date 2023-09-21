@@ -104,7 +104,7 @@ class ScannedCode {
                     labelNumber = match.toInt()
                     currentCode = searchString(currentCode, formula, 1)
                 } catch (ex: Exception) {
-                    // labelnumber is not ok so we set it to null
+                    // labelNumber is not ok, so we set it to null
                     labelNumber = null
                     currentCode = code
                 }

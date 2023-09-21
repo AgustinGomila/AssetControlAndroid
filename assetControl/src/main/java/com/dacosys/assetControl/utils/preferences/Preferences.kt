@@ -1,8 +1,6 @@
 package com.dacosys.assetControl.utils.preferences
 
 import android.content.SharedPreferences
-import androidx.preference.PreferenceManager
-import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.network.sync.SyncRegistryType
 import com.dacosys.assetControl.utils.settings.Preference
 import com.dacosys.assetControl.utils.settings.entries.ConfEntry
@@ -10,15 +8,7 @@ import com.dacosys.assetControl.utils.settings.entries.ConfEntry
 class Preferences {
     companion object {
 
-        var prefs: SharedPreferences? = null
-
-        fun startPrefs() {
-            prefs = PreferenceManager.getDefaultSharedPreferences(AssetControlApp.getContext())
-        }
-
-        fun prefsIsInitialized(): Boolean {
-            return prefs != null
-        }
+        lateinit var prefs: SharedPreferences
 
         fun resetLastUpdateDates(): Boolean {
             try {
@@ -33,12 +23,8 @@ class Preferences {
         }
 
         fun cleanPrefs(): Boolean {
-            if (prefs == null) {
-                return false
-            }
-
             return try {
-                prefs!!.edit().clear().apply()
+                prefs.edit().clear().apply()
                 true
             } catch (ex: java.lang.Exception) {
                 ex.printStackTrace()
@@ -47,20 +33,12 @@ class Preferences {
         }
 
         fun prefsGetByKey(key: String): Any? {
-            if (prefs == null) {
-                return null
-            }
-
-            return prefs!!.all[key]
+            return prefs.all[key]
         }
 
         fun prefsCleanKey(key: String): Boolean {
-            if (prefs == null) {
-                return false
-            }
-
             return try {
-                with(prefs!!.edit()) {
+                with(prefs.edit()) {
                     remove(key).apply()
                 }
                 true
@@ -71,12 +49,8 @@ class Preferences {
         }
 
         fun prefsPutLong(key: String, value: Long): Boolean {
-            if (prefs == null) {
-                return false
-            }
-
             return try {
-                with(prefs!!.edit()) {
+                with(prefs.edit()) {
                     putLong(key, value).apply()
                 }
                 true
@@ -87,12 +61,8 @@ class Preferences {
         }
 
         fun prefsPutInt(key: String, value: Int): Boolean {
-            if (prefs == null) {
-                return false
-            }
-
             return try {
-                with(prefs!!.edit()) {
+                with(prefs.edit()) {
                     putInt(key, value).apply()
                 }
                 true
@@ -103,12 +73,8 @@ class Preferences {
         }
 
         fun prefsPutBoolean(key: String, value: Boolean): Boolean {
-            if (prefs == null) {
-                return false
-            }
-
             return try {
-                with(prefs!!.edit()) {
+                with(prefs.edit()) {
                     putBoolean(key, value).apply()
                 }
                 true
@@ -119,12 +85,8 @@ class Preferences {
         }
 
         fun prefsPutString(key: String, value: String): Boolean {
-            if (prefs == null) {
-                return false
-            }
-
             return try {
-                with(prefs!!.edit()) {
+                with(prefs.edit()) {
                     putString(key, value).apply()
                 }
                 true
@@ -135,12 +97,8 @@ class Preferences {
         }
 
         fun prefsPutString(key: ArrayList<String>, value: String): Boolean {
-            if (prefs == null) {
-                return false
-            }
-
             return try {
-                with(prefs!!.edit()) {
+                with(prefs.edit()) {
                     for (k in key) {
                         putString(k, value).apply()
                     }
@@ -153,12 +111,8 @@ class Preferences {
         }
 
         fun prefsPutStringSet(key: String, value: Set<String>): Boolean {
-            if (prefs == null) {
-                return false
-            }
-
             return try {
-                with(prefs!!.edit()) {
+                with(prefs.edit()) {
                     putStringSet(key, value).apply()
                 }
                 true
@@ -169,12 +123,8 @@ class Preferences {
         }
 
         fun prefsGetStringSet(key: String, value: ArrayList<String>): Set<String>? {
-            if (prefs == null) {
-                return value.toSet()
-            }
-
             return try {
-                prefs!!.getStringSet(key, value.toSet())
+                prefs.getStringSet(key, value.toSet())
             } catch (ex: java.lang.Exception) {
                 value.toSet()
             }
@@ -189,10 +139,6 @@ class Preferences {
         }
 
         private fun prefsGetString(key: String, defValue: String): String {
-            if (prefs == null) {
-                return defValue
-            }
-
             return try {
                 return when (val pref = prefsGetByKey(key)) {
                     is String -> pref
@@ -212,10 +158,6 @@ class Preferences {
         }
 
         private fun prefsGetInt(key: String, defValue: Int): Int {
-            if (prefs == null) {
-                return defValue
-            }
-
             return try {
                 when (val pref = prefsGetByKey(key)) {
                     is Int -> pref
@@ -233,10 +175,6 @@ class Preferences {
         }
 
         private fun prefsGetLong(key: String, defValue: Long): Long {
-            if (prefs == null) {
-                return defValue
-            }
-
             return try {
                 when (val pref = prefsGetByKey(key)) {
                     is Long -> pref
@@ -254,10 +192,6 @@ class Preferences {
         }
 
         private fun prefsGetFloat(key: String, defValue: Float): Float {
-            if (prefs == null) {
-                return defValue
-            }
-
             return try {
                 when (val pref = prefsGetByKey(key)) {
                     is Float -> pref
@@ -278,10 +212,6 @@ class Preferences {
         }
 
         private fun prefsGetBoolean(key: String, defValue: Boolean): Boolean {
-            if (prefs == null) {
-                return defValue
-            }
-
             return try {
                 when (val pref = prefsGetByKey(key)) {
                     is Boolean -> pref

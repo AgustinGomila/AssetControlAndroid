@@ -16,7 +16,6 @@ import com.dacosys.assetControl.utils.Screen.Companion.setupUI
 
 class CRUDActivity : AppCompatActivity() {
 
-
     override fun onResume() {
         super.onResume()
 
@@ -92,6 +91,7 @@ class CRUDActivity : AppCompatActivity() {
                 onBackPressed()
                 true
             }
+
             else -> {
                 super.onOptionsItemSelected(item)
             }

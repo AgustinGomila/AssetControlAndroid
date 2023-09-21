@@ -164,6 +164,7 @@ class ItemCategoryAdapter(
                             holder.descriptionTextView?.setTextColor(dimgray)
                             holder.parentCategoryTextView?.setTextColor(dimgray)
                         }
+
                         else -> {
                             v.setBackgroundColor(whitesmoke)
                             holder.descriptionTextView?.setTextColor(black)

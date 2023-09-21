@@ -35,19 +35,24 @@ class UserWarehouseAreaObject() : Parcelable {
                             x.warehouse_area_id =
                                 (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
                         }
+
                         "user_id" -> {
                             x.user_id =
                                 (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
                         }
+
                         "see" -> {
                             x.see = soValue as? Int ?: 0
                         }
+
                         "move" -> {
                             x.move = soValue as? Int ?: 0
                         }
+
                         "check" -> {
                             x.check = soValue as? Int ?: 0
                         }
+
                         "count" -> {
                             x.count = soValue as? Int ?: 0
                         }

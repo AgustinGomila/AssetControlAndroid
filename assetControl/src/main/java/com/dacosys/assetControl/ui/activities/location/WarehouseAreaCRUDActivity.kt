@@ -3,7 +3,9 @@ package com.dacosys.assetControl.ui.activities.location
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import android.view.*
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -350,23 +352,39 @@ class WarehouseAreaCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
         }
     }
 
-    override fun scannerCompleted(scanCode: String) {
-        val sc = ScannedCode(this).getFromCode(
-            code = scanCode,
-            searchWarehouseAreaId = true,
-            searchAssetCode = false,
-            searchAssetSerial = false,
-            validateId = true
-        )
+    private val showScannedCode: Boolean
+        get() {
+            return prefsGetBoolean(Preference.showScannedCode)
+        }
 
-        if (sc.codeFound && sc.warehouseArea != null) {
-            // No hay ningún área cargada
-            if (warehouseArea == null) {
-                warehouseArea = sc.warehouseArea
-                fillControls()
-            } else {
-                changeWarehouseArea(sc.warehouseArea ?: return)
+    override fun scannerCompleted(scanCode: String) {
+        if (showScannedCode) makeText(binding.root, scanCode, SnackBarType.INFO)
+        JotterListener.lockScanner(this, true)
+
+        try {
+            val sc = ScannedCode(this).getFromCode(
+                code = scanCode,
+                searchWarehouseAreaId = true,
+                searchAssetCode = false,
+                searchAssetSerial = false,
+                validateId = true
+            )
+
+            if (sc.codeFound && sc.warehouseArea != null) {
+                // No hay ningún área cargada
+                if (warehouseArea == null) {
+                    warehouseArea = sc.warehouseArea
+                    fillControls()
+                } else {
+                    changeWarehouseArea(sc.warehouseArea ?: return)
+                }
             }
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+            makeText(binding.root, ex.message.toString(), SnackBarType.ERROR)
+            ErrorLog.writeLog(this, this::class.java.simpleName, ex)
+        } finally {
+            JotterListener.lockScanner(this, false)
         }
     }
 

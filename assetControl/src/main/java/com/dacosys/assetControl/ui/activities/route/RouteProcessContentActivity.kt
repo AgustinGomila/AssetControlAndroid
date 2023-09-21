@@ -43,12 +43,15 @@ import com.dacosys.assetControl.model.common.SaveProgress
 import com.dacosys.assetControl.model.dataCollection.DataCollection
 import com.dacosys.assetControl.model.dataCollection.DcrResult
 import com.dacosys.assetControl.model.route.*
-import com.dacosys.assetControl.model.route.common.*
+import com.dacosys.assetControl.model.route.common.ExprResultIntString
+import com.dacosys.assetControl.model.route.common.Parameter
+import com.dacosys.assetControl.model.route.common.SaveRouteProcess
+import com.dacosys.assetControl.model.route.common.SkipAll
 import com.dacosys.assetControl.model.user.User
 import com.dacosys.assetControl.model.user.permission.PermissionEntry
 import com.dacosys.assetControl.network.sync.SyncProgress
 import com.dacosys.assetControl.network.sync.SyncRegistryType
-import com.dacosys.assetControl.network.utils.*
+import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.ui.activities.asset.AssetDetailActivity
 import com.dacosys.assetControl.ui.activities.location.WarehouseAreaDetailActivity
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
@@ -57,12 +60,14 @@ import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
 import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.ScannedCode
 import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.utils.scanners.nfc.Nfc
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid.Companion.isRfidRequired
+import com.dacosys.assetControl.utils.settings.Preference
 import com.dacosys.assetControl.viewModel.route.*
 import com.dacosys.assetControl.viewModel.sync.SyncViewModel
 import com.udojava.evalex.Expression
@@ -955,7 +960,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
     private fun skipAll() {
         if ((rpContAdapter?.count ?: 0) > 0) {
-            JotterListener.pauseReaderDevices(this)
+            JotterListener.lockScanner(this, true)
             try {
                 val alert = AlertDialog.Builder(this)
                 alert.setTitle(getContext().getString(R.string.skip_remaining))
@@ -971,7 +976,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
                 ex.printStackTrace()
                 ErrorLog.writeLog(this, this::class.java.simpleName, ex)
             } finally {
-                JotterListener.resumeReaderDevices(this)
+                JotterListener.lockScanner(this, false)
             }
         }
     }
@@ -1029,7 +1034,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
                         SnackBarType.INFO
                     )
                 } else {
-                    JotterListener.pauseReaderDevices(this)
+                    JotterListener.lockScanner(this, true)
                     try {
                         val alert = AlertDialog.Builder(this)
                         alert.setTitle(getContext().getString(R.string.enter_record_again))
@@ -1044,7 +1049,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
                         ex.printStackTrace()
                         ErrorLog.writeLog(this, this::class.java.simpleName, ex)
                     } finally {
-                        JotterListener.resumeReaderDevices(this)
+                        JotterListener.lockScanner(this, false)
                     }
                 }
             }
@@ -1156,7 +1161,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         // El nivel está completo
         if (isRouteFinished()) {
             if (askConfirm) {
-                JotterListener.pauseReaderDevices(this)
+                JotterListener.lockScanner(this, true)
                 try {
                     val alert = AlertDialog.Builder(this)
                     alert.setTitle(getContext().getString(R.string.finished_route))
@@ -1171,7 +1176,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
                     ex.printStackTrace()
                     ErrorLog.writeLog(this, this::class.java.simpleName, ex)
                 } finally {
-                    JotterListener.resumeReaderDevices(this)
+                    JotterListener.lockScanner(this, false)
                 }
             } else {
                 saveRouteProcess()
@@ -1663,7 +1668,6 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
             return
         } finally {
-            // Unless is blocked, unlock the partial
             JotterListener.lockScanner(this, false)
         }
     }
@@ -1706,7 +1710,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
     }
 
     override fun onBackPressed() {
-        JotterListener.pauseReaderDevices(this)
+        JotterListener.lockScanner(this, true)
         try {
             val alert = AlertDialog.Builder(this)
             alert.setTitle(getContext().getString(R.string.suspend_the_data_collection))
@@ -1723,12 +1727,18 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             ex.printStackTrace()
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         } finally {
-            JotterListener.resumeReaderDevices(this)
+            JotterListener.lockScanner(this, false)
             allowClicks = true
         }
     }
 
+    private val showScannedCode: Boolean
+        get() {
+            return prefsGetBoolean(Preference.showScannedCode)
+        }
+
     override fun scannerCompleted(scanCode: String) {
+        if (showScannedCode) makeText(binding.root, scanCode, SnackBarType.INFO)
         scannerHandleScanCompleted(scanCode)
     }
 

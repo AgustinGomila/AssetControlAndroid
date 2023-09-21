@@ -457,7 +457,7 @@ class ArcConfirmActivity : AppCompatActivity(),
                 }
 
                 // Estas variables locales evitar posteriores cambios de estado.
-                val ls = lastSelected
+                val ls = lastSelected ?: contents.firstOrNull()
                 val cs = currentScrollPosition
                 Handler(Looper.getMainLooper()).postDelayed({
                     adapter?.selectItem(ls, false)
@@ -515,8 +515,7 @@ class ArcConfirmActivity : AppCompatActivity(),
                 binding.root, getString(R.string.mandatory_sign), SnackBarType.ERROR
             )
         } else {
-            ///////////////////////////////////////////
-            ////////////// IMAGE CONTROL //////////////
+            /////////////// ImageControl //////////////
             imageControlFragment?.saveImages(false)
             ///////////////////////////////////////////
 
@@ -534,8 +533,7 @@ class ArcConfirmActivity : AppCompatActivity(),
     private fun modifyCount() {
         closeKeyboard(this)
 
-        ///////////////////////////////////////////
-        ////////////// IMAGE CONTROL //////////////
+        /////////////// ImageControl //////////////
         imageControlFragment?.saveImages(false)
         ///////////////////////////////////////////
 

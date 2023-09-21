@@ -436,7 +436,7 @@ class WmcConfirmActivity : AppCompatActivity(),
                 }
 
                 // Estas variables locales evitar posteriores cambios de estado.
-                val ls = lastSelected
+                val ls = lastSelected ?: contents.firstOrNull()
                 val cs = currentScrollPosition
                 Handler(Looper.getMainLooper()).postDelayed({
                     adapter?.selectItem(ls, false)
@@ -495,8 +495,7 @@ class WmcConfirmActivity : AppCompatActivity(),
         } else {
             closeKeyboard(this)
 
-            ///////////////////////////////////////////
-            ////////////// IMAGE CONTROL //////////////
+            /////////////// ImageControl //////////////
             imageControlFragment?.saveImages(false)
             ///////////////////////////////////////////
 
@@ -511,8 +510,7 @@ class WmcConfirmActivity : AppCompatActivity(),
     private fun modifyMovement() {
         closeKeyboard(this)
 
-        ///////////////////////////////////////////
-        ////////////// IMAGE CONTROL //////////////
+        /////////////// ImageControl //////////////
         imageControlFragment?.saveImages(false)
         ///////////////////////////////////////////
 

@@ -46,36 +46,47 @@ class DataCollectionRuleContentObject() : Parcelable {
                         "data_collection_rule_content_id" -> {
                             x.dataCollectionRuleContentId = soValue as? Long ?: 0L
                         }
+
                         "data_collection_rule_id" -> {
                             x.dataCollectionRuleId = soValue as? Long ?: 0L
                         }
+
                         "level" -> {
                             x.level = soValue as? Int ?: 0
                         }
+
                         "position" -> {
                             x.position = soValue as? Int ?: 0
                         }
+
                         "attribute_id" -> {
                             x.attributeId = soValue as? Long ?: 0L
                         }
+
                         "attribute_composition_id" -> {
                             x.attributeCompositionId = soValue as? Long ?: 0L
                         }
+
                         "expression" -> {
                             x.expression = soValue as? String ?: ""
                         }
+
                         "true_result" -> {
                             x.trueResult = soValue as? Int ?: 0
                         }
+
                         "false_result" -> {
                             x.falseResult = soValue as? Int ?: 0
                         }
+
                         "description" -> {
                             x.description = soValue as? String ?: ""
                         }
+
                         "active" -> {
                             x.active = soValue as? Int ?: 0
                         }
+
                         "mandatory" -> {
                             x.mandatory = soValue as? Int ?: 0
                         }

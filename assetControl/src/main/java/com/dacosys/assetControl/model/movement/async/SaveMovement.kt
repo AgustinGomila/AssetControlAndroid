@@ -102,6 +102,7 @@ class SaveMovement {
                             getContext().getString(R.string.processing_asset_to_move)
                         } ${wmCont.code}"
                     }
+
                     wmCont.contentStatusId == WarehouseMovementContentStatus.noNeedToMove.id && wmCont.assetStatusId == AssetStatus.missing.id -> {
                         assetFoundedList.add(wmCont)
                         msg = "${
@@ -224,7 +225,7 @@ class SaveMovement {
 
                     if (collectorMovementId != null) {
                         // ACTUALIZAR EL ID DEL MOVIMIENTO EN LA BASE DE IMAGECONTROL
-                        IcDatabase.getDatabase().imageDao().updateImage(
+                        IcDatabase.getDatabase(context = getContext()).imageDao().updateImage(
                             programObjectId = Table.warehouseMovement.tableId.toLong(),
                             newObjectId1 = collectorMovementId.toString(),
                             oldObjectId1 = "0"

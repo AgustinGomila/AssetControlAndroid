@@ -20,9 +20,11 @@ class Collector {
                             val id: Int = if (pref.isEmpty()) 0 else pref.toInt()
                             CollectorType.getById(id)
                         }
+
                         is Int, is Long -> {
                             CollectorType.getById(pref as Int)
                         }
+
                         else -> {
                             CollectorType.none
                         }

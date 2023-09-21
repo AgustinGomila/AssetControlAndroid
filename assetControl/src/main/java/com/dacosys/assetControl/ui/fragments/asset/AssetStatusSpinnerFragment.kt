@@ -37,6 +37,7 @@ class AssetStatusSpinnerFragment : Fragment() {
                         else -> r
                     }
                 }
+
                 else -> null
             }
         }

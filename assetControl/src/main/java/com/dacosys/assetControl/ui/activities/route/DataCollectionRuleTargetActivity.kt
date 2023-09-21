@@ -15,7 +15,6 @@ import com.dacosys.assetControl.model.asset.Asset
 import com.dacosys.assetControl.model.category.ItemCategory
 import com.dacosys.assetControl.model.dataCollection.DataCollectionRule
 import com.dacosys.assetControl.model.location.WarehouseArea
-import com.dacosys.assetControl.network.utils.*
 import com.dacosys.assetControl.ui.activities.asset.AssetPrintLabelActivity
 import com.dacosys.assetControl.ui.activities.location.LocationSelectActivity
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
@@ -184,6 +183,7 @@ class DataCollectionRuleTargetActivity : AppCompatActivity() {
                                 "warehouseArea",
                                 Parcels.wrap(warehouseArea)
                             )
+
                             itemCategory != null -> intent.putExtra(
                                 "itemCategory",
                                 Parcels.wrap(itemCategory)
@@ -233,6 +233,7 @@ class DataCollectionRuleTargetActivity : AppCompatActivity() {
                 onBackPressed()
                 true
             }
+
             else -> {
                 super.onOptionsItemSelected(item)
             }

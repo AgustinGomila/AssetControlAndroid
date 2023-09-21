@@ -32,15 +32,19 @@ class DataCollectionRuleTargetObject() : Parcelable {
                         "data_collection_rule_id" -> {
                             x.dataCollectionRuleId = soValue as? Long ?: 0L
                         }
+
                         "asset_id" -> {
                             x.assetId = soValue as? Long ?: 0L
                         }
+
                         "warehouse_id" -> {
                             x.warehouseId = soValue as? Long ?: 0L
                         }
+
                         "warehouse_area_id" -> {
                             x.warehouseAreaId = soValue as? Long ?: 0L
                         }
+
                         "item_category_id" -> {
                             x.itemCategoryId = soValue as? Long ?: 0L
                         }

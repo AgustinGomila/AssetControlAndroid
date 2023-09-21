@@ -30,6 +30,7 @@ import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
 import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Screen.Companion.showKeyboard
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetStringSet
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.Scanner
@@ -296,19 +297,14 @@ class CodeSelectDialogActivity : AppCompatActivity(),
             JotterListener.onRequestPermissionsResult(this, requestCode, permissions, grantResults)
     }
 
-    override fun scannerCompleted(scanCode: String) {
-        JotterListener.lockScanner(this, true)
-
-        try {
-            //makeText(getString(R.string.ok), SnackbarType.SUCCESS)
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-            makeText(binding.root, ex.message.toString(), SnackBarType.ERROR)
-            ErrorLog.writeLog(this, this::class.java.simpleName, ex)
-        } finally {
-            // Unless is blocked, unlock the partial
-            JotterListener.lockScanner(this, false)
+    private val showScannedCode: Boolean
+        get() {
+            return prefsGetBoolean(Preference.showScannedCode)
         }
+
+    override fun scannerCompleted(scanCode: String) {
+        if (showScannedCode) makeText(binding.root, scanCode, SnackBarType.INFO)
+        JotterListener.lockScanner(this, false)
     }
 
     override fun onBackPressed() {

@@ -409,7 +409,13 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
         )
     }
 
+    private val showScannedCode: Boolean
+        get() {
+            return prefsGetBoolean(Preference.showScannedCode)
+        }
+
     override fun scannerCompleted(scanCode: String) {
+        if (showScannedCode) makeText(binding.root, scanCode, SnackBarType.INFO)
         JotterListener.lockScanner(this, true)
         JotterListener.hideWindow(this)
 
@@ -440,7 +446,6 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
             makeText(binding.root, ex.message.toString(), ERROR)
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         } finally {
-            // Unless is blocked, unlock the partial
             JotterListener.lockScanner(this, false)
         }
     }

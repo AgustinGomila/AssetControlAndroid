@@ -2,7 +2,7 @@ package com.dacosys.assetControl.ui.activities.manteinance
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.widget.*
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.dataBase.manteinance.AssetManteinanceDbHelper

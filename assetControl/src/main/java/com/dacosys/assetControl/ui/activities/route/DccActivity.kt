@@ -14,7 +14,7 @@ import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.inputmethod.InputMethodManager
-import android.widget.*
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
@@ -98,8 +98,8 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
     private var dcContArray: ArrayList<DataCollectionContent> = ArrayList()
 
     /////////////////////////////////////////////////////////////////////////////////
-    // TARGETS: Sólo cuando se ingresa a una recolección de datos de forma directa //
-    // sin que sea parte de un ruta. A través del botón Recolección de datos del   //
+    // TARGETS: Solo cuando se ingresa a una recolección de datos de forma directa //
+    // sin que sea parte de una ruta. A través del botón Recolección de datos del  //
     // menú principal                                                              //
     private var targetAsset: Asset? = null
     private var targetWarehouseArea: WarehouseArea? = null
@@ -1331,8 +1331,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         }
         ///////////////////////////////////////////
 
-        ///////////////////////////////////////////
-        ////////////// IMAGE CONTROL //////////////
+        /////////////// ImageControl //////////////
         imageControlFragment?.saveImages(false)
         ///////////////////////////////////////////
 
@@ -1609,19 +1608,14 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         )
     }
 
-    override fun scannerCompleted(scanCode: String) {
-        JotterListener.lockScanner(this, true)
-
-        try {
-            makeText(binding.root, getString(R.string.ok), SnackBarType.SUCCESS)
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-            ErrorLog.writeLog(this, this::class.java.simpleName, ex)
-            makeText(binding.root, ex.message.toString(), SnackBarType.ERROR)
-        } finally {
-            // Unless is blocked, unlock the partial
-            JotterListener.lockScanner(this, false)
+    private val showScannedCode: Boolean
+        get() {
+            return prefsGetBoolean(Preference.showScannedCode)
         }
+
+    override fun scannerCompleted(scanCode: String) {
+        if (showScannedCode) makeText(binding.root, scanCode, SnackBarType.INFO)
+        JotterListener.lockScanner(this, false)
     }
 
     public override fun onResume() {

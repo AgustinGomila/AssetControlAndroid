@@ -41,6 +41,7 @@ class UserSpinnerFragment : Fragment() {
                         else -> r.password
                     }
                 }
+
                 else -> ""
             }
         }
@@ -57,6 +58,7 @@ class UserSpinnerFragment : Fragment() {
                         else -> r.userId
                     }
                 }
+
                 else -> null
             }
         }

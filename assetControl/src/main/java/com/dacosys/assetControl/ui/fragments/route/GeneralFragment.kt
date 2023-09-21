@@ -135,6 +135,7 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
                 )
                 (currentFragment as DecimalFragment).setListener(this)
             }
+
             attrCompType == AttributeCompositionType.TypeDecimalNumber ||
                     attrCompType == AttributeCompositionType.TypeCurrency -> {
                 currentFragment = DecimalFragment.newInstance(
@@ -144,6 +145,7 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
                 )
                 (currentFragment as DecimalFragment).setListener(this)
             }
+
             attrCompType == AttributeCompositionType.TypeBool -> {
                 currentFragment = BooleanFragment.newInstance(
                     description = attrComp.description,
@@ -151,6 +153,7 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
                 )
                 (currentFragment as BooleanFragment).setListener(this)
             }
+
             attrCompType == AttributeCompositionType.TypeTextLong ||
                     attrCompType == AttributeCompositionType.TypeTextShort -> {
                 currentFragment = StringFragment.newInstance(
@@ -159,6 +162,7 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
                 )
                 (currentFragment as StringFragment).setListener(this)
             }
+
             attrCompType == AttributeCompositionType.TypeTime -> {
                 currentFragment = TimeFragment.newInstance(
                     description = attrComp.description,
@@ -166,6 +170,7 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
                 )
                 (currentFragment as TimeFragment).setListener(this)
             }
+
             attrCompType == AttributeCompositionType.TypeDate -> {
                 currentFragment = DateFragment.newInstance(
                     description = attrComp.description,
@@ -173,6 +178,7 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
                 )
                 (currentFragment as DateFragment).setListener(this)
             }
+
             attrCompType == AttributeCompositionType.TypeOptions -> {
                 var composition = ""
                 if (attrComp.composition != null) {
@@ -186,6 +192,7 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
                 )
                 (currentFragment as CommaSeparatedSpinnerFragment).setListener(this)
             }
+
             AttributeCompositionType.getAllUnitType().contains(attrCompType)
             -> {
                 when (attrCompType) {
@@ -197,6 +204,7 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
                         )
                         (currentFragment as UnitTypeSpinnerFragment).setListener(this)
                     }
+
                     AttributeCompositionType.TypeUnitWeight -> {
                         currentFragment = UnitTypeSpinnerFragment.newInstance(
                             unitTypeCat = UnitTypeCategory.weight,
@@ -205,6 +213,7 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
                         )
                         (currentFragment as UnitTypeSpinnerFragment).setListener(this)
                     }
+
                     AttributeCompositionType.TypeUnitTemperature -> {
                         currentFragment = UnitTypeSpinnerFragment.newInstance(
                             unitTypeCat = UnitTypeCategory.temperature,
@@ -213,6 +222,7 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
                         )
                         (currentFragment as UnitTypeSpinnerFragment).setListener(this)
                     }
+
                     AttributeCompositionType.TypeUnitPressure -> {
                         currentFragment = UnitTypeSpinnerFragment.newInstance(
                             unitTypeCat = UnitTypeCategory.pressure,
@@ -221,6 +231,7 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
                         )
                         (currentFragment as UnitTypeSpinnerFragment).setListener(this)
                     }
+
                     AttributeCompositionType.TypeUnitLenght -> {
                         currentFragment = UnitTypeSpinnerFragment.newInstance(
                             unitTypeCat = UnitTypeCategory.lenght,
@@ -229,6 +240,7 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
                         )
                         (currentFragment as UnitTypeSpinnerFragment).setListener(this)
                     }
+
                     AttributeCompositionType.TypeUnitArea -> {
                         currentFragment = UnitTypeSpinnerFragment.newInstance(
                             unitTypeCat = UnitTypeCategory.area,
@@ -421,22 +433,28 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
                     attrCompType == AttributeCompositionType.TypeCurrency -> {
                 (f as DecimalFragment).isEnabled = isEnabled
             }
+
             attrCompType == AttributeCompositionType.TypeBool -> {
                 (f as BooleanFragment).isEnabled = isEnabled
             }
+
             attrCompType == AttributeCompositionType.TypeTextLong ||
                     attrCompType == AttributeCompositionType.TypeTextShort -> {
                 (f as StringFragment).isEnabled = isEnabled
             }
+
             attrCompType == AttributeCompositionType.TypeTime -> {
                 (f as TimeFragment).isEnabled = isEnabled
             }
+
             attrCompType == AttributeCompositionType.TypeDate -> {
                 (f as DateFragment).isEnabled = isEnabled
             }
+
             attrCompType == AttributeCompositionType.TypeOptions -> {
                 (f as CommaSeparatedSpinnerFragment).isEnabled = isEnabled
             }
+
             AttributeCompositionType.getAllUnitType().contains(attrCompType) -> {
                 (f as UnitTypeSpinnerFragment).isEnabled = isEnabled
             }
@@ -470,29 +488,36 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
                         attrCompType == AttributeCompositionType.TypeCurrency -> {
                     (f as DecimalFragment).value.toString()
                 }
+
                 attrCompType == AttributeCompositionType.TypeBool -> {
                     (f as BooleanFragment).value.toString()
                 }
+
                 attrCompType == AttributeCompositionType.TypeTextLong ||
                         attrCompType == AttributeCompositionType.TypeTextShort -> {
                     (f as StringFragment).value
                 }
+
                 attrCompType == AttributeCompositionType.TypeTime -> {
                     val cal = (f as TimeFragment).value
                     val dateFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
                     dateFormat.format(cal.time)
                 }
+
                 attrCompType == AttributeCompositionType.TypeDate -> {
                     val cal = (f as DateFragment).value
                     val dateFormat = SimpleDateFormat("dd/MM/yyyy hh:mm:ss", Locale.getDefault())
                     dateFormat.format(cal.time)
                 }
+
                 attrCompType == AttributeCompositionType.TypeOptions -> {
                     (f as CommaSeparatedSpinnerFragment).selectedStrOption
                 }
+
                 AttributeCompositionType.getAllUnitType().contains(attrCompType) -> {
                     (f as UnitTypeSpinnerFragment).selectedUnitType.toString()
                 }
+
                 else -> {
                     null
                 }
@@ -510,33 +535,40 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
             when {
                 value == null -> {
                 }
+
                 attrCompType == AttributeCompositionType.TypeIntNumber ||
                         attrCompType == AttributeCompositionType.TypeDecimalNumber ||
                         attrCompType == AttributeCompositionType.TypeCurrency -> {
                     (f as DecimalFragment).defaultValue = typedV as Float
                     f.value = typedV
                 }
+
                 attrCompType == AttributeCompositionType.TypeBool -> {
                     (f as BooleanFragment).defaultValue = typedV as Boolean
                     f.value = typedV
                 }
+
                 attrCompType == AttributeCompositionType.TypeTextLong ||
                         attrCompType == AttributeCompositionType.TypeTextShort -> {
                     (f as StringFragment).defaultValue = typedV as String
                     f.value = typedV
                 }
+
                 attrCompType == AttributeCompositionType.TypeTime -> {
                     (f as TimeFragment).defaultValue = value
                     f.value = typedV as Calendar
                 }
+
                 attrCompType == AttributeCompositionType.TypeDate -> {
                     (f as DateFragment).defaultValue = value
                     f.value = typedV as Calendar
                 }
+
                 attrCompType == AttributeCompositionType.TypeOptions -> {
                     (f as CommaSeparatedSpinnerFragment).defaultValue = typedV as String
                     f.selectedStrOption = typedV
                 }
+
                 AttributeCompositionType.getAllUnitType().contains(attrCompType) -> {
                     (f as UnitTypeSpinnerFragment).defaultValue = typedV as UnitType
                     f.selectedUnitType = typedV
@@ -553,18 +585,22 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
             when {
                 value == null -> {
                 }
+
                 attributeCompositionType == AttributeCompositionType.TypeIntNumber ||
                         attributeCompositionType == AttributeCompositionType.TypeDecimalNumber ||
                         attributeCompositionType == AttributeCompositionType.TypeCurrency -> {
                     r = value.toFloatOrNull() ?: 0f
                 }
+
                 attributeCompositionType == AttributeCompositionType.TypeBool -> {
                     r = value.toBoolean()
                 }
+
                 attributeCompositionType == AttributeCompositionType.TypeTextLong ||
                         attributeCompositionType == AttributeCompositionType.TypeTextShort -> {
                     r = value
                 }
+
                 attributeCompositionType == AttributeCompositionType.TypeTime -> {
                     val cal = Calendar.getInstance()
                     val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
@@ -576,6 +612,7 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
                     }
                     r = cal
                 }
+
                 attributeCompositionType == AttributeCompositionType.TypeDate -> {
                     val cal = Calendar.getInstance()
                     val sdf = SimpleDateFormat("dd/MM/yyyy hh:mm:ss", Locale.getDefault())
@@ -586,9 +623,11 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
                     }
                     r = cal
                 }
+
                 attributeCompositionType == AttributeCompositionType.TypeOptions -> {
                     r = value
                 }
+
                 AttributeCompositionType.getAllUnitType()
                     .contains(attributeCompositionType) -> {
                     val uT = UnitType.getById(value.toInt())

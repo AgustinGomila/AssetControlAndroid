@@ -68,6 +68,7 @@ class Webservice @Throws(Exception::class) constructor(private var webServiceTyp
                 proxyUser = Repository.wsProxyUser
                 proxyPass = Repository.wsProxyPass
             }
+
             WebServiceType.AssetControlManteinance -> {
                 url = Repository.wsMantUrl
                 namespace = Repository.wsMantNamespace
@@ -77,6 +78,7 @@ class Webservice @Throws(Exception::class) constructor(private var webServiceTyp
                 proxyUser = Repository.wsMantProxyUser
                 proxyPass = Repository.wsMantProxyPass
             }
+
             WebServiceType.ImageControl -> {
                 url = Repository.wsIcUrl
                 namespace = Repository.wsIcNamespace
@@ -86,6 +88,7 @@ class Webservice @Throws(Exception::class) constructor(private var webServiceTyp
                 proxyUser = Repository.wsIcProxyUser
                 proxyPass = Repository.wsIcProxyPass
             }
+
             WebServiceType.Test -> {
                 url = Repository.wsTestUrl
                 namespace = Repository.wsTestNamespace
@@ -95,6 +98,7 @@ class Webservice @Throws(Exception::class) constructor(private var webServiceTyp
                 proxyUser = Repository.wsTestProxyUser
                 proxyPass = Repository.wsTestProxyPass
             }
+
             else -> {}
         }
     }
@@ -174,6 +178,7 @@ class Webservice @Throws(Exception::class) constructor(private var webServiceTyp
             WebServiceType.AssetControl,
             WebServiceType.AssetControlManteinance,
             -> getSessionObject(useConfSession)
+
             else -> return null
         } ?: return null
 
@@ -431,6 +436,7 @@ class Webservice @Throws(Exception::class) constructor(private var webServiceTyp
                     callWithRetry(aht, soapAction, envelope, headers, 3)
                     response = (envelope.response ?: return null)
                 }
+
                 "http://" -> {
                     val aht = HttpTransportSE(
                         proxy, "$url$wsQuery", timeout
@@ -440,6 +446,7 @@ class Webservice @Throws(Exception::class) constructor(private var webServiceTyp
                     callWithRetry(aht, soapAction, envelope, headers, 3)
                     response = (envelope.response ?: return null)
                 }
+
                 else -> return null
             }
         } catch (e: Exception) {

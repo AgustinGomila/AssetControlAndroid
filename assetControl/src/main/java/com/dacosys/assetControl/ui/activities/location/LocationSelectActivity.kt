@@ -13,7 +13,7 @@ import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.inputmethod.EditorInfo
-import android.widget.*
+import android.widget.AdapterView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
 import com.dacosys.assetControl.R
@@ -34,11 +34,13 @@ import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.utils.Screen.Companion.showKeyboard
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.ScannedCode
 import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.utils.scanners.nfc.Nfc
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
+import com.dacosys.assetControl.utils.settings.Preference
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent.registerEventListener
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener
 import org.parceler.Parcels
@@ -62,7 +64,13 @@ class LocationSelectActivity : AppCompatActivity(),
             JotterListener.onRequestPermissionsResult(this, requestCode, permissions, grantResults)
     }
 
+    private val showScannedCode: Boolean
+        get() {
+            return prefsGetBoolean(Preference.showScannedCode)
+        }
+
     override fun scannerCompleted(scanCode: String) {
+        if (showScannedCode) makeText(binding.root, scanCode, SnackBarType.INFO)
         JotterListener.lockScanner(this, true)
 
         try {
@@ -89,7 +97,6 @@ class LocationSelectActivity : AppCompatActivity(),
                 )
             }
 
-            JotterListener.lockScanner(this, false)
             if (locationOk) {
                 locationSelect()
             }
@@ -101,6 +108,8 @@ class LocationSelectActivity : AppCompatActivity(),
                 SnackBarType.ERROR
             )
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
+        } finally {
+            JotterListener.lockScanner(this, false)
         }
     }
 

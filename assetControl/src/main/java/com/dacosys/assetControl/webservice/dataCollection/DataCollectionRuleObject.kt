@@ -28,9 +28,11 @@ class DataCollectionRuleObject() : Parcelable {
                         "data_collection_rule_id" -> {
                             x.dataCollectionRuleId = soValue as? Long ?: 0L
                         }
+
                         "active" -> {
                             x.active = soValue as? Int ?: 0
                         }
+
                         "description" -> {
                             x.description = soValue as? String ?: ""
                         }

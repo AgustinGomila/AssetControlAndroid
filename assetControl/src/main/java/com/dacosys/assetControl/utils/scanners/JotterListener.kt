@@ -22,9 +22,7 @@ import com.dacosys.assetControl.utils.Collector.Companion.collectorType
 import com.dacosys.assetControl.utils.Collector.Companion.collectorTypeChanged
 import com.dacosys.assetControl.utils.Collector.Companion.isNfcRequired
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsIsInitialized
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsPutString
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.startPrefs
 import com.dacosys.assetControl.utils.scanners.Scanner.ScannerListener
 import com.dacosys.assetControl.utils.scanners.floatingCamera.FloatingCameraBarcode
 import com.dacosys.assetControl.utils.scanners.nfc.Nfc
@@ -146,24 +144,10 @@ object JotterListener : Jotter.Listener {
         Log.v("LifeCycleCallback", "ACTIVITY IS ${tActivity.javaClass.simpleName} >>> $event")
 
         when (event) {
-            "CREATE" -> {
-                // Ok, esto solo se ejecutaría luego de onCreate de HomeActivity
-                if (!prefsIsInitialized()) startPrefs()
-
-                onCreate(tActivity)
-            }
-
-            "RESUME" -> {
-                onResume(tActivity)
-            }
-
-            "PAUSE" -> {
-                onPause(tActivity)
-            }
-
-            "DESTROY" -> {
-                onDestroy(tActivity)
-            }
+            "CREATE" -> onCreate(tActivity)
+            "RESUME" -> onResume(tActivity)
+            "PAUSE" -> onPause(tActivity)
+            "DESTROY" -> onDestroy(tActivity)
         }
     }
 
@@ -204,22 +188,15 @@ object JotterListener : Jotter.Listener {
             val model = Build.MODEL
 
             when {
-                manufacturer.contains(
-                    "Honeywell", true
-                ) || manufacturer.startsWith("Universal Global Scientific Industrial") || manufacturer.startsWith(
-                    "Foxconn International Holdings Limited"
-                ) -> collectorType = CollectorType.honeywellNative
+                manufacturer.contains("Honeywell", true)
+                        || manufacturer.startsWith("Universal Global Scientific Industrial")
+                        || manufacturer.startsWith("Foxconn International Holdings Limited")
+                -> collectorType = CollectorType.honeywellNative
 
-                manufacturer.contains("Motorola", true) || manufacturer.contains(
-                    "Zebra", true
-                ) || manufacturer.contains("Symbol", true) -> collectorType = CollectorType.zebra
-                /*
-                manufacturer.contains("Janam", true)-> when (model) {
-                    "XG3" -> collectorType = CollectorType.janamXG3
-                    "XM5" -> collectorType = CollectorType.janamXM5
-                    "XT2" -> collectorType = CollectorType.janamXT2
-                }
-                */
+                manufacturer.contains("Motorola", true)
+                        || manufacturer.contains("Zebra", true)
+                        || manufacturer.contains("Symbol", true)
+                -> collectorType = CollectorType.zebra
             }
 
             Log.v(javaClass.simpleName, "Manufacturer: $manufacturer, Model: $model")
@@ -367,7 +344,7 @@ object JotterListener : Jotter.Listener {
         resumeReaderDevices(activity)
     }
 
-    fun resumeReaderDevices(activity: AppCompatActivity) {
+    private fun resumeReaderDevices(activity: AppCompatActivity) {
         if (isNfcRequired()) enableNfcForegroundDispatch(activity)
 
         if (activity is Rfid.RfidDeviceListener && isRfidRequired()) Rfid.resume(activity)
@@ -408,7 +385,7 @@ object JotterListener : Jotter.Listener {
         pauseReaderDevices(activity)
     }
 
-    fun pauseReaderDevices(activity: AppCompatActivity) {
+    private fun pauseReaderDevices(activity: AppCompatActivity) {
         if (activity is Rfid.RfidDeviceListener && isRfidRequired()) Rfid.pause()
 
         if (isNfcRequired()) Nfc.disableNfcForegroundDispatch(activity)

@@ -11,10 +11,13 @@ import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
 import android.util.Log
-import android.view.*
+import android.view.KeyEvent
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
 import android.view.View.GONE
 import android.view.inputmethod.EditorInfo
-import android.widget.*
+import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.menu.MenuBuilder
@@ -166,6 +169,9 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         set(value) {
             prefsPutBoolean(Preference.printLabelAssetShowCheckBoxes.key, value)
         }
+
+    private val visibleStatus: ArrayList<AssetStatus>
+        get() = assetSelectFilterFragment?.visibleStatusArray ?: AssetStatus.getAll()
 
     override fun onSaveInstanceState(savedInstanceState: Bundle) {
         super.onSaveInstanceState(savedInstanceState)
@@ -715,11 +721,11 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
                     lastSelected = adapter?.currentAsset()
                 }
 
-                if (adapter == null || assetArray != null) {
+                if (assetArray != null) {
                     adapter = AssetRecyclerAdapter.Builder()
                         .recyclerView(binding.recyclerView)
-                        .visibleStatus(assetSelectFilterFragment?.visibleStatusArray ?: AssetStatus.getAll())
-                        .fullList(assetArray ?: ArrayList())
+                        .visibleStatus(visibleStatus)
+                        .fullList(assetArray)
                         .checkedIdArray(checkedIdArray)
                         .multiSelect(multiSelect)
                         .showCheckBoxes(`val` = showCheckBoxes, callback = { showCheckBoxes = it })
@@ -775,7 +781,13 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         )
     }
 
+    private val showScannedCode: Boolean
+        get() {
+            return prefsGetBoolean(Preference.showScannedCode)
+        }
+
     override fun scannerCompleted(scanCode: String) {
+        if (showScannedCode) makeText(binding.root, scanCode, SnackBarType.INFO)
         JotterListener.lockScanner(this, true)
 
         try {
@@ -812,7 +824,6 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
             makeText(binding.root, ex.message.toString(), SnackBarType.ERROR)
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         } finally {
-            // Unless is blocked, unlock the partial
             JotterListener.lockScanner(this, false)
         }
     }
@@ -860,7 +871,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
 
         // Opciones de visibilidad del menú
         val allStatus = AssetStatus.getAll()
-        val s = assetSelectFilterFragment?.visibleStatusArray ?: AssetStatus.getAll()
+        val s = visibleStatus
         for (i in 0 until allStatus.size) {
             menu.add(0, allStatus[i].id, i + menuItems, allStatus[i].description)
                 .setChecked(s.contains(allStatus[i])).isCheckable = true
@@ -946,7 +957,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
             return false
         }
 
-        val visibleStatus = assetSelectFilterFragment!!.visibleStatusArray
+        val visibleStatus = visibleStatus
         item.isChecked = !item.isChecked
 
         when (item.itemId) {
@@ -1007,7 +1018,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
             }
         }
 
-        assetSelectFilterFragment!!.visibleStatusArray = visibleStatus
+        assetSelectFilterFragment?.visibleStatusArray = visibleStatus
 
         return true
     }
@@ -1108,7 +1119,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
             objId1 = tempObjectId
         )
 
-        ImageCoroutines().get(programData = programData) {
+        ImageCoroutines().get(context = getContext(), programData = programData) {
             val allLocal = toDocumentContentList(images = it, programData = programData)
             if (allLocal.isEmpty()) {
                 getFromWebservice()
