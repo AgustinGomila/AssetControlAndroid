@@ -33,7 +33,6 @@ import com.dacosys.assetControl.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.ParcelLong
-import com.dacosys.assetControl.utils.preferences.Preferences
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.ScannedCode
@@ -432,6 +431,7 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
                 searchWarehouseAreaId = false,
                 searchAssetCode = true,
                 searchAssetSerial = true,
+                searchAssetEan = true,
                 validateId = true
             )
 

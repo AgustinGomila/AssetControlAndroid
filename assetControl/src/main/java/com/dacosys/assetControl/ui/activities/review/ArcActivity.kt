@@ -1322,6 +1322,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
                 searchWarehouseAreaId = true,
                 searchAssetCode = true,
                 searchAssetSerial = true,
+                searchAssetEan = true,
                 validateId = true
             )
 

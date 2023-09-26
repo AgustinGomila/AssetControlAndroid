@@ -972,6 +972,33 @@ class AssetDbHelper {
         }
     }
 
+    fun selectByEan(ean: String): ArrayList<Asset> {
+        Log.i(this::class.java.simpleName, ": SQLite -> selectByEan ($ean)")
+
+        if (ean.isEmpty()) {
+            return ArrayList()
+        }
+
+        val where = " WHERE $TABLE_NAME.$EAN = '$ean'"
+        val rawQuery = basicSelect +
+                "," +
+                basicStrFields +
+                " FROM " + TABLE_NAME +
+                basicLeftJoin +
+                where +
+                " ORDER BY " + TABLE_NAME + "." + ASSET_ID
+
+        val sqLiteDatabase = getReadableDb()
+        return try {
+            val c = sqLiteDatabase.rawQuery(rawQuery, null)
+            fromCursor(c)
+        } catch (ex: SQLException) {
+            ex.printStackTrace()
+            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
+            ArrayList()
+        }
+    }
+
     private fun fromCursor(c: Cursor?): ArrayList<Asset> {
         val result = ArrayList<Asset>()
         c.use {

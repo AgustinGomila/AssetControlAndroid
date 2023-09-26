@@ -79,6 +79,7 @@ class LocationSelectActivity : AppCompatActivity(),
                 searchWarehouseAreaId = true,
                 searchAssetCode = false,
                 searchAssetSerial = false,
+                searchAssetEan = false,
                 validateId = true
             )
 

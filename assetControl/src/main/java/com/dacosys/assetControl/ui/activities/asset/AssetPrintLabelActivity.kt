@@ -804,6 +804,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
                 searchWarehouseAreaId = false,
                 searchAssetCode = true,
                 searchAssetSerial = true,
+                searchAssetEan = true,
                 validateId = true
             )
 

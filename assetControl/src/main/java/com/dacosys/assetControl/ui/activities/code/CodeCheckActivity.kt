@@ -318,6 +318,7 @@ class CodeCheckActivity : AppCompatActivity(),
                 searchWarehouseAreaId = true,
                 searchAssetCode = true,
                 searchAssetSerial = true,
+                searchAssetEan = true,
                 validateId = true
             )
 

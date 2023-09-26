@@ -77,6 +77,7 @@ class ScannedCode {
         searchWarehouseAreaId: Boolean,
         searchAssetCode: Boolean,
         searchAssetSerial: Boolean,
+        searchAssetEan: Boolean,
         validateId: Boolean,
     ): ScannedCode {
         var currentCode = code
@@ -110,7 +111,6 @@ class ScannedCode {
                 }
             }
 
-            // search for the item by code
             val assetArray = AssetDbHelper().selectByCode(currentCode)
             try {
                 if (assetArray.size > 0) {
@@ -122,8 +122,18 @@ class ScannedCode {
         }
 
         if (searchAssetSerial) {
-            // search for the item by code
             val assetArray = AssetDbHelper().selectBySerial(currentCode)
+            try {
+                if (assetArray.size > 0) {
+                    return ScannedCode(assetArray[0])
+                }
+            } catch (ex: Exception) {
+                return ScannedCode()
+            }
+        }
+
+        if (searchAssetEan) {
+            val assetArray = AssetDbHelper().selectByEan(currentCode)
             try {
                 if (assetArray.size > 0) {
                     return ScannedCode(assetArray[0])
