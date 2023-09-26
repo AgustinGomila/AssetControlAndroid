@@ -815,9 +815,11 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
                             getContext().getString(R.string.destination_changed),
                             SnackBarType.INFO
                         )
-                        runOnUiThread {
-                            headerFragment?.fill(scWa)
-                        }
+                        Handler(Looper.getMainLooper()).postDelayed({
+                            runOnUiThread {
+                                headerFragment?.fill(scWa)
+                            }
+                        }, 50)
                     }
                     break
                 }
