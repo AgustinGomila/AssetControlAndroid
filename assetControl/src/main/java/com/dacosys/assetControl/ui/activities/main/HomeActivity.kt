@@ -211,6 +211,8 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
         setupButtons()
     }
 
+    @SuppressLint("MissingSuperCall")
+    @Suppress("OVERRIDE_DEPRECATION")
     override fun onBackPressed() {
         Statics.currentUserId = null
 
@@ -220,7 +222,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
         ) {
             finishAfterTransition()
         } else {
-            super.onBackPressed()
+            finish()
         }
     }
 

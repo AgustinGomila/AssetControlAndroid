@@ -334,6 +334,8 @@ class WarehouseAreaCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
         fillControls()
     }
 
+    @SuppressLint("MissingSuperCall")
+    @Suppress("OVERRIDE_DEPRECATION")
     override fun onBackPressed() {
         cancelWarehouseAreaModify()
     }

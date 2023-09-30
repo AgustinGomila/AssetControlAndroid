@@ -1249,7 +1249,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             }
         }
 
-        if (!saving && Statics.demoMode) Handler(Looper.getMainLooper()).postDelayed(
+        if (!saving && Statics.DEMO_MODE) Handler(Looper.getMainLooper()).postDelayed(
             { demo() }, 500
         )
     }
@@ -1674,7 +1674,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
     }
 
     private fun demo() {
-        if (!Statics.demoMode) return
+        if (!Statics.DEMO_MODE) return
 
         if (isCurrentLevelCompleted()) {
             confirmLevel(false)
@@ -1686,7 +1686,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             when (currentRpc.routeProcessStatusId) {
                 RouteProcessStatus.processed.id -> {
                     rpContAdapter?.selectNext()
-                    if (!saving && Statics.demoMode) demo()
+                    if (!saving && Statics.DEMO_MODE) demo()
                 }
 
                 RouteProcessStatus.notProcessed.id -> {
@@ -1705,11 +1705,13 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         super.onResume()
         rejectNewInstances = false
 
-        if (!saving && Statics.demoMode) Handler(Looper.getMainLooper()).postDelayed(
+        if (!saving && Statics.DEMO_MODE) Handler(Looper.getMainLooper()).postDelayed(
             { demo() }, 300
         )
     }
 
+    @SuppressLint("MissingSuperCall")
+    @Suppress("OVERRIDE_DEPRECATION")
     override fun onBackPressed() {
         JotterListener.lockScanner(this, true)
         try {

@@ -78,6 +78,7 @@ import com.dacosys.assetControl.viewModel.sync.SyncViewModel
 import com.dacosys.imageControl.network.upload.SendPending
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import io.github.cdimascio.dotenv.DotenvBuilder
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import org.json.JSONObject
 import java.lang.ref.WeakReference
@@ -283,7 +284,9 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                 SQLiteDatabase.releaseMemory()
 
                 // Enviar las imágenes pendientes...
-                if (Repository.useImageControl) SendPending(context = getContext())
+                if (Repository.useImageControl) {
+                    SendPending(context = getContext())
+                }
 
                 thread {
                     Sync.goSync(onSyncProgress = { syncViewModel.setSyncDownloadProgress(it) },
@@ -416,6 +419,8 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         setEditTextFocus(true)
     }
 
+    @SuppressLint("MissingSuperCall")
+    @Suppress("OVERRIDE_DEPRECATION")
     override fun onBackPressed() {
         // Esto sirve para salir del programa desde la pantalla de Login
         moveTaskToBack(true)
@@ -944,11 +949,23 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
             }
 
             R.id.action_trigger_scan -> {
-                // /* For Debug */
-                // scannerCompleted(
-                //     """{"config":{"client_email":"centralpuerto.com","client_password":"293f0w4n"}}""".trimIndent()
-                // )
-                // return super.onOptionsItemSelected(item)
+                if (Statics.SUPER_DEMO_MODE && BuildConfig.DEBUG) {
+                    val env = DotenvBuilder()
+                        .directory("/assets")
+                        .filename("env")
+                        .load()
+
+                    var username = env["CLIENT_EMAIL"]
+                    var password = env["CLIENT_PASSWORD"]
+
+                    if (Repository.clientEmail.contains(username)) {
+                        username = env["CLIENT_EMAIL_ALT"]
+                        password = env["CLIENT_PASSWORD_ALT"]
+                    }
+
+                    scannerCompleted("""{"config":{"client_email":"$username","client_password":"$password"}}""".trimIndent())
+                    return super.onOptionsItemSelected(item)
+                }
 
                 JotterListener.trigger(this)
                 return super.onOptionsItemSelected(item)

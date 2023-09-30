@@ -32,29 +32,29 @@ class BarcodeLabel(templateStr: String) {
         var modStr = templateStr
         for (field in barcodeFields!!) {
             modStr = modStr.replace(
-                "${Statics.reservedChar}${field.name}${Statics.reservedChar}",
+                "${Statics.RESERVED_CHAR}${field.name}${Statics.RESERVED_CHAR}",
                 field.value
             )
         }
 
         modStr = modStr.replace(
-            "${Statics.reservedChar}${DefinedField.PRINT_SPEED.name}${Statics.reservedChar}",
+            "${Statics.RESERVED_CHAR}${DefinedField.PRINT_SPEED.name}${Statics.RESERVED_CHAR}",
             printOps!!.printerSpeed.toString().padStart(1, '0')
         )
         modStr = modStr.replace(
-            "${Statics.reservedChar}${DefinedField.PRINT_POWER.name}${Statics.reservedChar}",
+            "${Statics.RESERVED_CHAR}${DefinedField.PRINT_POWER.name}${Statics.RESERVED_CHAR}",
             printOps!!.printerPower.toString().padStart(2, '0')
         )
         modStr = modStr.replace(
-            "${Statics.reservedChar}${DefinedField.PRINT_COPIES.name}${Statics.reservedChar}",
+            "${Statics.RESERVED_CHAR}${DefinedField.PRINT_COPIES.name}${Statics.RESERVED_CHAR}",
             qty.toString().padStart(5, '0')
         )
         modStr = modStr.replace(
-            "${Statics.reservedChar}${DefinedField.COL_OFFSET.name}${Statics.reservedChar}",
+            "${Statics.RESERVED_CHAR}${DefinedField.COL_OFFSET.name}${Statics.RESERVED_CHAR}",
             printOps!!.colOffset.toString().padStart(4, '0')
         )
         modStr = modStr.replace(
-            "${Statics.reservedChar}${DefinedField.ROW_OFFSET.name}${Statics.reservedChar}",
+            "${Statics.RESERVED_CHAR}${DefinedField.ROW_OFFSET.name}${Statics.RESERVED_CHAR}",
             printOps!!.rowOffset.toString().padStart(4, '0')
         )
 

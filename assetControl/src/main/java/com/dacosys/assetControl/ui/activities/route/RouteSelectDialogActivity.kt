@@ -274,6 +274,8 @@ class RouteSelectDialogActivity : AppCompatActivity(),
         routeDescription = binding.autoCompleteTextView.text.toString()
     }
 
+    @SuppressLint("MissingSuperCall")
+    @Suppress("OVERRIDE_DEPRECATION")
     override fun onBackPressed() {
         closeKeyboard(this)
 

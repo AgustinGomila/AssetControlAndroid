@@ -22,12 +22,12 @@ class AssetLabelField(asset: Asset, forReport: Boolean) {
                 prefsGetBoolean(ConfEntry.acAddLabelNumberOnBarcode)
             tempCode = if (addLabelNumber) {
                 if (forReport) {
-                    asset!!.code + Statics.reservedChar + "0"
+                    asset!!.code + Statics.RESERVED_CHAR + "0"
                 } else {
                     if (asset!!.labelNumber == null) {
-                        asset!!.code + Statics.reservedChar + "1"
+                        asset!!.code + Statics.RESERVED_CHAR + "1"
                     } else {
-                        asset!!.code + Statics.reservedChar + (asset!!.labelNumber!! + 1).toString()
+                        asset!!.code + Statics.RESERVED_CHAR + (asset!!.labelNumber!! + 1).toString()
                     }
                 }
             } else {

@@ -6,14 +6,14 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.util.Log
 import com.dacosys.assetControl.AssetControlApp
-import com.dacosys.assetControl.utils.Statics.Companion.demoAutoSend
+import com.dacosys.assetControl.utils.Statics.Companion.DEMO_AUTO_SEND
 import com.dacosys.assetControl.utils.preferences.Preferences
 import com.dacosys.assetControl.utils.settings.Preference
 
 class Connection {
     companion object {
         fun autoSend(): Boolean {
-            return isOnline() && (Preferences.prefsGetBoolean(Preference.autoSend) || demoAutoSend)
+            return isOnline() && (Preferences.prefsGetBoolean(Preference.autoSend) || DEMO_AUTO_SEND)
         }
 
         @SuppressLint("MissingPermission")

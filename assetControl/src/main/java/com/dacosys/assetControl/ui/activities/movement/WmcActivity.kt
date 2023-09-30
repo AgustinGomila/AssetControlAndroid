@@ -770,6 +770,8 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
         closeKeyboard(this)
     }
 
+    @SuppressLint("MissingSuperCall")
+    @Suppress("OVERRIDE_DEPRECATION")
     override fun onBackPressed() {
         cancelWarehouseMovement()
     }
@@ -936,7 +938,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
             menu.removeItem(menu.findItem(R.id.action_rfid_connect).itemId)
         }
 
-        if (BuildConfig.DEBUG || Statics.demoMode) {
+        if (BuildConfig.DEBUG || Statics.DEMO_MODE) {
             menu.add(Menu.NONE, menuItemManualCode, Menu.NONE, "Manual code")
             menu.add(Menu.NONE, menuItemRandomCode, Menu.NONE, "Random asset code")
             menu.add(Menu.NONE, menuItemRandomOnListL, Menu.NONE, "Random asset on list")

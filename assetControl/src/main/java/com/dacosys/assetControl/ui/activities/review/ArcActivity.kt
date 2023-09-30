@@ -1031,7 +1031,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
             JotterListener.lockScanner(this, false)
         }
 
-        if (Statics.demoMode) {
+        if (Statics.DEMO_MODE) {
             val assetRevised = adapter?.countItemsRevised ?: 0
             val margin = ThreadLocalRandom.current().nextInt(0, 10) *
                     if (ThreadLocalRandom.current().nextInt(0, 5) == 0) -1 else 1
@@ -1097,6 +1097,8 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
         }
     }
 
+    @SuppressLint("MissingSuperCall")
+    @Suppress("OVERRIDE_DEPRECATION")
     override fun onBackPressed() {
         cancelAssetReview()
     }
@@ -1274,7 +1276,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
                     adapter?.scrollToPos(cs, true)
                 }, 200)
 
-                if (!saving && Statics.demoMode)
+                if (!saving && Statics.DEMO_MODE)
                     Handler(Looper.getMainLooper()).postDelayed(
                         { demo() }, 300
                     )
@@ -1456,14 +1458,14 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
                 try {
                     val f = finalArc
-                    if (!Statics.demoMode && addUnknownAssets) {
+                    if (!Statics.DEMO_MODE && addUnknownAssets) {
                         // Dar de alta el activo
                         assetCrud(f)
                         return
                     }
 
                     // Pedir una descripción y agregar como desconocido
-                    if (Statics.demoMode) {
+                    if (Statics.DEMO_MODE) {
                         f.description = getString(R.string.test_asset)
                     } else {
                         runOnUiThread { itemDescriptionDialog(f) }
@@ -1594,7 +1596,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
             menu.removeItem(menu.findItem(R.id.action_rfid_connect).itemId)
         }
 
-        if (BuildConfig.DEBUG || Statics.demoMode) {
+        if (BuildConfig.DEBUG || Statics.DEMO_MODE) {
             menu.add(Menu.NONE, menuItemManualCode, Menu.NONE, "Manual code")
             menu.add(Menu.NONE, menuItemRandomCode, Menu.NONE, "Random asset code")
             menu.add(Menu.NONE, menuItemRandomOnListL, Menu.NONE, "Random asset on list")
@@ -1877,7 +1879,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
             if (adapter?.countItemsAdded == 0) {
                 processAssetReview()
             } else {
-                if (Statics.demoMode) {
+                if (Statics.DEMO_MODE) {
                     processAssetReview()
                     return
 
@@ -1983,7 +1985,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
     private var allCodes: ArrayList<String> = ArrayList()
     private var allCodesInLocation: ArrayList<String> = ArrayList()
     private fun demo() {
-        if (!Statics.demoMode) {
+        if (!Statics.DEMO_MODE) {
             return
         }
 

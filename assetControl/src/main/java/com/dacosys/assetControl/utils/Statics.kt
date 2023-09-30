@@ -21,17 +21,9 @@ class Statics {
             get() = System.getProperty("line.separator") ?: "\r\n"
 
         // region DEBUG DEMO
-        const val demoMode = false
-        const val demoAutoSend = false
-        const val superDemoMode = false
-
-        var demoQrConfigCode = """
-{
-  "config": {
-    "client_email": "demo@dacosys.com",
-    "client_password": "1234"
-  }
-}""".trimIndent()
+        const val DEMO_MODE = false
+        const val DEMO_AUTO_SEND = false
+        const val SUPER_DEMO_MODE = false
         // endregion DEBUG DEMO
 
         val appName: String
@@ -45,7 +37,7 @@ class Statics {
             }
         }
 
-        const val defaultDate = "2001-01-01 00:00:00"
+        const val DEFAULT_DATE = "2001-01-01 00:00:00"
 
         fun getPercentage(completedTask: Int, totalTask: Int): String {
             if (completedTask == 0 && totalTask == 0) return getContext().getString(R.string.ellipsis)
@@ -71,8 +63,8 @@ class Statics {
         // Ver: https://source.cloud.google.com/assetcontrol/libs_windows/+/master:Collector/Identification/Program.cs
         const val INTERNAL_IMAGE_CONTROL_APP_ID: Int = 1
 
-        const val reservedChar = "#"
-        const val timeFilename = "android_time.txt"
+        const val RESERVED_CHAR = "#"
+        const val TIME_FILE_NAME = "android_time.txt"
 
         fun deviceDateIsValid(): Boolean {
             val year = Calendar.getInstance().get(Calendar.YEAR)

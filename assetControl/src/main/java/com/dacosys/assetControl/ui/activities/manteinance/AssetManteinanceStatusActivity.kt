@@ -114,6 +114,8 @@ class AssetManteinanceStatusActivity : AppCompatActivity(),
     override fun onItemSelected(manteinanceStatus: ManteinanceStatus?) {
     }
 
+    @SuppressLint("MissingSuperCall")
+    @Suppress("OVERRIDE_DEPRECATION")
     override fun onBackPressed() {
         closeKeyboard(this)
 

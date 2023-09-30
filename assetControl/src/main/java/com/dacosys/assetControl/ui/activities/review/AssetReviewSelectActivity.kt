@@ -500,7 +500,7 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
                     )
                 }
 
-                if (Statics.demoMode) Handler(Looper.getMainLooper()).postDelayed({ demo() }, 300)
+                if (Statics.DEMO_MODE) Handler(Looper.getMainLooper()).postDelayed({ demo() }, 300)
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
@@ -726,7 +726,7 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     private fun demo() {
-        if (!Statics.demoMode) return
+        if (!Statics.DEMO_MODE) return
 
         val allWarehouseArea = WarehouseAreaDbHelper().select(true)
         if (!allWarehouseArea.any()) return

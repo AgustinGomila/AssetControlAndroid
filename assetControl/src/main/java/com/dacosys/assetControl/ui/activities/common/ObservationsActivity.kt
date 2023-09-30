@@ -199,6 +199,8 @@ class ObservationsActivity : AppCompatActivity(), Scanner.ScannerListener {
         Nfc.nfcHandleIntent(intent, this)
     }
 
+    @SuppressLint("MissingSuperCall")
+    @Suppress("OVERRIDE_DEPRECATION")
     override fun onBackPressed() {
         closeKeyboard(this)
 

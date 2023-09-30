@@ -353,6 +353,8 @@ class AssetManteinanceSelectActivity : AppCompatActivity(),
         rejectNewInstances = false
     }
 
+    @SuppressLint("MissingSuperCall")
+    @Suppress("OVERRIDE_DEPRECATION")
     override fun onBackPressed() {
         closeKeyboard(this)
 

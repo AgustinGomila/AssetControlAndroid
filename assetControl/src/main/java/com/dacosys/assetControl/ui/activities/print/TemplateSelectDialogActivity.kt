@@ -286,6 +286,8 @@ class TemplateSelectDialogActivity : AppCompatActivity(),
         isFilling = false
     }
 
+    @SuppressLint("MissingSuperCall")
+    @Suppress("OVERRIDE_DEPRECATION")
     override fun onBackPressed() {
         closeKeyboard(this)
 

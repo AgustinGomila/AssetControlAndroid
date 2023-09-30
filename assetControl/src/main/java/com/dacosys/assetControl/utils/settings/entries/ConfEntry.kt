@@ -351,7 +351,7 @@ class ConfEntry(
 
         private var wcLastUpdate = ConfEntry(
             800, "LastUpdate", ConfSection.warehouseCounterData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         private var wcRadConfClient = ConfEntry(
@@ -492,7 +492,7 @@ class ConfEntry(
 
         private var acLastUpdate = ConfEntry(
             901, "LastUpdate", ConfSection.assetControlData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         //var acLastUpdateActionLog = ConfEntry(
@@ -501,72 +501,72 @@ class ConfEntry(
 
         var acLastUpdateAsset = ConfEntry(
             903, "LastUpdateAsset", ConfSection.assetControlData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         var acLastUpdateAssetManteinance = ConfEntry(
             956, "LastUpdateAssetManteinance", ConfSection.assetControlData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         var acLastUpdateAssetManteinanceLog = ConfEntry(
             957, "LastUpdateAssetManteinanceLog", ConfSection.assetControlData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         var acLastUpdateAssetReview = ConfEntry(
             904, "LastUpdateAssetReview", ConfSection.assetControlData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         var acLastUpdateItemCategory = ConfEntry(
             905, "LastUpdateItemCategory", ConfSection.assetControlData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         var acLastUpdateManteinanceType = ConfEntry(
             906, "LastUpdateManteinanceType", ConfSection.assetControlData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         var acLastUpdateManteinanceTypeGroup = ConfEntry(
             907, "LastUpdateManteinanceTypeGroup", ConfSection.assetControlData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         var acLastUpdateProviders = ConfEntry(
             908, "LastUpdateProviders", ConfSection.assetControlData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         var acLastUpdateRepairman = ConfEntry(
             955, "LastUpdateRepairman", ConfSection.assetControlData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         var acLastUpdateRepairshop = ConfEntry(
             909, "LastUpdateRepairshop", ConfSection.assetControlData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         var acLastUpdateUser = ConfEntry(
             910, "LastUpdateUser", ConfSection.assetControlData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         var acLastUpdateWarehouse = ConfEntry(
             911, "LastUpdateWarehouse", ConfSection.assetControlData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         var acLastUpdateWarehouseArea = ConfEntry(
             912, "LastUpdateWarehouseArea", ConfSection.assetControlData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         var acLastUpdateWarehouseMovement = ConfEntry(
             913, "LastUpdateWarehouseMovement", ConfSection.assetControlData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         // AC appdata
@@ -799,37 +799,37 @@ class ConfEntry(
 
         var acLastUpdateCostCentre = ConfEntry(
             959, "LastUpdateCostCentre", ConfSection.assetControlData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         var acLastUpdateAssetManteinanceProgramed = ConfEntry(
             960, "LastUpdateAssetManteinanceProgramed", ConfSection.assetControlData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         private var acLastUpdateAssetReviewContent = ConfEntry(
             961, "LastUpdateAssetReviewContent", ConfSection.assetControlData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         var acLastUpdateAttribute = ConfEntry(
             962, "LastUpdateAttribute", ConfSection.assetControlData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         var acLastUpdateAttributeCategory = ConfEntry(
             963, "LastUpdateAttributeCategory", ConfSection.assetControlData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         var acLastUpdateRoute = ConfEntry(
             964, "LastUpdateRoute", ConfSection.assetControlData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         var acLastUpdateDataCollectionRule = ConfEntry(
             965, "LastUpdateDataCollectionRule", ConfSection.assetControlData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         private var acControlRoute =
@@ -846,7 +846,7 @@ class ConfEntry(
 
         var acLastUpdateDataCollection = ConfEntry(
             968, "LastUpdateDataCollection", ConfSection.assetControlData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         private var acControlDataCollection =
@@ -869,7 +869,7 @@ class ConfEntry(
 
         var acLastUpdateRouteProcess = ConfEntry(
             972, "LastUpdateRouteProcess", ConfSection.assetControlData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         private var acControlRouteProcessMainForm =
@@ -886,7 +886,7 @@ class ConfEntry(
 
         private var acLastUpdateDataCollectionReport = ConfEntry(
             975, "LastUpdateDataCollectionReport", ConfSection.assetControlData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         private var acControlDataCollectionReport =
@@ -909,22 +909,22 @@ class ConfEntry(
 
         private var acLastUpdateWarehouseMovementContent = ConfEntry(
             979, "LastUpdateWarehouseMovementContent", ConfSection.assetControlData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         private var acLastUpdateRouteProcessContent = ConfEntry(
             980, "LastUpdateRouteProcessContent", ConfSection.assetControlData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         private var acLastUpdateDataCollectionContent = ConfEntry(
             981, "LastUpdateDataCollectionContent", ConfSection.assetControlData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         var acLastUpdateBarcodeLabelCustom = ConfEntry(
             982, "LastUpdateBarcodeLabelCustom", ConfSection.assetControlData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         private var acControlBarcodeLabelCustom =
@@ -936,7 +936,7 @@ class ConfEntry(
         var acLastUpdateUserWarehouseArea =
             ConfEntry(
                 984, "LastUpdateUserWarehouseArea", ConfSection.assetControlData,
-                String::class.javaObjectType, Statics.defaultDate
+                String::class.javaObjectType, Statics.DEFAULT_DATE
             )
 
         //</editor-fold>
@@ -1246,76 +1246,76 @@ class ConfEntry(
 
         private var acmLastUpdateAsset = ConfEntry(
             1322, "LastUpdateAsset", ConfSection.assetControlMantData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         private var acmLastUpdateAssetManteinance = ConfEntry(
             1323, "LastUpdateAssetManteinance", ConfSection.assetControlMantData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         private var acmLastUpdateAssetManteinanceLog = ConfEntry(
             1324, "LastUpdateAssetManteinanceLog", ConfSection.assetControlMantData,
             Int::class.javaObjectType,
-            Statics.defaultDate
+            Statics.DEFAULT_DATE
         )
 
         private var acmLastUpdateItemCategory = ConfEntry(
             1325, "LastUpdateItemCategory", ConfSection.assetControlMantData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         private var acmLastUpdateManteinanceType = ConfEntry(
             1326, "LastUpdateManteinanceType", ConfSection.assetControlMantData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         private var acmLastUpdateManteinanceTypeGroup = ConfEntry(
             1327, "LastUpdateManteinanceTypeGroup", ConfSection.assetControlMantData,
             Int::class.javaObjectType,
-            Statics.defaultDate
+            Statics.DEFAULT_DATE
         )
 
         private var acmLastUpdateProviders = ConfEntry(
             1328, "LastUpdateProviders", ConfSection.assetControlMantData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         private var acmLastUpdateRepairman = ConfEntry(
             1329, "LastUpdateRepairman", ConfSection.assetControlMantData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         private var acmLastUpdateRepairshop = ConfEntry(
             1330, "LastUpdateRepairshop", ConfSection.assetControlMantData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         private var acmLastUpdateUser = ConfEntry(
             1331, "LastUpdateUser", ConfSection.assetControlMantData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         private var acmLastUpdateWarehouse = ConfEntry(
             1332, "LastUpdateWarehouse", ConfSection.assetControlMantData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         private var acmLastUpdateWarehouseArea = ConfEntry(
             1333, "LastUpdateWarehouseArea", ConfSection.assetControlMantData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         private var acmLastUpdateWarehouseMovement = ConfEntry(
             1334, "LastUpdateWarehouseMovement", ConfSection.assetControlMantData,
             Int::class.javaObjectType,
-            Statics.defaultDate
+            Statics.DEFAULT_DATE
         )
 
         private var acmLastUpdateWarehouseMovementContent = ConfEntry(
             1335, "LastUpdateWarehouseMovementContent", ConfSection.assetControlMantData,
             Int::class.javaObjectType,
-            Statics.defaultDate
+            Statics.DEFAULT_DATE
         )
 
         private var acmManteinanceDays = ConfEntry(
@@ -1355,7 +1355,7 @@ class ConfEntry(
 
         private var acmLastUpdate = ConfEntry(
             1343, "LastUpdate", ConfSection.assetControlMantData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         private var acmControlErrorLogMainForm = ConfEntry(
@@ -1375,7 +1375,7 @@ class ConfEntry(
 
         private var psLastUpdate = ConfEntry(
             1401, "LastUpdate", ConfSection.presaleData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         private var psMinCharCountSearch = ConfEntry(
@@ -1400,52 +1400,52 @@ class ConfEntry(
 
         private var psLastUpdateClient = ConfEntry(
             1407, "LastUpdateClients", ConfSection.presaleData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         private var psLastUpdateItem = ConfEntry(
             1408, "LastUpdateItems", ConfSection.presaleData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         private var psLastUpdateSalesman = ConfEntry(
             1409, "LastUpdateSalesmans", ConfSection.presaleData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         private var psLastUpdateRoute = ConfEntry(
             1410, "LastUpdateRoutes", ConfSection.presaleData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         private var psLastUpdateCountry = ConfEntry(
             1411, "LastUpdateCountries", ConfSection.presaleData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         private var psLastUpdateOrder = ConfEntry(
             1412, "LastUpdateOrders", ConfSection.presaleData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         private var psLastUpdateReturn = ConfEntry(
             1413, "LastUpdateReturns", ConfSection.presaleData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         private var psLastUpdatePayment = ConfEntry(
             1414, "LastUpdatePayments", ConfSection.presaleData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         private var psLastUpdateItemCategory = ConfEntry(
             1415, "LastUpdateItemsCategory", ConfSection.presaleData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         private var psLastUpdateSalesmanRouteLog = ConfEntry(
             1416, "LastUpdateSalesmanRouteLog", ConfSection.presaleData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         private var psSyncThreads = ConfEntry(
@@ -1525,7 +1525,7 @@ class ConfEntry(
 
         private var psLastUpdatePromotion = ConfEntry(
             1432, "LastUpdatePromotion", ConfSection.presaleData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         //</editor-fold>
@@ -1534,7 +1534,7 @@ class ConfEntry(
 
         private var mmLastUpdate = ConfEntry(
             1500, "LastUpdate", ConfSection.medidorMovilData,
-            String::class.javaObjectType, Statics.defaultDate
+            String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         private var mmRadGridClient = ConfEntry(

@@ -39,6 +39,7 @@ class ImageControl {
             imageControl.wsIcUser = Repository.wsIcUser
             imageControl.wsIcPass = Repository.wsIcPass
             imageControl.maxHeightOrWidth = Repository.maxHeightOrWidth
+            imageControl.connectionTimeout = Repository.connectionTimeout
 
         }
     }

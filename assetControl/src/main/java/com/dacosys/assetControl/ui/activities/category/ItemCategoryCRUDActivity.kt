@@ -189,6 +189,8 @@ class ItemCategoryCRUDActivity : AppCompatActivity(), CrudCompleted,
         fillControls()
     }
 
+    @SuppressLint("MissingSuperCall")
+    @Suppress("OVERRIDE_DEPRECATION")
     override fun onBackPressed() {
         cancelItemCategoryModify()
     }

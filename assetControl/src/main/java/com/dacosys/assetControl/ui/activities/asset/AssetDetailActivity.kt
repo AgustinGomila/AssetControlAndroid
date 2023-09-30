@@ -26,9 +26,11 @@ class AssetDetailActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
+    @SuppressLint("MissingSuperCall")
+    @Suppress("OVERRIDE_DEPRECATION")
     override fun onBackPressed() {
         imageControlFragment?.saveImages(true)
-        super.onBackPressed()
+        finish()
     }
 
     private fun destroyLocals() {

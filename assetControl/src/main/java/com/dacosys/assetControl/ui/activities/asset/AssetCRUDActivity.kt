@@ -1,5 +1,6 @@
 package com.dacosys.assetControl.ui.activities.asset
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
@@ -404,6 +405,8 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
         fillControls()
     }
 
+    @SuppressLint("MissingSuperCall")
+    @Suppress("OVERRIDE_DEPRECATION")
     override fun onBackPressed() {
         cancelAssetModify()
     }

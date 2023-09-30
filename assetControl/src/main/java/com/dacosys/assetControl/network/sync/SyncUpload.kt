@@ -27,6 +27,7 @@ import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.preferences.Repository.Companion.connectionTimeout
 import com.dacosys.assetControl.utils.settings.Preference
 import com.dacosys.assetControl.webservice.asset.AssetCollectorObject
 import com.dacosys.assetControl.webservice.asset.AssetObject
@@ -56,10 +57,12 @@ import com.dacosys.assetControl.webservice.route.RouteProcessWs
 import com.dacosys.assetControl.webservice.user.UserObject
 import com.dacosys.assetControl.webservice.user.UserWarehouseAreaObject
 import com.dacosys.assetControl.webservice.user.UserWarehouseAreaWs
+import com.dacosys.imageControl.network.common.ProgressStatus.CREATOR.getFinish
 import com.dacosys.imageControl.network.upload.SendImages
 import com.dacosys.imageControl.network.upload.SendPending
 import com.dacosys.imageControl.network.upload.UploadImagesProgress
 import kotlinx.coroutines.*
+import com.dacosys.imageControl.network.common.ProgressStatus.CREATOR as NetProgressStatus
 
 class SyncUpload(
     private var registryType: SyncRegistryType? = null,
@@ -143,7 +146,7 @@ class SyncUpload(
 
         // Las imágenes con ID locales se enviarán después de
         // obtener los ID reales.
-        SendPending(context = getContext()) { onUploadProgress.invoke(it) }
+        sendPendingImages()
 
         // El orden está dado por la dependencia de los ID
         // en las subsiguientes tablas
@@ -219,6 +222,37 @@ class SyncUpload(
         // Eliminar datos enviados
         removeOldData()
         return@withContext true
+    }
+
+    @get:Synchronized
+    private var isProcessDone = false
+
+    @Synchronized
+    private fun getProcessState(): Boolean {
+        return isProcessDone
+    }
+
+    @Synchronized
+    private fun setProcessState(state: Boolean) {
+        isProcessDone = state
+    }
+
+
+    private fun sendPendingImages() {
+        setProcessState(false)
+
+        SendPending(context = getContext()) {
+            onUploadProgress.invoke(it)
+            val res = it.result
+            setProcessState(res in getFinish() || res == NetProgressStatus.success)
+        }
+
+        val startTime = System.currentTimeMillis()
+        while (!getProcessState()) {
+            if (System.currentTimeMillis() - startTime == (connectionTimeout * 1000).toLong()) {
+                setProcessState(true)
+            }
+        }
     }
 
     private fun removeOldData() {

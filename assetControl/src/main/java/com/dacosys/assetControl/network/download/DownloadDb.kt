@@ -550,7 +550,7 @@ class DownloadDb(
                 registries.add(ConfEntry.acLastUpdateManteinanceType.description)
                 registries.add(ConfEntry.acLastUpdateManteinanceTypeGroup.description)
                 prefsPutString(
-                    registries, Statics.defaultDate
+                    registries, Statics.DEFAULT_DATE
                 )
             } else {
                 scope.launch {

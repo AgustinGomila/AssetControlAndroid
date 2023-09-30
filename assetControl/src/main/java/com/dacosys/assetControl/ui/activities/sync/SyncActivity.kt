@@ -441,7 +441,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
         if (syncing) return
 
         try {
-            if (!Statics.superDemoMode) {
+            if (!Statics.SUPER_DEMO_MODE) {
                 if (Statics.OFFLINE_MODE || !isOnline()) {
                     makeText(binding.root, getString(R.string.offline_mode), SnackBarType.INFO)
                     return
@@ -454,34 +454,38 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
             addLogText("<b>${getString(R.string.sending_data)}...</b>", binding.uploadTextView)
 
             thread {
-                SyncUpload(onSyncTaskProgress = { syncViewModel.setSyncUploadProgress(it) },
+                SyncUpload(
+                    onSyncTaskProgress = { syncViewModel.setSyncUploadProgress(it) },
                     onUploadProgress = { syncViewModel.setUploadImagesProgress(it) })
             }
         } catch (ex: Exception) {
-            val fontColor = "#" + Integer.toHexString(
-                ContextCompat.getColor(
-                    this, R.color.firebrick
-                ) and 0x00ffffff
-            )
-            val t = "<font color='$fontColor'>${getString(R.string.error)}: ${ex.message}...</font>"
-            addLogText(t, binding.uploadTextView)
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                ErrorLog.writeLog(
-                    this,
-                    this::class.java.simpleName,
-                    Html.fromHtml(ex.message.toString(), Html.FROM_HTML_MODE_COMPACT).toString()
-                )
-            } else {
-                @Suppress("DEPRECATION") ErrorLog.writeLog(
-                    this,
-                    this::class.java.simpleName,
-                    Html.fromHtml(ex.message.toString()).toString()
-                )
-            }
-
+            setErrorText(ex.message.toString())
             CURRENT_MODE = -1
             syncing = false
+        }
+    }
+
+    private fun setErrorText(msg: String) {
+        val fontColor = "#" + Integer.toHexString(
+            ContextCompat.getColor(
+                this, R.color.firebrick
+            ) and 0x00ffffff
+        )
+        val t = "<font color='$fontColor'>${getString(R.string.error)}: ${msg}...</font>"
+        addLogText(t, binding.uploadTextView)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            ErrorLog.writeLog(
+                this,
+                this::class.java.simpleName,
+                Html.fromHtml(msg, Html.FROM_HTML_MODE_COMPACT).toString()
+            )
+        } else {
+            @Suppress("DEPRECATION") ErrorLog.writeLog(
+                this,
+                this::class.java.simpleName,
+                Html.fromHtml(msg).toString()
+            )
         }
     }
 

@@ -32,7 +32,7 @@ import com.dacosys.assetControl.network.serverDate.MySqlDateResult
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.network.utils.SetCurrentSession
 import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.Statics.Companion.timeFilename
+import com.dacosys.assetControl.utils.Statics.Companion.TIME_FILE_NAME
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetInt
@@ -1976,7 +1976,7 @@ class SyncDownload(
 
         private fun getDateTimeStr(): String {
             var dateTime = ""
-            val timeFileLocation = File(getContext().cacheDir.absolutePath + "/" + timeFilename)
+            val timeFileLocation = File(getContext().cacheDir.absolutePath + "/" + TIME_FILE_NAME)
 
             //Read text from file
             try {

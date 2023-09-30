@@ -600,6 +600,8 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
         }
     }
 
+    @SuppressLint("MissingSuperCall")
+    @Suppress("OVERRIDE_DEPRECATION")
     override fun onBackPressed() {
         closeKeyboard(this)
 

@@ -4,6 +4,16 @@ import com.dacosys.assetControl.utils.settings.Preference
 
 class Repository {
     companion object {
+        val clientEmail: String
+            get() {
+                return Preferences.prefsGetString(Preference.clientEmail)
+            }
+
+        val clientPassword: String
+            get() {
+                return Preferences.prefsGetString(Preference.clientPassword)
+            }
+
         val clientPackage: String
             get() {
                 return Preferences.prefsGetString(Preference.clientPackage)

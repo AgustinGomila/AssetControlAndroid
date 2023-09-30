@@ -301,7 +301,7 @@ class RouteSelectActivity : AppCompatActivity(),
                 return
             }
 
-            if (Statics.demoMode) {
+            if (Statics.DEMO_MODE) {
                 removeRouteProcess(rpArray[0])
                 fillListView()
             } else {
@@ -455,7 +455,7 @@ class RouteSelectActivity : AppCompatActivity(),
                     )
                 }
 
-                if (Statics.demoMode) Handler(Looper.getMainLooper()).postDelayed({ demo() }, 300)
+                if (Statics.DEMO_MODE) Handler(Looper.getMainLooper()).postDelayed({ demo() }, 300)
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
@@ -477,7 +477,7 @@ class RouteSelectActivity : AppCompatActivity(),
     }
 
     private fun demo() {
-        if (!Statics.demoMode) return
+        if (!Statics.DEMO_MODE) return
 
         arrayAdapter?.selectNext()
         routeSelect()

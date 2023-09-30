@@ -307,6 +307,8 @@ class CodeSelectDialogActivity : AppCompatActivity(),
         JotterListener.lockScanner(this, false)
     }
 
+    @SuppressLint("MissingSuperCall")
+    @Suppress("OVERRIDE_DEPRECATION")
     override fun onBackPressed() {
         closeKeyboard(this)
 

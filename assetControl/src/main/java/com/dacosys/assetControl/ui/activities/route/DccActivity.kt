@@ -459,6 +459,8 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         }
     }
 
+    @SuppressLint("MissingSuperCall")
+    @Suppress("OVERRIDE_DEPRECATION")
     override fun onBackPressed() {
         cancelDcc()
     }
@@ -809,7 +811,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
             fillPreviousData(currentFragment ?: return)
         }
 
-        if (Statics.demoMode) Handler(Looper.getMainLooper()).postDelayed({ demo() }, 300)
+        if (Statics.DEMO_MODE) Handler(Looper.getMainLooper()).postDelayed({ demo() }, 300)
     }
 
     private fun fillPreviousData(f: GeneralFragment) {
@@ -1646,7 +1648,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     private fun demo() {
-        if (!Statics.demoMode) {
+        if (!Statics.DEMO_MODE) {
             return
         }
 

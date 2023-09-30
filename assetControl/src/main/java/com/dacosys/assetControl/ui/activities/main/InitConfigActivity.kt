@@ -17,6 +17,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
+import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.removeDataBases
 import com.dacosys.assetControl.databinding.InitConfigActivityBinding
@@ -48,6 +49,7 @@ import com.dacosys.assetControl.utils.settings.QRConfigType
 import com.dacosys.assetControl.utils.settings.QRConfigType.CREATOR.QRConfigClientAccount
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import io.github.cdimascio.dotenv.DotenvBuilder
 import org.json.JSONObject
 import java.lang.ref.WeakReference
 
@@ -138,6 +140,8 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
         rejectNewInstances = false
     }
 
+    @SuppressLint("MissingSuperCall")
+    @Suppress("OVERRIDE_DEPRECATION")
     override fun onBackPressed() {
         // Esto sirve para salir del programa desde la pantalla de Login
         // moveTaskToBack(true)
@@ -487,11 +491,18 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
             }
 
             R.id.action_trigger_scan -> {
-                ///* For Debug */
-                //scannerCompleted(
-                //    """{"config":{"client_email":"miguel@dacosys.com","client_password":"sarasa123!!"}}""".trimIndent()
-                //)
-                //return super.onOptionsItemSelected(item)
+                if (Statics.SUPER_DEMO_MODE && BuildConfig.DEBUG) {
+                    val env = DotenvBuilder()
+                        .directory("/assets")
+                        .filename("env")
+                        .load()
+
+                    val username = env["CLIENT_EMAIL"]
+                    val password = env["CLIENT_PASSWORD"]
+
+                    scannerCompleted("""{"config":{"client_email":"$username","client_password":"$password"}}""".trimIndent())
+                    return super.onOptionsItemSelected(item)
+                }
 
                 JotterListener.trigger(this)
                 return super.onOptionsItemSelected(item)

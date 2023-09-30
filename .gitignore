@@ -1,6 +1,7 @@
 pass.txt
 private_key.pepk
 ac.jks
+assetControl/src/main/assets/env
 
 # Built application files
 *.apk

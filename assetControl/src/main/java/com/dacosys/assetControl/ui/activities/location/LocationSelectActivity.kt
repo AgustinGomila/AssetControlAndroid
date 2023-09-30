@@ -682,6 +682,8 @@ class LocationSelectActivity : AppCompatActivity(),
         }
     }
 
+    @SuppressLint("MissingSuperCall")
+    @Suppress("OVERRIDE_DEPRECATION")
     override fun onBackPressed() {
         closeKeyboard(this)
 

@@ -391,9 +391,10 @@ class WmcConfirmActivity : AppCompatActivity(),
         }
     }
 
+    @SuppressLint("MissingSuperCall")
+    @Suppress("OVERRIDE_DEPRECATION")
     override fun onBackPressed() {
         modifyMovement()
-        super.onBackPressed()
     }
 
     private fun setupTextView() {

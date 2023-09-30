@@ -231,6 +231,8 @@ class WarehouseCRUDActivity : AppCompatActivity(), CrudCompleted,
         fillControls()
     }
 
+    @SuppressLint("MissingSuperCall")
+    @Suppress("OVERRIDE_DEPRECATION")
     override fun onBackPressed() {
         cancelWarehouseModify()
     }

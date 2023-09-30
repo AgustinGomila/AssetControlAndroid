@@ -403,9 +403,10 @@ class ArcConfirmActivity : AppCompatActivity(),
         }
     }
 
+    @SuppressLint("MissingSuperCall")
+    @Suppress("OVERRIDE_DEPRECATION")
     override fun onBackPressed() {
         modifyCount()
-        super.onBackPressed()
     }
 
     private fun setupTextView() {
