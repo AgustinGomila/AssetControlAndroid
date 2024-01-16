@@ -48,6 +48,8 @@ class ClientPackage {
         }
 
         private var ValidProducts = getValidProducts()
+        private var finishByUser = false
+
         private fun getValidProducts(): ArrayList<String> {
             val r: ArrayList<String> = ArrayList()
             r.add(Statics.APP_VERSION_ID.toString())
@@ -119,11 +121,16 @@ class ClientPackage {
             val listItems: ArrayList<String> = ArrayList()
 
             for (pack in validProductsArray) {
-                listItems.add(pack.getString("client_package_content_description"))
+                val clientPackage = pack.getString("client_package_content_description")
+                val installationCode = pack.getString("installation_code")
+                val packageStr = "$clientPackage (${installationCode})"
+
+                listItems.add(packageStr)
             }
 
             selected = BooleanArray(validProductsArray.size)
 
+            finishByUser = false
             val cw = ContextThemeWrapper(activity, R.style.AlertDialogTheme)
             val builder = AlertDialog.Builder(cw)
 
@@ -158,7 +165,11 @@ class ClientPackage {
                         password = password
                     )
                 }
+                finishByUser = true
                 dialog.dismiss()
+            }
+            builder.setOnDismissListener {
+                if (!finishByUser) callback.onTaskConfigPanelEnded(ProgressStatus.canceled)
             }
 
             val layoutDefault = ResourcesCompat.getDrawable(

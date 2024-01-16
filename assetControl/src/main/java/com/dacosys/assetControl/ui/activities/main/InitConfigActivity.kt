@@ -56,11 +56,12 @@ import java.lang.ref.WeakReference
 class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
     Proxy.Companion.TaskSetupProxyEnded, ClientPackage.Companion.TaskConfigPanelEnded {
     override fun onTaskConfigPanelEnded(status: ProgressStatus) {
-        if (status == ProgressStatus.finished) {
+        if (status in ProgressStatus.getAllFinish()) {
             isConfiguring = false
-            makeText(
-                binding.root, getString(R.string.configuration_applied), SnackBarType.SUCCESS
-            )
+        }
+
+        if (status == ProgressStatus.finished) {
+            makeText(binding.root, getString(R.string.configuration_applied), SnackBarType.SUCCESS)
             removeDataBases()
             finish()
         }
@@ -340,9 +341,7 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private var isConfiguring = false
     private fun attemptToConfigure() {
-        if (isConfiguring) {
-            return
-        }
+        if (isConfiguring) return
         isConfiguring = true
 
         val email = binding.emailEditText.text.toString()
@@ -352,7 +351,9 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
             if (!binding.proxyCheckBox.isChecked) {
                 ConfigHelper.getConfig(
                     email = email, password = password, installationCode = ""
-                ) { onTaskGetPackagesEnded(it) }
+                ) {
+                    onTaskGetPackagesEnded(it)
+                }
             } else {
                 setupProxy(
                     callback = this,
@@ -469,6 +470,12 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
         return true
     }
 
+    private fun isBackPressed() {
+        closeKeyboard(this)
+        setResult(RESULT_CANCELED)
+        finish()
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
@@ -476,7 +483,7 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         return when (item.itemId) {
             R.id.home, android.R.id.home -> {
-                onBackPressed()
+                isBackPressed()
                 return true
             }
 

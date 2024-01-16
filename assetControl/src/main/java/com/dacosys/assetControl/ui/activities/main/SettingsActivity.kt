@@ -108,6 +108,12 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
         }
     }
 
+    private fun isBackPressed() {
+        closeKeyboard(this)
+        setResult(RESULT_CANCELED)
+        finish()
+    }
+
     private fun createOptionsMenu() {
         // Add menu items without overriding methods in the Activity
         addMenuProvider(object : MenuProvider {
@@ -124,7 +130,7 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
                 // Handle the menu selection
                 return when (menuItem.itemId) {
                     R.id.home, android.R.id.home -> {
-                        onBackPressed()
+                        isBackPressed()
                         true
                     }
 

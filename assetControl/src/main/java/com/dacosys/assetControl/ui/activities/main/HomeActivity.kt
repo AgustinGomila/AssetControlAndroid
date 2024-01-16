@@ -64,6 +64,7 @@ import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.utils.ConfigHelper
 import com.dacosys.assetControl.utils.ImageControl.Companion.setupImageControl
+import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
 import com.dacosys.assetControl.utils.Screen.Companion.getBestContrastColor
 import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Statics
@@ -912,6 +913,12 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
         }
     }
 
+    private fun isBackPressed() {
+        closeKeyboard(this)
+        setResult(RESULT_CANCELED)
+        finish()
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
@@ -919,7 +926,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
 
         when (item.itemId) {
             R.id.home, android.R.id.home -> {
-                onBackPressed()
+                isBackPressed()
                 return true
             }
 

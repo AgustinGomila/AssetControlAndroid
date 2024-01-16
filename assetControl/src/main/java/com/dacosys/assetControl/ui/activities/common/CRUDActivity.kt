@@ -11,6 +11,7 @@ import com.dacosys.assetControl.ui.activities.asset.AssetCRUDActivity
 import com.dacosys.assetControl.ui.activities.category.ItemCategoryCRUDActivity
 import com.dacosys.assetControl.ui.activities.location.WarehouseAreaCRUDActivity
 import com.dacosys.assetControl.ui.activities.location.WarehouseCRUDActivity
+import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
 import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Screen.Companion.setupUI
 
@@ -81,6 +82,12 @@ class CRUDActivity : AppCompatActivity() {
         setupUI(binding.root, this)
     }
 
+    private fun isBackPressed() {
+        closeKeyboard(this)
+        setResult(RESULT_CANCELED)
+        finish()
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
@@ -88,7 +95,7 @@ class CRUDActivity : AppCompatActivity() {
 
         return when (item.itemId) {
             R.id.home, android.R.id.home -> {
-                onBackPressed()
+                isBackPressed()
                 true
             }
 

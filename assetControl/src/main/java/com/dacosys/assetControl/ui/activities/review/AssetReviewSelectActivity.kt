@@ -616,13 +616,19 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
         return true
     }
 
+    private fun isBackPressed() {
+        closeKeyboard(this)
+        setResult(RESULT_CANCELED)
+        finish()
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         when (item.itemId) {
             R.id.home, android.R.id.home -> {
-                onBackPressed()
+                isBackPressed()
                 return true
             }
 

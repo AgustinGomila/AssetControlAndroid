@@ -178,6 +178,11 @@ class CodeCheckActivity : AppCompatActivity(),
     private val menuItemRandomWa = 999004
     private val menuItemRandomSerial = 999005
 
+    private fun isBackPressed() {
+        closeKeyboard(this)
+        setResult(RESULT_CANCELED)
+        finish()
+    }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         // Handle action bar item clicks here. The action bar will
@@ -186,7 +191,7 @@ class CodeCheckActivity : AppCompatActivity(),
 
         when (item.itemId) {
             R.id.home, android.R.id.home -> {
-                onBackPressed()
+                isBackPressed()
                 return true
             }
 

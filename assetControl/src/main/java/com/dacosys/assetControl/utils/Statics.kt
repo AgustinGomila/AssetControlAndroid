@@ -18,7 +18,7 @@ class Statics {
     companion object {
 
         val newLine: String
-            get() = System.getProperty("line.separator") ?: "\r\n"
+            get() = System.lineSeparator() ?: "\r\n"
 
         // region DEBUG DEMO
         const val DEMO_MODE = false

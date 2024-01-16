@@ -545,6 +545,12 @@ class ArcConfirmActivity : AppCompatActivity(),
         finish()
     }
 
+    private fun isBackPressed() {
+        closeKeyboard(this)
+        setResult(RESULT_CANCELED)
+        finish()
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
@@ -552,7 +558,7 @@ class ArcConfirmActivity : AppCompatActivity(),
 
         return when (item.itemId) {
             R.id.home, android.R.id.home -> {
-                onBackPressed()
+                isBackPressed()
                 true
             }
 
