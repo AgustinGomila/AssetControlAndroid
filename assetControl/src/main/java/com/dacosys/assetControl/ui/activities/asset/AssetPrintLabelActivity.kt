@@ -1114,7 +1114,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
             }
         }
 
-    override fun onAlbumViewRequired(tableId: Int, itemId: Long) {
+    override fun onAlbumViewRequired(tableId: Int, itemId: Long, filename: String) {
         if (!useImageControl) return
 
         if (rejectNewInstances) return

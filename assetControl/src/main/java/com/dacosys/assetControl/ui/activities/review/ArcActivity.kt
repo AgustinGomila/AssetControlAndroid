@@ -2092,7 +2092,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
 // region ImageControl
 
-    override fun onAlbumViewRequired(tableId: Int, itemId: Long) {
+    override fun onAlbumViewRequired(tableId: Int, itemId: Long, filename: String) {
         if (!useImageControl) {
             return
         }

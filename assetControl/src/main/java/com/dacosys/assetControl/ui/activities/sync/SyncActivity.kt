@@ -1,6 +1,7 @@
 package com.dacosys.assetControl.ui.activities.sync
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -12,6 +13,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.menu.MenuBuilder
@@ -21,9 +23,10 @@ import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat
 import androidx.core.view.ViewCompat
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.R.id
 import com.dacosys.assetControl.R.layout
+import com.dacosys.assetControl.adapters.interfaces.Interfaces
 import com.dacosys.assetControl.adapters.sync.SyncElementAdapter
 import com.dacosys.assetControl.databinding.SyncActivityBinding
 import com.dacosys.assetControl.model.asset.Asset
@@ -44,25 +47,35 @@ import com.dacosys.assetControl.network.utils.*
 import com.dacosys.assetControl.network.utils.Connection.Companion.isOnline
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
+import com.dacosys.assetControl.utils.Screen
 import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.Statics.Companion.INTERNAL_IMAGE_CONTROL_APP_ID
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.preferences.Preferences
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetStringSet
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsPutStringSet
-import com.dacosys.assetControl.utils.preferences.Repository
+import com.dacosys.assetControl.utils.preferences.Repository.Companion.useImageControl
 import com.dacosys.assetControl.utils.settings.Preference
 import com.dacosys.assetControl.viewModel.sync.PendingViewModel
 import com.dacosys.assetControl.viewModel.sync.SyncViewModel
 import com.dacosys.assetControl.webservice.common.Webservice.Companion.getWebservice
+import com.dacosys.imageControl.dto.DocumentContent
+import com.dacosys.imageControl.network.common.ProgramData
+import com.dacosys.imageControl.network.download.GetImages.Companion.toDocumentContentList
 import com.dacosys.imageControl.network.upload.UploadImagesProgress
+import com.dacosys.imageControl.room.dao.ImageCoroutines
 import com.dacosys.imageControl.room.entity.Image
+import com.dacosys.imageControl.ui.activities.ImageControlGridActivity
+import java.io.File
 import kotlin.concurrent.thread
 import com.dacosys.imageControl.network.common.ProgressStatus as IcProgressStatus
 
 @Suppress("UNCHECKED_CAST")
 class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
-    SyncElementAdapter.CheckedChangedListener, SyncElementAdapter.DataSetChangedListener {
+    SyncElementAdapter.CheckedChangedListener, SyncElementAdapter.DataSetChangedListener,
+    Interfaces.AlbumViewRequiredListener {
     override fun onDestroy() {
         saveSharedPreferences()
         destroyLocals()
@@ -79,7 +92,8 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
     }
 
     private fun destroyLocals() {
-        syncAdapter?.refreshListeners(null, null)
+        adapter?.refreshListeners(null, null)
+        adapter?.setImageControlListener(null)
     }
 
     override fun onDataSetChanged() {
@@ -224,8 +238,13 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
     private var checkedIdArray: ArrayList<String> = ArrayList()
     private var currentPos: Int? = null
     private var firstVisiblePos: Int? = null
-    private var syncAdapter: SyncElementAdapter? = null
+    private var adapter: SyncElementAdapter? = null
     //
+
+    private var tempObjectId = ""
+    private var tempTableId = 0
+
+    private var rejectNewInstances: Boolean = false
 
     private var syncing: Boolean = false
 
@@ -249,6 +268,13 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
     private var assetReviewStatus = ""
     private var warehouseMovementStatus = ""
     private var dataCollectionStatus = ""
+
+    private val menuItemShowImages = 9999
+    private var showImages
+        get() = Preferences.prefsGetBoolean(Preference.syncShowImages)
+        set(value) {
+            Preferences.prefsPutBoolean(Preference.syncShowImages.key, value)
+        }
 
     override fun onRefresh() {
         Handler(Looper.getMainLooper()).postDelayed({
@@ -295,11 +321,11 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
         b.putString("warehouseMovementStatus", warehouseMovementStatus)
         b.putString("dataCollectionStatus", dataCollectionStatus)
 
-        if (syncAdapter != null) {
-            b.putInt("currentPos", syncAdapter?.currentPos() ?: 0)
-            b.putInt("firstVisiblePos", syncAdapter?.firstVisiblePos() ?: 0)
-            b.putParcelableArrayList("visibleRegistryArray", syncAdapter?.getVisibleRegistry())
-            b.putStringArrayList("checkedIdArray", syncAdapter?.getAllChecked())
+        if (adapter != null) {
+            b.putInt("currentPos", adapter?.currentPos() ?: 0)
+            b.putInt("firstVisiblePos", adapter?.firstVisiblePos() ?: 0)
+            b.putParcelableArrayList("visibleRegistryArray", adapter?.getVisibleRegistry())
+            b.putStringArrayList("checkedIdArray", adapter?.getAllChecked())
         }
     }
 
@@ -910,13 +936,13 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
 
         try {
             runOnUiThread {
-                if (syncAdapter != null) {
-                    currentPos = syncAdapter?.currentPos()
-                    firstVisiblePos = syncAdapter?.firstVisiblePos()
+                if (adapter != null) {
+                    currentPos = adapter?.currentPos()
+                    firstVisiblePos = adapter?.firstVisiblePos()
                 }
 
-                if (syncAdapter == null || syncElements != null) {
-                    syncAdapter = SyncElementAdapter(
+                if (adapter == null || syncElements != null) {
+                    adapter = SyncElementAdapter(
                         activity = this,
                         resource = layout.null_row,
                         syncElements = syncElements ?: ArrayList(),
@@ -924,8 +950,11 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
                         multiSelect = false,
                         checkedIdArray = checkedIdArray,
                         visibleRegistry = visibleRegistryArray,
+                        showImages = showImages,
+                        showImagesCallback = { showImages = it },
                         checkedChangedListener = this,
-                        dataSetChangedListener = this
+                        dataSetChangedListener = this,
+                        albumViewRequiredListener = this
                     )
                 } else {
                     // IMPORTANTE:
@@ -933,17 +962,16 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
                     // las variables de esta actividad pueden
                     // tener valores antiguos en del adaptador.
 
-                    syncAdapter?.refreshListeners(
-                        checkedChangedListener = this, dataSetChangedListener = this
-                    )
-                    syncAdapter?.refresh()
+                    adapter?.refreshListeners(checkedChangedListener = this, dataSetChangedListener = this)
+                    adapter?.setImageControlListener(this)
+                    adapter?.refresh()
                 }
 
                 while (binding.syncElementListView.adapter == null) {
                     // Horrible wait for full load
                 }
 
-                syncAdapter?.setSelectItemAndScrollPos(currentPos, firstVisiblePos)
+                adapter?.setSelectItemAndScrollPos(currentPos, firstVisiblePos)
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
@@ -955,7 +983,6 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
 
     @SuppressLint("RestrictedApi")
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
         if (menu is MenuBuilder) {
             menu.setOptionalIconsVisible(true)
         }
@@ -1011,7 +1038,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
         colors.add(assetManteinance)
         colors.add(dataCollection)
         colors.add(routeProcess)
-        if (Repository.useImageControl) colors.add(image)
+        if (useImageControl) colors.add(image)
         //endregion Icon colors
 
         for ((index, i) in SyncRegistryType.getSyncUpload().withIndex()) {
@@ -1037,7 +1064,28 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
             })
         }
 
+        // Opción de visibilidad de Imágenes
+        if (useImageControl) {
+            menu.add(Menu.NONE, menuItemShowImages, Menu.NONE, getContext().getString(R.string.show_images))
+                .setChecked(showImages).isCheckable = true
+            val item = menu.findItem(menuItemShowImages)
+            if (showImages)
+                item.icon = ContextCompat.getDrawable(getContext(), R.drawable.ic_photo_library)
+            else
+                item.icon = ContextCompat.getDrawable(getContext(), R.drawable.ic_hide_image)
+            item.icon?.mutate()?.colorFilter =
+                BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
+                    getColor(R.color.dimgray), BlendModeCompat.SRC_IN
+                )
+        }
+
         return true
+    }
+
+    private fun isBackPressed() {
+        Screen.closeKeyboard(this)
+        setResult(RESULT_CANCELED)
+        finish()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -1045,31 +1093,47 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
 
-        if (item.itemId == id.home || item.itemId == android.R.id.home) {
-            onBackPressed()
-            return true
-        }
+        when (item.itemId) {
+            R.id.home, android.R.id.home -> {
+                isBackPressed()
+                return true
+            }
 
-        return statusItemSelected(item)
+            else -> {
+                return statusItemSelected(item)
+            }
+        }
     }
 
     private fun statusItemSelected(item: MenuItem): Boolean {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        if (syncAdapter == null) {
+        if (adapter == null) {
             return false
         }
 
-        val visibleRegistry = syncAdapter!!.getVisibleRegistry()
+        val visibleRegistry = adapter!!.getVisibleRegistry()
         item.isChecked = !item.isChecked
+
+        if (item.itemId == menuItemShowImages) {
+            adapter?.showImages(item.isChecked)
+            if (item.isChecked)
+                item.icon = ContextCompat.getDrawable(getContext(), R.drawable.ic_photo_library)
+            else
+                item.icon = ContextCompat.getDrawable(getContext(), R.drawable.ic_hide_image)
+            item.icon?.mutate()?.colorFilter =
+                BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
+                    getColor(R.color.dimgray), BlendModeCompat.SRC_IN
+                )
+        }
 
         val syncReg = SyncRegistryType.getById(item.itemId)
         if (syncReg != null) {
             if (item.isChecked && !visibleRegistry.contains(syncReg)) {
-                syncAdapter!!.addVisibleRegistry(syncReg)
+                adapter!!.addVisibleRegistry(syncReg)
             } else if (!item.isChecked && visibleRegistry.contains(syncReg)) {
-                syncAdapter!!.removeVisibleRegistry(syncReg)
+                adapter!!.removeVisibleRegistry(syncReg)
             } else {
                 return super.onOptionsItemSelected(item)
             }
@@ -1077,11 +1141,60 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
             return super.onOptionsItemSelected(item)
         }
 
-        if (syncAdapter?.isStatusVisible(syncAdapter?.currentPos() ?: -1) == false) {
+        if (adapter?.isStatusVisible(adapter?.currentPos() ?: -1) == false) {
             // La fila actual está invisible, seleccionar la anterior visible
-            syncAdapter?.selectNearVisible()
+            adapter?.selectNearVisible()
         }
 
         return true
     }
+
+    // region ImageControl Album
+    override fun onAlbumViewRequired(tableId: Int, itemId: Long, filename: String) {
+        if (!useImageControl) return
+
+        if (rejectNewInstances) return
+        rejectNewInstances = true
+
+        tempObjectId = itemId.toString()
+        tempTableId = tableId
+
+        val programData = ProgramData(
+            programId = INTERNAL_IMAGE_CONTROL_APP_ID,
+            programObjectId = tempTableId.toLong(),
+            objId1 = tempObjectId
+        )
+
+        ImageCoroutines().get(
+            context = getContext(),
+            programData = programData,
+        ) {
+            val allLocal = toDocumentContentList(
+                images = it,
+                programData = programData,
+            )
+            val r = allLocal.mapNotNull { image -> if (File(image.filenameOriginal).name == filename) image else null }
+
+            if (r.isNotEmpty()) {
+                showPhotoAlbum(ArrayList(r), filename)
+            }
+        }
+    }
+
+    private fun showPhotoAlbum(images: ArrayList<DocumentContent> = ArrayList(), filename: String) {
+        val intent = Intent(this, ImageControlGridActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+        intent.putExtra(ImageControlGridActivity.ARG_PROGRAM_OBJECT_ID, tempTableId.toLong())
+        intent.putExtra(ImageControlGridActivity.ARG_OBJECT_ID_1, tempObjectId)
+        intent.putExtra(ImageControlGridActivity.ARG_DOC_CONT_OBJ_ARRAY_LIST, images)
+        intent.putExtra(ImageControlGridActivity.ARG_FILTER_FILENAME, filename)
+        resultForShowPhotoAlbum.launch(intent)
+    }
+
+    private val resultForShowPhotoAlbum =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            rejectNewInstances = false
+        }
+
+    // endregion ImageControl Album
 }

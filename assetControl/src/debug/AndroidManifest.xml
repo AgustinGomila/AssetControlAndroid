@@ -50,6 +50,7 @@
 
     <application
             android:name="com.dacosys.assetControl.AssetControlApp"
+            android:enableOnBackInvokedCallback="true"
             android:configChanges="uiMode"
             android:hardwareAccelerated="true"
             android:icon="@mipmap/ic_launcher"
@@ -61,7 +62,7 @@
             android:theme="@style/AssetControlTheme"
             android:usesCleartextTraffic="true"
             tools:ignore="GoogleAppIndexingWarning"
-            tools:targetApi="n">
+            tools:targetApi="tiramisu">
 
         <!-- HONEYWELL Native support -->
         <uses-library

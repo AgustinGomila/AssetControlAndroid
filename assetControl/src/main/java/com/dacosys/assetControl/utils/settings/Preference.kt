@@ -633,6 +633,12 @@ class Preference(key: String, defaultValue: Any, debugValue: Any) {
             debugValue = false
         )
 
+        var syncShowImages = Preference(
+            "asset_print_show_images",
+            defaultValue = false,
+            debugValue = false
+        )
+
         var showScannedCode = Preference(
             "show_scanned_code",
             defaultValue = false,
@@ -865,7 +871,8 @@ class Preference(key: String, defaultValue: Any, debugValue: Any) {
                 selectRouteOnlyActive,
                 selectRouteDescription,
                 selectWarehouseAreaOnlyActive,
-                selectWarehouseOnlyActive
+                selectWarehouseOnlyActive,
+                syncShowImages
             )
 
             return ArrayList(allSections.sortedWith(compareBy { it.key }))

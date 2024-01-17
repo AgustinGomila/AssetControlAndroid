@@ -4,6 +4,8 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.Configuration
+import android.graphics.Bitmap
+import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -53,12 +55,17 @@ import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.UTCDataTime
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.preferences.Repository.Companion.maxHeightOrWidth
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.utils.scanners.nfc.Nfc
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.utils.settings.Preference
+import com.dacosys.imageControl.room.dao.ImageCoroutines
 import com.dacosys.imageControl.ui.fragments.ImageControlButtonsFragment
+import com.dacosys.imageControl.ui.snackBar.MakeText
+import com.dacosys.imageControl.ui.snackBar.SnackBarEventData
+import kotlinx.coroutines.runBlocking
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener
 import org.parceler.Parcels
@@ -1729,7 +1736,112 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
             }
         }
 
-        next()
+        val randomPhoto: Int = ThreadLocalRandom.current().nextInt(0, 9)
+        if (randomPhoto == 0) {
+            runBlocking {
+                addDemoPhoto(
+                    onSnackBarEvent = {
+                        MakeText.makeText(binding.root, it.text, it.snackBarType)
+                    },
+                    onFinished = {
+                        Log.i(this::class.java.simpleName, "Imagen de Demostración guardada OK.")
+                        runOnUiThread { next() }
+                    },
+                    onCrash = {
+                        Log.e(this::class.java.simpleName, "Error al guardar imagen de Demostración.")
+                        runOnUiThread { next() }
+                    }
+                )
+            }
+        } else {
+            next()
+        }
+    }
+
+    private fun addDemoPhoto(
+        onSnackBarEvent: (SnackBarEventData) -> Unit,
+        onFinished: () -> Unit,
+        onCrash: () -> Unit
+    ) {
+        if (imageControlFragment == null) return
+
+        val programId = imageControlFragment?.programId ?: return
+        val objectId1 = imageControlFragment?.objectId1 ?: return
+        val objectId2 = imageControlFragment?.objectId2 ?: ""
+        val tableId = imageControlFragment?.tableId ?: return
+
+        val dcrDescription = dcr?.description ?: ""
+        val rpcAsset = rpc?.assetStr ?: ""
+        val rpcWa = rpc?.warehouseAreaStr ?: ""
+        val rpcW = rpc?.warehouseStr
+        val rpcAssetCode = rpc?.assetCode ?: ""
+
+        Log.d(this::class.java.simpleName, "Guardando imagen de Demostración...")
+
+        val image: Bitmap = generateRandomBitmap(maxHeightOrWidth, maxHeightOrWidth)
+
+        val photoFilePath = ImageCoroutines().addJpgPhotoToGallery(
+            context = applicationContext,
+            activity = this,
+            image = image
+        )
+
+        val reference = "${getString(R.string.asset)}: $rpcAssetCode"
+        val obs = "${getString(R.string.user)}: ${Statics.currentUser()?.name}"
+
+        var description = "${dcrDescription}, ${
+            when {
+                rpcAsset.isNotEmpty() -> rpcAsset
+                rpcWa.isNotEmpty() -> rpcWa
+                !rpcW.isNullOrEmpty() -> rpcW
+                else -> getString(R.string.no_name)
+            }
+        }"
+
+        val tableName = Table.routeProcess.tableName
+        description = "$tableName: $description"
+        if (description.length > 255) {
+            description.substring(0, 255)
+        }
+
+        ImageCoroutines().savePhotoInDb(
+            context = applicationContext,
+            photoFilePath = photoFilePath,
+            programId = programId,
+            programObjectId = tableId,
+            objectId1 = objectId1,
+            objectId2 = objectId2,
+            description = description,
+            reference = reference,
+            obs = obs,
+            onSnackBarEvent = onSnackBarEvent,
+            onFinished = onFinished,
+            onCrash = onCrash
+        )
+    }
+
+    private fun generateRandomBitmap(width: Int, height: Int): Bitmap {
+        val gridSize = 3
+        val cellSize = width / gridSize // Tamaño de cada celda en el Bitmap
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        for (row in 0 until gridSize) {
+            for (col in 0 until gridSize) {
+                val color = generateRandomColor()
+                for (x in col * cellSize until (col + 1) * cellSize) {
+                    for (y in row * cellSize until (row + 1) * cellSize) {
+                        bitmap.setPixel(x, y, color)
+                    }
+                }
+            }
+        }
+        return bitmap
+    }
+
+    private fun generateRandomColor(): Int {
+        val red = (0..255).random()
+        val green = (0..255).random()
+        val blue = (0..255).random()
+        return Color.rgb(red, green, blue)
     }
 
 // region READERS Reception

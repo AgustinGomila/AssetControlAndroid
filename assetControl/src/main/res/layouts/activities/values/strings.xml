@@ -347,6 +347,7 @@
     <string name="category_modified_correctly">Categoría modificada correctamente</string>
     <string name="select_category">Seleccionar categoría</string>
     <string name="observations">Observaciones</string>
+    <string name="filename">Nombre de archivo</string>
     <string name="does_not_exist_in_the_database">No existe en la base de datos</string>
     <string name="it_has_a_label_valid_only_in_reports">Tiene una etiqueta sólo válida en reportes</string>
     <string name="it_has_a_disabled_tag">Tiene una etiqueta deshabilitada</string>

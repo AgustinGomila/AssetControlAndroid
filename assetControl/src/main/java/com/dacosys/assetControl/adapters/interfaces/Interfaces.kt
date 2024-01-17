@@ -27,7 +27,7 @@ class Interfaces {
     }
 
     interface AlbumViewRequiredListener {
-        fun onAlbumViewRequired(tableId: Int, itemId: Long)
+        fun onAlbumViewRequired(tableId: Int, itemId: Long, filename: String = "")
     }
 
     interface AddPhotoRequiredListener {

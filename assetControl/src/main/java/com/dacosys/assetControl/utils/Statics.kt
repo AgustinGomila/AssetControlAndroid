@@ -26,6 +26,8 @@ class Statics {
         const val SUPER_DEMO_MODE = false
         // endregion DEBUG DEMO
 
+        const val AUTO_SEND_ON_STARTUP = !DEMO_MODE
+
         val appName: String
             get() = "${getApplicationName()}M13"
 

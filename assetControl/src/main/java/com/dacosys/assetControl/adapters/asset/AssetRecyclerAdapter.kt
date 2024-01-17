@@ -1155,29 +1155,34 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
 
             Handler(Looper.getMainLooper()).postDelayed({
                 adapter.run {
-                    ImageAdapter.getImages(context = getContext(), programData = ProgramData(
-                        programObjectId = Table.asset.tableId.toLong(), objId1 = asset.assetId.toString()
-                    ), onProgress = {
-                        when (it.status) {
-                            GetImageStatus.STARTING -> {
-                                waitingImagePanel(holder)
-                            }
-
-                            GetImageStatus.NO_IMAGES -> {
-                                idWithImage.remove(asset.assetId)
-                                collapseImagePanel(holder)
-                            }
-
-                            GetImageStatus.IMAGE_BROKEN, GetImageStatus.NO_AVAILABLE, GetImageStatus.IMAGE_AVAILABLE -> {
-                                if (!idWithImage.contains(asset.assetId)) {
-                                    idWithImage.add(asset.assetId)
+                    ImageAdapter.getImages(
+                        context = getContext(),
+                        programData = ProgramData(
+                            programObjectId = Table.asset.tableId.toLong(),
+                            objId1 = asset.assetId.toString()
+                        ),
+                        onProgress = {
+                            when (it.status) {
+                                GetImageStatus.STARTING -> {
+                                    waitingImagePanel(holder)
                                 }
-                                val image = it.image
-                                if (image != null) showImagePanel(holder, image)
-                                else collapseImagePanel(holder)
+
+                                GetImageStatus.NO_IMAGES -> {
+                                    idWithImage.remove(asset.assetId)
+                                    collapseImagePanel(holder)
+                                }
+
+                                GetImageStatus.IMAGE_BROKEN, GetImageStatus.NO_AVAILABLE, GetImageStatus.IMAGE_AVAILABLE -> {
+                                    if (!idWithImage.contains(asset.assetId)) {
+                                        idWithImage.add(asset.assetId)
+                                    }
+                                    val image = it.image
+                                    if (image != null) showImagePanel(holder, image)
+                                    else collapseImagePanel(holder)
+                                }
                             }
                         }
-                    })
+                    )
                 }
             }, 0)
         }

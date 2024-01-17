@@ -284,9 +284,8 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                 SQLiteDatabase.releaseMemory()
 
                 // Enviar las imágenes pendientes...
-                if (Repository.useImageControl) {
+                if (Repository.useImageControl && Statics.AUTO_SEND_ON_STARTUP)
                     SendPending(context = getContext())
-                }
 
                 thread {
                     Sync.goSync(onSyncProgress = { syncViewModel.setSyncDownloadProgress(it) },

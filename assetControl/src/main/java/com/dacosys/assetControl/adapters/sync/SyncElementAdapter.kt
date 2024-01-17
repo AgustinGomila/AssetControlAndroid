@@ -2,7 +2,10 @@ package com.dacosys.assetControl.adapters.sync
 
 import android.annotation.SuppressLint
 import android.content.res.ColorStateList
+import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -11,12 +14,14 @@ import android.view.View.*
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat
 import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.R
+import com.dacosys.assetControl.adapters.interfaces.Interfaces
 import com.dacosys.assetControl.model.asset.Asset
 import com.dacosys.assetControl.model.asset.AssetStatus
 import com.dacosys.assetControl.model.category.ItemCategory
@@ -37,7 +42,11 @@ import com.dacosys.assetControl.utils.Screen.Companion.textLightColor
 import com.dacosys.assetControl.utils.misc.Md5.Companion.getMd5
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetString
 import com.dacosys.assetControl.utils.settings.Preference.Companion.lineSeparator
+import com.dacosys.imageControl.network.common.ProgramData
 import com.dacosys.imageControl.room.entity.Image
+import com.dacosys.imageControl.ui.adapter.ImageAdapter
+import com.dacosys.imageControl.ui.adapter.ImageAdapter.Companion.GetImageStatus
+import java.io.File
 import java.lang.ref.WeakReference
 import java.math.BigInteger
 import java.util.*
@@ -58,6 +67,9 @@ class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
     private var dataSetChangedListener: DataSetChangedListener? = null
     private var checkedChangedListener: CheckedChangedListener? = null
 
+    // Listeners para los eventos de ImageControl.
+    private var albumViewRequiredListener: Interfaces.AlbumViewRequiredListener? = null
+
     private var multiSelect: Boolean = false
 
     private var syncElementArray: ArrayList<Any> = ArrayList()
@@ -66,18 +78,26 @@ class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
     private var visibleRegistry: ArrayList<SyncRegistryType> = ArrayList()
     private var checkedIdArray: ArrayList<String> = ArrayList()
 
+    // Ids de activos que tienen imágenes
+    private var idWithImage: ArrayList<String> = ArrayList()
+
+    private var showImages: Boolean = false
+    private var showImagesChanged: (Boolean) -> Unit = { }
+
     constructor(
         activity: AppCompatActivity,
         resource: Int,
         syncElements: ArrayList<Any>,
         listView: ListView?,
         multiSelect: Boolean,
+        showImages: Boolean,
+        showImagesCallback: (Boolean) -> Unit = {},
         checkedIdArray: ArrayList<String>,
         visibleRegistry: ArrayList<SyncRegistryType>,
         checkedChangedListener: CheckedChangedListener?,
         dataSetChangedListener: DataSetChangedListener?,
-
-        ) : super(AssetControlApp.getContext(), resource, syncElements) {
+        albumViewRequiredListener: Interfaces.AlbumViewRequiredListener? = null
+    ) : super(AssetControlApp.getContext(), resource, syncElements) {
         this.activity = activity
         this.resource = resource
         this.multiSelect = multiSelect
@@ -88,8 +108,13 @@ class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
         this.checkedChangedListener = checkedChangedListener
         this.dataSetChangedListener = dataSetChangedListener
 
+        this.albumViewRequiredListener = albumViewRequiredListener
+
         this.listView = listView
         this.syncElementArray = syncElements
+
+        this.showImages = showImages
+        this.showImagesChanged = showImagesCallback
 
         setupColors()
     }
@@ -100,6 +125,12 @@ class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
     ) {
         this.checkedChangedListener = checkedChangedListener
         this.dataSetChangedListener = dataSetChangedListener
+    }
+
+    fun setImageControlListener(
+        albumViewRequiredListener: Interfaces.AlbumViewRequiredListener?
+    ) {
+        this.albumViewRequiredListener = albumViewRequiredListener
     }
 
     interface DataSetChangedListener {
@@ -147,7 +178,8 @@ class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
     override fun clear() {
         activity.runOnUiThread {
             super.clear()
-            clearChecked()
+            checkedIdArray.clear()
+            idWithImage.clear()
         }
     }
 
@@ -314,7 +346,7 @@ class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
     }
 
     /**
-     * Md5hash to int
+     * Md5 hash to int
      *
      * @param hash
      * @return Entero de 10 dígitos de longitud que puede usarse como identificador
@@ -347,10 +379,6 @@ class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
     fun setChecked(checkedItems: ArrayList<Any>) {
         checkedItems.clear()
         setChecked(checkedItems, true)
-    }
-
-    private fun clearChecked() {
-        checkedIdArray.clear()
     }
 
     override fun sort(comparator: Comparator<in Any>) {
@@ -451,7 +479,7 @@ class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
         return isStatusVisible(getItem(position))
     }
 
-    fun isStatusVisible(arc: Any?): Boolean {
+    private fun isStatusVisible(arc: Any?): Boolean {
         return if (arc != null) {
             when (arc) {
                 is Asset -> return visibleRegistry.contains(SyncRegistryType.Asset)
@@ -561,10 +589,21 @@ class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
             // El view ya existe, comprobar que no necesite cambiar de layout.
             if (
             // Row null cambiando...
-                v.tag is String || v.tag is AssetViewHolder && currentLayout != R.layout.sync_element_asset_row || v.tag is ItemCategoryViewHolder && currentLayout != R.layout.sync_element_item_category_row || v.tag is WarehouseViewHolder && currentLayout != R.layout.sync_element_warehouse_row || v.tag is WarehouseAreaViewHolder && currentLayout != R.layout.sync_element_warehouse_area_row || v.tag is WarehouseViewHolder && currentLayout != R.layout.sync_element_warehouse_row || v.tag is DataCollectionViewHolder && currentLayout != R.layout.sync_element_data_collection_row || v.tag is RouteProcessViewHolder && currentLayout != R.layout.sync_element_route_process_row || v.tag is WarehouseMovementViewHolder && currentLayout != R.layout.sync_element_warehouse_movement_row || v.tag is AssetReviewViewHolder && currentLayout != R.layout.sync_element_asset_review_row || v.tag is ImageViewHolder && currentLayout != R.layout.sync_element_image_row) {
+                v.tag is String ||
+                v.tag is AssetViewHolder && currentLayout != R.layout.sync_element_asset_row ||
+                v.tag is ItemCategoryViewHolder && currentLayout != R.layout.sync_element_item_category_row ||
+                v.tag is WarehouseViewHolder && currentLayout != R.layout.sync_element_warehouse_row ||
+                v.tag is WarehouseAreaViewHolder && currentLayout != R.layout.sync_element_warehouse_area_row ||
+                v.tag is WarehouseViewHolder && currentLayout != R.layout.sync_element_warehouse_row ||
+                v.tag is DataCollectionViewHolder && currentLayout != R.layout.sync_element_data_collection_row ||
+                v.tag is RouteProcessViewHolder && currentLayout != R.layout.sync_element_route_process_row ||
+                v.tag is WarehouseMovementViewHolder && currentLayout != R.layout.sync_element_warehouse_movement_row ||
+                v.tag is AssetReviewViewHolder && currentLayout != R.layout.sync_element_asset_review_row ||
+                v.tag is ImageViewHolder && currentLayout != R.layout.sync_element_image_row
+            ) {
                 // Ya fue creado, si es un row normal que está siendo seleccionada
                 // o un row expandido que está siendo deseleccionado
-                // debe cambiar de layout, por lo tanto volver a crearse.
+                // debe cambiar de layout, por lo tanto, volver a crearse.
                 val vi = LayoutInflater.from(context)
                 v = vi.inflate(currentLayout, parent, false)
 
@@ -1167,6 +1206,12 @@ class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
         holder.gralConstraintLayout = v.findViewById(R.id.generalDataConstraintLayout)
         holder.descriptionTv = v.findViewById(R.id.descriptionTv)
         holder.obsTv = v.findViewById(R.id.obsArTv)
+        holder.filenameTv = v.findViewById(R.id.filenameTv)
+
+        holder.albumImageView = v.findViewById(R.id.albumImageView)
+        holder.imageConstraintLayout = v.findViewById(R.id.imageConstraintLayout)
+        holder.progressBar = v.findViewById(R.id.progressBar)
+        holder.imageView = v.findViewById(R.id.imageView)
 
         if (multiSelect) {
             holder.checkBox?.visibility = VISIBLE
@@ -1461,8 +1506,15 @@ class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
 
         if (syncElement != null && syncElement is Image) {
             holder.descriptionTv?.text = syncElement.description
-            val c = "${syncElement.reference}${prefsGetString(lineSeparator)}${syncElement.obs}"
-            holder.obsTv?.text = c
+
+            val obs = "${syncElement.reference}${prefsGetString(lineSeparator)}${syncElement.obs}"
+            holder.obsTv?.text = obs
+
+            val filename = File(syncElement.filenameOriginal ?: "").name
+            holder.filenameTv?.text = filename
+
+            setAlbumViewLogic(holder.albumImageView, syncElement)
+            getImagesThumbs(holder, syncElement)
 
             if (holder.checkBox != null) {
                 var isSpeakButtonLongPressed = false
@@ -1527,6 +1579,73 @@ class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
             }
         }
         return v
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private fun setAlbumViewLogic(albumImageView: AppCompatImageView?, image: Image) {
+        albumImageView?.setOnTouchListener { _, event ->
+            if (event.action == MotionEvent.ACTION_DOWN) {
+                albumViewRequiredListener?.onAlbumViewRequired(
+                    tableId = image.programObjectId.toInt(),
+                    itemId = image.objectId1?.toLong() ?: 0L,
+                    filename = File(image.filenameOriginal ?: "").name
+                )
+            }
+            true
+        }
+    }
+
+    /**
+     * Get images thumbs
+     *
+     * @param holder ImageControl image holder
+     * @param image Image Element of which we are requesting the image
+     */
+    private fun getImagesThumbs(
+        holder: ImageViewHolder,
+        image: Image
+    ) {
+        if (!showImages) {
+            collapseImagePanel(holder)
+            return
+        }
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            run {
+                val objectId1 = image.objectId1 ?: ""
+                val matchFilename = File(image.filenameOriginal ?: "").name
+
+                ImageAdapter.getImages(
+                    context = context,
+                    programData = ProgramData(
+                        programObjectId = image.programObjectId,
+                        objId1 = objectId1
+                    ),
+                    matchFilename = matchFilename,
+                    onProgress = {
+                        when (it.status) {
+                            GetImageStatus.STARTING -> {
+                                waitingImagePanel(holder)
+                            }
+
+                            GetImageStatus.NO_IMAGES -> {
+                                idWithImage.remove(image.objectId1)
+                                collapseImagePanel(holder)
+                            }
+
+                            GetImageStatus.IMAGE_BROKEN, GetImageStatus.NO_AVAILABLE, GetImageStatus.IMAGE_AVAILABLE -> {
+                                if (objectId1.isNotEmpty() && !idWithImage.contains(objectId1)) {
+                                    idWithImage.add(objectId1)
+                                }
+                                val tempImage = it.image
+                                if (tempImage != null) showImagePanel(holder, tempImage)
+                                else collapseImagePanel(holder)
+                            }
+                        }
+                    }
+                )
+            }
+        }, 0)
     }
 
     override fun getFilter(): Filter {
@@ -1652,7 +1771,7 @@ class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
         var assetStatusCheckedTextView: CheckedTextView? = null
     }
 
-    internal class ImageViewHolder {
+    class ImageViewHolder {
         var checkBoxConstraintLayout: ConstraintLayout? = null
         var checkBox: CheckBox? = null
         var titleTextView: TextView? = null
@@ -1660,9 +1779,37 @@ class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
         var gralConstraintLayout: ConstraintLayout? = null
         var descriptionTv: AutoResizeTextView? = null
         var obsTv: AutoResizeTextView? = null
+        var filenameTv: AutoResizeTextView? = null
+
+        var albumImageView: AppCompatImageView? = null
+        var imageConstraintLayout: ConstraintLayout? = null
+        var progressBar: ProgressBar? = null
+        var imageView: AppCompatImageView? = null
     }
 
     companion object {
+        fun collapseImagePanel(icHolder: ImageViewHolder) {
+            icHolder.imageConstraintLayout?.post { icHolder.imageConstraintLayout?.visibility = GONE }
+            icHolder.imageView?.post { icHolder.imageView?.visibility = INVISIBLE }
+            icHolder.progressBar?.post { icHolder.progressBar?.visibility = GONE }
+        }
+
+        private fun waitingImagePanel(icHolder: ImageViewHolder) {
+            icHolder.imageView?.post { icHolder.imageView?.visibility = INVISIBLE }
+            icHolder.progressBar?.post { icHolder.progressBar?.visibility = VISIBLE }
+            icHolder.imageConstraintLayout?.post { icHolder.imageConstraintLayout?.visibility = VISIBLE }
+        }
+
+        private fun expandImagePanel(icHolder: ImageViewHolder) {
+            icHolder.imageView?.post { icHolder.imageView?.visibility = VISIBLE }
+            icHolder.progressBar?.post { icHolder.progressBar?.visibility = GONE }
+            icHolder.imageConstraintLayout?.post { icHolder.imageConstraintLayout?.visibility = VISIBLE }
+        }
+
+        private fun showImagePanel(icHolder: ImageViewHolder, image: Bitmap) {
+            icHolder.imageView?.post { icHolder.imageView?.setImageBitmap(image) }
+            expandImagePanel(icHolder)
+        }
 
         fun defaultRowHeight(): Int {
             return if (isTablet()) 51 else 157
@@ -1889,6 +2036,17 @@ class SyncElementAdapter : ArrayAdapter<Any>, Filterable {
                 foreColor, if (darkerColor) 0.8f else 1.4f
             )
         )
+    }
+
+    /**
+     * Show an images panel on the end of layout
+     *
+     * @param show
+     */
+    fun showImages(show: Boolean) {
+        showImages = show
+        showImagesChanged.invoke(showImages)
+        refresh()
     }
 
     class SyncElementLayout(foreColor: Int, backColor: Drawable, titleForeColor: Int) {
