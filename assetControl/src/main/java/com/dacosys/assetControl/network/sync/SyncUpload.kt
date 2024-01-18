@@ -139,15 +139,6 @@ class SyncUpload(
             )
         )
 
-        // Enviar imágenes pendientes que tienen ID reales,
-        // por ejemplo: Activos, categorías, ubicaciones
-        // existentes modificadas desde los CRUD o desde el
-        // buscador de activos.
-
-        // Las imágenes con ID locales se enviarán después de
-        // obtener los ID reales.
-        sendPendingImages()
-
         // El orden está dado por la dependencia de los ID
         // en las subsiguientes tablas
         if (registryType == null) {
@@ -218,6 +209,15 @@ class SyncUpload(
                 }
             }
         }
+
+        // Enviar imágenes pendientes que tienen ID reales,
+        // por ejemplo: Activos, categorías, ubicaciones
+        // existentes modificadas desde los CRUD o desde el
+        // buscador de activos.
+
+        // Las imágenes con ID locales se enviarán después de
+        // obtener los ID reales.
+        sendPendingImages()
 
         // Eliminar datos enviados
         removeOldData()

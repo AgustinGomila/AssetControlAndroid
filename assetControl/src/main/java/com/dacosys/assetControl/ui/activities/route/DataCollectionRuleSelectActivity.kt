@@ -7,6 +7,7 @@ import android.view.KeyEvent
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.inputmethod.EditorInfo
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.adapters.datacollection.DataCollectionRuleAdapter
@@ -110,6 +111,13 @@ class DataCollectionRuleSelectActivity : AppCompatActivity() {
         setScreenRotation(this)
         binding = DataCollectionRuleSelectActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val callback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                isBackPressed()
+            }
+        }
+        onBackPressedDispatcher.addCallback(this, callback)
 
         setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)

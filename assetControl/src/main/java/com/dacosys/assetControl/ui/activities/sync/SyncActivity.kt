@@ -2,10 +2,7 @@ package com.dacosys.assetControl.ui.activities.sync
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.os.Build
-import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
+import android.os.*
 import android.text.Html
 import android.text.method.ScrollingMovementMethod
 import android.util.Log
@@ -13,6 +10,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -22,21 +20,13 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat
 import androidx.core.view.ViewCompat
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.R.layout
 import com.dacosys.assetControl.adapters.interfaces.Interfaces
-import com.dacosys.assetControl.adapters.sync.SyncElementAdapter
+import com.dacosys.assetControl.adapters.sync.SyncElementRecyclerAdapter
 import com.dacosys.assetControl.databinding.SyncActivityBinding
-import com.dacosys.assetControl.model.asset.Asset
-import com.dacosys.assetControl.model.category.ItemCategory
-import com.dacosys.assetControl.model.dataCollection.DataCollection
-import com.dacosys.assetControl.model.location.Warehouse
-import com.dacosys.assetControl.model.location.WarehouseArea
-import com.dacosys.assetControl.model.movement.WarehouseMovement
-import com.dacosys.assetControl.model.review.AssetReview
-import com.dacosys.assetControl.model.route.RouteProcess
 import com.dacosys.assetControl.network.serverDate.GetMySqlDate
 import com.dacosys.assetControl.network.serverDate.MySqlDateResult
 import com.dacosys.assetControl.network.sync.SyncDownload
@@ -66,7 +56,6 @@ import com.dacosys.imageControl.network.common.ProgramData
 import com.dacosys.imageControl.network.download.GetImages.Companion.toDocumentContentList
 import com.dacosys.imageControl.network.upload.UploadImagesProgress
 import com.dacosys.imageControl.room.dao.ImageCoroutines
-import com.dacosys.imageControl.room.entity.Image
 import com.dacosys.imageControl.ui.activities.ImageControlGridActivity
 import java.io.File
 import kotlin.concurrent.thread
@@ -74,8 +63,7 @@ import com.dacosys.imageControl.network.common.ProgressStatus as IcProgressStatu
 
 @Suppress("UNCHECKED_CAST")
 class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
-    SyncElementAdapter.CheckedChangedListener, SyncElementAdapter.DataSetChangedListener,
-    Interfaces.AlbumViewRequiredListener {
+    Interfaces.AlbumViewRequiredListener, Interfaces.DataSetChangedListener, Interfaces.CheckedChangedListener {
     override fun onDestroy() {
         saveSharedPreferences()
         destroyLocals()
@@ -93,13 +81,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
 
     private fun destroyLocals() {
         adapter?.refreshListeners(null, null)
-        adapter?.setImageControlListener(null)
-    }
-
-    override fun onDataSetChanged() {
-    }
-
-    override fun onCheckedChanged(isChecked: Boolean, pos: Int) {
+        adapter?.refreshImageControlListeners(null)
     }
 
     private fun onSessionCreated(result: Boolean) {
@@ -235,10 +217,14 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
 
     //region ListView
     private var visibleRegistryArray: ArrayList<SyncRegistryType> = ArrayList()
-    private var checkedIdArray: ArrayList<String> = ArrayList()
-    private var currentPos: Int? = null
-    private var firstVisiblePos: Int? = null
-    private var adapter: SyncElementAdapter? = null
+    private var checkedKeyArray: ArrayList<String> = ArrayList()
+    private var adapter: SyncElementRecyclerAdapter? = null
+
+    private var multiSelect = false
+    private var showCheckBoxes = false
+
+    private var lastSelected: Any? = null
+    private var currentScrollPosition: Int = 0
     //
 
     private var tempObjectId = ""
@@ -322,10 +308,10 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
         b.putString("dataCollectionStatus", dataCollectionStatus)
 
         if (adapter != null) {
-            b.putInt("currentPos", adapter?.currentPos() ?: 0)
+            b.putParcelable("lastSelected", adapter?.currentSyncElement() as Parcelable?)
             b.putInt("firstVisiblePos", adapter?.firstVisiblePos() ?: 0)
-            b.putParcelableArrayList("visibleRegistryArray", adapter?.getVisibleRegistry())
-            b.putStringArrayList("checkedIdArray", adapter?.getAllChecked())
+            b.putInt("currentScrollPosition", currentScrollPosition)
+            b.putStringArrayList("checkedKeyArray", adapter?.checkedKeyArray)
         }
     }
 
@@ -358,10 +344,6 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
         warehouseMovementStatus = b.getString("warehouseMovementStatus") ?: ""
         dataCollectionStatus = b.getString("dataCollectionStatus") ?: ""
 
-        // Adapter
-        currentPos = if (b.containsKey("currentPos")) b.getInt("currentPos") else -1
-        firstVisiblePos = if (b.containsKey("firstVisiblePos")) b.getInt("firstVisiblePos") else -1
-
         visibleRegistryArray.clear()
         if (b.containsKey("visibleRegistryArray")) {
             val t3 = b.getParcelableArrayList<SyncRegistryType>("visibleRegistryArray")
@@ -370,9 +352,14 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
             loadDefaultVisibleStatus()
         }
 
-        checkedIdArray.clear()
-        val tempC = b.getStringArrayList("checkedIdArray")
-        if (tempC != null) checkedIdArray = tempC
+        checkedKeyArray.clear()
+        val tempC = b.getStringArrayList("checkedKeyArray")
+        if (tempC != null) checkedKeyArray = tempC
+
+        multiSelect = b.getBoolean("multiSelect", multiSelect)
+        lastSelected = b.getParcelable("lastSelected")
+        currentScrollPosition = b.getInt("currentScrollPosition")
+        checkedKeyArray = b.getStringArrayList("checkedKeyArray") ?: ArrayList()
     }
 
     private fun loadDefaultValues() {
@@ -400,9 +387,6 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
 
     override fun onResume() {
         super.onResume()
-
-        checkConnection()
-
         if (syncing) {
             setUploadText(
                 if (CURRENT_MODE == MODE_UPLOAD) getString(R.string.sending_data_please_wait) else getString(
@@ -410,6 +394,11 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
                 )
             )
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        checkConnection()
     }
 
     private lateinit var binding: SyncActivityBinding
@@ -422,6 +411,13 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
         setScreenRotation(this)
         binding = SyncActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val callback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                isBackPressed()
+            }
+        }
+        onBackPressedDispatcher.addCallback(this, callback)
 
         setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -883,33 +879,38 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
     }
 
     private fun onPendingData(syncElements: ArrayList<Any>) {
+        fillAdapter(syncElements)
+        changeButtonsEnableState()
+    }
+
+    private fun fillSummaryRow() {
         var t = ""
 
-        var r = syncElements.count { it is AssetReview }
+        var r = adapter?.totalAssetReview ?: 0
         if (r > 0) t = "$t${getString(R.string.asset_reviews)}: $r<br>"
 
-        r = syncElements.count { it is WarehouseMovement }
+        r = adapter?.totalWarehouseMovement ?: 0
         if (r > 0) t = "$t${getString(R.string.movements)}: $r<br>"
 
-        r = syncElements.count { it is Asset }
+        r = adapter?.totalAsset ?: 0
         if (r > 0) t = "$t${getString(R.string.assets)}: $r<br>"
 
-        r = syncElements.count { it is WarehouseArea }
+        r = adapter?.totalWarehouseArea ?: 0
         if (r > 0) t = "$t${getString(R.string.areas)}: $r<br>"
 
-        r = syncElements.count { it is Warehouse }
+        r = adapter?.totalWarehouse ?: 0
         if (r > 0) t = "$t${getString(R.string.warehouses)}: $r<br>"
 
-        r = syncElements.count { it is ItemCategory }
+        r = adapter?.totalItemCategory ?: 0
         if (r > 0) t = "$t${getString(R.string.categories)}: $r<br>"
 
-        r = syncElements.count { it is DataCollection }
+        r = adapter?.totalDataCollection ?: 0
         if (r > 0) t = "$t${getString(R.string.data_collections)}: $r<br>"
 
-        r = syncElements.count { it is RouteProcess }
+        r = adapter?.totalRouteProcess ?: 0
         if (r > 0) t = "$t${getString(R.string.route_process)}: $r<br>"
 
-        r = syncElements.count { it is Image }
+        r = adapter?.totalImage ?: 0
         if (r > 0) t = "$t${getString(R.string.images_to_send)}: $r<br>"
 
         t = when {
@@ -925,10 +926,6 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
 
             else -> setUploadText(t)
         }
-
-        fillAdapter(syncElements)
-
-        changeButtonsEnableState()
     }
 
     private fun fillAdapter(syncElements: ArrayList<Any>?) {
@@ -937,41 +934,42 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
         try {
             runOnUiThread {
                 if (adapter != null) {
-                    currentPos = adapter?.currentPos()
-                    firstVisiblePos = adapter?.firstVisiblePos()
+                    // Si el adapter es NULL es porque aún no fue creado.
+                    // Por lo tanto, puede ser que los valores de [lastSelected]
+                    // sean valores guardados de la instancia anterior y queremos preservarlos.
+                    lastSelected = adapter?.currentSyncElement()
                 }
 
-                if (adapter == null || syncElements != null) {
-                    adapter = SyncElementAdapter(
-                        activity = this,
-                        resource = layout.null_row,
-                        syncElements = syncElements ?: ArrayList(),
-                        listView = binding.syncElementListView,
-                        multiSelect = false,
-                        checkedIdArray = checkedIdArray,
-                        visibleRegistry = visibleRegistryArray,
-                        showImages = showImages,
-                        showImagesCallback = { showImages = it },
-                        checkedChangedListener = this,
-                        dataSetChangedListener = this,
-                        albumViewRequiredListener = this
-                    )
-                } else {
-                    // IMPORTANTE:
-                    // Se deben actualizar los listeners, si no
-                    // las variables de esta actividad pueden
-                    // tener valores antiguos en del adaptador.
-
-                    adapter?.refreshListeners(checkedChangedListener = this, dataSetChangedListener = this)
-                    adapter?.setImageControlListener(this)
-                    adapter?.refresh()
+                if (syncElements != null) {
+                    adapter = SyncElementRecyclerAdapter.Builder()
+                        .recyclerView(binding.recyclerView)
+                        .visibleRegistryTypes(visibleRegistryArray)
+                        .fullList(syncElements)
+                        .checkedKeyArray(checkedKeyArray)
+                        .multiSelect(multiSelect)
+                        .showCheckBoxes(`val` = showCheckBoxes, callback = { showCheckBoxes = it })
+                        .showImages(`val` = showImages, callback = { showImages = it })
+                        .filterOptions(SyncElementRecyclerAdapter.FilterOptions())
+                        .albumViewRequiredListener(this)
+                        .dataSetChangedListener(this)
+                        .checkedChangedListener(this)
+                        .build()
                 }
 
-                while (binding.syncElementListView.adapter == null) {
-                    // Horrible wait for full load
+                binding.recyclerView.layoutManager = LinearLayoutManager(this)
+                binding.recyclerView.adapter = adapter
+
+                while (binding.recyclerView.adapter == null) {
+                    // Horrible wait for a full load
                 }
 
-                adapter?.setSelectItemAndScrollPos(currentPos, firstVisiblePos)
+                // Estas variables locales evitar posteriores cambios de estado.
+                val ls = lastSelected
+                val cs = currentScrollPosition
+                Handler(Looper.getMainLooper()).postDelayed({
+                    adapter?.selectItem(ls, false)
+                    adapter?.scrollToPos(cs, true)
+                }, 200)
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
@@ -1113,7 +1111,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
             return false
         }
 
-        val visibleRegistry = adapter!!.getVisibleRegistry()
+        val visibleRegistry = adapter!!.getVisibleStatus()
         item.isChecked = !item.isChecked
 
         if (item.itemId == menuItemShowImages) {
@@ -1131,9 +1129,9 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
         val syncReg = SyncRegistryType.getById(item.itemId)
         if (syncReg != null) {
             if (item.isChecked && !visibleRegistry.contains(syncReg)) {
-                adapter!!.addVisibleRegistry(syncReg)
+                adapter!!.addVisibleStatus(syncReg)
             } else if (!item.isChecked && visibleRegistry.contains(syncReg)) {
-                adapter!!.removeVisibleRegistry(syncReg)
+                adapter!!.removeVisibleStatus(syncReg)
             } else {
                 return super.onOptionsItemSelected(item)
             }
@@ -1141,7 +1139,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
             return super.onOptionsItemSelected(item)
         }
 
-        if (adapter?.isStatusVisible(adapter?.currentPos() ?: -1) == false) {
+        if (adapter?.isVisible(adapter?.currentPos() ?: -1) == false) {
             // La fila actual está invisible, seleccionar la anterior visible
             adapter?.selectNearVisible()
         }
@@ -1195,6 +1193,14 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             rejectNewInstances = false
         }
+
+    override fun onDataSetChanged() {
+        fillSummaryRow()
+    }
+
+    override fun onCheckedChanged(isChecked: Boolean, pos: Int) {
+        fillSummaryRow()
+    }
 
     // endregion ImageControl Album
 }

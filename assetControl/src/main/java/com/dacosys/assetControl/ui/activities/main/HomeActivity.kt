@@ -23,6 +23,7 @@ import android.view.View.GONE
 import android.view.View.TEXT_ALIGNMENT_VIEW_START
 import android.view.inputmethod.EditorInfo
 import android.widget.Button
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
@@ -458,6 +459,13 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
         setScreenRotation(this)
         binding = HomeActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val callback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                isBackPressed()
+            }
+        }
+        onBackPressedDispatcher.addCallback(this, callback)
 
         setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)

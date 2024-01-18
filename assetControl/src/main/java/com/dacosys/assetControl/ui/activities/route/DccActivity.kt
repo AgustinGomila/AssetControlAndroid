@@ -17,6 +17,7 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
@@ -206,6 +207,13 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         setScreenRotation(this)
         binding = DataCollectionContentActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val callback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                isBackPressed()
+            }
+        }
+        onBackPressedDispatcher.addCallback(this, callback)
 
         setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -631,8 +639,8 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         }
 
         // Agrego la composición correspondiente al panel
-        // Si no está especificada es la primer composición (!isAttribute),
-        // sino busco el AttributeCompositionId correspondiente.
+        // Si no está especificada es la primera composición (!isAttribute),
+        // sino, busco el AttributeCompositionId correspondiente.
         var f: GeneralFragment? = null
         for (tempFr in attrFrags) {
             if (!tempFr.isAttribute) {
@@ -681,7 +689,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         // La colección resultante contiene tanto las composiciones del atributo como el atributo en sí mismo.
 
-        // Del atributo en sí mismo no se registran datos pero puede contener una expresión condicional
+        // Del atributo en sí mismo no se registran datos, pero puede contener una expresión condicional
         // que se evalúa luego de evaluar los datos registrados para las composiciones.
 
         attrFrags.clear()
@@ -1161,10 +1169,10 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         for (param in allParameters) {
             // Quedarse con la parte real del parámetro
-            val paramSplited = param.paramName.split(separator)
+            val paramSplit = param.paramName.split(separator)
             var realParameter = ""
             var index = 0
-            for (s in paramSplited.reversed()) {
+            for (s in paramSplit.reversed()) {
                 if (index > 3) {
                     break
                 }

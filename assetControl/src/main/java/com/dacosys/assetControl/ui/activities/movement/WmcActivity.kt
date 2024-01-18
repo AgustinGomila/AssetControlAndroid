@@ -11,6 +11,7 @@ import android.os.Looper
 import android.text.InputType
 import android.util.Log
 import android.view.*
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
@@ -228,6 +229,13 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
         setScreenRotation(this)
         binding = WarehouseMovementContentBottomPanelCollapsedBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val callback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                isBackPressed()
+            }
+        }
+        onBackPressedDispatcher.addCallback(this, callback)
 
         setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)

@@ -10,6 +10,7 @@ import android.os.Looper
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View.GONE
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.menu.MenuBuilder
 import androidx.constraintlayout.widget.ConstraintSet
@@ -162,6 +163,13 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
         setScreenRotation(this)
         binding = WarehouseAreaPrintLabelActivityTopPanelCollapsedBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val callback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                isBackPressed()
+            }
+        }
+        onBackPressedDispatcher.addCallback(this, callback)
 
         setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)

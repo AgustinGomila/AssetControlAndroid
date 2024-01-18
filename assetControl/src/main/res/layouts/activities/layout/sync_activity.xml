@@ -151,6 +151,7 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/listViewLayout"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -158,10 +159,9 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/summaryConstraintLayout">
 
-
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
                 android:id="@+id/swipeRefresh"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_marginStart="2dp"
                 android:layout_marginTop="2dp"
@@ -169,26 +169,26 @@
                 android:layout_marginBottom="2dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:srl_direction="bottom">
 
-            <ListView
-                    android:id="@+id/syncElementListView"
+            <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerView"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginStart="2dp"
+                    android:layout_marginLeft="2dp"
                     android:layout_marginTop="2dp"
-                    android:layout_marginEnd="2dp"
+                    android:layout_marginRight="2dp"
                     android:layout_marginBottom="2dp"
                     android:background="@drawable/listview_border"
                     android:choiceMode="singleChoice"
                     android:divider="@null"
                     android:dividerHeight="0dp"
                     android:padding="2dp"
-                    android:scrollbars="vertical">
-
-            </ListView>
+                    android:scrollbars="vertical"
+                    android:scrollbarSize="8dp"/>
 
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
@@ -237,12 +237,6 @@
                 app:layout_constraintVertical_bias="0.25"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.Guideline
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.5"/>
 
     <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline10"

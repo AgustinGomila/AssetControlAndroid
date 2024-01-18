@@ -12,6 +12,7 @@ import android.text.InputType
 import android.view.*
 import android.view.inputmethod.EditorInfo
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -170,6 +171,13 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
         binding = InitConfigActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        val callback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                isBackPressed()
+            }
+        }
+        onBackPressedDispatcher.addCallback(this, callback)
+
         setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
@@ -302,7 +310,7 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
     private fun attemptEnterConfig(password: String) {
         val realPass = prefsGetString(Preference.confPassword)
         if (password != realPass) {
-            makeText(binding.root, getString(R.string.invalid_password), SnackBarType.ERROR)
+            makeText(binding.root, getString(R.string.invalid_password), ERROR)
             return
         }
 
@@ -420,7 +428,7 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
         }
 
     override fun scannerCompleted(scanCode: String) {
-        if (showScannedCode) makeText(binding.root, scanCode, SnackBarType.INFO)
+        if (showScannedCode) makeText(binding.root, scanCode, INFO)
         JotterListener.lockScanner(this, true)
         JotterListener.hideWindow(this)
 
