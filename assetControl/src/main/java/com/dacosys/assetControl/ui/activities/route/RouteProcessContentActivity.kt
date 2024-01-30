@@ -1023,7 +1023,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             rpContAdapter?.refresh()
         }
 
-        if (s == RouteProcessStatus.processed) {
+        if (s == RouteProcessStatus.processed || s == RouteProcessStatus.skipped) {
             runOnUiThread {
                 binding.confirmButton.isEnabled = isCurrentLevelCompleted()
             }

@@ -24,7 +24,8 @@
             android:textSize="10sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/guideline75"
-            app:layout_constraintTop_toBottomOf="@+id/imageView"/>
+            app:layout_constraintTop_toBottomOf="@+id/imageView" android:textColor="@color/text_light"
+            android:background="@color/lightslategray"/>
     <androidx.appcompat.widget.Toolbar
             android:id="@+id/top_appbar"
             style="@style/MyActionBar"
@@ -104,7 +105,8 @@
             android:textSize="10sp"
             android:textStyle="bold"
             app:layout_constraintStart_toEndOf="@+id/progressBarLayout"
-            app:layout_constraintTop_toBottomOf="@+id/imageView" app:layout_constraintEnd_toStartOf="@+id/guideline75"/>
+            app:layout_constraintTop_toBottomOf="@+id/imageView" app:layout_constraintEnd_toStartOf="@+id/guideline75"
+            android:textColor="@color/text_light" android:background="@color/lightslategray"/>
 
 
     <androidx.constraintlayout.widget.ConstraintLayout

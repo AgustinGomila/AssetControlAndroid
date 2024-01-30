@@ -24,7 +24,8 @@
             android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/guideline3"
-            app:layout_constraintTop_toBottomOf="@+id/versionTextView"/>
+            app:layout_constraintTop_toBottomOf="@+id/versionTextView" android:textColor="@color/text_light"
+            android:background="@color/lightslategray"/>
     <androidx.appcompat.widget.Toolbar
             android:id="@+id/top_appbar"
             style="@style/MyActionBar"
@@ -105,7 +106,8 @@
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/versionTextView"
-            app:layout_constraintEnd_toStartOf="@+id/guideline3"/>
+            app:layout_constraintEnd_toStartOf="@+id/guideline3" android:textColor="@color/text_light"
+            android:background="@color/lightslategray"/>
 
 
     <androidx.constraintlayout.widget.ConstraintLayout

@@ -1,6 +1,8 @@
 package com.dacosys.assetControl.ui.activities.main
 
 import android.Manifest
+import android.animation.Animator
+import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.content.DialogInterface
 import android.content.Intent
@@ -17,6 +19,8 @@ import android.text.InputType
 import android.text.TextWatcher
 import android.util.Log
 import android.view.*
+import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.animation.Animation
 import android.view.inputmethod.EditorInfo
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
@@ -145,7 +149,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         userSpinnerFragment?.onDestroy()
     }
 
-    private fun onSyncTaskProgress(it: SyncProgress) {
+    private fun onSyncProgress(it: SyncProgress) {
         if (isDestroyed || isFinishing) return
 
         val totalTask: Int = it.totalTask
@@ -360,10 +364,14 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         READY, REFRESH, BUSY
     }
 
+    private var currentStyle: ButtonStyle = ButtonStyle.READY
+
     private fun setButton(style: ButtonStyle) {
+        if (currentStyle == style) return
+        currentStyle = style
+
         runOnUiThread {
-            connectionSuccess = style == ButtonStyle.READY
-            when (style) {
+            when (currentStyle) {
                 ButtonStyle.READY -> setLoginButton()
                 ButtonStyle.REFRESH -> setRefreshButton()
                 ButtonStyle.BUSY -> setWaitButton()
@@ -379,19 +387,37 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
             binding.loginImageView.contentDescription = getString(R.string.retry_connection)
             binding.loginImageView.foregroundTintList =
                 ColorStateList.valueOf(ResourcesCompat.getColor(resources, R.color.black, null))
+
+            binding.loginImageView.setOnClickListener {
+                initialSetup()
+            }
         }
     }
 
     private fun setWaitButton() {
         runOnUiThread {
-            binding.loginImageView.setImageResource(R.drawable.ic_hourglass)
+            binding.loginImageView.setOnClickListener { }
+
+            binding.loginImageView.setImageResource(R.drawable.ic_hourglass_rotate)
             binding.loginImageView.background = ResourcesCompat.getDrawable(
                 resources, R.drawable.rounded_corner_button_steelblue, null
             )
             binding.loginImageView.contentDescription = getString(R.string.connecting)
             binding.loginImageView.foregroundTintList =
                 ColorStateList.valueOf(ResourcesCompat.getColor(resources, R.color.white, null))
+
+            val drawable: Drawable = binding.loginImageView.drawable ?: return@runOnUiThread
+            val anim = createRotationAnimator(drawable)
+            anim.start()
         }
+    }
+
+    private fun createRotationAnimator(drawable: Drawable): Animator {
+        val anim = ObjectAnimator.ofInt(drawable, "level", 0, 10000)
+        anim.setDuration(2000)
+        anim.repeatCount = Animation.INFINITE
+        anim.interpolator = AccelerateDecelerateInterpolator()
+        return anim
     }
 
     private fun setLoginButton() {
@@ -403,6 +429,10 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
             binding.loginImageView.contentDescription = getString(R.string.sign_in)
             binding.loginImageView.foregroundTintList =
                 ColorStateList.valueOf(ResourcesCompat.getColor(resources, R.color.cornsilk, null))
+
+            binding.loginImageView.setOnClickListener {
+                runOnUiThread { attemptLogin() }
+            }
         }
     }
     // endregion
@@ -434,8 +464,6 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         savedInstanceState.putBoolean("syncing", syncing)
     }
 
-    private var connectionSuccess = false
-
     private var userSpinnerFragment: UserSpinnerFragment? = null
     private var firstTime = true
     private var rejectNewInstances = false
@@ -466,7 +494,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        syncViewModel.syncDownloadProgress.observe(this) { if (it != null) onSyncTaskProgress(it) }
+        syncViewModel.syncDownloadProgress.observe(this) { if (it != null) onSyncProgress(it) }
         syncViewModel.sessionCreated.observe(this) { if (it != null) onSessionCreated(it) }
         downloadDbViewModel.downloadTaskEvent.observe(this) { if (it != null) onDownloadDbTask(it) }
         downloadDbViewModel.uiEvent.observe(this) { if (it != null) showSnackBar(it) }
@@ -526,14 +554,6 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                 }
 
                 else -> false
-            }
-        }
-
-        binding.loginImageView.setOnClickListener {
-            if (connectionSuccess) {
-                runOnUiThread { attemptLogin() }
-            } else {
-                initialSetup()
             }
         }
 
