@@ -562,6 +562,13 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
 
                     else -> binding.packageTextView.visibility = View.VISIBLE
                 }
+                binding.installationCodeTextView.text = Repository.installationCode
+                when {
+                    Repository.installationCode.isEmpty() -> binding.installationCodeTextView.visibility =
+                        View.GONE
+
+                    else -> binding.installationCodeTextView.visibility = View.VISIBLE
+                }
             } catch (ex: Exception) {
                 ex.printStackTrace()
                 ErrorLog.writeLog(this, this::class.java.simpleName, ex)

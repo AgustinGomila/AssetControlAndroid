@@ -97,7 +97,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
         val msg: String = it.msg
 
         when (result.id) {
-            ProgressStatus.starting.id, ProgressStatus.running.id -> {
+            ProgressStatus.starting.id, ProgressStatus.running.id, ProgressStatus.success.id -> {
                 setProgressBarText(msg)
                 showImageProgressBar(true)
             }
@@ -105,24 +105,11 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
             ProgressStatus.crashed.id, ProgressStatus.canceled.id -> {
                 showImageProgressBar(false)
                 makeText(this, msg, SnackBarType.ERROR)
-
-                Handler(Looper.getMainLooper()).postDelayed({
-                    run {
-                        fillPendingData()
-                    }
-                }, 200)
             }
 
-            ProgressStatus.success.id -> {
+            ProgressStatus.finished.id -> {
                 showImageProgressBar(false)
                 makeText(this, getString(R.string.upload_images_success), SnackBarType.SUCCESS)
-
-                Handler(Looper.getMainLooper()).postDelayed({
-                    run {
-                        fillPendingData()
-                    }
-                }, 200)
-
             }
         }
     }
@@ -478,7 +465,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
             thread {
                 SyncUpload(
                     onSyncTaskProgress = { syncViewModel.setSyncUploadProgress(it) },
-                    onUploadProgress = { syncViewModel.setUploadImagesProgress(it) })
+                    onUploadImageProgress = { syncViewModel.setUploadImagesProgress(it) })
             }
         } catch (ex: Exception) {
             setErrorText(ex.message.toString())

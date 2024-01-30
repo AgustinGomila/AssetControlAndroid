@@ -728,7 +728,7 @@ class AssetReviewDbHelper {
 
     // region TABLA E IDS TEMPORALES
 
-    // Funciones que guardan y recuperan IDs entre actividades
+    // Funciones que guardan y recuperan Id entre actividades
     // y evitar el error: !!! FAILED BINDER TRANSACTION !!!
     // cuando se pasa un objeto demasiado grande
     private fun createTempTable() {

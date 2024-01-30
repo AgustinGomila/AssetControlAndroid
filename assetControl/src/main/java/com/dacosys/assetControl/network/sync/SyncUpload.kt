@@ -2,6 +2,7 @@ package com.dacosys.assetControl.network.sync
 
 import android.util.Log
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
+import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.dataBase.asset.AssetDbHelper
 import com.dacosys.assetControl.dataBase.category.ItemCategoryDbHelper
@@ -58,17 +59,18 @@ import com.dacosys.assetControl.webservice.user.UserObject
 import com.dacosys.assetControl.webservice.user.UserWarehouseAreaObject
 import com.dacosys.assetControl.webservice.user.UserWarehouseAreaWs
 import com.dacosys.imageControl.network.common.ProgressStatus.CREATOR.getFinish
-import com.dacosys.imageControl.network.upload.SendImages
 import com.dacosys.imageControl.network.upload.SendPending
+import com.dacosys.imageControl.network.upload.UpdateIdImages
 import com.dacosys.imageControl.network.upload.UploadImagesProgress
 import kotlinx.coroutines.*
-import com.dacosys.imageControl.network.common.ProgressStatus.CREATOR as NetProgressStatus
 
 class SyncUpload(
     private var registryType: SyncRegistryType? = null,
     private var onSyncTaskProgress: (SyncProgress) -> Unit = {},
-    private var onUploadProgress: (UploadImagesProgress) -> Unit = {},
+    private var onUploadImageProgress: (UploadImagesProgress) -> Unit = {},
 ) {
+    private val tag = this::class.java.simpleName
+
     private var registryOnProcess: ArrayList<SyncRegistryType> = ArrayList()
 
     private fun checkConnection() {
@@ -210,13 +212,7 @@ class SyncUpload(
             }
         }
 
-        // Enviar imágenes pendientes que tienen ID reales,
-        // por ejemplo: Activos, categorías, ubicaciones
-        // existentes modificadas desde los CRUD o desde el
-        // buscador de activos.
-
-        // Las imágenes con ID locales se enviarán después de
-        // obtener los ID reales.
+        // Enviar imágenes
         sendPendingImages()
 
         // Eliminar datos enviados
@@ -241,18 +237,35 @@ class SyncUpload(
     private fun sendPendingImages() {
         setProcessState(false)
 
+        var startTime = 0L
+        var lastState = UploadImagesProgress()
+
         SendPending(context = getContext()) {
-            onUploadProgress.invoke(it)
+            // Still running
+            startTime = System.currentTimeMillis()
+            lastState = it
+
             val res = it.result
-            setProcessState(res in getFinish() || res == NetProgressStatus.success)
+
+            if (BuildConfig.DEBUG) {
+                Log.i(tag, "Progreso de subida: ${res.description}")
+            }
+
+            if (res !in getFinish()) {
+                // Reportamos solo los progresos
+                onUploadImageProgress.invoke(it)
+            }
+
+            setProcessState(res in getFinish())
         }
 
-        val startTime = System.currentTimeMillis()
         while (!getProcessState()) {
             if (System.currentTimeMillis() - startTime == (connectionTimeout * 1000).toLong()) {
                 setProcessState(true)
             }
         }
+
+        onUploadImageProgress.invoke(lastState)
     }
 
     private fun removeOldData() {
@@ -374,15 +387,21 @@ class SyncUpload(
                 if (arId > 0) {
                     arDb.updateTransferredNew(arId, ar.collectorAssetReviewId)
 
-                    // Enviar imágenes si existen
-                    SendImages(context = getContext(), programObjectId = Table.assetReview.tableId.toLong(),
+                    // Actualizar los Ids del colector con los Ids reales
+                    UpdateIdImages(context = getContext(), programObjectId = Table.assetReview.tableId.toLong(),
                         newObjectId1 = arId,
                         localObjectId1 = ar.collectorAssetReviewId,
-                        onUploadProgress = { onUploadProgress.invoke(it) }).execute()
+                        onUploadProgress = {
+                            if (it.result !in getFinish()) {
+                                // Reportamos solo los progresos
+                                onUploadImageProgress.invoke(it)
+                            }
+                        }
+                    ).execute()
                 } else {
                     error = true
                     Log.d(
-                        this::class.java.simpleName,
+                        tag,
                         getContext().getString(R.string.failed_to_synchronize_the_asset_reviews)
                     )
                 }
@@ -400,7 +419,7 @@ class SyncUpload(
                 )
             )
 
-            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
+            ErrorLog.writeLog(null, tag, ex)
             return
         } finally {
             registryOnProcess.remove(registryType)
@@ -522,15 +541,21 @@ class SyncUpload(
                 if (wmId > 0) {
                     wmDb.updateTransferredNew(wmId, wm.collectorWarehouseMovementId)
 
-                    // Enviar imágenes si existen
-                    SendImages(context = getContext(), programObjectId = Table.warehouseMovement.tableId.toLong(),
+                    // Actualizar los Ids del colector con los Ids reales
+                    UpdateIdImages(context = getContext(), programObjectId = Table.warehouseMovement.tableId.toLong(),
                         newObjectId1 = wmId,
                         localObjectId1 = wm.collectorWarehouseMovementId,
-                        onUploadProgress = { onUploadProgress.invoke(it) }).execute()
+                        onUploadProgress = {
+                            if (it.result !in getFinish()) {
+                                // Reportamos solo los progresos
+                                onUploadImageProgress.invoke(it)
+                            }
+                        }
+                    ).execute()
                 } else {
                     error = true
                     Log.d(
-                        this::class.java.simpleName,
+                        tag,
                         getContext().getString(R.string.failed_to_synchronize_the_movements)
                     )
                 }
@@ -547,7 +572,7 @@ class SyncUpload(
                     ProgressStatus.crashed
                 )
             )
-            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
+            ErrorLog.writeLog(null, tag, ex)
             return
         } finally {
             registryOnProcess.remove(registryType)
@@ -658,15 +683,21 @@ class SyncUpload(
                 if (realAssetId > 0) {
                     allRealId.add(realAssetId)
 
-                    // Enviar imágenes si existen
-                    SendImages(context = getContext(), programObjectId = Table.asset.tableId.toLong(),
+                    // Actualizar los Ids del colector con los Ids reales
+                    UpdateIdImages(context = getContext(), programObjectId = Table.asset.tableId.toLong(),
                         newObjectId1 = realAssetId,
                         localObjectId1 = a.assetId,
-                        onUploadProgress = { onUploadProgress.invoke(it) }).execute()
+                        onUploadProgress = {
+                            if (it.result !in getFinish()) {
+                                // Reportamos solo los progresos
+                                onUploadImageProgress.invoke(it)
+                            }
+                        }
+                    ).execute()
                 } else {
                     error = true
                     Log.d(
-                        this::class.java.simpleName,
+                        tag,
                         getContext().getString(R.string.failed_to_synchronize_the_assets)
                     )
                 }
@@ -686,7 +717,7 @@ class SyncUpload(
                     ProgressStatus.crashed
                 )
             )
-            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
+            ErrorLog.writeLog(null, tag, ex)
             return
         } finally {
             registryOnProcess.remove(registryType)
@@ -835,15 +866,21 @@ class SyncUpload(
                 if (realWarehouseAreaId > 0) {
                     allRealId.add(realWarehouseAreaId)
 
-                    // Enviar imágenes si existen
-                    SendImages(context = getContext(), programObjectId = Table.warehouseArea.tableId.toLong(),
+                    // Actualizar los Ids del colector con los Ids reales
+                    UpdateIdImages(context = getContext(), programObjectId = Table.warehouseArea.tableId.toLong(),
                         newObjectId1 = realWarehouseAreaId,
                         localObjectId1 = wa.warehouseAreaId,
-                        onUploadProgress = { onUploadProgress.invoke(it) }).execute()
+                        onUploadProgress = {
+                            if (it.result !in getFinish()) {
+                                // Reportamos solo los progresos
+                                onUploadImageProgress.invoke(it)
+                            }
+                        }
+                    ).execute()
                 } else {
                     error = true
                     Log.d(
-                        this::class.java.simpleName,
+                        tag,
                         getContext().getString(R.string.failed_to_synchronize_the_warehouse_areas)
                     )
                 }
@@ -863,7 +900,7 @@ class SyncUpload(
                     ProgressStatus.crashed
                 )
             )
-            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
+            ErrorLog.writeLog(null, tag, ex)
             return
         } finally {
             registryOnProcess.remove(registryType)
@@ -983,15 +1020,21 @@ class SyncUpload(
                 if (realWarehouseId > 0) {
                     allRealId.add(realWarehouseId)
 
-                    // Enviar imágenes si existen
-                    SendImages(context = getContext(), programObjectId = Table.warehouse.tableId.toLong(),
+                    // Actualizar los Ids del colector con los Ids reales
+                    UpdateIdImages(context = getContext(), programObjectId = Table.warehouse.tableId.toLong(),
                         newObjectId1 = realWarehouseId,
                         localObjectId1 = w.warehouseId,
-                        onUploadProgress = { onUploadProgress.invoke(it) }).execute()
+                        onUploadProgress = {
+                            if (it.result !in getFinish()) {
+                                // Reportamos solo los progresos
+                                onUploadImageProgress.invoke(it)
+                            }
+                        }
+                    ).execute()
                 } else {
                     error = true
                     Log.d(
-                        this::class.java.simpleName,
+                        tag,
                         getContext().getString(R.string.failed_to_synchronize_the_warehouses)
                     )
                 }
@@ -1011,7 +1054,7 @@ class SyncUpload(
                     ProgressStatus.crashed
                 )
             )
-            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
+            ErrorLog.writeLog(null, tag, ex)
             return
         } finally {
             registryOnProcess.remove(registryType)
@@ -1120,15 +1163,21 @@ class SyncUpload(
                 if (realItemCategoryId > 0) {
                     allRealId.add(realItemCategoryId)
 
-                    // Enviar imágenes si existen
-                    SendImages(context = getContext(), programObjectId = Table.itemCategory.tableId.toLong(),
+                    // Actualizar los Ids del colector con los Ids reales
+                    UpdateIdImages(context = getContext(), programObjectId = Table.itemCategory.tableId.toLong(),
                         newObjectId1 = realItemCategoryId,
                         localObjectId1 = ic.itemCategoryId,
-                        onUploadProgress = { onUploadProgress.invoke(it) }).execute()
+                        onUploadProgress = {
+                            if (it.result !in getFinish()) {
+                                // Reportamos solo los progresos
+                                onUploadImageProgress.invoke(it)
+                            }
+                        }
+                    ).execute()
                 } else {
                     error = true
                     Log.d(
-                        this::class.java.simpleName,
+                        tag,
                         getContext().getString(R.string.failed_to_synchronize_the_categories)
                     )
                 }
@@ -1148,7 +1197,7 @@ class SyncUpload(
                     ProgressStatus.crashed
                 )
             )
-            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
+            ErrorLog.writeLog(null, tag, ex)
             return
         } finally {
             registryOnProcess.remove(registryType)
@@ -1274,15 +1323,21 @@ class SyncUpload(
                 if (dcId > 0) {
                     dcDb.updateTransferredNew(dcId, dc.collectorDataCollectionId)
 
-                    // Enviar imágenes si existen
-                    SendImages(context = getContext(), programObjectId = Table.dataCollection.tableId.toLong(),
+                    // Actualizar los Ids del colector con los Ids reales
+                    UpdateIdImages(context = getContext(), programObjectId = Table.dataCollection.tableId.toLong(),
                         newObjectId1 = dcId,
                         localObjectId1 = dc.collectorDataCollectionId,
-                        onUploadProgress = { onUploadProgress.invoke(it) }).execute()
+                        onUploadProgress = {
+                            if (it.result !in getFinish()) {
+                                // Reportamos solo los progresos
+                                onUploadImageProgress.invoke(it)
+                            }
+                        }
+                    ).execute()
                 } else {
                     error = true
                     Log.d(
-                        this::class.java.simpleName,
+                        tag,
                         getContext().getString(R.string.failed_to_synchronize_the_data_collections)
                     )
                 }
@@ -1299,7 +1354,7 @@ class SyncUpload(
                     ProgressStatus.crashed
                 )
             )
-            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
+            ErrorLog.writeLog(null, tag, ex)
             return
         } finally {
             registryOnProcess.remove(registryType)
@@ -1438,15 +1493,21 @@ class SyncUpload(
                 if (rpId > 0) {
                     rpDb.updateTransferredNew(rpId, rp.collectorRouteProcessId)
 
-                    // Enviar imágenes si existen
-                    SendImages(context = getContext(), programObjectId = Table.routeProcess.tableId.toLong(),
+                    // Actualizar los Ids del colector con los Ids reales
+                    UpdateIdImages(context = getContext(), programObjectId = Table.routeProcess.tableId.toLong(),
                         newObjectId1 = rpId,
                         localObjectId1 = rp.collectorRouteProcessId,
-                        onUploadProgress = { onUploadProgress.invoke(it) }).execute()
+                        onUploadProgress = {
+                            if (it.result !in getFinish()) {
+                                // Reportamos solo los progresos
+                                onUploadImageProgress.invoke(it)
+                            }
+                        }
+                    ).execute()
                 } else {
                     error = true
                     Log.d(
-                        this::class.java.simpleName,
+                        tag,
                         getContext().getString(R.string.failed_to_synchronize_the_route_process)
                     )
                 }
@@ -1463,7 +1524,7 @@ class SyncUpload(
                     ProgressStatus.crashed
                 )
             )
-            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
+            ErrorLog.writeLog(null, tag, ex)
             return
         } finally {
             registryOnProcess.remove(registryType)
@@ -1572,15 +1633,21 @@ class SyncUpload(
                 if (assetMaintenanceId > 0) {
                     amDb.updateTransferredNew(assetMaintenanceId)
 
-                    // Enviar imágenes si existen
-                    SendImages(context = getContext(), programObjectId = Table.assetManteinance.tableId.toLong(),
+                    // Actualizar los Ids del colector con los Ids reales
+                    UpdateIdImages(context = getContext(), programObjectId = Table.assetManteinance.tableId.toLong(),
                         newObjectId1 = assetMaintenanceId,
                         localObjectId1 = am.assetManteinanceId,
-                        onUploadProgress = { onUploadProgress.invoke(it) }).execute()
+                        onUploadProgress = {
+                            if (it.result !in getFinish()) {
+                                // Reportamos solo los progresos
+                                onUploadImageProgress.invoke(it)
+                            }
+                        }
+                    ).execute()
                 } else {
                     error = true
                     Log.d(
-                        this::class.java.simpleName,
+                        tag,
                         getContext().getString(R.string.failed_to_synchronize_the_maintenance_types)
                     )
                 }
@@ -1597,7 +1664,7 @@ class SyncUpload(
                     ProgressStatus.crashed
                 )
             )
-            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
+            ErrorLog.writeLog(null, tag, ex)
             return
         } finally {
             registryOnProcess.remove(registryType)

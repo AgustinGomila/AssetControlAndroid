@@ -36,8 +36,8 @@ import com.dacosys.assetControl.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import org.parceler.Parcels
+import java.util.*
 
-@Suppress("UNCHECKED_CAST")
 class RouteSelectActivity : AppCompatActivity(),
     SwipeRefreshLayout.OnRefreshListener,
     RouteSelectFilterFragment.FragmentListener {
@@ -487,7 +487,8 @@ class RouteSelectActivity : AppCompatActivity(),
     private fun demo() {
         if (!Statics.DEMO_MODE) return
 
-        arrayAdapter?.selectNext()
+        val t = arrayAdapter?.count() ?: 0
+        arrayAdapter?.selectItem(Random().nextInt(t))
         routeSelect()
     }
 

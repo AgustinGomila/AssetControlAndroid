@@ -14,6 +14,17 @@
                                                    tools:layout_editor_absoluteX="0dp"
                                                    tools:layout_editor_absoluteY="81dp">
 
+    <TextView
+            android:id="@+id/installationCodeTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:maxLines="1"
+            android:text="@string/installation_code"
+            android:textSize="10sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/guideline75"
+            app:layout_constraintTop_toBottomOf="@+id/imageView"/>
     <androidx.appcompat.widget.Toolbar
             android:id="@+id/top_appbar"
             style="@style/MyActionBar"
@@ -92,9 +103,8 @@
             android:text="@string/client_package"
             android:textSize="10sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/progressBarLayout"
-            app:layout_constraintTop_toBottomOf="@+id/imageView"/>
+            app:layout_constraintTop_toBottomOf="@+id/imageView" app:layout_constraintEnd_toStartOf="@+id/guideline75"/>
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -152,8 +162,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.5"/>
+            app:layout_constraintGuide_percent="0.5" android:id="@+id/guideline50"/>
 
+    <androidx.constraintlayout.widget.Guideline
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.75" android:id="@+id/guideline75"/>
     <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/textInputLayout"
             android:layout_width="0dp"
