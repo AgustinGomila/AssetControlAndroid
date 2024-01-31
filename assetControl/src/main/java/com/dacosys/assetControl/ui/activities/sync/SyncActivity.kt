@@ -1077,17 +1077,25 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
             menu.add(Menu.NONE, menuItemShowImages, Menu.NONE, getContext().getString(R.string.show_images))
                 .setChecked(showImages).isCheckable = true
             val item = menu.findItem(menuItemShowImages)
-            if (showImages)
+            setImageVisibilityIcon(showImages, item)
+        }
+
+        return true
+    }
+
+    private fun setImageVisibilityIcon(show: Boolean, item: MenuItem) {
+        runOnUiThread {
+            if (show) {
                 item.icon = ContextCompat.getDrawable(getContext(), R.drawable.ic_photo_library)
-            else
+            } else {
                 item.icon = ContextCompat.getDrawable(getContext(), R.drawable.ic_hide_image)
+            }
+
             item.icon?.mutate()?.colorFilter =
                 BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
                     getColor(R.color.dimgray), BlendModeCompat.SRC_IN
                 )
         }
-
-        return true
     }
 
     private fun isBackPressed() {
@@ -1126,14 +1134,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
 
         if (item.itemId == menuItemShowImages) {
             adapter?.showImages(item.isChecked)
-            if (item.isChecked)
-                item.icon = ContextCompat.getDrawable(getContext(), R.drawable.ic_photo_library)
-            else
-                item.icon = ContextCompat.getDrawable(getContext(), R.drawable.ic_hide_image)
-            item.icon?.mutate()?.colorFilter =
-                BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-                    getColor(R.color.dimgray), BlendModeCompat.SRC_IN
-                )
+            setImageVisibilityIcon(item.isChecked, item)
         }
 
         val syncReg = SyncRegistryType.getById(item.itemId)

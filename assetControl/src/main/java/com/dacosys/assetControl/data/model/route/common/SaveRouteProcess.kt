@@ -59,15 +59,15 @@ class SaveRouteProcess {
                     SyncUpload(registryType = SyncRegistryType.RouteProcess,
                         onSyncTaskProgress = { onSyncProgress.invoke(it) })
                 } else {
-                    onSyncProgress.invoke(SyncProgress(progressStatus = ProgressStatus.bigFinished))
+                    onSyncProgress.invoke(
+                        SyncProgress(progressStatus = ProgressStatus.bigFinished)
+                    )
                 }
             } else {
                 onSaveProgress.invoke(
                     SaveProgress(
                         msg = getContext().getString(R.string.error_saving_route),
                         taskStatus = ProgressStatus.crashed.id,
-                        progress = 0,
-                        total = 0
                     )
                 )
             }
@@ -130,12 +130,7 @@ class SaveRouteProcess {
             db.setTransactionSuccessful()
 
             onSaveProgress.invoke(
-                SaveProgress(
-                    msg = "",
-                    taskStatus = ProgressStatus.finished.id,
-                    progress = 0,
-                    total = 0
-                )
+                SaveProgress(taskStatus = ProgressStatus.finished.id)
             )
             return@withContext true
         } catch (ex: Exception) {
@@ -144,8 +139,6 @@ class SaveRouteProcess {
                 SaveProgress(
                     msg = ex.message.toString(),
                     taskStatus = ProgressStatus.crashed.id,
-                    progress = 0,
-                    total = 0
                 )
             )
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)

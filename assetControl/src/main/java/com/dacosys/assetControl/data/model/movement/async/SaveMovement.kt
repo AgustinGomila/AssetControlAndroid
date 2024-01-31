@@ -77,8 +77,6 @@ class SaveMovement {
                 SaveProgress(
                     msg = getContext().getString(R.string.saving_warehouse_movement),
                     taskStatus = ProgressStatus.starting.id,
-                    progress = 0,
-                    total = 0
                 )
             )
 
@@ -206,8 +204,6 @@ class SaveMovement {
                                     SaveProgress(
                                         msg = msg,
                                         taskStatus = ProgressStatus.crashed.id,
-                                        progress = 0,
-                                        total = 0
                                     )
                                 )
                                 return@withContext false
@@ -236,8 +232,6 @@ class SaveMovement {
                             SaveProgress(
                                 msg = msg,
                                 taskStatus = ProgressStatus.crashed.id,
-                                progress = 0,
-                                total = 0
                             )
                         )
                         return@withContext false
@@ -250,8 +244,6 @@ class SaveMovement {
                         SaveProgress(
                             msg = msg,
                             taskStatus = ProgressStatus.crashed.id,
-                            progress = 0,
-                            total = 0
                         )
                     )
                     return@withContext false
@@ -262,7 +254,7 @@ class SaveMovement {
                 msg = getContext().getString(R.string.movement_performed_correctly)
                 onProgress.invoke(
                     SaveProgress(
-                        msg = msg, taskStatus = ProgressStatus.finished.id, progress = 0, total = 0
+                        msg = msg, taskStatus = ProgressStatus.finished.id
                     )
                 )
                 return@withContext true
@@ -274,14 +266,14 @@ class SaveMovement {
                 msg = getContext().getString(R.string.movement_performed_correctly)
                 onProgress.invoke(
                     SaveProgress(
-                        msg = msg, taskStatus = ProgressStatus.finished.id, progress = 0, total = 0
+                        msg = msg, taskStatus = ProgressStatus.finished.id
                     )
                 )
                 return@withContext true
             } else {
                 onProgress.invoke(
                     SaveProgress(
-                        msg = msg, taskStatus = ProgressStatus.crashed.id, progress = 0, total = 0
+                        msg = msg, taskStatus = ProgressStatus.crashed.id
                     )
                 )
                 return@withContext false
@@ -292,8 +284,6 @@ class SaveMovement {
                 SaveProgress(
                     msg = ex.message.toString(),
                     taskStatus = ProgressStatus.crashed.id,
-                    progress = 0,
-                    total = 0
                 )
             )
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)

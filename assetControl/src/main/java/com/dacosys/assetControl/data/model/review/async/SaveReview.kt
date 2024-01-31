@@ -62,7 +62,9 @@ class SaveReview {
                 registryType = SyncRegistryType.AssetReview,
                 onSyncTaskProgress = { onSyncProgress.invoke(it) })
         } else {
-            onSyncProgress.invoke(SyncProgress(progressStatus = ProgressStatus.bigFinished))
+            onSyncProgress.invoke(
+                SyncProgress(progressStatus = ProgressStatus.bigFinished)
+            )
         }
     }
 
@@ -207,8 +209,6 @@ class SaveReview {
                     SaveProgress(
                         msg = "${getContext().getString(R.string.error_making_movements)}: ${ex.message}",
                         taskStatus = ProgressStatus.crashed.id,
-                        progress = 0,
-                        total = 0
                     )
                 )
                 return@withContext false
@@ -236,8 +236,6 @@ class SaveReview {
                     SaveProgress(
                         msg = "${getContext().getString(R.string.error_updating_asset_status)}: ${ex.message}",
                         taskStatus = ProgressStatus.crashed.id,
-                        progress = 0,
-                        total = 0
                     )
                 )
                 return@withContext false
@@ -268,8 +266,6 @@ class SaveReview {
                     SaveProgress(
                         msg = getContext().getString(R.string.failed_to_save_the_revision),
                         taskStatus = ProgressStatus.crashed.id,
-                        progress = 0,
-                        total = 0
                     )
                 )
                 return@withContext false
@@ -283,8 +279,6 @@ class SaveReview {
                 SaveProgress(
                     msg = "${getContext().getString(R.string.failed_to_do_the_review)}: ${ex.message}",
                     taskStatus = ProgressStatus.crashed.id,
-                    progress = 0,
-                    total = 0
                 )
             )
             return@withContext false

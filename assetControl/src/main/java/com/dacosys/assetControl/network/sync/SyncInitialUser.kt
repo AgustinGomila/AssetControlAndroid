@@ -48,8 +48,6 @@ class SyncInitialUser(
         scope.launch {
             onUiEvent(
                 SyncProgress(
-                    totalTask = 0,
-                    completedTask = 0,
                     msg = getContext().getString(R.string.starting_user_synchronization),
                     registryType = registryType,
                     progressStatus = ProgressStatus.starting
@@ -155,8 +153,6 @@ class SyncInitialUser(
             scope.launch {
                 onUiEvent(
                     SyncProgress(
-                        totalTask = 0,
-                        completedTask = 0,
                         msg = errorMsg,
                         registryType = registryType,
                         progressStatus = ProgressStatus.crashed
@@ -187,8 +183,6 @@ class SyncInitialUser(
                 scope.launch {
                     onUiEvent(
                         SyncProgress(
-                            totalTask = 0,
-                            completedTask = 0,
                             msg = getContext().getString(R.string.ok),
                             registryType = registryType,
                             progressStatus = ProgressStatus.finished
@@ -201,8 +195,6 @@ class SyncInitialUser(
                 scope.launch {
                     onUiEvent(
                         SyncProgress(
-                            totalTask = 0,
-                            completedTask = 0,
                             msg = it.msg,
                             registryType = registryType,
                             progressStatus = it.status

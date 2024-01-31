@@ -81,10 +81,7 @@ class SyncDownload(
             scope.launch {
                 onUiEvent(
                     SyncProgress(
-                        totalTask = 0,
-                        completedTask = 0,
                         msg = serverTime,
-                        registryType = null,
                         progressStatus = r.status
                     )
                 )
@@ -102,18 +99,12 @@ class SyncDownload(
         fun onFinish(it: Boolean) {
             val sp: SyncProgress = if (it) {
                 SyncProgress(
-                    totalTask = 0,
-                    completedTask = 0,
                     msg = getContext().getString(R.string.download_finished),
-                    registryType = null,
                     progressStatus = ProgressStatus.bigFinished
                 )
             } else {
                 SyncProgress(
-                    totalTask = 0,
-                    completedTask = 0,
                     msg = getContext().getString(R.string.error_downloading_the_database_from_the_server),
-                    registryType = null,
                     progressStatus = ProgressStatus.crashed
                 )
             }
@@ -153,10 +144,7 @@ class SyncDownload(
     private suspend fun suspendFunction(): Boolean = withContext(Dispatchers.IO) {
         onUiEvent(
             SyncProgress(
-                totalTask = 0,
-                completedTask = 0,
                 msg = getContext().getString(R.string.downloading_starting),
-                registryType = null,
                 progressStatus = ProgressStatus.bigStarting
             )
         )
@@ -194,11 +182,8 @@ class SyncDownload(
             ex.printStackTrace()
             onUiEvent(
                 SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.synchronization_failed),
-                    null,
-                    ProgressStatus.bigCrashed
+                    msg = getContext().getString(R.string.synchronization_failed),
+                    progressStatus = ProgressStatus.bigCrashed
                 )
             )
             return@withContext false
@@ -237,11 +222,9 @@ class SyncDownload(
         val registryType = SyncRegistryType.Asset
         onUiEvent(
             SyncProgress(
-                0,
-                0,
-                getContext().getString(R.string.starting_asset_synchronization),
-                registryType,
-                ProgressStatus.starting
+                msg = getContext().getString(R.string.starting_asset_synchronization),
+                registryType = registryType,
+                progressStatus = ProgressStatus.starting
             )
         )
 
@@ -285,11 +268,9 @@ class SyncDownload(
                         // Error local
                         onUiEvent(
                             SyncProgress(
-                                0,
-                                0,
-                                getContext().getString(R.string.local_error_in_asset_synchronization),
-                                registryType,
-                                ProgressStatus.crashed
+                                msg = getContext().getString(R.string.local_error_in_asset_synchronization),
+                                registryType = registryType,
+                                progressStatus = ProgressStatus.crashed
                             )
                         )
                         ErrorLog.writeLog(null, this::class.java.simpleName, ex)
@@ -302,11 +283,9 @@ class SyncDownload(
             // Error remoto
             onUiEvent(
                 SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.remote_error_in_asset_synchronization),
-                    registryType,
-                    ProgressStatus.crashed
+                    msg = getContext().getString(R.string.remote_error_in_asset_synchronization),
+                    registryType = registryType,
+                    progressStatus = ProgressStatus.crashed
                 )
             )
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
@@ -319,22 +298,18 @@ class SyncDownload(
         when {
             !scope.isActive -> onUiEvent(
                 SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.synchronization_canceled),
-                    registryType,
-                    ProgressStatus.canceled
+                    msg = getContext().getString(R.string.synchronization_canceled),
+                    registryType = registryType,
+                    progressStatus = ProgressStatus.canceled
                 )
             )
 
             else -> {
                 onUiEvent(
                     SyncProgress(
-                        0,
-                        0,
-                        getContext().getString(R.string.asset_synchronization_completed),
-                        registryType,
-                        ProgressStatus.success
+                        msg = getContext().getString(R.string.asset_synchronization_completed),
+                        registryType = registryType,
+                        progressStatus = ProgressStatus.success
                     )
                 )
                 if (!errorOccurred) {
@@ -348,11 +323,9 @@ class SyncDownload(
         val registryType = SyncRegistryType.ItemCategory
         onUiEvent(
             SyncProgress(
-                0,
-                0,
-                getContext().getString(R.string.starting_category_synchronization),
-                registryType,
-                ProgressStatus.starting
+                msg = getContext().getString(R.string.starting_category_synchronization),
+                registryType = registryType,
+                progressStatus = ProgressStatus.starting
             )
         )
 
@@ -396,11 +369,9 @@ class SyncDownload(
                         // Error local
                         onUiEvent(
                             SyncProgress(
-                                0,
-                                0,
-                                getContext().getString(R.string.local_error_in_category_synchronization),
-                                registryType,
-                                ProgressStatus.crashed
+                                msg = getContext().getString(R.string.local_error_in_category_synchronization),
+                                registryType = registryType,
+                                progressStatus = ProgressStatus.crashed
                             )
                         )
                         ErrorLog.writeLog(null, this::class.java.simpleName, ex)
@@ -413,11 +384,9 @@ class SyncDownload(
             // Error remoto
             onUiEvent(
                 SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.remote_error_in_category_synchronization),
-                    registryType,
-                    ProgressStatus.crashed
+                    msg = getContext().getString(R.string.remote_error_in_category_synchronization),
+                    registryType = registryType,
+                    progressStatus = ProgressStatus.crashed
                 )
             )
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
@@ -430,22 +399,18 @@ class SyncDownload(
         when {
             !scope.isActive -> onUiEvent(
                 SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.synchronization_canceled),
-                    registryType,
-                    ProgressStatus.canceled
+                    msg = getContext().getString(R.string.synchronization_canceled),
+                    registryType = registryType,
+                    progressStatus = ProgressStatus.canceled
                 )
             )
 
             else -> {
                 onUiEvent(
                     SyncProgress(
-                        0,
-                        0,
-                        getContext().getString(R.string.category_synchronization_completed),
-                        registryType,
-                        ProgressStatus.success
+                        msg = getContext().getString(R.string.category_synchronization_completed),
+                        registryType = registryType,
+                        progressStatus = ProgressStatus.success
                     )
                 )
                 if (!errorOccurred) {
@@ -459,11 +424,9 @@ class SyncDownload(
         val registryType = SyncRegistryType.User
         onUiEvent(
             SyncProgress(
-                0,
-                0,
-                getContext().getString(R.string.starting_user_synchronization),
-                registryType,
-                ProgressStatus.starting
+                msg = getContext().getString(R.string.starting_user_synchronization),
+                registryType = registryType,
+                progressStatus = ProgressStatus.starting
             )
         )
 
@@ -547,11 +510,9 @@ class SyncDownload(
                         // Error local
                         onUiEvent(
                             SyncProgress(
-                                0,
-                                0,
-                                getContext().getString(R.string.local_error_in_user_synchronization),
-                                registryType,
-                                ProgressStatus.crashed
+                                msg = getContext().getString(R.string.local_error_in_user_synchronization),
+                                registryType = registryType,
+                                progressStatus = ProgressStatus.crashed
                             )
                         )
                         ErrorLog.writeLog(null, this::class.java.simpleName, ex)
@@ -564,11 +525,9 @@ class SyncDownload(
             // Error remoto
             onUiEvent(
                 SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.remote_error_in_user_synchronization),
-                    registryType,
-                    ProgressStatus.crashed
+                    msg = getContext().getString(R.string.remote_error_in_user_synchronization),
+                    registryType = registryType,
+                    progressStatus = ProgressStatus.crashed
                 )
             )
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
@@ -581,22 +540,18 @@ class SyncDownload(
         when {
             !scope.isActive -> onUiEvent(
                 SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.synchronization_canceled),
-                    registryType,
-                    ProgressStatus.canceled
+                    msg = getContext().getString(R.string.synchronization_canceled),
+                    registryType = registryType,
+                    progressStatus = ProgressStatus.canceled
                 )
             )
 
             else -> {
                 onUiEvent(
                     SyncProgress(
-                        0,
-                        0,
-                        getContext().getString(R.string.user_synchronization_completed),
-                        registryType,
-                        ProgressStatus.success
+                        msg = getContext().getString(R.string.user_synchronization_completed),
+                        registryType = registryType,
+                        progressStatus = ProgressStatus.success
                     )
                 )
                 if (!errorOccurred) {
@@ -610,11 +565,9 @@ class SyncDownload(
         val registryType = SyncRegistryType.Warehouse
         onUiEvent(
             SyncProgress(
-                0,
-                0,
-                getContext().getString(R.string.starting_warehouse_synchronization),
-                registryType,
-                ProgressStatus.starting
+                msg = getContext().getString(R.string.starting_warehouse_synchronization),
+                registryType = registryType,
+                progressStatus = ProgressStatus.starting
             )
         )
 
@@ -658,11 +611,9 @@ class SyncDownload(
                         // Error local
                         onUiEvent(
                             SyncProgress(
-                                0,
-                                0,
-                                getContext().getString(R.string.local_error_in_warehouse_synchronization),
-                                registryType,
-                                ProgressStatus.crashed
+                                msg = getContext().getString(R.string.local_error_in_warehouse_synchronization),
+                                registryType = registryType,
+                                progressStatus = ProgressStatus.crashed
                             )
                         )
                         ErrorLog.writeLog(null, this::class.java.simpleName, ex)
@@ -675,11 +626,9 @@ class SyncDownload(
             // Error remoto
             onUiEvent(
                 SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.remote_error_in_warehouse_synchronization),
-                    registryType,
-                    ProgressStatus.crashed
+                    msg = getContext().getString(R.string.remote_error_in_warehouse_synchronization),
+                    registryType = registryType,
+                    progressStatus = ProgressStatus.crashed
                 )
             )
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
@@ -692,22 +641,18 @@ class SyncDownload(
         when {
             !scope.isActive -> onUiEvent(
                 SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.synchronization_canceled),
-                    registryType,
-                    ProgressStatus.canceled
+                    msg = getContext().getString(R.string.synchronization_canceled),
+                    registryType = registryType,
+                    progressStatus = ProgressStatus.canceled
                 )
             )
 
             else -> {
                 onUiEvent(
                     SyncProgress(
-                        0,
-                        0,
-                        getContext().getString(R.string.warehouse_synchronization_completed),
-                        registryType,
-                        ProgressStatus.success
+                        msg = getContext().getString(R.string.warehouse_synchronization_completed),
+                        registryType = registryType,
+                        progressStatus = ProgressStatus.success
                     )
                 )
                 if (!errorOccurred) {
@@ -721,11 +666,9 @@ class SyncDownload(
         val registryType = SyncRegistryType.WarehouseArea
         onUiEvent(
             SyncProgress(
-                0,
-                0,
-                getContext().getString(R.string.starting_warehouse_area_synchronization),
-                registryType,
-                ProgressStatus.starting
+                msg = getContext().getString(R.string.starting_warehouse_area_synchronization),
+                registryType = registryType,
+                progressStatus = ProgressStatus.starting
             )
         )
 
@@ -769,11 +712,9 @@ class SyncDownload(
                         // Error local
                         onUiEvent(
                             SyncProgress(
-                                0,
-                                0,
-                                getContext().getString(R.string.local_error_in_warehouse_area_synchronization),
-                                registryType,
-                                ProgressStatus.crashed
+                                msg = getContext().getString(R.string.local_error_in_warehouse_area_synchronization),
+                                registryType = registryType,
+                                progressStatus = ProgressStatus.crashed
                             )
                         )
                         ErrorLog.writeLog(null, this::class.java.simpleName, ex)
@@ -786,11 +727,9 @@ class SyncDownload(
             // Error remoto
             onUiEvent(
                 SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.remote_error_in_warehouse_area_synchronization),
-                    registryType,
-                    ProgressStatus.crashed
+                    msg = getContext().getString(R.string.remote_error_in_warehouse_area_synchronization),
+                    registryType = registryType,
+                    progressStatus = ProgressStatus.crashed
                 )
             )
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
@@ -803,22 +742,18 @@ class SyncDownload(
         when {
             !scope.isActive -> onUiEvent(
                 SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.synchronization_canceled),
-                    registryType,
-                    ProgressStatus.canceled
+                    msg = getContext().getString(R.string.synchronization_canceled),
+                    registryType = registryType,
+                    progressStatus = ProgressStatus.canceled
                 )
             )
 
             else -> {
                 onUiEvent(
                     SyncProgress(
-                        0,
-                        0,
-                        getContext().getString(R.string.warehouse_area_synchronization_completed),
-                        registryType,
-                        ProgressStatus.success
+                        msg = getContext().getString(R.string.warehouse_area_synchronization_completed),
+                        registryType = registryType,
+                        progressStatus = ProgressStatus.success
                     )
                 )
                 if (!errorOccurred) {
@@ -832,11 +767,9 @@ class SyncDownload(
         val registryType = SyncRegistryType.Attribute
         onUiEvent(
             SyncProgress(
-                0,
-                0,
-                getContext().getString(R.string.starting_attribute_synchronization),
-                registryType,
-                ProgressStatus.starting
+                msg = getContext().getString(R.string.starting_attribute_synchronization),
+                registryType = registryType,
+                progressStatus = ProgressStatus.starting
             )
         )
 
@@ -886,11 +819,9 @@ class SyncDownload(
                         // Error local
                         onUiEvent(
                             SyncProgress(
-                                0,
-                                0,
-                                getContext().getString(R.string.local_error_in_attribute_synchronization),
-                                registryType,
-                                ProgressStatus.crashed
+                                msg = getContext().getString(R.string.local_error_in_attribute_synchronization),
+                                registryType = registryType,
+                                progressStatus = ProgressStatus.crashed
                             )
                         )
                         ErrorLog.writeLog(null, this::class.java.simpleName, ex)
@@ -903,11 +834,9 @@ class SyncDownload(
             // Error remoto
             onUiEvent(
                 SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.remote_error_in_attribute_synchronization),
-                    registryType,
-                    ProgressStatus.crashed
+                    msg = getContext().getString(R.string.remote_error_in_attribute_synchronization),
+                    registryType = registryType,
+                    progressStatus = ProgressStatus.crashed
                 )
             )
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
@@ -920,22 +849,18 @@ class SyncDownload(
         when {
             !scope.isActive -> onUiEvent(
                 SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.synchronization_canceled),
-                    registryType,
-                    ProgressStatus.canceled
+                    msg = getContext().getString(R.string.synchronization_canceled),
+                    registryType = registryType,
+                    progressStatus = ProgressStatus.canceled
                 )
             )
 
             else -> {
                 onUiEvent(
                     SyncProgress(
-                        0,
-                        0,
-                        getContext().getString(R.string.attribute_synchronization_completed),
-                        registryType,
-                        ProgressStatus.success
+                        msg = getContext().getString(R.string.attribute_synchronization_completed),
+                        registryType = registryType,
+                        progressStatus = ProgressStatus.success
                     )
                 )
                 if (!errorOccurred) {
@@ -971,7 +896,7 @@ class SyncDownload(
 
                 val attributeId = a.attributeId
                 val objArray = ws.attributeCompositionGet(attributeId)
-                if (objArray != null && objArray.isNotEmpty()) {
+                if (!objArray.isNullOrEmpty()) {
                     for (obj in objArray) {
                         val attributeComposition = AttributeComposition(
                             obj.attributeCompositionId,
@@ -1006,11 +931,9 @@ class SyncDownload(
         val registryType = SyncRegistryType.AttributeCategory
         onUiEvent(
             SyncProgress(
-                0,
-                0,
-                getContext().getString(R.string.starting_attribute_category_synchronization),
-                registryType,
-                ProgressStatus.starting
+                msg = getContext().getString(R.string.starting_attribute_category_synchronization),
+                registryType = registryType,
+                progressStatus = ProgressStatus.starting
             )
         )
         registryOnProcess.add(registryType)
@@ -1053,11 +976,9 @@ class SyncDownload(
                         // Error local
                         onUiEvent(
                             SyncProgress(
-                                0,
-                                0,
-                                getContext().getString(R.string.local_error_in_attribute_category_synchronization),
-                                registryType,
-                                ProgressStatus.crashed
+                                msg = getContext().getString(R.string.local_error_in_attribute_category_synchronization),
+                                registryType = registryType,
+                                progressStatus = ProgressStatus.crashed
                             )
                         )
                         ErrorLog.writeLog(null, this::class.java.simpleName, ex)
@@ -1070,11 +991,9 @@ class SyncDownload(
             // Error remoto
             onUiEvent(
                 SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.remote_error_in_attribute_category_synchronization),
-                    registryType,
-                    ProgressStatus.crashed
+                    msg = getContext().getString(R.string.remote_error_in_attribute_category_synchronization),
+                    registryType = registryType,
+                    progressStatus = ProgressStatus.crashed
                 )
             )
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
@@ -1087,22 +1006,18 @@ class SyncDownload(
         when {
             !scope.isActive -> onUiEvent(
                 SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.synchronization_canceled),
-                    registryType,
-                    ProgressStatus.canceled
+                    msg = getContext().getString(R.string.synchronization_canceled),
+                    registryType = registryType,
+                    progressStatus = ProgressStatus.canceled
                 )
             )
 
             else -> {
                 onUiEvent(
                     SyncProgress(
-                        0,
-                        0,
-                        getContext().getString(R.string.attribute_category_synchronization_completed),
-                        registryType,
-                        ProgressStatus.success
+                        msg = getContext().getString(R.string.attribute_category_synchronization_completed),
+                        registryType = registryType,
+                        progressStatus = ProgressStatus.success
                     )
                 )
                 if (!errorOccurred) {
@@ -1116,11 +1031,9 @@ class SyncDownload(
         val registryType = SyncRegistryType.Route
         onUiEvent(
             SyncProgress(
-                0,
-                0,
-                getContext().getString(R.string.starting_route_synchronization),
-                registryType,
-                ProgressStatus.starting
+                msg = getContext().getString(R.string.starting_route_synchronization),
+                registryType = registryType,
+                progressStatus = ProgressStatus.starting
             )
         )
 
@@ -1174,11 +1087,9 @@ class SyncDownload(
                         // Error local
                         onUiEvent(
                             SyncProgress(
-                                0,
-                                0,
-                                getContext().getString(R.string.local_error_in_route_synchronization),
-                                registryType,
-                                ProgressStatus.crashed
+                                msg = getContext().getString(R.string.local_error_in_route_synchronization),
+                                registryType = registryType,
+                                progressStatus = ProgressStatus.crashed
                             )
                         )
                         ErrorLog.writeLog(null, this::class.java.simpleName, ex)
@@ -1191,11 +1102,9 @@ class SyncDownload(
             // Error remoto
             onUiEvent(
                 SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.remote_error_in_route_synchronization),
-                    registryType,
-                    ProgressStatus.crashed
+                    msg = getContext().getString(R.string.remote_error_in_route_synchronization),
+                    registryType = registryType,
+                    progressStatus = ProgressStatus.crashed
                 )
             )
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
@@ -1208,8 +1117,6 @@ class SyncDownload(
         when {
             !scope.isActive -> onUiEvent(
                 SyncProgress(
-                    totalTask = 0,
-                    completedTask = 0,
                     msg = getContext().getString(R.string.synchronization_canceled),
                     registryType = registryType,
                     progressStatus = ProgressStatus.canceled
@@ -1219,8 +1126,6 @@ class SyncDownload(
             else -> {
                 onUiEvent(
                     SyncProgress(
-                        totalTask = 0,
-                        completedTask = 0,
                         msg = getContext().getString(R.string.route_synchronization_completed),
                         registryType = registryType,
                         progressStatus = ProgressStatus.success
@@ -1242,7 +1147,7 @@ class SyncDownload(
             val objArray = ws.routeCompositionGet(routeId)
             aDb.deleteByRouteId(routeId)
 
-            if (objArray != null && objArray.isNotEmpty()) {
+            if (!objArray.isNullOrEmpty()) {
                 val countTotal = objArray.size
                 var currentCount = 0
                 try {
@@ -1293,11 +1198,9 @@ class SyncDownload(
         val registryType = SyncRegistryType.DataCollectionRule
         onUiEvent(
             SyncProgress(
-                0,
-                0,
-                getContext().getString(R.string.starting_data_collection_rule_synchronization),
-                registryType,
-                ProgressStatus.starting
+                msg = getContext().getString(R.string.starting_data_collection_rule_synchronization),
+                registryType = registryType,
+                progressStatus = ProgressStatus.starting
             )
         )
 
@@ -1362,11 +1265,9 @@ class SyncDownload(
                         // Error local
                         onUiEvent(
                             SyncProgress(
-                                0,
-                                0,
-                                getContext().getString(R.string.local_error_in_data_collection_rule_synchronization),
-                                registryType,
-                                ProgressStatus.crashed
+                                msg = getContext().getString(R.string.local_error_in_data_collection_rule_synchronization),
+                                registryType = registryType,
+                                progressStatus = ProgressStatus.crashed
                             )
                         )
                         ErrorLog.writeLog(null, this::class.java.simpleName, ex)
@@ -1379,11 +1280,9 @@ class SyncDownload(
             // Error remoto
             onUiEvent(
                 SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.remote_error_in_data_collection_rule_synchronization),
-                    registryType,
-                    ProgressStatus.crashed
+                    msg = getContext().getString(R.string.remote_error_in_data_collection_rule_synchronization),
+                    registryType = registryType,
+                    progressStatus = ProgressStatus.crashed
                 )
             )
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
@@ -1396,22 +1295,18 @@ class SyncDownload(
         when {
             !scope.isActive -> onUiEvent(
                 SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.synchronization_canceled),
-                    registryType,
-                    ProgressStatus.canceled
+                    msg = getContext().getString(R.string.synchronization_canceled),
+                    registryType = registryType,
+                    progressStatus = ProgressStatus.canceled
                 )
             )
 
             else -> {
                 onUiEvent(
                     SyncProgress(
-                        0,
-                        0,
-                        getContext().getString(R.string.data_collection_rule_synchronization_completed),
-                        registryType,
-                        ProgressStatus.success
+                        msg = getContext().getString(R.string.data_collection_rule_synchronization_completed),
+                        registryType = registryType,
+                        progressStatus = ProgressStatus.success
                     )
                 )
                 if (!errorOccurred) {
@@ -1430,7 +1325,7 @@ class SyncDownload(
             val objArray = ws.dataCollectionRuleContentGet(dataCollectionRuleId)
             aDb.deleteByDataCollectionRuleId(dataCollectionRuleId)
 
-            if (objArray != null && objArray.isNotEmpty()) {
+            if (!objArray.isNullOrEmpty()) {
                 val countTotal = objArray.size
                 var currentCount = 0
                 try {
@@ -1488,7 +1383,7 @@ class SyncDownload(
             val objArray = ws.dataCollectionRuleTargetGet(dataCollectionRuleId)
             aDb.deleteByDataCollectionRuleId(dataCollectionRuleId)
 
-            if (objArray != null && objArray.isNotEmpty()) {
+            if (!objArray.isNullOrEmpty()) {
                 val countTotal = objArray.size
                 var currentCount = 0
                 try {
@@ -1534,11 +1429,9 @@ class SyncDownload(
         val registryType = SyncRegistryType.ManteinanceType
         onUiEvent(
             SyncProgress(
-                0,
-                0,
-                getContext().getString(R.string.starting_maintenance_type_synchronization),
-                registryType,
-                ProgressStatus.starting
+                msg = getContext().getString(R.string.starting_maintenance_type_synchronization),
+                registryType = registryType,
+                progressStatus = ProgressStatus.starting
             )
         )
 
@@ -1574,22 +1467,22 @@ class SyncDownload(
                             currentCount++
                             onUiEvent(
                                 SyncProgress(
-                                    countTotal,
-                                    currentCount,
-                                    getContext().getString(R.string.synchronizing_maintenance_types),
-                                    registryType,
-                                    ProgressStatus.running
+                                    totalTask = countTotal,
+                                    completedTask = currentCount,
+                                    msg = getContext().getString(R.string.synchronizing_maintenance_types),
+                                    registryType = registryType,
+                                    progressStatus = ProgressStatus.running
                                 )
                             )
 
                             if (!scope.isActive) {
                                 onUiEvent(
                                     SyncProgress(
-                                        0,
-                                        0,
-                                        getContext().getString(R.string.canceling_maintenance_type_synchronization),
-                                        registryType,
-                                        ProgressStatus.canceled
+                                        totalTask = 0,
+                                        completedTask = 0,
+                                        msg = getContext().getString(R.string.canceling_maintenance_type_synchronization),
+                                        registryType = registryType,
+                                        progressStatus = ProgressStatus.canceled
                                     )
                                 )
                                 return
@@ -1626,11 +1519,9 @@ class SyncDownload(
                         // Error local
                         onUiEvent(
                             SyncProgress(
-                                0,
-                                0,
-                                getContext().getString(R.string.local_error_in_maintenance_type_synchronization),
-                                registryType,
-                                ProgressStatus.crashed
+                                msg = getContext().getString(R.string.local_error_in_maintenance_type_synchronization),
+                                registryType = registryType,
+                                progressStatus = ProgressStatus.crashed
                             )
                         )
                         ErrorLog.writeLog(null, this::class.java.simpleName, ex)
@@ -1643,11 +1534,9 @@ class SyncDownload(
             // Error remoto
             onUiEvent(
                 SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.remote_error_in_maintenance_type_synchronization),
-                    registryType,
-                    ProgressStatus.crashed
+                    msg = getContext().getString(R.string.remote_error_in_maintenance_type_synchronization),
+                    registryType = registryType,
+                    progressStatus = ProgressStatus.crashed
                 )
             )
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
@@ -1660,22 +1549,18 @@ class SyncDownload(
         when {
             !scope.isActive -> onUiEvent(
                 SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.synchronization_canceled),
-                    registryType,
-                    ProgressStatus.canceled
+                    msg = getContext().getString(R.string.synchronization_canceled),
+                    registryType = registryType,
+                    progressStatus = ProgressStatus.canceled
                 )
             )
 
             else -> {
                 onUiEvent(
                     SyncProgress(
-                        0,
-                        0,
-                        getContext().getString(R.string.maintenance_type_synchronization_completed),
-                        registryType,
-                        ProgressStatus.success
+                        msg = getContext().getString(R.string.maintenance_type_synchronization_completed),
+                        registryType = registryType,
+                        progressStatus = ProgressStatus.success
                     )
                 )
                 if (!errorOccurred) {
@@ -1689,11 +1574,9 @@ class SyncDownload(
         val registryType = SyncRegistryType.ManteinanceTypeGroup
         onUiEvent(
             SyncProgress(
-                0,
-                0,
-                getContext().getString(R.string.starting_maintenance_type_group_synchronization),
-                registryType,
-                ProgressStatus.starting
+                msg = getContext().getString(R.string.starting_maintenance_type_group_synchronization),
+                registryType = registryType,
+                progressStatus = ProgressStatus.starting
             )
         )
 
@@ -1729,22 +1612,22 @@ class SyncDownload(
                             currentCount++
                             onUiEvent(
                                 SyncProgress(
-                                    countTotal,
-                                    currentCount,
-                                    getContext().getString(R.string.synchronizing_maintenance_type_groups),
-                                    registryType,
-                                    ProgressStatus.starting
+                                    totalTask = countTotal,
+                                    completedTask = currentCount,
+                                    msg = getContext().getString(R.string.synchronizing_maintenance_type_groups),
+                                    registryType = registryType,
+                                    progressStatus = ProgressStatus.starting
                                 )
                             )
 
                             if (!scope.isActive) {
                                 onUiEvent(
                                     SyncProgress(
-                                        0,
-                                        0,
-                                        getContext().getString(R.string.canceling_maintenance_type_group_synchronization),
-                                        registryType,
-                                        ProgressStatus.canceled
+                                        totalTask = 0,
+                                        completedTask = 0,
+                                        msg = getContext().getString(R.string.canceling_maintenance_type_group_synchronization),
+                                        registryType = registryType,
+                                        progressStatus = ProgressStatus.canceled
                                     )
                                 )
                                 return
@@ -1780,11 +1663,9 @@ class SyncDownload(
                         // Error local
                         onUiEvent(
                             SyncProgress(
-                                0,
-                                0,
-                                getContext().getString(R.string.local_error_in_maintenance_type_group_synchronization),
-                                registryType,
-                                ProgressStatus.crashed
+                                msg = getContext().getString(R.string.local_error_in_maintenance_type_group_synchronization),
+                                registryType = registryType,
+                                progressStatus = ProgressStatus.crashed
                             )
                         )
                         ErrorLog.writeLog(null, this::class.java.simpleName, ex)
@@ -1797,11 +1678,9 @@ class SyncDownload(
             // Error remoto
             onUiEvent(
                 SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.remote_error_in_maintenance_type_group_synchronization),
-                    registryType,
-                    ProgressStatus.crashed
+                    msg = getContext().getString(R.string.remote_error_in_maintenance_type_group_synchronization),
+                    registryType = registryType,
+                    progressStatus = ProgressStatus.crashed
                 )
             )
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
@@ -1814,22 +1693,18 @@ class SyncDownload(
         when {
             !scope.isActive -> onUiEvent(
                 SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.synchronization_canceled),
-                    registryType,
-                    ProgressStatus.canceled
+                    msg = getContext().getString(R.string.synchronization_canceled),
+                    registryType = registryType,
+                    progressStatus = ProgressStatus.canceled
                 )
             )
 
             else -> {
                 onUiEvent(
                     SyncProgress(
-                        0,
-                        0,
-                        getContext().getString(R.string.maintenance_type_group_synchronization_completed),
-                        registryType,
-                        ProgressStatus.success
+                        msg = getContext().getString(R.string.maintenance_type_group_synchronization_completed),
+                        registryType = registryType,
+                        progressStatus = ProgressStatus.success
                     )
                 )
                 if (!errorOccurred) {
@@ -1843,11 +1718,9 @@ class SyncDownload(
         val registryType = SyncRegistryType.BarcodeLabelCustom
         onUiEvent(
             SyncProgress(
-                0,
-                0,
-                getContext().getString(R.string.starting_barcode_label_synchronization),
-                registryType,
-                ProgressStatus.starting
+                msg = getContext().getString(R.string.starting_barcode_label_synchronization),
+                registryType = registryType,
+                progressStatus = ProgressStatus.starting
             )
         )
 
@@ -1891,11 +1764,9 @@ class SyncDownload(
                         // Error local
                         onUiEvent(
                             SyncProgress(
-                                0,
-                                0,
-                                getContext().getString(R.string.local_error_in_barcode_label_synchronization),
-                                registryType,
-                                ProgressStatus.crashed
+                                msg = getContext().getString(R.string.local_error_in_barcode_label_synchronization),
+                                registryType = registryType,
+                                progressStatus = ProgressStatus.crashed
                             )
                         )
                         ErrorLog.writeLog(null, this::class.java.simpleName, ex)
@@ -1908,11 +1779,9 @@ class SyncDownload(
             // Error remoto
             onUiEvent(
                 SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.remote_error_in_barcode_label_synchronization),
-                    registryType,
-                    ProgressStatus.crashed
+                    msg = getContext().getString(R.string.remote_error_in_barcode_label_synchronization),
+                    registryType = registryType,
+                    progressStatus = ProgressStatus.crashed
                 )
             )
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
@@ -1925,22 +1794,18 @@ class SyncDownload(
         when {
             !scope.isActive -> onUiEvent(
                 SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.synchronization_canceled),
-                    registryType,
-                    ProgressStatus.canceled
+                    msg = getContext().getString(R.string.synchronization_canceled),
+                    registryType = registryType,
+                    progressStatus = ProgressStatus.canceled
                 )
             )
 
             else -> {
                 onUiEvent(
                     SyncProgress(
-                        0,
-                        0,
-                        getContext().getString(R.string.barcode_label_synchronization_completed),
-                        registryType,
-                        ProgressStatus.success
+                        msg = getContext().getString(R.string.barcode_label_synchronization_completed),
+                        registryType = registryType,
+                        progressStatus = ProgressStatus.success
                     )
                 )
                 if (!errorOccurred) {

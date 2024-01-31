@@ -69,8 +69,6 @@ class AssetReviewContentDbHelper {
                 msg = getContext()
                     .getString(R.string.adding_content_to_the_review),
                 taskStatus = ProgressStatus.starting.id,
-                progress = 0,
-                total = 0
             )
         )
 
@@ -177,8 +175,6 @@ class AssetReviewContentDbHelper {
                     msg = getContext()
                         .getString(R.string.error_inserting_assets_to_review),
                     taskStatus = ProgressStatus.crashed.id,
-                    progress = 0,
-                    total = 0
                 )
             )
         } else {
@@ -186,8 +182,6 @@ class AssetReviewContentDbHelper {
                 SaveProgress(
                     msg = getContext().getString(R.string.insert_ok),
                     taskStatus = ProgressStatus.finished.id,
-                    progress = 0,
-                    total = 0
                 )
             )
         }

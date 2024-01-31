@@ -60,8 +60,6 @@ class StartReview {
                         taskStatus = ProgressStatus.finished.id,
                         assetReview = assetReview,
                         arContArray = arcArray,
-                        progress = 0,
-                        total = 0
                     )
                 )
             } else {
@@ -71,8 +69,6 @@ class StartReview {
                         taskStatus = ProgressStatus.crashed.id,
                         assetReview = assetReview,
                         arContArray = arcArray,
-                        progress = 0,
-                        total = 0
                     )
                 )
             }
@@ -90,8 +86,6 @@ class StartReview {
                     taskStatus = ProgressStatus.starting.id,
                     assetReview = assetReview,
                     arContArray = arcArray,
-                    progress = 0,
-                    total = 0
                 )
             )
 

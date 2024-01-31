@@ -81,7 +81,8 @@ class SyncUpload(
             } else if (it.status == ProgressStatus.crashed || it.status == ProgressStatus.canceled) {
                 onSyncTaskProgress.invoke(
                     SyncProgress(
-                        0, 0, it.msg, null, it.status
+                        msg = it.msg,
+                        progressStatus = it.status
                     )
                 )
             }
@@ -93,20 +94,14 @@ class SyncUpload(
         if (result) {
             onSyncTaskProgress.invoke(
                 SyncProgress(
-                    totalTask = 0,
-                    completedTask = 0,
                     msg = getContext().getString(R.string.synchronization_finished),
-                    registryType = null,
                     progressStatus = ProgressStatus.bigFinished
                 )
             )
         } else {
             onSyncTaskProgress.invoke(
                 SyncProgress(
-                    totalTask = 0,
-                    completedTask = 0,
                     msg = getContext().getString(R.string.synchronization_failed),
-                    registryType = null,
                     progressStatus = ProgressStatus.crashed
                 )
             )
@@ -132,10 +127,7 @@ class SyncUpload(
     private suspend fun suspendFunction(): Boolean = withContext(Dispatchers.IO) {
         onSyncTaskProgress.invoke(
             SyncProgress(
-                totalTask = 0,
-                completedTask = 0,
                 msg = getContext().getString(R.string.synchronization_starting),
-                registryType = null,
                 progressStatus = ProgressStatus.bigStarting
             )
         )
@@ -289,11 +281,9 @@ class SyncUpload(
             if (!scope.isActive) {
                 onSyncTaskProgress.invoke(
                     SyncProgress(
-                        0,
-                        0,
-                        getContext().getString(R.string.canceling_asset_review_synchronization),
-                        registryType,
-                        ProgressStatus.canceled
+                        msg = getContext().getString(R.string.canceling_asset_review_synchronization),
+                        registryType = registryType,
+                        progressStatus = ProgressStatus.canceled
                     )
                 )
                 return
@@ -306,11 +296,9 @@ class SyncUpload(
 
             onSyncTaskProgress.invoke(
                 SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.starting_asset_review_synchronization),
-                    registryType,
-                    ProgressStatus.starting
+                    msg = getContext().getString(R.string.starting_asset_review_synchronization),
+                    registryType = registryType,
+                    progressStatus = ProgressStatus.starting
                 )
             )
 
@@ -318,22 +306,20 @@ class SyncUpload(
             for ((currentTask, ar) in arAl.toTypedArray().withIndex()) {
                 onSyncTaskProgress.invoke(
                     SyncProgress(
-                        totalTask,
-                        currentTask,
-                        getContext().getString(R.string.synchronizing_asset_reviews),
-                        registryType,
-                        ProgressStatus.running
+                        totalTask = totalTask,
+                        completedTask = currentTask,
+                        msg = getContext().getString(R.string.synchronizing_asset_reviews),
+                        registryType = registryType,
+                        progressStatus = ProgressStatus.running
                     )
                 )
 
                 if (!scope.isActive) {
                     onSyncTaskProgress.invoke(
                         SyncProgress(
-                            0,
-                            0,
-                            getContext().getString(R.string.canceling_asset_review_synchronization),
-                            registryType,
-                            ProgressStatus.canceled
+                            msg = getContext().getString(R.string.canceling_asset_review_synchronization),
+                            registryType = registryType,
+                            progressStatus = ProgressStatus.canceled
                         )
                     )
                     break
@@ -387,7 +373,9 @@ class SyncUpload(
                     arDb.updateTransferredNew(arId, ar.collectorAssetReviewId)
 
                     // Actualizar los Ids del colector con los Ids reales
-                    UpdateIdImages(context = getContext(), programObjectId = Table.assetReview.tableId.toLong(),
+                    UpdateIdImages(
+                        context = getContext(),
+                        programObjectId = Table.assetReview.tableId.toLong(),
                         newObjectId1 = arId,
                         localObjectId1 = ar.collectorAssetReviewId,
                         onUploadProgress = {
@@ -410,11 +398,9 @@ class SyncUpload(
             // Error remoto
             onSyncTaskProgress.invoke(
                 SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.failed_to_synchronize_the_asset_reviews),
-                    registryType,
-                    ProgressStatus.crashed
+                    msg = getContext().getString(R.string.failed_to_synchronize_the_asset_reviews),
+                    registryType = registryType,
+                    progressStatus = ProgressStatus.crashed
                 )
             )
 
@@ -424,10 +410,12 @@ class SyncUpload(
             registryOnProcess.remove(registryType)
             onSyncTaskProgress.invoke(
                 SyncProgress(
-                    0, 0, when {
+                    msg = when {
                         error -> getContext().getString(R.string.failed_to_synchronize_the_asset_reviews)
                         else -> getContext().getString(R.string.asset_review_synchronization_completed)
-                    }, registryType, when {
+                    },
+                    registryType = registryType,
+                    progressStatus = when {
                         error -> ProgressStatus.crashed
                         else -> ProgressStatus.success
                     }
@@ -451,11 +439,9 @@ class SyncUpload(
             if (!scope.isActive) {
                 onSyncTaskProgress.invoke(
                     SyncProgress(
-                        0,
-                        0,
-                        getContext().getString(R.string.canceling_movement_synchronization),
-                        registryType,
-                        ProgressStatus.canceled
+                        msg = getContext().getString(R.string.canceling_movement_synchronization),
+                        registryType = registryType,
+                        progressStatus = ProgressStatus.canceled
                     )
                 )
                 return
@@ -468,11 +454,9 @@ class SyncUpload(
 
             onSyncTaskProgress.invoke(
                 SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.starting_movement_synchronization),
-                    registryType,
-                    ProgressStatus.starting
+                    msg = getContext().getString(R.string.starting_movement_synchronization),
+                    registryType = registryType,
+                    progressStatus = ProgressStatus.starting
                 )
             )
 
@@ -480,22 +464,20 @@ class SyncUpload(
             for ((currentTask, wm) in wmAl.toTypedArray().withIndex()) {
                 onSyncTaskProgress.invoke(
                     SyncProgress(
-                        totalTask,
-                        currentTask,
-                        getContext().getString(R.string.synchronizing_movements),
-                        registryType,
-                        ProgressStatus.running
+                        totalTask = totalTask,
+                        completedTask = currentTask,
+                        msg = getContext().getString(R.string.synchronizing_movements),
+                        registryType = registryType,
+                        progressStatus = ProgressStatus.running
                     )
                 )
 
                 if (!scope.isActive) {
                     onSyncTaskProgress.invoke(
                         SyncProgress(
-                            0,
-                            0,
-                            getContext().getString(R.string.canceling_movement_synchronization),
-                            registryType,
-                            ProgressStatus.canceled
+                            msg = getContext().getString(R.string.canceling_movement_synchronization),
+                            registryType = registryType,
+                            progressStatus = ProgressStatus.canceled
                         )
                     )
                     break
@@ -541,7 +523,9 @@ class SyncUpload(
                     wmDb.updateTransferredNew(wmId, wm.collectorWarehouseMovementId)
 
                     // Actualizar los Ids del colector con los Ids reales
-                    UpdateIdImages(context = getContext(), programObjectId = Table.warehouseMovement.tableId.toLong(),
+                    UpdateIdImages(
+                        context = getContext(),
+                        programObjectId = Table.warehouseMovement.tableId.toLong(),
                         newObjectId1 = wmId,
                         localObjectId1 = wm.collectorWarehouseMovementId,
                         onUploadProgress = {
@@ -564,11 +548,9 @@ class SyncUpload(
             // Error remoto
             onSyncTaskProgress.invoke(
                 SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.failed_to_synchronize_the_movements),
-                    registryType,
-                    ProgressStatus.crashed
+                    msg = getContext().getString(R.string.failed_to_synchronize_the_movements),
+                    registryType = registryType,
+                    progressStatus = ProgressStatus.crashed
                 )
             )
             ErrorLog.writeLog(null, tag, ex)
@@ -577,10 +559,12 @@ class SyncUpload(
             registryOnProcess.remove(registryType)
             onSyncTaskProgress.invoke(
                 SyncProgress(
-                    0, 0, when {
+                    msg = when {
                         error -> getContext().getString(R.string.failed_to_synchronize_the_movements)
                         else -> getContext().getString(R.string.movement_synchronization_completed)
-                    }, registryType, when {
+                    },
+                    registryType = registryType,
+                    progressStatus = when {
                         error -> ProgressStatus.crashed
                         else -> ProgressStatus.success
                     }
@@ -605,11 +589,9 @@ class SyncUpload(
             if (!scope.isActive) {
                 onSyncTaskProgress.invoke(
                     SyncProgress(
-                        0,
-                        0,
-                        getContext().getString(R.string.canceling_asset_synchronization),
-                        registryType,
-                        ProgressStatus.canceled
+                        msg = getContext().getString(R.string.canceling_asset_synchronization),
+                        registryType = registryType,
+                        progressStatus = ProgressStatus.canceled
                     )
                 )
                 return
@@ -622,11 +604,9 @@ class SyncUpload(
 
             onSyncTaskProgress.invoke(
                 SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.starting_asset_synchronization),
-                    registryType,
-                    ProgressStatus.starting
+                    msg = getContext().getString(R.string.starting_asset_synchronization),
+                    registryType = registryType,
+                    progressStatus = ProgressStatus.starting
                 )
             )
 
@@ -636,22 +616,20 @@ class SyncUpload(
                 a.setDataRead()
                 onSyncTaskProgress.invoke(
                     SyncProgress(
-                        totalTask,
-                        currentTask,
-                        getContext().getString(R.string.synchronizing_assets),
-                        registryType,
-                        ProgressStatus.running
+                        totalTask = totalTask,
+                        completedTask = currentTask,
+                        msg = getContext().getString(R.string.synchronizing_assets),
+                        registryType = registryType,
+                        progressStatus = ProgressStatus.running
                     )
                 )
 
                 if (!scope.isActive) {
                     onSyncTaskProgress.invoke(
                         SyncProgress(
-                            0,
-                            0,
-                            getContext().getString(R.string.canceling_asset_synchronization),
-                            registryType,
-                            ProgressStatus.canceled
+                            msg = getContext().getString(R.string.canceling_asset_synchronization),
+                            registryType = registryType,
+                            progressStatus = ProgressStatus.canceled
                         )
                     )
                     break
@@ -684,7 +662,9 @@ class SyncUpload(
                     allRealId.add(realAssetId)
 
                     // Actualizar los Ids del colector con los Ids reales
-                    UpdateIdImages(context = getContext(), programObjectId = Table.asset.tableId.toLong(),
+                    UpdateIdImages(
+                        context = getContext(),
+                        programObjectId = Table.asset.tableId.toLong(),
                         newObjectId1 = realAssetId,
                         localObjectId1 = a.assetId,
                         onUploadProgress = {
@@ -710,11 +690,9 @@ class SyncUpload(
             // Error remoto
             onSyncTaskProgress.invoke(
                 SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.failed_to_synchronize_the_assets),
-                    registryType,
-                    ProgressStatus.crashed
+                    msg = getContext().getString(R.string.failed_to_synchronize_the_assets),
+                    registryType = registryType,
+                    progressStatus = ProgressStatus.crashed
                 )
             )
             ErrorLog.writeLog(null, tag, ex)
@@ -723,10 +701,12 @@ class SyncUpload(
             registryOnProcess.remove(registryType)
             onSyncTaskProgress.invoke(
                 SyncProgress(
-                    0, 0, when {
+                    msg = when {
                         error -> getContext().getString(R.string.failed_to_synchronize_the_assets)
                         else -> getContext().getString(R.string.asset_synchronization_completed)
-                    }, registryType, when {
+                    },
+                    registryType = registryType,
+                    progressStatus = when {
                         error -> ProgressStatus.crashed
                         else -> ProgressStatus.success
                     }
@@ -753,11 +733,9 @@ class SyncUpload(
             if (!scope.isActive) {
                 onSyncTaskProgress.invoke(
                     SyncProgress(
-                        0,
-                        0,
-                        getContext().getString(R.string.canceling_warehouse_area_synchronization),
-                        registryType,
-                        ProgressStatus.canceled
+                        msg = getContext().getString(R.string.canceling_warehouse_area_synchronization),
+                        registryType = registryType,
+                        progressStatus = ProgressStatus.canceled
                     )
                 )
                 return
@@ -770,11 +748,9 @@ class SyncUpload(
 
             onSyncTaskProgress.invoke(
                 SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.starting_warehouse_area_synchronization),
-                    registryType,
-                    ProgressStatus.starting
+                    msg = getContext().getString(R.string.starting_warehouse_area_synchronization),
+                    registryType = registryType,
+                    progressStatus = ProgressStatus.starting
                 )
             )
 
@@ -784,22 +760,20 @@ class SyncUpload(
                 wa.setDataRead()
                 onSyncTaskProgress.invoke(
                     SyncProgress(
-                        totalTask,
-                        currentTask,
-                        getContext().getString(R.string.synchronizing_warehouse_areas),
-                        registryType,
-                        ProgressStatus.running
+                        totalTask = totalTask,
+                        completedTask = currentTask,
+                        msg = getContext().getString(R.string.synchronizing_warehouse_areas),
+                        registryType = registryType,
+                        progressStatus = ProgressStatus.running
                     )
                 )
 
                 if (!scope.isActive) {
                     onSyncTaskProgress.invoke(
                         SyncProgress(
-                            0,
-                            0,
-                            getContext().getString(R.string.canceling_warehouse_area_synchronization),
-                            registryType,
-                            ProgressStatus.canceled
+                            msg = getContext().getString(R.string.canceling_warehouse_area_synchronization),
+                            registryType = registryType,
+                            progressStatus = ProgressStatus.canceled
                         )
                     )
                     break
@@ -867,7 +841,9 @@ class SyncUpload(
                     allRealId.add(realWarehouseAreaId)
 
                     // Actualizar los Ids del colector con los Ids reales
-                    UpdateIdImages(context = getContext(), programObjectId = Table.warehouseArea.tableId.toLong(),
+                    UpdateIdImages(
+                        context = getContext(),
+                        programObjectId = Table.warehouseArea.tableId.toLong(),
                         newObjectId1 = realWarehouseAreaId,
                         localObjectId1 = wa.warehouseAreaId,
                         onUploadProgress = {
@@ -893,11 +869,9 @@ class SyncUpload(
             // Error remoto
             onSyncTaskProgress.invoke(
                 SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.failed_to_synchronize_the_warehouse_areas),
-                    registryType,
-                    ProgressStatus.crashed
+                    msg = getContext().getString(R.string.failed_to_synchronize_the_warehouse_areas),
+                    registryType = registryType,
+                    progressStatus = ProgressStatus.crashed
                 )
             )
             ErrorLog.writeLog(null, tag, ex)
@@ -906,10 +880,12 @@ class SyncUpload(
             registryOnProcess.remove(registryType)
             onSyncTaskProgress.invoke(
                 SyncProgress(
-                    0, 0, when {
+                    msg = when {
                         error -> getContext().getString(R.string.failed_to_synchronize_the_warehouse_areas)
                         else -> getContext().getString(R.string.warehouse_area_synchronization_completed)
-                    }, registryType, when {
+                    },
+                    registryType = registryType,
+                    progressStatus = when {
                         error -> ProgressStatus.crashed
                         else -> ProgressStatus.success
                     }
@@ -936,11 +912,9 @@ class SyncUpload(
             if (!scope.isActive) {
                 onSyncTaskProgress.invoke(
                     SyncProgress(
-                        0,
-                        0,
-                        getContext().getString(R.string.canceling_warehouse_synchronization),
-                        registryType,
-                        ProgressStatus.canceled
+                        msg = getContext().getString(R.string.canceling_warehouse_synchronization),
+                        registryType = registryType,
+                        progressStatus = ProgressStatus.canceled
                     )
                 )
                 return
@@ -953,11 +927,9 @@ class SyncUpload(
 
             onSyncTaskProgress.invoke(
                 SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.starting_warehouse_synchronization),
-                    registryType,
-                    ProgressStatus.starting
+                    msg = getContext().getString(R.string.starting_warehouse_synchronization),
+                    registryType = registryType,
+                    progressStatus = ProgressStatus.starting
                 )
             )
 
@@ -967,22 +939,20 @@ class SyncUpload(
                 w.setDataRead()
                 onSyncTaskProgress.invoke(
                     SyncProgress(
-                        totalTask,
-                        currentTask,
-                        getContext().getString(R.string.synchronizing_warehouses),
-                        registryType,
-                        ProgressStatus.running
+                        totalTask = totalTask,
+                        completedTask = currentTask,
+                        msg = getContext().getString(R.string.synchronizing_warehouses),
+                        registryType = registryType,
+                        progressStatus = ProgressStatus.running
                     )
                 )
 
                 if (!scope.isActive) {
                     onSyncTaskProgress.invoke(
                         SyncProgress(
-                            0,
-                            0,
-                            getContext().getString(R.string.canceling_warehouse_synchronization),
-                            registryType,
-                            ProgressStatus.canceled
+                            msg = getContext().getString(R.string.canceling_warehouse_synchronization),
+                            registryType = registryType,
+                            progressStatus = ProgressStatus.canceled
                         )
                     )
                     break
@@ -1021,7 +991,9 @@ class SyncUpload(
                     allRealId.add(realWarehouseId)
 
                     // Actualizar los Ids del colector con los Ids reales
-                    UpdateIdImages(context = getContext(), programObjectId = Table.warehouse.tableId.toLong(),
+                    UpdateIdImages(
+                        context = getContext(),
+                        programObjectId = Table.warehouse.tableId.toLong(),
                         newObjectId1 = realWarehouseId,
                         localObjectId1 = w.warehouseId,
                         onUploadProgress = {
@@ -1047,11 +1019,9 @@ class SyncUpload(
             // Error remoto
             onSyncTaskProgress.invoke(
                 SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.failed_to_synchronize_the_warehouses),
-                    registryType,
-                    ProgressStatus.crashed
+                    msg = getContext().getString(R.string.failed_to_synchronize_the_warehouses),
+                    registryType = registryType,
+                    progressStatus = ProgressStatus.crashed
                 )
             )
             ErrorLog.writeLog(null, tag, ex)
@@ -1060,10 +1030,12 @@ class SyncUpload(
             registryOnProcess.remove(registryType)
             onSyncTaskProgress.invoke(
                 SyncProgress(
-                    0, 0, when {
+                    msg = when {
                         error -> getContext().getString(R.string.failed_to_synchronize_the_warehouses)
                         else -> getContext().getString(R.string.warehouse_synchronization_completed)
-                    }, registryType, when {
+                    },
+                    registryType = registryType,
+                    progressStatus = when {
                         error -> ProgressStatus.crashed
                         else -> ProgressStatus.success
                     }
@@ -1087,11 +1059,9 @@ class SyncUpload(
             if (!scope.isActive) {
                 onSyncTaskProgress.invoke(
                     SyncProgress(
-                        0,
-                        0,
-                        getContext().getString(R.string.canceling_category_synchronization),
-                        registryType,
-                        ProgressStatus.canceled
+                        msg = getContext().getString(R.string.canceling_category_synchronization),
+                        registryType = registryType,
+                        progressStatus = ProgressStatus.canceled
                     )
                 )
                 return
@@ -1104,11 +1074,9 @@ class SyncUpload(
 
             onSyncTaskProgress.invoke(
                 SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.starting_category_synchronization),
-                    registryType,
-                    ProgressStatus.starting
+                    msg = getContext().getString(R.string.starting_category_synchronization),
+                    registryType = registryType,
+                    progressStatus = ProgressStatus.starting
                 )
             )
 
@@ -1118,22 +1086,20 @@ class SyncUpload(
                 ic.setDataRead()
                 onSyncTaskProgress.invoke(
                     SyncProgress(
-                        totalTask,
-                        currentTask,
-                        getContext().getString(R.string.synchronizing_categories),
-                        registryType,
-                        ProgressStatus.running
+                        totalTask = totalTask,
+                        completedTask = currentTask,
+                        msg = getContext().getString(R.string.synchronizing_categories),
+                        registryType = registryType,
+                        progressStatus = ProgressStatus.running
                     )
                 )
 
                 if (!scope.isActive) {
                     onSyncTaskProgress.invoke(
                         SyncProgress(
-                            0,
-                            0,
-                            getContext().getString(R.string.canceling_category_synchronization),
-                            registryType,
-                            ProgressStatus.canceled
+                            msg = getContext().getString(R.string.canceling_category_synchronization),
+                            registryType = registryType,
+                            progressStatus = ProgressStatus.canceled
                         )
                     )
                     break
@@ -1164,7 +1130,9 @@ class SyncUpload(
                     allRealId.add(realItemCategoryId)
 
                     // Actualizar los Ids del colector con los Ids reales
-                    UpdateIdImages(context = getContext(), programObjectId = Table.itemCategory.tableId.toLong(),
+                    UpdateIdImages(
+                        context = getContext(),
+                        programObjectId = Table.itemCategory.tableId.toLong(),
                         newObjectId1 = realItemCategoryId,
                         localObjectId1 = ic.itemCategoryId,
                         onUploadProgress = {
@@ -1190,11 +1158,9 @@ class SyncUpload(
             // Error remoto
             onSyncTaskProgress.invoke(
                 SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.failed_to_synchronize_the_categories),
-                    registryType,
-                    ProgressStatus.crashed
+                    msg = getContext().getString(R.string.failed_to_synchronize_the_categories),
+                    registryType = registryType,
+                    progressStatus = ProgressStatus.crashed
                 )
             )
             ErrorLog.writeLog(null, tag, ex)
@@ -1203,10 +1169,12 @@ class SyncUpload(
             registryOnProcess.remove(registryType)
             onSyncTaskProgress.invoke(
                 SyncProgress(
-                    0, 0, when {
+                    msg = when {
                         error -> getContext().getString(R.string.failed_to_synchronize_the_categories)
                         else -> getContext().getString(R.string.category_synchronization_completed)
-                    }, registryType, when {
+                    },
+                    registryType = registryType,
+                    progressStatus = when {
                         error -> ProgressStatus.crashed
                         else -> ProgressStatus.success
                     }
@@ -1230,11 +1198,9 @@ class SyncUpload(
             if (!scope.isActive) {
                 onSyncTaskProgress.invoke(
                     SyncProgress(
-                        0,
-                        0,
-                        getContext().getString(R.string.canceling_data_collection_synchronization),
-                        registryType,
-                        ProgressStatus.canceled
+                        msg = getContext().getString(R.string.canceling_data_collection_synchronization),
+                        registryType = registryType,
+                        progressStatus = ProgressStatus.canceled
                     )
                 )
                 return
@@ -1247,11 +1213,9 @@ class SyncUpload(
 
             onSyncTaskProgress.invoke(
                 SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.starting_data_collection_synchronization),
-                    registryType,
-                    ProgressStatus.starting
+                    msg = getContext().getString(R.string.starting_data_collection_synchronization),
+                    registryType = registryType,
+                    progressStatus = ProgressStatus.starting
                 )
             )
 
@@ -1259,22 +1223,20 @@ class SyncUpload(
             for ((currentTask, dc) in dcAl.toTypedArray().withIndex()) {
                 onSyncTaskProgress.invoke(
                     SyncProgress(
-                        totalTask,
-                        currentTask,
-                        getContext().getString(R.string.synchronizing_data_collections),
-                        registryType,
-                        ProgressStatus.running
+                        totalTask = totalTask,
+                        completedTask = currentTask,
+                        msg = getContext().getString(R.string.synchronizing_data_collections),
+                        registryType = registryType,
+                        progressStatus = ProgressStatus.running
                     )
                 )
 
                 if (!scope.isActive) {
                     onSyncTaskProgress.invoke(
                         SyncProgress(
-                            0,
-                            0,
-                            getContext().getString(R.string.canceling_data_collection_synchronization),
-                            registryType,
-                            ProgressStatus.canceled
+                            msg = getContext().getString(R.string.canceling_data_collection_synchronization),
+                            registryType = registryType,
+                            progressStatus = ProgressStatus.canceled
                         )
                     )
                     break
@@ -1324,7 +1286,9 @@ class SyncUpload(
                     dcDb.updateTransferredNew(dcId, dc.collectorDataCollectionId)
 
                     // Actualizar los Ids del colector con los Ids reales
-                    UpdateIdImages(context = getContext(), programObjectId = Table.dataCollection.tableId.toLong(),
+                    UpdateIdImages(
+                        context = getContext(),
+                        programObjectId = Table.dataCollection.tableId.toLong(),
                         newObjectId1 = dcId,
                         localObjectId1 = dc.collectorDataCollectionId,
                         onUploadProgress = {
@@ -1347,11 +1311,9 @@ class SyncUpload(
             // Error remoto
             onSyncTaskProgress.invoke(
                 SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.failed_to_synchronize_the_data_collections),
-                    registryType,
-                    ProgressStatus.crashed
+                    msg = getContext().getString(R.string.failed_to_synchronize_the_data_collections),
+                    registryType = registryType,
+                    progressStatus = ProgressStatus.crashed
                 )
             )
             ErrorLog.writeLog(null, tag, ex)
@@ -1360,10 +1322,12 @@ class SyncUpload(
             registryOnProcess.remove(registryType)
             onSyncTaskProgress.invoke(
                 SyncProgress(
-                    0, 0, when {
+                    msg = when {
                         error -> getContext().getString(R.string.failed_to_synchronize_the_data_collections)
                         else -> getContext().getString(R.string.data_collection_synchronization_completed)
-                    }, registryType, when {
+                    },
+                    registryType = registryType,
+                    progressStatus = when {
                         error -> ProgressStatus.crashed
                         else -> ProgressStatus.success
                     }
@@ -1387,11 +1351,9 @@ class SyncUpload(
             if (!scope.isActive) {
                 onSyncTaskProgress.invoke(
                     SyncProgress(
-                        0,
-                        0,
-                        getContext().getString(R.string.canceling_route_process_synchronization),
-                        registryType,
-                        ProgressStatus.canceled
+                        msg = getContext().getString(R.string.canceling_route_process_synchronization),
+                        registryType = registryType,
+                        progressStatus = ProgressStatus.canceled
                     )
                 )
                 return
@@ -1404,11 +1366,9 @@ class SyncUpload(
 
             onSyncTaskProgress.invoke(
                 SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.starting_route_process_synchronization),
-                    registryType,
-                    ProgressStatus.starting
+                    msg = getContext().getString(R.string.starting_route_process_synchronization),
+                    registryType = registryType,
+                    progressStatus = ProgressStatus.starting
                 )
             )
 
@@ -1416,22 +1376,20 @@ class SyncUpload(
             for ((currentTask, rp) in rpAl.toTypedArray().withIndex()) {
                 onSyncTaskProgress.invoke(
                     SyncProgress(
-                        totalTask,
-                        currentTask,
-                        getContext().getString(R.string.synchronizing_route_process),
-                        registryType,
-                        ProgressStatus.running
+                        totalTask = totalTask,
+                        completedTask = currentTask,
+                        msg = getContext().getString(R.string.synchronizing_route_process),
+                        registryType = registryType,
+                        progressStatus = ProgressStatus.running
                     )
                 )
 
                 if (!scope.isActive) {
                     onSyncTaskProgress.invoke(
                         SyncProgress(
-                            0,
-                            0,
-                            getContext().getString(R.string.canceling_route_process_synchronization),
-                            registryType,
-                            ProgressStatus.canceled
+                            msg = getContext().getString(R.string.canceling_route_process_synchronization),
+                            registryType = registryType,
+                            progressStatus = ProgressStatus.canceled
                         )
                     )
                     break
@@ -1494,7 +1452,9 @@ class SyncUpload(
                     rpDb.updateTransferredNew(rpId, rp.collectorRouteProcessId)
 
                     // Actualizar los Ids del colector con los Ids reales
-                    UpdateIdImages(context = getContext(), programObjectId = Table.routeProcess.tableId.toLong(),
+                    UpdateIdImages(
+                        context = getContext(),
+                        programObjectId = Table.routeProcess.tableId.toLong(),
                         newObjectId1 = rpId,
                         localObjectId1 = rp.collectorRouteProcessId,
                         onUploadProgress = {
@@ -1517,11 +1477,9 @@ class SyncUpload(
             // Error remoto
             onSyncTaskProgress.invoke(
                 SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.failed_to_synchronize_the_route_process),
-                    registryType,
-                    ProgressStatus.crashed
+                    msg = getContext().getString(R.string.failed_to_synchronize_the_route_process),
+                    registryType = registryType,
+                    progressStatus = ProgressStatus.crashed
                 )
             )
             ErrorLog.writeLog(null, tag, ex)
@@ -1530,10 +1488,12 @@ class SyncUpload(
             registryOnProcess.remove(registryType)
             onSyncTaskProgress.invoke(
                 SyncProgress(
-                    0, 0, when {
+                    msg = when {
                         error -> getContext().getString(R.string.failed_to_synchronize_the_route_process)
                         else -> getContext().getString(R.string.route_process_synchronization_completed)
-                    }, registryType, when {
+                    },
+                    registryType = registryType,
+                    progressStatus = when {
                         error -> ProgressStatus.crashed
                         else -> ProgressStatus.success
                     }
@@ -1556,11 +1516,9 @@ class SyncUpload(
             if (!scope.isActive) {
                 onSyncTaskProgress.invoke(
                     SyncProgress(
-                        0,
-                        0,
-                        getContext().getString(R.string.canceling_maintenance_type_synchronization),
-                        registryType,
-                        ProgressStatus.canceled
+                        msg = getContext().getString(R.string.canceling_maintenance_type_synchronization),
+                        registryType = registryType,
+                        progressStatus = ProgressStatus.canceled
                     )
                 )
                 return
@@ -1573,11 +1531,9 @@ class SyncUpload(
 
             onSyncTaskProgress.invoke(
                 SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.starting_maintenance_type_synchronization),
-                    registryType,
-                    ProgressStatus.starting
+                    msg = getContext().getString(R.string.starting_maintenance_type_synchronization),
+                    registryType = registryType,
+                    progressStatus = ProgressStatus.starting
                 )
             )
 
@@ -1586,22 +1542,20 @@ class SyncUpload(
                 am.setDataRead()
                 onSyncTaskProgress.invoke(
                     SyncProgress(
-                        totalTask,
-                        currentTask,
-                        getContext().getString(R.string.synchronizing_maintenance_types),
-                        registryType,
-                        ProgressStatus.running
+                        totalTask = totalTask,
+                        completedTask = currentTask,
+                        msg = getContext().getString(R.string.synchronizing_maintenance_types),
+                        registryType = registryType,
+                        progressStatus = ProgressStatus.running
                     )
                 )
 
                 if (!scope.isActive) {
                     onSyncTaskProgress.invoke(
                         SyncProgress(
-                            0,
-                            0,
-                            getContext().getString(R.string.canceling_maintenance_type_synchronization),
-                            registryType,
-                            ProgressStatus.canceled
+                            msg = getContext().getString(R.string.canceling_maintenance_type_synchronization),
+                            registryType = registryType,
+                            progressStatus = ProgressStatus.canceled
                         )
                     )
                     break
@@ -1634,7 +1588,9 @@ class SyncUpload(
                     amDb.updateTransferredNew(assetMaintenanceId)
 
                     // Actualizar los Ids del colector con los Ids reales
-                    UpdateIdImages(context = getContext(), programObjectId = Table.assetManteinance.tableId.toLong(),
+                    UpdateIdImages(
+                        context = getContext(),
+                        programObjectId = Table.assetManteinance.tableId.toLong(),
                         newObjectId1 = assetMaintenanceId,
                         localObjectId1 = am.assetManteinanceId,
                         onUploadProgress = {
@@ -1657,11 +1613,9 @@ class SyncUpload(
             // Error remoto
             onSyncTaskProgress.invoke(
                 SyncProgress(
-                    0,
-                    0,
-                    getContext().getString(R.string.failed_to_synchronize_the_maintenance_types),
-                    registryType,
-                    ProgressStatus.crashed
+                    msg = getContext().getString(R.string.failed_to_synchronize_the_maintenance_types),
+                    registryType = registryType,
+                    progressStatus = ProgressStatus.crashed
                 )
             )
             ErrorLog.writeLog(null, tag, ex)
@@ -1670,10 +1624,12 @@ class SyncUpload(
             registryOnProcess.remove(registryType)
             onSyncTaskProgress.invoke(
                 SyncProgress(
-                    0, 0, when {
+                    msg = when {
                         error -> getContext().getString(R.string.failed_to_synchronize_the_maintenance_types)
                         else -> getContext().getString(R.string.maintenance_type_synchronization_completed)
-                    }, registryType, when {
+                    },
+                    registryType = registryType,
+                    progressStatus = when {
                         error -> ProgressStatus.crashed
                         else -> ProgressStatus.success
                     }
@@ -1685,13 +1641,7 @@ class SyncUpload(
     init {
         if (registryOnProcess.size > 0) {
             onSyncTaskProgress.invoke(
-                SyncProgress(
-                    totalTask = 0,
-                    completedTask = 0,
-                    msg = "",
-                    registryType = null,
-                    progressStatus = ProgressStatus.canceled
-                )
+                SyncProgress(progressStatus = ProgressStatus.canceled)
             )
         } else {
             checkConnection()

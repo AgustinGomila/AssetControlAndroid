@@ -65,8 +65,6 @@ class SkipAll(
                                 msg = getContext()
                                     .getString(R.string.error_updating_registered_data),
                                 taskStatus = ProgressStatus.crashed.id,
-                                progress = 0,
-                                total = 0
                             )
                         )
                         return@withContext false
@@ -74,12 +72,7 @@ class SkipAll(
                 }
             }
             onProgress.invoke(
-                SaveProgress(
-                    msg = "",
-                    taskStatus = ProgressStatus.finished.id,
-                    progress = 0,
-                    total = 0
-                )
+                SaveProgress(taskStatus = ProgressStatus.finished.id)
             )
             return@withContext true
         } catch (ex: Exception) {
@@ -88,8 +81,6 @@ class SkipAll(
                 SaveProgress(
                     msg = ex.message.toString(),
                     taskStatus = ProgressStatus.crashed.id,
-                    progress = 0,
-                    total = 0
                 )
             )
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
