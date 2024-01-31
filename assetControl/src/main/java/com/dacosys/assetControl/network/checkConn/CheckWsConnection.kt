@@ -2,13 +2,13 @@ package com.dacosys.assetControl.network.checkConn
 
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
+import com.dacosys.assetControl.data.webservice.common.Webservice.Companion.getWebservice
 import com.dacosys.assetControl.network.serverDate.GetMySqlDate
 import com.dacosys.assetControl.network.serverDate.MySqlDateResult
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarEventData
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.utils.preferences.Repository
-import com.dacosys.assetControl.webservice.common.Webservice.Companion.getWebservice
 
 class CheckWsConnection(
     private var url: String,

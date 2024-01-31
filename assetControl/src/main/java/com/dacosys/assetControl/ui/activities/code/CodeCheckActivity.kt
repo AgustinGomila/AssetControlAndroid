@@ -19,8 +19,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.menu.MenuBuilder
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.dataBase.asset.AssetDbHelper
-import com.dacosys.assetControl.dataBase.location.WarehouseAreaDbHelper
+import com.dacosys.assetControl.data.dataBase.asset.AssetDbHelper
+import com.dacosys.assetControl.data.dataBase.location.WarehouseAreaDbHelper
 import com.dacosys.assetControl.databinding.CodeCheckActivityBinding
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType

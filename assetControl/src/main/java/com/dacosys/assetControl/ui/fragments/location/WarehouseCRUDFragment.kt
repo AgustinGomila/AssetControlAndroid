@@ -7,15 +7,15 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R
+import com.dacosys.assetControl.data.model.common.CrudCompleted
+import com.dacosys.assetControl.data.model.location.Warehouse
+import com.dacosys.assetControl.data.model.location.WarehouseCRUD
+import com.dacosys.assetControl.data.model.user.User
+import com.dacosys.assetControl.data.model.user.permission.PermissionEntry
+import com.dacosys.assetControl.data.webservice.location.WarehouseObject
 import com.dacosys.assetControl.databinding.WarehouseCrudFragmentBinding
-import com.dacosys.assetControl.model.common.CrudCompleted
-import com.dacosys.assetControl.model.location.Warehouse
-import com.dacosys.assetControl.model.location.WarehouseCRUD
-import com.dacosys.assetControl.model.user.User
-import com.dacosys.assetControl.model.user.permission.PermissionEntry
 import com.dacosys.assetControl.ui.common.snackbar.MakeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
-import com.dacosys.assetControl.webservice.location.WarehouseObject
 
 class WarehouseCRUDFragment : Fragment() {
     private var warehouse: Warehouse? = null

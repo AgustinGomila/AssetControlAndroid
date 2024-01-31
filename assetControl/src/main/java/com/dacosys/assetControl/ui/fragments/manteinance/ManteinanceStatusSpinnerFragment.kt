@@ -7,8 +7,8 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R.layout.custom_spinner_dropdown_item
+import com.dacosys.assetControl.data.model.manteinance.ManteinanceStatus
 import com.dacosys.assetControl.databinding.FragmentSpinnerBinding
-import com.dacosys.assetControl.model.manteinance.ManteinanceStatus
 import com.dacosys.assetControl.ui.adapters.manteinance.ManteinanceStatusAdapter
 import org.parceler.Parcels
 

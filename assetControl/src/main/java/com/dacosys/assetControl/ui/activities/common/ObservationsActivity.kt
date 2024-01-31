@@ -7,9 +7,9 @@ import android.os.Bundle
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.dataBase.asset.AssetDbHelper
+import com.dacosys.assetControl.data.dataBase.asset.AssetDbHelper
+import com.dacosys.assetControl.data.model.asset.Asset
 import com.dacosys.assetControl.databinding.ObservationsActivityBinding
-import com.dacosys.assetControl.model.asset.Asset
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard

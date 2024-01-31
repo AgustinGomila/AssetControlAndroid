@@ -1,8 +1,8 @@
 package com.dacosys.assetControl.utils.settings
 
-import com.dacosys.assetControl.model.asset.AssetStatus
-import com.dacosys.assetControl.model.review.AssetReviewContentStatus
-import com.dacosys.assetControl.model.review.AssetReviewStatus
+import com.dacosys.assetControl.data.model.asset.AssetStatus
+import com.dacosys.assetControl.data.model.review.AssetReviewContentStatus
+import com.dacosys.assetControl.data.model.review.AssetReviewStatus
 import com.dacosys.assetControl.network.sync.SyncRegistryType
 import java.util.*
 

@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
+import com.dacosys.assetControl.data.webservice.common.Webservice.Companion.getWebservice
 import com.dacosys.assetControl.databinding.SyncActivityBinding
 import com.dacosys.assetControl.network.serverDate.GetMySqlDate
 import com.dacosys.assetControl.network.serverDate.MySqlDateResult
@@ -50,7 +51,6 @@ import com.dacosys.assetControl.utils.preferences.Repository.Companion.useImageC
 import com.dacosys.assetControl.utils.settings.Preference
 import com.dacosys.assetControl.viewModel.sync.PendingViewModel
 import com.dacosys.assetControl.viewModel.sync.SyncViewModel
-import com.dacosys.assetControl.webservice.common.Webservice.Companion.getWebservice
 import com.dacosys.imageControl.dto.DocumentContent
 import com.dacosys.imageControl.network.common.ProgramData
 import com.dacosys.imageControl.network.download.GetImages.Companion.toDocumentContentList

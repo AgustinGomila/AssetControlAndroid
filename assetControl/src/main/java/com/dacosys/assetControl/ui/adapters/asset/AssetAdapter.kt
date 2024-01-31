@@ -12,8 +12,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat.getColor
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.model.asset.Asset
-import com.dacosys.assetControl.model.asset.AssetStatus
+import com.dacosys.assetControl.data.model.asset.Asset
+import com.dacosys.assetControl.data.model.asset.AssetStatus
 import com.dacosys.assetControl.ui.adapters.asset.AssetRecyclerAdapter.FilterOptions
 import com.dacosys.assetControl.utils.Screen.Companion.getBestContrastColor
 import com.dacosys.assetControl.utils.Screen.Companion.isTablet

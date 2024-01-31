@@ -3,9 +3,9 @@ package com.dacosys.assetControl.utils
 import android.content.pm.ApplicationInfo
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.dataBase.user.UserDbHelper
-import com.dacosys.assetControl.model.user.User
-import com.dacosys.assetControl.webservice.common.SessionObject
+import com.dacosys.assetControl.data.dataBase.user.UserDbHelper
+import com.dacosys.assetControl.data.model.user.User
+import com.dacosys.assetControl.data.webservice.common.SessionObject
 import java.util.*
 
 /**

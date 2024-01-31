@@ -16,8 +16,8 @@ import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat
 import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.model.manteinance.AssetManteinance
-import com.dacosys.assetControl.model.manteinance.ManteinanceStatus
+import com.dacosys.assetControl.data.model.manteinance.AssetManteinance
+import com.dacosys.assetControl.data.model.manteinance.ManteinanceStatus
 import com.dacosys.assetControl.utils.Screen.Companion.getColorWithAlpha
 import java.lang.ref.WeakReference
 

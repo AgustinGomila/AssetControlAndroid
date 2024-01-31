@@ -3,9 +3,9 @@ package com.dacosys.assetControl.viewModel.route
 import android.util.Log
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.dataBase.DataBaseHelper
-import com.dacosys.assetControl.dataBase.route.RouteProcessContentDbHelper
-import com.dacosys.assetControl.model.route.RouteProcessContent
+import com.dacosys.assetControl.data.dataBase.DataBaseHelper
+import com.dacosys.assetControl.data.dataBase.route.RouteProcessContentDbHelper
+import com.dacosys.assetControl.data.model.route.RouteProcessContent
 import kotlinx.coroutines.*
 
 class GetRouteProcessContent(

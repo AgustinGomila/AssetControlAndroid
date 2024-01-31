@@ -11,24 +11,23 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.dataBase.asset.AssetDbHelper
-import com.dacosys.assetControl.dataBase.category.ItemCategoryDbHelper
-import com.dacosys.assetControl.dataBase.location.WarehouseAreaDbHelper
-import com.dacosys.assetControl.dataBase.location.WarehouseDbHelper
+import com.dacosys.assetControl.data.dataBase.asset.AssetDbHelper
+import com.dacosys.assetControl.data.dataBase.category.ItemCategoryDbHelper
+import com.dacosys.assetControl.data.dataBase.location.WarehouseAreaDbHelper
+import com.dacosys.assetControl.data.dataBase.location.WarehouseDbHelper
+import com.dacosys.assetControl.data.model.asset.*
+import com.dacosys.assetControl.data.model.category.ItemCategory
+import com.dacosys.assetControl.data.model.common.CrudCompleted
+import com.dacosys.assetControl.data.model.location.WarehouseArea
+import com.dacosys.assetControl.data.model.user.User
+import com.dacosys.assetControl.data.model.user.permission.PermissionEntry
+import com.dacosys.assetControl.data.webservice.asset.AssetObject
 import com.dacosys.assetControl.databinding.AssetCrudFragmentBinding
-import com.dacosys.assetControl.model.asset.*
-import com.dacosys.assetControl.model.category.ItemCategory
-import com.dacosys.assetControl.model.common.CrudCompleted
-import com.dacosys.assetControl.model.location.WarehouseArea
-import com.dacosys.assetControl.model.user.User
-import com.dacosys.assetControl.model.user.permission.PermissionEntry
 import com.dacosys.assetControl.ui.activities.category.ItemCategorySelectActivity
 import com.dacosys.assetControl.ui.activities.location.LocationSelectActivity
 import com.dacosys.assetControl.ui.common.snackbar.MakeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.webservice.asset.AssetCollectorObject
-import com.dacosys.assetControl.webservice.asset.AssetObject
 import org.parceler.Parcels
 
 class AssetCRUDFragment : Fragment() {
@@ -469,7 +468,7 @@ class AssetCRUDFragment : Fragment() {
 
             updateAsset()
             if (asset != null) {
-                val tempAsset = AssetCollectorObject(asset ?: return)
+                val tempAsset = com.dacosys.assetControl.data.webservice.asset.AssetCollectorObject(asset ?: return)
                 val updateAsset = AssetCRUD.AssetUpdate()
                 updateAsset.addParams(callback, tempAsset)
                 updateAsset.execute()

@@ -10,12 +10,12 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.dataBase.asset.AssetDbHelper
+import com.dacosys.assetControl.data.dataBase.asset.AssetDbHelper
+import com.dacosys.assetControl.data.model.asset.Asset
+import com.dacosys.assetControl.data.model.category.ItemCategory
+import com.dacosys.assetControl.data.model.dataCollection.DataCollectionRule
+import com.dacosys.assetControl.data.model.location.WarehouseArea
 import com.dacosys.assetControl.databinding.DataCollectionRuleTargetActivityBinding
-import com.dacosys.assetControl.model.asset.Asset
-import com.dacosys.assetControl.model.category.ItemCategory
-import com.dacosys.assetControl.model.dataCollection.DataCollectionRule
-import com.dacosys.assetControl.model.location.WarehouseArea
 import com.dacosys.assetControl.ui.activities.asset.AssetPrintLabelActivity
 import com.dacosys.assetControl.ui.activities.location.LocationSelectActivity
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText

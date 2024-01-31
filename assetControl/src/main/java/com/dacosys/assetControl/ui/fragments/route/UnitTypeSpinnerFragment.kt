@@ -9,9 +9,9 @@ import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.R.layout.custom_spinner_dropdown_item
+import com.dacosys.assetControl.data.model.asset.UnitType
+import com.dacosys.assetControl.data.model.asset.UnitTypeCategory
 import com.dacosys.assetControl.databinding.FragmentSpinnerBinding
-import com.dacosys.assetControl.model.asset.UnitType
-import com.dacosys.assetControl.model.asset.UnitTypeCategory
 import org.parceler.Parcels
 
 /**

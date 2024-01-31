@@ -8,8 +8,8 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import com.dacosys.assetControl.data.model.dataCollection.DataCollectionContent
 import com.dacosys.assetControl.databinding.DccHistoricDataFragmentBinding
-import com.dacosys.assetControl.model.dataCollection.DataCollectionContent
 
 class HistoricDataFragment : Fragment() {
     private var dccArrayList: ArrayList<DataCollectionContent> = ArrayList()

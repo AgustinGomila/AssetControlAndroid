@@ -5,9 +5,9 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R
+import com.dacosys.assetControl.data.model.asset.Asset
+import com.dacosys.assetControl.data.model.table.Table
 import com.dacosys.assetControl.databinding.AssetDetailActivityBinding
-import com.dacosys.assetControl.model.asset.Asset
-import com.dacosys.assetControl.model.table.Table
 import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.utils.Statics

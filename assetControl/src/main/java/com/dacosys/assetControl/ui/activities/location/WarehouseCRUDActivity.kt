@@ -10,12 +10,12 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R
+import com.dacosys.assetControl.data.model.common.CrudCompleted
+import com.dacosys.assetControl.data.model.common.CrudResult
+import com.dacosys.assetControl.data.model.common.CrudStatus.*
+import com.dacosys.assetControl.data.model.location.Warehouse
+import com.dacosys.assetControl.data.model.table.Table
 import com.dacosys.assetControl.databinding.WarehouseCrudActivityBinding
-import com.dacosys.assetControl.model.common.CrudCompleted
-import com.dacosys.assetControl.model.common.CrudResult
-import com.dacosys.assetControl.model.common.CrudStatus.*
-import com.dacosys.assetControl.model.location.Warehouse
-import com.dacosys.assetControl.model.table.Table
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.fragments.location.WarehouseCRUDFragment

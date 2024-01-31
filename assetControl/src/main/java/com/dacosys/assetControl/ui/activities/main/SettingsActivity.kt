@@ -17,7 +17,7 @@ import androidx.preference.PreferenceManager
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.removeDataBases
+import com.dacosys.assetControl.data.dataBase.DataBaseHelper.Companion.removeDataBases
 import com.dacosys.assetControl.databinding.SettingsActivityBinding
 import com.dacosys.assetControl.network.checkConn.CheckWsConnection
 import com.dacosys.assetControl.network.clientPackages.ClientPackagesProgress

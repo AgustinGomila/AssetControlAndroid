@@ -12,11 +12,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.TooltipCompat
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.dataBase.location.WarehouseAreaDbHelper
-import com.dacosys.assetControl.dataBase.location.WarehouseDbHelper
+import com.dacosys.assetControl.data.dataBase.location.WarehouseAreaDbHelper
+import com.dacosys.assetControl.data.dataBase.location.WarehouseDbHelper
+import com.dacosys.assetControl.data.model.location.Warehouse
+import com.dacosys.assetControl.data.model.location.WarehouseArea
 import com.dacosys.assetControl.databinding.LocationHeaderFragmentBinding
-import com.dacosys.assetControl.model.location.Warehouse
-import com.dacosys.assetControl.model.location.WarehouseArea
 import com.dacosys.assetControl.ui.activities.location.LocationSelectActivity
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import org.parceler.Parcels

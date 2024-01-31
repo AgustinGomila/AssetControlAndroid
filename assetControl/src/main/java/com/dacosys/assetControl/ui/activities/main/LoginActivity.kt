@@ -34,10 +34,10 @@ import androidx.core.view.ViewCompat
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.dataBase.DataBaseHelper
-import com.dacosys.assetControl.dataBase.user.UserDbHelper
+import com.dacosys.assetControl.data.dataBase.DataBaseHelper
+import com.dacosys.assetControl.data.dataBase.user.UserDbHelper
+import com.dacosys.assetControl.data.model.user.User
 import com.dacosys.assetControl.databinding.LoginActivityBinding
-import com.dacosys.assetControl.model.user.User
 import com.dacosys.assetControl.network.clientPackages.ClientPackagesProgress
 import com.dacosys.assetControl.network.download.DownloadDb
 import com.dacosys.assetControl.network.download.DownloadStatus

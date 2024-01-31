@@ -18,7 +18,7 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceScreen
 import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.dataBase.DataBaseHelper
+import com.dacosys.assetControl.data.dataBase.DataBaseHelper
 import com.dacosys.assetControl.network.download.DownloadDb
 import com.dacosys.assetControl.network.sync.SyncDownload
 import com.dacosys.assetControl.ui.activities.main.SettingsActivity.Companion.bindPreferenceSummaryToValue

@@ -1,6 +1,6 @@
 package com.dacosys.assetControl.viewModel.route
 
-import com.dacosys.assetControl.model.route.RouteProcess
+import com.dacosys.assetControl.data.model.route.RouteProcess
 
 data class RouteProcessResult(
     val routeProcess: RouteProcess? = null,

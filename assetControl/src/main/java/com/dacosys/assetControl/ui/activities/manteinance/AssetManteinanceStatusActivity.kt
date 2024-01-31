@@ -4,10 +4,10 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.dacosys.assetControl.R
+import com.dacosys.assetControl.data.model.manteinance.AssetManteinance
+import com.dacosys.assetControl.data.model.manteinance.ManteinanceStatus
+import com.dacosys.assetControl.data.model.manteinance.ManteinanceType
 import com.dacosys.assetControl.databinding.AssetManteinanceStatusActivityBinding
-import com.dacosys.assetControl.model.manteinance.AssetManteinance
-import com.dacosys.assetControl.model.manteinance.ManteinanceStatus
-import com.dacosys.assetControl.model.manteinance.ManteinanceType
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.fragments.manteinance.ManteinanceStatusSpinnerFragment

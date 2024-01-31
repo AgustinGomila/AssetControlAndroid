@@ -11,18 +11,18 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.dataBase.category.ItemCategoryDbHelper
+import com.dacosys.assetControl.data.dataBase.category.ItemCategoryDbHelper
+import com.dacosys.assetControl.data.model.category.ItemCategory
+import com.dacosys.assetControl.data.model.category.ItemCategoryCRUD
+import com.dacosys.assetControl.data.model.common.CrudCompleted
+import com.dacosys.assetControl.data.model.user.User
+import com.dacosys.assetControl.data.model.user.permission.PermissionEntry
+import com.dacosys.assetControl.data.webservice.category.ItemCategoryObject
 import com.dacosys.assetControl.databinding.ItemCategoryCrudFragmentBinding
-import com.dacosys.assetControl.model.category.ItemCategory
-import com.dacosys.assetControl.model.category.ItemCategoryCRUD
-import com.dacosys.assetControl.model.common.CrudCompleted
-import com.dacosys.assetControl.model.user.User
-import com.dacosys.assetControl.model.user.permission.PermissionEntry
 import com.dacosys.assetControl.ui.activities.category.ItemCategorySelectActivity
 import com.dacosys.assetControl.ui.common.snackbar.MakeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.webservice.category.ItemCategoryObject
 import org.parceler.Parcels
 
 class ItemCategoryCRUDFragment : Fragment() {

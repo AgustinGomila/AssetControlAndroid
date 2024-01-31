@@ -10,7 +10,7 @@ import androidx.core.content.res.ResourcesCompat
 import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.model.location.Warehouse
+import com.dacosys.assetControl.data.model.location.Warehouse
 import com.dacosys.assetControl.utils.Screen.Companion.isTablet
 import java.util.*
 

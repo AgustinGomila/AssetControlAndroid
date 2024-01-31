@@ -5,9 +5,9 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.dacosys.assetControl.R
+import com.dacosys.assetControl.data.model.location.WarehouseArea
+import com.dacosys.assetControl.data.model.table.Table
 import com.dacosys.assetControl.databinding.WarehouseAreaDetailActivityBinding
-import com.dacosys.assetControl.model.location.WarehouseArea
-import com.dacosys.assetControl.model.table.Table
 import com.dacosys.assetControl.ui.common.snackbar.MakeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation

@@ -11,19 +11,19 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.dataBase.location.WarehouseDbHelper
+import com.dacosys.assetControl.data.dataBase.location.WarehouseDbHelper
+import com.dacosys.assetControl.data.model.common.CrudCompleted
+import com.dacosys.assetControl.data.model.location.Warehouse
+import com.dacosys.assetControl.data.model.location.WarehouseArea
+import com.dacosys.assetControl.data.model.location.WarehouseAreaCRUD
+import com.dacosys.assetControl.data.model.user.User
+import com.dacosys.assetControl.data.model.user.permission.PermissionEntry
+import com.dacosys.assetControl.data.webservice.location.WarehouseAreaObject
 import com.dacosys.assetControl.databinding.WarehouseAreaCrudFragmentBinding
-import com.dacosys.assetControl.model.common.CrudCompleted
-import com.dacosys.assetControl.model.location.Warehouse
-import com.dacosys.assetControl.model.location.WarehouseArea
-import com.dacosys.assetControl.model.location.WarehouseAreaCRUD
-import com.dacosys.assetControl.model.user.User
-import com.dacosys.assetControl.model.user.permission.PermissionEntry
 import com.dacosys.assetControl.ui.activities.location.LocationSelectActivity
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.webservice.location.WarehouseAreaObject
 import org.parceler.Parcels
 
 class WarehouseAreaCRUDFragment : Fragment() {

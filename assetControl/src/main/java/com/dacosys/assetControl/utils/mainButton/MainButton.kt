@@ -2,7 +2,7 @@ package com.dacosys.assetControl.utils.mainButton
 
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.model.user.permission.PermissionEntry
+import com.dacosys.assetControl.data.model.user.permission.PermissionEntry
 import java.util.*
 
 /**

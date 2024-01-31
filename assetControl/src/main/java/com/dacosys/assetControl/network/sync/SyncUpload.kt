@@ -4,24 +4,51 @@ import android.util.Log
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.dataBase.asset.AssetDbHelper
-import com.dacosys.assetControl.dataBase.category.ItemCategoryDbHelper
-import com.dacosys.assetControl.dataBase.datacollection.DataCollectionContentDbHelper
-import com.dacosys.assetControl.dataBase.datacollection.DataCollectionDbHelper
-import com.dacosys.assetControl.dataBase.location.WarehouseAreaDbHelper
-import com.dacosys.assetControl.dataBase.location.WarehouseDbHelper
-import com.dacosys.assetControl.dataBase.manteinance.AssetManteinanceDbHelper
-import com.dacosys.assetControl.dataBase.movement.WarehouseMovementContentDbHelper
-import com.dacosys.assetControl.dataBase.movement.WarehouseMovementDbHelper
-import com.dacosys.assetControl.dataBase.review.AssetReviewContentDbHelper
-import com.dacosys.assetControl.dataBase.review.AssetReviewDbHelper
-import com.dacosys.assetControl.dataBase.route.RouteProcessContentDbHelper
-import com.dacosys.assetControl.dataBase.route.RouteProcessDbHelper
-import com.dacosys.assetControl.dataBase.user.UserWarehouseAreaDbHelper
-import com.dacosys.assetControl.model.review.AssetReviewContentStatus
-import com.dacosys.assetControl.model.review.AssetReviewStatus
-import com.dacosys.assetControl.model.table.Table
-import com.dacosys.assetControl.model.user.User
+import com.dacosys.assetControl.data.dataBase.asset.AssetDbHelper
+import com.dacosys.assetControl.data.dataBase.category.ItemCategoryDbHelper
+import com.dacosys.assetControl.data.dataBase.datacollection.DataCollectionContentDbHelper
+import com.dacosys.assetControl.data.dataBase.datacollection.DataCollectionDbHelper
+import com.dacosys.assetControl.data.dataBase.location.WarehouseAreaDbHelper
+import com.dacosys.assetControl.data.dataBase.location.WarehouseDbHelper
+import com.dacosys.assetControl.data.dataBase.manteinance.AssetManteinanceDbHelper
+import com.dacosys.assetControl.data.dataBase.movement.WarehouseMovementContentDbHelper
+import com.dacosys.assetControl.data.dataBase.movement.WarehouseMovementDbHelper
+import com.dacosys.assetControl.data.dataBase.review.AssetReviewContentDbHelper
+import com.dacosys.assetControl.data.dataBase.review.AssetReviewDbHelper
+import com.dacosys.assetControl.data.dataBase.route.RouteProcessContentDbHelper
+import com.dacosys.assetControl.data.dataBase.route.RouteProcessDbHelper
+import com.dacosys.assetControl.data.dataBase.user.UserWarehouseAreaDbHelper
+import com.dacosys.assetControl.data.model.review.AssetReviewContentStatus
+import com.dacosys.assetControl.data.model.review.AssetReviewStatus
+import com.dacosys.assetControl.data.model.table.Table
+import com.dacosys.assetControl.data.model.user.User
+import com.dacosys.assetControl.data.webservice.asset.AssetObject
+import com.dacosys.assetControl.data.webservice.asset.AssetWs
+import com.dacosys.assetControl.data.webservice.category.ItemCategoryObject
+import com.dacosys.assetControl.data.webservice.category.ItemCategoryWs
+import com.dacosys.assetControl.data.webservice.common.Webservice.Companion.getWebservice
+import com.dacosys.assetControl.data.webservice.dataCollection.DataCollectionContentObject
+import com.dacosys.assetControl.data.webservice.dataCollection.DataCollectionObject
+import com.dacosys.assetControl.data.webservice.dataCollection.DataCollectionWs
+import com.dacosys.assetControl.data.webservice.location.WarehouseAreaObject
+import com.dacosys.assetControl.data.webservice.location.WarehouseAreaWs
+import com.dacosys.assetControl.data.webservice.location.WarehouseObject
+import com.dacosys.assetControl.data.webservice.location.WarehouseWs
+import com.dacosys.assetControl.data.webservice.manteinance.AssetManteinanceLogObject
+import com.dacosys.assetControl.data.webservice.manteinance.AssetManteinanceObject
+import com.dacosys.assetControl.data.webservice.manteinance.AssetManteinanceWs
+import com.dacosys.assetControl.data.webservice.movement.WarehouseMovementContentObject
+import com.dacosys.assetControl.data.webservice.movement.WarehouseMovementObject
+import com.dacosys.assetControl.data.webservice.movement.WarehouseMovementWs
+import com.dacosys.assetControl.data.webservice.review.AssetReviewContentObject
+import com.dacosys.assetControl.data.webservice.review.AssetReviewObject
+import com.dacosys.assetControl.data.webservice.review.AssetReviewWs
+import com.dacosys.assetControl.data.webservice.route.RouteProcessContentObject
+import com.dacosys.assetControl.data.webservice.route.RouteProcessObject
+import com.dacosys.assetControl.data.webservice.route.RouteProcessWs
+import com.dacosys.assetControl.data.webservice.user.UserObject
+import com.dacosys.assetControl.data.webservice.user.UserWarehouseAreaObject
+import com.dacosys.assetControl.data.webservice.user.UserWarehouseAreaWs
 import com.dacosys.assetControl.network.serverDate.GetMySqlDate
 import com.dacosys.assetControl.network.serverDate.MySqlDateResult
 import com.dacosys.assetControl.network.utils.ProgressStatus
@@ -30,34 +57,6 @@ import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.utils.preferences.Repository.Companion.connectionTimeout
 import com.dacosys.assetControl.utils.settings.Preference
-import com.dacosys.assetControl.webservice.asset.AssetCollectorObject
-import com.dacosys.assetControl.webservice.asset.AssetObject
-import com.dacosys.assetControl.webservice.asset.AssetWs
-import com.dacosys.assetControl.webservice.category.ItemCategoryObject
-import com.dacosys.assetControl.webservice.category.ItemCategoryWs
-import com.dacosys.assetControl.webservice.common.Webservice.Companion.getWebservice
-import com.dacosys.assetControl.webservice.dataCollection.DataCollectionContentObject
-import com.dacosys.assetControl.webservice.dataCollection.DataCollectionObject
-import com.dacosys.assetControl.webservice.dataCollection.DataCollectionWs
-import com.dacosys.assetControl.webservice.location.WarehouseAreaObject
-import com.dacosys.assetControl.webservice.location.WarehouseAreaWs
-import com.dacosys.assetControl.webservice.location.WarehouseObject
-import com.dacosys.assetControl.webservice.location.WarehouseWs
-import com.dacosys.assetControl.webservice.manteinance.AssetManteinanceLogObject
-import com.dacosys.assetControl.webservice.manteinance.AssetManteinanceObject
-import com.dacosys.assetControl.webservice.manteinance.AssetManteinanceWs
-import com.dacosys.assetControl.webservice.movement.WarehouseMovementContentObject
-import com.dacosys.assetControl.webservice.movement.WarehouseMovementObject
-import com.dacosys.assetControl.webservice.movement.WarehouseMovementWs
-import com.dacosys.assetControl.webservice.review.AssetReviewContentObject
-import com.dacosys.assetControl.webservice.review.AssetReviewObject
-import com.dacosys.assetControl.webservice.review.AssetReviewWs
-import com.dacosys.assetControl.webservice.route.RouteProcessContentObject
-import com.dacosys.assetControl.webservice.route.RouteProcessObject
-import com.dacosys.assetControl.webservice.route.RouteProcessWs
-import com.dacosys.assetControl.webservice.user.UserObject
-import com.dacosys.assetControl.webservice.user.UserWarehouseAreaObject
-import com.dacosys.assetControl.webservice.user.UserWarehouseAreaWs
 import com.dacosys.imageControl.network.common.ProgressStatus.CREATOR.getFinish
 import com.dacosys.imageControl.network.upload.SendPending
 import com.dacosys.imageControl.network.upload.UpdateIdImages
@@ -661,7 +660,8 @@ class SyncUpload(
                 var realAssetId: Long
                 if (a.assetId > 0) {
                     realAssetId = assetWs.assetCollectorModify(
-                        Statics.currentUserId ?: return, AssetCollectorObject(a)
+                        Statics.currentUserId ?: return,
+                        com.dacosys.assetControl.data.webservice.asset.AssetCollectorObject(a)
                     )
                 } else {
                     realAssetId = assetWs.assetAdd(Statics.currentUserId ?: return, AssetObject(a))

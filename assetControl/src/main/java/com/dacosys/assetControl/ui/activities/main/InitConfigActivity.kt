@@ -20,7 +20,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.removeDataBases
+import com.dacosys.assetControl.data.dataBase.DataBaseHelper.Companion.removeDataBases
 import com.dacosys.assetControl.databinding.InitConfigActivityBinding
 import com.dacosys.assetControl.network.clientPackages.ClientPackagesProgress
 import com.dacosys.assetControl.network.utils.ClientPackage

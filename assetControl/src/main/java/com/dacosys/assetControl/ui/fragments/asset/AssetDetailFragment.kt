@@ -8,8 +8,8 @@ import android.view.WindowManager
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R
+import com.dacosys.assetControl.data.model.asset.Asset
 import com.dacosys.assetControl.databinding.AssetDetailFragmentBinding
-import com.dacosys.assetControl.model.asset.Asset
 
 /**
  * A simple [Fragment] subclass.

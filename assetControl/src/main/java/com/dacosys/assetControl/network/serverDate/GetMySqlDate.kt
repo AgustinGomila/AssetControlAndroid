@@ -2,9 +2,9 @@ package com.dacosys.assetControl.network.serverDate
 
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
+import com.dacosys.assetControl.data.webservice.common.Webservice
 import com.dacosys.assetControl.network.utils.Connection.Companion.isOnline
 import com.dacosys.assetControl.network.utils.ProgressStatus
-import com.dacosys.assetControl.webservice.common.Webservice
 import kotlinx.coroutines.*
 
 class GetMySqlDate(ws: Webservice, private var onResult: (MySqlDateResult) -> Unit = {}) {

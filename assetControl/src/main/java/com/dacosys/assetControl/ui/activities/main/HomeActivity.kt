@@ -39,12 +39,12 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.dataBase.DataBaseHelper.Companion.cleanTemporaryTables
-import com.dacosys.assetControl.dataBase.review.AssetReviewDbHelper
+import com.dacosys.assetControl.data.dataBase.DataBaseHelper.Companion.cleanTemporaryTables
+import com.dacosys.assetControl.data.dataBase.review.AssetReviewDbHelper
+import com.dacosys.assetControl.data.model.location.WarehouseArea
+import com.dacosys.assetControl.data.model.user.User
+import com.dacosys.assetControl.data.model.user.permission.PermissionEntry
 import com.dacosys.assetControl.databinding.HomeActivityBinding
-import com.dacosys.assetControl.model.location.WarehouseArea
-import com.dacosys.assetControl.model.user.User
-import com.dacosys.assetControl.model.user.permission.PermissionEntry
 import com.dacosys.assetControl.network.download.DownloadDb
 import com.dacosys.assetControl.network.sync.Sync
 import com.dacosys.assetControl.network.sync.SyncDownload

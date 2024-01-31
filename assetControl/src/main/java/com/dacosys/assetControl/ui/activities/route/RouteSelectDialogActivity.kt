@@ -17,10 +17,10 @@ import android.widget.AdapterView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.dataBase.route.RouteDbHelper
+import com.dacosys.assetControl.data.dataBase.route.RouteDbHelper
+import com.dacosys.assetControl.data.model.route.Route
+import com.dacosys.assetControl.data.model.route.Route.CREATOR.getAvailableRoutes
 import com.dacosys.assetControl.databinding.RouteSelectDialogActivityBinding
-import com.dacosys.assetControl.model.route.Route
-import com.dacosys.assetControl.model.route.Route.CREATOR.getAvailableRoutes
 import com.dacosys.assetControl.ui.adapters.route.RouteAdapter
 import com.dacosys.assetControl.ui.common.views.custom.ContractsAutoCompleteTextView
 import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard

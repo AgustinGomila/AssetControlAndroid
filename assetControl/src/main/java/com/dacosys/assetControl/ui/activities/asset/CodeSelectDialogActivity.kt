@@ -18,10 +18,10 @@ import android.widget.AdapterView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.dataBase.asset.AssetDbHelper
+import com.dacosys.assetControl.data.dataBase.asset.AssetDbHelper
+import com.dacosys.assetControl.data.model.asset.Asset
+import com.dacosys.assetControl.data.model.asset.AssetStatus
 import com.dacosys.assetControl.databinding.CodeSelectActivityBinding
-import com.dacosys.assetControl.model.asset.Asset
-import com.dacosys.assetControl.model.asset.AssetStatus
 import com.dacosys.assetControl.ui.adapters.asset.AssetAdapter
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType

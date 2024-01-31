@@ -8,9 +8,9 @@ import android.widget.AdapterView
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.R.layout.custom_spinner_dropdown_item
-import com.dacosys.assetControl.dataBase.user.UserDbHelper
+import com.dacosys.assetControl.data.dataBase.user.UserDbHelper
+import com.dacosys.assetControl.data.model.user.User
 import com.dacosys.assetControl.databinding.FragmentSpinnerBinding
-import com.dacosys.assetControl.model.user.User
 import com.dacosys.assetControl.ui.adapters.user.UserAdapter
 import org.parceler.Parcels
 

@@ -2,12 +2,12 @@ package com.dacosys.assetControl.viewModel.route
 
 import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.dataBase.DataBaseHelper
-import com.dacosys.assetControl.dataBase.attribute.AttributeCompositionDbHelper
-import com.dacosys.assetControl.dataBase.datacollection.DataCollectionRuleContentDbHelper
-import com.dacosys.assetControl.dataBase.route.RouteProcessDbHelper
-import com.dacosys.assetControl.model.route.Route
-import com.dacosys.assetControl.model.route.RouteProcess
+import com.dacosys.assetControl.data.dataBase.DataBaseHelper
+import com.dacosys.assetControl.data.dataBase.attribute.AttributeCompositionDbHelper
+import com.dacosys.assetControl.data.dataBase.datacollection.DataCollectionRuleContentDbHelper
+import com.dacosys.assetControl.data.dataBase.route.RouteProcessDbHelper
+import com.dacosys.assetControl.data.model.route.Route
+import com.dacosys.assetControl.data.model.route.RouteProcess
 import kotlinx.coroutines.*
 
 class GetRouteProcess(
