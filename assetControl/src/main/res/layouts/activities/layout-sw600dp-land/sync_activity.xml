@@ -205,6 +205,19 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
+        <com.dacosys.assetControl.ui.common.views.custom.AutoResizeTextView
+                android:id="@+id/syncPercentTextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="@+id/progressBar"
+                app:layout_constraintEnd_toEndOf="@+id/progressBar"
+                app:layout_constraintStart_toStartOf="@+id/progressBar"
+                app:layout_constraintTop_toTopOf="@+id/progressBar"
+                app:autoSizeMaxTextSize="16sp" app:autoSizeMinTextSize="14sp" android:maxLines="2"
+                android:minLines="1" app:layout_constraintVertical_bias="0.44" android:layout_marginEnd="56dp"
+                android:layout_marginStart="56dp" android:gravity="center_horizontal"/>
         <TextView
                 android:id="@+id/syncStatusTextView"
                 android:layout_width="wrap_content"

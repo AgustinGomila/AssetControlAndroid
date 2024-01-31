@@ -56,9 +56,7 @@ class SnackBarType : Parcelable {
 
         other as SnackBarType
 
-        if (snackBarTypeId != other.snackBarTypeId) return false
-
-        return true
+        return snackBarTypeId == other.snackBarTypeId
     }
 
     override fun hashCode(): Int {

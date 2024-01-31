@@ -95,11 +95,17 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
 
         val result: IcProgressStatus = it.result
         val msg: String = it.msg
+        val completed = it.completedTask
+        val total = it.totalTask
 
         when (result.id) {
-            ProgressStatus.starting.id, ProgressStatus.running.id, ProgressStatus.success.id -> {
+            ProgressStatus.starting.id, ProgressStatus.success.id -> {
                 setProgressBarText(msg)
-                showImageProgressBar(true)
+            }
+
+            ProgressStatus.running.id -> {
+                val tasksMsg = if (total > 0) "${completed}/${total}" else ""
+                setProgressBarText(msg, tasksMsg)
             }
 
             ProgressStatus.crashed.id, ProgressStatus.canceled.id -> {
@@ -114,10 +120,13 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
         }
     }
 
-    private fun setProgressBarText(text: String) {
+    private fun setProgressBarText(text: String = "", percent: String = "") {
         runOnUiThread {
             run {
+                if (text.isNotEmpty() || percent.isNotEmpty()) showImageProgressBar(true)
+
                 binding.syncStatusTextView.text = text
+                binding.syncPercentTextView.text = percent
             }
         }
     }
