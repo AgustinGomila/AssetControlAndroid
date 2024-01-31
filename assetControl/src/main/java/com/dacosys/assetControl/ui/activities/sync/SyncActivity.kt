@@ -34,6 +34,7 @@ import com.dacosys.assetControl.network.sync.SyncRegistryType
 import com.dacosys.assetControl.network.sync.SyncUpload
 import com.dacosys.assetControl.network.utils.*
 import com.dacosys.assetControl.network.utils.Connection.Companion.isOnline
+import com.dacosys.assetControl.ui.activities.sync.SyncActivity.Companion.SyncStatus.*
 import com.dacosys.assetControl.ui.adapters.interfaces.Interfaces
 import com.dacosys.assetControl.ui.adapters.sync.SyncElementRecyclerAdapter
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
@@ -169,7 +170,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
                     setDownloadText(tempMsg)
                 }
 
-                CURRENT_MODE = -1
+                CURRENT_MODE = MODE_WAITING
                 syncing = false
                 checkConnection()
             }
@@ -280,7 +281,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
     private fun saveBundleValues(b: Bundle) {
         b.putString("title", tempTitle)
 
-        b.putInt("CURRENT_MODE", CURRENT_MODE)
+        b.putString("CURRENT_MODE", CURRENT_MODE.name)
 
         b.putBoolean("syncing", syncing)
 
@@ -317,7 +318,11 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
         tempTitle = if (!t1.isNullOrEmpty()) t1 else getString(R.string.select_asset_review)
         // endregion
 
-        CURRENT_MODE = b.getInt("CURRENT_MODE")
+        val syncStatus = b.getString("CURRENT_MODE") ?: ""
+        CURRENT_MODE = if (syncStatus.isNotEmpty())
+            SyncStatus.valueOf(syncStatus)
+        else
+            MODE_WAITING
 
         syncing = b.getBoolean("syncing")
 
@@ -385,9 +390,9 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
         super.onResume()
         if (syncing) {
             setUploadText(
-                if (CURRENT_MODE == MODE_UPLOAD) getString(R.string.sending_data_please_wait) else getString(
-                    R.string.downloading_data_please_wait
-                )
+                if (CURRENT_MODE == MODE_UPLOAD)
+                    getString(R.string.sending_data_please_wait)
+                else getString(R.string.downloading_data_please_wait)
             )
         }
     }
@@ -478,7 +483,8 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
             }
         } catch (ex: Exception) {
             setErrorText(ex.message.toString())
-            CURRENT_MODE = -1
+
+            CURRENT_MODE = MODE_WAITING
             syncing = false
         }
     }
@@ -548,7 +554,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
                 )
             }
 
-            CURRENT_MODE = -1
+            CURRENT_MODE = MODE_WAITING
             syncing = false
         }
     }
@@ -844,10 +850,13 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
 
 
     companion object {
+        enum class SyncStatus {
+            MODE_WAITING,
+            MODE_UPLOAD,
+            MODE_DOWNLOAD,
+        }
 
-        private var CURRENT_MODE: Int = -1
-        private const val MODE_UPLOAD: Int = 0
-        private const val MODE_DOWNLOAD = 1
+        private var CURRENT_MODE = MODE_WAITING
     }
 
     private fun checkConnection() {
@@ -880,6 +889,18 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
     }
 
     private fun fillSummaryRow() {
+        if (syncing) {
+            if (CURRENT_MODE == MODE_DOWNLOAD) {
+                setDownloadText(concatDownloadText())
+            } else {
+                setUploadText(concatUploadText())
+            }
+        } else {
+            setUploadText(concatUploadPendingText())
+        }
+    }
+
+    private fun concatUploadPendingText(): String {
         var t = ""
 
         var r = adapter?.totalAssetReview ?: 0
@@ -914,14 +935,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
             else -> getString(R.string.no_data_to_send)
         }
 
-        when {
-            syncing -> when (CURRENT_MODE) {
-                MODE_DOWNLOAD -> setDownloadText(concatDownloadText())
-                else -> setUploadText(concatUploadText())
-            }
-
-            else -> setUploadText(t)
-        }
+        return t
     }
 
     private fun fillAdapter(syncElements: ArrayList<Any>?) {

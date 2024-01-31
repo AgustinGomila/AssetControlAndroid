@@ -27,12 +27,9 @@ allprojects {
 
     ext {
         roomVersion = '2.5.2'
-        moshiVersion = '1.14.0'
-        retrofitVersion = '2.9.0'
         parcelerVersion = '1.1.13'
         androidTargetSdk = 34
         zxingCore = 'com.google.zxing:core:3.4.1'
-        epoxyVersion = '5.1.3'
         buildToolsVer = '30.0.3'
         kTorVersion = '2.3.2'
         jvmCompatibility = JavaVersion.VERSION_1_8

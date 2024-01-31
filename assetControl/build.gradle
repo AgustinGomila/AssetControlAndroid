@@ -47,8 +47,8 @@ android {
     buildTypes {
         debug {
             initWith debug
-            minifyEnabled = true
-            shrinkResources = true
+            minifyEnabled(true)
+            shrinkResources(true)
             proguardFiles getDefaultProguardFile(
                     'proguard-android.txt'),
                     'proguard-rules.pro'
@@ -57,11 +57,11 @@ android {
         release {
             // Enables code shrinking, obfuscation, and optimization for only
             // your project's release build type.
-            minifyEnabled = true
+            minifyEnabled(true)
 
             // Enables resource shrinking, which is performed by the
             // Android Gradle plugin.
-            shrinkResources = true
+            shrinkResources(true)
 
             // Includes the default ProGuard rules files that are packaged with
             // the Android Gradle plugin. To learn more, go to the section about
@@ -131,24 +131,24 @@ dependencies {
 
     implementation 'com.google.android.gms:play-services-vision:20.1.3'
 
-    implementation 'androidx.annotation:annotation:1.6.0'
+    implementation 'androidx.annotation:annotation:1.7.1'
     implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'androidx.compose.animation:animation-core:1.4.3'
+    implementation 'androidx.compose.animation:animation-core:1.6.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.percentlayout:percentlayout:1.0.0'
-    implementation 'com.google.android.material:material:1.9.0'
+    implementation 'com.google.android.material:material:1.11.0'
     implementation 'androidx.vectordrawable:vectordrawable:1.1.0'
 
     // Para ActivityResults
-    implementation 'androidx.activity:activity-ktx:1.7.2'
-    implementation 'androidx.fragment:fragment-ktx:1.6.0'
+    implementation 'androidx.activity:activity-ktx:1.8.2'
+    implementation 'androidx.fragment:fragment-ktx:1.6.2'
 
     // ViewModel and LiveData
-    implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.6.1"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.7.0"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0"
 
     // Apache Commons Net
-    implementation 'commons-net:commons-net:3.8.0'
+    implementation 'commons-net:commons-net:3.9.0'
 
     // PARCELER
     implementation group: 'org.parceler', name: 'parceler-api', version: parcelerVersion
@@ -189,8 +189,8 @@ dependencies {
 
     // Use the SplashScreen compat library.
     implementation 'androidx.core:core-splashscreen:1.0.1'
-    implementation 'androidx.core:core-ktx:1.10.1'
-    implementation 'androidx.preference:preference-ktx:1.2.0'
+    implementation 'androidx.core:core-ktx:1.12.0'
+    implementation 'androidx.preference:preference-ktx:1.2.1'
 
     // SwipeR
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
@@ -199,7 +199,7 @@ dependencies {
     implementation files('libs/honeywell/DataCollection.aar')
 
     // RecyclerView
-    implementation 'androidx.recyclerview:recyclerview:1.3.0'
+    implementation 'androidx.recyclerview:recyclerview:1.3.2'
 
     // .env Support
     implementation 'io.github.cdimascio:dotenv-java:3.0.0'
