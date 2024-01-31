@@ -16,11 +16,11 @@ import android.widget.AdapterView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.adapters.barcode.BarcodeLabelCustomAdapter
 import com.dacosys.assetControl.dataBase.barcode.BarcodeLabelCustomDbHelper
 import com.dacosys.assetControl.databinding.CodeSelectActivityBinding
 import com.dacosys.assetControl.model.barcode.BarcodeLabelCustom
 import com.dacosys.assetControl.model.barcode.BarcodeLabelTarget
+import com.dacosys.assetControl.ui.adapters.barcode.BarcodeLabelCustomAdapter
 import com.dacosys.assetControl.ui.common.views.custom.ContractsAutoCompleteTextView
 import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
 import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation

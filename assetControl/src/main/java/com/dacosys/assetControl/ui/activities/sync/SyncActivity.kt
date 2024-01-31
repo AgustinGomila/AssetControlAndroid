@@ -24,8 +24,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.adapters.interfaces.Interfaces
-import com.dacosys.assetControl.adapters.sync.SyncElementRecyclerAdapter
 import com.dacosys.assetControl.databinding.SyncActivityBinding
 import com.dacosys.assetControl.network.serverDate.GetMySqlDate
 import com.dacosys.assetControl.network.serverDate.MySqlDateResult
@@ -35,6 +33,8 @@ import com.dacosys.assetControl.network.sync.SyncRegistryType
 import com.dacosys.assetControl.network.sync.SyncUpload
 import com.dacosys.assetControl.network.utils.*
 import com.dacosys.assetControl.network.utils.Connection.Companion.isOnline
+import com.dacosys.assetControl.ui.adapters.interfaces.Interfaces
+import com.dacosys.assetControl.ui.adapters.sync.SyncElementRecyclerAdapter
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.utils.Screen

@@ -18,7 +18,6 @@ import androidx.transition.ChangeBounds
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.adapters.route.RouteAdapter
 import com.dacosys.assetControl.dataBase.route.RouteDbHelper
 import com.dacosys.assetControl.dataBase.route.RouteProcessContentDbHelper
 import com.dacosys.assetControl.dataBase.route.RouteProcessDbHelper
@@ -27,6 +26,7 @@ import com.dacosys.assetControl.databinding.RouteSelectActivityBinding
 import com.dacosys.assetControl.model.route.Route
 import com.dacosys.assetControl.model.route.Route.CREATOR.getAvailableRoutes
 import com.dacosys.assetControl.model.route.RouteProcess
+import com.dacosys.assetControl.ui.adapters.route.RouteAdapter
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.fragments.route.RouteSelectFilterFragment

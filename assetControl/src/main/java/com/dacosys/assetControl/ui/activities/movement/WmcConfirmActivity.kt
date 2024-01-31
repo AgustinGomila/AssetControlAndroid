@@ -20,7 +20,6 @@ import androidx.transition.ChangeBounds
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.adapters.movement.WmcRecyclerAdapter
 import com.dacosys.assetControl.dataBase.movement.WarehouseMovementContentDbHelper
 import com.dacosys.assetControl.databinding.WarehouseMovementContentConfirmActivityBottomPanelCollapsedBinding
 import com.dacosys.assetControl.model.asset.AssetStatus
@@ -30,6 +29,7 @@ import com.dacosys.assetControl.model.movement.WarehouseMovementContentStatus
 import com.dacosys.assetControl.model.status.ConfirmStatus
 import com.dacosys.assetControl.model.table.Table
 import com.dacosys.assetControl.ui.activities.common.ObservationsActivity
+import com.dacosys.assetControl.ui.adapters.movement.WmcRecyclerAdapter
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.fragments.movement.LocationHeaderFragment

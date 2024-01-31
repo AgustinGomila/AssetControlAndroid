@@ -20,7 +20,6 @@ import androidx.transition.ChangeBounds
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.adapters.location.WarehouseAreaAdapter
 import com.dacosys.assetControl.dataBase.barcode.BarcodeLabelCustomDbHelper
 import com.dacosys.assetControl.dataBase.location.WarehouseAreaDbHelper
 import com.dacosys.assetControl.databinding.WarehouseAreaPrintLabelActivityTopPanelCollapsedBinding
@@ -29,6 +28,7 @@ import com.dacosys.assetControl.model.barcode.BarcodeLabelTarget
 import com.dacosys.assetControl.model.location.WarehouseArea
 import com.dacosys.assetControl.model.location.async.GetLocationAsync
 import com.dacosys.assetControl.network.utils.ProgressStatus
+import com.dacosys.assetControl.ui.adapters.location.WarehouseAreaAdapter
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.fragments.location.WarehouseAreaSelectFilterFragment

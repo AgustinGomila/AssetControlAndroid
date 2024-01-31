@@ -17,8 +17,6 @@ import android.widget.AdapterView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.adapters.location.WarehouseAdapter
-import com.dacosys.assetControl.adapters.location.WarehouseAreaAdapter
 import com.dacosys.assetControl.dataBase.location.WarehouseAreaDbHelper
 import com.dacosys.assetControl.dataBase.location.WarehouseDbHelper
 import com.dacosys.assetControl.databinding.LocationSelectActivityBinding
@@ -26,6 +24,8 @@ import com.dacosys.assetControl.model.location.Warehouse
 import com.dacosys.assetControl.model.location.WarehouseArea
 import com.dacosys.assetControl.model.location.async.WarehouseAreaChangedObserver
 import com.dacosys.assetControl.model.location.async.WarehouseChangedObserver
+import com.dacosys.assetControl.ui.adapters.location.WarehouseAdapter
+import com.dacosys.assetControl.ui.adapters.location.WarehouseAreaAdapter
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.common.views.custom.ContractsAutoCompleteTextView

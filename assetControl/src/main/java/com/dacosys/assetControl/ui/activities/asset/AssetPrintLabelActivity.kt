@@ -38,9 +38,6 @@ import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.adapters.asset.AssetRecyclerAdapter
-import com.dacosys.assetControl.adapters.asset.AssetRecyclerAdapter.FilterOptions
-import com.dacosys.assetControl.adapters.interfaces.Interfaces
 import com.dacosys.assetControl.dataBase.asset.AssetDbHelper
 import com.dacosys.assetControl.dataBase.barcode.BarcodeLabelCustomDbHelper
 import com.dacosys.assetControl.databinding.AssetPrintLabelActivityTopPanelCollapsedBinding
@@ -53,6 +50,9 @@ import com.dacosys.assetControl.model.category.ItemCategory
 import com.dacosys.assetControl.model.location.WarehouseArea
 import com.dacosys.assetControl.network.utils.Connection.Companion.autoSend
 import com.dacosys.assetControl.network.utils.ProgressStatus
+import com.dacosys.assetControl.ui.adapters.asset.AssetRecyclerAdapter
+import com.dacosys.assetControl.ui.adapters.asset.AssetRecyclerAdapter.FilterOptions
+import com.dacosys.assetControl.ui.adapters.interfaces.Interfaces
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.fragments.asset.AssetSelectFilterFragment

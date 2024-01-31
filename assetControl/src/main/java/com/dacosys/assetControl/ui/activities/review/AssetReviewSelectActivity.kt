@@ -27,7 +27,6 @@ import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.adapters.review.AssetReviewAdapter
 import com.dacosys.assetControl.dataBase.location.WarehouseAreaDbHelper
 import com.dacosys.assetControl.dataBase.review.AssetReviewContentDbHelper
 import com.dacosys.assetControl.dataBase.review.AssetReviewDbHelper
@@ -37,6 +36,7 @@ import com.dacosys.assetControl.model.review.AssetReview
 import com.dacosys.assetControl.model.review.AssetReviewStatus
 import com.dacosys.assetControl.model.table.Table
 import com.dacosys.assetControl.ui.activities.location.LocationSelectActivity
+import com.dacosys.assetControl.ui.adapters.review.AssetReviewAdapter
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR

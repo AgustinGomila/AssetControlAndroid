@@ -39,9 +39,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.adapters.interfaces.Interfaces
-import com.dacosys.assetControl.adapters.interfaces.Interfaces.AdapterProgress
-import com.dacosys.assetControl.adapters.review.ArcRecyclerAdapter
 import com.dacosys.assetControl.dataBase.asset.AssetDbHelper
 import com.dacosys.assetControl.dataBase.location.WarehouseAreaDbHelper
 import com.dacosys.assetControl.dataBase.review.AssetReviewContentDbHelper
@@ -70,6 +67,9 @@ import com.dacosys.assetControl.ui.activities.asset.AssetCRUDActivity
 import com.dacosys.assetControl.ui.activities.asset.AssetDetailActivity
 import com.dacosys.assetControl.ui.activities.asset.AssetPrintLabelActivity
 import com.dacosys.assetControl.ui.activities.manteinance.AssetManteinanceConditionActivity
+import com.dacosys.assetControl.ui.adapters.interfaces.Interfaces
+import com.dacosys.assetControl.ui.adapters.interfaces.Interfaces.AdapterProgress
+import com.dacosys.assetControl.ui.adapters.review.ArcRecyclerAdapter
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarEventData
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType

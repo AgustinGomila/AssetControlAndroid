@@ -11,12 +11,12 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.adapters.manteinance.AssetManteinanceAdapter
 import com.dacosys.assetControl.dataBase.asset.AssetDbHelper
 import com.dacosys.assetControl.dataBase.manteinance.AssetManteinanceDbHelper
 import com.dacosys.assetControl.databinding.AssetManteinanceSelectActivityBinding
 import com.dacosys.assetControl.model.manteinance.AssetManteinance
 import com.dacosys.assetControl.ui.activities.asset.AssetPrintLabelActivity
+import com.dacosys.assetControl.ui.adapters.manteinance.AssetManteinanceAdapter
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard

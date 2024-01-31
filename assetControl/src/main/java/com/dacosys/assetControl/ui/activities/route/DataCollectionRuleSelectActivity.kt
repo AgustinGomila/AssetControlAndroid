@@ -10,13 +10,13 @@ import android.view.inputmethod.EditorInfo
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.adapters.datacollection.DataCollectionRuleAdapter
 import com.dacosys.assetControl.dataBase.datacollection.DataCollectionRuleDbHelper
 import com.dacosys.assetControl.databinding.DataCollectionRuleSelectActivityBinding
 import com.dacosys.assetControl.model.asset.Asset
 import com.dacosys.assetControl.model.category.ItemCategory
 import com.dacosys.assetControl.model.dataCollection.DataCollectionRule
 import com.dacosys.assetControl.model.location.WarehouseArea
+import com.dacosys.assetControl.ui.adapters.datacollection.DataCollectionRuleAdapter
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard

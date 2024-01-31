@@ -16,10 +16,10 @@ import android.widget.AdapterView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.adapters.category.ItemCategoryAdapter
 import com.dacosys.assetControl.dataBase.category.ItemCategoryDbHelper
 import com.dacosys.assetControl.databinding.ItemCategorySelectActivityBinding
 import com.dacosys.assetControl.model.category.ItemCategory
+import com.dacosys.assetControl.ui.adapters.category.ItemCategoryAdapter
 import com.dacosys.assetControl.ui.common.views.custom.ContractsAutoCompleteTextView
 import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
 import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
