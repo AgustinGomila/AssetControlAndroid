@@ -107,6 +107,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
             ProgressStatus.running.id -> {
                 val tasksMsg = if (total > 0) "${completed}/${total}" else ""
                 setProgressBarText(msg, tasksMsg)
+                removeItem(SyncRegistryType.Image, it.uniqueHash)
             }
 
             ProgressStatus.crashed.id, ProgressStatus.canceled.id -> {
@@ -186,6 +187,29 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
                     registryType = registryType,
                     progressStatus = progressStatus
                 )
+
+                if (progressStatus == ProgressStatus.running) {
+                    val rt = registryType ?: return
+                    if (it.uniqueId.isEmpty()) return
+
+                    removeItem(rt, it.uniqueId)
+                }
+            }
+        }
+    }
+
+    private fun removeItem(rt: SyncRegistryType, uniqueId: String) {
+        val items = adapter?.itemCount ?: 0
+        if (items == 0) return
+
+        val key = SyncElementRecyclerAdapter.getKey(rt, uniqueId)
+        if (key.isEmpty()) return
+
+        val index = adapter?.getIndexByKey(key) ?: return
+
+        if (index in 0 until items) {
+            runOnUiThread {
+                adapter?.remove(index)
             }
         }
     }
@@ -212,7 +236,6 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
 
     private var tempTitle = ""
 
-    //region ListView
     private var visibleRegistryArray: ArrayList<SyncRegistryType> = ArrayList()
     private var checkedKeyArray: ArrayList<String> = ArrayList()
     private var adapter: SyncElementRecyclerAdapter? = null
@@ -222,7 +245,6 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
 
     private var lastSelected: Any? = null
     private var currentScrollPosition: Int = 0
-    //
 
     private var tempObjectId = ""
     private var tempTableId = 0
@@ -1205,6 +1227,8 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
             rejectNewInstances = false
         }
 
+    // endregion ImageControl Album
+
     override fun onDataSetChanged() {
         fillSummaryRow()
     }
@@ -1212,6 +1236,4 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
     override fun onCheckedChanged(isChecked: Boolean, pos: Int) {
         fillSummaryRow()
     }
-
-    // endregion ImageControl Album
 }

@@ -63,127 +63,80 @@ class SyncRegistryType : Parcelable {
             return arrayOfNulls(size)
         }
 
-        var Warehouse = SyncRegistryType(
-            1, getContext().getString(R.string.warehouses), ConfEntry.acLastUpdateWarehouse
-        )
-        var Asset = SyncRegistryType(
-            2, getContext().getString(R.string.assets), ConfEntry.acLastUpdateAsset
-        )
-        var User = SyncRegistryType(
-            3, getContext().getString(R.string.users), ConfEntry.acLastUpdateUser
-        )
-        var WarehouseArea = SyncRegistryType(
-            4, getContext().getString(R.string.areas), ConfEntry.acLastUpdateWarehouseArea
-        )
-        var ItemCategory = SyncRegistryType(
-            5, getContext().getString(R.string.categories), ConfEntry.acLastUpdateItemCategory
-        )
-        var AssetReview = SyncRegistryType(
-            6, getContext().getString(R.string.asset_reviews), ConfEntry.acLastUpdateAssetReview
-        )
-        var WarehouseMovement = SyncRegistryType(
-            7, getContext().getString(R.string.movements), ConfEntry.acLastUpdateWarehouseMovement
-        )
-        /*
-        var ActionLog = SyncRegistryType(8, "Registro de acciones", ConfEntry.acLastUpdateActionLog) */
+        val Warehouse =
+            SyncRegistryType(1, getContext().getString(R.string.warehouses), ConfEntry.acLastUpdateWarehouse)
+        val Asset = SyncRegistryType(2, getContext().getString(R.string.assets), ConfEntry.acLastUpdateAsset)
+        val User = SyncRegistryType(3, getContext().getString(R.string.users), ConfEntry.acLastUpdateUser)
+        val WarehouseArea =
+            SyncRegistryType(4, getContext().getString(R.string.areas), ConfEntry.acLastUpdateWarehouseArea)
+        val ItemCategory =
+            SyncRegistryType(5, getContext().getString(R.string.categories), ConfEntry.acLastUpdateItemCategory)
+        val AssetReview =
+            SyncRegistryType(6, getContext().getString(R.string.asset_reviews), ConfEntry.acLastUpdateAssetReview)
+        val WarehouseMovement =
+            SyncRegistryType(7, getContext().getString(R.string.movements), ConfEntry.acLastUpdateWarehouseMovement)
 
-        var Provider = SyncRegistryType(
-            9, getContext().getString(R.string.providers), ConfEntry.acLastUpdateProviders
-        )
-        var Repairman = SyncRegistryType(
-            10, getContext().getString(R.string.manteinance_user), ConfEntry.acLastUpdateRepairman
-        )
-        var Repairshop = SyncRegistryType(
-            11, getContext().getString(R.string.repairshop), ConfEntry.acLastUpdateRepairshop
-        )
-        var AssetManteinance = SyncRegistryType(
-            12, getContext().getString(R.string.manteinance), ConfEntry.acLastUpdateAssetManteinance
-        )
-        var AssetManteinanceLog = SyncRegistryType(
+        /* var ActionLog = SyncRegistryType(8, "Registro de acciones", ConfEntry.acLastUpdateActionLog) */
+        val Provider = SyncRegistryType(9, getContext().getString(R.string.providers), ConfEntry.acLastUpdateProviders)
+        val Repairman =
+            SyncRegistryType(10, getContext().getString(R.string.manteinance_user), ConfEntry.acLastUpdateRepairman)
+        val Repairshop =
+            SyncRegistryType(11, getContext().getString(R.string.repairshop), ConfEntry.acLastUpdateRepairshop)
+        val AssetManteinance =
+            SyncRegistryType(12, getContext().getString(R.string.manteinance), ConfEntry.acLastUpdateAssetManteinance)
+        val AssetManteinanceLog = SyncRegistryType(
             13,
             getContext().getString(R.string.manteinance_log),
             ConfEntry.acLastUpdateAssetManteinanceLog
         )
-        var ManteinanceType = SyncRegistryType(
+        val ManteinanceType = SyncRegistryType(
             14,
             getContext().getString(R.string.manteinance_type),
             ConfEntry.acLastUpdateManteinanceType
         )
-        var ManteinanceTypeGroup = SyncRegistryType(
+        val ManteinanceTypeGroup = SyncRegistryType(
             15,
             getContext().getString(R.string.manteinance_group),
             ConfEntry.acLastUpdateManteinanceTypeGroup
         )
-        var CostCentre = SyncRegistryType(
-            16, getContext().getString(R.string.cost_centre), ConfEntry.acLastUpdateCostCentre
-        )
-        var AssetManteinanceProgramed = SyncRegistryType(
+        val CostCentre =
+            SyncRegistryType(16, getContext().getString(R.string.cost_centre), ConfEntry.acLastUpdateCostCentre)
+        val AssetManteinanceProgramed = SyncRegistryType(
             17,
             getContext().getString(R.string.programed_manteinance),
             ConfEntry.acLastUpdateAssetManteinanceProgramed
         )
-        var DataCollectionRule = SyncRegistryType(
-            18, getContext().getString(R.string.rules), ConfEntry.acLastUpdateDataCollectionRule
-        )
-        var Attribute = SyncRegistryType(
-            19, getContext().getString(R.string.attributes), ConfEntry.acLastUpdateAttribute
-        )
-        var AttributeCategory = SyncRegistryType(
+        val DataCollectionRule =
+            SyncRegistryType(18, getContext().getString(R.string.rules), ConfEntry.acLastUpdateDataCollectionRule)
+        val Attribute =
+            SyncRegistryType(19, getContext().getString(R.string.attributes), ConfEntry.acLastUpdateAttribute)
+        val AttributeCategory = SyncRegistryType(
             20,
             getContext().getString(R.string.attribute_categories),
             ConfEntry.acLastUpdateAttributeCategory
         )
-        var DataCollection = SyncRegistryType(
-            21,
-            getContext().getString(R.string.data_collection),
-            ConfEntry.acLastUpdateDataCollection
-        )
-        var Route = SyncRegistryType(
-            22, getContext().getString(R.string.routes), ConfEntry.acLastUpdateRoute
-        )
-        var RouteProcess = SyncRegistryType(
-            23, getContext().getString(R.string.route_process), ConfEntry.acLastUpdateRouteProcess
-        )
-        var BarcodeLabelCustom = SyncRegistryType(
-            24, getContext().getString(R.string.labels), ConfEntry.acLastUpdateBarcodeLabelCustom
-        )
-        var UserWarehouseArea = SyncRegistryType(
+        val DataCollection =
+            SyncRegistryType(21, getContext().getString(R.string.data_collection), ConfEntry.acLastUpdateDataCollection)
+        val Route = SyncRegistryType(22, getContext().getString(R.string.routes), ConfEntry.acLastUpdateRoute)
+        val RouteProcess =
+            SyncRegistryType(23, getContext().getString(R.string.route_process), ConfEntry.acLastUpdateRouteProcess)
+        val BarcodeLabelCustom =
+            SyncRegistryType(24, getContext().getString(R.string.labels), ConfEntry.acLastUpdateBarcodeLabelCustom)
+        val UserWarehouseArea = SyncRegistryType(
             25,
             getContext().getString(R.string.user_warehouse_areas),
             ConfEntry.acLastUpdateUserWarehouseArea
         )
-        var AttributeComposition = SyncRegistryType(
-            26, getContext().getString(R.string.attribute_composition)
-        )
-        var RouteComposition = SyncRegistryType(
-            27, getContext().getString(R.string.route_composition)
-        )
-        var DataCollectionRuleContent = SyncRegistryType(
-            28, getContext().getString(R.string.rule_content)
-        )
-        var DataCollectionRuleTarget = SyncRegistryType(
-            29, getContext().getString(R.string.rule_target)
-        )
-        var AssetReviewStatus = SyncRegistryType(
-            100, getContext().getString(R.string.asset_review_status)
-        )
-        var RouteProcessStatus = SyncRegistryType(
-            101, getContext().getString(R.string.route_process_status)
-        )
-        var ManteinanceStatus = SyncRegistryType(
-            102, getContext().getString(R.string.manteinance_status)
-        )
-        var BarcodeLabelTarget = SyncRegistryType(
-            103, getContext().getString(R.string.label_target)
-        )
-        var UserPermission = SyncRegistryType(
-            104, getContext().getString(R.string.user_permissions)
-        )
-
-
-        var Image = SyncRegistryType(
-            999, getContext().getString(R.string.images)
-        )
+        val AttributeComposition = SyncRegistryType(26, getContext().getString(R.string.attribute_composition))
+        val RouteComposition = SyncRegistryType(27, getContext().getString(R.string.route_composition))
+        val DataCollectionRuleContent = SyncRegistryType(28, getContext().getString(R.string.rule_content))
+        val DataCollectionRuleTarget = SyncRegistryType(29, getContext().getString(R.string.rule_target))
+        val AssetReviewStatus = SyncRegistryType(100, getContext().getString(R.string.asset_review_status))
+        val RouteProcessStatus = SyncRegistryType(101, getContext().getString(R.string.route_process_status))
+        val ManteinanceStatus = SyncRegistryType(102, getContext().getString(R.string.manteinance_status))
+        val BarcodeLabelTarget = SyncRegistryType(103, getContext().getString(R.string.label_target))
+        val UserPermission = SyncRegistryType(104, getContext().getString(R.string.user_permissions))
+        val Image = SyncRegistryType(999, getContext().getString(R.string.images))
 
         fun getAll(): ArrayList<SyncRegistryType> {
             val allSections = ArrayList<SyncRegistryType>()

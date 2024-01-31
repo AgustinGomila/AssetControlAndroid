@@ -7,5 +7,6 @@ class SyncProgress(
     var completedTask: Int = 0,
     var msg: String = "",
     var registryType: SyncRegistryType? = null,
+    var uniqueId: String = "",
     var progressStatus: ProgressStatus = ProgressStatus.unknown,
 )

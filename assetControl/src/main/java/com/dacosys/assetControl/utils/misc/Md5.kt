@@ -1,11 +1,25 @@
 package com.dacosys.assetControl.utils.misc
 
 import java.io.UnsupportedEncodingException
+import java.math.BigInteger
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 
 class Md5 {
     companion object {
+
+        /**
+         * Md5 hash to int
+         *
+         * @param hash
+         * @return Entero de 10 dígitos de longitud que puede usarse como identificador
+         */
+        fun md5HashToInt(hash: String): Long {
+            val bigInt = BigInteger(hash, 16)
+            val maxVal = BigInteger.TEN.pow(10).subtract(BigInteger.ONE)
+            return bigInt.mod(maxVal).toLong()
+        }
+
         fun getMd5(text: String): String {
             return String(encodeHex(md5Bytes(getRawBytes(text))))
         }

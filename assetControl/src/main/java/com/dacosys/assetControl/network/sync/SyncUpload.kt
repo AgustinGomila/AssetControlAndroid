@@ -308,6 +308,7 @@ class SyncUpload(
                     SyncProgress(
                         totalTask = totalTask,
                         completedTask = currentTask,
+                        uniqueId = ar.collectorAssetReviewId.toString(),
                         msg = getContext().getString(R.string.synchronizing_asset_reviews),
                         registryType = registryType,
                         progressStatus = ProgressStatus.running
@@ -466,6 +467,7 @@ class SyncUpload(
                     SyncProgress(
                         totalTask = totalTask,
                         completedTask = currentTask,
+                        uniqueId = wm.collectorWarehouseMovementId.toString(),
                         msg = getContext().getString(R.string.synchronizing_movements),
                         registryType = registryType,
                         progressStatus = ProgressStatus.running
@@ -618,6 +620,7 @@ class SyncUpload(
                     SyncProgress(
                         totalTask = totalTask,
                         completedTask = currentTask,
+                        uniqueId = a.assetId.toString(),
                         msg = getContext().getString(R.string.synchronizing_assets),
                         registryType = registryType,
                         progressStatus = ProgressStatus.running
@@ -762,6 +765,7 @@ class SyncUpload(
                     SyncProgress(
                         totalTask = totalTask,
                         completedTask = currentTask,
+                        uniqueId = wa.warehouseAreaId.toString(),
                         msg = getContext().getString(R.string.synchronizing_warehouse_areas),
                         registryType = registryType,
                         progressStatus = ProgressStatus.running
@@ -941,6 +945,7 @@ class SyncUpload(
                     SyncProgress(
                         totalTask = totalTask,
                         completedTask = currentTask,
+                        uniqueId = w.warehouseId.toString(),
                         msg = getContext().getString(R.string.synchronizing_warehouses),
                         registryType = registryType,
                         progressStatus = ProgressStatus.running
@@ -1088,6 +1093,7 @@ class SyncUpload(
                     SyncProgress(
                         totalTask = totalTask,
                         completedTask = currentTask,
+                        uniqueId = ic.itemCategoryId.toString(),
                         msg = getContext().getString(R.string.synchronizing_categories),
                         registryType = registryType,
                         progressStatus = ProgressStatus.running
@@ -1225,6 +1231,7 @@ class SyncUpload(
                     SyncProgress(
                         totalTask = totalTask,
                         completedTask = currentTask,
+                        uniqueId = dc.collectorDataCollectionId.toString(),
                         msg = getContext().getString(R.string.synchronizing_data_collections),
                         registryType = registryType,
                         progressStatus = ProgressStatus.running
@@ -1378,6 +1385,7 @@ class SyncUpload(
                     SyncProgress(
                         totalTask = totalTask,
                         completedTask = currentTask,
+                        uniqueId = rp.collectorRouteProcessId.toString(),
                         msg = getContext().getString(R.string.synchronizing_route_process),
                         registryType = registryType,
                         progressStatus = ProgressStatus.running
@@ -1544,6 +1552,7 @@ class SyncUpload(
                     SyncProgress(
                         totalTask = totalTask,
                         completedTask = currentTask,
+                        uniqueId = am.collectorAssetManteinanceId.toString(),
                         msg = getContext().getString(R.string.synchronizing_maintenance_types),
                         registryType = registryType,
                         progressStatus = ProgressStatus.running

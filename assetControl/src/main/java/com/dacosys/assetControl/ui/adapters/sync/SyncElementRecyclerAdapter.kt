@@ -45,6 +45,7 @@ import com.dacosys.assetControl.utils.Screen.Companion.getBestContrastColor
 import com.dacosys.assetControl.utils.Screen.Companion.getColorWithAlpha
 import com.dacosys.assetControl.utils.Screen.Companion.manipulateColor
 import com.dacosys.assetControl.utils.misc.Md5.Companion.getMd5
+import com.dacosys.assetControl.utils.misc.Md5.Companion.md5HashToInt
 import com.dacosys.assetControl.utils.preferences.Repository.Companion.useImageControl
 import com.dacosys.imageControl.network.common.ProgramData
 import com.dacosys.imageControl.room.entity.Image
@@ -52,7 +53,6 @@ import com.dacosys.imageControl.ui.adapter.ImageAdapter
 import com.dacosys.imageControl.ui.adapter.ImageAdapter.Companion.GetImageStatus
 import com.dacosys.imageControl.ui.adapter.ImageAdapter.Companion.ImageControlHolder
 import java.io.File
-import java.math.BigInteger
 import java.util.*
 
 class SyncElementRecyclerAdapter private constructor(builder: Builder) :
@@ -694,6 +694,8 @@ class SyncElementRecyclerAdapter private constructor(builder: Builder) :
         fullList.add(position, syncElement)
         submitList(fullList) {
             run {
+                notifyItemInserted(position)
+
                 // Notificamos al Listener superior
                 dataSetChangedListener?.onDataSetChanged()
                 selectItem(getIndex(syncElement))
@@ -708,6 +710,8 @@ class SyncElementRecyclerAdapter private constructor(builder: Builder) :
         fullList.removeAt(position)
         submitList(fullList) {
             run {
+                notifyItemRemoved(position)
+
                 // Notificamos al Listener superior
                 dataSetChangedListener?.onDataSetChanged()
             }
@@ -1332,72 +1336,68 @@ class SyncElementRecyclerAdapter private constructor(builder: Builder) :
     }
 
     companion object {
+        fun getKey(registryType: SyncRegistryType, uniqueId: String): String {
+            val regId = registryType.id.toString()
+
+            val regIdStr = String.format("%0" + (4 - regId.length).toString() + "d%s", 0, regId)
+            val itemIdStr = String.format("%0" + (11 - uniqueId.length).toString() + "d%s", 0, uniqueId)
+            return "${regIdStr}${itemIdStr}"
+        }
+
         fun getKey(item: Any): String {
-            /**
-             * Md5 hash to int
-             *
-             * @param hash
-             * @return Entero de 10 dígitos de longitud que puede usarse como identificador
-             */
-            fun md5HashToInt(hash: String): Long {
-                val bigInt = BigInteger(hash, 16)
-                val maxVal = BigInteger.TEN.pow(10).subtract(BigInteger.ONE)
-                return bigInt.mod(maxVal).toLong()
-            }
 
-            var regId = ""
-            var itemId = ""
-
+            var registryType: SyncRegistryType? = null
+            var uniqueId = ""
             when (item) {
                 is Asset -> {
-                    regId = SyncRegistryType.Asset.id.toString()
-                    itemId = item.assetId.toString()
+                    registryType = SyncRegistryType.Asset
+                    uniqueId = item.assetId.toString()
                 }
 
                 is ItemCategory -> {
-                    regId = SyncRegistryType.ItemCategory.id.toString()
-                    itemId = item.itemCategoryId.toString()
+                    registryType = SyncRegistryType.ItemCategory
+                    uniqueId = item.itemCategoryId.toString()
                 }
 
                 is Warehouse -> {
-                    regId = SyncRegistryType.Warehouse.id.toString()
-                    itemId = item.warehouseId.toString()
+                    registryType = SyncRegistryType.Warehouse
+                    uniqueId = item.warehouseId.toString()
                 }
 
                 is WarehouseArea -> {
-                    regId = SyncRegistryType.WarehouseArea.id.toString()
-                    itemId = item.warehouseAreaId.toString()
+                    registryType = SyncRegistryType.WarehouseArea
+                    uniqueId = item.warehouseAreaId.toString()
                 }
 
                 is DataCollection -> {
-                    regId = SyncRegistryType.DataCollection.id.toString()
-                    itemId = item.collectorDataCollectionId.toString()
+                    registryType = SyncRegistryType.DataCollection
+                    uniqueId = item.collectorDataCollectionId.toString()
                 }
 
                 is RouteProcess -> {
-                    regId = SyncRegistryType.RouteProcess.id.toString()
-                    itemId = item.collectorRouteProcessId.toString()
+                    registryType = SyncRegistryType.RouteProcess
+                    uniqueId = item.collectorRouteProcessId.toString()
                 }
 
                 is WarehouseMovement -> {
-                    regId = SyncRegistryType.WarehouseMovement.id.toString()
-                    itemId = item.collectorWarehouseMovementId.toString()
+                    registryType = SyncRegistryType.WarehouseMovement
+                    uniqueId = item.collectorWarehouseMovementId.toString()
                 }
 
                 is AssetReview -> {
-                    regId = SyncRegistryType.AssetReview.id.toString()
-                    itemId = item.collectorAssetReviewId.toString()
+                    registryType = SyncRegistryType.AssetReview
+                    uniqueId = item.collectorAssetReviewId.toString()
                 }
 
                 is Image -> {
-                    regId = SyncRegistryType.Image.id.toString()
-                    itemId = md5HashToInt(item.hash ?: getMd5(item.objectId1.toString())).toString()
+                    registryType = SyncRegistryType.Image
+                    uniqueId = md5HashToInt(item.hash ?: getMd5(item.objectId1.toString())).toString()
                 }
             }
 
-            val regIdStr = String.format("%0" + (4 - regId.length).toString() + "d%s", 0, regId)
-            val itemIdStr = String.format("%0" + (11 - itemId.length).toString() + "d%s", 0, itemId)
-            return "${regIdStr}${itemIdStr}"
+            return if (registryType != null)
+                getKey(registryType = registryType, uniqueId = uniqueId)
+            else ""
         }
 
         fun getRegistryType(item: Any): SyncRegistryType? {
