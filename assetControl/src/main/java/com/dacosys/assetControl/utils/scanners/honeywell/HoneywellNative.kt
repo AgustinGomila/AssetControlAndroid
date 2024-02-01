@@ -19,6 +19,9 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 class HoneywellNative(private var weakRef: WeakReference<AppCompatActivity>) : Scanner(),
     BarcodeReader.BarcodeListener, BarcodeReader.TriggerListener {
+
+    private val tag = this::class.java.simpleName
+
     private var initialized = AtomicBoolean(false)
     private var initializing = AtomicBoolean(false)
     private var pendingResume = AtomicBoolean(false)
@@ -52,7 +55,7 @@ class HoneywellNative(private var weakRef: WeakReference<AppCompatActivity>) : S
         activityName = weakRef.get()?.javaClass?.simpleName ?: ""
         scannerListener = weakRef.get() as ScannerListener
 
-        Log.v(javaClass.simpleName, "Initializing scanner on $activityName...")
+        Log.v(tag, "Initializing scanner on $activityName...")
 
         initializing.set(true)
 
@@ -60,7 +63,7 @@ class HoneywellNative(private var weakRef: WeakReference<AppCompatActivity>) : S
         // create the AidcManager providing a Context and a
         // CreatedCallback implementation.
         AidcManager.create(weakRef.get()) { manager ->
-            Log.v(javaClass.simpleName, "Manager created on $activityName...")
+            Log.v(tag, "Manager created on $activityName...")
             scannerManager = manager
             scanner = scannerManager?.createBarcodeReader()
 
@@ -75,7 +78,7 @@ class HoneywellNative(private var weakRef: WeakReference<AppCompatActivity>) : S
                 scanner?.claim()
             } catch (e: ScannerUnavailableException) {
                 e.printStackTrace()
-                Log.e(javaClass.simpleName, "Scanner unavailable")
+                Log.e(tag, "Scanner unavailable")
             }
 
             loadProperties()
@@ -109,10 +112,9 @@ class HoneywellNative(private var weakRef: WeakReference<AppCompatActivity>) : S
                     BarcodeReader.TRIGGER_CONTROL_MODE_CLIENT_CONTROL
                 )
             }
+
             scanner?.setProperty(BarcodeReader.PROPERTY_DATA_PROCESSOR_LAUNCH_BROWSER, false)
-            scanner?.setProperty(
-                BarcodeReader.PROPERTY_TRIGGER_SCAN_MODE, BarcodeReader.TRIGGER_SCAN_MODE_ONESHOT
-            )
+            scanner?.setProperty(BarcodeReader.PROPERTY_TRIGGER_SCAN_MODE, BarcodeReader.TRIGGER_SCAN_MODE_ONESHOT)
         } catch (e: UnsupportedPropertyException) {
             e.printStackTrace()
         }
@@ -123,6 +125,14 @@ class HoneywellNative(private var weakRef: WeakReference<AppCompatActivity>) : S
     override fun onBarcodeEvent(barcodeReadEvent: BarcodeReadEvent) {
         if (lockScannerEvent) return
 
+        val list: MutableList<String> = ArrayList()
+        list.add("Barcode data: " + barcodeReadEvent.barcodeData)
+        list.add("Character Set: " + barcodeReadEvent.charset)
+        list.add("Code ID: " + barcodeReadEvent.codeId)
+        list.add("AIM ID: " + barcodeReadEvent.aimId)
+        list.add("Timestamp: " + barcodeReadEvent.timestamp)
+        Log.i(tag, list.toString())
+
         val codeRead = barcodeReadEvent.barcodeData
         if (codeRead != null) {
             scannerListener?.scannerCompleted(codeRead)
@@ -131,7 +141,7 @@ class HoneywellNative(private var weakRef: WeakReference<AppCompatActivity>) : S
 
     override fun onFailureEvent(barcodeFailureEvent: BarcodeFailureEvent) {
         if (lockScannerEvent) return
-        Log.v(javaClass.simpleName, getContext().getString(R.string.barcode_failure))
+        Log.v(tag, getContext().getString(R.string.barcode_failure))
     }
 
     // When using Automatic Trigger control do not need to implement the
@@ -147,17 +157,17 @@ class HoneywellNative(private var weakRef: WeakReference<AppCompatActivity>) : S
             scanner?.decode(triggerStateChangeEvent.state)
         } catch (e: ScannerNotClaimedException) {
             e.printStackTrace()
-            Log.e(javaClass.simpleName, "Scanner is not claimed")
+            Log.e(tag, "Scanner is not claimed")
         } catch (e: ScannerUnavailableException) {
             e.printStackTrace()
-            Log.e(javaClass.simpleName, "Scanner unavailable")
+            Log.e(tag, "Scanner unavailable")
         }
     }
 
     fun triggerScanner() {
         if (lockScannerEvent) return
 
-        // Reconfigurar el escaner para que acepte el disparo manual
+        // Reconfigurar el escáner para que acepte el disparo manual
         autoMode = false
         removeListeners()
         setupScanner()
@@ -171,7 +181,7 @@ class HoneywellNative(private var weakRef: WeakReference<AppCompatActivity>) : S
         handler.postDelayed({
             stopScanner()
 
-            // Volver el escaner a su estado normal
+            // Volver el escáner a su estado normal
             removeListeners()
             setupScanner()
         }, 3000)
@@ -188,30 +198,19 @@ class HoneywellNative(private var weakRef: WeakReference<AppCompatActivity>) : S
     private fun loadProperties() {
         properties = HashMap()
 
-        properties[BarcodeReader.PROPERTY_PDF_417_ENABLED] =
-            prefsGetBoolean(Preference.symbologyPDF417)
-        properties[BarcodeReader.PROPERTY_AZTEC_ENABLED] =
-            prefsGetBoolean(Preference.symbologyAztec)
-        properties[BarcodeReader.PROPERTY_QR_CODE_ENABLED] =
-            prefsGetBoolean(Preference.symbologyQRCode)
-        properties[BarcodeReader.PROPERTY_CODABAR_ENABLED] =
-            prefsGetBoolean(Preference.symbologyCODABAR)
-        properties[BarcodeReader.PROPERTY_CODE_128_ENABLED] =
-            prefsGetBoolean(Preference.symbologyCode128)
-        properties[BarcodeReader.PROPERTY_CODE_39_ENABLED] =
-            prefsGetBoolean(Preference.symbologyCode39)
-        properties[BarcodeReader.PROPERTY_CODE_93_ENABLED] =
-            prefsGetBoolean(Preference.symbologyCode93)
-        properties[BarcodeReader.PROPERTY_DATAMATRIX_ENABLED] =
-            prefsGetBoolean(Preference.symbologyDataMatrix)
-        properties[BarcodeReader.PROPERTY_EAN_13_ENABLED] =
-            prefsGetBoolean(Preference.symbologyEAN13)
+        properties[BarcodeReader.PROPERTY_PDF_417_ENABLED] = prefsGetBoolean(Preference.symbologyPDF417)
+        properties[BarcodeReader.PROPERTY_AZTEC_ENABLED] = prefsGetBoolean(Preference.symbologyAztec)
+        properties[BarcodeReader.PROPERTY_QR_CODE_ENABLED] = prefsGetBoolean(Preference.symbologyQRCode)
+        properties[BarcodeReader.PROPERTY_CODABAR_ENABLED] = prefsGetBoolean(Preference.symbologyCODABAR)
+        properties[BarcodeReader.PROPERTY_CODE_128_ENABLED] = prefsGetBoolean(Preference.symbologyCode128)
+        properties[BarcodeReader.PROPERTY_CODE_39_ENABLED] = prefsGetBoolean(Preference.symbologyCode39)
+        properties[BarcodeReader.PROPERTY_CODE_93_ENABLED] = prefsGetBoolean(Preference.symbologyCode93)
+        properties[BarcodeReader.PROPERTY_DATAMATRIX_ENABLED] = prefsGetBoolean(Preference.symbologyDataMatrix)
+        properties[BarcodeReader.PROPERTY_EAN_13_ENABLED] = prefsGetBoolean(Preference.symbologyEAN13)
         properties[BarcodeReader.PROPERTY_EAN_8_ENABLED] = prefsGetBoolean(Preference.symbologyEAN8)
-        properties[BarcodeReader.PROPERTY_MAXICODE_ENABLED] =
-            prefsGetBoolean(Preference.symbologyMaxiCode)
+        properties[BarcodeReader.PROPERTY_MAXICODE_ENABLED] = prefsGetBoolean(Preference.symbologyMaxiCode)
         properties[BarcodeReader.PROPERTY_RSS_ENABLED] = prefsGetBoolean(Preference.symbologyRSS14)
-        properties[BarcodeReader.PROPERTY_RSS_EXPANDED_ENABLED] =
-            prefsGetBoolean(Preference.symbologyRSSExpanded)
+        properties[BarcodeReader.PROPERTY_RSS_EXPANDED_ENABLED] = prefsGetBoolean(Preference.symbologyRSSExpanded)
         properties[BarcodeReader.PROPERTY_UPC_A_ENABLE] = prefsGetBoolean(Preference.symbologyUPCA)
         properties[BarcodeReader.PROPERTY_UPC_E_ENABLED] = prefsGetBoolean(Preference.symbologyUPCE)
 
@@ -224,14 +223,19 @@ class HoneywellNative(private var weakRef: WeakReference<AppCompatActivity>) : S
             if (sendDigit) BarcodeReader.CODE_39_CHECK_DIGIT_MODE_CHECK
             else BarcodeReader.CODE_39_CHECK_DIGIT_MODE_NO_CHECK
 
+        properties[BarcodeReader.PROPERTY_CODE_39_FULL_ASCII_ENABLED] = true
+
         // Set Max Code 39 barcode length
         properties[BarcodeReader.PROPERTY_CODE_39_MAXIMUM_LENGTH] = 10
+
         // Turn on center decoding
         properties[BarcodeReader.PROPERTY_CENTER_DECODE] = true
-        // Enable bad read response
+
+        // Enable bad read responses
         properties[BarcodeReader.PROPERTY_NOTIFICATION_BAD_READ_ENABLED] = true
     }
 
+    @Suppress("unused")
     fun setProperties(mapProperties: Map<String, Any>?) {
         if (mapProperties == null) return
 
@@ -261,7 +265,7 @@ class HoneywellNative(private var weakRef: WeakReference<AppCompatActivity>) : S
             return
         }
 
-        Log.v(javaClass.simpleName, "Resuming scanner on $activityName...")
+        Log.v(tag, "Resuming scanner on $activityName...")
 
         try {
             scanner?.claim()
@@ -276,15 +280,15 @@ class HoneywellNative(private var weakRef: WeakReference<AppCompatActivity>) : S
     }
 
     private fun pauseScanner() {
-        Log.v(javaClass.simpleName, "Pausing scanner on $activityName...")
-        // release the scanner claim so we don't get any scanner notifications while paused
+        Log.v(tag, "Pausing scanner on $activityName...")
+        // release the scanner claim, so we don't get any scanner notifications while paused
         // and the scanner properties are restored to default.
         scanner?.release()
         pendingResume.set(false)
     }
 
     fun destroy() {
-        Log.v(javaClass.simpleName, "Destroying scanner on $activityName...")
+        Log.v(tag, "Destroying scanner on $activityName...")
         try {
             removeListeners()
 

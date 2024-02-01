@@ -76,18 +76,18 @@ class Honeywell(private val activity: AppCompatActivity) : Scanner() {
          * Este es el nombre creado por defecto en los Honeywell
          * Settings / Scan Settings / Internal Scanner / + / Select an application / AssetControl
          */
-        const val appProfile = "AssetControl"
+        const val APP_PROFILE = "AssetControl"
 
         /**
          * Categoría por defecto. En otros ejemplos se envía vacía.
          */
-        const val defaultCategory = "android.intent.category.DEFAULT"
+        const val DEFAULT_INTENT_CATEGORY = "android.intent.category.DEFAULT"
 
         const val EXTRA_CONTROL = "com.honeywell.aidc.action.ACTION_CONTROL_SCANNER"
 
         /**
-         * Set to true to start or continue scanning.
-         * Set to false to stop scanning. Most scenarios only need this extra, however the scanner can be
+         * Set to true for start or continue scanning.
+         * Set to false for stop scanning. Most scenarios only need this extra, however the scanner can be
          * put into other states by adding from the following extras.
          */
         const val EXTRA_SCAN = "com.honeywell.aidc.extra.EXTRA_SCAN"
@@ -137,6 +137,8 @@ class Honeywell(private val activity: AppCompatActivity) : Scanner() {
         const val PROPERTY_UPC_A_ENABLE = "DEC_UPCA_ENABLE"
         const val PROPERTY_UPC_E_ENABLED = "DEC_UPCE0_ENABLED"
 
+        const val PROPERTY_CODE39_FULL_ASCII_ENABLED = "DEC_CODE39_FULL_ASCII_ENABLED"
+
         const val PROPERTY_INTERLEAVED_25_ENABLED = "DEC_I25_ENABLED"
         const val PROPERTY_GS1_128_ENABLED = "DEC_GS1_128_ENABLED"
         const val PROPERTY_EAN_13_CHECK_DIGIT_TRANSMIT_ENABLED = "DEC_EAN13_CHECK_DIGIT_TRANSMIT"
@@ -182,96 +184,51 @@ class Honeywell(private val activity: AppCompatActivity) : Scanner() {
         properties = Bundle()
 
         // Barcode camera scanner view
-        properties?.putBoolean(
-            Constants.PROPERTY_PDF_417_ENABLED,
-            prefsGetBoolean(Preference.symbologyPDF417)
-        )
-        properties?.putBoolean(
-            Constants.PROPERTY_AZTEC_ENABLED,
-            prefsGetBoolean(Preference.symbologyAztec)
-        )
-        properties?.putBoolean(
-            Constants.PROPERTY_QR_CODE_ENABLED,
-            prefsGetBoolean(Preference.symbologyQRCode)
-        )
-        properties?.putBoolean(
-            Constants.PROPERTY_CODABAR_ENABLED,
-            prefsGetBoolean(Preference.symbologyCODABAR)
-        )
-        properties?.putBoolean(
-            Constants.PROPERTY_CODE_128_ENABLED,
-            prefsGetBoolean(Preference.symbologyCode128)
-        )
-        properties?.putBoolean(
-            Constants.PROPERTY_CODE_39_ENABLED,
-            prefsGetBoolean(Preference.symbologyCode39)
-        )
-        properties?.putBoolean(
-            Constants.PROPERTY_CODE_93_ENABLED,
-            prefsGetBoolean(Preference.symbologyCode93)
-        )
-        properties?.putBoolean(
-            Constants.PROPERTY_DATAMATRIX_ENABLED,
-            prefsGetBoolean(Preference.symbologyDataMatrix)
-        )
-        properties?.putBoolean(
-            Constants.PROPERTY_EAN_13_ENABLED,
-            prefsGetBoolean(Preference.symbologyEAN13)
-        )
-        properties?.putBoolean(
-            Constants.PROPERTY_EAN_8_ENABLED,
-            prefsGetBoolean(Preference.symbologyEAN8)
-        )
-        properties?.putBoolean(
-            Constants.PROPERTY_MAXICODE_ENABLED,
-            prefsGetBoolean(Preference.symbologyMaxiCode)
-        )
-        properties?.putBoolean(
-            Constants.PROPERTY_RSS_ENABLED,
-            prefsGetBoolean(Preference.symbologyRSS14)
-        )
+        properties?.putBoolean(Constants.PROPERTY_PDF_417_ENABLED, prefsGetBoolean(Preference.symbologyPDF417))
+        properties?.putBoolean(Constants.PROPERTY_AZTEC_ENABLED, prefsGetBoolean(Preference.symbologyAztec))
+        properties?.putBoolean(Constants.PROPERTY_QR_CODE_ENABLED, prefsGetBoolean(Preference.symbologyQRCode))
+        properties?.putBoolean(Constants.PROPERTY_CODABAR_ENABLED, prefsGetBoolean(Preference.symbologyCODABAR))
+        properties?.putBoolean(Constants.PROPERTY_CODE_128_ENABLED, prefsGetBoolean(Preference.symbologyCode128))
+        properties?.putBoolean(Constants.PROPERTY_CODE_39_ENABLED, prefsGetBoolean(Preference.symbologyCode39))
+        properties?.putBoolean(Constants.PROPERTY_CODE_93_ENABLED, prefsGetBoolean(Preference.symbologyCode93))
+        properties?.putBoolean(Constants.PROPERTY_DATAMATRIX_ENABLED, prefsGetBoolean(Preference.symbologyDataMatrix))
+        properties?.putBoolean(Constants.PROPERTY_EAN_13_ENABLED, prefsGetBoolean(Preference.symbologyEAN13))
+        properties?.putBoolean(Constants.PROPERTY_EAN_8_ENABLED, prefsGetBoolean(Preference.symbologyEAN8))
+        properties?.putBoolean(Constants.PROPERTY_MAXICODE_ENABLED, prefsGetBoolean(Preference.symbologyMaxiCode))
+        properties?.putBoolean(Constants.PROPERTY_RSS_ENABLED, prefsGetBoolean(Preference.symbologyRSS14))
         properties?.putBoolean(
             Constants.PROPERTY_RSS_EXPANDED_ENABLED,
             prefsGetBoolean(Preference.symbologyRSSExpanded)
         )
-        properties?.putBoolean(
-            Constants.PROPERTY_UPC_A_ENABLE,
-            prefsGetBoolean(Preference.symbologyUPCA)
-        )
-        properties?.putBoolean(
-            Constants.PROPERTY_UPC_E_ENABLED,
-            prefsGetBoolean(Preference.symbologyUPCE)
-        )
+        properties?.putBoolean(Constants.PROPERTY_UPC_A_ENABLE, prefsGetBoolean(Preference.symbologyUPCA))
+        properties?.putBoolean(Constants.PROPERTY_UPC_E_ENABLED, prefsGetBoolean(Preference.symbologyUPCE))
 
-        val sendDigit =
-            prefsGetBoolean(Preference.sendBarcodeCheckDigit)
-        properties?.putBoolean(
-            Constants.PROPERTY_EAN_13_CHECK_DIGIT_TRANSMIT_ENABLED,
-            sendDigit
-        )
+        val sendDigit = prefsGetBoolean(Preference.sendBarcodeCheckDigit)
+        properties?.putBoolean(Constants.PROPERTY_EAN_13_CHECK_DIGIT_TRANSMIT_ENABLED, sendDigit)
         properties?.putBoolean(Constants.PROPERTY_EAN_8_CHECK_DIGIT_TRANSMIT_ENABLED, sendDigit)
         properties?.putBoolean(Constants.PROPERTY_UPC_A_CHECK_DIGIT_TRANSMIT_ENABLED, sendDigit)
 
         properties?.putString(
             Constants.PROPERTY_CODE_39_CHECK_DIGIT_MODE,
-            if (sendDigit)
-                Constants.CODE_39_CHECK_DIGIT_MODE_CHECK
-            else
-                Constants.CODE_39_CHECK_DIGIT_MODE_NO_CHECK
+            if (sendDigit) Constants.CODE_39_CHECK_DIGIT_MODE_CHECK
+            else Constants.CODE_39_CHECK_DIGIT_MODE_NO_CHECK
         )
+        properties?.putBoolean(Constants.PROPERTY_CODE39_FULL_ASCII_ENABLED, true)
 
         // Set Max Code 39 barcode length
         properties?.putInt(Constants.PROPERTY_CODE_39_MAXIMUM_LENGTH, 10)
+
         // Turn on center decoding
         properties?.putBoolean(Constants.PROPERTY_CENTER_DECODE, true)
-        // Enable bad read response
+
+        // Enable bad read responses
         properties?.putBoolean(Constants.PROPERTY_NOTIFICATION_BAD_READ_ENABLED, true)
 
         Log.v(javaClass.simpleName, "Scanner minimal properties defined!")
     }
 
     fun setProperties(mapProperties: Map<String, Any>?) {
-        if (mapProperties == null || mapProperties.isEmpty()) return
+        if (mapProperties.isNullOrEmpty()) return
         loadProperties()
         for ((key, value1) in mapProperties) {
             if (value1 is String) properties!!.putString(key, value1.toString())
@@ -347,7 +304,7 @@ class Honeywell(private val activity: AppCompatActivity) : Scanner() {
                 - If we use "DEFAULT" it will apply the settings from the Default profile in Scanner settings
                 - If not found, it will use Factory default settings.
                  */
-                .putExtra(Constants.EXTRA_PROFILE, Constants.appProfile)
+                .putExtra(Constants.EXTRA_PROFILE, Constants.APP_PROFILE)
 
             sendBroadcast(intent)
             isOpened = true
@@ -370,7 +327,7 @@ class Honeywell(private val activity: AppCompatActivity) : Scanner() {
             /*
              * Always provide a non-empty category, for example "android.intent.category.DEFAULT"
              */
-            .addCategory(Constants.defaultCategory)
+            .addCategory(Constants.DEFAULT_INTENT_CATEGORY)
 
         if (sdkVersion < 26) {
             Log.v(javaClass.simpleName, "Send $intent (${activityName})")

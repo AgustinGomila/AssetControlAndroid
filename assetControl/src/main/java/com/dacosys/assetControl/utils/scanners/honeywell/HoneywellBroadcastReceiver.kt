@@ -7,8 +7,9 @@ import android.util.Log
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 
-@Suppress("ConvertSecondaryConstructorToPrimary", "unused")
+@Suppress("unused")
 class HoneywellBroadcastReceiver : BroadcastReceiver {
+    private val tag = this::class.java.simpleName
     private lateinit var honeywell: Honeywell
 
     constructor()
@@ -18,7 +19,19 @@ class HoneywellBroadcastReceiver : BroadcastReceiver {
     }
 
     override fun onReceive(context: Context, intent: Intent) {
-        Log.w(javaClass.simpleName, "Intent received {$intent} ({$context})")
+        Log.w(tag, "Intent received {$intent} ({$context})")
+
+        fun bytesToHexString(arr: ByteArray?): String {
+            var s = "[]"
+            if (arr != null) {
+                s = "["
+                for (i in arr.indices) {
+                    s += "0x" + Integer.toHexString(arr[i].toInt()) + ", "
+                }
+                s = s.substring(0, s.length - 2) + "]"
+            }
+            return s
+        }
 
         try {
             when (intent.action) {
@@ -36,8 +49,29 @@ class HoneywellBroadcastReceiver : BroadcastReceiver {
                     */
 
                     val version = intent.getIntExtra("version", 0)
+                    val aimId = intent.getStringExtra("aimId")
+                    val charset = intent.getStringExtra("charset")
+                    val codeId = intent.getStringExtra("codeId")
+                    val data = intent.getStringExtra("data")
+                    val dataBytes = intent.getByteArrayExtra("dataBytes")
+                    val dataBytesStr: String = bytesToHexString(dataBytes)
+                    val timestamp = intent.getStringExtra("timestamp")
+
+                    val text = String.format(
+                        """
+                            Version: %s
+                            Data: %s
+                            Charset: %s
+                            Bytes: %s
+                            AimId: %s
+                            CodeId: %s
+                            Timestamp: %s
+                        """.trimIndent(),
+                        version, data, charset, dataBytesStr, aimId, codeId, timestamp
+                    )
+                    Log.i(tag, text)
+
                     if (version >= 1) {
-                        val data = intent.getStringExtra("data")
                         if (data != null) {
                             honeywell.sendScannedData(data)
                         }
@@ -46,7 +80,7 @@ class HoneywellBroadcastReceiver : BroadcastReceiver {
             }
         } catch (e: Exception) {
             Log.d(
-                javaClass.simpleName,
+                tag,
                 getContext().getString(R.string.barcode_failure)
             )
         }
