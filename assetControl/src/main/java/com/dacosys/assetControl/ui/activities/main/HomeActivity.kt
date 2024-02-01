@@ -64,13 +64,13 @@ import com.dacosys.assetControl.ui.activities.sync.SyncActivity
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.utils.ConfigHelper
-import com.dacosys.assetControl.utils.ImageControl.Companion.setupImageControl
 import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
 import com.dacosys.assetControl.utils.Screen.Companion.getBestContrastColor
 import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.Statics.Companion.OFFLINE_MODE
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.imageControl.ImageControl.Companion.setupImageControl
 import com.dacosys.assetControl.utils.mainButton.MainButton
 import com.dacosys.assetControl.utils.preferences.Preferences
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean

@@ -3,8 +3,8 @@ package com.dacosys.assetControl
 import android.app.Application
 import android.content.Context
 import androidx.preference.PreferenceManager
-import com.dacosys.assetControl.utils.ImageControl.Companion.imageControl
 import com.dacosys.assetControl.utils.Statics.Companion.INTERNAL_IMAGE_CONTROL_APP_ID
+import com.dacosys.assetControl.utils.imageControl.ImageControl.Companion.imageControl
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefs
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.imageControl.ImageControl

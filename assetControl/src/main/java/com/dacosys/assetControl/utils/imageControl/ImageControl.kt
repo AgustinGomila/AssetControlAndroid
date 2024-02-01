@@ -1,5 +1,6 @@
-package com.dacosys.assetControl.utils
+package com.dacosys.assetControl.utils.imageControl
 
+import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.preferences.Preferences
 import com.dacosys.assetControl.utils.preferences.Repository
 import com.dacosys.assetControl.utils.settings.Preference

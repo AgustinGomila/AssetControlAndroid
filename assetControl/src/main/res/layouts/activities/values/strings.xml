@@ -252,6 +252,9 @@
     <string name="asset_information">Información del activo</string>
     <string name="error_connecting_device">Error al conectar dispositivo</string>
     <string name="there_are_no_bluetooth_devices">No hay dispositivos Bluetooth</string>
+    <string name="bluetooth_printer_not_configured">Impresora Bluetooth no configurada</string>
+    <string name="permission_denied">Permiso denegado</string>
+    <string name="there_is_a_printing_in_progress_">Hay una impresión en curso…</string>
     <string name="there_is_no_selected_printer">No hay una impresora seleccionada</string>
     <string name="no_template_selected">No hay una plantilla seleccionada</string>
     <string name="the_selected_asset_was_not_uploaded_to_the_server_and_does_not_have_a_definitive_id">El activo

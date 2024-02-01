@@ -57,8 +57,6 @@ import com.dacosys.assetControl.ui.common.snackbar.SnackBarEventData
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.fragments.user.UserSpinnerFragment
 import com.dacosys.assetControl.utils.ConfigHelper
-import com.dacosys.assetControl.utils.ImageControl.Companion.closeImageControl
-import com.dacosys.assetControl.utils.ImageControl.Companion.setupImageControl
 import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
 import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Screen.Companion.setupUI
@@ -67,6 +65,8 @@ import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.Statics.Companion.OFFLINE_MODE
 import com.dacosys.assetControl.utils.Statics.Companion.appName
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.imageControl.ImageControl.Companion.closeImageControl
+import com.dacosys.assetControl.utils.imageControl.ImageControl.Companion.setupImageControl
 import com.dacosys.assetControl.utils.misc.Md5
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetString

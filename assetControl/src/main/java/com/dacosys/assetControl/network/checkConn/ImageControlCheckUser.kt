@@ -4,9 +4,9 @@ import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarEventData
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
-import com.dacosys.assetControl.utils.ImageControl.Companion.imageControl
-import com.dacosys.assetControl.utils.ImageControl.Companion.setupImageControl
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.imageControl.ImageControl.Companion.imageControl
+import com.dacosys.assetControl.utils.imageControl.ImageControl.Companion.setupImageControl
 import com.dacosys.imageControl.dto.UserAuthResult
 import kotlinx.coroutines.*
 
