@@ -10,6 +10,7 @@ import com.dacosys.assetControl.R.layout.custom_spinner_dropdown_item
 import com.dacosys.assetControl.data.model.asset.AssetCondition
 import com.dacosys.assetControl.databinding.FragmentSpinnerBinding
 import com.dacosys.assetControl.ui.adapters.asset.AssetConditionAdapter
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelableArrayList
 import org.parceler.Parcels
 
 /**
@@ -70,7 +71,7 @@ class AssetConditionSpinnerFragment : Fragment() {
 
         if (arguments != null) {
             allAssetCondition =
-                requireArguments().getParcelableArrayList(ARG_ALL_ASSET_CONDITION)
+                requireArguments().parcelableArrayList(ARG_ALL_ASSET_CONDITION)
         }
     }
 

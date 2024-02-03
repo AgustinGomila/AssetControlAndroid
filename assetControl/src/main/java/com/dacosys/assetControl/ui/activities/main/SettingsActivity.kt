@@ -29,19 +29,19 @@ import com.dacosys.assetControl.ui.common.snackbar.SnackBarEventData
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType.CREATOR.INFO
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
 import com.dacosys.assetControl.ui.fragments.settings.HeaderFragment
-import com.dacosys.assetControl.utils.ConfigHelper
-import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.Scanner
-import com.dacosys.assetControl.utils.settings.QRConfigType
-import com.dacosys.assetControl.utils.settings.QRConfigType.CREATOR.QRConfigApp
-import com.dacosys.assetControl.utils.settings.QRConfigType.CREATOR.QRConfigClientAccount
-import com.dacosys.assetControl.utils.settings.QRConfigType.CREATOR.QRConfigWebservice
+import com.dacosys.assetControl.utils.settings.config.ConfigHelper
+import com.dacosys.assetControl.utils.settings.config.QRConfigType
+import com.dacosys.assetControl.utils.settings.config.QRConfigType.CREATOR.QRConfigApp
+import com.dacosys.assetControl.utils.settings.config.QRConfigType.CREATOR.QRConfigClientAccount
+import com.dacosys.assetControl.utils.settings.config.QRConfigType.CREATOR.QRConfigWebservice
 import com.dacosys.assetControl.utils.settings.entries.ConfEntry
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
 import org.json.JSONObject
 import java.lang.ref.WeakReference
 
@@ -239,7 +239,7 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
 
     private val showScannedCode: Boolean
         get() {
-            return prefsGetBoolean(com.dacosys.assetControl.utils.settings.Preference.showScannedCode)
+            return prefsGetBoolean(com.dacosys.assetControl.utils.settings.config.Preference.showScannedCode)
         }
 
     override fun scannerCompleted(scanCode: String) {
@@ -321,7 +321,7 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
 
         fun bindPreferenceSummaryToValue(
             frag: PreferenceFragmentCompat,
-            pref: com.dacosys.assetControl.utils.settings.Preference,
+            pref: com.dacosys.assetControl.utils.settings.config.Preference,
         ) {
             val preference = frag.findPreference<Preference>(pref.key) ?: return
             val defaultValue: Any? = if (BuildConfig.DEBUG) pref.debugValue else pref.defaultValue

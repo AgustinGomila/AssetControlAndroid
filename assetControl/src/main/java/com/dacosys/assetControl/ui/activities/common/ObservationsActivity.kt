@@ -12,15 +12,15 @@ import com.dacosys.assetControl.data.model.asset.Asset
 import com.dacosys.assetControl.databinding.ObservationsActivityBinding
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
-import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
-import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
-import com.dacosys.assetControl.utils.Screen.Companion.setupUI
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.utils.scanners.nfc.Nfc
-import com.dacosys.assetControl.utils.settings.Preference
+import com.dacosys.assetControl.utils.settings.config.Preference
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
 
 class ObservationsActivity : AppCompatActivity(), Scanner.ScannerListener {
     private var obs = ""

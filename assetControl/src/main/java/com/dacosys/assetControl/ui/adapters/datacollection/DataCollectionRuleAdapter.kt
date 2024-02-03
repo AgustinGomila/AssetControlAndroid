@@ -17,7 +17,7 @@ import androidx.core.graphics.BlendModeCompat
 import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.model.dataCollection.DataCollectionRule
-import com.dacosys.assetControl.utils.Screen.Companion.getColorWithAlpha
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.getColorWithAlpha
 import java.lang.ref.WeakReference
 
 /**

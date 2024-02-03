@@ -8,7 +8,7 @@ import com.dacosys.assetControl.network.serverDate.MySqlDateResult
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarEventData
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
-import com.dacosys.assetControl.utils.preferences.Repository
+import com.dacosys.assetControl.utils.settings.preferences.Repository
 
 class CheckWsConnection(
     private var url: String,

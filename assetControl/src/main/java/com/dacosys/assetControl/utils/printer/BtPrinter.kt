@@ -20,8 +20,8 @@ import com.dacosys.assetControl.R
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarEventData
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.preferences.Preferences
-import com.dacosys.assetControl.utils.settings.Preference
+import com.dacosys.assetControl.utils.settings.config.Preference
+import com.dacosys.assetControl.utils.settings.preferences.Preferences
 import com.google.android.gms.common.api.CommonStatusCodes
 import java.io.IOException
 

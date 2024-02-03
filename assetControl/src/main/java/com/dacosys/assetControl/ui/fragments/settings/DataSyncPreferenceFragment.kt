@@ -27,9 +27,9 @@ import com.dacosys.assetControl.ui.common.snackbar.SnackBarEventData
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.preferences.Repository
-import com.dacosys.assetControl.utils.settings.PathHelper
 import com.dacosys.assetControl.utils.settings.entries.ConfEntry
+import com.dacosys.assetControl.utils.settings.io.PathHelper
+import com.dacosys.assetControl.utils.settings.preferences.Repository
 import com.google.android.gms.common.api.CommonStatusCodes
 import java.io.File
 import java.util.*
@@ -68,7 +68,7 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
         parentFragmentManager.beginTransaction().replace(id, prefFragment).addToBackStack(null).commit()
     }
 
-    val p = com.dacosys.assetControl.utils.settings.Preference
+    val p = com.dacosys.assetControl.utils.settings.config.Preference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -55,26 +55,26 @@ import com.dacosys.assetControl.ui.adapters.asset.AssetRecyclerAdapter.FilterOpt
 import com.dacosys.assetControl.ui.adapters.interfaces.Interfaces
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.isKeyboardVisible
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.ui.fragments.asset.AssetSelectFilterFragment
 import com.dacosys.assetControl.ui.fragments.asset.SummaryFragment
 import com.dacosys.assetControl.ui.fragments.print.PrinterFragment
-import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
-import com.dacosys.assetControl.utils.Screen.Companion.isKeyboardVisible
-import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
-import com.dacosys.assetControl.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.ParcelLong
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetLong
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsPutBoolean
-import com.dacosys.assetControl.utils.preferences.Repository.Companion.useImageControl
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.ScannedCode
 import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.utils.scanners.nfc.Nfc
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid.Companion.isRfidRequired
-import com.dacosys.assetControl.utils.settings.Preference
+import com.dacosys.assetControl.utils.settings.config.Preference
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetLong
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutBoolean
+import com.dacosys.assetControl.utils.settings.preferences.Repository.Companion.useImageControl
 import com.dacosys.imageControl.dto.DocumentContent
 import com.dacosys.imageControl.dto.DocumentContentRequestResult
 import com.dacosys.imageControl.network.common.ProgramData
@@ -83,6 +83,8 @@ import com.dacosys.imageControl.network.webService.WsFunction
 import com.dacosys.imageControl.room.dao.ImageCoroutines
 import com.dacosys.imageControl.ui.activities.ImageControlCameraActivity
 import com.dacosys.imageControl.ui.activities.ImageControlGridActivity
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelableArrayList
 import org.parceler.Parcels
 import kotlin.concurrent.thread
 
@@ -216,14 +218,14 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         if (b.containsKey("onlyActive")) onlyActive = b.getBoolean("onlyActive")
 
         multiSelect = b.getBoolean("multiSelect", multiSelect)
-        lastSelected = b.getParcelable("lastSelected")
+        lastSelected = b.parcelable("lastSelected")
         currentScrollPosition = b.getInt("currentScrollPosition")
         checkedIdArray = (b.getLongArray("checkedIdArray") ?: longArrayOf()).toCollection(ArrayList())
 
         fixedItemList = b.getBoolean("fixedItemList")
 
         if (b.containsKey("assetArray")) {
-            completeList = b.getParcelableArrayList("assetArray") ?: ArrayList()
+            completeList = b.parcelableArrayList("assetArray") ?: ArrayList()
             fixedItemList = true
             hideFilterPanel = true
         }
@@ -1295,7 +1297,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
             val data = it?.data
             try {
                 if (it?.resultCode == RESULT_OK && data != null) {
-                    val a = Parcels.unwrap<Asset>(data.getParcelableExtra("asset"))
+                    val a = Parcels.unwrap<Asset>(data.parcelable("asset"))
                         ?: return@registerForActivityResult
                     adapter?.updateAsset(a, true)
                 }

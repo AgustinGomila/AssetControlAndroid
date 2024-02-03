@@ -10,12 +10,13 @@ import com.dacosys.assetControl.data.model.table.Table
 import com.dacosys.assetControl.databinding.WarehouseAreaDetailActivityBinding
 import com.dacosys.assetControl.ui.common.snackbar.MakeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
-import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
-import com.dacosys.assetControl.utils.Screen.Companion.setupUI
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setupUI
 import com.dacosys.imageControl.dto.DocumentContent
 import com.dacosys.imageControl.dto.DocumentContentRequestResult
 import com.dacosys.imageControl.network.webService.WsFunction
 import com.dacosys.imageControl.ui.activities.ImageControlGridActivity
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 
 class WarehouseAreaDetailActivity : AppCompatActivity() {
     private var warehouseArea: WarehouseArea? = null
@@ -43,7 +44,7 @@ class WarehouseAreaDetailActivity : AppCompatActivity() {
 
         val extras = intent.extras
         if (extras != null) {
-            warehouseArea = extras.getParcelable("warehouseArea")
+            warehouseArea = extras.parcelable("warehouseArea")
         }
 
         binding.showImagesButton.setOnClickListener { showImages() }

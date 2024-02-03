@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.model.asset.Asset
 import com.dacosys.assetControl.databinding.AssetDetailFragmentBinding
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 
 /**
  * A simple [Fragment] subclass.
@@ -23,7 +24,7 @@ class AssetDetailFragment : DialogFragment() {
         super.onCreate(savedInstanceState)
 
         if (arguments != null) {
-            asset = requireArguments().getParcelable("asset")
+            asset = requireArguments().parcelable("asset")
         }
     }
 

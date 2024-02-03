@@ -41,12 +41,12 @@ import com.dacosys.assetControl.data.model.route.RouteProcess
 import com.dacosys.assetControl.databinding.*
 import com.dacosys.assetControl.network.sync.SyncRegistryType
 import com.dacosys.assetControl.ui.adapters.interfaces.Interfaces.*
-import com.dacosys.assetControl.utils.Screen.Companion.getBestContrastColor
-import com.dacosys.assetControl.utils.Screen.Companion.getColorWithAlpha
-import com.dacosys.assetControl.utils.Screen.Companion.manipulateColor
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.getBestContrastColor
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.getColorWithAlpha
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.manipulateColor
 import com.dacosys.assetControl.utils.misc.Md5.Companion.getMd5
 import com.dacosys.assetControl.utils.misc.Md5.Companion.md5HashToInt
-import com.dacosys.assetControl.utils.preferences.Repository.Companion.useImageControl
+import com.dacosys.assetControl.utils.settings.preferences.Repository.Companion.useImageControl
 import com.dacosys.imageControl.network.common.ProgramData
 import com.dacosys.imageControl.room.entity.Image
 import com.dacosys.imageControl.ui.adapter.ImageAdapter

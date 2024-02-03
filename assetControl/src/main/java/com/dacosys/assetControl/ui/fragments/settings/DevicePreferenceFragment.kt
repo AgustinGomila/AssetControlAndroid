@@ -25,20 +25,19 @@ import com.dacosys.assetControl.ui.activities.main.SettingsActivity.Companion.bi
 import com.dacosys.assetControl.ui.common.snackbar.MakeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarEventData
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
-import com.dacosys.assetControl.utils.Collector
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.preferences.Preferences
+import com.dacosys.assetControl.utils.scanners.Collector
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.utils.scanners.rfid.RfidType
 import com.dacosys.assetControl.utils.scanners.vh75.Vh75Bt
 import com.dacosys.assetControl.utils.settings.collectorType.CollectorType
 import com.dacosys.assetControl.utils.settings.collectorType.CollectorTypePreference
 import com.dacosys.assetControl.utils.settings.devices.DevicePreference
+import com.dacosys.assetControl.utils.settings.preferences.Preferences
 import com.google.android.gms.common.api.CommonStatusCodes
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 import kotlin.concurrent.thread
-import com.dacosys.assetControl.utils.settings.Preference as p
 
 /**
  * This fragment shows notification preferences only. It is used when the
@@ -138,11 +137,11 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
 
     private fun setCollectorPref() {
         ////////////////// COLECTOR //////////////////
-        bindPreferenceSummaryToValue(this, p.collectorType)
+        bindPreferenceSummaryToValue(this, com.dacosys.assetControl.utils.settings.config.Preference.collectorType)
 
         // PERMITE ACTUALIZAR EN PANTALLA EL ITEM SELECCIONADO EN EL SUMMARY DEL CONTROL
         val collectorTypeListPreference =
-            findPreference<Preference>(p.collectorType.key) as CollectorTypePreference
+            findPreference<Preference>(com.dacosys.assetControl.utils.settings.config.Preference.collectorType.key) as CollectorTypePreference
         if (collectorTypeListPreference.value == null) {
             // to ensure we don't selectByItemId a null value
             // set first value by default
@@ -173,11 +172,16 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
     }
 
     private fun getPrinterName(): String {
-        val useBtPrinter = Preferences.prefsGetBoolean(p.useBtPrinter)
-        val useNetPrinter = Preferences.prefsGetBoolean(p.useNetPrinter)
-        val ipNetPrinter = Preferences.prefsGetString(p.ipNetPrinter)
-        val printerBtAddress = Preferences.prefsGetString(p.printerBtAddress)
-        val portNetPrinter = Preferences.prefsGetString(p.portNetPrinter)
+        val useBtPrinter =
+            Preferences.prefsGetBoolean(com.dacosys.assetControl.utils.settings.config.Preference.useBtPrinter)
+        val useNetPrinter =
+            Preferences.prefsGetBoolean(com.dacosys.assetControl.utils.settings.config.Preference.useNetPrinter)
+        val ipNetPrinter =
+            Preferences.prefsGetString(com.dacosys.assetControl.utils.settings.config.Preference.ipNetPrinter)
+        val printerBtAddress =
+            Preferences.prefsGetString(com.dacosys.assetControl.utils.settings.config.Preference.printerBtAddress)
+        val portNetPrinter =
+            Preferences.prefsGetString(com.dacosys.assetControl.utils.settings.config.Preference.portNetPrinter)
 
         val r = if (!useBtPrinter && !useNetPrinter) {
             getString(R.string.disabled)
@@ -197,7 +201,8 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
 
     private fun setPrinterPref() {
         //region //// DEVICE LIST
-        val deviceListPreference = findPreference<Preference>(p.printerBtAddress.key) as DevicePreference
+        val deviceListPreference =
+            findPreference<Preference>(com.dacosys.assetControl.utils.settings.config.Preference.printerBtAddress.key) as DevicePreference
         if (deviceListPreference.value == null) {
             // to ensure we don't selectByItemId a null value
             // set first value by default
@@ -217,10 +222,12 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
         //endregion //// DEVICE LIST
 
         //region //// PRINTER IP / PORT
-        val portNetPrinterPref = findPreference<Preference>(p.portNetPrinter.key) as EditTextPreference
+        val portNetPrinterPref =
+            findPreference<Preference>(com.dacosys.assetControl.utils.settings.config.Preference.portNetPrinter.key) as EditTextPreference
         portNetPrinterPref.summary = portNetPrinterPref.text
 
-        val ipNetPrinterPref = findPreference<Preference>(p.ipNetPrinter.key) as EditTextPreference
+        val ipNetPrinterPref =
+            findPreference<Preference>(com.dacosys.assetControl.utils.settings.config.Preference.ipNetPrinter.key) as EditTextPreference
         ipNetPrinterPref.summary = ipNetPrinterPref.text
 
         ipNetPrinterPref.setOnBindEditTextListener {
@@ -231,14 +238,14 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
             it.filters = filters
         }
         ipNetPrinterPref.setOnPreferenceChangeListener { _, newValue ->
-            if (Preferences.prefsGetBoolean(p.useNetPrinter) && newValue != null) {
+            if (Preferences.prefsGetBoolean(com.dacosys.assetControl.utils.settings.config.Preference.useNetPrinter) && newValue != null) {
                 ipNetPrinterPref.summary = newValue.toString()
             }
             true
         }
 
         portNetPrinterPref.setOnPreferenceChangeListener { _, newValue ->
-            if (Preferences.prefsGetBoolean(p.useNetPrinter) && newValue != null) {
+            if (Preferences.prefsGetBoolean(com.dacosys.assetControl.utils.settings.config.Preference.useNetPrinter) && newValue != null) {
                 portNetPrinterPref.summary = newValue.toString()
             }
             true
@@ -246,9 +253,11 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
         //endregion //// PRINTER IP / PORT
 
         //region //// USE BLUETOOTH / NET PRINTER
-        val swPrefBtPrinter = findPreference<Preference>(p.useBtPrinter.key) as SwitchPreference
+        val swPrefBtPrinter =
+            findPreference<Preference>(com.dacosys.assetControl.utils.settings.config.Preference.useBtPrinter.key) as SwitchPreference
 
-        val swPrefNetPrinter = findPreference<Preference>(p.useNetPrinter.key) as SwitchPreference
+        val swPrefNetPrinter =
+            findPreference<Preference>(com.dacosys.assetControl.utils.settings.config.Preference.useNetPrinter.key) as SwitchPreference
 
         swPrefBtPrinter.setOnPreferenceChangeListener { _, newValue ->
             if (newValue == true) swPrefNetPrinter.isChecked = false
@@ -263,7 +272,8 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
 
         //region //// POTENCIA Y VELOCIDAD
         val maxPower = 23
-        val printerPowerPref = findPreference<Preference>(p.printerPower.key) as EditTextPreference
+        val printerPowerPref =
+            findPreference<Preference>(com.dacosys.assetControl.utils.settings.config.Preference.printerPower.key) as EditTextPreference
         printerPowerPref.summary = printerPowerPref.text
         printerPowerPref.setOnBindEditTextListener {
             val filters = arrayOf(InputFilter { source, _, _, dest, _, _ ->
@@ -279,7 +289,7 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
 
         val maxSpeed = 10
         val printerSpeedPref =
-            findPreference<Preference>(p.printerSpeed.key) as EditTextPreference
+            findPreference<Preference>(com.dacosys.assetControl.utils.settings.config.Preference.printerSpeed.key) as EditTextPreference
         printerSpeedPref.summary = printerSpeedPref.text
         printerSpeedPref.setOnBindEditTextListener {
             val filters = arrayOf(InputFilter { source, _, _, dest, _, _ ->
@@ -298,14 +308,15 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
         val swPrefCharLF = findPreference<Preference>("conf_printer_new_line_char_lf") as SwitchPreference
         val swPrefCharCR = findPreference<Preference>("conf_printer_new_line_char_cr") as SwitchPreference
 
-        val lineSeparator = Preferences.prefsGetString(p.lineSeparator)
+        val lineSeparator =
+            Preferences.prefsGetString(com.dacosys.assetControl.utils.settings.config.Preference.lineSeparator)
         if (lineSeparator == Char(10).toString()) swPrefCharLF.isChecked
         else if (lineSeparator == Char(13).toString()) swPrefCharCR.isChecked
 
         swPrefCharLF.setOnPreferenceChangeListener { _, newValue ->
             if (newValue == true) {
                 Preferences.prefsPutString(
-                    p.lineSeparator.key, Char(10).toString()
+                    com.dacosys.assetControl.utils.settings.config.Preference.lineSeparator.key, Char(10).toString()
                 )
                 swPrefCharCR.isChecked = false
             }
@@ -315,7 +326,7 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
         swPrefCharCR.setOnPreferenceChangeListener { _, newValue ->
             if (newValue == true) {
                 Preferences.prefsPutString(
-                    p.lineSeparator.key, Char(13).toString()
+                    com.dacosys.assetControl.utils.settings.config.Preference.lineSeparator.key, Char(13).toString()
                 )
                 swPrefCharLF.isChecked = false
             }
@@ -347,10 +358,14 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
 
     private fun getRfidSummary(): String {
         var rfidSummary =
-            if (Preferences.prefsGetBoolean(p.useBtRfid)) getString(R.string.enabled)
+            if (Preferences.prefsGetBoolean(com.dacosys.assetControl.utils.settings.config.Preference.useBtRfid)) getString(
+                R.string.enabled
+            )
             else getString(R.string.disabled)
 
-        if (Preferences.prefsGetString(p.rfidBtAddress).isNotEmpty())
+        if (Preferences.prefsGetString(com.dacosys.assetControl.utils.settings.config.Preference.rfidBtAddress)
+                .isNotEmpty()
+        )
             rfidSummary = "$rfidSummary: ${getBluetoothNameFromAddress()}"
 
         return rfidSummary
@@ -362,7 +377,8 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
 
     private fun setRfidPref() {
         //region //// USE RFID
-        val swPrefBtRfid = findPreference<Preference>(p.useBtRfid.key) as SwitchPreference
+        val swPrefBtRfid =
+            findPreference<Preference>(com.dacosys.assetControl.utils.settings.config.Preference.useBtRfid.key) as SwitchPreference
 
         swPrefBtRfid.setOnPreferenceChangeListener { _, _ ->
             thread { connectToRfidDevice() }
@@ -396,7 +412,8 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
         //endregion //// BLUETOOTH NAME
 
         //region //// DEVICE LIST PREFERENCE
-        val deviceListPreference = findPreference<Preference>(p.rfidBtAddress.key) as DevicePreference
+        val deviceListPreference =
+            findPreference<Preference>(com.dacosys.assetControl.utils.settings.config.Preference.rfidBtAddress.key) as DevicePreference
         if (deviceListPreference.value == null) {
             // to ensure we don't selectByItemId a null value
             // set first value by default
@@ -414,12 +431,13 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
 
         //region //// RFID POWER
         val rfidReadPower =
-            findPreference<Preference>(p.rfidReadPower.key) as SeekBarPreference
+            findPreference<Preference>(com.dacosys.assetControl.utils.settings.config.Preference.rfidReadPower.key) as SeekBarPreference
         rfidReadPower.setOnPreferenceChangeListener { _, newValue ->
             rfidReadPower.summary = "$newValue dB"
             true
         }
-        rfidReadPower.summary = "${Preferences.prefsGetInt(p.rfidReadPower)} dB"
+        rfidReadPower.summary =
+            "${Preferences.prefsGetInt(com.dacosys.assetControl.utils.settings.config.Preference.rfidReadPower)} dB"
         //endregion //// RFID POWER
 
         //region //// RESET TO FACTORY
@@ -442,7 +460,7 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
     }
 
     private fun connectToRfidDevice() {
-        if (!Preferences.prefsGetBoolean(p.useBtRfid)) return
+        if (!Preferences.prefsGetBoolean(com.dacosys.assetControl.utils.settings.config.Preference.useBtRfid)) return
 
         val bluetoothManager =
             AssetControlApp.getContext().getSystemService(AppCompatActivity.BLUETOOTH_SERVICE) as BluetoothManager
@@ -505,7 +523,8 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
     @SuppressLint("MissingPermission")
     private fun getBluetoothNameFromAddress(): String {
         var s = getString(R.string.there_is_no_selected_rfid_scanner)
-        val address = Preferences.prefsGetString(p.rfidBtAddress)
+        val address =
+            Preferences.prefsGetString(com.dacosys.assetControl.utils.settings.config.Preference.rfidBtAddress)
         if (address.isNotEmpty()) {
             val bluetoothManager =
                 AssetControlApp.getContext().getSystemService(AppCompatActivity.BLUETOOTH_SERVICE) as BluetoothManager

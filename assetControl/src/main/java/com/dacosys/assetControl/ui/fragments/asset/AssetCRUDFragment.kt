@@ -28,6 +28,7 @@ import com.dacosys.assetControl.ui.activities.location.LocationSelectActivity
 import com.dacosys.assetControl.ui.common.snackbar.MakeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 import org.parceler.Parcels
 
 class AssetCRUDFragment : Fragment() {
@@ -86,15 +87,15 @@ class AssetCRUDFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         if (arguments != null) {
-            asset = requireArguments().getParcelable("asset")
+            asset = requireArguments().parcelable("asset")
         }
 
         if (savedInstanceState != null) {
             active = savedInstanceState.getBoolean("active")
-            itemCategory = savedInstanceState.getParcelable("itemCategory")
-            currWarehouseArea = savedInstanceState.getParcelable("currWarehouseArea")
-            origWarehouseArea = savedInstanceState.getParcelable("origWarehouseArea")
-            assetStatus = savedInstanceState.getParcelable("assetStatus")
+            itemCategory = savedInstanceState.parcelable("itemCategory")
+            currWarehouseArea = savedInstanceState.parcelable("currWarehouseArea")
+            origWarehouseArea = savedInstanceState.parcelable("origWarehouseArea")
+            assetStatus = savedInstanceState.parcelable("assetStatus")
             serialNumber = savedInstanceState.getString("serialNumber") ?: ""
             model = savedInstanceState.getString("model") ?: ""
             manufacturer = savedInstanceState.getString("manufacturer") ?: ""
@@ -185,7 +186,7 @@ class AssetCRUDFragment : Fragment() {
             try {
                 if (it?.resultCode == AppCompatActivity.RESULT_OK && data != null) {
                     origWarehouseArea =
-                        Parcels.unwrap<WarehouseArea>(data.getParcelableExtra("warehouseArea"))
+                        Parcels.unwrap<WarehouseArea>(data.parcelable("warehouseArea"))
                     setOrigWarehouseAreaText()
                 }
             } catch (ex: Exception) {
@@ -202,7 +203,7 @@ class AssetCRUDFragment : Fragment() {
             try {
                 if (it?.resultCode == AppCompatActivity.RESULT_OK && data != null) {
                     currWarehouseArea =
-                        Parcels.unwrap<WarehouseArea>(data.getParcelableExtra("warehouseArea"))
+                        Parcels.unwrap<WarehouseArea>(data.parcelable("warehouseArea"))
                     setCurrWarehouseAreaText()
                 }
             } catch (ex: Exception) {
@@ -219,7 +220,7 @@ class AssetCRUDFragment : Fragment() {
             try {
                 if (it?.resultCode == AppCompatActivity.RESULT_OK && data != null) {
                     itemCategory =
-                        Parcels.unwrap<ItemCategory>(data.getParcelableExtra("itemCategory"))
+                        Parcels.unwrap<ItemCategory>(data.parcelable("itemCategory"))
                     setCategoryText()
                 }
             } catch (ex: Exception) {

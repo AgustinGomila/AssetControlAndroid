@@ -7,8 +7,8 @@ import android.net.NetworkCapabilities
 import android.util.Log
 import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.utils.Statics.Companion.DEMO_AUTO_SEND
-import com.dacosys.assetControl.utils.preferences.Preferences
-import com.dacosys.assetControl.utils.settings.Preference
+import com.dacosys.assetControl.utils.settings.config.Preference
+import com.dacosys.assetControl.utils.settings.preferences.Preferences
 
 class Connection {
     companion object {

@@ -15,7 +15,7 @@ import androidx.core.graphics.BlendModeCompat
 import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.Screen.Companion.getColorWithAlpha
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.getColorWithAlpha
 
 /**
  * Created by Agustin on 18/01/2017.

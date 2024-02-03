@@ -28,19 +28,21 @@ import com.dacosys.assetControl.ui.adapters.location.WarehouseAdapter
 import com.dacosys.assetControl.ui.adapters.location.WarehouseAreaAdapter
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setupUI
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.showKeyboard
 import com.dacosys.assetControl.ui.common.views.custom.ContractsAutoCompleteTextView
-import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
-import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
-import com.dacosys.assetControl.utils.Screen.Companion.setupUI
-import com.dacosys.assetControl.utils.Screen.Companion.showKeyboard
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.ScannedCode
 import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.utils.scanners.nfc.Nfc
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
-import com.dacosys.assetControl.utils.settings.Preference
+import com.dacosys.assetControl.utils.settings.config.Preference
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelableArrayList
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent.registerEventListener
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener
 import org.parceler.Parcels
@@ -190,22 +192,22 @@ class LocationSelectActivity : AppCompatActivity(),
 
             onlyActive = savedInstanceState.getBoolean("onlyActive")
             warehouseArray =
-                savedInstanceState.getParcelableArrayList("warehouseArray") ?: ArrayList()
+                savedInstanceState.parcelableArrayList("warehouseArray") ?: ArrayList()
             warehouseAreaArray =
-                savedInstanceState.getParcelableArrayList("warehouseAreaArray") ?: ArrayList()
+                savedInstanceState.parcelableArrayList("warehouseAreaArray") ?: ArrayList()
 
             binding.warehouse.setOnEditorActionListener(null)
             binding.warehouse.onItemClickListener = null
             binding.warehouse.onFocusChangeListener = null
             binding.warehouse.setOnDismissListener(null)
-            warehouse = savedInstanceState.getParcelable("warehouse")
+            warehouse = savedInstanceState.parcelable("warehouse")
             warehouseDescription = savedInstanceState.getString("warehouseDescription") ?: ""
 
             binding.warehouseArea.setOnEditorActionListener(null)
             binding.warehouseArea.onItemClickListener = null
             binding.warehouseArea.onFocusChangeListener = null
             binding.warehouseArea.setOnDismissListener(null)
-            warehouseArea = savedInstanceState.getParcelable("warehouseArea")
+            warehouseArea = savedInstanceState.parcelable("warehouseArea")
             warehouseAreaDescription =
                 savedInstanceState.getString("warehouseAreaDescription") ?: ""
 
@@ -218,14 +220,14 @@ class LocationSelectActivity : AppCompatActivity(),
                 if (!t1.isNullOrEmpty()) tempTitle = t1
 
                 if (extras.containsKey("onlyActive")) onlyActive = extras.getBoolean("onlyActive")
-                val t2 = extras.getParcelable("warehouseArea") as WarehouseArea?
+                val t2 = extras.parcelable("warehouseArea") as WarehouseArea?
                 if (t2 != null) warehouseArea = t2
 
-                warehouse = extras.getParcelable("warehouse")
+                warehouse = extras.parcelable("warehouse")
                 warehouseDescription = extras.getString("warehouseDescription") ?: ""
                 warehouseVisible = extras.getBoolean("warehouseVisible")
 
-                warehouseArea = extras.getParcelable("warehouseArea")
+                warehouseArea = extras.parcelable("warehouseArea")
                 warehouseAreaDescription = extras.getString("warehouseAreaDescription") ?: ""
                 warehouseAreaVisible = extras.getBoolean("warehouseAreaVisible")
             }

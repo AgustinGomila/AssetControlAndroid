@@ -54,23 +54,23 @@ import com.dacosys.assetControl.ui.adapters.interfaces.Interfaces
 import com.dacosys.assetControl.ui.adapters.movement.WmcRecyclerAdapter
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.ui.fragments.movement.LocationHeaderFragment
-import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
-import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
-import com.dacosys.assetControl.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.ParcelLong
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsPutBoolean
-import com.dacosys.assetControl.utils.preferences.Repository.Companion.useImageControl
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.ScannedCode
 import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.utils.scanners.nfc.Nfc
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid.Companion.isRfidRequired
-import com.dacosys.assetControl.utils.settings.Preference
+import com.dacosys.assetControl.utils.settings.config.Preference
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutBoolean
+import com.dacosys.assetControl.utils.settings.preferences.Repository.Companion.useImageControl
 import com.dacosys.assetControl.viewModel.review.SaveReviewViewModel
 import com.dacosys.imageControl.dto.DocumentContent
 import com.dacosys.imageControl.dto.DocumentContentRequestResult
@@ -80,6 +80,8 @@ import com.dacosys.imageControl.network.webService.WsFunction
 import com.dacosys.imageControl.room.dao.ImageCoroutines
 import com.dacosys.imageControl.ui.activities.ImageControlCameraActivity
 import com.dacosys.imageControl.ui.activities.ImageControlGridActivity
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelableArrayList
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import org.parceler.Parcels
@@ -195,7 +197,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
         tempTitle = if (!t1.isNullOrEmpty()) t1 else getString(R.string.assets_movement)
         // endregion
 
-        tempWarehouseArea = Parcels.unwrap<WarehouseArea>(b.getParcelable("warehouseArea"))
+        tempWarehouseArea = Parcels.unwrap<WarehouseArea>(b.parcelable("warehouseArea"))
         currentInventory = b.getStringArrayList("currentInventory")
 
         // Panels
@@ -204,7 +206,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         // Adapter
         checkedIdArray = (b.getLongArray("checkedIdArray") ?: longArrayOf()).toCollection(ArrayList())
-        lastSelected = b.getParcelable("lastSelected")
+        lastSelected = b.parcelable("lastSelected")
         firstVisiblePos = if (b.containsKey("firstVisiblePos")) b.getInt("firstVisiblePos") else -1
         currentScrollPosition = b.getInt("currentScrollPosition")
 
@@ -630,7 +632,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
             val data = it?.data
             try {
                 if (it?.resultCode == RESULT_OK && data != null) {
-                    val idParcel = data.getParcelableArrayListExtra<ParcelLong>("ids")
+                    val idParcel = data.parcelableArrayList<ParcelLong>("ids")
                         ?: return@registerForActivityResult
 
                     val ids: ArrayList<Long?> = ArrayList()
@@ -699,7 +701,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
             val data = it?.data
             try {
                 if (it?.resultCode == RESULT_OK && data != null) {
-                    when (Parcels.unwrap<ConfirmStatus>(data.getParcelableExtra("confirmStatus"))) {
+                    when (Parcels.unwrap<ConfirmStatus>(data.parcelable("confirmStatus"))) {
                         modify -> obs = data.getStringExtra("obs") ?: ""
                         cancel -> cancelWarehouseMovement()
                         confirm -> {
@@ -1270,7 +1272,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
             val data = it?.data
             try {
                 if (it?.resultCode == RESULT_OK && data != null) {
-                    val a = Parcels.unwrap<Asset>(data.getParcelableExtra("asset"))
+                    val a = Parcels.unwrap<Asset>(data.parcelable("asset"))
                         ?: return@registerForActivityResult
                     adapter?.updateContent(a, true)
                 }

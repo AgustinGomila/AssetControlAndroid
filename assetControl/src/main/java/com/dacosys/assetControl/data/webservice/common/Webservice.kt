@@ -3,7 +3,7 @@ package com.dacosys.assetControl.data.webservice.common
 import android.util.Log
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.misc.Md5
-import com.dacosys.assetControl.utils.preferences.Repository
+import com.dacosys.assetControl.utils.settings.preferences.Repository
 import org.ksoap2.HeaderProperty
 import org.ksoap2.SoapEnvelope
 import org.ksoap2.serialization.SoapObject

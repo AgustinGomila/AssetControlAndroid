@@ -16,6 +16,7 @@ import com.dacosys.assetControl.data.webservice.location.WarehouseObject
 import com.dacosys.assetControl.databinding.WarehouseCrudFragmentBinding
 import com.dacosys.assetControl.ui.common.snackbar.MakeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 
 class WarehouseCRUDFragment : Fragment() {
     private var warehouse: Warehouse? = null
@@ -37,13 +38,13 @@ class WarehouseCRUDFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         if (arguments != null) {
-            warehouse = requireArguments().getParcelable("warehouse")
+            warehouse = requireArguments().parcelable("warehouse")
         }
 
         if (savedInstanceState != null) {
             active = savedInstanceState.getBoolean("active")
             description = savedInstanceState.getString("description") ?: ""
-            warehouse = savedInstanceState.getParcelable("warehouse")
+            warehouse = savedInstanceState.parcelable("warehouse")
         }
     }
 

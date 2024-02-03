@@ -23,13 +23,13 @@ import com.dacosys.assetControl.ui.activities.main.SettingsActivity.Companion.bi
 import com.dacosys.assetControl.ui.common.snackbar.MakeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarEventData
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
-import com.dacosys.assetControl.utils.ConfigHelper
-import com.dacosys.assetControl.utils.Screen
+import com.dacosys.assetControl.ui.common.utils.Screen
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.preferences.Preferences
 import com.dacosys.assetControl.utils.scanners.GenerateQR
-import com.dacosys.assetControl.utils.settings.QRConfigType
+import com.dacosys.assetControl.utils.settings.config.ConfigHelper
+import com.dacosys.assetControl.utils.settings.config.QRConfigType
+import com.dacosys.assetControl.utils.settings.preferences.Preferences
 import java.io.File
 
 /**
@@ -53,7 +53,7 @@ class ImageControlPreferenceFragment : PreferenceFragmentCompat(), ClientPackage
         parentFragmentManager.beginTransaction().replace(id, prefFragment).addToBackStack(null).commit()
     }
 
-    val p = com.dacosys.assetControl.utils.settings.Preference
+    val p = com.dacosys.assetControl.utils.settings.config.Preference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

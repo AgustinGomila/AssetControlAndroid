@@ -1,4 +1,4 @@
-package com.dacosys.assetControl.utils
+package com.dacosys.assetControl.utils.settings.io
 
 import android.annotation.SuppressLint
 import android.content.ContentUris

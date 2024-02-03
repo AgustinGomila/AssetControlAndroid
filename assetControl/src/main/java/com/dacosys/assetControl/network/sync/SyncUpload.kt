@@ -54,9 +54,9 @@ import com.dacosys.assetControl.network.serverDate.MySqlDateResult
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
-import com.dacosys.assetControl.utils.preferences.Repository.Companion.connectionTimeout
-import com.dacosys.assetControl.utils.settings.Preference
+import com.dacosys.assetControl.utils.settings.config.Preference
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.settings.preferences.Repository.Companion.connectionTimeout
 import com.dacosys.imageControl.network.common.ProgressStatus.CREATOR.getFinish
 import com.dacosys.imageControl.network.upload.SendPending
 import com.dacosys.imageControl.network.upload.UpdateIdImages

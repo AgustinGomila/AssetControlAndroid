@@ -22,10 +22,10 @@ import com.dacosys.assetControl.data.model.route.Route
 import com.dacosys.assetControl.data.model.route.Route.CREATOR.getAvailableRoutes
 import com.dacosys.assetControl.databinding.RouteSelectDialogActivityBinding
 import com.dacosys.assetControl.ui.adapters.route.RouteAdapter
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.showKeyboard
 import com.dacosys.assetControl.ui.common.views.custom.ContractsAutoCompleteTextView
-import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
-import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
-import com.dacosys.assetControl.utils.Screen.Companion.showKeyboard
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener

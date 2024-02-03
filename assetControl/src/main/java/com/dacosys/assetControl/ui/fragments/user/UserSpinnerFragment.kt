@@ -12,6 +12,7 @@ import com.dacosys.assetControl.data.dataBase.user.UserDbHelper
 import com.dacosys.assetControl.data.model.user.User
 import com.dacosys.assetControl.databinding.FragmentSpinnerBinding
 import com.dacosys.assetControl.ui.adapters.user.UserAdapter
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelableArrayList
 import org.parceler.Parcels
 
 /**
@@ -103,7 +104,7 @@ class UserSpinnerFragment : Fragment() {
         }
 
         if (arguments != null) {
-            allUser = requireArguments().getParcelableArrayList(ARG_ALL_USER)
+            allUser = requireArguments().parcelableArrayList(ARG_ALL_USER)
             showGeneralLevel = requireArguments().getBoolean(ARG_SHOW_GENERAL_LEVEL)
         }
     }

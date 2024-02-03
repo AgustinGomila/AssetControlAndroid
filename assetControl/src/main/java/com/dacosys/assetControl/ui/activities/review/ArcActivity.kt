@@ -74,25 +74,25 @@ import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarEventData
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.ui.fragments.movement.LocationHeaderFragment
-import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
-import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.Statics.Companion.INTERNAL_IMAGE_CONTROL_APP_ID
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.ParcelLong
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetStringSet
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsPutBoolean
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsPutStringSet
-import com.dacosys.assetControl.utils.preferences.Repository.Companion.useImageControl
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.ScannedCode
 import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.utils.scanners.nfc.Nfc
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid.Companion.isRfidRequired
-import com.dacosys.assetControl.utils.settings.Preference
+import com.dacosys.assetControl.utils.settings.config.Preference
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetStringSet
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutBoolean
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutStringSet
+import com.dacosys.assetControl.utils.settings.preferences.Repository.Companion.useImageControl
 import com.dacosys.assetControl.viewModel.review.SaveReviewViewModel
 import com.dacosys.assetControl.viewModel.sync.SyncViewModel
 import com.dacosys.imageControl.dto.DocumentContent
@@ -103,6 +103,8 @@ import com.dacosys.imageControl.network.webService.WsFunction
 import com.dacosys.imageControl.room.dao.ImageCoroutines
 import com.dacosys.imageControl.ui.activities.ImageControlCameraActivity
 import com.dacosys.imageControl.ui.activities.ImageControlGridActivity
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelableArrayList
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import org.parceler.Parcels
@@ -125,9 +127,10 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
     private fun saveSharedPreferences() {
         prefsPutBoolean(Preference.assetReviewAddUnknownAssets.key, binding.addUnknownAssetsSwitch.isChecked)
         prefsPutBoolean(Preference.assetReviewAllowUnknownCodes.key, binding.allowUnknownCodesSwitch.isChecked)
-        prefsPutStringSet(Preference.assetReviewContentVisibleStatus.key, (adapter?.visibleStatus ?: ArrayList())
-            .map { it.id.toString() }
-            .toSet())
+        prefsPutStringSet(
+            Preference.assetReviewContentVisibleStatus.key, (adapter?.visibleStatus ?: ArrayList())
+                .map { it.id.toString() }
+                .toSet())
     }
 
     private var isFinishingByUser = false
@@ -304,7 +307,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     private fun loadBundleExtrasValues(b: Bundle) {
-        assetReview = Parcels.unwrap<AssetReview>(b.getParcelable("assetReview"))
+        assetReview = Parcels.unwrap<AssetReview>(b.parcelable("assetReview"))
         isNew = b.getBoolean("isNew")
 
         loadDefaultValues()
@@ -318,7 +321,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
         tempTitle = if (!t1.isNullOrEmpty()) t1 else getString(R.string.asset_review)
         // endregion
 
-        assetReview = Parcels.unwrap<AssetReview>(b.getParcelable("assetReview"))
+        assetReview = Parcels.unwrap<AssetReview>(b.parcelable("assetReview"))
         isNew = b.getBoolean("isNew")
         saving = b.getBoolean("saving")
 
@@ -337,7 +340,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         // Adapter
         checkedIdArray = (b.getLongArray("checkedIdArray") ?: longArrayOf()).toCollection(ArrayList())
-        lastSelected = b.getParcelable("lastSelected")
+        lastSelected = b.parcelable("lastSelected")
         firstVisiblePos = if (b.containsKey("firstVisiblePos")) b.getInt("firstVisiblePos") else -1
         currentScrollPosition = b.getInt("currentScrollPosition")
 
@@ -348,7 +351,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         visibleStatusArray.clear()
         if (b.containsKey("visibleStatusArray")) {
-            val t3 = b.getParcelableArrayList<AssetReviewContentStatus>("visibleStatusArray")
+            val t3 = b.parcelableArrayList<AssetReviewContentStatus>("visibleStatusArray")
             if (t3 != null) visibleStatusArray = t3
         } else {
             loadDefaultVisibleStatus()
@@ -924,7 +927,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
             val data = it?.data
             try {
                 if (it?.resultCode == RESULT_OK && data != null) {
-                    val idParcel = data.getParcelableArrayListExtra<ParcelLong>("ids")
+                    val idParcel = data.parcelableArrayList<ParcelLong>("ids")
                         ?: return@registerForActivityResult
 
                     val ids: ArrayList<Long?> = ArrayList()
@@ -978,7 +981,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
             val data = it?.data
             try {
                 if (it?.resultCode == RESULT_OK && data != null) {
-                    when (Parcels.unwrap<ConfirmStatus>(data.getParcelableExtra("confirmStatus"))) {
+                    when (Parcels.unwrap<ConfirmStatus>(data.parcelable("confirmStatus"))) {
                         modify -> {
                             assetReview?.obs = data.getStringExtra("obs") ?: ""
                         }
@@ -1324,7 +1327,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
             return
         }
 
-        var finalArc: AssetReviewContent? = null
+        val finalArc: AssetReviewContent?
 
         try {
             val sc = ScannedCode(this).getFromCode(
@@ -1453,30 +1456,26 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
                 )
 
                 runOnUiThread {
-                    val f = finalArc
-                    if (f != null) {
-                        if (adapter == null) {
-                            completeList = arrayListOf(f)
-                            fillAdapter(completeList)
-                        } else {
-                            adapter?.add(f)
-                        }
+                    if (adapter == null) {
+                        completeList = arrayListOf(finalArc)
+                        fillAdapter(completeList)
+                    } else {
+                        adapter?.add(finalArc)
                     }
                 }
 
                 try {
-                    val f = finalArc
                     if (!Statics.DEMO_MODE && addUnknownAssets) {
                         // Dar de alta el activo
-                        assetCrud(f)
+                        assetCrud(finalArc)
                         return
                     }
 
                     // Pedir una descripción y agregar como desconocido
                     if (Statics.DEMO_MODE) {
-                        f.description = getString(R.string.test_asset)
+                        finalArc.description = getString(R.string.test_asset)
                     } else {
-                        runOnUiThread { itemDescriptionDialog(f) }
+                        runOnUiThread { itemDescriptionDialog(finalArc) }
                     }
                 } catch (ex: Exception) {
                     ex.printStackTrace()
@@ -1561,7 +1560,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
             val data = it?.data
             try {
                 if (it?.resultCode == RESULT_OK && data != null) {
-                    val asset = Parcels.unwrap<Asset>(data.getParcelableExtra("asset"))
+                    val asset = Parcels.unwrap<Asset>(data.parcelable("asset"))
                         ?: return@registerForActivityResult
 
                     val arc = adapter?.currentItem()
@@ -2086,7 +2085,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
             val data = it?.data
             try {
                 if (it?.resultCode == RESULT_OK && data != null) {
-                    val a = Parcels.unwrap<Asset>(data.getParcelableExtra("asset"))
+                    val a = Parcels.unwrap<Asset>(data.parcelable("asset"))
                         ?: return@registerForActivityResult
                     adapter?.updateItem(a, true)
                 }

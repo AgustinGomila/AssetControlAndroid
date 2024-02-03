@@ -21,11 +21,12 @@ import com.dacosys.assetControl.data.model.barcode.BarcodeLabelCustom
 import com.dacosys.assetControl.data.model.barcode.BarcodeLabelTarget
 import com.dacosys.assetControl.databinding.CodeSelectActivityBinding
 import com.dacosys.assetControl.ui.adapters.barcode.BarcodeLabelCustomAdapter
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.showKeyboard
 import com.dacosys.assetControl.ui.common.views.custom.ContractsAutoCompleteTextView
-import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
-import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
-import com.dacosys.assetControl.utils.Screen.Companion.showKeyboard
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener
 import kotlin.concurrent.thread
@@ -81,8 +82,8 @@ class TemplateSelectDialogActivity : AppCompatActivity(),
             binding.autoCompleteTextView.setOnDismissListener(null)
 
             onlyActive = savedInstanceState.getBoolean("onlyActive")
-            barcodeLabelCustom = savedInstanceState.getParcelable("barcodeLabelCustom")
-            barcodeLabelTarget = savedInstanceState.getParcelable("barcodeLabelTarget")
+            barcodeLabelCustom = savedInstanceState.parcelable("barcodeLabelCustom")
+            barcodeLabelTarget = savedInstanceState.parcelable("barcodeLabelTarget")
         } else {
             val extras = intent.extras
             if (extras != null) {
@@ -90,8 +91,8 @@ class TemplateSelectDialogActivity : AppCompatActivity(),
                 if (!t1.isNullOrEmpty()) tempTitle = t1
 
                 if (extras.containsKey("onlyActive")) onlyActive = extras.getBoolean("onlyActive")
-                barcodeLabelCustom = extras.getParcelable("barcodeLabelCustom")
-                barcodeLabelTarget = extras.getParcelable("barcodeLabelTarget")
+                barcodeLabelCustom = extras.parcelable("barcodeLabelCustom")
+                barcodeLabelTarget = extras.parcelable("barcodeLabelTarget")
             }
         }
 

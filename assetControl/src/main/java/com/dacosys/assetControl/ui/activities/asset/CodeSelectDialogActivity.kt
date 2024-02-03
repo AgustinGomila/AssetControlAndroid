@@ -25,18 +25,19 @@ import com.dacosys.assetControl.databinding.CodeSelectActivityBinding
 import com.dacosys.assetControl.ui.adapters.asset.AssetAdapter
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.showKeyboard
 import com.dacosys.assetControl.ui.common.views.custom.ContractsAutoCompleteTextView
-import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
-import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
-import com.dacosys.assetControl.utils.Screen.Companion.showKeyboard
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetStringSet
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.utils.scanners.nfc.Nfc
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
-import com.dacosys.assetControl.utils.settings.Preference
+import com.dacosys.assetControl.utils.settings.config.Preference
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetStringSet
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelableArrayList
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener
 import kotlin.concurrent.thread
@@ -98,7 +99,7 @@ class CodeSelectDialogActivity : AppCompatActivity(),
 
             // Controles de filtrado visibles
             visibleStatusArray.clear()
-            val t3 = savedInstanceState.getParcelableArrayList<AssetStatus>("visibleStatusArray")
+            val t3 = savedInstanceState.parcelableArrayList<AssetStatus>("visibleStatusArray")
             if (t3 != null) visibleStatusArray = t3
         } else {
             val extras = intent.extras
@@ -108,7 +109,7 @@ class CodeSelectDialogActivity : AppCompatActivity(),
 
                 // Controles de filtrado visibles
                 visibleStatusArray.clear()
-                val t3 = extras.getParcelableArrayList<AssetStatus>("visibleStatusArray")
+                val t3 = extras.parcelableArrayList<AssetStatus>("visibleStatusArray")
                 if (t3 != null) visibleStatusArray = t3
 
                 if (extras.containsKey("onlyActive")) onlyActive = extras.getBoolean("onlyActive")

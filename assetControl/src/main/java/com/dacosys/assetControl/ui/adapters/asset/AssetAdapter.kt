@@ -15,8 +15,8 @@ import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.model.asset.Asset
 import com.dacosys.assetControl.data.model.asset.AssetStatus
 import com.dacosys.assetControl.ui.adapters.asset.AssetRecyclerAdapter.FilterOptions
-import com.dacosys.assetControl.utils.Screen.Companion.getBestContrastColor
-import com.dacosys.assetControl.utils.Screen.Companion.isTablet
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.getBestContrastColor
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.isTablet
 import java.util.*
 
 

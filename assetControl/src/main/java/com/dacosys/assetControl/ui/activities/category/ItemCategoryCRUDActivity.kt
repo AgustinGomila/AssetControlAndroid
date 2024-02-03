@@ -18,15 +18,16 @@ import com.dacosys.assetControl.data.model.table.Table
 import com.dacosys.assetControl.databinding.ItemCategoryCrudActivityBinding
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.ui.fragments.category.ItemCategoryCRUDFragment
-import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
-import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
-import com.dacosys.assetControl.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
-import com.dacosys.assetControl.utils.settings.Preference
+import com.dacosys.assetControl.utils.settings.config.Preference
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
 import com.dacosys.imageControl.ui.fragments.ImageControlButtonsFragment
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 import org.parceler.Parcels
 
 class ItemCategoryCRUDActivity : AppCompatActivity(), CrudCompleted,
@@ -161,7 +162,7 @@ class ItemCategoryCRUDActivity : AppCompatActivity(), CrudCompleted,
         itemCategoryCRUDFragment =
             supportFragmentManager.findFragmentById(binding.crudFragment.id) as ItemCategoryCRUDFragment
         if (savedInstanceState != null) {
-            val t1 = savedInstanceState.getParcelable<ItemCategory>("itemCategory")
+            val t1 = savedInstanceState.parcelable<ItemCategory>("itemCategory")
             if (t1 != null) {
                 itemCategory = t1
             }
@@ -178,7 +179,7 @@ class ItemCategoryCRUDActivity : AppCompatActivity(), CrudCompleted,
         } else {
             val extras = intent.extras
             if (extras != null) {
-                itemCategory = extras.getParcelable("itemCategory")
+                itemCategory = extras.parcelable("itemCategory")
                 returnOnSuccess = extras.getBoolean("return_on_success", false)
                 isNew = extras.getBoolean("is_new", false)
             }
@@ -362,7 +363,7 @@ class ItemCategoryCRUDActivity : AppCompatActivity(), CrudCompleted,
             val data = it?.data
             try {
                 if (it?.resultCode == RESULT_OK && data != null) {
-                    val iC = Parcels.unwrap<ItemCategory>(data.getParcelableExtra("itemCategory"))
+                    val iC = Parcels.unwrap<ItemCategory>(data.parcelable("itemCategory"))
                         ?: return@registerForActivityResult
 
                     try {

@@ -32,15 +32,16 @@ import com.dacosys.assetControl.ui.activities.main.SettingsActivity
 import com.dacosys.assetControl.ui.activities.print.TemplateSelectDialogActivity
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
-import com.dacosys.assetControl.utils.ConfigHelper
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.CounterHandler
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetLong
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetString
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsPutLong
 import com.dacosys.assetControl.utils.printer.Printer
-import com.dacosys.assetControl.utils.settings.Preference
+import com.dacosys.assetControl.utils.settings.config.ConfigHelper
+import com.dacosys.assetControl.utils.settings.config.Preference
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetLong
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetString
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutLong
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 
@@ -201,8 +202,8 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
     }
 
     private fun loadBundleValues(b: Bundle) {
-        barcodeLabelTarget = b.getParcelable(ARG_BARCODE_LABEL_TARGET)
-        barcodeLabelCustom = b.getParcelable(ARG_BARCODE_LABEL_CUSTOM)
+        barcodeLabelTarget = b.parcelable(ARG_BARCODE_LABEL_TARGET)
+        barcodeLabelCustom = b.parcelable(ARG_BARCODE_LABEL_CUSTOM)
         printer = b.getString(ARG_PRINTER) ?: ""
         qty = b.getInt(ARG_QTY)
     }
@@ -439,7 +440,7 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
             try {
                 if (it?.resultCode == AppCompatActivity.RESULT_OK && data != null) {
                     try {
-                        barcodeLabelCustom = data.getParcelableExtra(ARG_BARCODE_LABEL_CUSTOM)
+                        barcodeLabelCustom = data.parcelable(ARG_BARCODE_LABEL_CUSTOM)
                         setTemplateText()
                         sendMessage()
                     } catch (ex: Exception) {

@@ -1,9 +1,9 @@
 package com.dacosys.assetControl.utils.imageControl
 
 import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.preferences.Preferences
-import com.dacosys.assetControl.utils.preferences.Repository
-import com.dacosys.assetControl.utils.settings.Preference
+import com.dacosys.assetControl.utils.settings.config.Preference
+import com.dacosys.assetControl.utils.settings.preferences.Preferences
+import com.dacosys.assetControl.utils.settings.preferences.Repository
 
 class ImageControl {
 

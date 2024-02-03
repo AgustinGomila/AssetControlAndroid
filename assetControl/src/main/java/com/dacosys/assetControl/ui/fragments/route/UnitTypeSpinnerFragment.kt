@@ -12,6 +12,7 @@ import com.dacosys.assetControl.R.layout.custom_spinner_dropdown_item
 import com.dacosys.assetControl.data.model.asset.UnitType
 import com.dacosys.assetControl.data.model.asset.UnitTypeCategory
 import com.dacosys.assetControl.databinding.FragmentSpinnerBinding
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 import org.parceler.Parcels
 
 /**
@@ -64,8 +65,8 @@ class UnitTypeSpinnerFragment : Fragment() {
 
     private fun loadBundleValues(b: Bundle) {
         _tempIsEnabled = if (b.containsKey("isEnabled")) b.getBoolean("isEnabled") else true
-        _tempValue = b.getParcelable("currentValue")
-        _tempCat = b.getParcelable(ARG_UNIT_TYPE_CATEGORY)
+        _tempValue = b.parcelable("currentValue")
+        _tempCat = b.parcelable(ARG_UNIT_TYPE_CATEGORY)
         _tempDescription = b.getString("description") ?: ""
     }
 

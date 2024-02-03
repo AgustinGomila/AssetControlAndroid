@@ -7,8 +7,8 @@ import com.dacosys.assetControl.data.dataBase.route.RouteContract.RouteEntry.Com
 import com.dacosys.assetControl.data.dataBase.route.RouteContract.RouteEntry.Companion.DESCRIPTION
 import com.dacosys.assetControl.data.dataBase.route.RouteContract.RouteEntry.Companion.ROUTE_ID
 import com.dacosys.assetControl.data.dataBase.route.RouteDbHelper
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetString
-import com.dacosys.assetControl.utils.settings.Preference
+import com.dacosys.assetControl.utils.settings.config.Preference
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetString
 
 class Route : Parcelable {
     var routeId: Long = 0

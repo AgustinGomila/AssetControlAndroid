@@ -24,6 +24,7 @@ import com.dacosys.assetControl.ui.activities.location.LocationSelectActivity
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 import org.parceler.Parcels
 
 class WarehouseAreaCRUDFragment : Fragment() {
@@ -50,14 +51,14 @@ class WarehouseAreaCRUDFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         if (arguments != null) {
-            warehouseArea = requireArguments().getParcelable("warehouseArea")
+            warehouseArea = requireArguments().parcelable("warehouseArea")
         }
 
         if (savedInstanceState != null) {
             active = savedInstanceState.getBoolean("active")
             description = savedInstanceState.getString("description") ?: ""
-            warehouseArea = savedInstanceState.getParcelable("warehouseArea")
-            warehouse = savedInstanceState.getParcelable("warehouse")
+            warehouseArea = savedInstanceState.parcelable("warehouseArea")
+            warehouse = savedInstanceState.parcelable("warehouse")
         }
     }
 
@@ -111,7 +112,7 @@ class WarehouseAreaCRUDFragment : Fragment() {
             try {
                 if (it?.resultCode == AppCompatActivity.RESULT_OK && data != null) {
                     try {
-                        warehouse = Parcels.unwrap<Warehouse>(data.getParcelableExtra("warehouse"))
+                        warehouse = Parcels.unwrap<Warehouse>(data.parcelable("warehouse"))
                         setWarehouseText()
                     } catch (ex: Exception) {
                         ex.printStackTrace()

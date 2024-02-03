@@ -1,4 +1,4 @@
-package com.dacosys.assetControl.utils.settings
+package com.dacosys.assetControl.utils.settings.config
 
 import android.os.Parcel
 import android.os.Parcelable

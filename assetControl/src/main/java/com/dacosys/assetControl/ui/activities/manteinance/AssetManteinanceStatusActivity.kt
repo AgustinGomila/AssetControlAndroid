@@ -10,11 +10,12 @@ import com.dacosys.assetControl.data.model.manteinance.ManteinanceType
 import com.dacosys.assetControl.databinding.AssetManteinanceStatusActivityBinding
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.ui.fragments.manteinance.ManteinanceStatusSpinnerFragment
 import com.dacosys.assetControl.ui.fragments.manteinance.ManteinanceTypeSpinnerFragment
-import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
-import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
-import com.dacosys.assetControl.utils.Screen.Companion.setupUI
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 
 class AssetManteinanceStatusActivity : AppCompatActivity(),
     ManteinanceTypeSpinnerFragment.OnItemSelectedListener,
@@ -39,7 +40,7 @@ class AssetManteinanceStatusActivity : AppCompatActivity(),
 
         val extras = intent.extras
         if (extras != null) {
-            currentAssetMant = extras.getParcelable("assetManteinance")
+            currentAssetMant = extras.parcelable("assetManteinance")
         }
 
         binding.descriptionTextView.text = currentAssetMant?.assetStr

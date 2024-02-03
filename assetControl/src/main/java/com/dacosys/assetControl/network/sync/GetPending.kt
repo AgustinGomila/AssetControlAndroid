@@ -2,7 +2,7 @@ package com.dacosys.assetControl.network.sync
 
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.network.download.DownloadDb
-import com.dacosys.assetControl.utils.preferences.Repository
+import com.dacosys.assetControl.utils.settings.preferences.Repository
 import com.dacosys.imageControl.room.database.IcDatabase
 import kotlinx.coroutines.*
 

@@ -19,6 +19,7 @@ import com.dacosys.assetControl.data.model.location.WarehouseArea
 import com.dacosys.assetControl.databinding.LocationHeaderFragmentBinding
 import com.dacosys.assetControl.ui.activities.location.LocationSelectActivity
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 import org.parceler.Parcels
 
 /**
@@ -80,8 +81,8 @@ class LocationHeaderFragment : Fragment() {
     }
 
     private fun loadBundleValues(b: Bundle) {
-        warehouse = b.getParcelable("warehouse")
-        warehouseArea = b.getParcelable("warehouseArea")
+        warehouse = b.parcelable("warehouse")
+        warehouseArea = b.parcelable("warehouseArea")
         tempTitle = b.getString("title") ?: ""
     }
 
@@ -158,7 +159,7 @@ class LocationHeaderFragment : Fragment() {
             val data = it?.data
             try {
                 if (it?.resultCode == AppCompatActivity.RESULT_OK && data != null) {
-                    val wa = Parcels.unwrap<WarehouseArea>(data.getParcelableExtra("warehouseArea"))
+                    val wa = Parcels.unwrap<WarehouseArea>(data.parcelable("warehouseArea"))
 
                     if (wa == null || wa == warehouseArea) {
                         return@registerForActivityResult

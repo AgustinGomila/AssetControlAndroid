@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.model.location.WarehouseArea
 import com.dacosys.assetControl.databinding.WarehouseAreaDetailFragmentBinding
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 
 /**
  * A simple [Fragment] subclass.
@@ -24,7 +25,7 @@ class WarehouseAreaDetailFragment : DialogFragment() {
         super.onCreate(savedInstanceState)
 
         if (arguments != null) {
-            warehouseArea = requireArguments().getParcelable("warehouseArea")
+            warehouseArea = requireArguments().parcelable("warehouseArea")
         }
     }
 

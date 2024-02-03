@@ -11,11 +11,11 @@ import android.util.Log
 import androidx.core.app.ActivityCompat
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetInt
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetString
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
-import com.dacosys.assetControl.utils.settings.Preference
+import com.dacosys.assetControl.utils.settings.config.Preference
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetInt
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetString
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream

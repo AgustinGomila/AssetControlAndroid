@@ -18,11 +18,13 @@ import com.dacosys.assetControl.ui.activities.asset.CodeSelectDialogActivity
 import com.dacosys.assetControl.ui.activities.category.ItemCategorySelectActivity
 import com.dacosys.assetControl.ui.activities.location.LocationSelectActivity
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetStringSet
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsPutBoolean
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsPutStringSet
-import com.dacosys.assetControl.utils.settings.Preference
+import com.dacosys.assetControl.utils.settings.config.Preference
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetStringSet
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutBoolean
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutStringSet
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelableArrayList
 import org.parceler.Parcels
 
 /**
@@ -108,14 +110,14 @@ class AssetSelectFilterFragment : Fragment() {
     }
 
     private fun loadBundleValues(b: Bundle) {
-        itemCategory = b.getParcelable(argItemCategory)
-        warehouseArea = b.getParcelable(argWarehouseArea)
+        itemCategory = b.parcelable(argItemCategory)
+        warehouseArea = b.parcelable(argWarehouseArea)
         itemCode = b.getString(argItemCode) ?: ""
         if (b.containsKey(argOnlyActive)) onlyActive = b.getBoolean(argOnlyActive)
 
         visibleStatusArray.clear()
         if (b.containsKey("visibleStatusArray")) {
-            val t3 = b.getParcelableArrayList<AssetStatus>("visibleStatusArray")
+            val t3 = b.parcelableArrayList<AssetStatus>("visibleStatusArray")
             if (t3 != null) visibleStatusArray = t3
         } else {
             loadDefaultVisibleStatus()
@@ -275,7 +277,7 @@ class AssetSelectFilterFragment : Fragment() {
             try {
                 if (it?.resultCode == AppCompatActivity.RESULT_OK && data != null) {
                     warehouseArea =
-                        Parcels.unwrap<WarehouseArea>(data.getParcelableExtra(argWarehouseArea))
+                        Parcels.unwrap<WarehouseArea>(data.parcelable(argWarehouseArea))
                             ?: return@registerForActivityResult
 
                     setWarehouseAreaText()
@@ -304,7 +306,7 @@ class AssetSelectFilterFragment : Fragment() {
             try {
                 if (it?.resultCode == AppCompatActivity.RESULT_OK && data != null) {
                     itemCategory =
-                        Parcels.unwrap<ItemCategory>(data.getParcelableExtra(argItemCategory))
+                        Parcels.unwrap<ItemCategory>(data.parcelable(argItemCategory))
                             ?: return@registerForActivityResult
 
                     setCategoryText()

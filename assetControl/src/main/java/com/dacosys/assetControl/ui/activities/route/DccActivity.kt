@@ -49,23 +49,24 @@ import com.dacosys.assetControl.data.model.user.permission.PermissionEntry
 import com.dacosys.assetControl.databinding.DataCollectionContentActivityBinding
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.ui.fragments.route.*
-import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
-import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.UTCDataTime
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
-import com.dacosys.assetControl.utils.preferences.Repository.Companion.maxHeightOrWidth
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.utils.scanners.nfc.Nfc
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
-import com.dacosys.assetControl.utils.settings.Preference
+import com.dacosys.assetControl.utils.settings.config.Preference
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.settings.preferences.Repository.Companion.maxHeightOrWidth
 import com.dacosys.imageControl.room.dao.ImageCoroutines
 import com.dacosys.imageControl.ui.fragments.ImageControlButtonsFragment
 import com.dacosys.imageControl.ui.snackBar.MakeText
 import com.dacosys.imageControl.ui.snackBar.SnackBarEventData
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 import kotlinx.coroutines.runBlocking
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener
@@ -163,19 +164,19 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     private fun loadBundleValuesFromExtras(b: Bundle) {
-        val tempRpc = Parcels.unwrap<RouteProcessContent>(b.getParcelable("routeProcessContent"))
+        val tempRpc = Parcels.unwrap<RouteProcessContent>(b.parcelable("routeProcessContent"))
         if (tempRpc != null) setRouteProcessContent(tempRpc)
 
-        val tempDcr = Parcels.unwrap<DataCollectionRule>(b.getParcelable("dataCollectionRule"))
+        val tempDcr = Parcels.unwrap<DataCollectionRule>(b.parcelable("dataCollectionRule"))
         if (tempDcr != null) dcr = tempDcr
 
-        val tempAsset = Parcels.unwrap<Asset>(b.getParcelable("asset"))
+        val tempAsset = Parcels.unwrap<Asset>(b.parcelable("asset"))
         if (tempAsset != null) targetAsset = tempAsset
 
-        val tempWarehouseArea = Parcels.unwrap<WarehouseArea>(b.getParcelable("warehouseArea"))
+        val tempWarehouseArea = Parcels.unwrap<WarehouseArea>(b.parcelable("warehouseArea"))
         if (tempWarehouseArea != null) targetWarehouseArea = tempWarehouseArea
 
-        val tempItemCategory = Parcels.unwrap<ItemCategory>(b.getParcelable("itemCategory"))
+        val tempItemCategory = Parcels.unwrap<ItemCategory>(b.parcelable("itemCategory"))
         if (tempItemCategory != null) targetItemCategory = tempItemCategory
     }
 
@@ -193,7 +194,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         if (b.containsKey("panelBottomIsExpanded")) panelBottomIsExpanded =
             b.getBoolean("panelBottomIsExpanded")
 
-        rpc = b.getParcelable("rpc")
+        rpc = b.parcelable("rpc")
         if (rpc != null) setRouteProcessContent(rpc ?: return)
 
         fragCollectionCreated = b.getBoolean("fragCollectionCreated")

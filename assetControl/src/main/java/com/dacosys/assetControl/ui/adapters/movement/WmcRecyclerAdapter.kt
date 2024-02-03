@@ -42,11 +42,11 @@ import com.dacosys.assetControl.databinding.AssetRowBinding
 import com.dacosys.assetControl.databinding.AssetRowExpandedBinding
 import com.dacosys.assetControl.ui.adapters.asset.AssetRecyclerAdapter.FilterOptions
 import com.dacosys.assetControl.ui.adapters.interfaces.Interfaces.*
-import com.dacosys.assetControl.utils.Screen.Companion.getBestContrastColor
-import com.dacosys.assetControl.utils.Screen.Companion.getColorWithAlpha
-import com.dacosys.assetControl.utils.Screen.Companion.manipulateColor
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.getBestContrastColor
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.getColorWithAlpha
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.manipulateColor
 import com.dacosys.assetControl.utils.Statics.Companion.currentUser
-import com.dacosys.assetControl.utils.preferences.Repository.Companion.useImageControl
+import com.dacosys.assetControl.utils.settings.preferences.Repository.Companion.useImageControl
 import com.dacosys.imageControl.network.common.ProgramData
 import com.dacosys.imageControl.ui.adapter.ImageAdapter
 import com.dacosys.imageControl.ui.adapter.ImageAdapter.Companion.GetImageStatus

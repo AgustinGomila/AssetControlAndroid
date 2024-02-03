@@ -12,6 +12,7 @@ import com.dacosys.assetControl.data.dataBase.manteinance.ManteinanceTypeDbHelpe
 import com.dacosys.assetControl.data.model.manteinance.ManteinanceType
 import com.dacosys.assetControl.databinding.FragmentSpinnerBinding
 import com.dacosys.assetControl.ui.adapters.manteinance.ManteinanceTypeAdapter
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelableArrayList
 import org.parceler.Parcels
 
 /**
@@ -82,7 +83,7 @@ class ManteinanceTypeSpinnerFragment : Fragment() {
 
         if (arguments != null) {
             allManteinanceType =
-                requireArguments().getParcelableArrayList(ARG_ALL_MANTEINANCE_TYPE)
+                requireArguments().parcelableArrayList(ARG_ALL_MANTEINANCE_TYPE)
             showGeneralLevel = requireArguments().getBoolean(ARG_SHOW_GENERAL_LEVEL)
         }
     }

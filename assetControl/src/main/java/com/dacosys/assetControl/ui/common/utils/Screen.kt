@@ -1,4 +1,4 @@
-package com.dacosys.assetControl.utils
+package com.dacosys.assetControl.ui.common.utils
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -24,8 +24,8 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
-import com.dacosys.assetControl.utils.settings.Preference
+import com.dacosys.assetControl.utils.settings.config.Preference
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import kotlin.math.min
 import kotlin.math.roundToInt

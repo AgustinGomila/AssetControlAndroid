@@ -9,7 +9,7 @@ import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.ui.activities.main.SettingsActivity
 import com.dacosys.assetControl.ui.activities.main.SettingsActivity.Companion.bindPreferenceSummaryToValue
-import com.dacosys.assetControl.utils.preferences.Preferences
+import com.dacosys.assetControl.utils.settings.preferences.Preferences
 
 /**
  * This fragment shows notification preferences only. It is used when the
@@ -32,7 +32,7 @@ class MaintenancePreferenceFragment : PreferenceFragmentCompat() {
         parentFragmentManager.beginTransaction().replace(id, prefFragment).addToBackStack(null).commit()
     }
 
-    val p = com.dacosys.assetControl.utils.settings.Preference
+    val p = com.dacosys.assetControl.utils.settings.config.Preference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

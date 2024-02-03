@@ -3,7 +3,7 @@ package com.dacosys.assetControl.utils.scanners
 import android.os.Build
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import com.dacosys.assetControl.utils.Collector.Companion.collectorType
+import com.dacosys.assetControl.utils.scanners.Collector.Companion.collectorType
 import com.dacosys.assetControl.utils.scanners.honeywell.Honeywell
 import com.dacosys.assetControl.utils.scanners.honeywell.HoneywellNative
 import com.dacosys.assetControl.utils.scanners.zebra.Zebra

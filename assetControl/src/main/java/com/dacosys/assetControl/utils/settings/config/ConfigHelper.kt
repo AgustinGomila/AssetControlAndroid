@@ -1,4 +1,4 @@
-package com.dacosys.assetControl.utils
+package com.dacosys.assetControl.utils.settings.config
 
 import android.util.Log
 import com.dacosys.assetControl.AssetControlApp
@@ -7,11 +7,10 @@ import com.dacosys.assetControl.R
 import com.dacosys.assetControl.network.clientPackages.ClientPackagesProgress
 import com.dacosys.assetControl.network.clientPackages.GetClientPackages
 import com.dacosys.assetControl.network.utils.ProgressStatus
+import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.preferences.Preferences
-import com.dacosys.assetControl.utils.preferences.Repository
-import com.dacosys.assetControl.utils.settings.Preference
-import com.dacosys.assetControl.utils.settings.QRConfigType
+import com.dacosys.assetControl.utils.settings.preferences.Preferences
+import com.dacosys.assetControl.utils.settings.preferences.Repository
 import org.json.JSONObject
 
 class ConfigHelper {

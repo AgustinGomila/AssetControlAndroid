@@ -5,8 +5,8 @@ import android.content.Context
 import androidx.preference.PreferenceManager
 import com.dacosys.assetControl.utils.Statics.Companion.INTERNAL_IMAGE_CONTROL_APP_ID
 import com.dacosys.assetControl.utils.imageControl.ImageControl.Companion.imageControl
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefs
 import com.dacosys.assetControl.utils.scanners.JotterListener
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefs
 import com.dacosys.imageControl.ImageControl
 import id.pahlevikun.jotter.Jotter
 import id.pahlevikun.jotter.event.ActivityEvent

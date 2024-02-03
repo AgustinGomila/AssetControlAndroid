@@ -20,11 +20,13 @@ import com.dacosys.assetControl.ui.activities.asset.AssetPrintLabelActivity
 import com.dacosys.assetControl.ui.activities.location.LocationSelectActivity
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
-import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
-import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
-import com.dacosys.assetControl.utils.Screen.Companion.setupUI
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.ParcelLong
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelableArrayList
 import org.parceler.Parcels
 
 class DataCollectionRuleTargetActivity : AppCompatActivity() {
@@ -94,7 +96,7 @@ class DataCollectionRuleTargetActivity : AppCompatActivity() {
             val data = it?.data
             try {
                 if (it?.resultCode == RESULT_OK && data != null) {
-                    val idParcel = data.getParcelableArrayListExtra<ParcelLong>("ids")
+                    val idParcel = data.parcelableArrayList<ParcelLong>("ids")
                         ?: return@registerForActivityResult
 
                     val ids: ArrayList<Long?> = ArrayList()
@@ -138,7 +140,7 @@ class DataCollectionRuleTargetActivity : AppCompatActivity() {
             try {
                 if (it?.resultCode == RESULT_OK && data != null) {
                     val warehouseArea =
-                        Parcels.unwrap<WarehouseArea>(data.getParcelableExtra("warehouseArea"))
+                        Parcels.unwrap<WarehouseArea>(data.parcelable("warehouseArea"))
                             ?: return@registerForActivityResult
 
                     if (!rejectNewInstances) {
@@ -165,15 +167,15 @@ class DataCollectionRuleTargetActivity : AppCompatActivity() {
             try {
                 if (it?.resultCode == RESULT_OK && data != null) {
                     val dcr =
-                        Parcels.unwrap<DataCollectionRule>(data.getParcelableExtra("dataCollectionRule"))
+                        Parcels.unwrap<DataCollectionRule>(data.parcelable("dataCollectionRule"))
                             ?: return@registerForActivityResult
 
                     // Targets
-                    val asset = Parcels.unwrap<Asset>(data.getParcelableExtra("asset"))
+                    val asset = Parcels.unwrap<Asset>(data.parcelable("asset"))
                     val warehouseArea =
-                        Parcels.unwrap<WarehouseArea>(data.getParcelableExtra("warehouseArea"))
+                        Parcels.unwrap<WarehouseArea>(data.parcelable("warehouseArea"))
                     val itemCategory =
-                        Parcels.unwrap<ItemCategory>(data.getParcelableExtra("itemCategory"))
+                        Parcels.unwrap<ItemCategory>(data.parcelable("itemCategory"))
 
                     if (asset == null && warehouseArea == null && itemCategory == null) {
                         return@registerForActivityResult

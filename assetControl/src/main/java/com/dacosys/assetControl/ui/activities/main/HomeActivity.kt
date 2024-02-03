@@ -63,24 +63,25 @@ import com.dacosys.assetControl.ui.activities.route.RouteSelectActivity
 import com.dacosys.assetControl.ui.activities.sync.SyncActivity
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
-import com.dacosys.assetControl.utils.ConfigHelper
-import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
-import com.dacosys.assetControl.utils.Screen.Companion.getBestContrastColor
-import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.ui.common.utils.Screen
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.getBestContrastColor
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.Statics.Companion.OFFLINE_MODE
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.imageControl.ImageControl.Companion.setupImageControl
 import com.dacosys.assetControl.utils.mainButton.MainButton
-import com.dacosys.assetControl.utils.preferences.Preferences
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetString
-import com.dacosys.assetControl.utils.preferences.Repository
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.ScannedCode
 import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid.Companion.isRfidRequired
-import com.dacosys.assetControl.utils.settings.Preference
+import com.dacosys.assetControl.utils.settings.config.ConfigHelper
+import com.dacosys.assetControl.utils.settings.config.Preference
+import com.dacosys.assetControl.utils.settings.preferences.Preferences
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetString
+import com.dacosys.assetControl.utils.settings.preferences.Repository
 import com.dacosys.assetControl.viewModel.sync.SyncViewModel
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
@@ -667,7 +668,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
             }
         }
         button.setOnTouchListener(View.OnTouchListener { view, motionEvent ->
-            com.dacosys.assetControl.utils.Screen.touchButton(motionEvent, view as Button)
+            Screen.touchButton(motionEvent, view as Button)
             return@OnTouchListener true
         })
     }

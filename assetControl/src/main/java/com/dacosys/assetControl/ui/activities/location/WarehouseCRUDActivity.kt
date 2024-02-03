@@ -18,15 +18,16 @@ import com.dacosys.assetControl.data.model.table.Table
 import com.dacosys.assetControl.databinding.WarehouseCrudActivityBinding
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.ui.fragments.location.WarehouseCRUDFragment
-import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
-import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
-import com.dacosys.assetControl.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
-import com.dacosys.assetControl.utils.settings.Preference
+import com.dacosys.assetControl.utils.settings.config.Preference
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
 import com.dacosys.imageControl.ui.fragments.ImageControlButtonsFragment
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 import org.parceler.Parcels
 
 
@@ -160,7 +161,7 @@ class WarehouseCRUDActivity : AppCompatActivity(), CrudCompleted,
         warehouseCRUDFragment =
             supportFragmentManager.findFragmentById(binding.crudFragment.id) as WarehouseCRUDFragment
         if (savedInstanceState != null) {
-            val t1 = savedInstanceState.getParcelable<Warehouse>("warehouse")
+            val t1 = savedInstanceState.parcelable<Warehouse>("warehouse")
             if (t1 != null) {
                 warehouse = t1
             }
@@ -177,7 +178,7 @@ class WarehouseCRUDActivity : AppCompatActivity(), CrudCompleted,
         } else {
             val extras = intent.extras
             if (extras != null) {
-                warehouse = extras.getParcelable("warehouse")
+                warehouse = extras.parcelable("warehouse")
                 returnOnSuccess = extras.getBoolean("return_on_success", false)
                 isNew = extras.getBoolean("is_new", false)
             }
@@ -208,7 +209,7 @@ class WarehouseCRUDActivity : AppCompatActivity(), CrudCompleted,
             val data = it?.data
             try {
                 if (it?.resultCode == RESULT_OK && data != null) {
-                    val w = Parcels.unwrap<Warehouse>(data.getParcelableExtra("warehouse"))
+                    val w = Parcels.unwrap<Warehouse>(data.parcelable("warehouse"))
                         ?: return@registerForActivityResult
 
                     try {

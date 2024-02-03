@@ -54,12 +54,12 @@ import com.dacosys.assetControl.network.utils.SetCurrentSession
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.Statics.Companion.TIME_FILE_NAME
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetInt
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetString
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsPutString
-import com.dacosys.assetControl.utils.settings.Preference
+import com.dacosys.assetControl.utils.settings.config.Preference
 import com.dacosys.assetControl.utils.settings.entries.ConfEntry
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetInt
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetString
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutString
 import kotlinx.coroutines.*
 import java.io.BufferedReader
 import java.io.File

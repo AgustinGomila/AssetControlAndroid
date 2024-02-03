@@ -18,11 +18,10 @@ import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
-import com.dacosys.assetControl.utils.Collector.Companion.collectorType
-import com.dacosys.assetControl.utils.Collector.Companion.collectorTypeChanged
-import com.dacosys.assetControl.utils.Collector.Companion.isNfcRequired
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsPutString
+import com.dacosys.assetControl.utils.scanners.Collector.Companion.collectorType
+import com.dacosys.assetControl.utils.scanners.Collector.Companion.collectorTypeChanged
+import com.dacosys.assetControl.utils.scanners.Collector.Companion.isNfcRequired
 import com.dacosys.assetControl.utils.scanners.Scanner.ScannerListener
 import com.dacosys.assetControl.utils.scanners.floatingCamera.FloatingCameraBarcode
 import com.dacosys.assetControl.utils.scanners.nfc.Nfc
@@ -30,8 +29,9 @@ import com.dacosys.assetControl.utils.scanners.nfc.Nfc.enableNfcForegroundDispat
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid.Companion.isRfidRequired
 import com.dacosys.assetControl.utils.scanners.rfid.RfidType
-import com.dacosys.assetControl.utils.settings.Preference
 import com.dacosys.assetControl.utils.settings.collectorType.CollectorType
+import com.dacosys.assetControl.utils.settings.config.Preference
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutString
 import com.google.android.gms.common.api.CommonStatusCodes
 import id.pahlevikun.jotter.Jotter
 

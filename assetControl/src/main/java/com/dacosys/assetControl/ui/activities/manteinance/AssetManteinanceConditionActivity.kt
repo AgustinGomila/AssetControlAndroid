@@ -14,11 +14,11 @@ import com.dacosys.assetControl.data.model.manteinance.ManteinanceType
 import com.dacosys.assetControl.databinding.AssetManteinanceConditionActivityBinding
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.ui.fragments.asset.AssetConditionSpinnerFragment
 import com.dacosys.assetControl.ui.fragments.manteinance.ManteinanceTypeSpinnerFragment
-import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
-import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
-import com.dacosys.assetControl.utils.Screen.Companion.setupUI
 
 
 class AssetManteinanceConditionActivity : AppCompatActivity(),

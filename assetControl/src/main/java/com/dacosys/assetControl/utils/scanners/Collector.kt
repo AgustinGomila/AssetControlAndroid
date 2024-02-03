@@ -1,9 +1,9 @@
-package com.dacosys.assetControl.utils
+package com.dacosys.assetControl.utils.scanners
 
 import android.util.Log
-import com.dacosys.assetControl.utils.preferences.Preferences
-import com.dacosys.assetControl.utils.settings.Preference
 import com.dacosys.assetControl.utils.settings.collectorType.CollectorType
+import com.dacosys.assetControl.utils.settings.config.Preference
+import com.dacosys.assetControl.utils.settings.preferences.Preferences
 
 class Collector {
     companion object {

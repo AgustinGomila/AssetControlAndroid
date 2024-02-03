@@ -19,13 +19,14 @@ import com.dacosys.assetControl.databinding.DataCollectionRuleSelectActivityBind
 import com.dacosys.assetControl.ui.adapters.datacollection.DataCollectionRuleAdapter
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
-import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
-import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
-import com.dacosys.assetControl.utils.Screen.Companion.setupUI
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsPutBoolean
-import com.dacosys.assetControl.utils.settings.Preference
+import com.dacosys.assetControl.utils.settings.config.Preference
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutBoolean
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 import org.parceler.Parcels
 
 
@@ -86,16 +87,16 @@ class DataCollectionRuleSelectActivity : AppCompatActivity() {
         // endregion
 
         binding.onlyActiveSwitch.isChecked = b.getBoolean("onlyActive")
-        currentDataCollectionRule = b.getParcelable("currentDataCollectionRule")
+        currentDataCollectionRule = b.parcelable("currentDataCollectionRule")
 
-        if (b.containsKey("asset")) asset = Parcels.unwrap<Asset>(b.getParcelable("asset"))
+        if (b.containsKey("asset")) asset = Parcels.unwrap<Asset>(b.parcelable("asset"))
         if (b.containsKey("warehouseArea")) warehouseArea =
-            Parcels.unwrap<WarehouseArea>(b.getParcelable("warehouseArea"))
+            Parcels.unwrap<WarehouseArea>(b.parcelable("warehouseArea"))
         if (b.containsKey("itemCategory")) itemCategory =
-            Parcels.unwrap<ItemCategory>(b.getParcelable("itemCategory"))
+            Parcels.unwrap<ItemCategory>(b.parcelable("itemCategory"))
 
         // ADAPTER
-        lastSelected = b.getParcelable("lastSelected")
+        lastSelected = b.parcelable("lastSelected")
         firstVisiblePos = if (b.containsKey("firstVisiblePos")) b.getInt("firstVisiblePos") else -1
     }
 

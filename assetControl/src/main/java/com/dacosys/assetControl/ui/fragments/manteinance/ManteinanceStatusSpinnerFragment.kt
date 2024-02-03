@@ -10,6 +10,7 @@ import com.dacosys.assetControl.R.layout.custom_spinner_dropdown_item
 import com.dacosys.assetControl.data.model.manteinance.ManteinanceStatus
 import com.dacosys.assetControl.databinding.FragmentSpinnerBinding
 import com.dacosys.assetControl.ui.adapters.manteinance.ManteinanceStatusAdapter
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelableArrayList
 import org.parceler.Parcels
 
 /**
@@ -71,7 +72,7 @@ class ManteinanceStatusSpinnerFragment : Fragment() {
 
         if (arguments != null) {
             allManteinanceStatus =
-                requireArguments().getParcelableArrayList(ARG_ALL_MANTEINANCE_STATUS)
+                requireArguments().parcelableArrayList(ARG_ALL_MANTEINANCE_STATUS)
         }
     }
 

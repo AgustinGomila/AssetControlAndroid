@@ -57,20 +57,22 @@ import com.dacosys.assetControl.ui.activities.location.WarehouseAreaDetailActivi
 import com.dacosys.assetControl.ui.adapters.route.RouteProcessContentAdapter
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
-import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
-import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.ScannedCode
 import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.utils.scanners.nfc.Nfc
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid.Companion.isRfidRequired
-import com.dacosys.assetControl.utils.settings.Preference
+import com.dacosys.assetControl.utils.settings.config.Preference
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.viewModel.route.*
 import com.dacosys.assetControl.viewModel.sync.SyncViewModel
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelableArrayList
 import com.udojava.evalex.Expression
 import org.parceler.Parcels
 import java.util.regex.Pattern
@@ -280,18 +282,18 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         // endregion
 
         // Panels
-        route = Parcels.unwrap<Route>(b.getParcelable("route"))
+        route = Parcels.unwrap<Route>(b.parcelable("route"))
         if (b.containsKey("panelBottomIsExpanded")) panelBottomIsExpanded =
             b.getBoolean("panelBottomIsExpanded")
 
         // Adapter
-        lastSelected = b.getParcelable("lastSelected")
+        lastSelected = b.parcelable("lastSelected")
         firstVisiblePos = if (b.containsKey("firstVisiblePos")) b.getInt("firstVisiblePos") else -1
         checkedIdArray =
             (b.getLongArray("checkedIdArray") ?: longArrayOf()).toCollection(ArrayList())
 
         rpContArray.clear()
-        val t1 = b.getParcelableArrayList<RouteProcessContent>("rpContArray")
+        val t1 = b.parcelableArrayList<RouteProcessContent>("rpContArray")
         if (t1 != null) rpContArray = t1
     }
 
@@ -1152,7 +1154,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             try {
                 if (it?.resultCode == RESULT_OK && data != null) {
                     val dc =
-                        Parcels.unwrap<DataCollection>(data.getParcelableExtra("dataCollection"))
+                        Parcels.unwrap<DataCollection>(data.parcelable("dataCollection"))
                     processFinish(dc)
                 }
             } catch (ex: Exception) {

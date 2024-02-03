@@ -32,15 +32,16 @@ import com.dacosys.assetControl.ui.activities.common.ObservationsActivity
 import com.dacosys.assetControl.ui.adapters.movement.WmcRecyclerAdapter
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.ui.fragments.movement.LocationHeaderFragment
-import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
-import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
-import com.dacosys.assetControl.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
-import com.dacosys.assetControl.utils.settings.Preference
+import com.dacosys.assetControl.utils.settings.config.Preference
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
 import com.dacosys.imageControl.ui.fragments.ImageControlButtonsFragment
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 import org.parceler.Parcels
 
 class WmcConfirmActivity : AppCompatActivity(),
@@ -124,7 +125,7 @@ class WmcConfirmActivity : AppCompatActivity(),
             supportFragmentManager.findFragmentById(binding.headerFragment.id) as LocationHeaderFragment?
         var tempWarehouseArea: WarehouseArea? = null
         if (savedInstanceState != null) {
-            tempWarehouseArea = savedInstanceState.getParcelable("warehouseArea")
+            tempWarehouseArea = savedInstanceState.parcelable("warehouseArea")
 
             //Restore the fragment's instance
             val icF = supportFragmentManager.getFragment(savedInstanceState, "imageControlFragment")
@@ -136,7 +137,7 @@ class WmcConfirmActivity : AppCompatActivity(),
             // Adapter
             checkedIdArray =
                 (savedInstanceState.getLongArray("checkedIdArray") ?: longArrayOf()).toCollection(ArrayList())
-            lastSelected = savedInstanceState.getParcelable("lastSelected")
+            lastSelected = savedInstanceState.parcelable("lastSelected")
             firstVisiblePos =
                 if (savedInstanceState.containsKey("firstVisiblePos")) savedInstanceState.getInt("firstVisiblePos") else -1
             currentScrollPosition = savedInstanceState.getInt("currentScrollPosition")
@@ -146,7 +147,7 @@ class WmcConfirmActivity : AppCompatActivity(),
             // Traer los parámetros que recibe la actividad
             val extras = intent.extras
             if (extras != null) {
-                tempWarehouseArea = Parcels.unwrap<WarehouseArea>(extras.getParcelable("warehouseArea"))
+                tempWarehouseArea = Parcels.unwrap<WarehouseArea>(extras.parcelable("warehouseArea"))
             }
         }
 

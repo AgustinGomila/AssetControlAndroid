@@ -18,8 +18,8 @@ import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.model.location.WarehouseArea
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
-import com.dacosys.assetControl.utils.Screen.Companion.getColorWithAlpha
-import com.dacosys.assetControl.utils.Screen.Companion.isTablet
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.getColorWithAlpha
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.isTablet
 import java.lang.ref.WeakReference
 import java.util.*
 

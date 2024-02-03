@@ -1,10 +1,10 @@
 package com.dacosys.assetControl.utils.scanners.rfid
 
 import android.util.Log
-import com.dacosys.assetControl.utils.preferences.Preferences
 import com.dacosys.assetControl.utils.scanners.vh75.Utility
 import com.dacosys.assetControl.utils.scanners.vh75.Vh75Bt
-import com.dacosys.assetControl.utils.settings.Preference
+import com.dacosys.assetControl.utils.settings.config.Preference
+import com.dacosys.assetControl.utils.settings.preferences.Preferences
 
 /**
  * Created by Agustin on 19/10/2017.

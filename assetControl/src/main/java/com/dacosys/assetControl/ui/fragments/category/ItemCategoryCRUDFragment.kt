@@ -23,6 +23,7 @@ import com.dacosys.assetControl.ui.activities.category.ItemCategorySelectActivit
 import com.dacosys.assetControl.ui.common.snackbar.MakeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 import org.parceler.Parcels
 
 class ItemCategoryCRUDFragment : Fragment() {
@@ -49,14 +50,14 @@ class ItemCategoryCRUDFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         if (arguments != null) {
-            itemCategory = requireArguments().getParcelable("itemCategory")
+            itemCategory = requireArguments().parcelable("itemCategory")
         }
 
         if (savedInstanceState != null) {
             active = savedInstanceState.getBoolean("active")
             description = savedInstanceState.getString("description") ?: ""
-            itemCategory = savedInstanceState.getParcelable("itemCategory")
-            parentCategory = savedInstanceState.getParcelable("parentCategory")
+            itemCategory = savedInstanceState.parcelable("itemCategory")
+            parentCategory = savedInstanceState.parcelable("parentCategory")
         }
     }
 
@@ -109,7 +110,7 @@ class ItemCategoryCRUDFragment : Fragment() {
                 if (it?.resultCode == AppCompatActivity.RESULT_OK && data != null) {
                     try {
                         parentCategory =
-                            Parcels.unwrap<ItemCategory>(data.getParcelableExtra("itemCategory"))
+                            Parcels.unwrap<ItemCategory>(data.parcelable("itemCategory"))
                         setParentCategoryText()
                     } catch (ex: Exception) {
                         ex.printStackTrace()

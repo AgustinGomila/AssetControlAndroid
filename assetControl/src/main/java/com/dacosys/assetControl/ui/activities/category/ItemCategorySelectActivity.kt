@@ -20,12 +20,13 @@ import com.dacosys.assetControl.data.dataBase.category.ItemCategoryDbHelper
 import com.dacosys.assetControl.data.model.category.ItemCategory
 import com.dacosys.assetControl.databinding.ItemCategorySelectActivityBinding
 import com.dacosys.assetControl.ui.adapters.category.ItemCategoryAdapter
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setupUI
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.showKeyboard
 import com.dacosys.assetControl.ui.common.views.custom.ContractsAutoCompleteTextView
-import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
-import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
-import com.dacosys.assetControl.utils.Screen.Companion.setupUI
-import com.dacosys.assetControl.utils.Screen.Companion.showKeyboard
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener
 import org.parceler.Parcels
@@ -89,7 +90,7 @@ class ItemCategorySelectActivity :
             binding.category.setOnDismissListener(null)
 
             onlyActive = savedInstanceState.getBoolean("onlyActive")
-            itemCategory = savedInstanceState.getParcelable("itemCategory")
+            itemCategory = savedInstanceState.parcelable("itemCategory")
             itemCategoryStr = savedInstanceState.getString("itemCategoryStr") ?: ""
         } else {
             val extras = intent.extras
@@ -97,7 +98,7 @@ class ItemCategorySelectActivity :
                 val t1 = extras.getString("title")
                 if (!t1.isNullOrEmpty()) tempTitle = t1
 
-                val t2 = extras.getParcelable("itemCategory") as ItemCategory?
+                val t2 = extras.parcelable("itemCategory") as ItemCategory?
                 if (t2 != null) itemCategory = t2
                 if (extras.containsKey("onlyActive")) onlyActive = extras.getBoolean("onlyActive")
                 itemCategoryStr = extras.getString("itemCategoryStr") ?: ""

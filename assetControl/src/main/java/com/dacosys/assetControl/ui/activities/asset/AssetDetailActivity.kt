@@ -8,12 +8,13 @@ import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.model.asset.Asset
 import com.dacosys.assetControl.data.model.table.Table
 import com.dacosys.assetControl.databinding.AssetDetailActivityBinding
-import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
-import com.dacosys.assetControl.utils.Screen.Companion.setupUI
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
-import com.dacosys.assetControl.utils.settings.Preference
+import com.dacosys.assetControl.utils.settings.config.Preference
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
 import com.dacosys.imageControl.ui.fragments.ImageControlButtonsFragment
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 
 class AssetDetailActivity : AppCompatActivity() {
     private var asset: Asset? = null
@@ -73,7 +74,7 @@ class AssetDetailActivity : AppCompatActivity() {
         } else {
             val extras = intent.extras
             if (extras != null) {
-                asset = extras.getParcelable("asset")
+                asset = extras.parcelable("asset")
             }
         }
 

@@ -2,9 +2,9 @@ package com.dacosys.assetControl.data.model.barcode.fields
 
 import com.dacosys.assetControl.data.model.barcode.BarcodeLabelPrintOps
 import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetInt
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetString
 import com.dacosys.assetControl.utils.settings.entries.ConfEntry
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetInt
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetString
 
 class BarcodeLabel(templateStr: String) {
     private var templateStr: String = ""

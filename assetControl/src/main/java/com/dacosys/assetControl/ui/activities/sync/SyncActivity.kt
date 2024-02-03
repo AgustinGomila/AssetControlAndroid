@@ -39,17 +39,17 @@ import com.dacosys.assetControl.ui.adapters.interfaces.Interfaces
 import com.dacosys.assetControl.ui.adapters.sync.SyncElementRecyclerAdapter
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
-import com.dacosys.assetControl.utils.Screen
-import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
-import com.dacosys.assetControl.utils.Screen.Companion.setupUI
+import com.dacosys.assetControl.ui.common.utils.Screen
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.Statics.Companion.INTERNAL_IMAGE_CONTROL_APP_ID
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.preferences.Preferences
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetStringSet
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsPutStringSet
-import com.dacosys.assetControl.utils.preferences.Repository.Companion.useImageControl
-import com.dacosys.assetControl.utils.settings.Preference
+import com.dacosys.assetControl.utils.settings.config.Preference
+import com.dacosys.assetControl.utils.settings.preferences.Preferences
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetStringSet
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutStringSet
+import com.dacosys.assetControl.utils.settings.preferences.Repository.Companion.useImageControl
 import com.dacosys.assetControl.viewModel.sync.PendingViewModel
 import com.dacosys.assetControl.viewModel.sync.SyncViewModel
 import com.dacosys.imageControl.dto.DocumentContent
@@ -58,6 +58,8 @@ import com.dacosys.imageControl.network.download.GetImages.Companion.toDocumentC
 import com.dacosys.imageControl.network.upload.UploadImagesProgress
 import com.dacosys.imageControl.room.dao.ImageCoroutines
 import com.dacosys.imageControl.ui.activities.ImageControlGridActivity
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelableArrayList
 import java.io.File
 import kotlin.concurrent.thread
 import com.dacosys.imageControl.network.common.ProgressStatus as IcProgressStatus
@@ -369,7 +371,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
 
         visibleRegistryArray.clear()
         if (b.containsKey("visibleRegistryArray")) {
-            val t3 = b.getParcelableArrayList<SyncRegistryType>("visibleRegistryArray")
+            val t3 = b.parcelableArrayList<SyncRegistryType>("visibleRegistryArray")
             if (t3 != null) visibleRegistryArray = t3
         } else {
             loadDefaultVisibleStatus()
@@ -380,7 +382,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
         if (tempC != null) checkedKeyArray = tempC
 
         multiSelect = b.getBoolean("multiSelect", multiSelect)
-        lastSelected = b.getParcelable("lastSelected")
+        lastSelected = b.parcelable("lastSelected")
         currentScrollPosition = b.getInt("currentScrollPosition")
         checkedKeyArray = b.getStringArrayList("checkedKeyArray") ?: ArrayList()
     }

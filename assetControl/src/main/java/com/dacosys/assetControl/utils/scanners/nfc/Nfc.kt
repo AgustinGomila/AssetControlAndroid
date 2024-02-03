@@ -25,6 +25,7 @@ import com.dacosys.assetControl.ui.activities.movement.WmcActivity
 import com.dacosys.assetControl.ui.activities.review.ArcActivity
 import com.dacosys.assetControl.ui.activities.route.DccActivity
 import com.dacosys.assetControl.ui.activities.route.RouteProcessContentActivity
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 import kotlin.experimental.or
 
 /**
@@ -65,7 +66,7 @@ object Nfc {
 
         val action = intent.action
         if (NfcAdapter.ACTION_TECH_DISCOVERED == action) {
-            var tag: Tag? = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG)
+            var tag: Tag? = intent.parcelable(NfcAdapter.EXTRA_TAG)
             tag = patchTag(tag)
 
             val id = byte2HexString(tag!!.id)

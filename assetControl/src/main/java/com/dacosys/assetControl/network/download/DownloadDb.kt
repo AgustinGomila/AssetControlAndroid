@@ -33,10 +33,10 @@ import com.dacosys.assetControl.ui.common.snackbar.SnackBarEventData
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsPutString
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.resetLastUpdateDates
-import com.dacosys.assetControl.utils.preferences.Repository
 import com.dacosys.assetControl.utils.settings.entries.ConfEntry
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutString
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.resetLastUpdateDates
+import com.dacosys.assetControl.utils.settings.preferences.Repository
 import kotlinx.coroutines.*
 import java.io.*
 import java.text.SimpleDateFormat

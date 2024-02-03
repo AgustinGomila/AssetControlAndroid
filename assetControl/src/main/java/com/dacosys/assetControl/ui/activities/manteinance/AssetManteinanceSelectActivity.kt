@@ -19,14 +19,16 @@ import com.dacosys.assetControl.ui.activities.asset.AssetPrintLabelActivity
 import com.dacosys.assetControl.ui.adapters.manteinance.AssetManteinanceAdapter
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
-import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
-import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
-import com.dacosys.assetControl.utils.Screen.Companion.setupUI
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.ParcelLong
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsPutBoolean
-import com.dacosys.assetControl.utils.settings.Preference
+import com.dacosys.assetControl.utils.settings.config.Preference
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutBoolean
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelableArrayList
 
 class AssetManteinanceSelectActivity : AppCompatActivity(),
     AssetManteinanceAdapter.CustomCheckedChangeListener {
@@ -92,8 +94,8 @@ class AssetManteinanceSelectActivity : AppCompatActivity(),
         binding.etDescription.setText(b.getString("description"))
         binding.onlyActiveSwitch.isChecked = b.getBoolean("onlyActive")
 
-        currentAssetManteinance = b.getParcelable("currentAssetManteinance")
-        amantChecked = (b.getParcelableArrayList("amantChecked") ?: return)
+        currentAssetManteinance = b.parcelable("currentAssetManteinance")
+        amantChecked = (b.parcelableArrayList("amantChecked") ?: return)
 
         val t1 = b.getString("title")
         if (!t1.isNullOrEmpty()) tempTitle = t1
@@ -228,7 +230,7 @@ class AssetManteinanceSelectActivity : AppCompatActivity(),
             val data = it?.data
             try {
                 if (it?.resultCode == RESULT_OK && data != null) {
-                    val idParcel = data.getParcelableArrayListExtra<ParcelLong>(
+                    val idParcel = data.parcelableArrayList<ParcelLong>(
                         "ids"
                     ) ?: return@registerForActivityResult
 

@@ -26,13 +26,13 @@ import com.dacosys.assetControl.ui.activities.main.SettingsActivity.Companion.sB
 import com.dacosys.assetControl.ui.common.snackbar.MakeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarEventData
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
-import com.dacosys.assetControl.utils.ConfigHelper
-import com.dacosys.assetControl.utils.Screen
+import com.dacosys.assetControl.ui.common.utils.Screen
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.preferences.Preferences
 import com.dacosys.assetControl.utils.scanners.GenerateQR
-import com.dacosys.assetControl.utils.settings.QRConfigType
+import com.dacosys.assetControl.utils.settings.config.ConfigHelper
+import com.dacosys.assetControl.utils.settings.config.QRConfigType
+import com.dacosys.assetControl.utils.settings.preferences.Preferences
 import org.json.JSONObject
 import java.lang.ref.WeakReference
 
@@ -55,7 +55,7 @@ class AccountPreferenceFragment : PreferenceFragmentCompat(), ClientPackage.Comp
     }
 
     private var alreadyAnsweredYes = false
-    val p = com.dacosys.assetControl.utils.settings.Preference
+    val p = com.dacosys.assetControl.utils.settings.config.Preference
 
     override fun onDestroy() {
         super.onDestroy()
@@ -262,7 +262,7 @@ class AccountPreferenceFragment : PreferenceFragmentCompat(), ClientPackage.Comp
          */
         private fun bindPreferenceSummaryToValue(
             frag: PreferenceFragmentCompat,
-            pref: com.dacosys.assetControl.utils.settings.Preference,
+            pref: com.dacosys.assetControl.utils.settings.config.Preference,
         ) {
             val preference = frag.findPreference<Preference>(pref.key)
             val all: Map<String, *> = PreferenceManager.getDefaultSharedPreferences(getContext()).all

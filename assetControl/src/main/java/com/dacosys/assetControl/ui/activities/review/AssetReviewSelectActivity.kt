@@ -40,24 +40,26 @@ import com.dacosys.assetControl.ui.adapters.review.AssetReviewAdapter
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.ui.fragments.location.WarehouseAreaSelectFilterFragment
-import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
-import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
-import com.dacosys.assetControl.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetStringSet
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsPutStringSet
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.ScannedCode
 import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.utils.scanners.nfc.Nfc
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid.Companion.isRfidRequired
-import com.dacosys.assetControl.utils.settings.Preference
+import com.dacosys.assetControl.utils.settings.config.Preference
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetStringSet
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutStringSet
 import com.dacosys.imageControl.network.common.ProgramData
 import com.dacosys.imageControl.room.dao.ImageCoroutines
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelableArrayList
 import org.parceler.Parcels
 import java.io.File
 import java.util.concurrent.ThreadLocalRandom
@@ -141,7 +143,7 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         // ADAPTER
         multiSelect = b.getBoolean("multiSelect", multiSelect)
-        lastSelected = b.getParcelable("lastSelected")
+        lastSelected = b.parcelable("lastSelected")
         firstVisiblePos = if (b.containsKey("firstVisiblePos")) b.getInt("firstVisiblePos") else -1
 
         checkedIdArray =
@@ -149,7 +151,7 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         visibleStatusArray.clear()
         if (b.containsKey("visibleStatusArray")) {
-            val t3 = b.getParcelableArrayList<AssetReviewStatus>("visibleStatusArray")
+            val t3 = b.parcelableArrayList<AssetReviewStatus>("visibleStatusArray")
             if (t3 != null) visibleStatusArray = t3
         } else {
             loadDefaultVisibleStatus()
@@ -440,7 +442,7 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
             try {
                 if (it?.resultCode == RESULT_OK && data != null) {
                     val warehouseArea =
-                        Parcels.unwrap<WarehouseArea>(data.getParcelableExtra("warehouseArea"))
+                        Parcels.unwrap<WarehouseArea>(data.parcelable("warehouseArea"))
                     if (warehouseArea != null) {
                         rejectNewInstances = false
                         beginAssetReview(warehouseArea)

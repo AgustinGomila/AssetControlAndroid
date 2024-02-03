@@ -1,8 +1,8 @@
-package com.dacosys.assetControl.utils.preferences
+package com.dacosys.assetControl.utils.settings.preferences
 
 import android.content.SharedPreferences
 import com.dacosys.assetControl.network.sync.SyncRegistryType
-import com.dacosys.assetControl.utils.settings.Preference
+import com.dacosys.assetControl.utils.settings.config.Preference
 import com.dacosys.assetControl.utils.settings.entries.ConfEntry
 
 class Preferences {

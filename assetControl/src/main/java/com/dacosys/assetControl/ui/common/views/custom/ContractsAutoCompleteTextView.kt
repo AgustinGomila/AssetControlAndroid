@@ -4,7 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.KeyEvent
 import androidx.appcompat.widget.AppCompatAutoCompleteTextView
-import com.dacosys.assetControl.utils.Screen.Companion.isKeyboardVisible
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.isKeyboardVisible
 
 
 class ContractsAutoCompleteTextView : AppCompatAutoCompleteTextView {

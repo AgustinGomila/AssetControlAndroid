@@ -6,7 +6,7 @@ import com.dacosys.assetControl.R
 import com.dacosys.assetControl.network.utils.Connection.Companion.isOnline
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.preferences.Repository
+import com.dacosys.assetControl.utils.settings.preferences.Repository
 import kotlinx.coroutines.*
 import org.json.JSONException
 import org.json.JSONObject

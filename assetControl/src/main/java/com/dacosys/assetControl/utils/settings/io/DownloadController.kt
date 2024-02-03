@@ -1,4 +1,4 @@
-package com.dacosys.assetControl.utils.settings
+package com.dacosys.assetControl.utils.settings.io
 
 import android.app.DownloadManager
 import android.content.*

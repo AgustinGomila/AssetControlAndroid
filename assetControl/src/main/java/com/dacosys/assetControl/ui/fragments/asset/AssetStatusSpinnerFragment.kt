@@ -10,6 +10,7 @@ import com.dacosys.assetControl.R.layout.custom_spinner_dropdown_item
 import com.dacosys.assetControl.data.model.asset.AssetStatus
 import com.dacosys.assetControl.databinding.FragmentSpinnerBinding
 import com.dacosys.assetControl.ui.adapters.asset.AssetStatusAdapter
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelableArrayList
 import org.parceler.Parcels
 
 /**
@@ -78,7 +79,7 @@ class AssetStatusSpinnerFragment : Fragment() {
         }
 
         if (arguments != null) {
-            allAssetStatus = requireArguments().getParcelableArrayList(ARG_ALL_ASSET_STATUS)
+            allAssetStatus = requireArguments().parcelableArrayList(ARG_ALL_ASSET_STATUS)
         }
     }
 

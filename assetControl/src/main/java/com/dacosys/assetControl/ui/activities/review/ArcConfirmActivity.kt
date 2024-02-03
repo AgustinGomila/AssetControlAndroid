@@ -31,16 +31,17 @@ import com.dacosys.assetControl.ui.activities.common.ObservationsActivity
 import com.dacosys.assetControl.ui.adapters.review.ArcRecyclerAdapter
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.ui.fragments.movement.LocationHeaderFragment
-import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
-import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
-import com.dacosys.assetControl.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsPutBoolean
-import com.dacosys.assetControl.utils.settings.Preference
+import com.dacosys.assetControl.utils.settings.config.Preference
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutBoolean
 import com.dacosys.imageControl.ui.fragments.ImageControlButtonsFragment
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 import org.parceler.Parcels
 
 class ArcConfirmActivity : AppCompatActivity(),
@@ -148,7 +149,7 @@ class ArcConfirmActivity : AppCompatActivity(),
         headerFragment =
             supportFragmentManager.findFragmentById(binding.headerFragment.id) as LocationHeaderFragment?
         if (savedInstanceState != null) {
-            assetReview = savedInstanceState.getParcelable("assetReview")
+            assetReview = savedInstanceState.parcelable("assetReview")
             if (assetReview != null) obs = assetReview?.obs ?: ""
 
             binding.completedSwitch.isChecked = savedInstanceState.getBoolean("completedSwitch")
@@ -163,14 +164,14 @@ class ArcConfirmActivity : AppCompatActivity(),
             // Adapter
             checkedIdArray =
                 (savedInstanceState.getLongArray("checkedIdArray") ?: longArrayOf()).toCollection(ArrayList())
-            lastSelected = savedInstanceState.getParcelable("lastSelected")
+            lastSelected = savedInstanceState.parcelable("lastSelected")
             firstVisiblePos =
                 if (savedInstanceState.containsKey("firstVisiblePos")) savedInstanceState.getInt("firstVisiblePos") else -1
             currentScrollPosition = savedInstanceState.getInt("currentScrollPosition")
         } else {
             val extras = intent.extras
             if (extras != null) {
-                assetReview = Parcels.unwrap<AssetReview>(extras.getParcelable("assetReview"))
+                assetReview = Parcels.unwrap<AssetReview>(extras.parcelable("assetReview"))
 
                 if (assetReview != null) obs = assetReview?.obs ?: ""
             }

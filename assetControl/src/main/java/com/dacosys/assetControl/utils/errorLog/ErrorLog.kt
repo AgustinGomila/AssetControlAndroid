@@ -12,8 +12,8 @@ import androidx.fragment.app.FragmentActivity
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.misc.UTCDataTime
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetBoolean
-import com.dacosys.assetControl.utils.settings.Preference
+import com.dacosys.assetControl.utils.settings.config.Preference
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
 import java.io.*
 import java.text.SimpleDateFormat
 import java.util.*

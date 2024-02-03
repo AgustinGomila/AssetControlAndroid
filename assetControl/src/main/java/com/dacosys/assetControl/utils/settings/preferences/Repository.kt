@@ -1,6 +1,6 @@
-package com.dacosys.assetControl.utils.preferences
+package com.dacosys.assetControl.utils.settings.preferences
 
-import com.dacosys.assetControl.utils.settings.Preference
+import com.dacosys.assetControl.utils.settings.config.Preference
 
 class Repository {
     companion object {

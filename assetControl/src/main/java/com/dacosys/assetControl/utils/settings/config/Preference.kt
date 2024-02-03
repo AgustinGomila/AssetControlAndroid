@@ -1,4 +1,4 @@
-package com.dacosys.assetControl.utils.settings
+package com.dacosys.assetControl.utils.settings.config
 
 import com.dacosys.assetControl.data.model.asset.AssetStatus
 import com.dacosys.assetControl.data.model.review.AssetReviewContentStatus

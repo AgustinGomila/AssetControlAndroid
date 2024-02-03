@@ -16,12 +16,12 @@ import com.dacosys.assetControl.ui.activities.main.SettingsActivity
 import com.dacosys.assetControl.ui.activities.main.SettingsActivity.Companion.bindPreferenceSummaryToValue
 import com.dacosys.assetControl.ui.common.snackbar.MakeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
-import com.dacosys.assetControl.utils.ConfigHelper
-import com.dacosys.assetControl.utils.Screen
+import com.dacosys.assetControl.ui.common.utils.Screen
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.scanners.GenerateQR
-import com.dacosys.assetControl.utils.settings.QRConfigType
+import com.dacosys.assetControl.utils.settings.config.ConfigHelper
+import com.dacosys.assetControl.utils.settings.config.QRConfigType
 import java.io.File
 
 /**
@@ -46,7 +46,7 @@ class GeneralPreferenceFragment : PreferenceFragmentCompat() {
         parentFragmentManager.beginTransaction().replace(id, prefFragment).addToBackStack(null).commit()
     }
 
-    val p = com.dacosys.assetControl.utils.settings.Preference
+    val p = com.dacosys.assetControl.utils.settings.config.Preference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

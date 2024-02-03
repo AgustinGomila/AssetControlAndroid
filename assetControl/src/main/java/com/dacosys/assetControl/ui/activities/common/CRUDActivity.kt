@@ -12,9 +12,9 @@ import com.dacosys.assetControl.ui.activities.asset.AssetCRUDActivity
 import com.dacosys.assetControl.ui.activities.category.ItemCategoryCRUDActivity
 import com.dacosys.assetControl.ui.activities.location.WarehouseAreaCRUDActivity
 import com.dacosys.assetControl.ui.activities.location.WarehouseCRUDActivity
-import com.dacosys.assetControl.utils.Screen.Companion.closeKeyboard
-import com.dacosys.assetControl.utils.Screen.Companion.setScreenRotation
-import com.dacosys.assetControl.utils.Screen.Companion.setupUI
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
+import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setupUI
 
 class CRUDActivity : AppCompatActivity() {
 

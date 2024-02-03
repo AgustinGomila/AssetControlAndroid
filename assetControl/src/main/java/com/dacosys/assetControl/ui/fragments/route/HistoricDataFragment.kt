@@ -10,6 +10,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.data.model.dataCollection.DataCollectionContent
 import com.dacosys.assetControl.databinding.DccHistoricDataFragmentBinding
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelableArrayList
 
 class HistoricDataFragment : Fragment() {
     private var dccArrayList: ArrayList<DataCollectionContent> = ArrayList()
@@ -45,7 +46,7 @@ class HistoricDataFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         if (arguments != null) {
-            dccArrayList = requireArguments().getParcelableArrayList("dccArrayList")
+            dccArrayList = requireArguments().parcelableArrayList("dccArrayList")
                 ?: ArrayList()
         }
 

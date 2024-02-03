@@ -12,9 +12,9 @@ import com.dacosys.assetControl.network.serverDate.GetMySqlDate
 import com.dacosys.assetControl.network.serverDate.MySqlDateResult
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsGetInt
-import com.dacosys.assetControl.utils.preferences.Preferences.Companion.prefsPutString
 import com.dacosys.assetControl.utils.settings.entries.ConfEntry
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetInt
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutString
 import kotlinx.coroutines.*
 
 class SyncInitialUser(
