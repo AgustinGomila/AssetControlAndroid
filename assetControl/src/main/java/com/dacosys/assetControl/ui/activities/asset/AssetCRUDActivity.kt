@@ -16,6 +16,7 @@ import androidx.interpolator.view.animation.FastOutSlowInInterpolator
 import androidx.transition.ChangeBounds
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
+import com.dacosys.assetControl.AssetControlApp.Companion.currentUser
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.dataBase.asset.AssetDbHelper
 import com.dacosys.assetControl.data.model.asset.Asset
@@ -32,7 +33,6 @@ import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setScreenRotati
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.ui.fragments.asset.AssetCRUDFragment
 import com.dacosys.assetControl.ui.fragments.asset.AssetStatusSpinnerFragment
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.ParcelLong
 import com.dacosys.assetControl.utils.scanners.JotterListener
@@ -297,7 +297,7 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
             description.substring(0, 255)
         }
 
-        val obs = "${getString(R.string.user)}: ${Statics.currentUser()?.name}"
+        val obs = "${getString(R.string.user)}: ${currentUser()?.name}"
 
         if (imageControlFragment == null) {
             imageControlFragment = ImageControlButtonsFragment.newInstance(

@@ -17,6 +17,7 @@ import androidx.preference.Preference.OnPreferenceClickListener
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceScreen
 import com.dacosys.assetControl.AssetControlApp
+import com.dacosys.assetControl.AssetControlApp.Companion.isLogged
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.dataBase.DataBaseHelper
 import com.dacosys.assetControl.network.download.DownloadDb
@@ -222,7 +223,7 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
         }
 
         // Si ya está loggeado, deshabilitar la descargar completa de la base de datos
-        if (Statics.currentUserId != null) {
+        if (isLogged()) {
             downloadDbButton?.isEnabled = false
             loadCustomDbButton?.isEnabled = false
             removeCustomDbButton?.isEnabled = false

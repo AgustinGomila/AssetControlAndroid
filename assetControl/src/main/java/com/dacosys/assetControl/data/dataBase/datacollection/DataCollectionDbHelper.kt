@@ -4,6 +4,7 @@ import android.content.ContentValues
 import android.database.Cursor
 import android.database.SQLException
 import android.util.Log
+import com.dacosys.assetControl.AssetControlApp.Companion.getUserId
 import com.dacosys.assetControl.data.dataBase.DataBaseHelper.Companion.getReadableDb
 import com.dacosys.assetControl.data.dataBase.DataBaseHelper.Companion.getWritableDb
 import com.dacosys.assetControl.data.dataBase.asset.AssetContract
@@ -30,7 +31,6 @@ import com.dacosys.assetControl.data.model.asset.Asset
 import com.dacosys.assetControl.data.model.dataCollection.DataCollection
 import com.dacosys.assetControl.data.model.location.WarehouseArea
 import com.dacosys.assetControl.data.model.route.RouteProcessContent
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.UTCDataTime
 
@@ -90,7 +90,7 @@ class DataCollectionDbHelper {
             @collector_route_process_id)
          */
 
-        val userId = Statics.currentUserId ?: return null
+        val userId = getUserId() ?: return null
         var assetId = 0L
         if (rpc.assetId != null) {
             assetId = (rpc.assetId ?: return null)
@@ -179,7 +179,7 @@ class DataCollectionDbHelper {
             @collector_route_process_id)
          */
 
-        val userId = Statics.currentUserId ?: return null
+        val userId = getUserId() ?: return null
         val assetId = asset.assetId
         val newId = lastId
         val insertQ: String = "INSERT INTO [" + TABLE_NAME + "] ( " +
@@ -247,7 +247,7 @@ class DataCollectionDbHelper {
             @collector_route_process_id)
          */
 
-        val userId = Statics.currentUserId ?: return null
+        val userId = getUserId() ?: return null
         val warehouseAreaId = warehouseArea.warehouseAreaId
         val warehouseId = warehouseArea.warehouseId
         val newId = lastId

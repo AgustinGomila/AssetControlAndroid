@@ -2,6 +2,7 @@ package com.dacosys.assetControl.network.sync
 
 import android.util.Log
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
+import com.dacosys.assetControl.AssetControlApp.Companion.getUserId
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.dataBase.asset.AssetDbHelper
@@ -52,7 +53,6 @@ import com.dacosys.assetControl.data.webservice.user.UserWarehouseAreaWs
 import com.dacosys.assetControl.network.serverDate.GetMySqlDate
 import com.dacosys.assetControl.network.serverDate.MySqlDateResult
 import com.dacosys.assetControl.network.utils.ProgressStatus
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.settings.config.Preference
 import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
@@ -641,11 +641,11 @@ class SyncUpload(
                 var realAssetId: Long
                 if (a.assetId > 0) {
                     realAssetId = assetWs.assetCollectorModify(
-                        Statics.currentUserId ?: return,
+                        getUserId() ?: return,
                         com.dacosys.assetControl.data.webservice.asset.AssetCollectorObject(a)
                     )
                 } else {
-                    realAssetId = assetWs.assetAdd(Statics.currentUserId ?: return, AssetObject(a))
+                    realAssetId = assetWs.assetAdd(getUserId() ?: return, AssetObject(a))
                     if (realAssetId > 0) {
 
                         // Actualizar el propio activo
@@ -786,11 +786,11 @@ class SyncUpload(
                 var realWarehouseAreaId: Long
                 if (wa.warehouseAreaId > 0) {
                     realWarehouseAreaId = warehouseAreaWs.warehouseAreaModify(
-                        Statics.currentUserId ?: return, WarehouseAreaObject(wa)
+                        getUserId() ?: return, WarehouseAreaObject(wa)
                     )
                 } else {
                     realWarehouseAreaId = warehouseAreaWs.warehouseAreaAdd(
-                        Statics.currentUserId ?: return, WarehouseAreaObject(wa)
+                        getUserId() ?: return, WarehouseAreaObject(wa)
                     )
 
                     if (realWarehouseAreaId > 0) {
@@ -824,19 +824,19 @@ class SyncUpload(
 
                         // Enviar las áreas del usuario
                         val uObj = UserObject().getByUser(
-                            User(Statics.currentUserId ?: return, false)
+                            User(getUserId() ?: return, false)
                         )
 
                         val uwaObj = UserWarehouseAreaObject()
                         uwaObj.warehouse_area_id = realWarehouseAreaId
-                        uwaObj.user_id = (Statics.currentUserId ?: return)
+                        uwaObj.user_id = (getUserId() ?: return)
                         uwaObj.check = 1
                         uwaObj.count = 1
                         uwaObj.move = 1
                         uwaObj.see = 1
 
                         UserWarehouseAreaWs().userWarehouseAreaAdd(
-                            Statics.currentUserId ?: return, uObj, arrayListOf(uwaObj)
+                            getUserId() ?: return, uObj, arrayListOf(uwaObj)
                         )
                     }
                 }
@@ -966,11 +966,11 @@ class SyncUpload(
                 var realWarehouseId: Long
                 if (w.warehouseId > 0) {
                     realWarehouseId = warehouseWs.warehouseModify(
-                        Statics.currentUserId ?: return, WarehouseObject(w)
+                        getUserId() ?: return, WarehouseObject(w)
                     )
                 } else {
                     realWarehouseId = warehouseWs.warehouseAdd(
-                        Statics.currentUserId ?: return, WarehouseObject(w)
+                        getUserId() ?: return, WarehouseObject(w)
                     )
 
                     if (realWarehouseId > 0) {
@@ -1114,11 +1114,11 @@ class SyncUpload(
                 var realItemCategoryId: Long
                 if (ic.itemCategoryId > 0) {
                     realItemCategoryId = itemCategoryWs.itemCategoryModify(
-                        Statics.currentUserId ?: return, ItemCategoryObject(ic)
+                        getUserId() ?: return, ItemCategoryObject(ic)
                     )
                 } else {
                     realItemCategoryId = itemCategoryWs.itemCategoryAdd(
-                        Statics.currentUserId ?: return, ItemCategoryObject(ic)
+                        getUserId() ?: return, ItemCategoryObject(ic)
                     )
 
                     if (realItemCategoryId > 0) {
@@ -1575,21 +1575,21 @@ class SyncUpload(
                 amObj.asset_manteinance_id = am.assetManteinanceId
                 amObj.manteinance_type_id = am.manteinanceTypeId
                 amObj.manteinance_status_id = am.manteinanceStatusId
-                amObj.repairman_id = (Statics.currentUserId ?: return)
+                amObj.repairman_id = (getUserId() ?: return)
 
                 val amLogObj = AssetManteinanceLogObject()
                 amLogObj.description = am.observations
                 amLogObj.asset_manteinance_id = am.assetManteinanceId
                 amLogObj.manteinance_status_id = am.manteinanceStatusId
-                amLogObj.repairman_id = (Statics.currentUserId ?: return)
+                amLogObj.repairman_id = (getUserId() ?: return)
 
                 val assetMaintenanceId = if (am.assetManteinanceId == 0L) {
                     amWs.assetManteinanceAdd(
-                        Statics.currentUserId ?: return, amObj, amLogObj
+                        getUserId() ?: return, amObj, amLogObj
                     )
                 } else {
                     amWs.assetManteinanceModify(
-                        Statics.currentUserId ?: return, amObj, amLogObj
+                        getUserId() ?: return, amObj, amLogObj
                     )
                 }
 

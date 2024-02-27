@@ -26,6 +26,7 @@ import androidx.interpolator.view.animation.FastOutSlowInInterpolator
 import androidx.transition.ChangeBounds
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
+import com.dacosys.assetControl.AssetControlApp.Companion.currentUser
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.dataBase.attribute.AttributeCompositionDbHelper
 import com.dacosys.assetControl.data.dataBase.datacollection.DataCollectionContentDbHelper
@@ -418,7 +419,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         }"
 
         val reference = "${getString(R.string.asset)}: ${rpc.assetCode}"
-        val obs = "${getString(R.string.user)}: ${Statics.currentUser()?.name}"
+        val obs = "${getString(R.string.user)}: ${currentUser()?.name}"
 
         val tableName = Table.routeProcess.tableName
         description = "$tableName: $description"
@@ -1796,7 +1797,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         )
 
         val reference = "${getString(R.string.asset)}: $rpcAssetCode"
-        val obs = "${getString(R.string.user)}: ${Statics.currentUser()?.name}"
+        val obs = "${getString(R.string.user)}: ${currentUser()?.name}"
 
         var description = "${dcrDescription}, ${
             when {

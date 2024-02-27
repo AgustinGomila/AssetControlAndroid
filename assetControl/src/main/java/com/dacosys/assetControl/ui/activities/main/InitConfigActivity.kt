@@ -18,6 +18,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
+import com.dacosys.assetControl.AssetControlApp.Companion.appName
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.dataBase.DataBaseHelper.Companion.removeDataBases
@@ -442,7 +443,7 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
                     ) { onTaskGetPackagesEnded(it) }
                 }
 
-                mainJson.has(Statics.appName) -> {
+                mainJson.has(appName) -> {
                     if (scanCode.contains(Preference.acWsServer.key)) {
                         ConfigHelper.getConfigFromScannedCode(
                             scanCode = scanCode, mode = QRConfigType.QRConfigWebservice

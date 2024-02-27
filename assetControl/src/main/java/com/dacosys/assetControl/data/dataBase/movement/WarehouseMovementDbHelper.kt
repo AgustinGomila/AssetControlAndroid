@@ -4,6 +4,7 @@ import android.content.ContentValues
 import android.database.Cursor
 import android.database.SQLException
 import android.util.Log
+import com.dacosys.assetControl.AssetControlApp.Companion.getUserId
 import com.dacosys.assetControl.data.dataBase.DataBaseHelper.Companion.getReadableDb
 import com.dacosys.assetControl.data.dataBase.DataBaseHelper.Companion.getWritableDb
 import com.dacosys.assetControl.data.dataBase.location.WarehouseAreaContract
@@ -25,7 +26,6 @@ import com.dacosys.assetControl.data.dataBase.movement.WarehouseMovementContract
 import com.dacosys.assetControl.data.dataBase.movement.WarehouseMovementContract.WarehouseMovementEntry.Companion.WAREHOUSE_MOVEMENT_DATE
 import com.dacosys.assetControl.data.dataBase.movement.WarehouseMovementContract.WarehouseMovementEntry.Companion.WAREHOUSE_MOVEMENT_ID
 import com.dacosys.assetControl.data.model.movement.WarehouseMovement
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.UTCDataTime
 
@@ -83,7 +83,7 @@ class WarehouseMovementDbHelper {
             @p5)
         */
 
-        val userId = Statics.currentUserId ?: return null
+        val userId = getUserId() ?: return null
         val newId = lastId
         val insertQ: String = "INSERT INTO [" + TABLE_NAME + "] ( " +
                 WAREHOUSE_MOVEMENT_DATE + ", " +

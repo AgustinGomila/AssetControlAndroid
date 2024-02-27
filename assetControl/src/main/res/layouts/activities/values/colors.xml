@@ -80,4 +80,8 @@
     <color name="text_dark">#FF1B1B1B</color>
     <color name="text_light">#FFFBFBFB</color>
     <color name="status_no_need_to_move">#FFFFC107</color>
+
+    <color name="status_rpc_processed">#FF009688</color>
+    <color name="status_rpc_not_processed">#FF2196F3</color>
+    <color name="status_rpc_skipped">#FFFFC107</color>
 </resources>

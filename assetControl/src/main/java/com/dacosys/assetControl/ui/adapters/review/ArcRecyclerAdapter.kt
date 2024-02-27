@@ -27,6 +27,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.*
+import com.dacosys.assetControl.AssetControlApp.Companion.currentUser
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.model.asset.Asset
@@ -45,7 +46,6 @@ import com.dacosys.assetControl.ui.adapters.interfaces.Interfaces.*
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.getBestContrastColor
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.getColorWithAlpha
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.manipulateColor
-import com.dacosys.assetControl.utils.Statics.Companion.currentUser
 import com.dacosys.assetControl.utils.settings.preferences.Repository.Companion.useImageControl
 import com.dacosys.imageControl.network.common.ProgramData
 import com.dacosys.imageControl.ui.adapter.ImageAdapter

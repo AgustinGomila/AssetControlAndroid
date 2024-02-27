@@ -13,6 +13,7 @@ import androidx.preference.PreferenceManager
 import androidx.preference.PreferenceScreen
 import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
+import com.dacosys.assetControl.AssetControlApp.Companion.isLogged
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.dataBase.DataBaseHelper
@@ -27,7 +28,6 @@ import com.dacosys.assetControl.ui.common.snackbar.MakeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarEventData
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.common.utils.Screen
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.scanners.GenerateQR
 import com.dacosys.assetControl.utils.settings.config.ConfigHelper
@@ -175,7 +175,7 @@ class AccountPreferenceFragment : PreferenceFragmentCompat(), ClientPackage.Comp
         }
 
         // Si ya está autentificado, deshabilitar estas opciones
-        if (Statics.currentUserId != null) {
+        if (!isLogged()) {
             passwordEditText?.isEnabled = false
             emailEditText?.isEnabled = false
             selectPackageButton?.isEnabled = false

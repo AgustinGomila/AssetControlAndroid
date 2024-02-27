@@ -3,7 +3,9 @@ package com.dacosys.assetControl.network.utils
 import android.annotation.SuppressLint
 import android.os.Build
 import android.provider.Settings
+import com.dacosys.assetControl.AssetControlApp.Companion.currentUser
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
+import com.dacosys.assetControl.AssetControlApp.Companion.isLogged
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.webservice.common.SessionObject
 import com.dacosys.assetControl.data.webservice.common.Webservice.Companion.getWebservice
@@ -21,7 +23,7 @@ class SetCurrentSession(private var onSessionCreated: (Boolean) -> Unit = {}) {
 
     private var deferred: Deferred<Boolean>? = null
     private suspend fun doInBackground(): Boolean {
-        if (Statics.currentUserId == null) {
+        if (!isLogged()) {
             Statics.currentSession = null
             return false
         }
@@ -44,12 +46,14 @@ class SetCurrentSession(private var onSessionCreated: (Boolean) -> Unit = {}) {
 
         val macAddress = "" // getMACAddress()
 
-        val user = Statics.currentUser()
-        if (user == null) {
+        if (!isLogged()) {
             Statics.currentSession = null
             return@withContext false
         }
-        val userId = Statics.currentUserId ?: return@withContext false
+
+        val user = currentUser() ?: return@withContext false
+        val userId = user.userId
+        val userPass = user.password
 
         val operatingSystem =
             "Android ${Build.VERSION.RELEASE} (SDK ${Build.VERSION.SDK_INT})"
@@ -83,8 +87,8 @@ class SetCurrentSession(private var onSessionCreated: (Boolean) -> Unit = {}) {
         */
 
         val sessionId = getWebservice().addSession(
-            userId = user.userId,
-            password = user.password,
+            userId = userId,
+            password = userPass,
             userIp = ip,
             userMacAddress = macAddress,
             operatingSystem = operatingSystem,

@@ -3,6 +3,8 @@ package com.dacosys.assetControl
 import android.app.Application
 import android.content.Context
 import androidx.preference.PreferenceManager
+import com.dacosys.assetControl.data.dataBase.user.UserDbHelper
+import com.dacosys.assetControl.data.model.user.User
 import com.dacosys.assetControl.utils.Statics.Companion.INTERNAL_IMAGE_CONTROL_APP_ID
 import com.dacosys.assetControl.utils.imageControl.ImageControl.Companion.imageControl
 import com.dacosys.assetControl.utils.scanners.JotterListener
@@ -43,10 +45,46 @@ class AssetControlApp : Application() {
             return getApplication()!!.applicationContext
         }
 
+        private var sApplication: Application? = null
         private fun getApplication(): Application? {
             return sApplication
         }
 
-        private var sApplication: Application? = null
+        val appName: String
+            get() = "${getApplicationName()}M13"
+
+        private fun getApplicationName(): String {
+            val applicationInfo = getContext().applicationInfo
+            return when (val stringId = applicationInfo.labelRes) {
+                0 -> applicationInfo.nonLocalizedLabel.toString()
+                else -> getContext().getString(stringId)
+            }
+        }
+
+        private var currentUserId: Long? = null
+
+        /**
+         * Current user
+         * Se utiliza generalmente para obtener el nombre del usuario actual
+         * necesario en algunos procesos.
+         * @return
+         */
+        fun currentUser(): User? {
+            return if (currentUserId != null) {
+                UserDbHelper().selectById(currentUserId ?: return null)
+            } else null
+        }
+
+        fun isLogged(): Boolean {
+            return (currentUserId ?: 0L) > 0L
+        }
+
+        fun getUserId(): Long? {
+            return currentUserId
+        }
+
+        fun setCurrentUserId(userId: Long? = null) {
+            currentUserId = userId
+        }
     }
 }

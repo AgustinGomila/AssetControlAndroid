@@ -9,6 +9,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.dacosys.assetControl.AssetControlApp.Companion.currentUser
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.model.common.CrudCompleted
 import com.dacosys.assetControl.data.model.common.CrudResult
@@ -22,7 +23,6 @@ import com.dacosys.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.ui.fragments.location.WarehouseCRUDFragment
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.settings.config.Preference
 import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
@@ -282,7 +282,7 @@ class WarehouseCRUDActivity : AppCompatActivity(), CrudCompleted,
             description.substring(0, 255)
         }
 
-        val obs = "${getString(R.string.user)}: ${Statics.currentUser()?.name}"
+        val obs = "${getString(R.string.user)}: ${currentUser()?.name}"
 
         if (imageControlFragment == null) {
             imageControlFragment = ImageControlButtonsFragment.newInstance(

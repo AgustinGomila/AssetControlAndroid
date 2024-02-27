@@ -31,7 +31,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.ViewCompat
+import com.dacosys.assetControl.AssetControlApp.Companion.appName
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
+import com.dacosys.assetControl.AssetControlApp.Companion.setCurrentUserId
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.dataBase.DataBaseHelper
@@ -62,7 +64,6 @@ import com.dacosys.assetControl.ui.common.utils.Screen.Companion.showKeyboard
 import com.dacosys.assetControl.ui.fragments.user.UserSpinnerFragment
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.Statics.Companion.OFFLINE_MODE
-import com.dacosys.assetControl.utils.Statics.Companion.appName
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.imageControl.ImageControl.Companion.closeImageControl
 import com.dacosys.assetControl.utils.imageControl.ImageControl.Companion.setupImageControl
@@ -830,7 +831,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             if (encondedPass == Md5.getMd5(password) || BuildConfig.DEBUG) {
-                Statics.currentUserId = userId
+                setCurrentUserId(userId)
                 setupImageControl()
 
                 thread {

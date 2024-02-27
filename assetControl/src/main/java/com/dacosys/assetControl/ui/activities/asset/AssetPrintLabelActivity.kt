@@ -756,7 +756,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
                     // Horrible wait for a full load
                 }
 
-                // Estas variables locales evitar posteriores cambios de estado.
+                // Recuperar la última posición seleccionada
                 val ls = lastSelected
                 val cs = currentScrollPosition
                 Handler(Looper.getMainLooper()).postDelayed({

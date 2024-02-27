@@ -2,8 +2,8 @@ package com.dacosys.assetControl.data.webservice.manteinance
 
 import android.os.Parcel
 import android.os.Parcelable
+import com.dacosys.assetControl.AssetControlApp.Companion.getUserId
 import com.dacosys.assetControl.data.model.manteinance.AssetManteinance
-import com.dacosys.assetControl.utils.Statics
 import org.ksoap2.serialization.SoapObject
 
 class AssetManteinanceObject() : Parcelable {
@@ -27,7 +27,7 @@ class AssetManteinanceObject() : Parcelable {
         manteinance_type_id = assetManteinance.manteinanceTypeId
         manteinance_status_id = assetManteinance.manteinanceStatusId
         asset_id = assetManteinance.assetId
-        repairman_id = Statics.currentUserId ?: 0
+        repairman_id = getUserId() ?: 0
     }
 
     fun getBySoapObject(so: SoapObject): AssetManteinanceObject {

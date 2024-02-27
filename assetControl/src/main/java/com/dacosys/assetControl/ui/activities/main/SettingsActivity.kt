@@ -15,6 +15,7 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
+import com.dacosys.assetControl.AssetControlApp.Companion.getUserId
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.dataBase.DataBaseHelper.Companion.removeDataBases
@@ -31,7 +32,6 @@ import com.dacosys.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType.CREATOR.INFO
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
 import com.dacosys.assetControl.ui.fragments.settings.HeaderFragment
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.Scanner
@@ -248,7 +248,7 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
 
         try {
             // No capturar códigos que cambian el servidor cuando está logeado.
-            if (Statics.currentUserId != null && (currentQRConfigType == QRConfigClientAccount || currentQRConfigType == QRConfigWebservice)) {
+            if (getUserId() != null && (currentQRConfigType == QRConfigClientAccount || currentQRConfigType == QRConfigWebservice)) {
                 return
             }
 

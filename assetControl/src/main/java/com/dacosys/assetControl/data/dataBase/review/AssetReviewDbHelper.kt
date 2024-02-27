@@ -4,6 +4,7 @@ import android.content.ContentValues
 import android.database.Cursor
 import android.database.SQLException
 import android.util.Log
+import com.dacosys.assetControl.AssetControlApp.Companion.getUserId
 import com.dacosys.assetControl.data.dataBase.DataBaseHelper.Companion.getReadableDb
 import com.dacosys.assetControl.data.dataBase.DataBaseHelper.Companion.getWritableDb
 import com.dacosys.assetControl.data.dataBase.location.WarehouseAreaContract
@@ -24,7 +25,6 @@ import com.dacosys.assetControl.data.dataBase.review.AssetReviewContract.AssetRe
 import com.dacosys.assetControl.data.model.location.WarehouseArea
 import com.dacosys.assetControl.data.model.review.AssetReview
 import com.dacosys.assetControl.data.model.review.AssetReviewStatus
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.UTCDataTime
 import com.dacosys.assetControl.utils.misc.splitList
@@ -92,7 +92,7 @@ class AssetReviewDbHelper {
          */
 
         val obs = ""
-        val userId = Statics.currentUserId ?: return null
+        val userId = getUserId() ?: return null
         val warehouseAreaId = warehouseArea.warehouseAreaId
         val warehouseId = warehouseArea.warehouseId
         val statusId = AssetReviewStatus.onProcess.id
@@ -503,7 +503,7 @@ class AssetReviewDbHelper {
                 uWa.TABLE_NAME + "." + uWa.WAREHOUSE_AREA_ID +
                 " FROM " + uWa.TABLE_NAME +
                 " WHERE ( " +
-                uWa.TABLE_NAME + "." + uWa.USER_ID + " = " + Statics.currentUserId + " AND " +
+                uWa.TABLE_NAME + "." + uWa.USER_ID + " = " + getUserId() + " AND " +
                 uWa.TABLE_NAME + "." + uWa.SEE + " = 1 )))"
         val rawQuery = basicSelect +
                 "," +

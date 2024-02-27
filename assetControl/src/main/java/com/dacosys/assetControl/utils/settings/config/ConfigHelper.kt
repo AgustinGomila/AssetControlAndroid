@@ -2,6 +2,7 @@ package com.dacosys.assetControl.utils.settings.config
 
 import android.util.Log
 import com.dacosys.assetControl.AssetControlApp
+import com.dacosys.assetControl.AssetControlApp.Companion.appName
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.network.clientPackages.ClientPackagesProgress
@@ -43,7 +44,7 @@ class ConfigHelper {
             val mainJson = JSONObject(scanCode)
             val mainTag = when {
                 mainJson.has("config") && mode == QRConfigType.QRConfigClientAccount -> "config"
-                mainJson.has(Statics.appName) && mode != QRConfigType.QRConfigClientAccount -> Statics.appName
+                mainJson.has(appName) && mode != QRConfigType.QRConfigClientAccount -> appName
                 else -> ""
             }
 

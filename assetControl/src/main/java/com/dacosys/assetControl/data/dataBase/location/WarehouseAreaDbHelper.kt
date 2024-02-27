@@ -5,6 +5,7 @@ import android.database.Cursor
 import android.database.SQLException
 import android.util.Log
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
+import com.dacosys.assetControl.AssetControlApp.Companion.getUserId
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.dataBase.DataBaseHelper.Companion.getReadableDb
@@ -21,7 +22,6 @@ import com.dacosys.assetControl.data.webservice.location.WarehouseAreaObject
 import com.dacosys.assetControl.network.sync.SyncProgress
 import com.dacosys.assetControl.network.sync.SyncRegistryType
 import com.dacosys.assetControl.network.utils.ProgressStatus
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.splitList
 import com.dacosys.assetControl.data.dataBase.user.UserWarehouseAreaContract.UserWarehouseAreaEntry as uWa
@@ -340,7 +340,7 @@ class WarehouseAreaDbHelper {
                 uWa.TABLE_NAME + "." + uWa.WAREHOUSE_AREA_ID +
                 " FROM " + uWa.TABLE_NAME +
                 " WHERE ( " +
-                uWa.TABLE_NAME + "." + uWa.USER_ID + " = " + Statics.currentUserId + " AND " +
+                uWa.TABLE_NAME + "." + uWa.USER_ID + " = " + getUserId() + " AND " +
                 uWa.TABLE_NAME + "." + uWa.SEE + " = 1 )))"
         val rawQuery = basicSelect +
                 "," +
@@ -418,7 +418,7 @@ class WarehouseAreaDbHelper {
                 uWa.TABLE_NAME + "." + uWa.WAREHOUSE_AREA_ID +
                 " FROM " + uWa.TABLE_NAME +
                 " WHERE ( " +
-                uWa.TABLE_NAME + "." + uWa.USER_ID + " = " + Statics.currentUserId + " AND " +
+                uWa.TABLE_NAME + "." + uWa.USER_ID + " = " + getUserId() + " AND " +
                 uWa.TABLE_NAME + "." + uWa.SEE + " = 1 )))"
         val rawQuery = basicSelect +
                 "," +
@@ -457,7 +457,7 @@ class WarehouseAreaDbHelper {
                 uWa.TABLE_NAME + "." + uWa.WAREHOUSE_AREA_ID +
                 " FROM " + uWa.TABLE_NAME +
                 " WHERE ( " +
-                uWa.TABLE_NAME + "." + uWa.USER_ID + " = " + Statics.currentUserId + " AND " +
+                uWa.TABLE_NAME + "." + uWa.USER_ID + " = " + getUserId() + " AND " +
                 uWa.TABLE_NAME + "." + uWa.SEE + " = 1 )))"
         val rawQuery = basicSelect +
                 "," +
@@ -491,7 +491,7 @@ class WarehouseAreaDbHelper {
                 uWa.TABLE_NAME + "." + uWa.WAREHOUSE_AREA_ID +
                 " FROM " + uWa.TABLE_NAME +
                 " WHERE ( " +
-                uWa.TABLE_NAME + "." + uWa.USER_ID + " = " + Statics.currentUserId + " AND " +
+                uWa.TABLE_NAME + "." + uWa.USER_ID + " = " + getUserId() + " AND " +
                 uWa.TABLE_NAME + "." + uWa.SEE + " = 1 )))"
         val rawQuery = basicSelect +
                 "," +
@@ -534,7 +534,7 @@ class WarehouseAreaDbHelper {
                 uWa.TABLE_NAME + "." + uWa.WAREHOUSE_AREA_ID +
                 " FROM " + uWa.TABLE_NAME +
                 " WHERE ( " +
-                uWa.TABLE_NAME + "." + uWa.USER_ID + " = " + Statics.currentUserId + " AND " +
+                uWa.TABLE_NAME + "." + uWa.USER_ID + " = " + getUserId() + " AND " +
                 uWa.TABLE_NAME + "." + uWa.SEE + " = 1 )))"
         val rawQuery = basicSelect +
                 "," +

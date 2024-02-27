@@ -3,6 +3,7 @@ package com.dacosys.assetControl.network.download
 import android.database.sqlite.SQLiteDatabase
 import android.util.Log
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
+import com.dacosys.assetControl.AssetControlApp.Companion.isLogged
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.dataBase.DataBaseHelper
 import com.dacosys.assetControl.data.dataBase.DataBaseHelper.Companion.DATABASE_NAME
@@ -193,7 +194,7 @@ class DownloadDb(
         }
 
         // Si aún no está loggeado y hay datos por enviar, no descargar la base de datos
-        if (Statics.currentUserId == null && pendingDelivery()) {
+        if (!isLogged() && pendingDelivery()) {
             onDownloadEvent.invoke(
                 DownloadTask(
                     msg = getContext().getString(R.string.the_database_will_not_be_downloaded_because_there_is_data_pending_delivery),

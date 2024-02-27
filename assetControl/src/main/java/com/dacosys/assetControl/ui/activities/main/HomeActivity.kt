@@ -36,7 +36,10 @@ import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat
 import androidx.core.splashscreen.SplashScreen
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.dacosys.assetControl.AssetControlApp.Companion.currentUser
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
+import com.dacosys.assetControl.AssetControlApp.Companion.isLogged
+import com.dacosys.assetControl.AssetControlApp.Companion.setCurrentUserId
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.dataBase.DataBaseHelper.Companion.cleanTemporaryTables
@@ -186,7 +189,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
             return
         }
 
-        if (Statics.currentUserId == null) {
+        if (!isLogged()) {
             rejectNewInstances = false
             login()
             return
@@ -217,7 +220,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
     @SuppressLint("MissingSuperCall")
     @Suppress("OVERRIDE_DEPRECATION")
     override fun onBackPressed() {
-        Statics.currentUserId = null
+        setCurrentUserId(null)
 
         if (isTaskRoot &&
             supportFragmentManager.primaryNavigationFragment?.childFragmentManager?.backStackEntryCount == 0 &&
@@ -535,8 +538,9 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
 
     private fun setupHeaderPanel() {
         /// USUARIO
-        if (Statics.currentUserId != null) {
-            val user = User(Statics.currentUserId ?: return, false)
+        val currentUser = currentUser()
+        if (currentUser != null) {
+            val user = User(currentUser.userId, false)
             binding.userTextView.text = user.name
         }
 

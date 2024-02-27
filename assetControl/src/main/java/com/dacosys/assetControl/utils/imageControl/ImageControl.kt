@@ -1,6 +1,6 @@
 package com.dacosys.assetControl.utils.imageControl
 
-import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.AssetControlApp.Companion.currentUser
 import com.dacosys.assetControl.utils.settings.config.Preference
 import com.dacosys.assetControl.utils.settings.preferences.Preferences
 import com.dacosys.assetControl.utils.settings.preferences.Repository
@@ -21,7 +21,7 @@ class ImageControl {
             imageControl.appAllowScreenRotation =
                 Preferences.prefsGetBoolean(Preference.allowScreenRotation)
 
-            val currentUser = Statics.currentUser()
+            val currentUser = currentUser()
             if (currentUser != null) {
                 imageControl.userId = currentUser.userId
                 imageControl.userName = currentUser.name

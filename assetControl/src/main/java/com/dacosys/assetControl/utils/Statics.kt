@@ -3,8 +3,6 @@ package com.dacosys.assetControl.utils
 import android.content.pm.ApplicationInfo
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.dataBase.user.UserDbHelper
-import com.dacosys.assetControl.data.model.user.User
 import com.dacosys.assetControl.data.webservice.common.SessionObject
 import java.util.*
 
@@ -28,17 +26,6 @@ class Statics {
 
         const val AUTO_SEND_ON_STARTUP = !DEMO_MODE
 
-        val appName: String
-            get() = "${getApplicationName()}M13"
-
-        private fun getApplicationName(): String {
-            val applicationInfo = getContext().applicationInfo
-            return when (val stringId = applicationInfo.labelRes) {
-                0 -> applicationInfo.nonLocalizedLabel.toString()
-                else -> getContext().getString(stringId)
-            }
-        }
-
         const val DEFAULT_DATE = "2001-01-01 00:00:00"
 
         fun getPercentage(completedTask: Int, totalTask: Int): String {
@@ -46,7 +33,6 @@ class Statics {
             return "${completedTask * 100 / if (totalTask == 0) 1 else totalTask}%"
         }
 
-        var currentUserId: Long? = null
         var currentSession: SessionObject? = null
 
         const val AC_ROOT_PATH = "/asset_control"
@@ -75,18 +61,6 @@ class Statics {
                 year < pandemicYear -> false
                 else -> true
             }
-        }
-
-        /**
-         * Current user
-         * Se utiliza generalmente para obtener el nombre del usuario actual
-         * necesario en algunos procesos.
-         * @return
-         */
-        fun currentUser(): User? {
-            return if (currentUserId != null) {
-                UserDbHelper().selectById(currentUserId ?: return null)
-            } else null
         }
 
         fun isDebuggable(): Boolean {

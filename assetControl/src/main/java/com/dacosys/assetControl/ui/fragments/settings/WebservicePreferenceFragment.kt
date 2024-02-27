@@ -11,6 +11,8 @@ import androidx.preference.Preference.OnPreferenceClickListener
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceScreen
 import com.dacosys.assetControl.AssetControlApp
+import com.dacosys.assetControl.AssetControlApp.Companion.appName
+import com.dacosys.assetControl.AssetControlApp.Companion.isLogged
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.network.download.DownloadDb
@@ -19,7 +21,6 @@ import com.dacosys.assetControl.ui.activities.main.SettingsActivity.Companion.bi
 import com.dacosys.assetControl.ui.common.snackbar.MakeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.common.utils.Screen
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.scanners.GenerateQR
 import com.dacosys.assetControl.utils.settings.config.ConfigHelper
@@ -133,7 +134,7 @@ class WebservicePreferenceFragment : PreferenceFragmentCompat() {
                 return@OnPreferenceClickListener false
             }
 
-            GenerateQR(data = ConfigHelper.getBarcodeForConfig(p.getAcWebserivce(), Statics.appName),
+            GenerateQR(data = ConfigHelper.getBarcodeForConfig(p.getAcWebserivce(), appName),
                 size = Size(Screen.getScreenWidth(requireActivity()), Screen.getScreenHeight(requireActivity())),
                 onProgress = {},
                 onFinish = { showQrCode(it) })
@@ -190,7 +191,7 @@ class WebservicePreferenceFragment : PreferenceFragmentCompat() {
         }
 
         // Si ya está loggeado, deshabilitar estas opciones
-        if (Statics.currentUserId != null) {
+        if (isLogged()) {
             scanConfigCode?.isEnabled = false
             urlEditText.isEnabled = false
             namespaceEditText?.isEnabled = false

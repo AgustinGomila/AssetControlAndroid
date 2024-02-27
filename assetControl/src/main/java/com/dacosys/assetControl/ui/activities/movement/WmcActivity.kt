@@ -492,7 +492,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
                     // Horrible wait for a full load
                 }
 
-                // Estas variables locales evitar posteriores cambios de estado.
+                // Recuperar la última posición seleccionada
                 val ls = lastSelected ?: contents.firstOrNull()
                 val cs = currentScrollPosition
                 Handler(Looper.getMainLooper()).postDelayed({

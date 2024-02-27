@@ -3,6 +3,8 @@ package com.dacosys.assetControl.data.model.user
 import android.content.ContentValues
 import android.os.Parcel
 import android.os.Parcelable
+import com.dacosys.assetControl.AssetControlApp
+import com.dacosys.assetControl.AssetControlApp.Companion.isLogged
 import com.dacosys.assetControl.data.dataBase.user.UserContract.UserEntry.Companion.ACTIVE
 import com.dacosys.assetControl.data.dataBase.user.UserContract.UserEntry.Companion.EMAIL
 import com.dacosys.assetControl.data.dataBase.user.UserContract.UserEntry.Companion.EXTERNAL_ID
@@ -12,7 +14,6 @@ import com.dacosys.assetControl.data.dataBase.user.UserContract.UserEntry.Compan
 import com.dacosys.assetControl.data.dataBase.user.UserDbHelper
 import com.dacosys.assetControl.data.dataBase.user.UserPermissionDbHelper
 import com.dacosys.assetControl.data.model.user.permission.PermissionEntry
-import com.dacosys.assetControl.utils.Statics
 
 class User : Parcelable {
     // setters
@@ -181,9 +182,9 @@ class User : Parcelable {
         }
 
         fun hasPermission(permission: PermissionEntry): Boolean {
-            return if (Statics.currentUserId != null) {
+            return if (isLogged()) {
                 val up = UserPermissionDbHelper().selectByUserIdUserPermissionId(
-                    userId = Statics.currentUserId ?: 0,
+                    userId = AssetControlApp.getUserId() ?: 0,
                     userPermissionId = permission.id
                 )
                 up != null

@@ -4,6 +4,7 @@ import android.content.ContentValues
 import android.database.Cursor
 import android.database.SQLException
 import android.util.Log
+import com.dacosys.assetControl.AssetControlApp.Companion.getUserId
 import com.dacosys.assetControl.data.dataBase.DataBaseHelper.Companion.getReadableDb
 import com.dacosys.assetControl.data.dataBase.DataBaseHelper.Companion.getWritableDb
 import com.dacosys.assetControl.data.dataBase.route.RouteProcessContract.RouteProcessEntry.Companion.COLLECTOR_ROUTE_PROCESS_ID
@@ -20,7 +21,6 @@ import com.dacosys.assetControl.data.dataBase.route.RouteProcessContract.RoutePr
 import com.dacosys.assetControl.data.dataBase.user.UserContract
 import com.dacosys.assetControl.data.model.route.Route
 import com.dacosys.assetControl.data.model.route.RouteProcess
-import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.UTCDataTime
 import java.text.SimpleDateFormat
@@ -54,7 +54,7 @@ class RouteProcessDbHelper {
         }
 
     fun insert(route: Route): Long {
-        val userId = Statics.currentUserId ?: return 0
+        val userId = getUserId() ?: return 0
 
         Log.i(this::class.java.simpleName, ": SQLite -> insert")
 
