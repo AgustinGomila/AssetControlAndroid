@@ -915,14 +915,18 @@ class ArcRecyclerAdapter(
     }
 
     fun remove(position: Int) {
+        if (position < 0) return
+
         val content = getContentByIndex(position) ?: return
         updateCheckedList(content, false)
 
-        fullList.removeAt(position)
-        submitList(fullList) {
-            run {
-                // Notificamos al Listener superior
-                dataSetChangedListener?.onDataSetChanged()
+        if (fullList.lastIndex >= position) {
+            fullList.removeAt(position)
+            submitList(fullList) {
+                run {
+                    // Notificamos al Listener superior
+                    dataSetChangedListener?.onDataSetChanged()
+                }
             }
         }
     }

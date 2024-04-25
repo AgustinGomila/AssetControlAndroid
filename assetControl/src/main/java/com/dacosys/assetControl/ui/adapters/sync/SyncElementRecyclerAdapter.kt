@@ -704,18 +704,32 @@ class SyncElementRecyclerAdapter private constructor(builder: Builder) :
     }
 
     fun remove(position: Int) {
+        if (position < 0) return
+
         val id = getItem(position)
         checkedKeyArray.remove(id)
 
-        fullList.removeAt(position)
-        submitList(fullList) {
-            run {
-                notifyItemRemoved(position)
+        if (fullList.lastIndex >= position) {
+            fullList.removeAt(position)
+            submitList(fullList) {
+                run {
+                    notifyItemRemoved(position)
 
-                // Notificamos al Listener superior
-                dataSetChangedListener?.onDataSetChanged()
+                    // Notificamos al Listener superior
+                    dataSetChangedListener?.onDataSetChanged()
+                }
             }
         }
+    }
+
+    fun removeItem(rt: SyncRegistryType, uniqueId: String) {
+        if (itemCount == 0) return
+
+        val key = getKey(rt, uniqueId)
+        if (key.isEmpty()) return
+
+        val index = getIndexByKey(key)
+        remove(index)
     }
 
     fun selectItem(a: Any?, scroll: Boolean = true) {

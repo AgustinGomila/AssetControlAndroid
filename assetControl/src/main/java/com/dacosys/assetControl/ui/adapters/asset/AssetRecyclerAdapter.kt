@@ -573,14 +573,18 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
     }
 
     fun remove(position: Int) {
+        if (position < 0) return
+
         val id = getItemId(position)
         checkedIdArray.remove(id)
 
-        fullList.removeAt(position)
-        submitList(fullList) {
-            run {
-                // Notificamos al Listener superior
-                dataSetChangedListener?.onDataSetChanged()
+        if (fullList.lastIndex >= position) {
+            fullList.removeAt(position)
+            submitList(fullList) {
+                run {
+                    // Notificamos al Listener superior
+                    dataSetChangedListener?.onDataSetChanged()
+                }
             }
         }
     }

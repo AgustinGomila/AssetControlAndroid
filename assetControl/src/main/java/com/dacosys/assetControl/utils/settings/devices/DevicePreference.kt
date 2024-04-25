@@ -28,7 +28,7 @@ class DevicePreference
         }
     }
 
-    private fun entries(): Array<CharSequence>? {
+    private fun entries(): Array<CharSequence> {
         var allDescription: List<String>? = null
         try {
             //action to provide entry data in char sequence array for list
@@ -44,10 +44,10 @@ class DevicePreference
             ex.printStackTrace()
         }
 
-        return allDescription?.toTypedArray()
+        return allDescription?.toTypedArray() ?: emptyArray()
     }
 
-    private fun entryValues(): Array<CharSequence>? {
+    private fun entryValues(): Array<CharSequence> {
         var allValues: List<String>? = null
         try {
             //action to provide value data for list
@@ -57,7 +57,7 @@ class DevicePreference
             ex.printStackTrace()
         }
 
-        return allValues?.toTypedArray()
+        return allValues?.toTypedArray() ?: emptyArray()
     }
 
     private fun initializeIndex(): Int {
