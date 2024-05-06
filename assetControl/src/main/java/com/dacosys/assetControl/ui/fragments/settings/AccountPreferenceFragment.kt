@@ -175,7 +175,7 @@ class AccountPreferenceFragment : PreferenceFragmentCompat(), ClientPackage.Comp
         }
 
         // Si ya está autentificado, deshabilitar estas opciones
-        if (!isLogged()) {
+        if (isLogged()) {
             passwordEditText?.isEnabled = false
             emailEditText?.isEnabled = false
             selectPackageButton?.isEnabled = false
