@@ -1,5 +1,6 @@
 package com.dacosys.assetControl.network.clientPackages
 
+import android.os.Build
 import android.util.Log
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
@@ -15,6 +16,7 @@ import java.io.DataOutputStream
 import java.io.InputStreamReader
 import java.net.*
 import javax.net.ssl.HttpsURLConnection
+
 
 class GetClientPackages(
     private val email: String,
@@ -92,6 +94,13 @@ class GetClientPackages(
             connection.requestMethod = "POST"
             connection.setRequestProperty("Content-Type", "application/json; charset=utf-8")
             connection.connectTimeout = Repository.connectionTimeout * 1000
+
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+                val t = TrustFactory.getTrustFactoryManager(getContext())
+                HttpsURLConnection.setDefaultSSLSocketFactory(t.first)
+                connection.sslSocketFactory = t.first
+            }
+
             //connection.useCaches = false
 
             val authDataCont = JSONObject()
@@ -129,6 +138,7 @@ class GetClientPackages(
     private fun getResponse(connection: HttpsURLConnection) {
         //Get Response
         val result: ArrayList<JSONObject> = ArrayList()
+
         val inputStream = connection.inputStream
         val rd = BufferedReader(InputStreamReader(inputStream))
 

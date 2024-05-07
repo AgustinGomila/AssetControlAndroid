@@ -1,6 +1,9 @@
 package com.dacosys.assetControl.data.webservice.common
 
+import android.os.Build
 import android.util.Log
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
+import com.dacosys.assetControl.network.clientPackages.TrustFactory
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.misc.Md5
 import com.dacosys.assetControl.utils.settings.preferences.Repository
@@ -9,6 +12,7 @@ import org.ksoap2.SoapEnvelope
 import org.ksoap2.serialization.SoapObject
 import org.ksoap2.serialization.SoapSerializationEnvelope
 import org.ksoap2.transport.HttpTransportSE
+import org.ksoap2.transport.HttpsServiceConnectionSE
 import org.ksoap2.transport.HttpsTransportSE
 import org.xmlpull.v1.XmlPullParserException
 import java.io.IOException
@@ -432,6 +436,11 @@ class Webservice @Throws(Exception::class) constructor(private var webServiceTyp
                         proxy, wsDomain, wsPort, "$wsUri$wsQuery", timeout
                     )
                     aht.debug = false
+
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+                        val t = TrustFactory.getTrustFactoryManager(getContext())
+                        (aht.serviceConnection as HttpsServiceConnectionSE).setSSLSocketFactory(t.first)
+                    }
 
                     callWithRetry(aht, soapAction, envelope, headers, 3)
                     response = (envelope.response ?: return null)

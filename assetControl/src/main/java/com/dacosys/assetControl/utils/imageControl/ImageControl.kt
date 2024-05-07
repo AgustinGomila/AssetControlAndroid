@@ -1,6 +1,9 @@
 package com.dacosys.assetControl.utils.imageControl
 
+import android.os.Build
 import com.dacosys.assetControl.AssetControlApp.Companion.currentUser
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
+import com.dacosys.assetControl.network.clientPackages.TrustFactory
 import com.dacosys.assetControl.utils.settings.config.Preference
 import com.dacosys.assetControl.utils.settings.preferences.Preferences
 import com.dacosys.assetControl.utils.settings.preferences.Repository
@@ -42,6 +45,8 @@ class ImageControl {
             imageControl.maxHeightOrWidth = Repository.maxHeightOrWidth
             imageControl.connectionTimeout = Repository.connectionTimeout
 
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
+                imageControl.trustFactory = TrustFactory.getTrustFactoryManager(getContext())
         }
     }
 }
