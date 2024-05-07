@@ -12,12 +12,12 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
+import com.dacosys.assetControl.utils.Statics.Companion.appHasBluetoothPermission
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.scanners.Collector.Companion.collectorType
 import com.dacosys.assetControl.utils.scanners.Collector.Companion.collectorTypeChanged
@@ -257,16 +257,17 @@ object JotterListener : Jotter.Listener {
 
             if (isNfcRequired()) Nfc.setupNFCReader(activity)
 
-            if (activity is Rfid.RfidDeviceListener && isRfidRequired()) {
-                rfidStart(activity)
-                rfidSetup(activity)
-            }
+            if (isRfidRequired(activity)) rfidStart(activity)
         }
     }
 
     fun rfidStart(activity: AppCompatActivity) {
         Rfid.destroy()
-        Rfid.build(if (activity is Rfid.RfidDeviceListener) activity else null, RfidType.vh75)
+        if (!isRfidRequired(activity)) return
+
+        Rfid.build(activity as Rfid.RfidDeviceListener, RfidType.vh75)
+
+        rfidSetup(activity)
     }
 
     private fun rfidSetup(activity: AppCompatActivity) {
@@ -281,20 +282,14 @@ object JotterListener : Jotter.Listener {
             )
         } else {
             if (!mBluetoothAdapter.isEnabled) {
-                val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-                enableBtIntent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-                if (ActivityCompat.checkSelfPermission(
-                        activity, Manifest.permission.BLUETOOTH_CONNECT
-                    ) != PackageManager.PERMISSION_GRANTED
-                ) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        activity.requestPermissions(
-                            arrayOf(Manifest.permission.BLUETOOTH_CONNECT),
-                            REQUEST_BLUETOOTH_CONNECT
-                        )
-                    }
+                if (!appHasBluetoothPermission()) {
+                    activity.requestPermissions(
+                        arrayOf(Manifest.permission.BLUETOOTH_CONNECT),
+                        REQUEST_BLUETOOTH_CONNECT
+                    )
                     return
                 }
+
                 val resultForRfidConnect =
                     activity.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
                         if (it?.resultCode == CommonStatusCodes.SUCCESS || it?.resultCode == CommonStatusCodes.SUCCESS_CACHE) {
@@ -302,6 +297,8 @@ object JotterListener : Jotter.Listener {
                         }
                     }
 
+                val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+                enableBtIntent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
                 resultForRfidConnect.launch(enableBtIntent)
             } else {
                 rfidSetListener(activity)
@@ -347,7 +344,7 @@ object JotterListener : Jotter.Listener {
     private fun resumeReaderDevices(activity: AppCompatActivity) {
         if (isNfcRequired()) enableNfcForegroundDispatch(activity)
 
-        if (activity is Rfid.RfidDeviceListener && isRfidRequired()) Rfid.resume(activity)
+        if (isRfidRequired(activity)) Rfid.resume(activity as Rfid.RfidDeviceListener)
 
         scannerList.firstOrNull { it.activityName() == activity.javaClass.simpleName }?.onResume()
         floatingWindowList.firstOrNull { it.activityName == activity.javaClass.simpleName }
@@ -386,7 +383,7 @@ object JotterListener : Jotter.Listener {
     }
 
     private fun pauseReaderDevices(activity: AppCompatActivity) {
-        if (activity is Rfid.RfidDeviceListener && isRfidRequired()) Rfid.pause()
+        if (isRfidRequired(activity)) Rfid.pause()
 
         if (isNfcRequired()) Nfc.disableNfcForegroundDispatch(activity)
 

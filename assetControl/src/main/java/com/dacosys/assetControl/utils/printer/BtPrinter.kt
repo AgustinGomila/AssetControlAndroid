@@ -8,23 +8,22 @@ import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothSocket
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Build
 import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import androidx.fragment.app.FragmentActivity
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarEventData
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
+import com.dacosys.assetControl.utils.Statics.Companion.appHasBluetoothPermission
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.settings.config.Preference
 import com.dacosys.assetControl.utils.settings.preferences.Preferences
 import com.google.android.gms.common.api.CommonStatusCodes
 import java.io.IOException
 
+@SuppressLint("MissingPermission")
 open class BtPrinter(private val activity: FragmentActivity, private val onEvent: (SnackBarEventData) -> Unit) :
     Printer.PrintLabelListener, Runnable {
 
@@ -53,22 +52,21 @@ open class BtPrinter(private val activity: FragmentActivity, private val onEvent
             sendEvent(getContext().getString(R.string.there_are_no_bluetooth_devices), SnackBarType.ERROR)
         } else {
             if (!mBluetoothAdapter.isEnabled) {
-                val enablePrinter = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-                enablePrinter.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-                if (ActivityCompat.checkSelfPermission(
-                        activity, Manifest.permission.BLUETOOTH_CONNECT
-                    ) != PackageManager.PERMISSION_GRANTED
-                ) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        requestConnectPermission.launch(Manifest.permission.BLUETOOTH_CONNECT)
-                    }
-                    return
+                if (!appHasBluetoothPermission()) {
+                    resultForPrinterBtPermissions()
+                } else {
+                    enableBluetooth()
                 }
-                resultForPrinterConnect.launch(enablePrinter)
             } else {
                 connectToPrinter(printer.address)
             }
         }
+    }
+
+    private fun enableBluetooth() {
+        val enablePrinter = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+        enablePrinter.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+        resultForPrinterConnect.launch(enablePrinter)
     }
 
     private fun connectToPrinter(deviceAddress: String) {
@@ -81,14 +79,9 @@ open class BtPrinter(private val activity: FragmentActivity, private val onEvent
         mBluetoothConnectThread.start()
     }
 
-    @SuppressLint("MissingPermission")
     override fun run() {
         try {
-            if (ActivityCompat.checkSelfPermission(
-                    getContext(),
-                    Manifest.permission.BLUETOOTH_CONNECT
-                ) == PackageManager.PERMISSION_GRANTED
-            ) {
+            if (appHasBluetoothPermission()) {
                 val device = bluetoothDevice ?: return
 
                 bluetoothSocket = device.createRfcommSocketToServiceRecord(device.uuids[0].uuid)
@@ -96,11 +89,6 @@ open class BtPrinter(private val activity: FragmentActivity, private val onEvent
                 bluetoothSocket?.connect()
 
                 sendEvent(activity.getString(R.string.device_connected), SnackBarType.INFO)
-            } else {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    requestConnectPermission.launch(Manifest.permission.BLUETOOTH_CONNECT)
-                }
-                return
             }
         } catch (eConnectException: IOException) {
             Log.e(tag, "CouldNotConnectToSocket", eConnectException)
@@ -111,18 +99,21 @@ open class BtPrinter(private val activity: FragmentActivity, private val onEvent
         }
     }
 
-    private val requestConnectPermission =
-        activity.registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            if (isGranted) {
-                Log.i("DEBUG", "permission granted")
-            } else {
-                Log.i("DEBUG", "permission denied")
-
-                !ActivityCompat.shouldShowRequestPermissionRationale(
-                    activity, Manifest.permission.CAMERA
-                )
-            }
+    private fun resultForPrinterBtPermissions() {
+        if (!appHasBluetoothPermission()) {
+            requestPermissionsPrinter.launch(arrayOf(Manifest.permission.BLUETOOTH_CONNECT))
+        } else {
+            enableBluetooth()
         }
+    }
+
+    private val requestPermissionsPrinter = activity.registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        if (permissions.values.all { it }) {
+            enableBluetooth()
+        }
+    }
 
     private val resultForPrinterConnect =
         activity.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -189,16 +180,12 @@ open class BtPrinter(private val activity: FragmentActivity, private val onEvent
             val bluetoothManager = getContext().getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
             val bluetoothAdapter = bluetoothManager.adapter ?: return
 
-            if (ActivityCompat.checkSelfPermission(
-                    getContext(),
-                    Manifest.permission.BLUETOOTH_CONNECT
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
+            if (!appHasBluetoothPermission()) {
                 onEvent(SnackBarEventData(getContext().getString(R.string.permission_denied), SnackBarType.ERROR))
                 return
             }
 
-            @SuppressLint("MissingPermission") val mPairedDevices = bluetoothAdapter.bondedDevices
+            val mPairedDevices = bluetoothAdapter.bondedDevices
 
             this.bluetoothAdapter = bluetoothAdapter
 

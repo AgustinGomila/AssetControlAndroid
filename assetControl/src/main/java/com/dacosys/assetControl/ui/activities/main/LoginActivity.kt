@@ -955,7 +955,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
             menu.removeItem(menu.findItem(R.id.action_settings).itemId)
         }
 
-        if (!isRfidRequired()) {
+        if (!isRfidRequired(this)) {
             menu.removeItem(menu.findItem(R.id.action_rfid_connect).itemId)
         }
 

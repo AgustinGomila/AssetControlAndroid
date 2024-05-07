@@ -5,18 +5,12 @@ import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.text.InputFilter
 import android.text.Spanned
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import androidx.preference.*
 import androidx.preference.Preference.OnPreferenceClickListener
 import com.dacosys.assetControl.AssetControlApp
@@ -25,6 +19,7 @@ import com.dacosys.assetControl.ui.activities.main.SettingsActivity.Companion.bi
 import com.dacosys.assetControl.ui.common.snackbar.MakeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarEventData
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
+import com.dacosys.assetControl.utils.Statics.Companion.appHasBluetoothPermission
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.scanners.Collector
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
@@ -34,6 +29,7 @@ import com.dacosys.assetControl.utils.settings.collectorType.CollectorType
 import com.dacosys.assetControl.utils.settings.collectorType.CollectorTypePreference
 import com.dacosys.assetControl.utils.settings.devices.DevicePreference
 import com.dacosys.assetControl.utils.settings.preferences.Preferences
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
 import com.google.android.gms.common.api.CommonStatusCodes
 import java.util.regex.Matcher
 import java.util.regex.Pattern
@@ -44,10 +40,66 @@ import com.dacosys.assetControl.utils.settings.config.Preference.Companion as Pr
  * This fragment shows notification preferences only. It is used when the
  * activity is showing a two-pane settings UI.
  */
+@SuppressLint("MissingPermission")
 class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceListener {
 
     private lateinit var printerPref: PreferenceScreen
     private lateinit var rfidPref: PreferenceScreen
+
+    private val context = AssetControlApp.getContext()
+
+    override fun onNavigateToScreen(preferenceScreen: PreferenceScreen) {
+        val prefFragment = DevicePreferenceFragment()
+
+        val args = Bundle()
+        args.putString("rootKey", preferenceScreen.key)
+        prefFragment.arguments = args
+
+        parentFragmentManager
+            .beginTransaction()
+            .replace(id, prefFragment)
+            .addToBackStack(null)
+            .commit()
+    }
+
+    override fun onGetBluetoothName(name: String) {}
+
+    override fun onReadCompleted(scanCode: String) {}
+
+    override fun onWriteCompleted(isOk: Boolean) {}
+
+    override fun onStateChanged(state: Int) {
+        if (prefsGetBoolean(PreferenceConfig.rfidShowConnectedMessage)) {
+            when (Rfid.vh75State) {
+                Vh75Bt.STATE_CONNECTED -> {
+                    showSnackBar(
+                        SnackBarEventData(
+                            getString(R.string.rfid_connected),
+                            SnackBarType.SUCCESS
+                        )
+                    )
+                }
+
+                Vh75Bt.STATE_CONNECTING -> {
+                    showSnackBar(
+                        SnackBarEventData(
+                            getString(R.string.searching_rfid_reader),
+                            SnackBarType.RUNNING
+                        )
+                    )
+                }
+
+                else -> {
+                    showSnackBar(
+                        SnackBarEventData(
+                            getString(R.string.there_is_no_rfid_device_connected),
+                            SnackBarType.INFO
+                        )
+                    )
+                }
+            }
+        }
+    }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         var key = rootKey
@@ -74,40 +126,14 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
         }
     }
 
-    override fun onNavigateToScreen(preferenceScreen: PreferenceScreen) {
-        val prefFragment = DevicePreferenceFragment()
-        val args = Bundle()
-        args.putString("rootKey", preferenceScreen.key)
-        prefFragment.arguments = args
-        parentFragmentManager.beginTransaction().replace(id, prefFragment).addToBackStack(null).commit()
-    }
-
-    private lateinit var v: View
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?,
-    ): View {
-        v = super.onCreateView(inflater, container, savedInstanceState)
-        return v
-    }
-
-    override fun onGetBluetoothName(name: String) {
-        rfidDeviceNamePreference?.summary = name
-    }
-
-    override fun onReadCompleted(scanCode: String) {}
-
-    override fun onWriteCompleted(isOk: Boolean) {}
-
     private fun setupRfidReader() {
         try {
-            if (Rfid.isRfidRequired()) {
+            if (Rfid.isRfidRequired(this::class)) {
                 Rfid.setListener(this, RfidType.vh75)
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
-            MakeText.makeText(v, getString(R.string.rfid_reader_not_initialized), SnackBarType.INFO)
+            showSnackBar(SnackBarEventData(getString(R.string.rfid_reader_not_initialized), SnackBarType.INFO))
             ErrorLog.writeLog(activity, this::class.java.simpleName, ex)
         }
     }
@@ -173,16 +199,11 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
     }
 
     private fun getPrinterName(): String {
-        val useBtPrinter =
-            Preferences.prefsGetBoolean(PreferenceConfig.useBtPrinter)
-        val useNetPrinter =
-            Preferences.prefsGetBoolean(PreferenceConfig.useNetPrinter)
-        val ipNetPrinter =
-            Preferences.prefsGetString(PreferenceConfig.ipNetPrinter)
-        val printerBtAddress =
-            Preferences.prefsGetString(PreferenceConfig.printerBtAddress)
-        val portNetPrinter =
-            Preferences.prefsGetString(PreferenceConfig.portNetPrinter)
+        val useBtPrinter = prefsGetBoolean(PreferenceConfig.useBtPrinter)
+        val useNetPrinter = prefsGetBoolean(PreferenceConfig.useNetPrinter)
+        val ipNetPrinter = Preferences.prefsGetString(PreferenceConfig.ipNetPrinter)
+        val printerBtAddress = Preferences.prefsGetString(PreferenceConfig.printerBtAddress)
+        val portNetPrinter = Preferences.prefsGetString(PreferenceConfig.portNetPrinter)
 
         val r = if (!useBtPrinter && !useNetPrinter) {
             getString(R.string.disabled)
@@ -200,7 +221,27 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
         return r
     }
 
+    private fun resultForPrinterBtPermissions() {
+        if (!appHasBluetoothPermission()) {
+            requestPermissionsPrinter.launch(arrayOf(Manifest.permission.BLUETOOTH_CONNECT))
+        } else {
+            setPrinter()
+        }
+    }
+
+    private val requestPermissionsPrinter = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        if (permissions.values.all { it }) {
+            setPrinter()
+        }
+    }
+
     private fun setPrinterPref() {
+        resultForPrinterBtPermissions()
+    }
+
+    private fun setPrinter() {
         //region //// DEVICE LIST
         val deviceListPreference =
             findPreference<Preference>(PreferenceConfig.printerBtAddress.key) as DevicePreference
@@ -214,9 +255,10 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
             else deviceListPreference.entry
         deviceListPreference.onPreferenceChangeListener =
             Preference.OnPreferenceChangeListener { preference, _ ->
+                val entry = deviceListPreference.entry
                 val pn =
-                    if (deviceListPreference.entry.isNullOrEmpty()) getString(R.string.there_is_no_selected_printer)
-                    else deviceListPreference.entry.toString()
+                    if (entry.isNullOrEmpty()) getString(R.string.there_is_no_selected_printer)
+                    else entry.toString()
                 preference.summary = pn
                 true
             }
@@ -239,14 +281,14 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
             it.filters = filters
         }
         ipNetPrinterPref.setOnPreferenceChangeListener { _, newValue ->
-            if (Preferences.prefsGetBoolean(PreferenceConfig.useNetPrinter) && newValue != null) {
+            if (prefsGetBoolean(PreferenceConfig.useNetPrinter) && newValue != null) {
                 ipNetPrinterPref.summary = newValue.toString()
             }
             true
         }
 
         portNetPrinterPref.setOnPreferenceChangeListener { _, newValue ->
-            if (Preferences.prefsGetBoolean(PreferenceConfig.useNetPrinter) && newValue != null) {
+            if (prefsGetBoolean(PreferenceConfig.useNetPrinter) && newValue != null) {
                 portNetPrinterPref.summary = newValue.toString()
             }
             true
@@ -336,47 +378,58 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
         //endregion //// CARÁCTER DE SALTO DE LÍNEA
     }
 
-    private val resultForRfidConnect = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it?.resultCode == CommonStatusCodes.SUCCESS || it?.resultCode == CommonStatusCodes.SUCCESS_CACHE) {
-            setupRfidReader()
-        }
-    }
-
-    private val resultForRfidPermissionConnect =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            // returns boolean representing whether the
-            // permission is granted or not
-            if (!isGranted) {
-                MakeText.makeText(
-                    v,
-                    AssetControlApp.getContext().getString(R.string.app_dont_have_necessary_permissions),
-                    SnackBarType.ERROR
-                )
-            } else {
+    private val resultForRfidConnect =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it?.resultCode == CommonStatusCodes.SUCCESS ||
+                it?.resultCode == CommonStatusCodes.SUCCESS_CACHE
+            ) {
                 setupRfidReader()
             }
         }
 
     private fun getRfidSummary(): String {
         var rfidSummary =
-            if (Preferences.prefsGetBoolean(PreferenceConfig.useBtRfid)) getString(
-                R.string.enabled
-            )
-            else getString(R.string.disabled)
+            if (prefsGetBoolean(PreferenceConfig.useBtRfid))
+                getString(R.string.enabled)
+            else
+                getString(R.string.disabled)
 
-        if (Preferences.prefsGetString(PreferenceConfig.rfidBtAddress)
-                .isNotEmpty()
-        )
-            rfidSummary = "$rfidSummary: ${getBluetoothNameFromAddress()}"
+        val btAddress = Preferences.prefsGetString(PreferenceConfig.rfidBtAddress)
+        if (btAddress.isNotEmpty()) {
+            var description = btAddress
+            val btName = Preferences.prefsGetString(PreferenceConfig.rfidBtName)
+            if (btName.isNotEmpty()) description = btName
+
+            rfidSummary = "$rfidSummary: $description"
+        }
 
         return rfidSummary
     }
 
-    // Esta preferencia se utiliza al recibir el nombre del dispositivo
-    // RFID seleccionado para modificar el texto de su sumario.
-    private var rfidDeviceNamePreference: EditTextPreference? = null
+    private fun resultForRfidBtPermissions() {
+        if (!appHasBluetoothPermission()) {
+            requestPermissionsRfid.launch(arrayOf(Manifest.permission.BLUETOOTH_CONNECT))
+        } else {
+            setRfid()
+        }
+    }
+
+    private val requestPermissionsRfid = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        if (permissions.values.all { it }) {
+            setRfid()
+        }
+    }
 
     private fun setRfidPref() {
+        resultForRfidBtPermissions()
+    }
+
+    private val vh75: Vh75Bt?
+        get() = Rfid.vh75.takeIf { it?.state == Vh75Bt.STATE_CONNECTED }
+
+    private fun setRfid() {
         //region //// USE RFID
         val swPrefBtRfid =
             findPreference<Preference>(PreferenceConfig.useBtRfid.key) as SwitchPreference
@@ -388,28 +441,33 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
         //endregion //// USE RFID
 
         //region //// BLUETOOTH NAME
-        rfidDeviceNamePreference = findPreference<Preference>("rfid_bluetooth_name") as EditTextPreference
-        if (Rfid.rfidDevice != null && (Rfid.rfidDevice as Vh75Bt).getState() == Vh75Bt.STATE_CONNECTED) {
-            (Rfid.rfidDevice as Vh75Bt).getBluetoothName()
-        }
-        rfidDeviceNamePreference!!.setOnPreferenceClickListener {
-            if (Rfid.rfidDevice == null || (Rfid.rfidDevice as Vh75Bt).getState() != Vh75Bt.STATE_CONNECTED) {
-                MakeText.makeText(
-                    v, getString(R.string.there_is_no_rfid_device_connected), SnackBarType.ERROR
+        val rfidNamePreference = findPreference<Preference>(PreferenceConfig.rfidBtName.key) as EditTextPreference
+        rfidNamePreference.setOnPreferenceClickListener {
+            if (vh75?.state != Vh75Bt.STATE_CONNECTED) {
+                showSnackBar(
+                    SnackBarEventData(
+                        getString(R.string.there_is_no_rfid_device_connected),
+                        SnackBarType.ERROR
+                    )
                 )
             }
             true
         }
-        rfidDeviceNamePreference!!.setOnPreferenceChangeListener { _, newValue ->
-            if (Rfid.rfidDevice != null && (Rfid.rfidDevice as Vh75Bt).getState() == Vh75Bt.STATE_CONNECTED) {
-                (Rfid.rfidDevice as Vh75Bt).setBluetoothName(newValue.toString())
+        rfidNamePreference.setOnPreferenceChangeListener { _, newValue ->
+            if (vh75?.state == Vh75Bt.STATE_CONNECTED) {
+                vh75?.setBluetoothName(newValue.toString())
+                rfidNamePreference.summary = newValue.toString()
             } else {
-                MakeText.makeText(
-                    v, getString(R.string.there_is_no_rfid_device_connected), SnackBarType.ERROR
+                showSnackBar(
+                    SnackBarEventData(
+                        getString(R.string.there_is_no_rfid_device_connected),
+                        SnackBarType.ERROR
+                    )
                 )
             }
             true
         }
+        rfidNamePreference.summary = Preferences.prefsGetString(PreferenceConfig.rfidBtName)
         //endregion //// BLUETOOTH NAME
 
         //region //// DEVICE LIST PREFERENCE
@@ -420,12 +478,21 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
             // set first value by default
             deviceListPreference.setValueIndex(0)
         }
+        deviceListPreference.summary =
+            if (deviceListPreference.entry.isNullOrEmpty()) getString(R.string.there_is_no_selected_rfid_scanner)
+            else deviceListPreference.entry
         deviceListPreference.onPreferenceChangeListener =
             Preference.OnPreferenceChangeListener { preference, _ ->
+                val entry = deviceListPreference.entry
                 val pn =
-                    if (deviceListPreference.entry.isNullOrEmpty()) getString(R.string.there_is_no_selected_rfid_scanner)
-                    else deviceListPreference.entry.toString()
+                    if (entry.isNullOrEmpty()) getString(R.string.there_is_no_selected_rfid_scanner)
+                    else entry.toString()
                 preference.summary = pn
+
+                if (!entry.isNullOrEmpty()) {
+                    Preferences.prefsPutString(PreferenceConfig.rfidBtName.key, entry.toString())
+                }
+
                 true
             }
         //endregion //// DEVICE LIST PREFERENCE
@@ -445,12 +512,15 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
         val resetButton =
             findPreference<Preference>("rfid_reset_to_factory") as Preference
         resetButton.onPreferenceClickListener = OnPreferenceClickListener {
-            if (Rfid.rfidDevice != null && (Rfid.rfidDevice as Vh75Bt).getState() == Vh75Bt.STATE_CONNECTED) {
+            if (vh75?.state == Vh75Bt.STATE_CONNECTED) {
                 val diaBox = askForResetToFactory()
                 diaBox.show()
             } else {
-                MakeText.makeText(
-                    v, getString(R.string.there_is_no_rfid_device_connected), SnackBarType.ERROR
+                showSnackBar(
+                    SnackBarEventData(
+                        getString(R.string.there_is_no_rfid_device_connected),
+                        SnackBarType.ERROR
+                    )
                 )
             }
             true
@@ -461,10 +531,10 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
     }
 
     private fun connectToRfidDevice() {
-        if (!Preferences.prefsGetBoolean(PreferenceConfig.useBtRfid)) return
+        if (!prefsGetBoolean(PreferenceConfig.useBtRfid)) return
 
         val bluetoothManager =
-            AssetControlApp.getContext().getSystemService(AppCompatActivity.BLUETOOTH_SERVICE) as BluetoothManager
+            context.getSystemService(AppCompatActivity.BLUETOOTH_SERVICE) as BluetoothManager
         val mBluetoothAdapter = bluetoothManager.adapter
         if (mBluetoothAdapter == null) {
             showSnackBar(
@@ -473,22 +543,14 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
                 )
             )
         } else {
-            if (!mBluetoothAdapter.isEnabled) {
-                val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-                enableBtIntent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-                if (ActivityCompat.checkSelfPermission(
-                        requireContext(), Manifest.permission.BLUETOOTH_CONNECT
-                    ) != PackageManager.PERMISSION_GRANTED
-                ) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        resultForRfidPermissionConnect.launch(Manifest.permission.BLUETOOTH_CONNECT)
-                    }
-                    return
-                }
-                resultForRfidConnect.launch(enableBtIntent)
-            } else {
+            if (mBluetoothAdapter.isEnabled) {
                 setupRfidReader()
+                return
             }
+
+            val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+            enableBtIntent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+            resultForRfidConnect.launch(enableBtIntent)
         }
     }
 
@@ -501,58 +563,11 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
                 getString(R.string.reset)
             ) { dialog, _ ->
                 //your deleting code
-                (Rfid.rfidDevice as Vh75Bt).resetToFactory()
+                vh75?.resetToFactory()
                 dialog.dismiss()
             }.setNegativeButton(
                 R.string.cancel
             ) { dialog, _ -> dialog.dismiss() }.create()
-    }
-
-    private val resultForBtPermissionConnect =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            // returns boolean representing whether the
-            // permission is granted or not
-            if (!isGranted) {
-                MakeText.makeText(
-                    v,
-                    AssetControlApp.getContext().getString(R.string.app_dont_have_necessary_permissions),
-                    SnackBarType.ERROR
-                )
-            }
-        }
-
-    @SuppressLint("MissingPermission")
-    private fun getBluetoothNameFromAddress(): String {
-        var s = getString(R.string.there_is_no_selected_rfid_scanner)
-        val address =
-            Preferences.prefsGetString(PreferenceConfig.rfidBtAddress)
-        if (address.isNotEmpty()) {
-            val bluetoothManager =
-                AssetControlApp.getContext().getSystemService(AppCompatActivity.BLUETOOTH_SERVICE) as BluetoothManager
-            val mBluetoothAdapter = bluetoothManager.adapter
-
-            if (ActivityCompat.checkSelfPermission(
-                    AssetControlApp.getContext(), Manifest.permission.BLUETOOTH_CONNECT
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    resultForBtPermissionConnect.launch(Manifest.permission.BLUETOOTH_CONNECT)
-                }
-                return s
-            }
-
-            val mPairedDevices = mBluetoothAdapter!!.bondedDevices
-            if (mPairedDevices.size > 0) {
-                for (mDevice in mPairedDevices) {
-                    if (mDevice.address == address) {
-                        s = mDevice.name.toString()
-                        break
-                    }
-                }
-            }
-        }
-
-        return s
     }
 
     private fun showSnackBar(it: SnackBarEventData) {

@@ -273,6 +273,12 @@ class Preference(key: String, defaultValue: Any, debugValue: Any) {
             debugValue = false
         )
 
+        var rfidShowConnectedMessage = Preference(
+            "show_rfid_connected_message",
+            defaultValue = false,
+            debugValue = false
+        )
+
         var allowScreenRotation = Preference(
             "allow_screen_rotation",
             defaultValue = true,
@@ -421,8 +427,8 @@ class Preference(key: String, defaultValue: Any, debugValue: Any) {
 
         var connectionTimeout = Preference(
             key = "connection_timeout",
-            defaultValue = 10,
-            debugValue = 10
+            defaultValue = 25,
+            debugValue = 25
         )
 
         var clientPackage = Preference(
@@ -832,6 +838,7 @@ class Preference(key: String, defaultValue: Any, debugValue: Any) {
                 rfidShockOnRead,
                 rfidSkipSameRead,
                 rfidWritePower,
+                rfidShowConnectedMessage,
 
                 flCameraPortraitLocX,
                 flCameraPortraitLocY,

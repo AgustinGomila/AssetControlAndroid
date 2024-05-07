@@ -6,6 +6,8 @@ import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.network.clientPackages.TrustFactory
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.misc.Md5
+import com.dacosys.assetControl.utils.settings.config.Preference
+import com.dacosys.assetControl.utils.settings.preferences.Preferences
 import com.dacosys.assetControl.utils.settings.preferences.Repository
 import org.ksoap2.HeaderProperty
 import org.ksoap2.SoapEnvelope
@@ -22,6 +24,7 @@ import java.net.PasswordAuthentication
 import java.net.Proxy
 import java.util.*
 import java.util.regex.Pattern
+import javax.net.ssl.HttpsURLConnection
 
 
 class Webservice @Throws(Exception::class) constructor(private var webServiceType: WebServiceType?) {
@@ -426,7 +429,7 @@ class Webservice @Throws(Exception::class) constructor(private var webServiceTyp
         val response: Any
 
         try {
-            val timeout = 25000
+            val timeout = Preferences.prefsGetInt(Preference.connectionTimeout) * 1000
             val headers: MutableList<HeaderProperty> = ArrayList()
             headers.add(HeaderProperty("Connection", "close"))
 
@@ -439,10 +442,11 @@ class Webservice @Throws(Exception::class) constructor(private var webServiceTyp
 
                     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
                         val t = TrustFactory.getTrustFactoryManager(getContext())
+                        HttpsURLConnection.setDefaultSSLSocketFactory(t.first)
                         (aht.serviceConnection as HttpsServiceConnectionSE).setSSLSocketFactory(t.first)
                     }
 
-                    callWithRetry(aht, soapAction, envelope, headers, 3)
+                    callWithRetry(aht, soapAction, envelope, headers)
                     response = (envelope.response ?: return null)
                 }
 
@@ -452,7 +456,7 @@ class Webservice @Throws(Exception::class) constructor(private var webServiceTyp
                     )
                     aht.debug = false
 
-                    callWithRetry(aht, soapAction, envelope, headers, 3)
+                    callWithRetry(aht, soapAction, envelope, headers)
                     response = (envelope.response ?: return null)
                 }
 
@@ -484,12 +488,13 @@ class Webservice @Throws(Exception::class) constructor(private var webServiceTyp
         soapAction: String,
         envelope: SoapEnvelope,
         headers: List<*>,
-        numRetries: Int,
+        numRetries: Int = 3,
     ): List<*>? {
-        for (i in 0..numRetries) {
-            if (i > 0) {
-                aht.serviceConnection.connect()
+        var attempt = 0
+        while (attempt < numRetries) {
+            if (attempt > 0) {
                 Thread.sleep(3000)
+                aht.serviceConnection.connect()
             }
 
             try {
@@ -498,12 +503,15 @@ class Webservice @Throws(Exception::class) constructor(private var webServiceTyp
                         "%s: %s", soapAction, envelope.bodyOut?.toString() ?: ""
                     )
                 )
+
                 val r = aht.call(soapAction, envelope, headers, null)
                 aht.serviceConnection.disconnect()
                 return r
             } catch (e: Exception) {
                 e.printStackTrace()
-                if (i == numRetries) {
+
+                attempt++
+                if (attempt >= numRetries) {
                     Log.e(
                         this::class.java.simpleName,
                         "Error al conectar después de $numRetries intentos"

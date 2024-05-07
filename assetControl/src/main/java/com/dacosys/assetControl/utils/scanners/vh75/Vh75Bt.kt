@@ -1,16 +1,15 @@
 package com.dacosys.assetControl.utils.scanners.vh75
 
-import android.Manifest
+import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
-import android.content.pm.PackageManager
 import android.media.AudioManager
 import android.media.ToneGenerator
 import android.util.Log
-import androidx.core.app.ActivityCompat
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
+import com.dacosys.assetControl.utils.Statics.Companion.appHasBluetoothPermission
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.utils.settings.config.Preference
 import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
@@ -25,10 +24,10 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.experimental.inv
 
-
+@SuppressLint("MissingPermission")
 class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
     /**
-     * Constructor. Prepares a new Vh75Bt session.     *
+     * Constructor. Prepares a new Vh75Bt session.
      * BuilderVH75 Contains both the Listener and the Context
      */
     // Member fields
@@ -38,20 +37,24 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
     /**
      * Return the current connection mState.
      */
-    @get:Synchronized
-    var mState: Int = 0
+    @set:Synchronized
+    private var mState: Int = 0
 
-    private var mNewState: Int = 0
     private val mDestroy = AtomicBoolean(false)
+
+    private fun refreshState(state: Int, report: Boolean = true) {
+        if (state == this.state && !report) return
+
+        mState = state
+        if (report) reportState()
+    }
 
     @Volatile
     private var reconnectAttempts = 0
 
     init {
-        mState = STATE_NONE
+        refreshState(STATE_NONE, false)
         mDestroy.set(false)
-
-        mNewState = mState
 
         pairDevice()
     }
@@ -66,10 +69,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
             return
         }
 
-        if (ActivityCompat.checkSelfPermission(
-                getContext(), Manifest.permission.BLUETOOTH_CONNECT
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
+        if (!appHasBluetoothPermission()) {
             return
         }
 
@@ -109,10 +109,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
             // Get a BluetoothSocket for a connection with the
             // given BluetoothDevice
             try {
-                if (ActivityCompat.checkSelfPermission(
-                        getContext(), Manifest.permission.BLUETOOTH_CONNECT
-                    ) == PackageManager.PERMISSION_GRANTED
-                ) {
+                if (appHasBluetoothPermission()) {
                     tmp = mDevice.createRfcommSocketToServiceRecord(uuid)
                 }
             } catch (e: IOException) {
@@ -121,17 +118,14 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
 
             if (tmp != null) {
                 mmSocket = NativeBluetoothSocket(tmp)
-                mState = STATE_CONNECTING
+                refreshState(STATE_CONNECTING, true)
             }
         }
 
         override fun run() {
             Log.v(tag, "BEGIN mConnectThread")
 
-            if (ActivityCompat.checkSelfPermission(
-                    getContext(), Manifest.permission.BLUETOOTH_CONNECT
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
+            if (!appHasBluetoothPermission()) {
                 return
             }
 
@@ -201,49 +195,25 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
      */
     @Synchronized
     private fun reportState() {
-        mState = getState()
+        mState = state
 
-        /*
-        val STATE_NONE = 0
-        val STATE_LISTEN = 1
-        val STATE_CONNECTING = 2
-        val STATE_CONNECTED = 3
-        */
-
-        var mNewStateStr = ""
-        when (mNewState) {
-            STATE_CONNECTED -> mNewStateStr = "STATE_CONNECTED"
-            STATE_NONE -> mNewStateStr = "STATE_NONE"
-            STATE_CONNECTING -> mNewStateStr = "STATE_CONNECTING"
-        }
-
-        var mStateStr = ""
-        when (mState) {
-            STATE_CONNECTED -> mStateStr = "STATE_CONNECTED"
-            STATE_NONE -> mStateStr = "STATE_NONE"
-            STATE_CONNECTING -> mStateStr = "STATE_CONNECTING"
-        }
-
-        Log.v(tag, "reportState() $mNewStateStr ($mNewState) -> $mStateStr ($mState)")
-        mNewState = mState
-
-        if (mNewState == STATE_CONNECTED) {
+        if (state == STATE_CONNECTED) {
             val toneGen1 = ToneGenerator(AudioManager.STREAM_MUSIC, 100)
             toneGen1.startTone(ToneGenerator.TONE_DTMF_S, 150)
             // RFID Device connected SUCCESS!
         }
-        if (listener != null) {
-            listener!!.onStateChanged(mNewState)
-        }
+
+        listener?.onStateChanged(state)
     }
 
     /**
      * Return the current connection state.
      */
-    @Synchronized
-    fun getState(): Int {
-        return mState
-    }
+    @get:Synchronized
+    val state: Int
+        get() {
+            return mState
+        }
 
     /**
      * Start the ConnectThread to initiate a connection to a remote device.
@@ -259,8 +229,6 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
         // Start the thread to connect with the given device
         val conn = ConnectThread(device)
         conn.start()
-
-        reportState()
     }
 
     /**
@@ -273,16 +241,12 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
         Log.v(tag, "Connected to Socket")
 
         // Cancel any thread currently running a connection
-        if (mConnectedThread != null) {
-            mConnectedThread!!.interrupt()
-            mConnectedThread = null
-        }
+        mConnectedThread?.interrupt()
+        mConnectedThread = null
 
         // Start the thread to manage the connection and perform transmissions
         mConnectedThread = ConnectedThread(socket, MODE_CONTINUOS_READ)
-        mConnectedThread!!.start()
-
-        reportState()
+        mConnectedThread?.start()
 
         // Leer la configuración del dispositivo.
         // El resultado de la lectura dispara el evento onRead y este
@@ -298,12 +262,10 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
      */
     @Synchronized
     fun destroy() {
-        if (mConnectedThread != null) {
-            mConnectedThread!!.finish()
-            mConnectedThread = null
-        }
+        mConnectedThread?.finish()
+        mConnectedThread = null
 
-        reportState()
+        refreshState(STATE_NONE, false)
     }
 
     /**
@@ -317,7 +279,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
         val r: ConnectedThread?
         // Synchronize a copy of the ConnectedThread
         synchronized(this) {
-            if (mState != STATE_CONNECTED) return
+            if (state != STATE_CONNECTED) return
             r = mConnectedThread
         }
         // Perform the writing in an unsynchronized way
@@ -329,7 +291,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
         val r: ConnectedThread?
         // Synchronize a copy of the ConnectedThread
         synchronized(this) {
-            if (mState != STATE_CONNECTED) return
+            if (state != STATE_CONNECTED) return
             r = mConnectedThread
         }
 
@@ -348,7 +310,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
         val r: ConnectedThread?
         // Synchronize a copy of the ConnectedThread
         synchronized(this) {
-            if (mState != STATE_CONNECTED) return
+            if (state != STATE_CONNECTED) return
             r = mConnectedThread
         }
 
@@ -392,7 +354,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
         val r: ConnectedThread?
         // Synchronize a copy of the ConnectedThread
         synchronized(this) {
-            if (mState != STATE_CONNECTED) return false
+            if (state != STATE_CONNECTED) return false
             r = mConnectedThread
         }
 
@@ -437,8 +399,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
     private fun connectionFailed() {
         Log.e(this::class.java.simpleName, "connectionFailed -> Unable to connect device")
 
-        mState = STATE_NONE
-        reportState()
+        refreshState(STATE_NONE, false)
 
         reconnect()
     }
@@ -449,8 +410,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
     private fun connectionLost() {
         Log.e(this::class.java.simpleName, "connectionLost -> Device connection was lost")
 
-        mState = STATE_NONE
-        reportState()
+        refreshState(STATE_NONE, false)
 
         reconnect()
     }
@@ -463,7 +423,10 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
             )
 
             destroy()
+
             pairDevice()
+        } else {
+            refreshState(STATE_NONE, true)
         }
     }
 
@@ -496,7 +459,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
 
             mmInStream = tmpIn
             mmOutStream = tmpOut
-            mState = STATE_CONNECTED
+            refreshState(STATE_CONNECTED, true)
 
             reconnectAttempts = 0
             mThreadMode = threadMode
@@ -508,7 +471,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
             var bytes: Int
 
             // Keep listening to the InputStream while connected
-            while (mState == STATE_CONNECTED && !mDestroy.get()) {
+            while (this@Vh75Bt.state == STATE_CONNECTED && !mDestroy.get()) {
                 while (mThreadMode == MODE_PAUSE && !mDestroy.get()) {
                 }
 
@@ -640,8 +603,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
                 mmOutStream?.close()
                 mmInStream?.close()
 
-                mState = STATE_NONE
-                reportState()
+                refreshState(STATE_NONE, false)
 
                 reconnect()
             }
@@ -656,7 +618,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
                 // 2. Detener el Thread
                 Log.v(tag, "ConnectedThread -> Interrupting connected thread...")
 
-                mState = STATE_NONE
+                refreshState(STATE_NONE, false)
                 mThreadMode = MODE_PAUSE
                 mDestroy.set(true)
 
@@ -688,10 +650,10 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
         const val STATE_CONNECTED = 2  // now connected to a remote device
 
         // Contiene los estados de ejecución del Thread de lectura
-        const val MODE_PAUSE = 0       // Pausar lecturas
-        const val MODE_CONTINUOS_READ = 1 // Lectura continua
-        const val MODE_FIRST_READ_UNTIL_TIMEOUT = 2  // Primera lectura antes del TimeOut
-        const val MODE_ALL_READ_UNTIL_TIMEOUT = 3  // Todas las lecturas antes del TimeOut
+        const val MODE_PAUSE = 0                    // Pausar lecturas
+        const val MODE_CONTINUOS_READ = 1           // Lectura continua
+        const val MODE_FIRST_READ_UNTIL_TIMEOUT = 2 // Primera lectura antes del TimeOut
+        const val MODE_ALL_READ_UNTIL_TIMEOUT = 3   // Todas las lecturas antes del TimeOut
 
         fun checkSuccess(data: ByteArray): Boolean {
             var commandCode = "Unknown command"
@@ -796,7 +758,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
                     CommandCode.ReadHandsetParam.code -> {
                         // Lectura de parámetros de configuración!
                         if (cSuc) {
-                            (rfidDevice as Vh75Bt).setConfigParameters(ret2)
+                            vh75?.setConfigParameters(ret2)
                         }
                     }
                 }
@@ -940,7 +902,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
             "Write RFID Config Parameters: TagType: ${param.TagType} Alarm: ${param.Alarm} Vibration: ${param.Reserve19} Power: ${param.Power} MinFrequence: ${param.Min_Frequence} MaxFrequence: ${param.Max_Frequence}"
         )
 
-        (rfidDevice as Vh75Bt).write(genCommand(CommandCode.WriteHandlerParam, param.toBytes()))
+        vh75?.write(genCommand(CommandCode.WriteHandlerParam, param.toBytes()))
     }
 
     private fun genCommandListTagID(mem: Int, address: Int, len: Int, mask: ByteArray): ByteArray {
@@ -1053,7 +1015,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
         param[4 + epcLen + dataLen + 2] = bPassword[2]
         param[4 + epcLen + dataLen + 3] = bPassword[3]
 
-        (rfidDevice as Vh75Bt).write(genCommand(CommandCode.WriteWordBlock, param))
+        vh75?.write(genCommand(CommandCode.WriteWordBlock, param))
     }
 
     private fun parseReadParamResult(data: ByteArray): HandsetParam {
@@ -1127,23 +1089,13 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
             get() = underlyingSocket.outputStream
 
         override val remoteDeviceName: String
-            get() = if (ActivityCompat.checkSelfPermission(
-                    getContext(), Manifest.permission.BLUETOOTH_CONNECT
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                ""
-            } else {
-                underlyingSocket.remoteDevice.name.toString()
-            }
+            get() =
+                if (!appHasBluetoothPermission()) ""
+                else underlyingSocket.remoteDevice.name.toString()
 
         @Throws(IOException::class)
         override fun connect() {
-            if (ActivityCompat.checkSelfPermission(
-                    getContext(), Manifest.permission.BLUETOOTH_CONNECT
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                return
-            }
+            if (!appHasBluetoothPermission()) return
             underlyingSocket.connect()
         }
 
@@ -1169,12 +1121,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
 
         @Throws(IOException::class)
         override fun connect() {
-            if (ActivityCompat.checkSelfPermission(
-                    getContext(), Manifest.permission.BLUETOOTH_CONNECT
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                return
-            }
+            if (!appHasBluetoothPermission()) return
             fallbackSocket!!.connect()
         }
 

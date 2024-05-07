@@ -45,6 +45,7 @@ import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.utils.scanners.nfc.Nfc
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid.Companion.isRfidRequired
+import com.dacosys.assetControl.utils.scanners.vh75.Vh75Bt
 import com.dacosys.assetControl.utils.settings.config.Preference
 import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetLong
@@ -627,7 +628,7 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
             menu.setOptionalIconsVisible(true)
         }
 
-        if (!isRfidRequired()) {
+        if (!isRfidRequired(this)) {
             menu.removeItem(menu.findItem(R.id.action_rfid_connect).itemId)
         }
 
@@ -741,7 +742,39 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
 
     override fun onWriteCompleted(isOk: Boolean) {}
 
+    override fun onStateChanged(state: Int) {
+        if (!::binding.isInitialized || isFinishing || isDestroyed) return
+        if (prefsGetBoolean(Preference.rfidShowConnectedMessage)) {
+            when (Rfid.vh75State) {
+                Vh75Bt.STATE_CONNECTED -> {
+                    makeText(
+                        binding.root,
+                        getString(R.string.rfid_connected),
+                        SnackBarType.SUCCESS
+                    )
+                }
+
+                Vh75Bt.STATE_CONNECTING -> {
+                    makeText(
+                        binding.root,
+                        getString(R.string.searching_rfid_reader),
+                        SnackBarType.RUNNING
+                    )
+                }
+
+                else -> {
+                    makeText(
+                        binding.root,
+                        getString(R.string.there_is_no_rfid_device_connected),
+                        SnackBarType.INFO
+                    )
+                }
+            }
+        }
+    }
+
     override fun onReadCompleted(scanCode: String) {
+        if (!::binding.isInitialized || isFinishing || isDestroyed) return
         scannerCompleted(scanCode)
     }
 

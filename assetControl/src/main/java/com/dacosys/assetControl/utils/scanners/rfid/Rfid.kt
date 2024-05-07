@@ -1,10 +1,13 @@
 package com.dacosys.assetControl.utils.scanners.rfid
 
 import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
+import com.dacosys.assetControl.utils.Statics.Companion.classImplementsInterface
 import com.dacosys.assetControl.utils.scanners.vh75.Utility
 import com.dacosys.assetControl.utils.scanners.vh75.Vh75Bt
 import com.dacosys.assetControl.utils.settings.config.Preference
 import com.dacosys.assetControl.utils.settings.preferences.Preferences
+import kotlin.reflect.KClass
 
 /**
  * Created by Agustin on 19/10/2017.
@@ -12,7 +15,7 @@ import com.dacosys.assetControl.utils.settings.preferences.Preferences
 
 open class Rfid {
     interface RfidDeviceListener {
-        fun onStateChanged(state: Int) {}
+        fun onStateChanged(state: Int)
 
         fun onRead(data: ByteArray, bytes: Int) {
             val res = data.copyOfRange(0, bytes)
@@ -21,10 +24,8 @@ open class Rfid {
                 this::class.java.simpleName,
                 "onRead Data (b: $bytes): " + Utility.bytes2HexStringWithSeparator(res)
             )
-            if (rfidDevice != null) {
-                if (rfidDevice is Vh75Bt) {
-                    Vh75Bt.processMessage(this, res, bytes)
-                }
+            if (vh75 != null) {
+                Vh75Bt.processMessage(this, res, bytes)
             }
         }
 
@@ -46,47 +47,51 @@ open class Rfid {
 
     companion object {
         // region Public methods
-        var rfidDevice: Rfid? = null
+        private var rfidDevice: Rfid? = null
+
+        val vh75: Vh75Bt?
+            get() = rfidDevice as? Vh75Bt
+
+        val vh75State: Int?
+            get() = vh75?.state
 
         private fun initRfidRequired(): Boolean {
-            return if (isRfidRequired()) {
-                if (rfidDevice == null) {
-                    true
-                } else {
-                    if ((rfidDevice is Vh75Bt)) {
-                        (rfidDevice as Vh75Bt).mState == Vh75Bt.STATE_NONE
-                    } else false
-                }
-            } else false
+            return isRfidEnabled() && (rfidDevice == null || vh75?.state == Vh75Bt.STATE_NONE)
         }
 
-        fun isRfidRequired(): Boolean {
-            if (!Preferences.prefsGetBoolean(Preference.useBtRfid)) {
+        private fun isRfidEnabled(): Boolean {
+            if (!Preferences.prefsGetBoolean(Preference.useBtRfid))
                 return false
-            }
 
             val btAddress = Preferences.prefsGetString(Preference.rfidBtAddress)
             return btAddress.isNotEmpty()
         }
 
+        fun isRfidRequired(activity: AppCompatActivity): Boolean {
+            return isRfidRequired(activity::class)
+        }
+
+        fun isRfidRequired(listener: KClass<*>): Boolean {
+            if (!isRfidEnabled())
+                return false
+
+            return classImplementsInterface(listener, RfidDeviceListener::class)
+        }
+
         fun resume(listener: RfidDeviceListener) {
-            if (rfidDevice != null) {
-                if (rfidDevice is Vh75Bt) {
-                    Log.v(this::class.java.simpleName, "RFID Listener: $listener")
-                    (rfidDevice as Vh75Bt).setListener(null)
-                    (rfidDevice as Vh75Bt).resume()
-                    (rfidDevice as Vh75Bt).setListener(listener)
-                }
+            if (vh75 != null) {
+                Log.v(this::class.java.simpleName, "RFID Listener: $listener")
+                vh75?.setListener(null)
+                vh75?.resume()
+                vh75?.setListener(listener)
             }
         }
 
         fun pause() {
-            if (rfidDevice != null) {
-                if (rfidDevice is Vh75Bt) {
-                    Log.v(this::class.java.simpleName, "RFID Listener: NULL")
-                    (rfidDevice as Vh75Bt).setListener(null)
-                    (rfidDevice as Vh75Bt).pause()
-                }
+            if (vh75 != null) {
+                Log.v(this::class.java.simpleName, "RFID Listener: NULL")
+                vh75?.setListener(null)
+                vh75?.pause()
             }
         }
 
@@ -101,13 +106,11 @@ open class Rfid {
         }
 
         fun destroy() {
-            if (rfidDevice != null) {
-                if (rfidDevice is Vh75Bt) {
-                    (rfidDevice as Vh75Bt).setListener(null)
-                    (rfidDevice as Vh75Bt).destroy()
-                }
-                rfidDevice = null
+            if (vh75 != null) {
+                vh75?.setListener(null)
+                vh75?.destroy()
             }
+            rfidDevice = null
         }
 
         fun lockScanner(lock: Boolean) {
@@ -126,8 +129,8 @@ open class Rfid {
             if (initRfidRequired()) {
                 build(listener, rfidType)
             } else {
-                if (rfidDevice != null && rfidDevice is Vh75Bt) {
-                    (rfidDevice as Vh75Bt).setListener(listener)
+                if (vh75 != null) {
+                    vh75?.setListener(listener)
                 }
             }
         }

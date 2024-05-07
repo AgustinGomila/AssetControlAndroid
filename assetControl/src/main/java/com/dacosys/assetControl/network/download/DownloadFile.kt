@@ -121,6 +121,7 @@ class DownloadFile(
             )
 
             connection = url.openConnection() as HttpsURLConnection
+
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
                 val t = TrustFactory.getTrustFactoryManager(getContext())
                 HttpsURLConnection.setDefaultSSLSocketFactory(t.first)

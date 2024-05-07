@@ -204,6 +204,11 @@
                 android:dependency="conf_rfid_use_bt_default"
                 android:key="skip_same_on_rfid_read"
                 android:title="@string/skip_repeated_readings"/>
+        <SwitchPreference
+                android:defaultValue="false"
+                android:dependency="conf_rfid_use_bt_default"
+                android:key="show_rfid_connected_message"
+                android:title="@string/show_message_on_rfid_reader_is_ready"/>
     </androidx.preference.PreferenceScreen>
     <SwitchPreference
             android:defaultValue="false"

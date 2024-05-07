@@ -1,10 +1,15 @@
 package com.dacosys.assetControl.utils
 
+import android.Manifest
 import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.core.app.ActivityCompat
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.webservice.common.SessionObject
 import java.util.*
+import kotlin.reflect.KClass
 
 /**
  * Created by Agustin on 24/01/2017.
@@ -65,6 +70,16 @@ class Statics {
 
         fun isDebuggable(): Boolean {
             return 0 != getContext().applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE
+        }
+
+        fun classImplementsInterface(clazz: KClass<*>, interfaceKClass: KClass<*>): Boolean {
+            return interfaceKClass.java.isAssignableFrom(clazz.java)
+        }
+
+        fun appHasBluetoothPermission(): Boolean {
+            return Build.VERSION.SDK_INT < Build.VERSION_CODES.S || ActivityCompat.checkSelfPermission(
+                getContext(), Manifest.permission.BLUETOOTH_CONNECT
+            ) == PackageManager.PERMISSION_GRANTED
         }
     }
 }
