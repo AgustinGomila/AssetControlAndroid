@@ -438,7 +438,7 @@ class AccountPreferenceFragment : PreferenceFragmentCompat(), ClientPackage.Comp
         msg: String,
         progress: Int,
     ) {
-        if (requireActivity().isFinishing || requireActivity().isDestroyed) return
+        if (requireActivity().isDestroyed || requireActivity().isFinishing) return
 
         if (progressDialog == null) createProgressDialog()
 

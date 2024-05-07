@@ -59,7 +59,7 @@ class WarehouseAreaCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
      * del área
      */
     override fun <T> onCompleted(result: CrudResult<T?>) {
-        if (isDestroyed || isFinishing) return
+        if (!::binding.isInitialized || isFinishing || isDestroyed) return
 
         val warehouseArea: WarehouseArea? = (result.itemResult as WarehouseArea?)
         when (result.status) {
@@ -233,22 +233,24 @@ class WarehouseAreaCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
 
             val fm = supportFragmentManager
 
-            if (!isFinishing) runOnUiThread {
-                fm.beginTransaction()
-                    .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out).replace(
-                        binding.imageControlFragment.id,
-                        imageControlFragment ?: return@runOnUiThread
-                    ).commit()
+            if (!isFinishing && !isDestroyed) {
+                runOnUiThread {
+                    fm.beginTransaction()
+                        .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                        .replace(binding.imageControlFragment.id, imageControlFragment ?: return@runOnUiThread)
+                        .commit()
 
-                if (!prefsGetBoolean(Preference.useImageControl)) {
-                    fm.beginTransaction()
-                        .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                        .hide(imageControlFragment as Fragment).commitAllowingStateLoss()
-                } else {
-                    fm.beginTransaction()
-                        .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                        .show((imageControlFragment ?: return@runOnUiThread) as Fragment)
-                        .commitAllowingStateLoss()
+                    if (!prefsGetBoolean(Preference.useImageControl)) {
+                        fm.beginTransaction()
+                            .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                            .hide(imageControlFragment as Fragment)
+                            .commitAllowingStateLoss()
+                    } else {
+                        fm.beginTransaction()
+                            .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                            .show((imageControlFragment ?: return@runOnUiThread) as Fragment)
+                            .commitAllowingStateLoss()
+                    }
                 }
             }
         } else {

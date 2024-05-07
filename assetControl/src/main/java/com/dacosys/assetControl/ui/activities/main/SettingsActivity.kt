@@ -188,7 +188,7 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
     }
 
     private fun onTaskGetPackagesEnded(it: ClientPackagesProgress) {
-        if (isDestroyed || isFinishing) return
+        if (!::binding.isInitialized || isFinishing || isDestroyed) return
 
         val status: ProgressStatus = it.status
         val result: ArrayList<JSONObject> = it.result

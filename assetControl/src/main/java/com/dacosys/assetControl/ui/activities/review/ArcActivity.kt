@@ -164,7 +164,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
     private var currentInventory: ArrayList<String>? = null
 
     private fun onSyncUploadProgress(it: SyncProgress) {
-        if (isDestroyed || isFinishing) return
+        if (!::binding.isInitialized || isFinishing || isDestroyed) return
 
         val totalTask: Int = it.totalTask
         val completedTask: Int = it.completedTask
@@ -1022,7 +1022,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     @Suppress("unused")
     private fun showSnackBar(it: SnackBarEventData) {
-        if (isDestroyed || isFinishing) return
+        if (!::binding.isInitialized || isFinishing || isDestroyed) return
 
         makeText(binding.root, it.text, it.snackBarType)
     }
@@ -1176,7 +1176,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
                             return@OnClickListener
                         })
 
-                    if (!isFinishing) progressDialog?.show()
+                    if (!isFinishing && !isDestroyed) progressDialog?.show()
                 }
 
                 ProgressStatus.running.id -> {
@@ -1215,7 +1215,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
                             return@OnClickListener
                         })
 
-                    if (!isFinishing) progressDialog?.show()
+                    if (!isFinishing && !isDestroyed) progressDialog?.show()
                 }
 
                 ProgressStatus.finished.id, ProgressStatus.canceled.id, ProgressStatus.crashed.id -> {
@@ -1925,7 +1925,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     private fun onSaveProgress(it: SaveProgress) {
-        if (isDestroyed || isFinishing) return
+        if (!::binding.isInitialized || isFinishing || isDestroyed) return
 
         val msg: String = it.msg
         val taskStatus: Int = it.taskStatus
@@ -1938,7 +1938,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     private fun onStartReviewProgress(it: StartReviewProgress) {
-        if (isDestroyed || isFinishing) return
+        if (!::binding.isInitialized || isFinishing || isDestroyed) return
 
         val msg: String = it.msg
         val taskStatus: Int = it.taskStatus
@@ -2181,7 +2181,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
     private var tempTableId = 0
 
     private fun fillResults(docContReqResObj: DocumentContentRequestResult) {
-        if (isDestroyed || isFinishing) return
+        if (!::binding.isInitialized || isFinishing || isDestroyed) return
 
         if (docContReqResObj.documentContentArray.isEmpty()) {
             makeText(binding.root, getString(R.string.no_images), SnackBarType.INFO)

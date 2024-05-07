@@ -101,7 +101,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
     }
 
     private fun onSaveProgress(it: SaveProgress) {
-        if (isDestroyed || isFinishing) return
+        if (!::binding.isInitialized || isFinishing || isDestroyed) return
 
         val msg: String = it.msg
         val taskStatus: Int = it.taskStatus
@@ -123,7 +123,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
     }
 
     private fun onSkipAllProgress(it: SaveProgress) {
-        if (isDestroyed || isFinishing) return
+        if (!::binding.isInitialized || isFinishing || isDestroyed) return
 
         val msg: String = it.msg
         val taskStatus: Int = it.taskStatus
@@ -166,14 +166,14 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
     @Suppress("unused")
     private fun showProgressBar(show: Boolean) {
-        if (isDestroyed || isFinishing) return
+        if (!::binding.isInitialized || isFinishing || isDestroyed) return
         runOnUiThread {
             binding.swipeRefresh.isRefreshing = show
         }
     }
 
     fun onSyncTaskProgress(it: SyncProgress) {
-        if (isDestroyed || isFinishing) return
+        if (!::binding.isInitialized || isFinishing || isDestroyed) return
 
         val totalTask: Int = it.totalTask
         val completedTask: Int = it.completedTask
@@ -417,7 +417,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
     }
 
     private fun onGetRouteProcess(it: RouteProcessResult) {
-        if (isDestroyed || isFinishing) return
+        if (!::binding.isInitialized || isFinishing || isDestroyed) return
 
         val error = it.error
         if (error != null) {
@@ -443,7 +443,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
     }
 
     private fun onGetContentProcess(it: GetRouteProcessContentResult) {
-        if (isDestroyed || isFinishing) return
+        if (!::binding.isInitialized || isFinishing || isDestroyed) return
 
         // Contenidos del nivel solicitado
         val contents = it.currentRouteProcessContent
@@ -1826,7 +1826,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
                             return@OnClickListener
                         })
 
-                    if (!isFinishing) progressDialog?.show()
+                    if (!isFinishing && !isDestroyed) progressDialog?.show()
                 }
 
                 ProgressStatus.running.id -> {
@@ -1865,7 +1865,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
                             return@OnClickListener
                         })
 
-                    if (!isFinishing) progressDialog?.show()
+                    if (!isFinishing && !isDestroyed) progressDialog?.show()
                 }
 
                 ProgressStatus.finished.id, ProgressStatus.canceled.id, ProgressStatus.crashed.id -> {

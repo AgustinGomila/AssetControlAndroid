@@ -124,7 +124,11 @@ class CodeCheckActivity : AppCompatActivity(),
         var fragmentTransaction = supportFragmentManager.beginTransaction()
         if (oldFragment != null) {
             try {
-                if (!isFinishing) fragmentTransaction.remove(oldFragment).commitAllowingStateLoss()
+                if (!isFinishing && !isDestroyed) {
+                    fragmentTransaction
+                        .remove(oldFragment)
+                        .commitAllowingStateLoss()
+                }
             } catch (ignored: java.lang.Exception) {
             }
         }
@@ -146,11 +150,11 @@ class CodeCheckActivity : AppCompatActivity(),
                     R.anim.animation_fade_out
                 )
                 try {
-                    if (!isFinishing) fragmentTransaction.replace(
-                        binding.fragmentLayout.id,
-                        newFragment
-                    )
-                        .commitAllowingStateLoss()
+                    if (!isFinishing && !isDestroyed) {
+                        fragmentTransaction
+                            .replace(binding.fragmentLayout.id, newFragment)
+                            .commitAllowingStateLoss()
+                    }
                 } catch (ignored: java.lang.Exception) {
                 }
             }

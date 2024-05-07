@@ -94,7 +94,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
     }
 
     private fun onUploadImagesProgress(it: UploadImagesProgress) {
-        if (isDestroyed || isFinishing) return
+        if (!::binding.isInitialized || isFinishing || isDestroyed) return
 
         val result: IcProgressStatus = it.result
         val msg: String = it.msg
@@ -151,7 +151,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
     }
 
     fun onSyncProgress(it: SyncProgress) {
-        if (isDestroyed || isFinishing) return
+        if (!::binding.isInitialized || isFinishing || isDestroyed) return
 
         val totalTask: Int = it.totalTask
         val completedTask: Int = it.completedTask
@@ -873,7 +873,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
 
     private fun checkConnection() {
         fun onConnectionResult(it: MySqlDateResult) {
-            if (isDestroyed || isFinishing) return
+            if (!::binding.isInitialized || isFinishing || isDestroyed) return
 
             when (it.status) {
                 ProgressStatus.finished -> {

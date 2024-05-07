@@ -126,21 +126,23 @@ class AssetDetailActivity : AppCompatActivity() {
 
             val fm = supportFragmentManager
 
-            if (!isFinishing) runOnUiThread {
-                fm.beginTransaction()
-                    .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out).replace(
-                        binding.imageControlLayout.id, imageControlFragment ?: return@runOnUiThread
-                    ).commit()
+            if (!isFinishing && !isDestroyed) {
+                runOnUiThread {
+                    fm.beginTransaction()
+                        .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out).replace(
+                            binding.imageControlLayout.id, imageControlFragment ?: return@runOnUiThread
+                        ).commit()
 
-                if (!prefsGetBoolean(Preference.useImageControl)) {
-                    fm.beginTransaction()
-                        .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                        .hide(imageControlFragment as Fragment).commitAllowingStateLoss()
-                } else {
-                    fm.beginTransaction()
-                        .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                        .show((imageControlFragment ?: return@runOnUiThread) as Fragment)
-                        .commitAllowingStateLoss()
+                    if (!prefsGetBoolean(Preference.useImageControl)) {
+                        fm.beginTransaction()
+                            .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                            .hide(imageControlFragment as Fragment).commitAllowingStateLoss()
+                    } else {
+                        fm.beginTransaction()
+                            .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                            .show((imageControlFragment ?: return@runOnUiThread) as Fragment)
+                            .commitAllowingStateLoss()
+                    }
                 }
             }
         } else {

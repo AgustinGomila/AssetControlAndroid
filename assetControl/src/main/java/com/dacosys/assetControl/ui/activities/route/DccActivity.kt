@@ -437,22 +437,24 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
 
             val fm = supportFragmentManager
 
-            if (!isFinishing) runOnUiThread {
-                fm.beginTransaction()
-                    .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out).replace(
-                        binding.imageControlFragment.id,
-                        imageControlFragment ?: return@runOnUiThread
-                    ).commit()
+            if (!isFinishing && !isDestroyed) {
+                runOnUiThread {
+                    fm.beginTransaction()
+                        .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                        .replace(binding.imageControlFragment.id, imageControlFragment ?: return@runOnUiThread)
+                        .commit()
 
-                if (!prefsGetBoolean(Preference.useImageControl)) {
-                    fm.beginTransaction()
-                        .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                        .hide(imageControlFragment as Fragment).commitAllowingStateLoss()
-                } else {
-                    fm.beginTransaction()
-                        .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                        .show((imageControlFragment ?: return@runOnUiThread) as Fragment)
-                        .commitAllowingStateLoss()
+                    if (!prefsGetBoolean(Preference.useImageControl)) {
+                        fm.beginTransaction()
+                            .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                            .hide(imageControlFragment as Fragment)
+                            .commitAllowingStateLoss()
+                    } else {
+                        fm.beginTransaction()
+                            .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                            .show((imageControlFragment ?: return@runOnUiThread) as Fragment)
+                            .commitAllowingStateLoss()
+                    }
                 }
             }
         } else {
@@ -774,7 +776,11 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         var fragmentTransaction = supportFragmentManager.beginTransaction()
         if (oldFragment != null) {
             try {
-                if (!isFinishing) fragmentTransaction.remove(oldFragment).commitAllowingStateLoss()
+                if (!isFinishing && !isDestroyed) {
+                    fragmentTransaction
+                        .remove(oldFragment)
+                        .commitAllowingStateLoss()
+                }
             } catch (ex: java.lang.Exception) {
                 Log.e(this.javaClass.simpleName, ex.message.toString())
             }
@@ -795,9 +801,11 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
                     R.anim.animation_fade_in, R.anim.animation_fade_out
                 )
                 try {
-                    if (!isFinishing) fragmentTransaction.replace(
-                        binding.fragmentLayout.id, newFragment
-                    ).commitAllowingStateLoss()
+                    if (!isFinishing && !isDestroyed) {
+                        fragmentTransaction
+                            .replace(binding.fragmentLayout.id, newFragment)
+                            .commitAllowingStateLoss()
+                    }
                 } catch (ex: java.lang.Exception) {
                     Log.e(this.javaClass.simpleName, ex.message.toString())
                 }

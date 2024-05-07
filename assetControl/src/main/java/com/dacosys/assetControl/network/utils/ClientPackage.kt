@@ -66,7 +66,7 @@ class ClientPackage {
             password: String,
         ) {
             val activity = weakAct.get() ?: return
-            if (activity.isFinishing) return
+            if (activity.isDestroyed || activity.isFinishing) return
 
             allProductsArray.clear()
             for (pack in allPackage) {

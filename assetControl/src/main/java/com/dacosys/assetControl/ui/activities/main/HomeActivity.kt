@@ -565,7 +565,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
     }
 
     private fun onTimerTick(secs: Int) {
-        if (isDestroyed || isFinishing) return
+        if (!::binding.isInitialized || isFinishing || isDestroyed) return
 
         runOnUiThread {
             val restSec = Preferences.prefsGetInt(Preference.acSyncInterval) - secs
@@ -577,7 +577,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
     }
 
     private fun onSyncTaskProgress(it: SyncProgress) {
-        if (isDestroyed || isFinishing) return
+        if (!::binding.isInitialized || isFinishing || isDestroyed) return
 
         when (it.progressStatus) {
             ProgressStatus.bigStarting,

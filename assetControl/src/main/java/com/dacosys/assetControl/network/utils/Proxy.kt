@@ -38,7 +38,7 @@ class Proxy {
             installationCode: String = "",
         ) {
             val activity = weakAct.get() ?: return
-            if (activity.isFinishing) return
+            if (activity.isDestroyed || activity.isFinishing) return
 
             if (avoidSetupProxyDialog) {
                 return

@@ -1085,7 +1085,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     private fun onSaveProgress(it: SaveProgress) {
-        if (isDestroyed || isFinishing) return
+        if (!::binding.isInitialized || isFinishing || isDestroyed) return
 
         val msg: String = it.msg
         val taskStatus: Int = it.taskStatus
@@ -1164,7 +1164,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
                             return@OnClickListener
                         })
 
-                    if (!isFinishing) progressDialog?.show()
+                    if (!isFinishing && !isDestroyed) progressDialog?.show()
                 }
 
                 ProgressStatus.running.id -> {
@@ -1203,7 +1203,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
                             return@OnClickListener
                         })
 
-                    if (!isFinishing) progressDialog?.show()
+                    if (!isFinishing && !isDestroyed) progressDialog?.show()
                 }
 
                 ProgressStatus.finished.id, ProgressStatus.canceled.id, ProgressStatus.crashed.id -> {
