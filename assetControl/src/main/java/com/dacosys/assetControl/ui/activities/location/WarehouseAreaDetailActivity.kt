@@ -3,6 +3,7 @@ package com.dacosys.assetControl.ui.activities.location
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.model.location.WarehouseArea
@@ -29,6 +30,10 @@ class WarehouseAreaDetailActivity : AppCompatActivity() {
         rejectNewInstances = false
     }
 
+    private fun isBackPressed() {
+        finish()
+    }
+
     private lateinit var binding: WarehouseAreaDetailActivityBinding
 
     @SuppressLint("ClickableViewAccessibility")
@@ -37,6 +42,13 @@ class WarehouseAreaDetailActivity : AppCompatActivity() {
         setScreenRotation(this)
         binding = WarehouseAreaDetailActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val callback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                isBackPressed()
+            }
+        }
+        onBackPressedDispatcher.addCallback(this, callback)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 

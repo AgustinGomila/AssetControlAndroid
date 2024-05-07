@@ -550,9 +550,9 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
                 alert.setMessage(getContext().getString(R.string.discard_changes_and_return_to_the_main_menu_question))
                 alert.setNegativeButton(R.string.cancel, null)
                 alert.setPositiveButton(R.string.accept) { _, _ ->
-                    closeKeyboard(this)
-
                     isFinishingByUser = true
+
+                    closeKeyboard(this)
                     setResult(RESULT_CANCELED)
                     finish()
                 }
@@ -781,12 +781,6 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
         closeKeyboard(this)
     }
 
-    @SuppressLint("MissingSuperCall")
-    @Suppress("OVERRIDE_DEPRECATION")
-    override fun onBackPressed() {
-        cancelWarehouseMovement()
-    }
-
     private val showScannedCode: Boolean
         get() {
             return prefsGetBoolean(Preference.showScannedCode)
@@ -971,9 +965,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
     private val menuItemRandomSerial = 999005
 
     private fun isBackPressed() {
-        closeKeyboard(this)
-        setResult(RESULT_CANCELED)
-        finish()
+        cancelWarehouseMovement()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

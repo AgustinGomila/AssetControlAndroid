@@ -240,12 +240,6 @@ class WarehouseCRUDActivity : AppCompatActivity(), CrudCompleted,
         fillControls()
     }
 
-    @SuppressLint("MissingSuperCall")
-    @Suppress("OVERRIDE_DEPRECATION")
-    override fun onBackPressed() {
-        cancelWarehouseModify()
-    }
-
     private fun fillControls() {
         if (warehouse == null) {
             setImageControlFragment()
@@ -370,7 +364,6 @@ class WarehouseCRUDActivity : AppCompatActivity(), CrudCompleted,
             alert.setNegativeButton(R.string.cancel, null)
             alert.setPositiveButton(R.string.accept) { _, _ ->
                 closeKeyboard(this)
-
                 setResult(RESULT_CANCELED)
                 finish()
             }
@@ -378,7 +371,6 @@ class WarehouseCRUDActivity : AppCompatActivity(), CrudCompleted,
             alert.show()
         } else {
             closeKeyboard(this)
-
             setResult(RESULT_CANCELED)
             finish()
         }
@@ -389,9 +381,7 @@ class WarehouseCRUDActivity : AppCompatActivity(), CrudCompleted,
     }
 
     private fun isBackPressed() {
-        closeKeyboard(this)
-        setResult(RESULT_CANCELED)
-        finish()
+        cancelWarehouseModify()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

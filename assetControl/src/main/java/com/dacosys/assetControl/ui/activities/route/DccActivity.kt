@@ -478,12 +478,6 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         }
     }
 
-    @SuppressLint("MissingSuperCall")
-    @Suppress("OVERRIDE_DEPRECATION")
-    override fun onBackPressed() {
-        cancelDcc()
-    }
-
     private fun previous() {
         if (isEvaluating) {
             return
@@ -1608,7 +1602,8 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
             alert.setMessage(getString(R.string.you_want_to_cancel_the_current_data_collection))
             alert.setNegativeButton(R.string.cancel, null)
             alert.setPositiveButton(R.string.accept) { _, _ ->
-                setResult(RESULT_CANCELED, null)
+                closeKeyboard(this)
+                setResult(RESULT_CANCELED)
                 finish()
             }
             alert.show()
@@ -1905,9 +1900,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
 //endregion READERS Reception
 
     private fun isBackPressed() {
-        closeKeyboard(this)
-        setResult(RESULT_CANCELED)
-        finish()
+        cancelDcc()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

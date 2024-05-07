@@ -450,13 +450,6 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         setEditTextFocus(true)
     }
 
-    @SuppressLint("MissingSuperCall")
-    @Suppress("OVERRIDE_DEPRECATION")
-    override fun onBackPressed() {
-        // Esto sirve para salir del programa desde la pantalla de Login
-        moveTaskToBack(true)
-    }
-
     override fun onSaveInstanceState(savedInstanceState: Bundle) {
         super.onSaveInstanceState(savedInstanceState)
 
@@ -964,8 +957,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
 
     private fun isBackPressed() {
         closeKeyboard(this)
-        setResult(RESULT_CANCELED)
-        finish()
+        moveTaskToBack(true)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

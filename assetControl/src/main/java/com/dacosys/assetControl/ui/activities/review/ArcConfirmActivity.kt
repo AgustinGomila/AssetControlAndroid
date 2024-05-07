@@ -412,12 +412,6 @@ class ArcConfirmActivity : AppCompatActivity(),
         }
     }
 
-    @SuppressLint("MissingSuperCall")
-    @Suppress("OVERRIDE_DEPRECATION")
-    override fun onBackPressed() {
-        modifyCount()
-    }
-
     private fun setupTextView() {
         val assetsMissed = adapter?.countItemsMissed ?: 0
         val assetsAdded = adapter?.countItemsAdded ?: 0
@@ -555,9 +549,7 @@ class ArcConfirmActivity : AppCompatActivity(),
     }
 
     private fun isBackPressed() {
-        closeKeyboard(this)
-        setResult(RESULT_CANCELED)
-        finish()
+        modifyCount()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

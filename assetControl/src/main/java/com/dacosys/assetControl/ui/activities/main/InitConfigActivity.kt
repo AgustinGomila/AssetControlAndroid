@@ -143,19 +143,6 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
         rejectNewInstances = false
     }
 
-    @SuppressLint("MissingSuperCall")
-    @Suppress("OVERRIDE_DEPRECATION")
-    override fun onBackPressed() {
-        // Esto sirve para salir del programa desde la pantalla de Login
-        // moveTaskToBack(true)
-
-        val i = baseContext.packageManager.getLaunchIntentForPackage(baseContext.packageName)
-        if (i != null) {
-            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            startActivity(i)
-        }
-    }
-
     override fun onSaveInstanceState(savedInstanceState: Bundle) {
         super.onSaveInstanceState(savedInstanceState)
 
@@ -480,9 +467,11 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     private fun isBackPressed() {
-        closeKeyboard(this)
-        setResult(RESULT_CANCELED)
-        finish()
+        val i = baseContext.packageManager.getLaunchIntentForPackage(baseContext.packageName)
+        if (i != null) {
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            startActivity(i)
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

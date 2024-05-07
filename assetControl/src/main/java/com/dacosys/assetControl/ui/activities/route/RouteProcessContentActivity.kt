@@ -1331,9 +1331,25 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
     }
 
     private fun isBackPressed() {
-        closeKeyboard(this)
-        setResult(RESULT_CANCELED)
-        finish()
+        JotterListener.lockScanner(this, true)
+        try {
+            val alert = AlertDialog.Builder(this)
+            alert.setTitle(getContext().getString(R.string.suspend_the_data_collection))
+            alert.setMessage(getContext().getString(R.string.you_want_to_suspend_the_data_collection_process))
+            alert.setNegativeButton(R.string.cancel, null)
+            alert.setPositiveButton(R.string.accept) { _, _ ->
+                closeKeyboard(this)
+                setResult(RESULT_CANCELED)
+                finish()
+            }
+            alert.show()
+        } catch (ex: java.lang.Exception) {
+            ex.printStackTrace()
+            ErrorLog.writeLog(this, this::class.java.simpleName, ex)
+        } finally {
+            JotterListener.lockScanner(this, false)
+            allowClicks = true
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -1750,31 +1766,6 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         super.onResume()
         rejectNewInstances = false
         runDemo()
-    }
-
-    @SuppressLint("MissingSuperCall")
-    @Suppress("OVERRIDE_DEPRECATION")
-    override fun onBackPressed() {
-        JotterListener.lockScanner(this, true)
-        try {
-            val alert = AlertDialog.Builder(this)
-            alert.setTitle(getContext().getString(R.string.suspend_the_data_collection))
-            alert.setMessage(getContext().getString(R.string.you_want_to_suspend_the_data_collection_process))
-            alert.setNegativeButton(R.string.cancel, null)
-            alert.setPositiveButton(R.string.accept) { _, _ ->
-                closeKeyboard(this)
-
-                setResult(RESULT_OK)
-                finish()
-            }
-            alert.show()
-        } catch (ex: java.lang.Exception) {
-            ex.printStackTrace()
-            ErrorLog.writeLog(this, this::class.java.simpleName, ex)
-        } finally {
-            JotterListener.lockScanner(this, false)
-            allowClicks = true
-        }
     }
 
     private val showScannedCode: Boolean

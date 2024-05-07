@@ -198,12 +198,6 @@ class ItemCategoryCRUDActivity : AppCompatActivity(), CrudCompleted,
         fillControls()
     }
 
-    @SuppressLint("MissingSuperCall")
-    @Suppress("OVERRIDE_DEPRECATION")
-    override fun onBackPressed() {
-        cancelItemCategoryModify()
-    }
-
     private fun fillControls() {
         if (itemCategory == null) {
             setImageControlFragment()
@@ -332,7 +326,6 @@ class ItemCategoryCRUDActivity : AppCompatActivity(), CrudCompleted,
             alert.setNegativeButton(R.string.cancel, null)
             alert.setPositiveButton(R.string.accept) { _, _ ->
                 closeKeyboard(this)
-
                 setResult(RESULT_CANCELED)
                 finish()
             }
@@ -340,7 +333,6 @@ class ItemCategoryCRUDActivity : AppCompatActivity(), CrudCompleted,
             alert.show()
         } else {
             closeKeyboard(this)
-
             setResult(RESULT_CANCELED)
             finish()
         }
@@ -391,9 +383,7 @@ class ItemCategoryCRUDActivity : AppCompatActivity(), CrudCompleted,
     }
 
     private fun isBackPressed() {
-        closeKeyboard(this)
-        setResult(RESULT_CANCELED)
-        finish()
+        cancelItemCategoryModify()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

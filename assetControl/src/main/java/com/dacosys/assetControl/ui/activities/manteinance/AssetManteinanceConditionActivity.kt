@@ -3,6 +3,7 @@ package com.dacosys.assetControl.ui.activities.manteinance
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.dataBase.manteinance.AssetManteinanceDbHelper
@@ -37,6 +38,13 @@ class AssetManteinanceConditionActivity : AppCompatActivity(),
         setScreenRotation(this)
         binding = AssetManteinanceConditionActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val callback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                isBackPressed()
+            }
+        }
+        onBackPressedDispatcher.addCallback(this, callback)
 
         setSupportActionBar(binding.topAppbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -173,11 +181,8 @@ class AssetManteinanceConditionActivity : AppCompatActivity(),
     override fun onItemSelected(assetCondition: AssetCondition?) {
     }
 
-    @SuppressLint("MissingSuperCall")
-    @Suppress("OVERRIDE_DEPRECATION")
-    override fun onBackPressed() {
+    private fun isBackPressed() {
         closeKeyboard(this)
-
         setResult(RESULT_CANCELED)
         finish()
     }

@@ -1,6 +1,5 @@
 package com.dacosys.assetControl.ui.activities.asset
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
@@ -415,12 +414,6 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
         fillControls()
     }
 
-    @SuppressLint("MissingSuperCall")
-    @Suppress("OVERRIDE_DEPRECATION")
-    override fun onBackPressed() {
-        cancelAssetModify()
-    }
-
     private fun fillControls() {
         isNew = asset == null
         runOnUiThread {
@@ -558,7 +551,6 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
                 alert.setNegativeButton(R.string.cancel, null)
                 alert.setPositiveButton(R.string.accept) { _, _ ->
                     closeKeyboard(this)
-
                     setResult(RESULT_CANCELED)
                     finish()
                 }
@@ -630,9 +622,7 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     private fun isBackPressed() {
-        closeKeyboard(this)
-        setResult(RESULT_CANCELED)
-        finish()
+        cancelAssetModify()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

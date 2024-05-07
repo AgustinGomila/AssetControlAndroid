@@ -2,6 +2,7 @@ package com.dacosys.assetControl.ui.activities.asset
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.AssetControlApp.Companion.currentUser
@@ -27,13 +28,6 @@ class AssetDetailActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
-    @SuppressLint("MissingSuperCall")
-    @Suppress("OVERRIDE_DEPRECATION")
-    override fun onBackPressed() {
-        imageControlFragment?.saveImages(true)
-        finish()
-    }
-
     private fun destroyLocals() {
         imageControlFragment?.onDestroy()
         imageControlFragment = null
@@ -53,6 +47,10 @@ class AssetDetailActivity : AppCompatActivity() {
         )
     }
 
+    private fun isBackPressed() {
+        imageControlFragment?.saveImages(true)
+        finish()
+    }
 
     private lateinit var binding: AssetDetailActivityBinding
 
@@ -62,6 +60,13 @@ class AssetDetailActivity : AppCompatActivity() {
         setScreenRotation(this)
         binding = AssetDetailActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val callback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                isBackPressed()
+            }
+        }
+        onBackPressedDispatcher.addCallback(this, callback)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
@@ -93,7 +98,7 @@ class AssetDetailActivity : AppCompatActivity() {
             binding.serialNumberTextView.text = (asset ?: return).serialNumber
         }
 
-        binding.assetDetail.setOnClickListener { onBackPressed() }
+        binding.assetDetail.setOnClickListener { isBackPressed() }
 
         setImageControlFragment()
 

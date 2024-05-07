@@ -1109,12 +1109,6 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
         }
     }
 
-    @SuppressLint("MissingSuperCall")
-    @Suppress("OVERRIDE_DEPRECATION")
-    override fun onBackPressed() {
-        cancelAssetReview()
-    }
-
     private val showScannedCode: Boolean
         get() {
             return prefsGetBoolean(Preference.showScannedCode)
@@ -1697,9 +1691,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
     private val menuItemRandomSerial = 999005
 
     private fun isBackPressed() {
-        closeKeyboard(this)
-        setResult(RESULT_CANCELED)
-        finish()
+        cancelAssetReview()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

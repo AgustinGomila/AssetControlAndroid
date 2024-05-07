@@ -400,12 +400,6 @@ class WmcConfirmActivity : AppCompatActivity(),
         }
     }
 
-    @SuppressLint("MissingSuperCall")
-    @Suppress("OVERRIDE_DEPRECATION")
-    override fun onBackPressed() {
-        modifyMovement()
-    }
-
     private fun setupTextView() {
         val assetToMove = adapter?.assetsToMove ?: 0
         val tempText = if (assetToMove == 1) {
@@ -532,9 +526,7 @@ class WmcConfirmActivity : AppCompatActivity(),
     }
 
     private fun isBackPressed() {
-        closeKeyboard(this)
-        setResult(RESULT_CANCELED)
-        finish()
+        modifyMovement()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

@@ -67,7 +67,6 @@ import com.dacosys.assetControl.ui.activities.sync.SyncActivity
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.common.utils.Screen
-import com.dacosys.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.getBestContrastColor
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Statics
@@ -215,21 +214,6 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
         setupHeaderPanel()
         setupSyncPanel()
         setupButtons()
-    }
-
-    @SuppressLint("MissingSuperCall")
-    @Suppress("OVERRIDE_DEPRECATION")
-    override fun onBackPressed() {
-        setCurrentUserId(null)
-
-        if (isTaskRoot &&
-            supportFragmentManager.primaryNavigationFragment?.childFragmentManager?.backStackEntryCount == 0 &&
-            supportFragmentManager.backStackEntryCount == 0
-        ) {
-            finishAfterTransition()
-        } else {
-            finish()
-        }
     }
 
     public override fun onPause() {
@@ -927,9 +911,16 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
     }
 
     private fun isBackPressed() {
-        closeKeyboard(this)
-        setResult(RESULT_CANCELED)
-        finish()
+        setCurrentUserId(null)
+
+        if (isTaskRoot &&
+            supportFragmentManager.primaryNavigationFragment?.childFragmentManager?.backStackEntryCount == 0 &&
+            supportFragmentManager.backStackEntryCount == 0
+        ) {
+            finishAfterTransition()
+        } else {
+            finish()
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

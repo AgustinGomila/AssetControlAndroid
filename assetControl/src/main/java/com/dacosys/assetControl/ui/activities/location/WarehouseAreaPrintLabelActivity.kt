@@ -610,11 +610,8 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
         }
     }
 
-    @SuppressLint("MissingSuperCall")
-    @Suppress("OVERRIDE_DEPRECATION")
-    override fun onBackPressed() {
+    private fun isBackPressed() {
         closeKeyboard(this)
-
         setResult(RESULT_CANCELED)
         finish()
     }
@@ -633,12 +630,6 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
         }
 
         return true
-    }
-
-    private fun isBackPressed() {
-        closeKeyboard(this)
-        setResult(RESULT_CANCELED)
-        finish()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

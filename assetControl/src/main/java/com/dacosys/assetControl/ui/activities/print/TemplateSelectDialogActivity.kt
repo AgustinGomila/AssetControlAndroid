@@ -13,6 +13,7 @@ import android.view.View
 import android.view.View.GONE
 import android.view.inputmethod.EditorInfo
 import android.widget.AdapterView
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
 import com.dacosys.assetControl.R
@@ -65,6 +66,13 @@ class TemplateSelectDialogActivity : AppCompatActivity(),
         binding = CodeSelectActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        val callback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                isBackPressed()
+            }
+        }
+        onBackPressedDispatcher.addCallback(this, callback)
+
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         // Permite finalizar la actividad si se toca la pantalla
@@ -97,7 +105,7 @@ class TemplateSelectDialogActivity : AppCompatActivity(),
         }
 
         title = tempTitle
-        binding.codeSelect.setOnClickListener { onBackPressed() }
+        binding.codeSelect.setOnClickListener { isBackPressed() }
 
         binding.clearImageView.setOnClickListener {
             barcodeLabelCustom = null
@@ -287,11 +295,8 @@ class TemplateSelectDialogActivity : AppCompatActivity(),
         isFilling = false
     }
 
-    @SuppressLint("MissingSuperCall")
-    @Suppress("OVERRIDE_DEPRECATION")
-    override fun onBackPressed() {
+    private fun isBackPressed() {
         closeKeyboard(this)
-
         setResult(RESULT_CANCELED)
         finish()
     }

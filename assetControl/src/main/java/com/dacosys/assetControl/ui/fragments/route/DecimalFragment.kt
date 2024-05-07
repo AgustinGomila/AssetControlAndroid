@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.databinding.FragmentDecimalBinding
 import com.dacosys.assetControl.ui.common.views.filters.DecimalDigitsInputFilter
 import java.math.BigDecimal
+import java.math.RoundingMode
 
 
 /**
@@ -177,7 +178,7 @@ class DecimalFragment : Fragment() {
 
         private fun round(d: Double, decimalPlaces: Int): Double {
             var bd = BigDecimal(d.toString())
-            bd = bd.setScale(decimalPlaces, BigDecimal.ROUND_HALF_UP)
+            bd = bd.setScale(decimalPlaces, RoundingMode.HALF_UP)
             return bd.toDouble()
         }
     }

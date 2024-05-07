@@ -14,6 +14,7 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.inputmethod.EditorInfo
 import android.widget.AdapterView
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
 import com.dacosys.assetControl.R
@@ -183,6 +184,13 @@ class LocationSelectActivity : AppCompatActivity(),
         binding = LocationSelectActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        val callback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                isBackPressed()
+            }
+        }
+        onBackPressedDispatcher.addCallback(this, callback)
+
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         var tempTitle = getString(R.string.select_warehouse_area)
@@ -236,7 +244,7 @@ class LocationSelectActivity : AppCompatActivity(),
 
         title = tempTitle
 
-        binding.locationSelect.setOnClickListener { onBackPressed() }
+        binding.locationSelect.setOnClickListener { isBackPressed() }
         binding.selectButton.setOnClickListener { locationSelect() }
         binding.scanButton.setOnClickListener {
             JotterListener.toggleCameraFloatingWindowVisibility(
@@ -685,11 +693,8 @@ class LocationSelectActivity : AppCompatActivity(),
         }
     }
 
-    @SuppressLint("MissingSuperCall")
-    @Suppress("OVERRIDE_DEPRECATION")
-    override fun onBackPressed() {
+    private fun isBackPressed() {
         closeKeyboard(this)
-
         setResult(RESULT_CANCELED)
         finish()
     }

@@ -840,16 +840,6 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         }
     }
 
-    @SuppressLint("MissingSuperCall")
-    @Suppress("OVERRIDE_DEPRECATION")
-    override fun onBackPressed() {
-        closeKeyboard(this)
-
-        isFinishingByUser = true
-        setResult(RESULT_CANCELED)
-        finish()
-    }
-
     @SuppressLint("RestrictedApi")
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -932,6 +922,8 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
     }
 
     private fun isBackPressed() {
+        isFinishingByUser = true
+
         closeKeyboard(this)
         setResult(RESULT_CANCELED)
         finish()
