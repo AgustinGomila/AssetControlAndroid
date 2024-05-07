@@ -968,45 +968,52 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         return when (item.itemId) {
             R.id.home, android.R.id.home -> {
                 isBackPressed()
-                return true
+                true
             }
 
             R.id.action_settings -> {
-                configApp()
+                if (currentStyle != ButtonStyle.BUSY) {
+                    configApp()
+                }
                 true
             }
 
             R.id.action_rfid_connect -> {
-                JotterListener.rfidStart(this)
-                return super.onOptionsItemSelected(item)
+                if (currentStyle != ButtonStyle.BUSY) {
+                    JotterListener.rfidStart(this)
+                }
+                super.onOptionsItemSelected(item)
             }
 
             R.id.action_trigger_scan -> {
-                if (Statics.SUPER_DEMO_MODE && BuildConfig.DEBUG) {
-                    val env = DotenvBuilder()
-                        .directory("/assets")
-                        .filename("env")
-                        .load()
+                if (currentStyle != ButtonStyle.BUSY) {
+                    if (Statics.SUPER_DEMO_MODE && BuildConfig.DEBUG) {
+                        val env = DotenvBuilder()
+                            .directory("/assets")
+                            .filename("env")
+                            .load()
 
-                    var username = env["CLIENT_EMAIL"]
-                    var password = env["CLIENT_PASSWORD"]
+                        var username = env["CLIENT_EMAIL"]
+                        var password = env["CLIENT_PASSWORD"]
 
-                    if (Repository.clientEmail.contains(username)) {
-                        username = env["CLIENT_EMAIL_ALT"]
-                        password = env["CLIENT_PASSWORD_ALT"]
+                        if (Repository.clientEmail.contains(username)) {
+                            username = env["CLIENT_EMAIL_ALT"]
+                            password = env["CLIENT_PASSWORD_ALT"]
+                        }
+
+                        scannerCompleted("""{"config":{"client_email":"$username","client_password":"$password"}}""".trimIndent())
+                    } else {
+                        JotterListener.trigger(this)
                     }
-
-                    scannerCompleted("""{"config":{"client_email":"$username","client_password":"$password"}}""".trimIndent())
-                    return super.onOptionsItemSelected(item)
                 }
-
-                JotterListener.trigger(this)
-                return super.onOptionsItemSelected(item)
+                super.onOptionsItemSelected(item)
             }
 
             R.id.action_read_barcode -> {
-                JotterListener.toggleCameraFloatingWindowVisibility(this)
-                return super.onOptionsItemSelected(item)
+                if (currentStyle != ButtonStyle.BUSY) {
+                    JotterListener.toggleCameraFloatingWindowVisibility(this)
+                }
+                super.onOptionsItemSelected(item)
             }
 
             else -> {
