@@ -848,9 +848,11 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         grantResults: IntArray,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (permissions.contains(Manifest.permission.BLUETOOTH_CONNECT)) JotterListener.onRequestPermissionsResult(
-            this, requestCode, permissions, grantResults
-        )
+        if (permissions.contains(Manifest.permission.BLUETOOTH_CONNECT)) {
+            JotterListener.onRequestPermissionsResult(
+                this, requestCode, permissions, grantResults
+            )
+        }
     }
 
     private val showScannedCode: Boolean
@@ -859,6 +861,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         }
 
     override fun scannerCompleted(scanCode: String) {
+        if (!::binding.isInitialized || isFinishing || isDestroyed) return
         if (showScannedCode) showSnackBar(SnackBarEventData(scanCode, SnackBarType.INFO))
         JotterListener.lockScanner(this, true)
         JotterListener.hideWindow(this)

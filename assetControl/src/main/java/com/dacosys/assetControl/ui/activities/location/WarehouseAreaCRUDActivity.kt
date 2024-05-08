@@ -366,6 +366,7 @@ class WarehouseAreaCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
         }
 
     override fun scannerCompleted(scanCode: String) {
+        if (!::binding.isInitialized || isFinishing || isDestroyed) return
         if (showScannedCode) makeText(binding.root, scanCode, SnackBarType.INFO)
         JotterListener.lockScanner(this, true)
 

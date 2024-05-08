@@ -108,7 +108,7 @@ import id.pahlevikun.jotter.Jotter
 //                                                                              //
 // En la ventana flotante usamos onCreate()/onDestroy() ya que para registrar   //
 // las actividades hay que hacerlo antes de onStart():                          //
-// LifecycleOwners must call register before they are STARTED                   //
+//     LifecycleOwners must call register before they are STARTED               //
 //                                                                              //
 //------------------------------------------------------------------------------//
 
@@ -346,7 +346,9 @@ object JotterListener : Jotter.Listener {
 
         if (isRfidRequired(activity)) Rfid.resume(activity as Rfid.RfidDeviceListener)
 
-        scannerList.firstOrNull { it.activityName() == activity.javaClass.simpleName }?.onResume()
+        scannerList.firstOrNull { it.activityName() == activity.javaClass.simpleName }
+            ?.onResume()
+
         floatingWindowList.firstOrNull { it.activityName == activity.javaClass.simpleName }
             ?.onResume()
     }
@@ -387,7 +389,9 @@ object JotterListener : Jotter.Listener {
 
         if (isNfcRequired()) Nfc.disableNfcForegroundDispatch(activity)
 
-        scannerList.firstOrNull { it.activityName() == activity.javaClass.simpleName }?.onPause()
+        scannerList.firstOrNull { it.activityName() == activity.javaClass.simpleName }
+            ?.onPause()
+
         floatingWindowList.firstOrNull { it.activityName == activity.javaClass.simpleName }
             ?.onPause()
     }

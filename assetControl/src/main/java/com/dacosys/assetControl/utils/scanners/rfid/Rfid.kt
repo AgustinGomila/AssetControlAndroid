@@ -46,7 +46,6 @@ open class Rfid {
     }
 
     companion object {
-        // region Public methods
         private var rfidDevice: Rfid? = null
 
         val vh75: Vh75Bt?
@@ -123,7 +122,6 @@ open class Rfid {
             }
             return -1
         }
-        //endregion
 
         fun setListener(listener: RfidDeviceListener, rfidType: RfidType) {
             if (initRfidRequired()) {
@@ -135,7 +133,6 @@ open class Rfid {
             }
         }
 
-        //endregion
         fun build(listener: RfidDeviceListener?, rfidType: RfidType): Rfid? {
             if (rfidType == RfidType.vh75) {
                 rfidDevice = Vh75Bt(listener)

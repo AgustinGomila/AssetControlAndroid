@@ -156,12 +156,12 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
                     mmSocket?.connect()
 
                     /*
-                        mmSocket = mDevice.javaClass.getMethod
-                            ("createRfcommSocket",
-                             Int::class.javaPrimitiveType!!)
-                            .invoke(mDevice, 1) as BluetoothSocket
-                        mmSocket?.connect()
-                        */
+                    mmSocket = mDevice.javaClass.getMethod
+                        ("createRfcommSocket",
+                         Int::class.javaPrimitiveType!!)
+                        .invoke(mDevice, 1) as BluetoothSocket
+                    mmSocket?.connect()
+                    */
                 } catch (e: Exception) {
                     Log.e(tag, "Unable to connect() to socket", e)
 

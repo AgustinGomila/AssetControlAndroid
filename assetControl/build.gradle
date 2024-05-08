@@ -157,7 +157,7 @@ dependencies {
     implementation 'net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent:2.3.0'
 
     // Constaint Layout
-    // No actualizar la 2.0.1 (Fallos en: 2.0.2, 2.0.3, 2.0.4, 2.1.0),
+    // No actualizar la 2.0.1 (Fallos hasta 2.1.4),
     // Todas tienen un bug al finalizar una animación que no re-dibuja los fragmentos
     implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
 

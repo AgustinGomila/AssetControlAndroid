@@ -787,9 +787,11 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         grantResults: IntArray,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (permissions.contains(Manifest.permission.BLUETOOTH_CONNECT)) JotterListener.onRequestPermissionsResult(
-            this, requestCode, permissions, grantResults
-        )
+        if (permissions.contains(Manifest.permission.BLUETOOTH_CONNECT)) {
+            JotterListener.onRequestPermissionsResult(
+                this, requestCode, permissions, grantResults
+            )
+        }
     }
 
     private val showScannedCode: Boolean
@@ -798,6 +800,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         }
 
     override fun scannerCompleted(scanCode: String) {
+        if (!::binding.isInitialized || isFinishing || isDestroyed) return
         if (showScannedCode) makeText(binding.root, scanCode, SnackBarType.INFO)
         JotterListener.lockScanner(this, true)
 

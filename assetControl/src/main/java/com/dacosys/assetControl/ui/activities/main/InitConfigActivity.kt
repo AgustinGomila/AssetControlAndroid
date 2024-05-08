@@ -405,9 +405,11 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
         grantResults: IntArray,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (permissions.contains(Manifest.permission.BLUETOOTH_CONNECT)) JotterListener.onRequestPermissionsResult(
-            this, requestCode, permissions, grantResults
-        )
+        if (permissions.contains(Manifest.permission.BLUETOOTH_CONNECT)) {
+            JotterListener.onRequestPermissionsResult(
+                this, requestCode, permissions, grantResults
+            )
+        }
     }
 
     private val showScannedCode: Boolean
@@ -416,6 +418,7 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
         }
 
     override fun scannerCompleted(scanCode: String) {
+        if (!::binding.isInitialized || isFinishing || isDestroyed) return
         if (showScannedCode) makeText(binding.root, scanCode, INFO)
         JotterListener.lockScanner(this, true)
         JotterListener.hideWindow(this)
