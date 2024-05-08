@@ -139,11 +139,18 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         }
 
         if (taskStatus == ProgressStatus.finished.id) {
-            if ((adapter?.itemCount ?: 0) > 0)
-                adapter?.notifyItemRangeChanged(0, adapter?.itemCount ?: 0, PAYLOADS.STATUS_CHANGE)
+            if (itemCount > 0) {
+                runOnUiThread {
+                    adapter?.notifyItemRangeChanged(
+                        0,
+                        itemCount,
+                        PAYLOADS.STATUS_CHANGE
+                    )
+                }
+            }
 
             // El nivel al que volví está completo
-            if (isCurrentLevelCompleted() && adapter?.currentLevel() == 1) {
+            if (isCurrentLevelCompleted && currentLevel == 1) {
                 runOnUiThread {
                     binding.confirmButton.isEnabled = true
                 }
@@ -282,7 +289,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             b.putLongArray("checkedIdArray", adapter?.checkedIdArray?.map { it }?.toLongArray())
             b.putInt("currentScrollPosition", currentScrollPosition)
 
-            b.putParcelableArrayList("rpcArray", adapter?.fullList)
+            b.putParcelableArrayList("rpcArray", allItems)
         }
     }
 
@@ -477,7 +484,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
             Handler(Looper.getMainLooper()).postDelayed({
                 // Activo o no el botón de confirmar si el nivel está completado
-                binding.confirmButton.isEnabled = isCurrentLevelCompleted()
+                binding.confirmButton.isEnabled = isCurrentLevelCompleted
 
                 next()
             }, 200)
@@ -495,7 +502,11 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
     private fun initRoute() {
         val r = route ?: return
 
-        GetRouteProcess(route = r, onProgress = { onGetRouteProcess(it) })
+        GetRouteProcess(
+            route = r,
+            onProgress = {
+                onGetRouteProcess(it)
+            })
     }
 
     private fun continueRouteProcess(rp: RouteProcess) {
@@ -980,7 +991,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         updateStatus(rpc = rpc, s = RouteProcessStatus.skipped, dc = null)
 
         // El nivel al que volví está completo
-        if (isCurrentLevelCompleted()) {
+        if (isCurrentLevelCompleted) {
             runOnUiThread {
                 binding.confirmButton.isEnabled = true
             }
@@ -991,32 +1002,33 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
     }
 
     private fun skipAll() {
-        if ((adapter?.itemCount ?: 0) > 0) {
-            JotterListener.lockScanner(this, true)
-            try {
-                val alert = AlertDialog.Builder(this)
-                alert.setTitle(getContext().getString(R.string.skip_remaining))
-                alert.setMessage(getContext().getString(R.string.do_you_want_to_skip_the_remaining_steps_question))
-                alert.setNegativeButton(R.string.cancel, null)
-                alert.setPositiveButton(R.string.accept) { dialog, _ ->
-                    dialog.dismiss()
-                    positiveSkipAll()
-                }
+        if (itemCount <= 0) return
 
-                alert.show()
-            } catch (ex: java.lang.Exception) {
-                ex.printStackTrace()
-                ErrorLog.writeLog(this, this::class.java.simpleName, ex)
-            } finally {
-                JotterListener.lockScanner(this, false)
+        JotterListener.lockScanner(this, true)
+        try {
+            val alert = AlertDialog.Builder(this)
+            alert.setTitle(getContext().getString(R.string.skip_remaining))
+            alert.setMessage(getContext().getString(R.string.do_you_want_to_skip_the_remaining_steps_question))
+            alert.setNegativeButton(R.string.cancel, null)
+            alert.setPositiveButton(R.string.accept) { dialog, _ ->
+                dialog.dismiss()
+                positiveSkipAll()
             }
+
+            alert.show()
+        } catch (ex: java.lang.Exception) {
+            ex.printStackTrace()
+            ErrorLog.writeLog(this, this::class.java.simpleName, ex)
+        } finally {
+            JotterListener.lockScanner(this, false)
         }
     }
 
     private fun positiveSkipAll() {
         JotterListener.lockScanner(this, true)
 
-        SkipAll(allRouteProcessContent = adapter?.fullList ?: ArrayList(),
+        SkipAll(
+            allRouteProcessContent = allItems,
             onProgress = { onSkipAllProgress(it) })
     }
 
@@ -1050,7 +1062,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
         if (s == RouteProcessStatus.processed || s == RouteProcessStatus.skipped) {
             runOnUiThread {
-                binding.confirmButton.isEnabled = isCurrentLevelCompleted()
+                binding.confirmButton.isEnabled = isCurrentLevelCompleted
             }
         }
     }
@@ -1237,6 +1249,26 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         }
     }
 
+    private val currentLevel: Int
+        get() {
+            return adapter?.currentLevel() ?: 0
+        }
+
+    private val isCurrentLevelCompleted: Boolean
+        get() {
+            return adapter?.isLevelCompleted ?: false
+        }
+
+    private val allItems: ArrayList<RouteProcessContent>
+        get() {
+            return adapter?.fullList ?: ArrayList()
+        }
+
+    private val itemCount: Int
+        get() {
+            return adapter?.itemCount ?: 0
+        }
+
     @Suppress("unused")
     private fun next() {
         adapter?.selectNext()
@@ -1275,7 +1307,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         }
 
         // El nivel al que volví está completo
-        if (isCurrentLevelCompleted()) {
+        if (isCurrentLevelCompleted) {
             // Seguir bajando
             runOnUiThread {
                 binding.confirmButton.isEnabled = true
@@ -1295,28 +1327,13 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
     private fun isRouteFinished(): Boolean {
         return try {
-            val level = adapter?.currentLevel() ?: 1
-            isCurrentLevelCompleted() && level == 1
+            val level = currentLevel
+            isCurrentLevelCompleted && level == 1
         } catch (ex: Exception) {
             ex.printStackTrace()
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
             true
         }
-    }
-
-    private fun isCurrentLevelCompleted(): Boolean {
-        val c = adapter?.itemCount ?: 0
-
-        (0 until c).forEach { i ->
-            val z = adapter?.getContentByIndex(i)
-            if (z != null) {
-                if (z.routeProcessStatusId == RouteProcessStatus.notProcessed.id || z.routeProcessStatusId == RouteProcessStatus.unknown.id) {
-                    return false
-                }
-            }
-        }
-
-        return true
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -1696,7 +1713,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
             var rpc: RouteProcessContent? = null
 
-            if (adapter != null && adapter?.fullList?.any() == true) {
+            if (adapter != null && allItems.any()) {
                 // Buscar primero en el adaptador de la lista
                 (0 until adapter!!.itemCount).map { adapter!!.getContentByIndex(it) }.filter {
                     it != null && (sc.asset != null && it.assetCode != null && it.assetCode == tempCode || sc.warehouseArea != null && it.warehouseAreaId != null && it.warehouseAreaId.toString() == tempCode)
@@ -1737,7 +1754,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
     private fun demo() {
         if (!Statics.DEMO_MODE) return
 
-        if (isCurrentLevelCompleted()) {
+        if (isCurrentLevelCompleted) {
             confirmLevel(false)
             return
         }
@@ -1779,7 +1796,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
     }
 
     // region ProgressBar
-// Aparece mientras se realizan operaciones sobre las bases remota y local
+    // Aparece mientras se realizan operaciones sobre las bases remota y local
     private var progressDialog: AlertDialog? = null
     private lateinit var alertBinding: ProgressBarDialogBinding
     private fun createProgressDialog() {
@@ -1875,7 +1892,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             }
         }
     }
-// endregion
+    // endregion
 
     companion object {
         fun equals(a: Any?, b: Any?): Boolean {
@@ -1883,8 +1900,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         }
     }
 
-// region READERS Reception
-
+    // region READERS Reception
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         Nfc.nfcHandleIntent(intent, this)

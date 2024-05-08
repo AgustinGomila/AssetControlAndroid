@@ -678,6 +678,11 @@ class RpcRecyclerAdapter(
     fun selectPrev() {
         if (!fullList.any()) return
 
+        if (!fullList.any { it.routeProcessStatusId == RouteProcessStatus.notProcessed.id }) {
+            selectFirst()
+            return
+        }
+
         var prevIndex = if (currentIndex == 0) itemCount - 1 else currentIndex - 1
 
         while (true) {
@@ -696,8 +701,10 @@ class RpcRecyclerAdapter(
                 continue
             }
 
-            if (z.routeProcessStatusId == RouteProcessStatus.processed.id ||
-                z.routeProcessStatusId == RouteProcessStatus.skipped.id
+            val processStatusId = z.routeProcessStatusId
+
+            if (processStatusId == RouteProcessStatus.processed.id ||
+                processStatusId == RouteProcessStatus.skipped.id
             ) {
                 prevIndex--
                 continue
@@ -709,8 +716,21 @@ class RpcRecyclerAdapter(
         }
     }
 
+    private fun selectFirst() {
+        selectItem(0, true)
+    }
+
+    private fun selectLast() {
+        selectItem(fullList.lastIndex, true)
+    }
+
     fun selectNext() {
         if (!fullList.any()) return
+
+        if (!fullList.any { it.routeProcessStatusId == RouteProcessStatus.notProcessed.id }) {
+            selectLast()
+            return
+        }
 
         var nextIndex = if (itemCount == currentIndex + 1) 0 else currentIndex + 1
 
@@ -730,8 +750,10 @@ class RpcRecyclerAdapter(
                 continue
             }
 
-            if (z.routeProcessStatusId == RouteProcessStatus.processed.id ||
-                z.routeProcessStatusId == RouteProcessStatus.skipped.id
+            val processStatusId = z.routeProcessStatusId
+
+            if (processStatusId == RouteProcessStatus.processed.id ||
+                processStatusId == RouteProcessStatus.skipped.id
             ) {
                 nextIndex++
                 continue
@@ -743,23 +765,31 @@ class RpcRecyclerAdapter(
         }
     }
 
-    fun countChecked(): Int {
-        return checkedIdArray.count()
-    }
+    @Suppress("unused", "MemberVisibilityCanBePrivate")
+    val countChecked: Int
+        get() {
+            return checkedIdArray.count()
+        }
 
-    @Suppress("unused")
+    @Suppress("unused", "MemberVisibilityCanBePrivate")
+    val isLevelCompleted: Boolean
+        get() {
+            return notProcessed <= 0
+        }
+
+    @Suppress("unused", "MemberVisibilityCanBePrivate")
     val processed: Int
         get() = fullList.count {
             it.routeProcessStatusId == RouteProcessStatus.processed.id
         }
 
-    @Suppress("unused")
+    @Suppress("unused", "MemberVisibilityCanBePrivate")
     val notProcessed: Int
         get() = fullList.count {
             it.routeProcessStatusId == RouteProcessStatus.notProcessed.id
         }
 
-    @Suppress("unused")
+    @Suppress("unused", "MemberVisibilityCanBePrivate")
     val skipped: Int
         get() = fullList.count {
             it.routeProcessStatusId == RouteProcessStatus.skipped.id
