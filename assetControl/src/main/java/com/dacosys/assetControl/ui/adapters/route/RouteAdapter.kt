@@ -393,12 +393,13 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
         return -1
     }
 
-    fun count(): Int {
-        return count
-    }
+    val itemCount: Int
+        get() {
+            return count
+        }
 
     fun maxHeightNeeded(): Int {
-        return count() * defaultDropDownItemHeight()
+        return itemCount * defaultDropDownItemHeight()
     }
 
     fun getAllId(): ArrayList<Long> {

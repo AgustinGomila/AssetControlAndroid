@@ -129,7 +129,12 @@ class SyncElementRecyclerAdapter private constructor(builder: Builder) :
         keyWithImage.clear()
 
         fullList.clear()
-        submitList(fullList)
+        submitList(fullList) {
+            run {
+                // Notificamos al Listener superior
+                dataSetChangedListener?.onDataSetChanged()
+            }
+        }
     }
 
     fun refreshListeners(

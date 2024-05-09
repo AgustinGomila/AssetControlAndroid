@@ -10,6 +10,8 @@ import android.os.Looper
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -68,7 +70,7 @@ import java.util.concurrent.ThreadLocalRandom
 @Suppress("UNCHECKED_CAST")
 class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
     SwipeRefreshLayout.OnRefreshListener, WarehouseAreaSelectFilterFragment.FragmentListener,
-    Rfid.RfidDeviceListener {
+    Rfid.RfidDeviceListener, AssetReviewAdapter.DataSetChangedListener {
     override fun onDestroy() {
         destroyLocals()
         super.onDestroy()
@@ -76,7 +78,7 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private fun destroyLocals() {
         saveSharedPreferences()
-        arrayAdapter?.refreshListeners(null, null)
+        adapter?.refreshListeners(null, null)
         waSelectFilterFragment?.onDestroy()
     }
 
@@ -108,7 +110,7 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
     private var checkedIdArray: ArrayList<Long> = ArrayList()
     private var lastSelected: AssetReview? = null
     private var firstVisiblePos: Int? = null
-    private var arrayAdapter: AssetReviewAdapter? = null
+    private var adapter: AssetReviewAdapter? = null
     private var panelBottomIsExpanded = true
 
 
@@ -122,13 +124,13 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
         b.putBoolean("multiSelect", multiSelect)
         b.putBoolean("panelBottomIsExpanded", panelBottomIsExpanded)
 
-        if (arrayAdapter != null) {
-            b.putParcelable("lastSelected", arrayAdapter?.currentAssetReview())
-            b.putInt("firstVisiblePos", arrayAdapter?.firstVisiblePos() ?: 0)
+        if (adapter != null) {
+            b.putParcelable("lastSelected", adapter?.currentAssetReview())
+            b.putInt("firstVisiblePos", adapter?.firstVisiblePos() ?: 0)
             b.putParcelableArrayList(
-                "visibleStatusArray", arrayAdapter?.getVisibleStatus()
+                "visibleStatusArray", adapter?.getVisibleStatus()
             )
-            b.putLongArray("checkedIdArray", arrayAdapter?.getAllChecked()?.toLongArray())
+            b.putLongArray("checkedIdArray", adapter?.getAllChecked()?.toLongArray())
         }
     }
 
@@ -326,8 +328,8 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     private fun assetReviewSelect() {
-        if (arrayAdapter != null) {
-            val ar = arrayAdapter?.currentAssetReview() ?: return
+        if (adapter != null) {
+            val ar = adapter?.currentAssetReview() ?: return
 
             if (ar.statusId == AssetReviewStatus.onProcess.id) {
                 if (!rejectNewInstances) {
@@ -348,8 +350,8 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     private fun assetReviewRemove() {
-        if (arrayAdapter != null) {
-            val ar = arrayAdapter?.currentAssetReview() ?: return
+        if (adapter != null) {
+            val ar = adapter?.currentAssetReview() ?: return
 
             if (ar.statusId == AssetReviewStatus.completed.id) {
                 makeText(
@@ -372,7 +374,7 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
                     AssetReviewContentDbHelper().deleteByAssetReviewId(ar.collectorAssetReviewId)
                     removeAssetReviewImages()
 
-                    arrayAdapter?.remove(ar)
+                    adapter?.remove(ar)
                     fillListView()
                 }
 
@@ -387,8 +389,8 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     private fun removeAssetReviewImages() {
-        if (arrayAdapter != null) {
-            val ar = arrayAdapter?.currentAssetReview() ?: return
+        if (adapter != null) {
+            val ar = adapter?.currentAssetReview() ?: return
 
             try {
                 val programData = ProgramData(
@@ -459,26 +461,17 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
         }
 
     private fun fillListView() {
-        try {
-            val w = waSelectFilterFragment?.wDescription ?: ""
-            val wa = waSelectFilterFragment?.waDescription ?: ""
-            val onlyActive = waSelectFilterFragment?.onlyActive ?: true
+        val w = waSelectFilterFragment?.wDescription ?: ""
+        val wa = waSelectFilterFragment?.waDescription ?: ""
+        val onlyActive = waSelectFilterFragment?.onlyActive ?: true
 
-            var assetReviewList: ArrayList<AssetReview> = ArrayList()
-            try {
-                assetReviewList = AssetReviewDbHelper().selectByDescription(w, wa, onlyActive)
-            } catch (ex: Exception) {
-                ex.printStackTrace()
-                ErrorLog.writeLog(this, this::class.java.simpleName, ex)
-            }
+        val assetReviewList = AssetReviewDbHelper().selectByDescription(
+            wDescription = w,
+            waDescription = wa,
+            onlyActive = onlyActive
+        )
 
-            fillAdapter(assetReviewList)
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-            ErrorLog.writeLog(this, this::class.java.simpleName, ex)
-        } finally {
-            showProgressBar(false)
-        }
+        fillAdapter(assetReviewList)
     }
 
     private fun fillAdapter(assetReviewArray: ArrayList<AssetReview>) {
@@ -486,12 +479,12 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         try {
             runOnUiThread {
-                if (arrayAdapter != null) {
-                    lastSelected = arrayAdapter?.currentAssetReview()
-                    firstVisiblePos = arrayAdapter?.firstVisiblePos()
+                if (adapter != null) {
+                    lastSelected = adapter?.currentAssetReview()
+                    firstVisiblePos = adapter?.firstVisiblePos()
                 }
 
-                arrayAdapter = AssetReviewAdapter(
+                adapter = AssetReviewAdapter(
                     activity = this,
                     resource = R.layout.asset_review_row,
                     assetReviews = assetReviewArray,
@@ -501,15 +494,13 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
                     visibleStatus = visibleStatusArray
                 )
 
+                adapter?.refreshListeners(null, this)
+
                 while (binding.assetReviewListView.adapter == null) {
                     // Horrible wait for full load
                 }
 
-                if (arrayAdapter != null) {
-                    arrayAdapter?.setSelectItemAndScrollPos(
-                        lastSelected, firstVisiblePos
-                    )
-                }
+                adapter?.setSelectItemAndScrollPos(lastSelected, firstVisiblePos)
 
                 if (Statics.DEMO_MODE) Handler(Looper.getMainLooper()).postDelayed({ demo() }, 300)
             }
@@ -668,11 +659,11 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        if (arrayAdapter == null) {
+        if (adapter == null) {
             return false
         }
 
-        val visibleStatus = arrayAdapter!!.getVisibleStatus()
+        val visibleStatus = adapter!!.getVisibleStatus()
         item.isChecked = !item.isChecked
 
         when (item.itemId) {
@@ -680,44 +671,44 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
                     AssetReviewStatus.onProcess
                 )
             ) {
-                arrayAdapter!!.addVisibleStatus(AssetReviewStatus.onProcess)
+                adapter!!.addVisibleStatus(AssetReviewStatus.onProcess)
             } else if (!item.isChecked && visibleStatus.contains(AssetReviewStatus.onProcess)) {
-                arrayAdapter!!.removeVisibleStatus(AssetReviewStatus.onProcess)
+                adapter!!.removeVisibleStatus(AssetReviewStatus.onProcess)
             }
 
             AssetReviewStatus.completed.id -> if (item.isChecked && !visibleStatus.contains(
                     AssetReviewStatus.completed
                 )
             ) {
-                arrayAdapter!!.addVisibleStatus(AssetReviewStatus.completed)
+                adapter!!.addVisibleStatus(AssetReviewStatus.completed)
             } else if (!item.isChecked && visibleStatus.contains(AssetReviewStatus.completed)) {
-                arrayAdapter!!.removeVisibleStatus(AssetReviewStatus.completed)
+                adapter!!.removeVisibleStatus(AssetReviewStatus.completed)
             }
 
             AssetReviewStatus.transferred.id -> if (item.isChecked && !visibleStatus.contains(
                     AssetReviewStatus.transferred
                 )
             ) {
-                arrayAdapter!!.addVisibleStatus(AssetReviewStatus.transferred)
+                adapter!!.addVisibleStatus(AssetReviewStatus.transferred)
             } else if (!item.isChecked && visibleStatus.contains(AssetReviewStatus.transferred)) {
-                arrayAdapter!!.removeVisibleStatus(AssetReviewStatus.transferred)
+                adapter!!.removeVisibleStatus(AssetReviewStatus.transferred)
             }
 
             AssetReviewStatus.unknown.id -> if (item.isChecked && !visibleStatus.contains(
                     AssetReviewStatus.unknown
                 )
             ) {
-                arrayAdapter!!.addVisibleStatus(AssetReviewStatus.unknown)
+                adapter!!.addVisibleStatus(AssetReviewStatus.unknown)
             } else if (!item.isChecked && visibleStatus.contains(AssetReviewStatus.unknown)) {
-                arrayAdapter!!.removeVisibleStatus(AssetReviewStatus.unknown)
+                adapter!!.removeVisibleStatus(AssetReviewStatus.unknown)
             }
 
             else -> return super.onOptionsItemSelected(item)
         }
 
-        if (arrayAdapter?.isStatusVisible(arrayAdapter?.currentPos() ?: -1) == false) {
+        if (adapter?.isStatusVisible(adapter?.currentPos() ?: -1) == false) {
             // La fila actual está invisible, seleccionar la anterior visible
-            arrayAdapter?.selectNearVisible()
+            adapter?.selectNearVisible()
         }
 
         return true
@@ -731,15 +722,21 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
         waSelectFilterFragment?.refreshViews()
     }
 
-    companion object {
-        fun equals(a: Any?, b: Any?): Boolean {
-            return a != null && a == b
-        }
-    }
-
     override fun onFilterChanged(waDescription: String, wDescription: String, onlyActive: Boolean) {
         closeKeyboard(this)
         fillListView()
+    }
+
+    override fun onDataSetChanged() {
+        showListOrEmptyListMessage()
+    }
+
+    private fun showListOrEmptyListMessage() {
+        runOnUiThread {
+            val isEmpty = (adapter?.itemCount ?: 0) == 0
+            binding.emptyTextView.visibility = if (isEmpty) VISIBLE else GONE
+            binding.assetReviewListView.visibility = if (isEmpty) GONE else VISIBLE
+        }
     }
 
     private fun demo() {
@@ -867,5 +864,9 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     //endregion READERS Reception
 
-
+    companion object {
+        fun equals(a: Any?, b: Any?): Boolean {
+            return a != null && a == b
+        }
+    }
 }

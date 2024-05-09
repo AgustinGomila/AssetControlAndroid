@@ -9,6 +9,8 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
@@ -1221,6 +1223,15 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
 
     override fun onDataSetChanged() {
         fillSummaryRow()
+        showListOrEmptyListMessage()
+    }
+
+    private fun showListOrEmptyListMessage() {
+        runOnUiThread {
+            val isEmpty = (adapter?.itemCount ?: 0) == 0
+            binding.emptyTextView.visibility = if (isEmpty) VISIBLE else GONE
+            binding.recyclerView.visibility = if (isEmpty) GONE else VISIBLE
+        }
     }
 
     override fun onCheckedChanged(isChecked: Boolean, pos: Int) {

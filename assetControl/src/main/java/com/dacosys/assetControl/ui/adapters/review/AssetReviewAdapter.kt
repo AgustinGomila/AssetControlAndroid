@@ -224,9 +224,10 @@ class AssetReviewAdapter :
         return -1
     }
 
-    fun count(): Int {
-        return count
-    }
+    val itemCount: Int
+        get() {
+            return count
+        }
 
     fun countVisible(): Int {
         var visibleItems = 0

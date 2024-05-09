@@ -7,6 +7,8 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.MenuItem
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -41,14 +43,14 @@ import java.util.*
 
 class RouteSelectActivity : AppCompatActivity(),
     SwipeRefreshLayout.OnRefreshListener,
-    RouteSelectFilterFragment.FragmentListener {
+    RouteSelectFilterFragment.FragmentListener, RouteAdapter.DataSetChangedListener {
     override fun onDestroy() {
         destroyLocals()
         super.onDestroy()
     }
 
     private fun destroyLocals() {
-        arrayAdapter?.refreshListeners(checkedChangedListener = null, dataSetChangedListener = null)
+        adapter?.refreshListeners(checkedChangedListener = null, dataSetChangedListener = null)
         routeSelectFilterFragment?.onDestroy()
     }
 
@@ -68,7 +70,7 @@ class RouteSelectActivity : AppCompatActivity(),
     private var routeSelectFilterFragment: RouteSelectFilterFragment? = null
     private var lastSelected: Route? = null
     private var firstVisiblePos: Int? = null
-    private var arrayAdapter: RouteAdapter? = null
+    private var adapter: RouteAdapter? = null
     private var panelBottomIsExpanded = true
 
     override fun onResume() {
@@ -89,9 +91,9 @@ class RouteSelectActivity : AppCompatActivity(),
         b.putBoolean("multiSelect", multiSelect)
         b.putBoolean("panelBottomIsExpanded", panelBottomIsExpanded)
 
-        if (arrayAdapter != null) {
-            b.putParcelable("lastSelected", arrayAdapter?.currentRoute())
-            b.putInt("firstVisiblePos", arrayAdapter?.firstVisiblePos() ?: 0)
+        if (adapter != null) {
+            b.putParcelable("lastSelected", adapter?.currentRoute())
+            b.putInt("firstVisiblePos", adapter?.firstVisiblePos() ?: 0)
         }
     }
 
@@ -268,8 +270,8 @@ class RouteSelectActivity : AppCompatActivity(),
     }
 
     private fun routeSelect() {
-        if (arrayAdapter != null) {
-            val currentRoute = arrayAdapter?.currentRoute() ?: return
+        if (adapter != null) {
+            val currentRoute = adapter?.currentRoute() ?: return
 
             if (!rejectNewInstances) {
                 rejectNewInstances = true
@@ -296,8 +298,8 @@ class RouteSelectActivity : AppCompatActivity(),
         }
 
     private fun cancelRouteProcess() {
-        if (arrayAdapter != null) {
-            val currentRoute = arrayAdapter?.currentRoute() ?: return
+        if (adapter != null) {
+            val currentRoute = adapter?.currentRoute() ?: return
 
             val rpArray = RouteProcessDbHelper().selectByRouteIdNoCompleted(currentRoute.routeId)
 
@@ -398,18 +400,11 @@ class RouteSelectActivity : AppCompatActivity(),
         }
 
     private fun fillListView() {
-        try {
-            fillRouteAdapter(
-                routeArray = routeList,
-                routeIdOnProcess = routeIdOnProcess,
-                routeIdToSend = routeIdToSend
-            )
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-            ErrorLog.writeLog(this, this::class.java.simpleName, ex)
-        } finally {
-            showProgressBar(false)
-        }
+        fillRouteAdapter(
+            routeArray = routeList,
+            routeIdOnProcess = routeIdOnProcess,
+            routeIdToSend = routeIdToSend
+        )
     }
 
     private fun fillRouteAdapter(
@@ -421,13 +416,13 @@ class RouteSelectActivity : AppCompatActivity(),
 
         try {
             runOnUiThread {
-                if (arrayAdapter != null) {
-                    lastSelected = arrayAdapter?.currentRoute()
-                    firstVisiblePos = arrayAdapter?.firstVisiblePos()
+                if (adapter != null) {
+                    lastSelected = adapter?.currentRoute()
+                    firstVisiblePos = adapter?.firstVisiblePos()
                 }
 
-                if (arrayAdapter == null || routeArray.size > 0) {
-                    arrayAdapter = RouteAdapter(
+                if (adapter == null || routeArray.size > 0) {
+                    adapter = RouteAdapter(
                         activity = this,
                         resource = R.layout.route_row,
                         routes = routeArray,
@@ -437,28 +432,28 @@ class RouteSelectActivity : AppCompatActivity(),
                         checkedIdArray = ArrayList(),
                         multiSelect = false,
                         checkedChangedListener = null,
-                        dataSetChangedListener = null
+                        dataSetChangedListener = this
                     )
-                } else if (routeArray.size <= 0) {
+                } else {
                     // IMPORTANTE:
                     // Se deben actualizar los listeners, si no
                     // las variables de esta actividad pueden
                     // tener valores antiguos en del adaptador.
 
-                    arrayAdapter?.refreshListeners(
+                    adapter?.refreshListeners(
                         checkedChangedListener = null,
-                        dataSetChangedListener = null
+                        dataSetChangedListener = this
                     )
 
-                    arrayAdapter?.refresh()
+                    adapter?.refresh()
                 }
 
                 while (binding.routeListView.adapter == null) {
                     // Horrible wait for full load
                 }
 
-                if (arrayAdapter != null) {
-                    arrayAdapter?.setSelectItemAndScrollPos(
+                if (adapter != null) {
+                    adapter?.setSelectItemAndScrollPos(
                         lastSelected,
                         firstVisiblePos
                     )
@@ -488,8 +483,8 @@ class RouteSelectActivity : AppCompatActivity(),
     private fun demo() {
         if (!Statics.DEMO_MODE) return
 
-        val t = arrayAdapter?.count() ?: 0
-        arrayAdapter?.selectItem(Random().nextInt(t))
+        val t = adapter?.itemCount ?: 0
+        adapter?.selectItem(Random().nextInt(t))
         routeSelect()
     }
 
@@ -513,6 +508,18 @@ class RouteSelectActivity : AppCompatActivity(),
             else -> {
                 super.onOptionsItemSelected(item)
             }
+        }
+    }
+
+    override fun onDataSetChanged() {
+        showListOrEmptyListMessage()
+    }
+
+    private fun showListOrEmptyListMessage() {
+        runOnUiThread {
+            val isEmpty = (adapter?.itemCount ?: 0) == 0
+            binding.emptyTextView.visibility = if (isEmpty) VISIBLE else GONE
+            binding.routeListView.visibility = if (isEmpty) GONE else VISIBLE
         }
     }
 }
