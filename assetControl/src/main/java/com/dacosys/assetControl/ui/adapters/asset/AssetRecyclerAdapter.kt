@@ -128,7 +128,12 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
         idWithImage.clear()
 
         fullList.clear()
-        submitList(fullList)
+        submitList(fullList) {
+            run {
+                // Notificamos al Listener superior
+                dataSetChangedListener?.onDataSetChanged()
+            }
+        }
     }
 
     fun refreshListeners(

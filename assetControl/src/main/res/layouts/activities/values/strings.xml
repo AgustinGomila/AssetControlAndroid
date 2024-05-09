@@ -1124,4 +1124,5 @@
     <string name="enter_code">Ingrese un código</string>
     <string name="rfid_connected">Lector RFID conectado</string>
     <string name="show_message_on_rfid_reader_is_ready">Mostrar mensaje de conexión del lector RFID</string>
+    <string name="no_items_to_display">No hay ítems para mostrar</string>
 </resources>

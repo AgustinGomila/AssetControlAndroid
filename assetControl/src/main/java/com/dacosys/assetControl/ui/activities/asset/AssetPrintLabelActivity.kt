@@ -16,6 +16,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.inputmethod.EditorInfo
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
@@ -123,6 +124,15 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
 
     override fun onDataSetChanged() {
         fillSummaryRow()
+        showListOrEmptyListMessage()
+    }
+
+    private fun showListOrEmptyListMessage() {
+        runOnUiThread {
+            val isEmpty = (adapter?.itemCount ?: 0) == 0
+            binding.emptyTextView.visibility = if (isEmpty) VISIBLE else GONE
+            binding.recyclerView.visibility = if (isEmpty) GONE else VISIBLE
+        }
     }
 
     override fun onCheckedChanged(isChecked: Boolean, pos: Int) {
@@ -486,7 +496,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
 
             val asset = adapter?.currentAsset()
             val countChecked = adapter?.countChecked ?: 0
-            var assetArray: java.util.ArrayList<Asset> = ArrayList()
+            var assetArray: ArrayList<Asset> = ArrayList()
 
             if (!multiSelect && asset != null) {
                 data.putParcelableArrayListExtra("ids", arrayListOf(ParcelLong(asset.assetId)))
@@ -1214,7 +1224,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
 
         val asset = adapter?.currentAsset()
         val countChecked = adapter?.countChecked ?: 0
-        var assetArray: java.util.ArrayList<Asset> = ArrayList()
+        var assetArray: ArrayList<Asset> = ArrayList()
 
         if (!multiSelect && asset != null) {
             assetArray = arrayListOf(asset)
