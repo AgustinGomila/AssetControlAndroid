@@ -11,6 +11,8 @@ import android.os.Looper
 import android.text.InputType
 import android.util.Log
 import android.view.*
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -1276,6 +1278,15 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     override fun onDataSetChanged() {
         setupTextView()
+        showListOrEmptyListMessage()
+    }
+
+    private fun showListOrEmptyListMessage() {
+        runOnUiThread {
+            val isEmpty = (adapter?.itemCount ?: 0) == 0
+            binding.emptyTextView.visibility = if (isEmpty) VISIBLE else GONE
+            binding.recyclerView.visibility = if (isEmpty) GONE else VISIBLE
+        }
     }
 
     override fun onEditAssetRequired(tableId: Int, itemId: Long) {
