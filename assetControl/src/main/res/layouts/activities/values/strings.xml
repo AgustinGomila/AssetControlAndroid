@@ -636,7 +636,7 @@
     <string name="asset_condition_excellent">Excelente</string>
     <string name="allow_quick_reviews">Permitir revisiones rápidas</string>
     <string name="allows_to_mark_assets_in_a_revision_by_clicking_on_the_list">Permite marcar activos en una revisión
-        haciendo click sobre la lista
+        haciendo clic sobre la lista
     </string>
     <string name="if_you_have_a_configuration_barcode_you_can_capture_it_here">Si dispone de un código de barras de
         configuración puede carpturarlo aquí
@@ -1125,5 +1125,5 @@
     <string name="rfid_connected">Lector RFID conectado</string>
     <string name="show_message_on_rfid_reader_is_ready">Mostrar mensaje de conexión del lector RFID</string>
     <string name="no_items_to_display">No hay ítems para mostrar</string>
-    <string name="scan_a_code_or_manual_add">Escanear código o añadir manualmente</string>
+    <string name="scan_or_manual_add_items">Escanear o ingresar ítems y\nubicaciones manualmente</string>
 </resources>

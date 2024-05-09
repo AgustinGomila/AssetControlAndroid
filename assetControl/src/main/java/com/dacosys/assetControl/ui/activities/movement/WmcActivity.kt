@@ -773,6 +773,8 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
         if (_fillAdapter) {
             _fillAdapter = false
             fillAdapter(completeList)
+        } else {
+            showListOrEmptyListMessage()
         }
     }
 
