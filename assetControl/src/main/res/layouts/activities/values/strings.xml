@@ -709,6 +709,7 @@
         configuración de fábrica?
     </string>
     <string name="there_is_no_rfid_device_connected">No hay un dispositivo RFID conectado</string>
+    <string name="there_is_no_rfid_device_selected">No hay un dispositivo RFID seleccionado</string>
     <string name="failed_rfid_writing">Escritura RFID fallida</string>
     <string name="rfid_writing_ok">Escritura RFID OK</string>
     <string name="rfid_device_name">Nombre del dispositivo</string>

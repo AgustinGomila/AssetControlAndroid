@@ -3,13 +3,12 @@ package com.dacosys.assetControl.ui.fragments.settings
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.Size
-import android.view.View
 import android.widget.ImageView
 import androidx.appcompat.app.AlertDialog
+import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import androidx.preference.Preference.OnPreferenceClickListener
 import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.PreferenceScreen
 import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.AssetControlApp.Companion.appName
 import com.dacosys.assetControl.AssetControlApp.Companion.isLogged
@@ -17,7 +16,6 @@ import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.network.download.DownloadDb
 import com.dacosys.assetControl.ui.activities.main.SettingsActivity
-import com.dacosys.assetControl.ui.activities.main.SettingsActivity.Companion.bindPreferenceSummaryToValue
 import com.dacosys.assetControl.ui.common.snackbar.MakeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.common.utils.Screen
@@ -27,10 +25,6 @@ import com.dacosys.assetControl.utils.settings.config.ConfigHelper
 import com.dacosys.assetControl.utils.settings.config.QRConfigType
 import com.dacosys.assetControl.utils.settings.preferences.Preferences
 
-/**
- * This fragment shows notification preferences only. It is used when the
- * activity is showing a two-pane settings UI.
- */
 class WebservicePreferenceFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         var key = rootKey
@@ -40,47 +34,39 @@ class WebservicePreferenceFragment : PreferenceFragmentCompat() {
         setPreferencesFromResource(R.xml.pref_webservice, key)
     }
 
-    override fun onNavigateToScreen(preferenceScreen: PreferenceScreen) {
-        val prefFragment = WebservicePreferenceFragment()
-        val args = Bundle()
-        args.putString("rootKey", preferenceScreen.key)
-        prefFragment.arguments = args
-        parentFragmentManager.beginTransaction().replace(id, prefFragment).addToBackStack(null).commit()
-    }
-
     private var alreadyAnsweredYes = false
     private val p = com.dacosys.assetControl.utils.settings.config.Preference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        bindPreferenceSummaryToValue(this, p.acWsServer)
-        bindPreferenceSummaryToValue(this, p.acWsNamespace)
+        val wsServerPref: EditTextPreference? = findPreference(p.acWsServer.key)
+        wsServerPref?.summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
+
+        val wsNamespacePref: EditTextPreference? = findPreference(p.acWsNamespace.key)
+        wsNamespacePref?.summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
+
+        val wsUserPref: EditTextPreference? = findPreference(p.acWsUser.key)
+        val wsPassPref: EditTextPreference? = findPreference(p.acWsPass.key)
+        val userPref: EditTextPreference? = findPreference(p.acUser.key)
+        val passPref: EditTextPreference? = findPreference(p.acPass.key)
 
         if (BuildConfig.DEBUG) {
-            bindPreferenceSummaryToValue(this, p.acWsUser)
-            bindPreferenceSummaryToValue(this, p.acWsPass)
-            bindPreferenceSummaryToValue(this, p.acUser)
-            bindPreferenceSummaryToValue(this, p.acPass)
+            wsUserPref?.summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
+            wsPassPref?.summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
+            userPref?.summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
+            passPref?.summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
         }
 
-        bindPreferenceSummaryToValue(this, p.acWsProxy)
-        bindPreferenceSummaryToValue(this, p.acWsProxyPort)
-    }
+        val wsProxyPref: EditTextPreference? = findPreference(p.acWsProxy.key)
+        wsProxyPref?.summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+        val wsProxyPortPref: EditTextPreference? = findPreference(p.acWsProxyPort.key)
+        wsProxyPortPref?.summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
 
-        val urlEditText = findPreference<Preference>(p.acWsServer.key)
-        val namespaceEditText = findPreference<Preference>(p.acWsNamespace.key)
-        val userWsEditText = findPreference<Preference>(p.acWsUser.key)
-        val passWsEditText = findPreference<Preference>(p.acWsPass.key)
-        val userEditText = findPreference<Preference>(p.acUser.key)
-        val passEditText = findPreference<Preference>(p.acPass.key)
-
-        val testButton = findPreference<Preference>("ac_test")
-        testButton?.onPreferenceClickListener = OnPreferenceClickListener {
-            if (urlEditText != null && namespaceEditText != null) {
+        val testPref: Preference? = findPreference("ac_test")
+        testPref?.onPreferenceClickListener = OnPreferenceClickListener {
+            if (wsServerPref != null && wsNamespacePref != null) {
                 val url = Preferences.prefsGetString(p.acWsServer)
                 val namespace = Preferences.prefsGetString(p.acWsNamespace)
                 val urlProxy = Preferences.prefsGetString(p.acWsProxy)
@@ -103,10 +89,15 @@ class WebservicePreferenceFragment : PreferenceFragmentCompat() {
             true
         }
 
-        val scanConfigCode = findPreference<Preference>("scan_config_code")
-        scanConfigCode?.onPreferenceClickListener = OnPreferenceClickListener {
+        val scanCodePref: Preference? = findPreference("scan_config_code")
+        scanCodePref?.onPreferenceClickListener = OnPreferenceClickListener {
             try {
-                SettingsActivity.doScanWork(QRConfigType.QRConfigWebservice)
+                if (!isLogged()) {
+                    val settingsActivity: SettingsActivity = requireActivity() as? SettingsActivity
+                        ?: return@OnPreferenceClickListener true
+
+                    SettingsActivity.doScanWork(settingsActivity, QRConfigType.QRConfigWebservice)
+                }
                 true
             } catch (ex: Exception) {
                 ex.printStackTrace()
@@ -118,8 +109,8 @@ class WebservicePreferenceFragment : PreferenceFragmentCompat() {
             }
         }
 
-        val qrCodeButton = findPreference<Preference>("ac_qr_code")
-        qrCodeButton?.onPreferenceClickListener = OnPreferenceClickListener {
+        val qrCodePref: Preference? = findPreference("ac_qr_code")
+        qrCodePref?.onPreferenceClickListener = OnPreferenceClickListener {
             val url = Preferences.prefsGetString(p.acWsServer)
             val namespace = Preferences.prefsGetString(p.acWsNamespace)
             val userWs = Preferences.prefsGetString(p.acWsUser)
@@ -134,71 +125,66 @@ class WebservicePreferenceFragment : PreferenceFragmentCompat() {
                 return@OnPreferenceClickListener false
             }
 
-            GenerateQR(data = ConfigHelper.getBarcodeForConfig(p.getAcWebserivce(), appName),
-                size = Size(Screen.getScreenWidth(requireActivity()), Screen.getScreenHeight(requireActivity())),
+            GenerateQR(data = ConfigHelper.getBarcodeForConfig(
+                p.getAcWebserivce(),
+                appName
+            ),
+                size = Size(
+                    Screen.getScreenWidth(requireActivity()),
+                    Screen.getScreenHeight(requireActivity())
+                ),
                 onProgress = {},
                 onFinish = { showQrCode(it) })
             true
         }
 
-        (urlEditText ?: return).setOnPreferenceChangeListener { preference, newValue ->
+        wsServerPref?.setOnPreferenceChangeListener { preference, newValue ->
             if (!alreadyAnsweredYes) {
                 val diaBox = askForDownloadDbRequired(
                     preference = preference, newValue = newValue
                 )
                 diaBox.show()
                 false
-            } else {
-                preference.summary = newValue.toString()
+            } else
                 true
-            }
         }
-        namespaceEditText?.setOnPreferenceChangeListener { preference, newValue ->
+        wsNamespacePref?.setOnPreferenceChangeListener { preference, newValue ->
             if (!alreadyAnsweredYes) {
                 val diaBox = askForDownloadDbRequired(
                     preference = preference, newValue = newValue
                 )
                 diaBox.show()
                 false
-            } else {
-                preference.summary = newValue.toString()
-                true
-            }
+            } else true
         }
-        userWsEditText?.setOnPreferenceChangeListener { preference, newValue ->
+        wsUserPref?.setOnPreferenceChangeListener { preference, newValue ->
             if (!alreadyAnsweredYes) {
                 val diaBox = askForDownloadDbRequired(
                     preference = preference, newValue = newValue
                 )
                 diaBox.show()
                 false
-            } else {
-                preference.summary = newValue.toString()
-                true
-            }
+            } else true
         }
-        passWsEditText?.setOnPreferenceChangeListener { preference, newValue ->
+        wsPassPref?.setOnPreferenceChangeListener { preference, newValue ->
             if (!alreadyAnsweredYes) {
                 val diaBox = askForDownloadDbRequired(
                     preference = preference, newValue = newValue
                 )
                 diaBox.show()
                 false
-            } else {
-                preference.summary = newValue.toString()
-                true
-            }
+            } else true
         }
 
-        // Si ya está loggeado, deshabilitar estas opciones
+        // Si ya está autentificado, deshabilitar estas opciones
         if (isLogged()) {
-            scanConfigCode?.isEnabled = false
-            urlEditText.isEnabled = false
-            namespaceEditText?.isEnabled = false
-            userWsEditText?.isEnabled = false
-            passWsEditText?.isEnabled = false
-            userEditText?.isEnabled = false
-            passEditText?.isEnabled = false
+            scanCodePref?.isEnabled = false
+            wsServerPref?.isEnabled = false
+            wsNamespacePref?.isEnabled = false
+            wsUserPref?.isEnabled = false
+            wsPassPref?.isEnabled = false
+            userPref?.isEnabled = false
+            passPref?.isEnabled = false
         }
     }
 
@@ -244,7 +230,7 @@ class WebservicePreferenceFragment : PreferenceFragmentCompat() {
 
     /**
      * Limpia la información relacionada con la cuenta del usuario
-     * ya que está configurando el webservice de manera manual
+     * porque está configurando el webservice de manera manual
      */
     private fun cleanPanelWebData() {
         Preferences.prefsPutString(

@@ -1,20 +1,15 @@
 package com.dacosys.assetControl.ui.fragments.settings
 
 import android.os.Bundle
+import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import androidx.preference.Preference.OnPreferenceClickListener
 import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.PreferenceScreen
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.ui.activities.main.SettingsActivity
-import com.dacosys.assetControl.ui.activities.main.SettingsActivity.Companion.bindPreferenceSummaryToValue
 import com.dacosys.assetControl.utils.settings.preferences.Preferences
 
-/**
- * This fragment shows notification preferences only. It is used when the
- * activity is showing a two-pane settings UI.
- */
 class MaintenancePreferenceFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         var key = rootKey
@@ -24,39 +19,38 @@ class MaintenancePreferenceFragment : PreferenceFragmentCompat() {
         setPreferencesFromResource(R.xml.pref_webservice_maintenance, key)
     }
 
-    override fun onNavigateToScreen(preferenceScreen: PreferenceScreen) {
-        val prefFragment = MaintenancePreferenceFragment()
-        val args = Bundle()
-        args.putString("rootKey", preferenceScreen.key)
-        prefFragment.arguments = args
-        parentFragmentManager.beginTransaction().replace(id, prefFragment).addToBackStack(null).commit()
-    }
-
     val p = com.dacosys.assetControl.utils.settings.config.Preference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        bindPreferenceSummaryToValue(this, p.acMantWsServer)
-        bindPreferenceSummaryToValue(this, p.acMantWsNamespace)
+        val wsServerPref: EditTextPreference? = findPreference(p.acMantWsServer.key)
+        wsServerPref?.summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
+
+        val wsNamespacePref: EditTextPreference? = findPreference(p.acMantWsNamespace.key)
+        wsNamespacePref?.summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
+
+        val wsUserPref: EditTextPreference? = findPreference(p.acMantWsUser.key)
+        val wsPassPref: EditTextPreference? = findPreference(p.acMantWsPass.key)
+        val userPref: EditTextPreference? = findPreference(p.acMantUser.key)
+        val passPref: EditTextPreference? = findPreference(p.acMantPass.key)
 
         if (BuildConfig.DEBUG) {
-            bindPreferenceSummaryToValue(this, p.acMantWsUser)
-            bindPreferenceSummaryToValue(this, p.acMantWsPass)
-            bindPreferenceSummaryToValue(this, p.acMantUser)
-            bindPreferenceSummaryToValue(this, p.acMantPass)
+            wsUserPref?.summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
+            wsPassPref?.summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
+            userPref?.summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
+            passPref?.summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
         }
 
-        findPreference<Preference>(p.acMantWsUseProxy.key)
-        bindPreferenceSummaryToValue(this, p.acMantWsProxy)
-        bindPreferenceSummaryToValue(this, p.acMantWsProxyPort)
+        val wsProxyPref: EditTextPreference? = findPreference(p.acMantWsProxy.key)
+        wsProxyPref?.summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
 
-        val button = findPreference<Preference>("ac_mant_test")
-        button?.onPreferenceClickListener = OnPreferenceClickListener {
-            val urlEditText = findPreference<Preference>(p.acMantWsServer.key)
-            val namespaceEditText = findPreference<Preference>(p.acMantWsNamespace.key)
+        val wsProxyPortPref: EditTextPreference? = findPreference(p.acMantWsProxyPort.key)
+        wsProxyPortPref?.summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
 
-            if (urlEditText != null && namespaceEditText != null) {
+        val testPref: Preference? = findPreference("ac_mant_test")
+        testPref?.onPreferenceClickListener = OnPreferenceClickListener {
+            if (wsServerPref != null && wsNamespacePref != null) {
                 val url = Preferences.prefsGetString(p.acMantWsServer)
                 val namespace = Preferences.prefsGetString(p.acMantWsNamespace)
                 val urlProxy = Preferences.prefsGetString(p.acMantWsProxy)

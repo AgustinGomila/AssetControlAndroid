@@ -3,16 +3,13 @@ package com.dacosys.assetControl.ui.fragments.settings
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.Size
-import android.view.View
 import android.widget.ImageView
 import androidx.appcompat.app.AlertDialog
+import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import androidx.preference.Preference.OnPreferenceClickListener
 import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.PreferenceManager
-import androidx.preference.PreferenceScreen
 import com.dacosys.assetControl.AssetControlApp
-import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.AssetControlApp.Companion.isLogged
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
@@ -23,7 +20,6 @@ import com.dacosys.assetControl.network.download.DownloadDb
 import com.dacosys.assetControl.network.utils.ClientPackage
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.ui.activities.main.SettingsActivity
-import com.dacosys.assetControl.ui.activities.main.SettingsActivity.Companion.sBindPreferenceSummaryToValueListener
 import com.dacosys.assetControl.ui.common.snackbar.MakeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarEventData
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
@@ -36,7 +32,6 @@ import com.dacosys.assetControl.utils.settings.preferences.Preferences
 import org.json.JSONObject
 import java.lang.ref.WeakReference
 
-
 class AccountPreferenceFragment : PreferenceFragmentCompat(), ClientPackage.Companion.TaskConfigPanelEnded {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         var key = rootKey
@@ -44,14 +39,6 @@ class AccountPreferenceFragment : PreferenceFragmentCompat(), ClientPackage.Comp
             key = requireArguments().getString("rootKey")
         }
         setPreferencesFromResource(R.xml.pref_account, key)
-    }
-
-    override fun onNavigateToScreen(preferenceScreen: PreferenceScreen) {
-        val prefFragment = AccountPreferenceFragment()
-        val args = Bundle()
-        args.putString("rootKey", preferenceScreen.key)
-        prefFragment.arguments = args
-        parentFragmentManager.beginTransaction().replace(id, prefFragment).addToBackStack(null).commit()
     }
 
     private var alreadyAnsweredYes = false
@@ -65,47 +52,37 @@ class AccountPreferenceFragment : PreferenceFragmentCompat(), ClientPackage.Comp
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Bind the summaries of EditText/List/Dialog/Ringtone preferences
-        // to their values. When their values change, their summaries are
-        // updated to reflect the new value, per the Android Design
-        // guidelines.
+        val emailPref: EditTextPreference? = findPreference(p.clientEmail.key)
+        val passPref: EditTextPreference? = findPreference(p.clientPassword.key)
 
         if (BuildConfig.DEBUG) {
-            bindPreferenceSummaryToValue(this, p.clientEmail)
-            bindPreferenceSummaryToValue(this, p.clientPassword)
+            emailPref?.summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
+            passPref?.summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
         }
-    }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        val emailEditText = findPreference<Preference>(p.clientEmail.key)
-        emailEditText?.setOnPreferenceChangeListener { preference, newValue ->
+        emailPref?.setOnPreferenceChangeListener { preference, newValue ->
             if (!alreadyAnsweredYes) {
                 val diaBox = askForDownloadDbRequired(preference = preference, newValue = newValue)
                 diaBox.show()
                 false
             } else {
-                preference.summary = newValue.toString()
                 true
             }
         }
 
-        val passwordEditText = findPreference<Preference>(p.clientPassword.key)
-        passwordEditText?.setOnPreferenceChangeListener { preference, newValue ->
+        passPref?.setOnPreferenceChangeListener { preference, newValue ->
             if (!alreadyAnsweredYes) {
                 val diaBox = askForDownloadDbRequired(preference = preference, newValue = newValue)
                 diaBox.show()
                 false
             } else {
-                preference.summary = newValue.toString()
                 true
             }
         }
 
-        val selectPackageButton = findPreference<Preference>("select_package")
-        selectPackageButton?.onPreferenceClickListener = OnPreferenceClickListener {
-            if (emailEditText != null && passwordEditText != null) {
+        val selectPackagePref: Preference? = findPreference("select_package")
+        selectPackagePref?.onPreferenceClickListener = OnPreferenceClickListener {
+            if (emailPref != null && passPref != null) {
                 val email = Preferences.prefsGetString(p.clientEmail)
                 val password = Preferences.prefsGetString(p.clientPassword)
 
@@ -123,10 +100,15 @@ class AccountPreferenceFragment : PreferenceFragmentCompat(), ClientPackage.Comp
             true
         }
 
-        val scanConfigCode = findPreference<Preference>("scan_config_code")
-        scanConfigCode?.onPreferenceClickListener = OnPreferenceClickListener {
+        val scanCodePref: Preference? = findPreference("scan_config_code")
+        scanCodePref?.onPreferenceClickListener = OnPreferenceClickListener {
             try {
-                SettingsActivity.doScanWork(QRConfigType.QRConfigClientAccount)
+                if (!isLogged()) {
+                    val settingsActivity: SettingsActivity = requireActivity() as? SettingsActivity
+                        ?: return@OnPreferenceClickListener true
+
+                    SettingsActivity.doScanWork(settingsActivity, QRConfigType.QRConfigClientAccount)
+                }
                 true
             } catch (ex: Exception) {
                 ex.printStackTrace()
@@ -138,9 +120,8 @@ class AccountPreferenceFragment : PreferenceFragmentCompat(), ClientPackage.Comp
             }
         }
 
-        val qrCodeButton = findPreference<Preference>("ac_qr_code")
-
-        qrCodeButton?.onPreferenceClickListener = OnPreferenceClickListener {
+        val qrCodePref: Preference? = findPreference("ac_qr_code")
+        qrCodePref?.onPreferenceClickListener = OnPreferenceClickListener {
             val urlPanel = Preferences.prefsGetString(p.urlPanel)
             val installationCode = Preferences.prefsGetString(p.installationCode)
             val clientEmail = Preferences.prefsGetString(p.clientEmail)
@@ -167,19 +148,19 @@ class AccountPreferenceFragment : PreferenceFragmentCompat(), ClientPackage.Comp
         }
 
         // Actualizar el programa
-        val updateAppButton = findPreference<Preference>("update_app") as Preference
-        updateAppButton.isEnabled = false
-        updateAppButton.onPreferenceClickListener = OnPreferenceClickListener {
+        val updateAppPref: Preference? = findPreference("update_app")
+        updateAppPref?.isEnabled = false
+        updateAppPref?.onPreferenceClickListener = OnPreferenceClickListener {
             MakeText.makeText(requireView(), getString(R.string.no_available_option), SnackBarType.INFO)
             true
         }
 
         // Si ya está autentificado, deshabilitar estas opciones
         if (isLogged()) {
-            passwordEditText?.isEnabled = false
-            emailEditText?.isEnabled = false
-            selectPackageButton?.isEnabled = false
-            scanConfigCode?.isEnabled = false
+            passPref?.isEnabled = false
+            emailPref?.isEnabled = false
+            selectPackagePref?.isEnabled = false
+            scanCodePref?.isEnabled = false
         }
     }
 
@@ -249,109 +230,6 @@ class AccountPreferenceFragment : PreferenceFragmentCompat(), ClientPackage.Comp
     companion object {
         fun equals(a: Any?, b: Any?): Boolean {
             return a != null && a == b
-        }
-
-        /**
-         * Binds a preference's summary to its value. More specifically, when the
-         * preference's value is changed, its summary (line of text below the
-         * preference title) is updated to reflect the value. The summary is also
-         * immediately updated upon calling this method. The exact display format is
-         * dependent on the type of preference.
-         *
-         * @see .sBindPreferenceSummaryToValueListener
-         */
-        private fun bindPreferenceSummaryToValue(
-            frag: PreferenceFragmentCompat,
-            pref: com.dacosys.assetControl.utils.settings.config.Preference,
-        ) {
-            val preference = frag.findPreference<Preference>(pref.key)
-            val all: Map<String, *> = PreferenceManager.getDefaultSharedPreferences(getContext()).all
-
-            // Set the listener to watch for value changes.
-            preference?.onPreferenceChangeListener = sBindPreferenceSummaryToValueListener
-
-            val defaultValue: Any? = if (BuildConfig.DEBUG) pref.debugValue else pref.defaultValue
-
-            when {
-                all[pref.key] is String && preference != null -> {
-                    sBindPreferenceSummaryToValueListener.onPreferenceChange(
-                        preference,
-                        PreferenceManager.getDefaultSharedPreferences(preference.context)
-                            .getString(preference.key, defaultValue.toString())
-                    )
-                }
-
-                all[pref.key] is Boolean && preference != null -> {
-                    sBindPreferenceSummaryToValueListener.onPreferenceChange(
-                        preference,
-                        PreferenceManager.getDefaultSharedPreferences(preference.context)
-                            .getBoolean(preference.key, defaultValue.toString().toBoolean())
-                    )
-                }
-
-                all[pref.key] is Float && preference != null -> {
-                    sBindPreferenceSummaryToValueListener.onPreferenceChange(
-                        preference,
-                        PreferenceManager.getDefaultSharedPreferences(preference.context)
-                            .getFloat(preference.key, defaultValue.toString().toFloat())
-                    )
-                }
-
-                all[pref.key] is Int && preference != null -> {
-                    sBindPreferenceSummaryToValueListener.onPreferenceChange(
-                        preference,
-                        PreferenceManager.getDefaultSharedPreferences(preference.context)
-                            .getInt(preference.key, defaultValue.toString().toInt())
-                    )
-                }
-
-                all[pref.key] is Long && preference != null -> {
-                    sBindPreferenceSummaryToValueListener.onPreferenceChange(
-                        preference,
-                        PreferenceManager.getDefaultSharedPreferences(preference.context)
-                            .getLong(preference.key, defaultValue.toString().toLong())
-                    )
-                }
-
-                else -> {
-                    try {
-                        if (preference != null) when (defaultValue) {
-                            is String -> sBindPreferenceSummaryToValueListener.onPreferenceChange(
-                                preference,
-                                PreferenceManager.getDefaultSharedPreferences(preference.context)
-                                    .getString(preference.key, defaultValue)
-                            )
-
-                            is Float -> sBindPreferenceSummaryToValueListener.onPreferenceChange(
-                                preference,
-                                PreferenceManager.getDefaultSharedPreferences(preference.context)
-                                    .getFloat(preference.key, defaultValue)
-                            )
-
-                            is Int -> sBindPreferenceSummaryToValueListener.onPreferenceChange(
-                                preference,
-                                PreferenceManager.getDefaultSharedPreferences(preference.context)
-                                    .getInt(preference.key, defaultValue)
-                            )
-
-                            is Long -> sBindPreferenceSummaryToValueListener.onPreferenceChange(
-                                preference,
-                                PreferenceManager.getDefaultSharedPreferences(preference.context)
-                                    .getLong(preference.key, defaultValue)
-                            )
-
-                            is Boolean -> sBindPreferenceSummaryToValueListener.onPreferenceChange(
-                                preference,
-                                PreferenceManager.getDefaultSharedPreferences(preference.context)
-                                    .getBoolean(preference.key, defaultValue)
-                            )
-                        }
-                    } catch (ex: Exception) {
-                        ex.printStackTrace()
-                        ErrorLog.writeLog(null, this::class.java.simpleName, ex)
-                    }
-                }
-            }
         }
     }
 

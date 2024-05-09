@@ -4,13 +4,12 @@ import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Environment
 import android.util.Size
-import android.view.View
 import android.widget.ImageView
 import androidx.appcompat.app.AlertDialog
+import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import androidx.preference.Preference.OnPreferenceClickListener
 import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.PreferenceScreen
 import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.AssetControlApp.Companion.appName
 import com.dacosys.assetControl.BuildConfig
@@ -20,7 +19,6 @@ import com.dacosys.assetControl.network.checkConn.ImageControlCheckUser
 import com.dacosys.assetControl.network.utils.ClientPackage
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.ui.activities.main.SettingsActivity
-import com.dacosys.assetControl.ui.activities.main.SettingsActivity.Companion.bindPreferenceSummaryToValue
 import com.dacosys.assetControl.ui.common.snackbar.MakeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarEventData
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
@@ -32,10 +30,6 @@ import com.dacosys.assetControl.utils.settings.config.QRConfigType
 import com.dacosys.assetControl.utils.settings.preferences.Preferences
 import java.io.File
 
-/**
- * This fragment shows notification preferences only. It is used when the
- * activity is showing a two-pane settings UI.
- */
 class ImageControlPreferenceFragment : PreferenceFragmentCompat(), ClientPackage.Companion.TaskConfigPanelEnded {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         var key = rootKey
@@ -45,46 +39,41 @@ class ImageControlPreferenceFragment : PreferenceFragmentCompat(), ClientPackage
         setPreferencesFromResource(R.xml.pref_image_control, key)
     }
 
-    override fun onNavigateToScreen(preferenceScreen: PreferenceScreen) {
-        val prefFragment = ImageControlPreferenceFragment()
-        val args = Bundle()
-        args.putString("rootKey", preferenceScreen.key)
-        prefFragment.arguments = args
-        parentFragmentManager.beginTransaction().replace(id, prefFragment).addToBackStack(null).commit()
-    }
-
     val p = com.dacosys.assetControl.utils.settings.config.Preference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        bindPreferenceSummaryToValue(this, p.icPhotoMaxHeightOrWidth)
-        bindPreferenceSummaryToValue(this, p.icWsServer)
-        bindPreferenceSummaryToValue(this, p.icWsNamespace)
+        val wsServerPref: EditTextPreference? = findPreference(p.icWsServer.key)
+        wsServerPref?.summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
+
+        val wsNamespacePref: EditTextPreference? = findPreference(p.icWsNamespace.key)
+        wsNamespacePref?.summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
+
+        val wsUserPref: EditTextPreference? = findPreference(p.icWsUser.key)
+        val wsPassPref: EditTextPreference? = findPreference(p.icWsPass.key)
+        val userPref: EditTextPreference? = findPreference(p.icUser.key)
+        val passPref: EditTextPreference? = findPreference(p.icPass.key)
 
         if (BuildConfig.DEBUG) {
-            bindPreferenceSummaryToValue(this, p.icWsUser)
-            bindPreferenceSummaryToValue(this, p.icWsPass)
-            bindPreferenceSummaryToValue(this, p.icUser)
-            bindPreferenceSummaryToValue(this, p.icPass)
+            wsUserPref?.summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
+            wsPassPref?.summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
+            userPref?.summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
+            passPref?.summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
         }
 
-        findPreference<Preference>(p.icWsUseProxy.key)
-        bindPreferenceSummaryToValue(this, p.icWsProxy)
-        bindPreferenceSummaryToValue(this, p.icWsProxyPort)
-    }
+        val wsProxyPref: EditTextPreference? = findPreference(p.icWsProxy.key)
+        wsProxyPref?.summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+        val wsProxyPortPref: EditTextPreference? = findPreference(p.icWsProxyPort.key)
+        wsProxyPortPref?.summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
 
-        val urlEditText = findPreference<Preference>(p.icWsServer.key)
-        val namespaceEditText = findPreference<Preference>(p.icWsNamespace.key)
-        val userEditText = findPreference<Preference>(p.icUser.key)
-        val passEditText = findPreference<Preference>(p.icPass.key)
+        val photoMaxSizePref: EditTextPreference? = findPreference(p.icPhotoMaxHeightOrWidth.key)
+        photoMaxSizePref?.summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
 
-        val button = findPreference<Preference>("ic_test")
-        button?.onPreferenceClickListener = OnPreferenceClickListener {
-            if (urlEditText != null && namespaceEditText != null && userEditText != null && passEditText != null) {
+        val testPref: Preference? = findPreference("ic_test")
+        testPref?.onPreferenceClickListener = OnPreferenceClickListener {
+            if (wsServerPref != null && wsNamespacePref != null && userPref != null && passPref != null) {
                 val url = Preferences.prefsGetString(p.icWsServer)
                 val namespace = Preferences.prefsGetString(p.icWsNamespace)
 
@@ -93,14 +82,14 @@ class ImageControlPreferenceFragment : PreferenceFragmentCompat(), ClientPackage
             true
         }
 
-        val removeImagesCache = findPreference<Preference>("remove_images_cache")
+        val removeImagesCache: Preference? = findPreference("remove_images_cache")
         removeImagesCache?.onPreferenceClickListener = OnPreferenceClickListener {
             val diaBox = askForDelete()
             diaBox.show()
             true
         }
 
-        val qrCodeButton = findPreference<Preference>("ic_qr_code")
+        val qrCodeButton: Preference? = findPreference("ic_qr_code")
         qrCodeButton?.onPreferenceClickListener = OnPreferenceClickListener {
             val icUrl = Preferences.prefsGetString(p.icWsServer)
             val icNamespace = Preferences.prefsGetString(p.icWsNamespace)
@@ -125,10 +114,13 @@ class ImageControlPreferenceFragment : PreferenceFragmentCompat(), ClientPackage
             true
         }
 
-        val scanConfigCode = findPreference<Preference>("scan_config_code")
+        val scanConfigCode: Preference? = findPreference("scan_config_code")
         scanConfigCode?.onPreferenceClickListener = OnPreferenceClickListener {
             try {
-                SettingsActivity.doScanWork(QRConfigType.QRConfigImageControl)
+                val settingsActivity: SettingsActivity = requireActivity() as? SettingsActivity
+                    ?: return@OnPreferenceClickListener true
+
+                SettingsActivity.doScanWork(settingsActivity, QRConfigType.QRConfigImageControl)
                 true
             } catch (ex: Exception) {
                 ex.printStackTrace()

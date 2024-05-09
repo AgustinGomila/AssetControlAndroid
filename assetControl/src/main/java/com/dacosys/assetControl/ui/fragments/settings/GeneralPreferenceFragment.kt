@@ -3,18 +3,16 @@ package com.dacosys.assetControl.ui.fragments.settings
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.Size
-import android.view.View
 import android.widget.ImageView
 import androidx.appcompat.app.AlertDialog
+import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import androidx.preference.Preference.OnPreferenceClickListener
 import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.PreferenceScreen
 import com.dacosys.assetControl.AssetControlApp.Companion.appName
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.ui.activities.main.SettingsActivity
-import com.dacosys.assetControl.ui.activities.main.SettingsActivity.Companion.bindPreferenceSummaryToValue
 import com.dacosys.assetControl.ui.common.snackbar.MakeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.common.utils.Screen
@@ -24,26 +22,13 @@ import com.dacosys.assetControl.utils.settings.config.ConfigHelper
 import com.dacosys.assetControl.utils.settings.config.QRConfigType
 import java.io.File
 
-/**
- * This fragment shows general preferences only. It is used when the
- * activity is showing a two-pane settings UI.
- */
 class GeneralPreferenceFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+        var key = rootKey
         if (arguments != null) {
-            val key = requireArguments().getString("rootKey")
-            setPreferencesFromResource(R.xml.pref_general, key)
-        } else {
-            setPreferencesFromResource(R.xml.pref_general, rootKey)
+            key = requireArguments().getString("rootKey")
         }
-    }
-
-    override fun onNavigateToScreen(preferenceScreen: PreferenceScreen) {
-        val prefFragment = GeneralPreferenceFragment()
-        val args = Bundle()
-        args.putString("rootKey", preferenceScreen.key)
-        prefFragment.arguments = args
-        parentFragmentManager.beginTransaction().replace(id, prefFragment).addToBackStack(null).commit()
+        setPreferencesFromResource(R.xml.pref_general, key)
     }
 
     val p = com.dacosys.assetControl.utils.settings.config.Preference
@@ -51,34 +36,28 @@ class GeneralPreferenceFragment : PreferenceFragmentCompat() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Bind the summaries of EditText/List/Dialog/Ringtone preferences
-        // to their values. When their values change, their summaries are
-        // updated to reflect the new value, per the Android Design
-        // guidelines.
-        bindPreferenceSummaryToValue(this, p.acFilterRouteDescription)
-
-        findPreference<Preference>(p.registryError.key) as Preference
-        findPreference<Preference>(p.showConfButton.key) as Preference
+        val filterRoutePref: EditTextPreference? = findPreference(p.acFilterRouteDescription.key)
+        filterRoutePref?.summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
 
         if (BuildConfig.DEBUG) {
-            bindPreferenceSummaryToValue(this, p.confPassword)
+            val confPassPref: EditTextPreference? = findPreference(p.confPassword.key)
+            confPassPref?.summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
         }
-    }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        val removeLogFiles = findPreference<Preference>("remove_log_files")
+        val removeLogFiles: Preference? = findPreference("remove_log_files")
         removeLogFiles?.onPreferenceClickListener = OnPreferenceClickListener {
             val diaBox = askForDelete()
             diaBox.show()
             true
         }
 
-        val scanConfigCode = findPreference<Preference>("scan_config_code")
+        val scanConfigCode: Preference? = findPreference("scan_config_code")
         scanConfigCode?.onPreferenceClickListener = OnPreferenceClickListener {
             try {
-                SettingsActivity.doScanWork(QRConfigType.QRConfigApp)
+                val settingsActivity: SettingsActivity = requireActivity() as? SettingsActivity
+                    ?: return@OnPreferenceClickListener true
+
+                SettingsActivity.doScanWork(settingsActivity, QRConfigType.QRConfigApp)
                 true
             } catch (ex: Exception) {
                 ex.printStackTrace()
@@ -90,10 +69,17 @@ class GeneralPreferenceFragment : PreferenceFragmentCompat() {
             }
         }
 
-        val qrCodeButton = findPreference<Preference>("ac_qr_code")
+        val qrCodeButton: Preference? = findPreference("ac_qr_code")
         qrCodeButton?.onPreferenceClickListener = OnPreferenceClickListener {
-            GenerateQR(data = ConfigHelper.getBarcodeForConfig(p.getAppConf(), appName),
-                size = Size(Screen.getScreenWidth(requireActivity()), Screen.getScreenHeight(requireActivity())),
+            GenerateQR(
+                data = ConfigHelper.getBarcodeForConfig(
+                    p.getAppConf(),
+                    appName
+                ),
+                size = Size(
+                    Screen.getScreenWidth(requireActivity()),
+                    Screen.getScreenHeight(requireActivity())
+                ),
                 onProgress = {},
                 onFinish = { showQrCode(it) })
             true

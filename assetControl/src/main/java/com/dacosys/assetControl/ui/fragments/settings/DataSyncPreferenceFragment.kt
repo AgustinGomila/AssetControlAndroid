@@ -12,17 +12,16 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.FileProvider
+import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import androidx.preference.Preference.OnPreferenceClickListener
 import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.PreferenceScreen
 import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.AssetControlApp.Companion.isLogged
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.dataBase.DataBaseHelper
 import com.dacosys.assetControl.network.download.DownloadDb
 import com.dacosys.assetControl.network.sync.SyncDownload
-import com.dacosys.assetControl.ui.activities.main.SettingsActivity.Companion.bindPreferenceSummaryToValue
 import com.dacosys.assetControl.ui.common.snackbar.MakeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarEventData
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
@@ -35,24 +34,7 @@ import com.google.android.gms.common.api.CommonStatusCodes
 import java.io.File
 import java.util.*
 
-
-/**
- * This fragment shows data and sync preferences only. It is used when the
- * activity is showing a two-pane settings UI.
- */
 class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.OnRequestPermissionsResultCallback {
-    companion object {
-        fun equals(a: Any?, b: Any?): Boolean {
-            return a != null && a == b
-        }
-
-        private var NEXT_STEP = 0
-        private const val REQUEST_EXTERNAL_STORAGE_FOR_COPY_DB_TO_DOC = 4001
-        private const val REQUEST_EXTERNAL_STORAGE_FOR_COPY_DB = 3001
-        private const val REQUEST_EXTERNAL_STORAGE_FOR_CUSTOM_DB = 2001
-        private const val REQUEST_EXTERNAL_STORAGE_FOR_SEND_MAIL = 1001
-    }
-
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         var key = rootKey
         if (arguments != null) {
@@ -61,29 +43,19 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
         setPreferencesFromResource(R.xml.pref_data_sync, key)
     }
 
-    override fun onNavigateToScreen(preferenceScreen: PreferenceScreen) {
-        val prefFragment = DataSyncPreferenceFragment()
-        val args = Bundle()
-        args.putString("rootKey", preferenceScreen.key)
-        prefFragment.arguments = args
-        parentFragmentManager.beginTransaction().replace(id, prefFragment).addToBackStack(null).commit()
-    }
-
     val p = com.dacosys.assetControl.utils.settings.config.Preference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Bind the summaries of EditText/List/Dialog/Ringtone preferences
-        // to their values. When their values change, their summaries are
-        // updated to reflect the new value, per the Android Design
-        // guidelines.
+        val syncQtyPref: EditTextPreference? = findPreference(ConfEntry.acSyncQtyRegistry.description)
+        syncQtyPref?.summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
 
-        bindPreferenceSummaryToValue(this, ConfEntry.acSyncQtyRegistry)
-        bindPreferenceSummaryToValue(this, p.acSyncInterval)
+        val syncIntervalPref: EditTextPreference? = findPreference(p.acSyncInterval.key)
+        syncIntervalPref?.summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
 
-        val downloadDbButton = findPreference<Preference>("download_db_data")
-        downloadDbButton?.onPreferenceClickListener = OnPreferenceClickListener {
+        val downloadDbPref: Preference? = findPreference("download_db_data")
+        downloadDbPref?.onPreferenceClickListener = OnPreferenceClickListener {
             try {
                 askForDownload().show()
             } catch (ex: Exception) {
@@ -98,8 +70,8 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
             true
         }
 
-        val resetSyncDateButton = findPreference<Preference>("reset_last_sync_date")
-        resetSyncDateButton?.onPreferenceClickListener = OnPreferenceClickListener {
+        val resetSyncDatePref: Preference? = findPreference("reset_last_sync_date")
+        resetSyncDatePref?.onPreferenceClickListener = OnPreferenceClickListener {
             try {
                 if (SyncDownload.resetSyncDates()) {
                     if (view != null) MakeText.makeText(
@@ -126,8 +98,8 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
             true
         }
 
-        val loadCustomDbButton = findPreference<Preference>("load_custom_db")
-        loadCustomDbButton?.onPreferenceClickListener = OnPreferenceClickListener {
+        val loadCustomDbPref: Preference? = findPreference("load_custom_db")
+        loadCustomDbPref?.onPreferenceClickListener = OnPreferenceClickListener {
             try {
                 val permissions = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 activity?.let {
@@ -154,8 +126,8 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
             true
         }
 
-        val removeCustomDbButton = findPreference<Preference>("remove_custom_db")
-        removeCustomDbButton?.onPreferenceClickListener = OnPreferenceClickListener {
+        val removeCustomDbPref: Preference? = findPreference("remove_custom_db")
+        removeCustomDbPref?.onPreferenceClickListener = OnPreferenceClickListener {
             try {
                 deleteTempDbFiles()
             } catch (ex: Exception) {
@@ -170,8 +142,8 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
             true
         }
 
-        val sendDbButton = findPreference<Preference>("send_db_by_mail")
-        sendDbButton?.onPreferenceClickListener = OnPreferenceClickListener {
+        val sendDbPref: Preference? = findPreference("send_db_by_mail")
+        sendDbPref?.onPreferenceClickListener = OnPreferenceClickListener {
             try {
                 val permissions = arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
                 activity?.let {
@@ -194,8 +166,8 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
             true
         }
 
-        val copyDbButton = findPreference<Preference>("copy_db")
-        copyDbButton?.onPreferenceClickListener = OnPreferenceClickListener {
+        val copyDbPref: Preference? = findPreference("copy_db")
+        copyDbPref?.onPreferenceClickListener = OnPreferenceClickListener {
             try {
                 val permissions = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 activity?.let {
@@ -222,11 +194,12 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
             true
         }
 
-        // Si ya está loggeado, deshabilitar la descargar completa de la base de datos
+        // Si ya está autentificado,
+        // deshabilitar la descarga completa de la base de datos
         if (isLogged()) {
-            downloadDbButton?.isEnabled = false
-            loadCustomDbButton?.isEnabled = false
-            removeCustomDbButton?.isEnabled = false
+            downloadDbPref?.isEnabled = false
+            loadCustomDbPref?.isEnabled = false
+            removeCustomDbPref?.isEnabled = false
         }
     }
 
@@ -238,7 +211,7 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
 
         try {
-            resultForPickfileRequestCode.launch(
+            resultForPickFileRequestCode.launch(
                 Intent.createChooser(
                     intent, getString(R.string.select_db_file)
                 )
@@ -273,7 +246,7 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
         ActivityCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
     }
 
-    private val resultForPickfileRequestCode =
+    private val resultForPickFileRequestCode =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             val data = it?.data
             try {
@@ -566,5 +539,17 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
         if (requireActivity().isDestroyed || requireActivity().isFinishing) return
 
         MakeText.makeText(requireView(), it.text, it.snackBarType)
+    }
+
+    companion object {
+        fun equals(a: Any?, b: Any?): Boolean {
+            return a != null && a == b
+        }
+
+        private var NEXT_STEP = 0
+        private const val REQUEST_EXTERNAL_STORAGE_FOR_COPY_DB_TO_DOC = 4001
+        private const val REQUEST_EXTERNAL_STORAGE_FOR_COPY_DB = 3001
+        private const val REQUEST_EXTERNAL_STORAGE_FOR_CUSTOM_DB = 2001
+        private const val REQUEST_EXTERNAL_STORAGE_FOR_SEND_MAIL = 1001
     }
 }
