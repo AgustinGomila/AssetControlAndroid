@@ -181,7 +181,7 @@ class GetClientPackages(
 
                     val productId = jsonPack.getInt("product_version_id")
                     if (jsonPack.getInt("active") == 1 &&
-                        (productId == Statics.APP_VERSION_ID || productId == Statics.APP_VERSION_ID_IMAGECONTROL)
+                        (productId == Statics.APP_VERSION_ID || productId == Statics.APP_VERSION_ID_IMAGE_CONTROL)
                     ) {
                         result.add(jsonPack)
                     }

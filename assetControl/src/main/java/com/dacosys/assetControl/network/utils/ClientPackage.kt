@@ -53,7 +53,7 @@ class ClientPackage {
         private fun getValidProducts(): ArrayList<String> {
             val r: ArrayList<String> = ArrayList()
             r.add(Statics.APP_VERSION_ID.toString())
-            r.add(Statics.APP_VERSION_ID_IMAGECONTROL.toString())
+            r.add(Statics.APP_VERSION_ID_IMAGE_CONTROL.toString())
             return r
         }
 
@@ -80,7 +80,7 @@ class ClientPackage {
             val allMainApp =
                 allProductsArray.mapNotNull { if (it.getString("product_version_id") == Statics.APP_VERSION_ID.toString()) it else null }
             val allSecondApp =
-                allProductsArray.mapNotNull { if (it.getString("product_version_id") == Statics.APP_VERSION_ID_IMAGECONTROL.toString()) it else null }
+                allProductsArray.mapNotNull { if (it.getString("product_version_id") == Statics.APP_VERSION_ID_IMAGE_CONTROL.toString()) it else null }
 
             if (allMainApp.isEmpty() && allSecondApp.isEmpty()) {
                 MakeText.makeText(
@@ -271,7 +271,7 @@ class ClientPackage {
 
                     x.putString(Preference.icUser.key, icUser)
                     x.putString(Preference.icPass.key, icPass)
-                } else if (productId == Statics.APP_VERSION_ID_IMAGECONTROL.toString()) {
+                } else if (productId == Statics.APP_VERSION_ID_IMAGE_CONTROL.toString()) {
                     x.putBoolean(Preference.useImageControl.key, true)
 
                     x.putString(Preference.icWsServer.key, url)

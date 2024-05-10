@@ -20,7 +20,6 @@ object DataCollectionContentContract {
             DataCollectionContentEntry.DATA_COLLECTION_CONTENT_ID,
             DataCollectionContentEntry.COLLECTOR_DATA_COLLECTION_CONTENT_ID,
             DataCollectionContentEntry.DATA_COLLECTION_RULE_CONTENT_ID
-
         )
     }
 
@@ -39,6 +38,10 @@ object DataCollectionContentContract {
             const val DATA_COLLECTION_CONTENT_ID = "data_collection_content_id"
             const val COLLECTOR_DATA_COLLECTION_CONTENT_ID = "_id"
             const val DATA_COLLECTION_RULE_CONTENT_ID = "data_collection_rule_content_id"
+
+            const val DATA_COLLECTION_RULE_CONTENT_STR = "data_collection_rule_content_str"
+            const val ATTRIBUTE_STR = "attribute_str"
+            const val ATTRIBUTE_COMPOSITION_STR = "attribute_composition_str"
         }
     }
 }

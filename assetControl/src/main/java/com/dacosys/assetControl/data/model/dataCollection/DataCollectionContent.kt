@@ -111,6 +111,9 @@ class DataCollectionContent : Parcelable {
                 this.collectorDataCollectionContentId = temp.collectorDataCollectionContentId
                 this.dataCollectionRuleContentId = temp.dataCollectionRuleContentId
 
+                this.attributeStr = temp.attributeStr
+                this.attributeCompositionStr = temp.attributeCompositionStr
+
                 true
             }
 
@@ -122,7 +125,7 @@ class DataCollectionContent : Parcelable {
     val dataCollection: DataCollection?
         get() {
             return if (dataCollectionId == null || dataCollectionId == 0L) null
-else DataCollection( dataCollectionId!!, false)
+            else DataCollection( dataCollectionId!!, false)
         }
     */
 
@@ -138,6 +141,12 @@ else DataCollection( dataCollectionId!!, false)
             else field
         }
 
+    var dataCollectionRuleContentStr: String = ""
+        get() {
+            return if (!dataRead && !refreshData()) ""
+            else field
+        }
+
     var dataCollectionId: Long? = null
         get() {
             return if (!dataRead && !refreshData()) null
@@ -148,7 +157,7 @@ else DataCollection( dataCollectionId!!, false)
     val attribute: Attribute?
         get() {
             return if (attributeId == 0L) null
-else Attribute( attributeId, false)
+            else Attribute( attributeId, false)
         }
     */
 
@@ -158,17 +167,29 @@ else Attribute( attributeId, false)
             else field
         }
 
+    var attributeStr: String = ""
+        get() {
+            return if (!dataRead && !refreshData()) ""
+            else field
+        }
+
     /*
     val attributeComposition: AttributeComposition?
         get() {
             return if (attributeCompositionId == 0L) null
-else AttributeComposition( attributeCompositionId, false)
+            else AttributeComposition( attributeCompositionId, false)
         }
     */
 
     var attributeCompositionId: Long = 0
         get() {
             return if (!dataRead && !refreshData()) 0
+            else field
+        }
+
+    var attributeCompositionStr: String = ""
+        get() {
+            return if (!dataRead && !refreshData()) ""
             else field
         }
 

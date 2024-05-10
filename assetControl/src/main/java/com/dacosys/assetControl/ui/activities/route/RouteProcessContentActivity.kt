@@ -412,6 +412,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         binding.skipAllButton.setOnClickListener { skipAll() }
         binding.beginProcessButton.setOnClickListener { beginProcess() }
         binding.detailButton.setOnClickListener { detail() }
+        binding.currentDataButton.setOnClickListener { currentData() }
         binding.confirmButton.setOnClickListener { confirmLevel(true) }
 
         buttonCollection.add(binding.reentryButton)
@@ -419,6 +420,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         buttonCollection.add(binding.skipAllButton)
         buttonCollection.add(binding.beginProcessButton)
         buttonCollection.add(binding.detailButton)
+        buttonCollection.add(binding.currentDataButton)
         buttonCollection.add(binding.confirmButton)
 
         // Para expandir y colapsar el panel inferior
@@ -1197,6 +1199,24 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         }
     }
 
+    private fun currentData() {
+        val rpc = adapter?.currentRpc() ?: return
+        val dcId = rpc.dataCollectionId ?: return
+        if (dcId == 0L) {
+            makeText(binding.root, getContext().getString(R.string.not_processed), SnackBarType.INFO)
+            return
+        }
+
+        if (!rejectNewInstances) {
+            rejectNewInstances = true
+
+            val intent = Intent(this, DccDetailActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+            intent.putExtra("dataCollectionId", dcId)
+            startActivity(intent)
+        }
+    }
+
     private fun beginProcess() {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
 
@@ -1856,6 +1876,16 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         progressDialog = builder.create()
     }
 
+    private fun showProgressDialog(it: AdapterProgress) {
+        showProgressDialog(
+            title = getContext().getString(R.string.processing_route),
+            msg = it.msg,
+            status = it.progressStatus.id,
+            progress = it.completedTask,
+            total = it.totalTask
+        )
+    }
+
     private fun showProgressDialog(
         title: String,
         msg: String,
@@ -1997,6 +2027,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
     //endregion READERS Reception
 
     override fun onUiEventRequired(it: AdapterProgress) {
+        showProgressDialog(it)
     }
 
     override fun onDataSetChanged() {

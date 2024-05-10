@@ -1126,4 +1126,6 @@
     <string name="show_message_on_rfid_reader_is_ready">Mostrar mensaje de conexión del lector RFID</string>
     <string name="no_items_to_display">No hay ítems para mostrar</string>
     <string name="scan_or_manual_add_items">Escanear o ingresar ítems y\nubicaciones manualmente</string>
+    <string name="current">Actual</string>
+    <string name="fantasy_date">06/05/2024 10:38:20 p.m.</string>
 </resources>

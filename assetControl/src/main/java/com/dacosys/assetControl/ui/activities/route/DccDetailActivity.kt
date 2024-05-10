@@ -1,4 +1,4 @@
-package com.dacosys.assetControl.ui.activities.asset
+package com.dacosys.assetControl.ui.activities.route
 
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -8,19 +8,21 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.AssetControlApp.Companion.currentUser
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.model.asset.Asset
+import com.dacosys.assetControl.data.dataBase.datacollection.DataCollectionDbHelper
+import com.dacosys.assetControl.data.dataBase.user.UserDbHelper
+import com.dacosys.assetControl.data.model.dataCollection.DataCollection
 import com.dacosys.assetControl.data.model.table.Table
-import com.dacosys.assetControl.databinding.AssetDetailActivityBinding
+import com.dacosys.assetControl.databinding.DccDetailActivityBinding
+import com.dacosys.assetControl.ui.adapters.route.DccAdapter
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setupUI
 import com.dacosys.assetControl.utils.settings.config.Preference
 import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.utils.settings.preferences.Repository.Companion.useImageControl
 import com.dacosys.imageControl.ui.fragments.ImageControlButtonsFragment
-import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 
-class AssetDetailActivity : AppCompatActivity() {
-    private var asset: Asset? = null
+class DccDetailActivity : AppCompatActivity() {
+    private var dc: DataCollection? = null
     private var rejectNewInstances = false
 
     private var imageControlFragment: ImageControlButtonsFragment? = null
@@ -54,13 +56,13 @@ class AssetDetailActivity : AppCompatActivity() {
         finish()
     }
 
-    private lateinit var binding: AssetDetailActivityBinding
+    private lateinit var binding: DccDetailActivityBinding
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setScreenRotation(this)
-        binding = AssetDetailActivityBinding.inflate(layoutInflater)
+        binding = DccDetailActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         val callback = object : OnBackPressedCallback(true) {
@@ -72,7 +74,7 @@ class AssetDetailActivity : AppCompatActivity() {
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        title = getString(R.string.asset_information)
+        title = getString(R.string.data_collection)
 
         if (savedInstanceState != null) {
             //Restore the fragment's instance
@@ -81,30 +83,52 @@ class AssetDetailActivity : AppCompatActivity() {
         } else {
             val extras = intent.extras
             if (extras != null) {
-                asset = extras.parcelable("asset")
+                val dcId = extras.getLong("dataCollectionId")
+                dc = DataCollectionDbHelper().selectByCollectorId(dcId)
             }
         }
 
-        if (asset != null) {
-            binding.descriptionTextView.text = (asset ?: return).description
-            binding.codeTextView.text = (asset ?: return).code
-            binding.eanTextView.text = (asset ?: return).ean
-            binding.itemCategoryTextView.text = (asset ?: return).itemCategoryStr
-            binding.warehouseTextView.text = (asset ?: return).warehouseStr
-            binding.warehouseAreaTextView.text = (asset ?: return).warehouseAreaStr
-            binding.origWarehouseTextView.text = (asset ?: return).originalWarehouseStr
-            binding.origWarehouseAreaTextView.text = (asset ?: return).originalWarehouseAreaStr
-            binding.assetStatusTextView.text = ((asset ?: return).assetStatus ?: return).description
-            binding.manufacturerTextView.text = (asset ?: return).manufacturer
-            binding.modelTextView.text = (asset ?: return).model
-            binding.serialNumberTextView.text = (asset ?: return).serialNumber
+        val tempDc = dc
+        if (tempDc != null) {
+            val userName = UserDbHelper().selectById(tempDc.userId)?.name ?: ""
+
+            binding.descriptionTextView.text = getDescription(tempDc)
+            binding.codeTextView.text = tempDc.assetCode
+            binding.userTextView.text = userName
+
+            val dc = DataCollectionDbHelper().selectByCollectorId(tempDc.collectorDataCollectionId)
+            if (dc != null) {
+                fillAdapter(dc)
+            }
         }
 
-        binding.assetDetail.setOnClickListener { isBackPressed() }
+        binding.dccDetail.setOnClickListener { isBackPressed() }
 
         setImageControlFragment()
 
         setupUI(binding.root, this)
+    }
+
+    private fun getDescription(dc: DataCollection): String {
+        return if (dc.assetStr.isNotEmpty()) dc.assetStr
+        else if (dc.warehouseAreaStr.isNotEmpty()) dc.warehouseAreaStr
+        else if (dc.warehouseStr.isNotEmpty()) dc.warehouseStr
+        else ""
+    }
+
+    private fun getReference(dc: DataCollection): String {
+        return if (dc.assetCode.isNotEmpty()) "${getString(R.string.asset)}: ${dc.assetCode}"
+        else if (dc.warehouseAreaId > 0L) "${getString(R.string.area)}: ${dc.warehouseAreaId}"
+        else if (dc.warehouseId > 0L) "${getString(R.string.warehouse)}: ${dc.warehouseId}"
+        else ""
+    }
+
+    private fun fillAdapter(dc: DataCollection) {
+        runOnUiThread {
+            val contents = dc.contents
+            val adapter = DccAdapter(this, contents)
+            binding.dccList.adapter = adapter
+        }
     }
 
     private fun setImageControlFragment() {
@@ -115,12 +139,15 @@ class AssetDetailActivity : AppCompatActivity() {
             return
         }
 
-        val tempAsset = asset ?: return
-        var description = tempAsset.description
+        val tempDc = dc ?: return
         val table = Table.routeProcess
-        val id = tempAsset.assetId
+        val id = tempDc.collectorRouteProcessId
 
-        description = "${table.tableName}: $description"
+        var description = getDescription(tempDc)
+        val reference = getReference(tempDc)
+
+        val tableName = table.tableName
+        description = "$tableName: $description"
         if (description.length > 255) {
             description.substring(0, 255)
         }
@@ -133,7 +160,7 @@ class AssetDetailActivity : AppCompatActivity() {
                 objectId1 = id.toString()
             )
 
-            setFragmentValues(description, "", obs)
+            setFragmentValues(description, reference, obs)
 
             val fm = supportFragmentManager
 
@@ -161,7 +188,7 @@ class AssetDetailActivity : AppCompatActivity() {
             imageControlFragment?.setObjectId1(id)
             imageControlFragment?.setObjectId2(null)
 
-            setFragmentValues(description, "", obs)
+            setFragmentValues(description, reference, obs)
         }
     }
 

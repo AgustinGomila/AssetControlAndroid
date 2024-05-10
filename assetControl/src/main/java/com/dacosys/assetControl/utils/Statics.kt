@@ -23,13 +23,15 @@ class Statics {
         val newLine: String
             get() = System.lineSeparator() ?: "\r\n"
 
-        // region DEBUG DEMO
+        // region Variables para DEBUG/DEMO
+
         const val DEMO_MODE = false
         const val DEMO_AUTO_SEND = false
         const val SUPER_DEMO_MODE = false
-        // endregion DEBUG DEMO
-
         const val AUTO_SEND_ON_STARTUP = !DEMO_MODE
+        var OFFLINE_MODE = false
+
+        // endregion Variables para DEBUG/DEMO
 
         const val DEFAULT_DATE = "2001-01-01 00:00:00"
 
@@ -43,13 +45,11 @@ class Statics {
         const val AC_ROOT_PATH = "/asset_control"
         const val ERROR_LOG_PATH = "/error_log"
 
-        var OFFLINE_MODE = false
-
         private var IMAGE_CONTROL_DATABASE_NAME = "imagecontrol.sqlite"
 
         // Estos números se corresponden con package_id https://manager.dacosys.com/package/index
         const val APP_VERSION_ID: Int = 12 // AssetControl Milestone13
-        const val APP_VERSION_ID_IMAGECONTROL = 13 // ImageControl Milestone13
+        const val APP_VERSION_ID_IMAGE_CONTROL = 13 // ImageControl Milestone13
 
         // Este es el valor de program_id (Ver archivo Program.cs en el proyecto Identification)
         // Lo utiliza internamente ImageControl para identificar la aplicación que lo está usando.
