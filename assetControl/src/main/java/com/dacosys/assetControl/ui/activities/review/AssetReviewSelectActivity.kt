@@ -78,7 +78,7 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private fun destroyLocals() {
         saveSharedPreferences()
-        adapter?.refreshListeners(null, null)
+        adapter?.refreshListeners()
         waSelectFilterFragment?.onDestroy()
     }
 
@@ -494,7 +494,7 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
                     visibleStatus = visibleStatusArray
                 )
 
-                adapter?.refreshListeners(null, this)
+                adapter?.refreshListeners(dataSetChangedListener = this)
 
                 while (binding.assetReviewListView.adapter == null) {
                     // Horrible wait for full load

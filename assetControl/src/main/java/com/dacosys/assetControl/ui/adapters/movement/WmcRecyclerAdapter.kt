@@ -113,8 +113,8 @@ class WmcRecyclerAdapter(
     }
 
     fun refreshImageControlListeners(
-        addPhotoListener: AddPhotoRequiredListener?,
-        albumViewListener: AlbumViewRequiredListener?,
+        addPhotoListener: AddPhotoRequiredListener? = null,
+        albumViewListener: AlbumViewRequiredListener? = null,
     ) {
         addPhotoRequiredListener = addPhotoListener
         albumViewRequiredListener = albumViewListener
@@ -343,9 +343,6 @@ class WmcRecyclerAdapter(
 
             // Seleccionamos el ítem
             holder.itemView.isSelected = currentIndex == position
-
-            // Notificamos al Listener superior
-            dataSetChangedListener?.onDataSetChanged()
         }
 
         // Actualiza la vista según el estado de selección del elemento

@@ -266,7 +266,7 @@ class CodeSelectDialogActivity : AppCompatActivity(),
         val adapter = AssetAdapter(
             activity = this,
             resource = R.layout.asset_simple_row,
-            itemList = itemArray,
+            fullList = itemArray,
             suggestedList = ArrayList(),
             visibleStatus = visibleStatusArray
         )

@@ -489,8 +489,8 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
         //endregion //// RFID POWER
 
         //region //// RESET TO FACTORY
-        val resetButton: Preference? = findPreference("rfid_reset_to_factory")
-        resetButton?.onPreferenceClickListener = OnPreferenceClickListener {
+        val resetPref: Preference? = findPreference("rfid_reset_to_factory")
+        resetPref?.onPreferenceClickListener = OnPreferenceClickListener {
             if (vh75?.state == Vh75Bt.STATE_CONNECTED) {
                 val diaBox = askForResetToFactory()
                 diaBox.show()

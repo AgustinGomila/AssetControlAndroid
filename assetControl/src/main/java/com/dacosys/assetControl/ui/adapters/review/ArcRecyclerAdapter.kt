@@ -98,7 +98,12 @@ class ArcRecyclerAdapter(
         idWithImage.clear()
 
         fullList.clear()
-        submitList(fullList)
+        submitList(fullList) {
+            run {
+                // Notificamos al Listener superior
+                dataSetChangedListener?.onDataSetChanged()
+            }
+        }
     }
 
     fun refreshListeners(
@@ -112,14 +117,14 @@ class ArcRecyclerAdapter(
     }
 
     fun refreshImageControlListeners(
-        addPhotoListener: AddPhotoRequiredListener?,
-        albumViewListener: AlbumViewRequiredListener?,
+        addPhotoListener: AddPhotoRequiredListener? = null,
+        albumViewListener: AlbumViewRequiredListener? = null,
     ) {
         addPhotoRequiredListener = addPhotoListener
         albumViewRequiredListener = albumViewListener
     }
 
-    fun refreshUiEventListener(uiEventListener: UiEventListener?) {
+    fun refreshUiEventListener(uiEventListener: UiEventListener? = null) {
         this.uiEventListener = uiEventListener
     }
 
@@ -359,9 +364,6 @@ class ArcRecyclerAdapter(
 
             // Seleccionamos el ítem
             holder.itemView.isSelected = currentIndex == position
-
-            // Notificamos al Listener superior
-            dataSetChangedListener?.onDataSetChanged()
         }
 
         // Actualiza la vista según el estado de selección del elemento

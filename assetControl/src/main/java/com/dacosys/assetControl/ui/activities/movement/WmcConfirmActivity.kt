@@ -7,6 +7,8 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.MenuItem
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -30,6 +32,7 @@ import com.dacosys.assetControl.data.model.status.ConfirmStatus
 import com.dacosys.assetControl.data.model.table.Table
 import com.dacosys.assetControl.databinding.WarehouseMovementContentConfirmActivityBottomPanelCollapsedBinding
 import com.dacosys.assetControl.ui.activities.common.ObservationsActivity
+import com.dacosys.assetControl.ui.adapters.interfaces.Interfaces
 import com.dacosys.assetControl.ui.adapters.movement.WmcRecyclerAdapter
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
@@ -45,7 +48,7 @@ import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 import org.parceler.Parcels
 
 class WmcConfirmActivity : AppCompatActivity(),
-    SwipeRefreshLayout.OnRefreshListener {
+    SwipeRefreshLayout.OnRefreshListener, Interfaces.DataSetChangedListener {
     override fun onRefresh() {
         Handler(Looper.getMainLooper()).postDelayed({
             run {
@@ -60,6 +63,7 @@ class WmcConfirmActivity : AppCompatActivity(),
     }
 
     private fun destroyLocals() {
+        adapter?.refreshListeners()
         imageControlFragment?.onDestroy()
         imageControlFragment = null
     }
@@ -404,11 +408,9 @@ class WmcConfirmActivity : AppCompatActivity(),
 
     private fun setupTextView() {
         val assetToMove = adapter?.assetsToMove ?: 0
-        val tempText = if (assetToMove == 1) {
-            getString(R.string.asset)
-        } else {
-            getString(R.string.assets)
-        }
+        val tempText =
+            if (assetToMove == 1) getString(R.string.asset)
+            else getString(R.string.assets)
 
         runOnUiThread {
             binding.toMoveTextView.text = String.format("%s %s", assetToMove.toString(), tempText)
@@ -434,6 +436,8 @@ class WmcConfirmActivity : AppCompatActivity(),
                     visibleStatus = WarehouseMovementContentStatus.getAll()
                 )
 
+                adapter?.refreshListeners(dataSetChangedListener = this)
+
                 binding.recyclerView.layoutManager = LinearLayoutManager(this)
                 binding.recyclerView.adapter = adapter
 
@@ -448,8 +452,6 @@ class WmcConfirmActivity : AppCompatActivity(),
                     adapter?.selectItem(ls, false)
                     adapter?.scrollToPos(cs, true)
                 }, 200)
-
-                setupTextView()
             } catch (ex: Exception) {
                 ex.printStackTrace()
                 ErrorLog.writeLog(this, this::class.java.simpleName, ex)
@@ -551,6 +553,19 @@ class WmcConfirmActivity : AppCompatActivity(),
     companion object {
         fun equals(a: Any?, b: Any?): Boolean {
             return a != null && a == b
+        }
+    }
+
+    override fun onDataSetChanged() {
+        setupTextView()
+        showListOrEmptyListMessage()
+    }
+
+    private fun showListOrEmptyListMessage() {
+        runOnUiThread {
+            val isEmpty = (adapter?.itemCount ?: 0) == 0
+            binding.emptyTextView.visibility = if (isEmpty) VISIBLE else GONE
+            binding.recyclerView.visibility = if (isEmpty) GONE else VISIBLE
         }
     }
 }

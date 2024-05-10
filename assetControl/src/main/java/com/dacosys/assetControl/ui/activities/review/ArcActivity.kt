@@ -15,6 +15,8 @@ import android.transition.Transition
 import android.transition.TransitionManager
 import android.util.Log
 import android.view.*
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.EditText
@@ -74,6 +76,7 @@ import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarEventData
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
+import com.dacosys.assetControl.ui.common.snackbar.SnackBarType.CREATOR.SUCCESS
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.ui.fragments.movement.LocationHeaderFragment
@@ -100,6 +103,7 @@ import com.dacosys.imageControl.dto.DocumentContent
 import com.dacosys.imageControl.dto.DocumentContentRequestResult
 import com.dacosys.imageControl.network.common.ProgramData
 import com.dacosys.imageControl.network.download.GetImages.Companion.toDocumentContentList
+import com.dacosys.imageControl.network.upload.UploadImagesProgress
 import com.dacosys.imageControl.network.webService.WsFunction
 import com.dacosys.imageControl.room.dao.ImageCoroutines
 import com.dacosys.imageControl.ui.activities.ImageControlCameraActivity
@@ -112,6 +116,7 @@ import org.parceler.Parcels
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.concurrent.thread
+import com.dacosys.imageControl.network.common.ProgressStatus as IcProgressStatus
 
 @Suppress("UNCHECKED_CAST")
 class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
@@ -140,9 +145,9 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
         // Borramos los Ids temporales que se usaron en la actividad.
         if (isFinishingByUser) AssetReviewContentDbHelper().deleteTemp()
 
-        adapter?.refreshListeners(null, null, null)
-        adapter?.refreshImageControlListeners(null, null)
-        adapter?.refreshUiEventListener(null)
+        adapter?.refreshListeners()
+        adapter?.refreshImageControlListeners()
+        adapter?.refreshUiEventListener()
         progressDialog?.dismiss()
         progressDialog = null
     }
@@ -162,6 +167,35 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     private var currentInventory: ArrayList<String>? = null
+
+    private fun onUploadImagesProgress(it: UploadImagesProgress) {
+        if (!::binding.isInitialized || isFinishing || isDestroyed) return
+
+        val result: IcProgressStatus = it.result
+        val msg: String = it.msg
+        val completed = it.completedTask
+        val total = it.totalTask
+
+        when (result.id) {
+            ProgressStatus.starting.id, ProgressStatus.success.id, ProgressStatus.running.id -> {
+                showProgressDialog(
+                    title = getString(R.string.uploading_images),
+                    msg = msg,
+                    status = result.id,
+                    progress = completed,
+                    total = total
+                )
+            }
+
+            ProgressStatus.crashed.id, ProgressStatus.canceled.id -> {
+                makeText(this, msg, ERROR)
+            }
+
+            ProgressStatus.finished.id -> {
+                makeText(this, getString(R.string.upload_images_success), SUCCESS)
+            }
+        }
+    }
 
     private fun onSyncUploadProgress(it: SyncProgress) {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
@@ -408,6 +442,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
         saveViewModel.saveProgress.observe(this) { if (it != null) onSaveProgress(it) }
         saveViewModel.startReviewProgress.observe(this) { if (it != null) onStartReviewProgress(it) }
         syncViewModel.syncUploadProgress.observe(this) { if (it != null) onSyncUploadProgress(it) }
+        syncViewModel.uploadImagesProgress.observe(this) { if (it != null) onUploadImagesProgress(it) }
 
         headerFragment =
             supportFragmentManager.findFragmentById(binding.headerFragment.id) as LocationHeaderFragment?
@@ -907,7 +942,6 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
     private fun removeFromAdapter(arCont: AssetReviewContent) {
         if (adapter == null) return
         adapter?.removeContent(arCont)
-        setupTextView()
     }
 
     private fun addAsset() {
@@ -1012,10 +1046,13 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         thread {
             val sr = SaveReview()
-            sr.addParams(assetReview = tempReview,
-                allAssetList = all,
+            sr.addParams(
+                assetReview = tempReview,
+                contents = all,
                 onSaveProgress = { saveViewModel.setSaveProgress(it) },
-                onSyncProgress = { syncViewModel.setSyncUploadProgress(it) })
+                onSyncProgress = { syncViewModel.setSyncUploadProgress(it) },
+                onUploadImageProgress = { syncViewModel.setUploadImagesProgress(it) },
+            )
             sr.execute()
         }
     }
@@ -1165,10 +1202,10 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
                     alertBinding.messageTextView.text = msg
                     alertBinding.progressBarHor.progress = 0
                     alertBinding.progressBarHor.max = 0
-                    alertBinding.progressBarHor.visibility = View.GONE
-                    alertBinding.progressTextView.visibility = View.GONE
+                    alertBinding.progressBarHor.visibility = GONE
+                    alertBinding.progressTextView.visibility = GONE
                     alertBinding.progressBarHor.progressTintList = ColorStateList.valueOf(appColor)
-                    alertBinding.progressBar.visibility = View.VISIBLE
+                    alertBinding.progressBar.visibility = VISIBLE
                     alertBinding.progressBar.progressTintList = ColorStateList.valueOf(appColor)
 
                     progressDialog?.setButton(DialogInterface.BUTTON_NEGATIVE,
@@ -1190,24 +1227,24 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
                         val t = "$progress / $total"
                         alertBinding.progressTextView.text = t
 
-                        if (alertBinding.progressBarHor.visibility == View.GONE) {
-                            alertBinding.progressBarHor.visibility = View.VISIBLE
-                            alertBinding.progressTextView.visibility = View.VISIBLE
+                        if (alertBinding.progressBarHor.visibility == GONE) {
+                            alertBinding.progressBarHor.visibility = VISIBLE
+                            alertBinding.progressTextView.visibility = VISIBLE
                         }
 
-                        if (alertBinding.progressBar.visibility == View.VISIBLE) alertBinding.progressBar.visibility =
-                            View.GONE
+                        if (alertBinding.progressBar.visibility == VISIBLE) alertBinding.progressBar.visibility =
+                            GONE
                     } else {
                         alertBinding.progressBar.progress = 0
                         alertBinding.progressBar.max = 0
                         alertBinding.progressBar.isIndeterminate = true
 
-                        if (alertBinding.progressBarHor.visibility == View.VISIBLE) {
-                            alertBinding.progressBarHor.visibility = View.GONE
-                            alertBinding.progressTextView.visibility = View.GONE
+                        if (alertBinding.progressBarHor.visibility == VISIBLE) {
+                            alertBinding.progressBarHor.visibility = GONE
+                            alertBinding.progressTextView.visibility = GONE
                         }
-                        if (alertBinding.progressBar.visibility == View.GONE) alertBinding.progressBar.visibility =
-                            View.VISIBLE
+                        if (alertBinding.progressBar.visibility == GONE) alertBinding.progressBar.visibility =
+                            VISIBLE
                     }
 
                     progressDialog?.setButton(DialogInterface.BUTTON_NEGATIVE,
@@ -1287,8 +1324,6 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
                     Handler(Looper.getMainLooper()).postDelayed(
                         { demo() }, 300
                     )
-
-                setupTextView()
             } catch (ex: Exception) {
                 ex.printStackTrace()
                 ErrorLog.writeLog(this, this::class.java.simpleName, ex)
@@ -1299,9 +1334,19 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     private fun refreshAdapterListeners() {
-        adapter?.refreshListeners(this, this, this)
-        if (useImageControl) adapter?.refreshListeners(this, this)
-        adapter?.refreshUiEventListener(this)
+        adapter?.refreshListeners(
+            checkedChangedListener = this,
+            dataSetChangedListener = this,
+            editAssetListener = this
+        )
+        adapter?.refreshUiEventListener(uiEventListener = this)
+
+        if (useImageControl) {
+            adapter?.refreshImageControlListeners(
+                addPhotoListener = this,
+                albumViewListener = this
+            )
+        }
     }
 
     private fun gentlyReturn() {
@@ -1397,7 +1442,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
                         }
 
                         val res = "$scannedCode: ${getString(R.string.ok)}"
-                        makeText(binding.root, res, SnackBarType.SUCCESS)
+                        makeText(binding.root, res, SUCCESS)
                         Log.d(this::class.java.simpleName, res)
                     } else {
                         val res = "$scannedCode: ${getString(R.string.already_registered)}"
@@ -1983,6 +2028,15 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     override fun onDataSetChanged() {
         setupTextView()
+        showListOrEmptyListMessage()
+    }
+
+    private fun showListOrEmptyListMessage() {
+        runOnUiThread {
+            val isEmpty = (adapter?.itemCount ?: 0) == 0
+            binding.emptyTextView.visibility = if (isEmpty) VISIBLE else GONE
+            binding.recyclerView.visibility = if (isEmpty) GONE else VISIBLE
+        }
     }
 
     override fun onCheckedChanged(isChecked: Boolean, pos: Int) {
@@ -2037,7 +2091,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
 
-// region READERS Reception
+    // region READERS Reception
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
@@ -2056,7 +2110,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
                     makeText(
                         binding.root,
                         getString(R.string.rfid_connected),
-                        SnackBarType.SUCCESS
+                        SUCCESS
                     )
                 }
 
@@ -2086,7 +2140,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
         scannerHandleScanCompleted(scannedCode = scanCode, manuallyAdded = false)
     }
 
-//endregion READERS Reception
+    //endregion READERS Reception
 
     override fun onEditAssetRequired(tableId: Int, itemId: Long) {
         if (rejectNewInstances) return
@@ -2122,7 +2176,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
             }
         }
 
-// region ImageControl
+    // region ImageControl
 
     override fun onAlbumViewRequired(tableId: Int, itemId: Long, filename: String) {
         if (!useImageControl) {
@@ -2247,5 +2301,5 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
             }
         }
 
-// endregion IC
+    // endregion IC
 }

@@ -113,7 +113,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
                     tmp = mDevice.createRfcommSocketToServiceRecord(uuid)
                 }
             } catch (e: IOException) {
-                Log.e(tag, "Socket create() failed", e)
+                Log.e(TAG, "Socket create() failed", e)
             }
 
             if (tmp != null) {
@@ -123,7 +123,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
         }
 
         override fun run() {
-            Log.v(tag, "BEGIN mConnectThread")
+            Log.v(TAG, "BEGIN mConnectThread")
 
             if (!appHasBluetoothPermission()) {
                 return
@@ -140,16 +140,16 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
                 try {
                     mmSocket?.close()
                 } catch (e1: IOException) {
-                    Log.e(tag, "Unable to close() socket", e)
+                    Log.e(TAG, "Unable to close() socket", e)
                 }
                 mmSocket = null
 
                 currentThread().interrupt()
-                Log.v(tag, "END mConnectThread (InterruptedException)")
+                Log.v(TAG, "END mConnectThread (InterruptedException)")
                 return
             } catch (e: IOException) {
                 try {
-                    Log.v(tag, "Error al conectar Socket, reintentando...")
+                    Log.v(TAG, "Error al conectar Socket, reintentando...")
 
                     mmSocket = FallbackBluetoothSocket(mmSocket?.underlyingSocket!!)
                     sleep(500)
@@ -163,13 +163,13 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
                     mmSocket?.connect()
                     */
                 } catch (e: Exception) {
-                    Log.e(tag, "Unable to connect() to socket", e)
+                    Log.e(TAG, "Unable to connect() to socket", e)
 
                     // Close the socket
                     try {
                         mmSocket?.close()
                     } catch (e2: IOException) {
-                        Log.e(tag, "Unable to close() socket during connection failure", e2)
+                        Log.e(TAG, "Unable to close() socket during connection failure", e2)
                     } finally {
                         mmSocket = null
 
@@ -222,7 +222,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
      */
     @Synchronized
     fun connect(device: BluetoothDevice) {
-        Log.v(tag, "Connect to: $device")
+        Log.v(TAG, "Connect to: $device")
 
         destroy()
 
@@ -238,7 +238,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
      */
     @Synchronized
     fun connected(socket: BluetoothSocket) {
-        Log.v(tag, "Connected to Socket")
+        Log.v(TAG, "Connected to Socket")
 
         // Cancel any thread currently running a connection
         mConnectedThread?.interrupt()
@@ -324,7 +324,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
 
     @Synchronized
     private fun reportMode(currentMode: Int) {
-        Log.v(tag, "reportMode() ${getThreadModeDescription(currentMode)} ($currentMode)")
+        Log.v(TAG, "reportMode() ${getThreadModeDescription(currentMode)} ($currentMode)")
     }
 
     private fun getThreadModeDescription(currentMode: Int): String {/*
@@ -419,7 +419,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
         if (reconnectAttempts < 3) {
             reconnectAttempts++
             Log.v(
-                tag, "${getContext().getString(R.string.searching_rfid_reader)} ($reconnectAttempts)..."
+                TAG, "${getContext().getString(R.string.searching_rfid_reader)} ($reconnectAttempts)..."
             )
 
             destroy()
@@ -445,7 +445,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
         var mOldThreadMode = MODE_PAUSE
 
         init {
-            Log.v(tag, "Create ConnectedThread")
+            Log.v(TAG, "Create ConnectedThread")
             var tmpIn: InputStream? = null
             var tmpOut: OutputStream? = null
 
@@ -454,7 +454,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
                 tmpIn = mmSocket.inputStream
                 tmpOut = mmSocket.outputStream
             } catch (e: IOException) {
-                Log.e(tag, "Temp sockets not created", e)
+                Log.e(TAG, "Temp sockets not created", e)
             }
 
             mmInStream = tmpIn
@@ -466,7 +466,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
         }
 
         override fun run() {
-            Log.v(tag, "BEGIN mConnectedThread")
+            Log.v(TAG, "BEGIN mConnectedThread")
             val buffer = ByteArray(1024)
             var bytes: Int
 
@@ -510,7 +510,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
 
                                         if (bytes >= 3) {
                                             Log.v(
-                                                tag,
+                                                TAG,
                                                 "${getThreadModeDescription(mThreadMode)} Command Code: " + CommandCode.getByCode(
                                                     buffer[2]
                                                 )
@@ -555,7 +555,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
                                 val commandCode = buffer[2]
                                 val commandStr = CommandCode.getByCode(commandCode)
                                 Log.v(
-                                    tag, "${getThreadModeDescription(mThreadMode)} Command Code: $commandStr"
+                                    TAG, "${getThreadModeDescription(mThreadMode)} Command Code: $commandStr"
                                 )
                             }
                             if (listener != null) {
@@ -567,7 +567,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
                         return
                     } catch (e: IOException) {
                         if (!mDestroy.get()) {
-                            Log.e(tag, "Disconnected by exception: ", e)
+                            Log.e(TAG, "Disconnected by exception: ", e)
                             connectionLost()
                         }
                         break
@@ -588,7 +588,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
             if (buffer.count() >= 3) {
                 val commandCode = buffer[2]
                 val commandStr = CommandCode.getByCode(commandCode)
-                Log.v(tag, "Writing Command Code: $commandStr(${commandCode.toInt()})")
+                Log.v(TAG, "Writing Command Code: $commandStr(${commandCode.toInt()})")
             }
 
             try {
@@ -597,7 +597,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
                     listener!!.onWrite(buffer)
                 }
             } catch (e: IOException) {
-                Log.e(tag, "Exception during write", e)
+                Log.e(TAG, "Exception during write", e)
 
                 mmSocket.close()
                 mmOutStream?.close()
@@ -612,11 +612,11 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
         fun finish() {
             try {
                 // 1. Dejar de escuchar los eventos
-                Log.v(tag, "ConnectedThread -> Destroying listener and context...")
+                Log.v(TAG, "ConnectedThread -> Destroying listener and context...")
                 listener = null
 
                 // 2. Detener el Thread
-                Log.v(tag, "ConnectedThread -> Interrupting connected thread...")
+                Log.v(TAG, "ConnectedThread -> Interrupting connected thread...")
 
                 refreshState(STATE_NONE, false)
                 mThreadMode = MODE_PAUSE
@@ -625,21 +625,21 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
                 interrupt()
 
                 // 3. Cerrar el socket
-                Log.v(tag, "ConnectedThread -> Closing socket...")
+                Log.v(TAG, "ConnectedThread -> Closing socket...")
                 mmInStream?.close()
                 mmOutStream?.close()
                 mmSocket.close()
 
-                Log.v(tag, "ConnectedThread FINISHED")
+                Log.v(TAG, "ConnectedThread FINISHED")
             } catch (e: IOException) {
-                Log.e(tag, "finish() failed", e)
+                Log.e(TAG, "finish() failed", e)
             }
         }
     }
 
     companion object {
         // Debugging
-        private const val tag = "Vh75Bt"
+        private const val TAG = "Vh75Bt"
 
         // Unique UUID for this application
         private val uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
@@ -668,29 +668,29 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
 
             when {
                 data[0] == Head.RECEIVE_OK.code -> Log.v(
-                    tag, "checkSuccess: $commandCode ${Head.RECEIVE_OK.name} ${
+                    TAG, "checkSuccess: $commandCode ${Head.RECEIVE_OK.name} ${
                         Utility.bytes2HexStringWithSeparator(data)
                     }"
                 )
 
                 data[0] == Head.RECEIVE_FAIL.code -> Log.e(
-                    tag, "checkSuccess: $commandCode ${Head.RECEIVE_FAIL.name} ${
+                    TAG, "checkSuccess: $commandCode ${Head.RECEIVE_FAIL.name} ${
                         Utility.bytes2HexStringWithSeparator(data)
                     }"
                 )
 
                 data[0] == Head.SEND.code -> Log.v(
-                    tag, "checkSuccess: $commandCode ${Head.SEND.name} ${
+                    TAG, "checkSuccess: $commandCode ${Head.SEND.name} ${
                         Utility.bytes2HexStringWithSeparator(data)
                     }"
                 )
 
                 data[0] == 0x00.toByte() -> Log.v(
-                    tag, "checkSuccess: $commandCode OK ${Utility.bytes2HexStringWithSeparator(data)}"
+                    TAG, "checkSuccess: $commandCode OK ${Utility.bytes2HexStringWithSeparator(data)}"
                 )
 
                 else -> Log.v(
-                    tag, "checkSuccess: $commandCode Unknown Result ${
+                    TAG, "checkSuccess: $commandCode Unknown Result ${
                         Utility.bytes2HexStringWithSeparator(data)
                     }"
                 )
@@ -707,7 +707,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
             }
 
             val epcLen = 12
-            Log.v(tag, "processMessage: ${Utility.bytes2HexStringWithSeparator(ret2)}")
+            Log.v(TAG, "processMessage: ${Utility.bytes2HexStringWithSeparator(ret2)}")
 
             // Cuando se escanea un tag con el botón del dispositivo devuelve estos primeros 12 bytes:
             // 000055AA-13031B04-03030406
@@ -728,7 +728,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
                 val epcId = getEpcID(ret2, 12, (12 + epcLen))
                 if (epcId.isNotEmpty()) {
                     if (epcId.contains('�')) {
-                        Log.e(tag, "Scanned code contains unrecognized token")
+                        Log.e(TAG, "Scanned code contains unrecognized token")
                     }
 
                     // Lectura completa!
@@ -743,9 +743,9 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
 
                 val cSuc = checkSuccess(ret2)
                 if (cSuc) {
-                    Log.v(tag, "CommandCode: ${CommandCode.getByCode(commandCode)} OK")
+                    Log.v(TAG, "CommandCode: ${CommandCode.getByCode(commandCode)} OK")
                 } else {
-                    Log.e(tag, "CommandCode: ${CommandCode.getByCode(commandCode)} FAIL")
+                    Log.e(TAG, "CommandCode: ${CommandCode.getByCode(commandCode)} FAIL")
                 }
 
                 // Clasificar las respuestas según el tipo de comando
@@ -768,7 +768,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
         private fun getDataSegment(data: ByteArray): ByteArray? {
             val len = data[1].toInt()
             if (len == 2) { // Command + Checksum
-                Log.v(tag, "Data segment is empty")
+                Log.v(TAG, "Data segment is empty")
                 return null
             }
 
@@ -777,7 +777,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
                 dataSegment = ByteArray(len - 2)
 
                 System.arraycopy(data, 3, dataSegment, 0, len - 2)
-                Log.v(tag, "Data segment is " + Utility.bytes2HexString(dataSegment))
+                Log.v(TAG, "Data segment is " + Utility.bytes2HexString(dataSegment))
             }
             return dataSegment
         }
@@ -786,7 +786,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
             return try {
                 return Utility.bytes2String(ret.copyOfRange(from, to))
             } catch (e: Exception) {
-                Log.e(tag, "getEpcID: Error decoding message. ${e.message}")
+                Log.e(TAG, "getEpcID: Error decoding message. ${e.message}")
                 ""
             }
         }
@@ -881,7 +881,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
     fun setConfigParameters(ret2: ByteArray) {
         val param = parseReadParamResult(ret2)
         Log.v(
-            tag,
+            TAG,
             "Read RFID Config Parameters: TagType: ${param.TagType} Alarm: ${param.Alarm} Vibration: ${param.Reserve19} Power: ${param.Power} MinFrequence: ${param.Min_Frequence} MaxFrequence: ${param.Max_Frequence}"
         )
 
@@ -898,7 +898,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
         param.Max_Frequence = 76.toByte()
 
         Log.v(
-            tag,
+            TAG,
             "Write RFID Config Parameters: TagType: ${param.TagType} Alarm: ${param.Alarm} Vibration: ${param.Reserve19} Power: ${param.Power} MinFrequence: ${param.Min_Frequence} MaxFrequence: ${param.Max_Frequence}"
         )
 
@@ -938,7 +938,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
         val dataHex = genHexString(data)
         val epcIdHex = genHexString(epcId)
 
-        Log.v(tag, "writeData: OLD EpcId: $epcIdHex - NEW EpcId: $data ($dataHex)")
+        Log.v(TAG, "writeData: OLD EpcId: $epcIdHex - NEW EpcId: $data ($dataHex)")
 
         val mem = 1 // EPC
         val tagDataAddress = 0
@@ -1145,7 +1145,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
 
     class FallbackException(e: java.lang.Exception?) : java.lang.Exception(e) {
         companion object {
-            private const val serialVersionUID = 1L
+            private const val SERIAL_VERSION_UID = 1L
         }
     }
 }

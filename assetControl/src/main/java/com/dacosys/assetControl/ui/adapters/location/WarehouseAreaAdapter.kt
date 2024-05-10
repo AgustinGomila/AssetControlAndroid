@@ -31,16 +31,17 @@ class WarehouseAreaAdapter : ArrayAdapter<WarehouseArea>, Filterable {
     private var activity: AppCompatActivity
     private var resource: Int = 0
     private var multiSelect: Boolean = false
+    private var lastSelectedPos = -1
+
     var suspendReport = false
 
     private var dataSetChangedListener: DataSetChangedListener? = null
     private var checkedChangedListener: CheckedChangedListener? = null
 
-    private var lastSelectedPos = -1
-    private var checkedIdArray: ArrayList<Long> = ArrayList()
-
-    private var waArray: ArrayList<WarehouseArea> = ArrayList()
+    private var fullList: ArrayList<WarehouseArea> = ArrayList()
     private var suggestedList: ArrayList<WarehouseArea> = ArrayList()
+
+    private var checkedIdArray: ArrayList<Long> = ArrayList()
 
     constructor(
         activity: AppCompatActivity,
@@ -59,7 +60,7 @@ class WarehouseAreaAdapter : ArrayAdapter<WarehouseArea>, Filterable {
         this.checkedChangedListener = checkedChangedListener
         this.dataSetChangedListener = dataSetChangedListener
         this.listView = listView
-        this.waArray = warehouseAreas
+        this.fullList = warehouseAreas
     }
 
     constructor(
@@ -70,13 +71,13 @@ class WarehouseAreaAdapter : ArrayAdapter<WarehouseArea>, Filterable {
     ) : super(AssetControlApp.getContext(), resource, suggestedList) {
         this.activity = activity
         this.resource = resource
-        this.waArray = warehouseAreas
+        this.fullList = warehouseAreas
         this.suggestedList = suggestedList
     }
 
     fun refreshListeners(
-        checkedChangedListener: CheckedChangedListener?,
-        dataSetChangedListener: DataSetChangedListener?,
+        checkedChangedListener: CheckedChangedListener? = null,
+        dataSetChangedListener: DataSetChangedListener? = null,
     ) {
         this.checkedChangedListener = checkedChangedListener
         this.dataSetChangedListener = dataSetChangedListener
@@ -105,11 +106,11 @@ class WarehouseAreaAdapter : ArrayAdapter<WarehouseArea>, Filterable {
         }
     }
 
-    fun add(assets: ArrayList<WarehouseArea>) {
+    fun add(areas: ArrayList<WarehouseArea>) {
         val assetsAdded: ArrayList<WarehouseArea> = ArrayList()
 
         activity.runOnUiThread {
-            for (w in assets) {
+            for (w in areas) {
                 if (!getAll().contains(w)) {
                     assetsAdded.add(w)
                     super.add(w)
@@ -126,6 +127,7 @@ class WarehouseAreaAdapter : ArrayAdapter<WarehouseArea>, Filterable {
         activity.runOnUiThread {
             super.clear()
             clearChecked()
+            dataSetChangedListener?.onDataSetChanged()
         }
     }
 
@@ -194,7 +196,7 @@ class WarehouseAreaAdapter : ArrayAdapter<WarehouseArea>, Filterable {
 
         listView?.clearChoices()
 
-        // Deseleccionar cuando:
+        // Quitar selección cuando:
         //   - Estaba previamente seleccionado
         //   - La posición es negativa
         //   - La cantidad de ítems es cero o menos
@@ -225,16 +227,16 @@ class WarehouseAreaAdapter : ArrayAdapter<WarehouseArea>, Filterable {
     /**
      * Muestra un mensaje en pantalla con los códigos agregados
      */
-    private fun reportWarehouseAreaAdded(warehouseAreaArray: ArrayList<WarehouseArea>) {
+    private fun reportWarehouseAreaAdded(areas: ArrayList<WarehouseArea>) {
         if (suspendReport) {
             return
         }
-        if (warehouseAreaArray.size <= 0) {
+        if (areas.size <= 0) {
             return
         }
 
         var res = ""
-        for (warehouseArea in warehouseAreaArray) {
+        for (warehouseArea in areas) {
             res += "${warehouseArea.description}, "
         }
 
@@ -243,7 +245,7 @@ class WarehouseAreaAdapter : ArrayAdapter<WarehouseArea>, Filterable {
         }
 
         res += ": " +
-                if (warehouseAreaArray.size > 1)
+                if (areas.size > 1)
                     " ${AssetControlApp.getContext().getString(R.string.added_plural)}" else
                     " ${AssetControlApp.getContext().getString(R.string.added)}"
 
@@ -254,18 +256,18 @@ class WarehouseAreaAdapter : ArrayAdapter<WarehouseArea>, Filterable {
     /**
      * Muestra un mensaje en pantalla con los códigos eliminados
      */
-    private fun reportWarehouseAreaRemoved(warehouseAreaArray: ArrayList<WarehouseArea>) {
+    private fun reportWarehouseAreaRemoved(areas: ArrayList<WarehouseArea>) {
         // En modo arqueo no se muestran los carteles de eliminación de warehouseAreas
-        // porque nunca se eliminan sino que se ponen en cero
+        // porque nunca se eliminan, en cambio, se ponen en cero
         if (suspendReport) {
             return
         }
-        if (warehouseAreaArray.size <= 0) {
+        if (areas.size <= 0) {
             return
         }
 
         var res = ""
-        for (warehouseArea in warehouseAreaArray) {
+        for (warehouseArea in areas) {
             res += "${warehouseArea.description}, "
         }
 
@@ -274,7 +276,7 @@ class WarehouseAreaAdapter : ArrayAdapter<WarehouseArea>, Filterable {
         }
 
         res += ": " +
-                if (warehouseAreaArray.size > 1)
+                if (areas.size > 1)
                     " ${AssetControlApp.getContext().getString(R.string.removed_plural)}" else
                     " ${AssetControlApp.getContext().getString(R.string.removed)}"
 
@@ -318,12 +320,13 @@ class WarehouseAreaAdapter : ArrayAdapter<WarehouseArea>, Filterable {
         return -1
     }
 
-    fun count(): Int {
-        return count
-    }
+    val itemCount: Int
+        get() {
+            return count
+        }
 
     fun maxHeightNeeded(): Int {
-        return count() * defaultRowHeight()
+        return itemCount * defaultRowHeight()
     }
 
     fun getAllId(): ArrayList<Long> {
@@ -391,7 +394,7 @@ class WarehouseAreaAdapter : ArrayAdapter<WarehouseArea>, Filterable {
         setChecked(checkedItems, true)
     }
 
-    fun clearChecked() {
+    private fun clearChecked() {
         checkedIdArray.clear()
     }
 
@@ -437,8 +440,8 @@ class WarehouseAreaAdapter : ArrayAdapter<WarehouseArea>, Filterable {
             v.tag is ViewHolder && currentLayout != R.layout.warehouse_area_row
         ) {
             // Ya fue creado, si es un row normal que está siendo seleccionada
-            // o un row expandido que está siendo deseleccionado
-            // debe cambiar de layout, por lo tanto volver a crearse.
+            // o un row expandido que está siendo des seleccionado
+            // debe cambiar de layout, por lo tanto, volver a crearse.
 
             val vi = LayoutInflater.from(context)
             v = vi.inflate(currentLayout, parent, false)
@@ -645,8 +648,8 @@ class WarehouseAreaAdapter : ArrayAdapter<WarehouseArea>, Filterable {
                     filterString = constraint.toString().lowercase(Locale.getDefault())
                     var filterableIc: WarehouseArea
 
-                    for (i in 0 until waArray.size) {
-                        filterableIc = waArray[i]
+                    for (i in 0 until fullList.size) {
+                        filterableIc = fullList[i]
                         if (
                             filterableIc.description.contains(filterString, true) ||
                             filterableIc.warehouseStr.contains(filterString, true)

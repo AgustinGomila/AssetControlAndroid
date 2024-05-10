@@ -89,8 +89,8 @@ class ImageControlPreferenceFragment : PreferenceFragmentCompat(), ClientPackage
             true
         }
 
-        val qrCodeButton: Preference? = findPreference("ic_qr_code")
-        qrCodeButton?.onPreferenceClickListener = OnPreferenceClickListener {
+        val qrCodePref: Preference? = findPreference("ic_qr_code")
+        qrCodePref?.onPreferenceClickListener = OnPreferenceClickListener {
             val icUrl = Preferences.prefsGetString(p.icWsServer)
             val icNamespace = Preferences.prefsGetString(p.icWsNamespace)
             val icUserWs = Preferences.prefsGetString(p.icWsUser)
@@ -114,8 +114,8 @@ class ImageControlPreferenceFragment : PreferenceFragmentCompat(), ClientPackage
             true
         }
 
-        val scanConfigCode: Preference? = findPreference("scan_config_code")
-        scanConfigCode?.onPreferenceClickListener = OnPreferenceClickListener {
+        val scanCodePref: Preference? = findPreference("scan_config_code")
+        scanCodePref?.onPreferenceClickListener = OnPreferenceClickListener {
             try {
                 val settingsActivity: SettingsActivity = requireActivity() as? SettingsActivity
                     ?: return@OnPreferenceClickListener true

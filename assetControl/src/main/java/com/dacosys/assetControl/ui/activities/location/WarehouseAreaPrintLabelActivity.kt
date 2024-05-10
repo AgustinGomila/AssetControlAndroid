@@ -10,6 +10,7 @@ import android.os.Looper
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View.GONE
+import android.view.View.VISIBLE
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.menu.MenuBuilder
@@ -57,14 +58,14 @@ import kotlin.concurrent.thread
 class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
     Scanner.ScannerListener, KeyboardVisibilityEventListener, Rfid.RfidDeviceListener,
     WarehouseAreaSelectFilterFragment.FragmentListener, GetLocationAsync.GetLocationAsyncListener,
-    PrinterFragment.FragmentListener {
+    PrinterFragment.FragmentListener, WarehouseAreaAdapter.DataSetChangedListener {
     override fun onDestroy() {
         destroyLocals()
         super.onDestroy()
     }
 
     private fun destroyLocals() {
-        arrayAdapter?.refreshListeners(null, null)
+        adapter?.refreshListeners()
         warehouseAreaSelectFilterFragment?.onDestroy()
         printerFragment?.onDestroy()
     }
@@ -82,7 +83,7 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
     private var rejectNewInstances = false
 
     private var multiSelect = false
-    private var arrayAdapter: WarehouseAreaAdapter? = null
+    private var adapter: WarehouseAreaAdapter? = null
     private var checkedIdArray: ArrayList<Long> = ArrayList()
     private var lastSelected: WarehouseArea? = null
     private var firstVisiblePos: Int? = null
@@ -111,15 +112,15 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
         b.putBoolean("panelBottomIsExpanded", panelBottomIsExpanded)
         b.putBoolean("fixedItemList", fixedItemList)
 
-        if (arrayAdapter != null) {
-            b.putParcelable("lastSelected", arrayAdapter?.currentWarehouseArea())
-            b.putInt("firstVisiblePos", arrayAdapter?.firstVisiblePos() ?: 0)
-            b.putLongArray("checkedIdArray", arrayAdapter?.getAllChecked()?.toLongArray())
+        if (adapter != null) {
+            b.putParcelable("lastSelected", adapter?.currentWarehouseArea())
+            b.putInt("firstVisiblePos", adapter?.firstVisiblePos() ?: 0)
+            b.putLongArray("checkedIdArray", adapter?.getAllChecked()?.toLongArray())
         }
 
         // Guardar en la DB temporalmente los ítems listados
         if (fixedItemList) WarehouseAreaDbHelper().insertTempId(
-            arrayAdapter?.getAllId() ?: ArrayList()
+            adapter?.getAllId() ?: ArrayList()
         )
     }
 
@@ -224,8 +225,12 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
             }
         }
 
-        // MODO SELECCION A PARTIR DE UNA LISTA FIJA DE ITEMS
-        if (fixedItemList) fillAdapter(completeList)
+        // MODO SELECCIÓN A PARTIR DE UNA LISTA FIJA DE ÁREAS
+        if (fixedItemList) {
+            fillAdapter(completeList)
+        } else {
+            showListOrEmptyListMessage()
+        }
 
         setPanels()
 
@@ -238,9 +243,9 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
         closeKeyboard(this)
         val data = Intent()
 
-        if (arrayAdapter != null) {
-            val warehouseArea = arrayAdapter?.currentWarehouseArea()
-            val warehouseAreaIdArray = arrayAdapter?.getAllChecked()
+        if (adapter != null) {
+            val warehouseArea = adapter?.currentWarehouseArea()
+            val warehouseAreaIdArray = adapter?.getAllChecked()
 
             if (!multiSelect && warehouseArea != null) {
                 data.putParcelableArrayListExtra(
@@ -493,13 +498,13 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
 
         try {
             runOnUiThread {
-                if (arrayAdapter != null) {
-                    lastSelected = arrayAdapter?.currentWarehouseArea()
-                    firstVisiblePos = arrayAdapter?.firstVisiblePos()
+                if (adapter != null) {
+                    lastSelected = adapter?.currentWarehouseArea()
+                    firstVisiblePos = adapter?.firstVisiblePos()
                 }
 
-                if (arrayAdapter == null || warehouseAreaArray != null) {
-                    arrayAdapter = WarehouseAreaAdapter(
+                if (adapter == null || warehouseAreaArray != null) {
+                    adapter = WarehouseAreaAdapter(
                         activity = this,
                         resource = R.layout.warehouse_area_row,
                         warehouseAreas = warehouseAreaArray ?: ArrayList(),
@@ -507,7 +512,7 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
                         checkedIdArray = checkedIdArray,
                         multiSelect = multiSelect,
                         checkedChangedListener = null,
-                        dataSetChangedListener = null
+                        dataSetChangedListener = this
                     )
                 } else {
                     // IMPORTANTE:
@@ -515,18 +520,16 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
                     // las variables de esta actividad pueden
                     // tener valores antiguos en del adaptador.
 
-                    arrayAdapter?.refreshListeners(
-                        checkedChangedListener = null, dataSetChangedListener = null
-                    )
-                    arrayAdapter?.refresh()
+                    adapter?.refreshListeners(dataSetChangedListener = this)
+                    adapter?.refresh()
                 }
 
                 while (binding.warehouseAreaListView.adapter == null) {
                     // Horrible wait for full load
                 }
 
-                if (arrayAdapter != null) {
-                    arrayAdapter?.setSelectItemAndScrollPos(
+                if (adapter != null) {
+                    adapter?.setSelectItemAndScrollPos(
                         lastSelected, firstVisiblePos
                     )
                 }
@@ -541,9 +544,9 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
 
     public override fun onResume() {
         super.onResume()
-
         rejectNewInstances = false
         closeKeyboard(this)
+
         refreshTextViews()
     }
 
@@ -598,7 +601,7 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
             }
 
             if (warehouseArea != null) {
-                arrayAdapter?.selectItem(warehouseArea)
+                adapter?.selectItem(warehouseArea)
                 printerFragment?.printWa(arrayListOf(warehouseArea))
             }
         } catch (ex: Exception) {
@@ -698,7 +701,7 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
         if (waDescription.isEmpty() && wDescription.isEmpty()) {
             // Limpiar el control
             completeList.clear()
-            arrayAdapter?.clear()
+            adapter?.clear()
             return
         }
 
@@ -707,7 +710,7 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
 
     override fun onFilterChanged(printer: String, template: BarcodeLabelCustom?, qty: Int?) {}
     override fun onPrintRequested(printer: String, template: BarcodeLabelCustom, qty: Int) {
-        printerFragment?.printWaById(arrayAdapter?.getAllChecked() ?: ArrayList())
+        printerFragment?.printWaById(adapter?.getAllChecked() ?: ArrayList())
     }
 
     private var qtyTextViewFocused: Boolean = false
@@ -803,6 +806,18 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
             runOnUiThread {
                 binding.expandTopPanelButton.performClick()
             }
+        }
+    }
+
+    override fun onDataSetChanged() {
+        showListOrEmptyListMessage()
+    }
+
+    private fun showListOrEmptyListMessage() {
+        runOnUiThread {
+            val isEmpty = (adapter?.itemCount ?: 0) == 0
+            binding.emptyTextView.visibility = if (isEmpty) VISIBLE else GONE
+            binding.warehouseAreaListView.visibility = if (isEmpty) GONE else VISIBLE
         }
     }
 }

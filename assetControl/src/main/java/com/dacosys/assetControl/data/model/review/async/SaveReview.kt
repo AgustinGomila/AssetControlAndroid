@@ -19,6 +19,7 @@ import com.dacosys.assetControl.network.sync.SyncUpload
 import com.dacosys.assetControl.network.utils.Connection.Companion.autoSend
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.utils.misc.UTCDataTime
+import com.dacosys.imageControl.network.upload.UploadImagesProgress
 import kotlinx.coroutines.*
 
 class SaveReview {
@@ -26,17 +27,20 @@ class SaveReview {
     private var allAssets: ArrayList<AssetReviewContent> = ArrayList()
     private var onSaveProgress: (SaveProgress) -> Unit = {}
     private var onSyncProgress: (SyncProgress) -> Unit = {}
+    private var onUploadImageProgress: (UploadImagesProgress) -> Unit = {}
 
     fun addParams(
         assetReview: AssetReview,
-        allAssetList: ArrayList<AssetReviewContent>,
+        contents: ArrayList<AssetReviewContent>,
         onSaveProgress: (SaveProgress) -> Unit = {},
         onSyncProgress: (SyncProgress) -> Unit = {},
+        onUploadImageProgress: (UploadImagesProgress) -> Unit = {},
     ) {
         this.tempReview = assetReview
-        this.allAssets = allAssetList
+        this.allAssets = contents
         this.onSaveProgress = onSaveProgress
         this.onSyncProgress = onSyncProgress
+        this.onUploadImageProgress = onUploadImageProgress
     }
 
     private val scope = CoroutineScope(Job() + Dispatchers.IO)
@@ -60,7 +64,9 @@ class SaveReview {
         if (result && autoSend()) {
             SyncUpload(
                 registryType = SyncRegistryType.AssetReview,
-                onSyncTaskProgress = { onSyncProgress.invoke(it) })
+                onSyncTaskProgress = { onSyncProgress.invoke(it) },
+                onUploadImageProgress = { onUploadImageProgress.invoke(it) },
+            )
         } else {
             onSyncProgress.invoke(
                 SyncProgress(progressStatus = ProgressStatus.bigFinished)
@@ -82,7 +88,7 @@ class SaveReview {
         // Lista de activos desconocidos que no están la base de datos
         val assetUnknownList: ArrayList<AssetReviewContent> = ArrayList()
 
-        // Iteramos la lista de todos los activos, tanto los que fueron encotrados durante
+        // Iteramos la lista de todos los activos, tanto los que fueron encontrados durante
         // la revisión como los que no y los que no existen en la base de datos.
         for (arCont in allAssets) {
             var msg = ""
@@ -133,11 +139,11 @@ class SaveReview {
         // Para controlar la transacción //
         val db = DataBaseHelper.getWritableDb()
 
-        // Hacer los movimientos y los cambios de estados de los activos sólo
+        // Hacer los movimientos y los cambios de estados de los activos solo
         // cuando la revisión está completada
         if (tempReview.statusId == AssetReviewStatus.completed.id) {
             //////////// MOVEMENTS ////////////
-            // Create a Array List with the differents
+            // Create an Array List with the different
             // Origin Warehouse Areas to select the number of movements to do
             val waIdList = ArrayList<Long>()
 
@@ -261,7 +267,7 @@ class SaveReview {
                     arCont = allAssets.toTypedArray(),
                     onSaveProgress = { onSaveProgress.invoke(it) })
             } else {
-                // No es necesario settear error = true, termina acá.
+                // No es necesario definir error = true, el proceso termina acá.
                 onSaveProgress.invoke(
                     SaveProgress(
                         msg = getContext().getString(R.string.failed_to_save_the_revision),

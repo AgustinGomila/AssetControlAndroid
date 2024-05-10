@@ -24,7 +24,7 @@ import java.util.*
 class BarcodeLabelCustomAdapter(
     private var activity: AppCompatActivity,
     private var resource: Int,
-    private var barcodeLabelCustomList: ArrayList<BarcodeLabelCustom>,
+    private var fullList: ArrayList<BarcodeLabelCustom>,
     private var suggestedList: ArrayList<BarcodeLabelCustom>,
 ) : ArrayAdapter<BarcodeLabelCustom>(getContext(), resource, suggestedList),
     Filterable {
@@ -150,7 +150,7 @@ class BarcodeLabelCustomAdapter(
         setChecked(checkedItems, true)
     }
 
-    fun clearChecked() {
+    private fun clearChecked() {
         checkedIdArray.clear()
     }
 
@@ -297,8 +297,8 @@ class BarcodeLabelCustomAdapter(
                     filterString = constraint.toString().lowercase(Locale.getDefault())
                     var t: BarcodeLabelCustom
 
-                    for (i in 0 until barcodeLabelCustomList.size) {
-                        t = barcodeLabelCustomList[i]
+                    for (i in 0 until fullList.size) {
+                        t = fullList[i]
                         if (t.description.contains(filterString, true)) {
                             r.add(t)
                         }

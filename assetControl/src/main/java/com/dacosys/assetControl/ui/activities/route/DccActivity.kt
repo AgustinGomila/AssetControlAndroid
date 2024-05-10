@@ -1861,7 +1861,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         return Color.rgb(red, green, blue)
     }
 
-// region READERS Reception
+    // region READERS Reception
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
@@ -1908,7 +1908,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         scannerCompleted(scanCode)
     }
 
-//endregion READERS Reception
+    // endregion READERS Reception
 
     private fun isBackPressed() {
         cancelDcc()

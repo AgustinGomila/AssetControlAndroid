@@ -31,18 +31,18 @@ import java.util.*
 class RouteAdapter : ArrayAdapter<Route>, Filterable {
     private var activity: AppCompatActivity
     private var resource: Int = 0
-    private var lastSelectedPos = -1
     private var multiSelect: Boolean = false
+    private var lastSelectedPos = -1
 
     var suspendReport = false
 
     private var dataSetChangedListener: DataSetChangedListener? = null
     private var checkedChangedListener: CheckedChangedListener? = null
 
+    private var fullList: ArrayList<Route> = ArrayList()
     private var suggestedList: ArrayList<Route> = ArrayList()
-    private var checkedIdArray: ArrayList<Long> = ArrayList()
 
-    private var routeArray: ArrayList<Route> = ArrayList()
+    private var checkedIdArray: ArrayList<Long> = ArrayList()
     private var routeIdOnProcess: ArrayList<Long> = ArrayList()
     private var routeIdToSend: ArrayList<Long> = ArrayList()
 
@@ -70,7 +70,7 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
         this.checkedIdArray = checkedIdArray
 
         this.listView = listView
-        this.routeArray = routes
+        this.fullList = routes
     }
 
     constructor(
@@ -81,13 +81,13 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
     ) : super(AssetControlApp.getContext(), resource, suggestedList) {
         this.activity = activity
         this.resource = resource
-        this.routeArray = routes
+        this.fullList = routes
         this.suggestedList = suggestedList
     }
 
     fun refreshListeners(
-        checkedChangedListener: CheckedChangedListener?,
-        dataSetChangedListener: DataSetChangedListener?,
+        checkedChangedListener: CheckedChangedListener? = null,
+        dataSetChangedListener: DataSetChangedListener? = null,
     ) {
         this.checkedChangedListener = checkedChangedListener
         this.dataSetChangedListener = dataSetChangedListener
@@ -104,31 +104,31 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
         )
     }
 
-    override fun add(wa: Route?) {
-        if (wa != null) {
-            if (!getAll().contains(wa)) {
+    override fun add(route: Route?) {
+        if (route != null) {
+            if (!getAll().contains(route)) {
                 activity.runOnUiThread {
-                    super.add(wa)
+                    super.add(route)
                 }
 
-                reportRouteAdded(arrayListOf(wa))
+                reportRouteAdded(arrayListOf(route))
             }
         }
     }
 
-    fun add(assets: ArrayList<Route>) {
-        val assetsAdded: ArrayList<Route> = ArrayList()
+    fun add(routes: ArrayList<Route>) {
+        val routesToAdd: ArrayList<Route> = ArrayList()
 
         activity.runOnUiThread {
-            for (w in assets) {
+            for (w in routes) {
                 if (!getAll().contains(w)) {
-                    assetsAdded.add(w)
+                    routesToAdd.add(w)
                     super.add(w)
                 }
             }
 
-            if (assetsAdded.size > 0) {
-                reportRouteAdded(assetsAdded)
+            if (routesToAdd.size > 0) {
+                reportRouteAdded(routesToAdd)
             }
         }
     }
@@ -137,6 +137,7 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
         activity.runOnUiThread {
             super.clear()
             clearChecked()
+            dataSetChangedListener?.onDataSetChanged()
         }
     }
 
@@ -205,7 +206,7 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
 
         listView?.clearChoices()
 
-        // Deseleccionar cuando:
+        // Quitar selección cuando:
         //   - Estaba previamente seleccionado
         //   - La posición es negativa
         //   - La cantidad de ítems es cero o menos
@@ -300,16 +301,16 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
     /**
      * Muestra un mensaje en pantalla con los códigos agregados
      */
-    private fun reportRouteAdded(routeArray: ArrayList<Route>) {
+    private fun reportRouteAdded(routes: ArrayList<Route>) {
         if (suspendReport) {
             return
         }
-        if (routeArray.size <= 0) {
+        if (routes.size <= 0) {
             return
         }
 
         var res = ""
-        for (route in routeArray) {
+        for (route in routes) {
             res += "${route.description}, "
         }
 
@@ -318,7 +319,7 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
         }
 
         res += ": " +
-                if (routeArray.size > 1)
+                if (routes.size > 1)
                     " ${AssetControlApp.getContext().getString(R.string.added_plural)}" else
                     " ${AssetControlApp.getContext().getString(R.string.added)}"
 
@@ -329,18 +330,18 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
     /**
      * Muestra un mensaje en pantalla con los códigos eliminados
      */
-    private fun reportRouteRemoved(routeArray: ArrayList<Route>) {
+    private fun reportRouteRemoved(routes: ArrayList<Route>) {
         // En modo arqueo no se muestran los carteles de eliminación de routes
-        // porque nunca se eliminan sino que se ponen en cero
+        // porque nunca se eliminan, en cambio, se ponen en cero
         if (suspendReport) {
             return
         }
-        if (routeArray.size <= 0) {
+        if (routes.size <= 0) {
             return
         }
 
         var res = ""
-        for (route in routeArray) {
+        for (route in routes) {
             res += "${route.description}, "
         }
 
@@ -349,7 +350,7 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
         }
 
         res += ": " +
-                if (routeArray.size > 1)
+                if (routes.size > 1)
                     " ${AssetControlApp.getContext().getString(R.string.removed_plural)}" else
                     " ${AssetControlApp.getContext().getString(R.string.removed)}"
 
@@ -467,7 +468,7 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
         setChecked(checkedItems, true)
     }
 
-    fun clearChecked() {
+    private fun clearChecked() {
         checkedIdArray.clear()
     }
 
@@ -533,8 +534,8 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
                 v.tag is ItemListViewHolder && currentLayout != R.layout.route_dropdown_row
             ) {
                 // Ya fue creado, si es un row normal que está siendo seleccionada
-                // o un row expandido que está siendo deseleccionado
-                // debe cambiar de layout, por lo tanto volver a crearse.
+                // o un row expandido que está siendo des seleccionado
+                // debe cambiar de layout, por lo tanto, volver a crearse.
                 val vi = LayoutInflater.from(context)
                 v = vi.inflate(currentLayout, parent, false)
 
@@ -1005,8 +1006,8 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
                     filterString = constraint.toString().lowercase(Locale.getDefault())
                     var filterableIc: Route
 
-                    for (i in 0 until routeArray.size) {
-                        filterableIc = routeArray[i]
+                    for (i in 0 until fullList.size) {
+                        filterableIc = fullList[i]
                         if (filterableIc.description.contains(filterString, true)) {
                             r.add(filterableIc)
                         }

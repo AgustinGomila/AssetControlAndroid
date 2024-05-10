@@ -47,6 +47,8 @@ import com.dacosys.assetControl.data.model.status.ConfirmStatus.CREATOR.confirm
 import com.dacosys.assetControl.data.model.status.ConfirmStatus.CREATOR.modify
 import com.dacosys.assetControl.databinding.ProgressBarDialogBinding
 import com.dacosys.assetControl.databinding.WarehouseMovementContentBottomPanelCollapsedBinding
+import com.dacosys.assetControl.network.sync.SyncProgress
+import com.dacosys.assetControl.network.sync.SyncRegistryType
 import com.dacosys.assetControl.network.utils.Connection.Companion.autoSend
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.ui.activities.asset.AssetCRUDActivity
@@ -56,6 +58,8 @@ import com.dacosys.assetControl.ui.adapters.interfaces.Interfaces
 import com.dacosys.assetControl.ui.adapters.movement.WmcRecyclerAdapter
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
+import com.dacosys.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
+import com.dacosys.assetControl.ui.common.snackbar.SnackBarType.CREATOR.SUCCESS
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setupUI
@@ -75,10 +79,12 @@ import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion
 import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutBoolean
 import com.dacosys.assetControl.utils.settings.preferences.Repository.Companion.useImageControl
 import com.dacosys.assetControl.viewModel.review.SaveReviewViewModel
+import com.dacosys.assetControl.viewModel.sync.SyncViewModel
 import com.dacosys.imageControl.dto.DocumentContent
 import com.dacosys.imageControl.dto.DocumentContentRequestResult
 import com.dacosys.imageControl.network.common.ProgramData
 import com.dacosys.imageControl.network.download.GetImages.Companion.toDocumentContentList
+import com.dacosys.imageControl.network.upload.UploadImagesProgress
 import com.dacosys.imageControl.network.webService.WsFunction
 import com.dacosys.imageControl.room.dao.ImageCoroutines
 import com.dacosys.imageControl.ui.activities.ImageControlCameraActivity
@@ -90,6 +96,7 @@ import com.google.android.material.textfield.TextInputLayout
 import org.parceler.Parcels
 import java.util.*
 import kotlin.concurrent.thread
+import com.dacosys.imageControl.network.common.ProgressStatus as IcProgressStatus
 
 class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
     Rfid.RfidDeviceListener, SwipeRefreshLayout.OnRefreshListener,
@@ -109,8 +116,8 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
         // Borramos los Ids temporales que se usaron en la actividad.
         if (isFinishingByUser) WarehouseMovementContentDbHelper().deleteTemp()
 
-        adapter?.refreshListeners(null, null, null)
-        adapter?.refreshImageControlListeners(null, null)
+        adapter?.refreshListeners()
+        adapter?.refreshImageControlListeners()
         progressDialog?.dismiss()
         progressDialog = null
     }
@@ -227,6 +234,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private lateinit var binding: WarehouseMovementContentBottomPanelCollapsedBinding
     private val saveViewModel: SaveReviewViewModel by viewModels()
+    private val syncViewModel: SyncViewModel by viewModels()
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -246,6 +254,8 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         saveViewModel.saveProgress.observe(this) { if (it != null) onSaveProgress(it) }
+        syncViewModel.syncUploadProgress.observe(this) { if (it != null) onSyncUploadProgress(it) }
+        syncViewModel.uploadImagesProgress.observe(this) { if (it != null) onUploadImagesProgress(it) }
 
         headerFragment =
             supportFragmentManager.findFragmentById(binding.headerFragment.id) as LocationHeaderFragment?
@@ -287,7 +297,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
                     makeText(
                         binding.root,
                         getContext().getString(R.string.you_must_add_at_least_one_asset),
-                        SnackBarType.ERROR
+                        ERROR
                     )
                 } else {
                     allowClicks = false
@@ -502,8 +512,6 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
                     adapter?.selectItem(ls, false)
                     adapter?.scrollToPos(cs, true)
                 }, 200)
-
-                setupTextView()
             } catch (ex: Exception) {
                 ex.printStackTrace()
                 ErrorLog.writeLog(this, this::class.java.simpleName, ex)
@@ -514,8 +522,18 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     private fun refreshAdapterListeners() {
-        adapter?.refreshListeners(this, this, this)
-        if (useImageControl) adapter?.refreshListeners(this, this)
+        adapter?.refreshListeners(
+            checkedChangedListener = this,
+            dataSetChangedListener = this,
+            editAssetListener = this
+        )
+
+        if (useImageControl) {
+            adapter?.refreshImageControlListeners(
+                addPhotoListener = this,
+                albumViewListener = this
+            )
+        }
     }
 
     private fun gentlyReturn() {
@@ -655,7 +673,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
                     } catch (ex: Exception) {
                         val res =
                             getContext().getString(R.string.an_error_occurred_while_trying_to_add_the_item)
-                        makeText(binding.root, res, SnackBarType.ERROR)
+                        makeText(binding.root, res, ERROR)
                         Log.d(this::class.java.simpleName, res)
                     }
                 }
@@ -674,7 +692,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
             makeText(
                 binding.root,
                 getContext().getString(R.string.you_must_select_a_destination_for_assets),
-                SnackBarType.ERROR
+                ERROR
             )
 
             allowClicks = true
@@ -743,10 +761,14 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         thread {
             val saveMovement = SaveMovement()
-            saveMovement.addParams(destWarehouseAreaId = destWaId,
+            saveMovement.addParams(
+                destWarehouseAreaId = destWaId,
                 obs = obs,
-                allMovementContent = allWmc,
-                onProgress = { saveViewModel.setSaveProgress(it) })
+                movementContents = allWmc,
+                onProgress = { saveViewModel.setSaveProgress(it) },
+                onSyncProgress = { syncViewModel.setSyncUploadProgress(it) },
+                onUploadImageProgress = { syncViewModel.setUploadImagesProgress(it) },
+            )
             saveMovement.execute()
         }
     }
@@ -760,7 +782,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
             )
         } catch (ex: Exception) {
             ex.printStackTrace()
-            makeText(binding.root, ex.message.toString(), SnackBarType.ERROR)
+            makeText(binding.root, ex.message.toString(), ERROR)
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         } finally {
             JotterListener.lockScanner(this, false)
@@ -804,7 +826,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
                 // Nada que hacer, volver
                 if (scannedCode.isEmpty()) {
                     val res = getString(R.string.invalid_code)
-                    makeText(binding.root, res, SnackBarType.ERROR)
+                    makeText(binding.root, res, ERROR)
                     Log.d(this::class.java.simpleName, res)
                     continue
                 }
@@ -838,14 +860,14 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
                 if (sc.codeFound && sc.asset != null && sc.labelNbr == 0) {
                     val res = getString(R.string.report_code)
-                    makeText(binding.root, res, SnackBarType.ERROR)
+                    makeText(binding.root, res, ERROR)
                     Log.d(this::class.java.simpleName, res)
                     continue
                 }
 
                 if (sc.codeFound && sc.asset != null && sc.asset?.labelNumber == null) {
                     val res = getString(R.string.no_printed_label)
-                    makeText(binding.root, res, SnackBarType.ERROR)
+                    makeText(binding.root, res, ERROR)
                     Log.d(this::class.java.simpleName, res)
                     continue
                 }
@@ -854,7 +876,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
                     sc.labelNbr != null && sc.asset?.labelNumber != sc.labelNbr
                 ) {
                     val res = getString(R.string.invalid_code)
-                    makeText(binding.root, res, SnackBarType.ERROR)
+                    makeText(binding.root, res, ERROR)
                     Log.d(this::class.java.simpleName, res)
                     continue
                 }
@@ -885,7 +907,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
                 if (sc.asset == null) {
                     val res = getString(R.string.unknown_code)
-                    makeText(binding.root, res, SnackBarType.ERROR)
+                    makeText(binding.root, res, ERROR)
                     Log.d(this::class.java.simpleName, res)
                     continue
                 }
@@ -920,7 +942,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
-            makeText(binding.root, ex.message.toString(), SnackBarType.ERROR)
+            makeText(binding.root, ex.message.toString(), ERROR)
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
             return
         }
@@ -1110,14 +1132,106 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
             makeText(
                 binding.root,
                 getContext().getString(R.string.movement_performed_correctly),
-                SnackBarType.SUCCESS
+                SUCCESS
             )
 
             isFinishingByUser = true
             setResult(RESULT_OK)
             finish()
         } else if (taskStatus == ProgressStatus.canceled.id || taskStatus == ProgressStatus.crashed.id) {
-            makeText(binding.root, msg, SnackBarType.ERROR)
+            makeText(binding.root, msg, ERROR)
+        }
+    }
+
+    private fun onUploadImagesProgress(it: UploadImagesProgress) {
+        if (!::binding.isInitialized || isFinishing || isDestroyed) return
+
+        val result: IcProgressStatus = it.result
+        val msg: String = it.msg
+        val completed = it.completedTask
+        val total = it.totalTask
+
+        when (result.id) {
+            ProgressStatus.starting.id, ProgressStatus.success.id, ProgressStatus.running.id -> {
+                showProgressDialog(
+                    title = getString(R.string.uploading_images),
+                    msg = msg,
+                    status = result.id,
+                    progress = completed,
+                    total = total
+                )
+            }
+
+            ProgressStatus.crashed.id, ProgressStatus.canceled.id -> {
+                makeText(this, msg, ERROR)
+            }
+
+            ProgressStatus.finished.id -> {
+                makeText(this, getString(R.string.upload_images_success), SUCCESS)
+            }
+        }
+    }
+
+    private fun onSyncUploadProgress(it: SyncProgress) {
+        if (!::binding.isInitialized || isFinishing || isDestroyed) return
+
+        val totalTask: Int = it.totalTask
+        val completedTask: Int = it.completedTask
+        val msg: String = it.msg
+        val registryType: SyncRegistryType? = it.registryType
+        val progressStatus: ProgressStatus = it.progressStatus
+
+        val progressStatusDesc = progressStatus.description
+        var registryDesc = getString(R.string.all_tasks)
+        if (registryType != null) {
+            registryDesc = registryType.description
+        }
+
+        when (progressStatus) {
+            ProgressStatus.bigStarting,
+            ProgressStatus.starting,
+            ProgressStatus.running,
+            -> {
+                showProgressDialog(
+                    title = getString(R.string.synchronizing_),
+                    msg = msg,
+                    status = progressStatus.id,
+                    progress = completedTask,
+                    total = totalTask
+                )
+            }
+
+            ProgressStatus.bigFinished -> {
+                closeKeyboard(this)
+
+                isFinishingByUser = true
+                setResult(RESULT_OK)
+                finish()
+            }
+
+            ProgressStatus.bigCrashed,
+            ProgressStatus.canceled,
+            -> {
+                closeKeyboard(this)
+                makeText(binding.root, msg, ERROR)
+                ErrorLog.writeLog(
+                    this, this::class.java.simpleName, "$progressStatusDesc: $registryDesc ${
+                        Statics.getPercentage(completedTask, totalTask)
+                    }, $msg"
+                )
+
+                isFinishingByUser = true
+                setResult(RESULT_OK)
+                finish()
+            }
+
+            else -> {
+                Log.d(
+                    this::class.java.simpleName, "$progressStatusDesc: $registryDesc ${
+                        Statics.getPercentage(completedTask, totalTask)
+                    }, $msg"
+                )
+            }
         }
     }
 
@@ -1157,10 +1271,10 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
                     alertBinding.messageTextView.text = msg
                     alertBinding.progressBarHor.progress = 0
                     alertBinding.progressBarHor.max = 0
-                    alertBinding.progressBarHor.visibility = View.GONE
-                    alertBinding.progressTextView.visibility = View.GONE
+                    alertBinding.progressBarHor.visibility = GONE
+                    alertBinding.progressTextView.visibility = GONE
                     alertBinding.progressBarHor.progressTintList = ColorStateList.valueOf(appColor)
-                    alertBinding.progressBar.visibility = View.VISIBLE
+                    alertBinding.progressBar.visibility = VISIBLE
                     alertBinding.progressBar.progressTintList = ColorStateList.valueOf(appColor)
 
                     progressDialog?.setButton(DialogInterface.BUTTON_NEGATIVE,
@@ -1182,24 +1296,24 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
                         val t = "$progress / $total"
                         alertBinding.progressTextView.text = t
 
-                        if (alertBinding.progressBarHor.visibility == View.GONE) {
-                            alertBinding.progressBarHor.visibility = View.VISIBLE
-                            alertBinding.progressTextView.visibility = View.VISIBLE
+                        if (alertBinding.progressBarHor.visibility == GONE) {
+                            alertBinding.progressBarHor.visibility = VISIBLE
+                            alertBinding.progressTextView.visibility = VISIBLE
                         }
 
-                        if (alertBinding.progressBar.visibility == View.VISIBLE) alertBinding.progressBar.visibility =
-                            View.GONE
+                        if (alertBinding.progressBar.visibility == VISIBLE) alertBinding.progressBar.visibility =
+                            GONE
                     } else {
                         alertBinding.progressBar.progress = 0
                         alertBinding.progressBar.max = 0
                         alertBinding.progressBar.isIndeterminate = true
 
-                        if (alertBinding.progressBarHor.visibility == View.VISIBLE) {
-                            alertBinding.progressBarHor.visibility = View.GONE
-                            alertBinding.progressTextView.visibility = View.GONE
+                        if (alertBinding.progressBarHor.visibility == VISIBLE) {
+                            alertBinding.progressBarHor.visibility = GONE
+                            alertBinding.progressTextView.visibility = GONE
                         }
-                        if (alertBinding.progressBar.visibility == View.GONE) alertBinding.progressBar.visibility =
-                            View.VISIBLE
+                        if (alertBinding.progressBar.visibility == GONE) alertBinding.progressBar.visibility =
+                            VISIBLE
                     }
 
                     progressDialog?.setButton(DialogInterface.BUTTON_NEGATIVE,
@@ -1240,7 +1354,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
                     makeText(
                         binding.root,
                         getString(R.string.rfid_connected),
-                        SnackBarType.SUCCESS
+                        SUCCESS
                     )
                 }
 

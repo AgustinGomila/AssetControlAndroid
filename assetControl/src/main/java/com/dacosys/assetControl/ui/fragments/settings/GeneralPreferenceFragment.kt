@@ -44,15 +44,15 @@ class GeneralPreferenceFragment : PreferenceFragmentCompat() {
             confPassPref?.summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
         }
 
-        val removeLogFiles: Preference? = findPreference("remove_log_files")
-        removeLogFiles?.onPreferenceClickListener = OnPreferenceClickListener {
+        val removeLogFilesPref: Preference? = findPreference("remove_log_files")
+        removeLogFilesPref?.onPreferenceClickListener = OnPreferenceClickListener {
             val diaBox = askForDelete()
             diaBox.show()
             true
         }
 
-        val scanConfigCode: Preference? = findPreference("scan_config_code")
-        scanConfigCode?.onPreferenceClickListener = OnPreferenceClickListener {
+        val scanCodePref: Preference? = findPreference("scan_config_code")
+        scanCodePref?.onPreferenceClickListener = OnPreferenceClickListener {
             try {
                 val settingsActivity: SettingsActivity = requireActivity() as? SettingsActivity
                     ?: return@OnPreferenceClickListener true
@@ -69,8 +69,8 @@ class GeneralPreferenceFragment : PreferenceFragmentCompat() {
             }
         }
 
-        val qrCodeButton: Preference? = findPreference("ac_qr_code")
-        qrCodeButton?.onPreferenceClickListener = OnPreferenceClickListener {
+        val qrCodePref: Preference? = findPreference("ac_qr_code")
+        qrCodePref?.onPreferenceClickListener = OnPreferenceClickListener {
             GenerateQR(
                 data = ConfigHelper.getBarcodeForConfig(
                     p.getAppConf(),

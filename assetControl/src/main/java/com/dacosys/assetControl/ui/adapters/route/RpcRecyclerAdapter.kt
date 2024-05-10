@@ -69,7 +69,12 @@ class RpcRecyclerAdapter(
         checkedIdArray.clear()
 
         fullList.clear()
-        submitList(fullList)
+        submitList(fullList) {
+            run {
+                // Notificamos al Listener superior
+                dataSetChangedListener?.onDataSetChanged()
+            }
+        }
     }
 
     fun refreshListeners(
@@ -231,9 +236,6 @@ class RpcRecyclerAdapter(
 
             // Seleccionamos el ítem
             holder.itemView.isSelected = currentIndex == position
-
-            // Notificamos al Listener superior
-            dataSetChangedListener?.onDataSetChanged()
         }
 
         // Actualiza la vista según el estado de selección del elemento

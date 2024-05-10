@@ -106,8 +106,8 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         // Borramos los Ids temporales que se usaron en la actividad.
         if (isFinishingByUser) AssetDbHelper().deleteTemp()
 
-        adapter?.refreshListeners(null, null, null)
-        adapter?.refreshImageControlListeners(null, null)
+        adapter?.refreshListeners()
+        adapter?.refreshImageControlListeners()
         assetSelectFilterFragment?.onDestroy()
         summaryFragment?.onDestroy()
         printerFragment?.onDestroy()
@@ -786,7 +786,6 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
 
     public override fun onResume() {
         super.onResume()
-
         rejectNewInstances = false
         closeKeyboard(this)
     }

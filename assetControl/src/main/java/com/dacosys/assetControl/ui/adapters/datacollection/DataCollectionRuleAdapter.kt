@@ -150,7 +150,7 @@ class DataCollectionRuleAdapter : ArrayAdapter<DataCollectionRule> {
 
         listView?.clearChoices()
 
-        // Deseleccionar cuando:
+        // Quitar selección cuando:
         //   - Estaba previamente seleccionado
         //   - La posición es negativa
         //   - La cantidad de ítems es cero o menos

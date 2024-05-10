@@ -137,9 +137,9 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
     }
 
     fun refreshListeners(
-        checkedChangedListener: CheckedChangedListener?,
-        dataSetChangedListener: DataSetChangedListener?,
-        editAssetRequiredListener: EditAssetRequiredListener?,
+        checkedChangedListener: CheckedChangedListener? = null,
+        dataSetChangedListener: DataSetChangedListener? = null,
+        editAssetRequiredListener: EditAssetRequiredListener? = null,
     ) {
         this.checkedChangedListener = checkedChangedListener
         this.dataSetChangedListener = dataSetChangedListener
@@ -147,8 +147,8 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
     }
 
     fun refreshImageControlListeners(
-        addPhotoListener: AddPhotoRequiredListener?,
-        albumViewListener: AlbumViewRequiredListener?,
+        addPhotoListener: AddPhotoRequiredListener? = null,
+        albumViewListener: AlbumViewRequiredListener? = null,
     ) {
         addPhotoRequiredListener = addPhotoListener
         albumViewRequiredListener = albumViewListener
@@ -253,9 +253,6 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
 
             // Seleccionamos el ítem
             holder.itemView.isSelected = currentIndex == position
-
-            // Notificamos al Listener superior
-            dataSetChangedListener?.onDataSetChanged()
         }
 
         // Establecer los valores para cada elemento según su posición con el estilo correspondiente

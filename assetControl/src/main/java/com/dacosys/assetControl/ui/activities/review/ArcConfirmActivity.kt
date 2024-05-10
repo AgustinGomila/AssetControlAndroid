@@ -7,6 +7,8 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.MenuItem
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -29,6 +31,7 @@ import com.dacosys.assetControl.data.model.status.ConfirmStatus
 import com.dacosys.assetControl.data.model.table.Table
 import com.dacosys.assetControl.databinding.AssetReviewContentConfirmBottomPanelCollapsedBinding
 import com.dacosys.assetControl.ui.activities.common.ObservationsActivity
+import com.dacosys.assetControl.ui.adapters.interfaces.Interfaces
 import com.dacosys.assetControl.ui.adapters.review.ArcRecyclerAdapter
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
@@ -45,7 +48,7 @@ import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 import org.parceler.Parcels
 
 class ArcConfirmActivity : AppCompatActivity(),
-    SwipeRefreshLayout.OnRefreshListener {
+    SwipeRefreshLayout.OnRefreshListener, Interfaces.DataSetChangedListener {
     override fun onRefresh() {
         Handler(Looper.getMainLooper()).postDelayed({
             run {
@@ -60,6 +63,7 @@ class ArcConfirmActivity : AppCompatActivity(),
     }
 
     override fun onPause() {
+        adapter?.refreshListeners()
         imageControlFragment?.onDestroy()
         imageControlFragment = null
         saveSharedPreferences()
@@ -73,7 +77,7 @@ class ArcConfirmActivity : AppCompatActivity(),
     }
 
     private fun destroyLocals() {
-        adapter?.refreshListeners(null, null, null)
+        adapter?.refreshListeners()
     }
 
     private var rejectNewInstances = false
@@ -456,6 +460,8 @@ class ArcConfirmActivity : AppCompatActivity(),
                     visibleStatus = AssetReviewContentStatus.getAllConfirm()
                 )
 
+                adapter?.refreshListeners(dataSetChangedListener = this)
+
                 binding.recyclerView.layoutManager = LinearLayoutManager(this)
                 binding.recyclerView.adapter = adapter
 
@@ -470,8 +476,6 @@ class ArcConfirmActivity : AppCompatActivity(),
                     adapter?.selectItem(ls, false)
                     adapter?.scrollToPos(cs, true)
                 }, 200)
-
-                setupTextView()
             } catch (ex: Exception) {
                 ex.printStackTrace()
                 ErrorLog.writeLog(this, this::class.java.simpleName, ex)
@@ -575,6 +579,19 @@ class ArcConfirmActivity : AppCompatActivity(),
     companion object {
         fun equals(a: Any?, b: Any?): Boolean {
             return a != null && a == b
+        }
+    }
+
+    override fun onDataSetChanged() {
+        setupTextView()
+        showListOrEmptyListMessage()
+    }
+
+    private fun showListOrEmptyListMessage() {
+        runOnUiThread {
+            val isEmpty = (adapter?.itemCount ?: 0) == 0
+            binding.emptyTextView.visibility = if (isEmpty) VISIBLE else GONE
+            binding.recyclerView.visibility = if (isEmpty) GONE else VISIBLE
         }
     }
 }

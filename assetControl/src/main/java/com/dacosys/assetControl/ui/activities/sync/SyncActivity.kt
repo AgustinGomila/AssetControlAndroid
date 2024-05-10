@@ -85,8 +85,8 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
     }
 
     private fun destroyLocals() {
-        adapter?.refreshListeners(null, null)
-        adapter?.refreshImageControlListeners(null)
+        adapter?.refreshListeners()
+        adapter?.refreshImageControlListeners()
     }
 
     private fun onSessionCreated(result: Boolean) {

@@ -23,7 +23,7 @@ import java.util.*
 class AssetAdapter(
     private var resource: Int,
     private var activity: AppCompatActivity,
-    private var itemList: ArrayList<Asset>,
+    private var fullList: ArrayList<Asset>,
     private var suggestedList: ArrayList<Asset>,
     private var filterOptions: FilterOptions = FilterOptions(),
     private var visibleStatus: ArrayList<AssetStatus>
@@ -265,8 +265,8 @@ class AssetAdapter(
                     if (filterString.isNotEmpty()) {
                         var filterableItem: Asset
 
-                        for (i in 0 until itemList.size) {
-                            filterableItem = itemList[i]
+                        for (i in 0 until fullList.size) {
+                            filterableItem = fullList[i]
 
                             // Descartamos aquellos que no debe ser visibles
                             if (filterableItem.assetStatus !in visibleStatus) continue

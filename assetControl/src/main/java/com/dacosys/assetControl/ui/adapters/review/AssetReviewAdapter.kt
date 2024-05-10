@@ -69,8 +69,8 @@ class AssetReviewAdapter :
     }
 
     fun refreshListeners(
-        checkedChangedListener: CheckedChangedListener?,
-        dataSetChangedListener: DataSetChangedListener?,
+        checkedChangedListener: CheckedChangedListener? = null,
+        dataSetChangedListener: DataSetChangedListener? = null,
     ) {
         this.checkedChangedListener = checkedChangedListener
         this.dataSetChangedListener = dataSetChangedListener
@@ -126,6 +126,7 @@ class AssetReviewAdapter :
         activity.runOnUiThread {
             super.clear()
             clearChecked()
+            dataSetChangedListener?.onDataSetChanged()
         }
     }
 
@@ -304,7 +305,7 @@ class AssetReviewAdapter :
         setChecked(checkedItems, true)
     }
 
-    fun clearChecked() {
+    private fun clearChecked() {
         checkedIdArray.clear()
     }
 
@@ -340,7 +341,7 @@ class AssetReviewAdapter :
 
         listView?.clearChoices()
 
-        // Deseleccionar cuando:
+        // Quitar selección cuando:
         //   - Estaba previamente seleccionado
         //   - La posición es negativa
         //   - La cantidad de ítems es cero o menos
@@ -526,8 +527,8 @@ class AssetReviewAdapter :
             // Row null cambiando...
 
             // Ya fue creado, si es un row normal que está siendo seleccionada
-            // o un row expandido que está siendo deseleccionado
-            // debe cambiar de layout, por lo tanto volver a crearse.
+            // o un row expandido que está siendo des seleccionado
+            // debe cambiar de layout, por lo tanto, volver a crearse.
 
             val vi = LayoutInflater.from(context)
             v = vi.inflate(currentLayout, parent, false)

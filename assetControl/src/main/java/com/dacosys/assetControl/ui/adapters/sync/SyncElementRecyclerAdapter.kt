@@ -138,15 +138,15 @@ class SyncElementRecyclerAdapter private constructor(builder: Builder) :
     }
 
     fun refreshListeners(
-        checkedChangedListener: CheckedChangedListener?,
-        dataSetChangedListener: DataSetChangedListener?,
+        checkedChangedListener: CheckedChangedListener? = null,
+        dataSetChangedListener: DataSetChangedListener? = null,
     ) {
         this.checkedChangedListener = checkedChangedListener
         this.dataSetChangedListener = dataSetChangedListener
     }
 
     fun refreshImageControlListeners(
-        albumViewListener: AlbumViewRequiredListener?,
+        albumViewListener: AlbumViewRequiredListener? = null,
     ) {
         albumViewRequiredListener = albumViewListener
     }
@@ -310,9 +310,6 @@ class SyncElementRecyclerAdapter private constructor(builder: Builder) :
 
             // Seleccionamos el ítem
             holder.itemView.isSelected = currentIndex == position
-
-            // Notificamos al Listener superior
-            dataSetChangedListener?.onDataSetChanged()
         }
 
         // Establecer los valores para cada elemento según su posición con el estilo correspondiente

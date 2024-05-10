@@ -12,6 +12,8 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.widget.Button
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
@@ -62,6 +64,8 @@ import com.dacosys.assetControl.ui.adapters.route.RpcRecyclerAdapter
 import com.dacosys.assetControl.ui.adapters.route.RpcRecyclerAdapter.PAYLOADS
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
+import com.dacosys.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
+import com.dacosys.assetControl.ui.common.snackbar.SnackBarType.CREATOR.SUCCESS
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.utils.Statics
@@ -77,12 +81,14 @@ import com.dacosys.assetControl.utils.settings.config.Preference
 import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.viewModel.route.*
 import com.dacosys.assetControl.viewModel.sync.SyncViewModel
+import com.dacosys.imageControl.network.upload.UploadImagesProgress
 import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelableArrayList
 import com.udojava.evalex.Expression
 import org.parceler.Parcels
 import java.util.regex.Pattern
 import kotlin.concurrent.thread
+import com.dacosys.imageControl.network.common.ProgressStatus as IcProgressStatus
 
 class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener,
     Rfid.RfidDeviceListener, SwipeRefreshLayout.OnRefreshListener,
@@ -95,7 +101,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
     }
 
     private fun destroyLocals() {
-        adapter?.refreshListeners(null, null)
+        adapter?.refreshListeners()
         progressDialog?.dismiss()
         progressDialog = null
     }
@@ -118,7 +124,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
         if (taskStatus == ProgressStatus.crashed.id || taskStatus == ProgressStatus.canceled.id) {
             saving = false
-            makeText(binding.root, msg, SnackBarType.ERROR)
+            makeText(binding.root, msg, ERROR)
         }
     }
 
@@ -159,7 +165,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
             next()
         } else if (taskStatus == ProgressStatus.crashed.id || taskStatus == ProgressStatus.canceled.id) {
-            makeText(binding.root, msg, SnackBarType.ERROR)
+            makeText(binding.root, msg, ERROR)
         }
     }
 
@@ -179,7 +185,36 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         }
     }
 
-    fun onSyncTaskProgress(it: SyncProgress) {
+    private fun onUploadImagesProgress(it: UploadImagesProgress) {
+        if (!::binding.isInitialized || isFinishing || isDestroyed) return
+
+        val result: IcProgressStatus = it.result
+        val msg: String = it.msg
+        val completed = it.completedTask
+        val total = it.totalTask
+
+        when (result.id) {
+            ProgressStatus.starting.id, ProgressStatus.success.id, ProgressStatus.running.id -> {
+                showProgressDialog(
+                    title = getString(R.string.uploading_images),
+                    msg = msg,
+                    status = result.id,
+                    progress = completed,
+                    total = total
+                )
+            }
+
+            ProgressStatus.crashed.id, ProgressStatus.canceled.id -> {
+                makeText(this, msg, ERROR)
+            }
+
+            ProgressStatus.finished.id -> {
+                makeText(this, getString(R.string.upload_images_success), SUCCESS)
+            }
+        }
+    }
+
+    private fun onSyncTaskProgress(it: SyncProgress) {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
 
         val totalTask: Int = it.totalTask
@@ -218,7 +253,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             ProgressStatus.canceled,
             -> {
                 closeKeyboard(this)
-                makeText(binding.root, msg, SnackBarType.ERROR)
+                makeText(binding.root, msg, ERROR)
                 ErrorLog.writeLog(
                     this, this::class.java.simpleName, "$progressStatusDesc: $registryDesc ${
                         Statics.getPercentage(completedTask, totalTask)
@@ -344,6 +379,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
         saveViewModel.saveProgress.observe(this) { if (it != null) onSaveProgress(it) }
         syncViewModel.syncUploadProgress.observe(this) { if (it != null) onSyncTaskProgress(it) }
+        syncViewModel.uploadImagesProgress.observe(this) { if (it != null) onUploadImagesProgress(it) }
 
         if (savedInstanceState != null) {
             loadBundleValues(savedInstanceState)
@@ -456,6 +492,13 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         val contents = it.currentRouteProcessContent
         val level = it.level
 
+        fillAdapter(contents)
+
+        // Agrego el paso que estoy procesando
+        backLevelSteps.add(level)
+    }
+
+    private fun fillAdapter(contents: ArrayList<RouteProcessContent>) {
         runOnUiThread {
             if (adapter != null) {
                 // Si el adapter es NULL es porque aún no fue creado.
@@ -489,14 +532,14 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
                 next()
             }, 200)
         }
-
-        // Agrego el paso que estoy procesando
-        backLevelSteps.add(level)
     }
 
     private fun refreshAdapterListeners() {
-        adapter?.refreshListeners(this, this)
-        adapter?.refreshUiEventListener(this)
+        adapter?.refreshListeners(
+            checkedChangedListener = this,
+            dataSetChangedListener = this
+        )
+        adapter?.refreshUiEventListener(uiEventListener = this)
     }
 
     private fun initRoute() {
@@ -971,7 +1014,9 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
                 routeProcessId = routeProcessId,
                 level = level,
                 rpContArray = rpcArray
-            ) { onGetContentProcess(it) }
+            ) {
+                onGetContentProcess(it)
+            }
         } catch (ex: Exception) {
             ex.printStackTrace()
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
@@ -1051,7 +1096,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             makeText(
                 binding.root,
                 getContext().getString(R.string.error_updating_registered_data),
-                SnackBarType.ERROR
+                ERROR
             )
         }
 
@@ -1102,7 +1147,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             makeText(
                 binding.root,
                 getContext().getString(R.string.you_do_not_have_permission_to_enter_collected_data_again),
-                SnackBarType.ERROR
+                ERROR
             )
         }
     }
@@ -1241,10 +1286,13 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
         thread {
             val saveRouteProcess = SaveRouteProcess()
-            saveRouteProcess.addParams(routeProcess = rp,
+            saveRouteProcess.addParams(
+                routeProcess = rp,
                 allRouteProcessContent = rpcArray,
                 onSaveProgress = { saveViewModel.setSaveProgress(it) },
-                onSyncProgress = { syncViewModel.setSyncUploadProgress(it) })
+                onSyncProgress = { syncViewModel.setSyncUploadProgress(it) },
+                onUploadImageProgress = { syncViewModel.setUploadImagesProgress(it) },
+            )
             saveRouteProcess.execute()
         }
     }
@@ -1482,7 +1530,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             makeText(
                 binding.root,
                 getContext().getString(R.string.route_design_error),
-                SnackBarType.ERROR
+                ERROR
             )
             return
         }
@@ -1492,7 +1540,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             makeText(
                 binding.root,
                 getContext().getString(R.string.invalid_value_does_not_allow_to_continue),
-                SnackBarType.ERROR
+                ERROR
             )
             return
         }
@@ -1504,7 +1552,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             makeText(
                 binding.root,
                 getContext().getString(R.string.value_does_not_allow_to_continue),
-                SnackBarType.ERROR
+                ERROR
             )
             return
         }
@@ -1636,7 +1684,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
                         makeText(
                             binding.root,
                             getContext().getString(R.string.value_does_not_allow_to_continue),
-                            SnackBarType.ERROR
+                            ERROR
                         )
                         return
                     }
@@ -1664,7 +1712,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             // Nada que hacer, volver
             if (scannedCode.trim().isEmpty()) {
                 val res = this.getString(R.string.invalid_code)
-                makeText(binding.root, res, SnackBarType.ERROR)
+                makeText(binding.root, res, ERROR)
                 Log.d(this::class.java.simpleName, res)
                 return
             }
@@ -1680,14 +1728,14 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
             if (sc.codeFound && sc.asset != null && sc.labelNbr == 0) {
                 val res = this.getString(R.string.report_code)
-                makeText(binding.root, res, SnackBarType.ERROR)
+                makeText(binding.root, res, ERROR)
                 Log.d(this::class.java.simpleName, res)
                 return
             }
 
             if (sc.codeFound && sc.asset != null && (sc.asset ?: return).labelNumber == null) {
                 val res = this.getString(R.string.no_printed_label)
-                makeText(binding.root, res, SnackBarType.ERROR)
+                makeText(binding.root, res, ERROR)
                 Log.d(this::class.java.simpleName, res)
                 return
             }
@@ -1696,7 +1744,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
                     ?: return).labelNumber != sc.labelNbr && sc.labelNbr != null)
             ) {
                 val res = this.getString(R.string.invalid_code)
-                makeText(binding.root, res, SnackBarType.ERROR)
+                makeText(binding.root, res, ERROR)
                 Log.d(this::class.java.simpleName, res)
                 return
             }
@@ -1723,7 +1771,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
                             ?: return@forEach).routeProcessStatusId == RouteProcessStatus.notProcessed.id
                     ) {
                         val res = this.getString(R.string.ok)
-                        makeText(binding.root, res, SnackBarType.SUCCESS)
+                        makeText(binding.root, res, SUCCESS)
                         Log.d(this::class.java.simpleName, res)
                         it
                     } else {
@@ -1743,7 +1791,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             return
         } catch (ex: Exception) {
             ex.printStackTrace()
-            makeText(binding.root, ex.message.toString(), SnackBarType.ERROR)
+            makeText(binding.root, ex.message.toString(), ERROR)
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
             return
         } finally {
@@ -1919,7 +1967,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
                     makeText(
                         binding.root,
                         getString(R.string.rfid_connected),
-                        SnackBarType.SUCCESS
+                        SUCCESS
                     )
                 }
 
@@ -1952,6 +2000,15 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
     }
 
     override fun onDataSetChanged() {
+        showListOrEmptyListMessage()
+    }
+
+    private fun showListOrEmptyListMessage() {
+        runOnUiThread {
+            val isEmpty = (adapter?.itemCount ?: 0) == 0
+            binding.emptyTextView.visibility = if (isEmpty) VISIBLE else GONE
+            binding.recyclerView.visibility = if (isEmpty) GONE else VISIBLE
+        }
     }
 
     override fun onCheckedChanged(isChecked: Boolean, pos: Int) {

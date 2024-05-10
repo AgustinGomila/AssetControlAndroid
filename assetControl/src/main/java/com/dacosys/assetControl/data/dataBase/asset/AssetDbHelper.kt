@@ -1332,11 +1332,16 @@ class AssetDbHelper {
             }
         }
 
-// region TABLA E IDS TEMPORALES
+    // region TABLA E IDS TEMPORALES
+    /**
+     * Funciones que guardan y recuperan ID entre actividades
+     * y, cuando se pasa un objeto demasiado grande, evitar el error:
+     *      "FAILED BINDER TRANSACTION !!!"
+     */
 
-    // Funciones que guardan y recuperan ID entre actividades
-// y, cuando se pasa un objeto demasiado grande, evitar el error:
-// "FAILED BINDER TRANSACTION !!!"
+    /**
+     * Create temp table
+     */
     private fun createTempTable() {
         val allCommands: ArrayList<String> = ArrayList()
         allCommands.add(CREATE_TEMP_TABLE)
@@ -1439,7 +1444,8 @@ class AssetDbHelper {
             sqLiteDatabase.endTransaction()
         }
     }
-// endregion TABLA E IDS TEMPORALES
+
+    // endregion TABLA E IDS TEMPORALES
 
     private val basicSelect = "SELECT " +
             TABLE_NAME + "." + ASSET_ID + "," +

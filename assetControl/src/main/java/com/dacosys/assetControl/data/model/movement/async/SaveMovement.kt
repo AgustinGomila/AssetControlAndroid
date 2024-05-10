@@ -12,11 +12,13 @@ import com.dacosys.assetControl.data.model.common.SaveProgress
 import com.dacosys.assetControl.data.model.movement.WarehouseMovementContent
 import com.dacosys.assetControl.data.model.movement.WarehouseMovementContentStatus
 import com.dacosys.assetControl.data.model.table.Table
+import com.dacosys.assetControl.network.sync.SyncProgress
 import com.dacosys.assetControl.network.sync.SyncRegistryType
 import com.dacosys.assetControl.network.sync.SyncUpload
 import com.dacosys.assetControl.network.utils.Connection.Companion.autoSend
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.imageControl.network.upload.UploadImagesProgress
 import com.dacosys.imageControl.room.database.IcDatabase
 import kotlinx.coroutines.*
 
@@ -26,17 +28,23 @@ class SaveMovement {
     private var obs: String = ""
     private var collectorMovementId: Long? = null
     private var onProgress: (SaveProgress) -> Unit = {}
+    private var onSyncProgress: (SyncProgress) -> Unit = {}
+    private var onUploadImageProgress: (UploadImagesProgress) -> Unit = {}
 
     fun addParams(
         destWarehouseAreaId: Long,
         obs: String,
-        allMovementContent: ArrayList<WarehouseMovementContent>,
+        movementContents: ArrayList<WarehouseMovementContent>,
         onProgress: (SaveProgress) -> Unit = {},
+        onSyncProgress: (SyncProgress) -> Unit = {},
+        onUploadImageProgress: (UploadImagesProgress) -> Unit = {},
     ) {
-        this.onProgress = onProgress
         this.destWarehouseAreaId = destWarehouseAreaId
         this.obs = obs
-        this.allMovementContent = allMovementContent
+        this.allMovementContent = movementContents
+        this.onProgress = onProgress
+        this.onSyncProgress = onSyncProgress
+        this.onUploadImageProgress = onUploadImageProgress
     }
 
     private val scope = CoroutineScope(Job() + Dispatchers.IO)
@@ -58,8 +66,11 @@ class SaveMovement {
         }
 
         if (result && autoSend()) {
-            // Por el momento no se están escuchando los eventos de sincroinización
-            SyncUpload(SyncRegistryType.WarehouseMovement)
+            SyncUpload(
+                registryType = SyncRegistryType.WarehouseMovement,
+                onSyncTaskProgress = { onSyncProgress.invoke(it) },
+                onUploadImageProgress = { onUploadImageProgress.invoke(it) },
+            )
         }
     }
 
@@ -84,8 +95,8 @@ class SaveMovement {
             val assetInMovementList: ArrayList<WarehouseMovementContent> = ArrayList()
 
             // Activos para dar de alta. Aquellos activos que ya pertenecen
-            // al área de destino pero se encuentran extraviados no forman parte
-            // del contenido del movimiento pero vuelve a estar En Inventario
+            // al área de destino, pero se encuentran extraviados no forman parte
+            // del contenido del movimiento, pero vuelve a estar En Inventario
             val assetFoundedList: ArrayList<WarehouseMovementContent> = ArrayList()
 
             var partialCount = 0
@@ -130,7 +141,7 @@ class SaveMovement {
                 warehouseAreaId = destWarehouseAreaId!!, assets = assetFoundedList
             )
 
-            // Hacer los movimientos y los cambios de estados de los activos sólo
+            // Hacer los movimientos y los cambios de estados de los activos solo
             // cuando el movimiento está completada
             if (assetInMovementList.size > 0) {
 
@@ -139,7 +150,7 @@ class SaveMovement {
                 val wmContDbHelper = WarehouseMovementContentDbHelper()
 
                 try {
-                    // Create a Array List with the differents
+                    // Create an Array List with the different
                     // Origin Warehouse Areas to select the number of movements to do
                     val waIdList = ArrayList<Long>()
 

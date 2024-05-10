@@ -14,6 +14,7 @@ import com.dacosys.assetControl.network.sync.SyncUpload
 import com.dacosys.assetControl.network.utils.Connection.Companion.autoSend
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.imageControl.network.upload.UploadImagesProgress
 import kotlinx.coroutines.*
 
 class SaveRouteProcess {
@@ -21,17 +22,20 @@ class SaveRouteProcess {
     private lateinit var routeProcess: RouteProcess
     private var onSaveProgress: (SaveProgress) -> Unit = {}
     private var onSyncProgress: (SyncProgress) -> Unit = {}
+    private var onUploadImageProgress: (UploadImagesProgress) -> Unit = {}
 
     fun addParams(
         routeProcess: RouteProcess,
         allRouteProcessContent: ArrayList<RouteProcessContent>,
         onSaveProgress: (SaveProgress) -> Unit = {},
         onSyncProgress: (SyncProgress) -> Unit = {},
+        onUploadImageProgress: (UploadImagesProgress) -> Unit = {},
     ) {
         this.routeProcess = routeProcess
         this.allRouteProcessContent = allRouteProcessContent
         this.onSaveProgress = onSaveProgress
         this.onSyncProgress = onSyncProgress
+        this.onUploadImageProgress = onUploadImageProgress
     }
 
     private val scope = CoroutineScope(Job() + Dispatchers.IO)
@@ -56,8 +60,10 @@ class SaveRouteProcess {
             routeProcess.completed = true
             if (routeProcess.saveChanges()) {
                 if (autoSend()) {
-                    SyncUpload(registryType = SyncRegistryType.RouteProcess,
-                        onSyncTaskProgress = { onSyncProgress.invoke(it) })
+                    SyncUpload(
+                        registryType = SyncRegistryType.RouteProcess,
+                        onSyncTaskProgress = { onSyncProgress.invoke(it) },
+                        onUploadImageProgress = { onUploadImageProgress.invoke(it) })
                 } else {
                     onSyncProgress.invoke(
                         SyncProgress(progressStatus = ProgressStatus.bigFinished)

@@ -50,7 +50,7 @@ class RouteSelectActivity : AppCompatActivity(),
     }
 
     private fun destroyLocals() {
-        adapter?.refreshListeners(checkedChangedListener = null, dataSetChangedListener = null)
+        adapter?.refreshListeners()
         routeSelectFilterFragment?.onDestroy()
     }
 
@@ -400,14 +400,14 @@ class RouteSelectActivity : AppCompatActivity(),
         }
 
     private fun fillListView() {
-        fillRouteAdapter(
+        fillAdapter(
             routeArray = routeList,
             routeIdOnProcess = routeIdOnProcess,
             routeIdToSend = routeIdToSend
         )
     }
 
-    private fun fillRouteAdapter(
+    private fun fillAdapter(
         routeArray: ArrayList<Route>,
         routeIdOnProcess: ArrayList<Long>,
         routeIdToSend: ArrayList<Long>,
@@ -440,11 +440,7 @@ class RouteSelectActivity : AppCompatActivity(),
                     // las variables de esta actividad pueden
                     // tener valores antiguos en del adaptador.
 
-                    adapter?.refreshListeners(
-                        checkedChangedListener = null,
-                        dataSetChangedListener = this
-                    )
-
+                    adapter?.refreshListeners(dataSetChangedListener = this)
                     adapter?.refresh()
                 }
 
