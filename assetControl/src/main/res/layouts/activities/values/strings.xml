@@ -317,6 +317,9 @@
     <string name="do_you_want_to_delete_the_old_error_logs_question">¿Desea eliminar los registros de errores
         antiguos?
     </string>
+    <string name="do_you_want_to_restore_the_default_system_symbology_settings">¿Desea restablecer las simbologías predeterminadas del
+        sistema?
+    </string>
     <string name="do_you_want_to_delete_the_image_cache_question">¿Desea eliminar el caché de imágenes?</string>
     <string name="invalid_webservice_data">Datos del webservice inválidos</string>
     <string name="connection_error">Error de conexión</string>
@@ -1128,4 +1131,6 @@
     <string name="scan_or_manual_add_items">Escanear o ingresar ítems y\nubicaciones manualmente</string>
     <string name="current">Actual</string>
     <string name="fantasy_date">06/05/2024 10:38:20 p.m.</string>
+    <string name="restore_to_default">Restaurar predeterminadas</string>
+    <string name="default_values">Valores predeterminados</string>
 </resources>

@@ -7,6 +7,12 @@
             android:icon="@drawable/ic_qrcode"
             android:key="symbology"
             android:title="@string/supported_symbologies">
+        <Preference
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:icon="@drawable/ic_reset"
+                android:key="restore_to_default"
+                android:title="@string/restore_to_default"/>
         <SwitchPreference
                 android:defaultValue="false"
                 android:key="symbology_aztec"

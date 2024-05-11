@@ -28,6 +28,7 @@ import com.dacosys.assetControl.utils.settings.collectorType.CollectorTypePrefer
 import com.dacosys.assetControl.utils.settings.devices.DevicePreference
 import com.dacosys.assetControl.utils.settings.preferences.Preferences
 import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
+import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutBoolean
 import com.google.android.gms.common.api.CommonStatusCodes
 import java.util.regex.Matcher
 import java.util.regex.Pattern
@@ -73,7 +74,9 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
                 setRfidPref()
             }
 
-            "symbology" -> {}
+            "symbology" -> {
+                setSymbology()
+            }
 
             else -> {
                 setDevicePref()
@@ -100,6 +103,7 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
             getRfidSummary()
         }
 
+        setSymbology()
         setPrinterPref()
         setCollectorPref()
         setRfidPref()
@@ -190,6 +194,55 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
     ) { permissions ->
         if (permissions.values.all { it }) {
             setPrinter()
+        }
+    }
+
+    private fun setSymbology() {
+        val resetSymbologyPref: Preference? = findPreference("restore_to_default")
+        resetSymbologyPref?.onPreferenceClickListener = OnPreferenceClickListener {
+            val diaBox = askForResetSymbology()
+            diaBox.show()
+            true
+        }
+    }
+
+    private fun askForResetSymbology(): AlertDialog {
+        return AlertDialog.Builder(requireActivity())
+            //set message, title, and icon
+            .setTitle(getString(R.string.default_values))
+            .setMessage(getString(R.string.do_you_want_to_restore_the_default_system_symbology_settings))
+            .setPositiveButton(
+                getString(R.string.ok)
+            ) { dialog, _ ->
+                resetSymbology()
+                dialog.dismiss()
+            }.setNegativeButton(
+                R.string.cancel
+            ) { dialog, _ -> dialog.dismiss() }.create()
+    }
+
+    private fun resetSymbology() {
+        setDefaultSymbology()
+        updateSymbologySwitchPreferences()
+    }
+
+    private fun setDefaultSymbology() {
+        val allSymbology = PreferenceConfig.getSymbology()
+        for (s in allSymbology) {
+            prefsPutBoolean(s.key, s.defaultValue as Boolean)
+        }
+    }
+
+    private fun updateSymbologySwitchPreferences() {
+        val preferenceScreen = preferenceScreen
+        for (i in 0 until preferenceScreen.preferenceCount) {
+            val preference = preferenceScreen.getPreference(i)
+            if (preference is SwitchPreference) {
+                val allSymbology = PreferenceConfig.getSymbology()
+                val pref = allSymbology.firstOrNull { it.key == preference.key } ?: continue
+                val defaultValue = pref.defaultValue as Boolean
+                preference.isChecked = defaultValue
+            }
         }
     }
 
