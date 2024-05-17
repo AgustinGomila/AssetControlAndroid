@@ -1,0 +1,34 @@
+package com.dacosys.assetControl.data.room.dao.review
+
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.Query
+import com.dacosys.assetControl.data.room.entity.review.TempReviewContent
+import com.dacosys.assetControl.data.room.entity.review.TempReviewContent.Entry
+
+@Dao
+interface TempReviewContentDao {
+    @Query("SELECT MAX(${Entry.WAREHOUSE_MOVEMENT_CONTENT_ID}) $BASIC_FROM")
+    fun selectMaxId(): Long?
+
+    @Query("$BASIC_SELECT $BASIC_FROM WHERE ${Entry.TABLE_NAME}.${Entry.WAREHOUSE_MOVEMENT_ID} = :arId $BASIC_ORDER")
+    fun selectByTempIds(arId: Long): List<TempReviewContent>
+
+
+    @Insert
+    suspend fun insert(content: TempReviewContent)
+
+    @Insert
+    suspend fun insert(contents: List<TempReviewContent>)
+
+    @Query("DELETE FROM ${Entry.TABLE_NAME}")
+    suspend fun deleteAll()
+
+    companion object {
+        const val BASIC_SELECT = "SELECT ${Entry.TABLE_NAME}.*"
+        const val BASIC_FROM = "FROM ${Entry.TABLE_NAME}"
+        const val BASIC_ORDER = "ORDER BY ${Entry.TABLE_NAME}.${Entry.DESCRIPTION}, " +
+                "${Entry.TABLE_NAME}.${Entry.CODE}, " +
+                "${Entry.TABLE_NAME}.${Entry.ASSET_ID}"
+    }
+}

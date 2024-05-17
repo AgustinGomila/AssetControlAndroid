@@ -30,12 +30,12 @@ import androidx.recyclerview.widget.RecyclerView.*
 import com.dacosys.assetControl.AssetControlApp.Companion.currentUser
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.model.asset.Asset
-import com.dacosys.assetControl.data.model.asset.AssetStatus
-import com.dacosys.assetControl.data.model.asset.OwnershipStatus
-import com.dacosys.assetControl.data.model.table.Table
-import com.dacosys.assetControl.data.model.user.User
-import com.dacosys.assetControl.data.model.user.permission.PermissionEntry
+import com.dacosys.assetControl.data.enums.asset.AssetStatus
+import com.dacosys.assetControl.data.enums.asset.OwnershipStatus
+import com.dacosys.assetControl.data.enums.common.Table
+import com.dacosys.assetControl.data.enums.permission.PermissionEntry
+import com.dacosys.assetControl.data.room.entity.asset.Asset
+import com.dacosys.assetControl.data.room.entity.user.User
 import com.dacosys.assetControl.databinding.AssetRowBinding
 import com.dacosys.assetControl.databinding.AssetRowExpandedBinding
 import com.dacosys.assetControl.ui.adapters.interfaces.Interfaces.*
@@ -189,9 +189,9 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
                 PAYLOADS.CHECKBOX_STATE -> {
                     val asset = getItem(position)
                     if (position == currentIndex)
-                        (holder as SelectedViewHolder).bindCheckBoxState(checkedIdArray.contains(asset.assetId))
+                        (holder as SelectedViewHolder).bindCheckBoxState(checkedIdArray.contains(asset.id))
                     else
-                        (holder as UnselectedViewHolder).bindCheckBoxState(checkedIdArray.contains(asset.assetId))
+                        (holder as UnselectedViewHolder).bindCheckBoxState(checkedIdArray.contains(asset.id))
                 }
 
                 PAYLOADS.IMAGE_VISIBILITY -> {
@@ -199,13 +199,13 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
                     if (position == currentIndex) {
                         getImagesThumbs(this, (holder as SelectedViewHolder).icHolder, asset)
                         holder.bindImageVisibility(
-                            imageVisibility = imageVisibility(asset.assetId),
+                            imageVisibility = imageVisibility(asset.id),
                             changingState = true
                         )
                     } else {
                         getImagesThumbs(this, (holder as UnselectedViewHolder).icHolder, asset)
                         holder.bindImageVisibility(
-                            imageVisibility = imageVisibility(asset.assetId),
+                            imageVisibility = imageVisibility(asset.id),
                             changingState = true
                         )
                     }
@@ -274,7 +274,7 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
         holder.bind(
             asset = asset,
             checkBoxVisibility = if (showCheckBoxes) VISIBLE else GONE,
-            imageVisibility = imageVisibility(asset.assetId)
+            imageVisibility = imageVisibility(asset.id)
         )
 
         holder.itemView.background.colorFilter = BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
@@ -306,7 +306,7 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
         holder.bind(
             asset = asset,
             checkBoxVisibility = if (showCheckBoxes) VISIBLE else GONE,
-            imageVisibility = imageVisibility(asset.assetId)
+            imageVisibility = imageVisibility(asset.id)
         )
 
         holder.itemView.background.colorFilter = null
@@ -327,7 +327,7 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
         albumImageView.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_DOWN) {
                 albumViewRequiredListener?.onAlbumViewRequired(
-                    tableId = Table.asset.tableId, itemId = asset.assetId
+                    tableId = Table.asset.id, itemId = asset.id
                 )
             }
             true
@@ -339,8 +339,8 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
         addPhotoImageView.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_DOWN) {
                 addPhotoRequiredListener?.onAddPhotoRequired(
-                    tableId = Table.asset.tableId,
-                    itemId = asset.assetId,
+                    tableId = Table.asset.id,
+                    itemId = asset.id,
                     description = asset.description,
                     obs = "${getContext().getString(R.string.user)}: ${currentUser()?.name}"
                 )
@@ -361,7 +361,7 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
         editImageView.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_DOWN) {
                 editAssetRequiredListener?.onEditAssetRequired(
-                    tableId = Table.asset.tableId, itemId = asset.assetId
+                    tableId = Table.asset.id, itemId = asset.id
                 )
             }
             true
@@ -411,15 +411,15 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
             val newState = !checkBox.isChecked
             if (newState) {
                 currentList.mapIndexed { pos, asset ->
-                    if (asset.assetId !in checkedIdArray) {
-                        checkedIdArray.add(asset.assetId)
+                    if (asset.id !in checkedIdArray) {
+                        checkedIdArray.add(asset.id)
                         notifyItemChanged(pos, PAYLOADS.CHECKBOX_STATE)
                     }
                 }
             } else {
                 currentList.mapIndexed { pos, asset ->
-                    if (asset.assetId in checkedIdArray) {
-                        checkedIdArray.remove(asset.assetId)
+                    if (asset.id in checkedIdArray) {
+                        checkedIdArray.remove(asset.id)
                         notifyItemChanged(pos, PAYLOADS.CHECKBOX_STATE)
                     }
                 }
@@ -433,7 +433,7 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
         // Important to remove previous checkedChangedListener before calling setChecked
         checkBox.setOnCheckedChangeListener(null)
 
-        checkBox.isChecked = checkedIdArray.contains(asset.assetId)
+        checkBox.isChecked = checkedIdArray.contains(asset.id)
         checkBox.isLongClickable = true
         checkBox.tag = position
 
@@ -523,7 +523,7 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
 
                         // Recuperamos el item seleccionado y la posición del scroll
                         if (firstVisible != null)
-                            scrollToPos(getIndexById(firstVisible?.assetId ?: -1), true)
+                            scrollToPos(getIndexById(firstVisible?.id ?: -1), true)
                         if (selected != null)
                             selectItem(selected, false)
                     }
@@ -535,21 +535,21 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
     private fun sortItems(originalList: MutableList<Asset>): ArrayList<Asset> {
         // Get all the parent groups
         val groups = originalList.sortedWith(
-            compareBy({ it.parentAssetId },
+            compareBy({ it.parentId },
                 { it.code },
                 { it.description },
                 { it.serialNumber },
                 { it.ean })
-        ).groupBy { it.parentAssetId }
+        ).groupBy { it.parentId }
 
         // Recursively get the children
         fun follow(asset: Asset): List<Asset> {
-            return listOf(asset) + (groups[asset.assetId] ?: emptyList()).flatMap(::follow)
+            return listOf(asset) + (groups[asset.id] ?: emptyList()).flatMap(::follow)
         }
 
         // Run the follow method on each of the roots
-        return originalList.map { it.parentAssetId }
-            .subtract(originalList.map { it.assetId }.toSet())
+        return originalList.map { it.parentId }
+            .subtract(originalList.map { it.id }.toSet())
             .flatMap { groups[it] ?: emptyList() }
             .flatMap(::follow) as ArrayList<Asset>
     }
@@ -597,27 +597,8 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
     fun updateAsset(asset: Asset, scrollToPos: Boolean = false) {
         val t = fullList.firstOrNull { it == asset } ?: return
 
-        t.assetId = asset.assetId
-        t.code = asset.code
-        t.description = asset.description
-        t.warehouseId = asset.warehouseId
-        t.warehouseAreaId = asset.warehouseAreaId
-        t.active = asset.active
-        t.ownershipStatusId = asset.ownershipStatusId
-        t.assetStatusId = asset.assetStatusId
-        t.missingDate = asset.missingDate
-        t.itemCategoryId = asset.itemCategoryId
-        t.transferred = asset.transferred
-        t.originalWarehouseId = asset.originalWarehouseId
-        t.originalWarehouseAreaId = asset.originalWarehouseAreaId
-        t.labelNumber = asset.labelNumber
-        t.manufacturer = asset.manufacturer
-        t.model = asset.model
-        t.serialNumber = asset.serialNumber
-        t.assetConditionId = asset.assetConditionId
-        t.parentAssetId = asset.parentAssetId
-        t.ean = asset.ean
-        t.lastAssetReviewDate = asset.lastAssetReviewDate
+        val index = fullList.indexOf(t)
+        if (index != -1) fullList[index] = asset
 
         submitList(fullList) {
             run {
@@ -706,7 +687,7 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
     }
 
     fun getIndexById(id: Long): Int {
-        return currentList.indexOfFirst { it.assetId == id }
+        return currentList.indexOfFirst { it.id == id }
     }
 
     private fun getIndex(asset: Asset): Int {
@@ -714,7 +695,7 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
     }
 
     private fun getAssetById(id: Long): Asset? {
-        return fullList.firstOrNull { it.assetId == id }
+        return fullList.firstOrNull { it.id == id }
     }
 
     fun getAllChecked(): ArrayList<Asset> {
@@ -736,13 +717,13 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
         get() = itemCount
 
     val totalOnInventory: Int
-        get() = fullList.count { it.assetStatusId == AssetStatus.onInventory.id }
+        get() = fullList.count { it.status == AssetStatus.onInventory.id }
 
     val totalMissing: Int
-        get() = fullList.count { it.assetStatusId == AssetStatus.missing.id }
+        get() = fullList.count { it.status == AssetStatus.missing.id }
 
     val totalRemoved: Int
-        get() = fullList.count { it.assetStatusId == AssetStatus.removed.id }
+        get() = fullList.count { it.status == AssetStatus.removed.id }
 
     fun firstVisiblePos(): Int {
         val layoutManager = recyclerView.layoutManager as LinearLayoutManager
@@ -750,9 +731,9 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
     }
 
     fun setChecked(asset: Asset, isChecked: Boolean, suspendRefresh: Boolean = false) {
-        val pos = getIndexById(asset.assetId)
-        checkedIdArray.remove(asset.assetId)
-        if (isChecked) checkedIdArray.add(asset.assetId)
+        val pos = getIndexById(asset.id)
+        checkedIdArray.remove(asset.id)
+        if (isChecked) checkedIdArray.add(asset.id)
 
         // Notificamos al Listener superior
         if (!suspendRefresh) checkedChangedListener?.onCheckedChanged(isChecked, pos)
@@ -770,7 +751,7 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
         visibleStatus.remove(status)
 
         // Quitamos los ítems con el estado seleccionado de la lista marcados.
-        val uncheckedItems = ArrayList(fullList.mapNotNull { if (it.assetStatus == status) it.assetId else null })
+        val uncheckedItems = ArrayList(fullList.mapNotNull { if (it.assetStatus == status) it.id else null })
         checkedIdArray.removeAll(uncheckedItems.toSet())
 
         refreshFilter()
@@ -819,7 +800,7 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
 
             binding.descriptionAutoSize.text = asset.description
             binding.code.text = asset.code
-            binding.assetStatus.text = AssetStatus.getById(asset.assetStatusId)?.description ?: ""
+            binding.assetStatus.text = AssetStatus.getById(asset.status).description
 
             // region Manufacturer
             val manufacturerStr = asset.manufacturer ?: ""
@@ -853,7 +834,7 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
 
             // region Category
             val categoryStr = asset.itemCategoryStr
-            val ownershipStr = OwnershipStatus.getById(asset.ownershipStatusId)?.description ?: ""
+            val ownershipStr = OwnershipStatus.getById(asset.ownershipStatus).description
 
             if (categoryStr.isEmpty() && ownershipStr.isEmpty()) {
                 binding.dividerInternal3.visibility = GONE
@@ -896,7 +877,7 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
 
             val backColor: Drawable
             val foreColor: Int
-            when (asset.assetStatusId) {
+            when (asset.status) {
                 AssetStatus.onInventory.id -> {
                     backColor = layoutOnInventory!!
                     foreColor = onInventorySelectedForeColor
@@ -982,7 +963,7 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
 
             binding.descriptionAutoSize.text = asset.description
             binding.code.text = asset.code
-            binding.assetStatus.text = AssetStatus.getById(asset.assetStatusId)?.description ?: ""
+            binding.assetStatus.text = AssetStatus.getById(asset.status).description
 
             val manufacturerStr = asset.manufacturer ?: ""
             val modelStr = asset.model ?: ""
@@ -1012,7 +993,7 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
             val foreColor: Int
             val titleForeColor: Int = darkslategray
 
-            when (asset.assetStatusId) {
+            when (asset.status) {
                 AssetStatus.onInventory.id -> {
                     backColor = layoutOnInventory!!
                     foreColor = onInventoryForeColor
@@ -1050,25 +1031,25 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
 
     private object AssetDiffUtilCallback : DiffUtil.ItemCallback<Asset>() {
         override fun areItemsTheSame(oldItem: Asset, newItem: Asset): Boolean {
-            return oldItem.assetId == newItem.assetId
+            return oldItem.id == newItem.id
         }
 
         override fun areContentsTheSame(oldItem: Asset, newItem: Asset): Boolean {
-            if (oldItem.assetId != newItem.assetId) return false
+            if (oldItem.id != newItem.id) return false
             if (oldItem.description != newItem.description) return false
             if (oldItem.ean != newItem.ean) return false
             if (oldItem.code != newItem.code) return false
             if (oldItem.active != newItem.active) return false
             if (oldItem.itemCategoryId != newItem.itemCategoryId) return false
-            if (oldItem.assetStatusId != newItem.assetStatusId) return false
-            if (oldItem.ownershipStatusId != newItem.ownershipStatusId) return false
+            if (oldItem.status != newItem.status) return false
+            if (oldItem.ownershipStatus != newItem.ownershipStatus) return false
             if (oldItem.warehouseId != newItem.warehouseId) return false
             if (oldItem.warehouseAreaId != newItem.warehouseAreaId) return false
             if (oldItem.serialNumber != newItem.serialNumber) return false
             if (oldItem.manufacturer != newItem.manufacturer) return false
             if (oldItem.model != newItem.model) return false
-            if (oldItem.parentAssetId != newItem.parentAssetId) return false
-            return oldItem.assetConditionId == newItem.assetConditionId
+            if (oldItem.parentId != newItem.parentId) return false
+            return oldItem.condition == newItem.condition
         }
     }
 
@@ -1164,8 +1145,8 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
                     ImageAdapter.getImages(
                         context = getContext(),
                         programData = ProgramData(
-                            programObjectId = Table.asset.tableId.toLong(),
-                            objId1 = asset.assetId.toString()
+                            programObjectId = Table.asset.id.toLong(),
+                            objId1 = asset.id.toString()
                         ),
                         onProgress = {
                             when (it.status) {
@@ -1174,13 +1155,13 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
                                 }
 
                                 GetImageStatus.NO_IMAGES -> {
-                                    idWithImage.remove(asset.assetId)
+                                    idWithImage.remove(asset.id)
                                     collapseImagePanel(holder)
                                 }
 
                                 GetImageStatus.IMAGE_BROKEN, GetImageStatus.NO_AVAILABLE, GetImageStatus.IMAGE_AVAILABLE -> {
-                                    if (!idWithImage.contains(asset.assetId)) {
-                                        idWithImage.add(asset.assetId)
+                                    if (!idWithImage.contains(asset.id)) {
+                                        idWithImage.add(asset.id)
                                     }
                                     val image = it.image
                                     if (image != null) showImagePanel(holder, image)

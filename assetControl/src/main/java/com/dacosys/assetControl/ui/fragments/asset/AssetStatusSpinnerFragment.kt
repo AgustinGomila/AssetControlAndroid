@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R.layout.custom_spinner_dropdown_item
-import com.dacosys.assetControl.data.model.asset.AssetStatus
+import com.dacosys.assetControl.data.enums.asset.AssetStatus
 import com.dacosys.assetControl.databinding.FragmentSpinnerBinding
 import com.dacosys.assetControl.ui.adapters.asset.AssetStatusAdapter
 import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelableArrayList
@@ -153,7 +153,7 @@ class AssetStatusSpinnerFragment : Fragment() {
 
     private fun fillAdapter() {
         oldPos = -1
-        allAssetStatus = AssetStatus.getAll()
+        allAssetStatus = ArrayList(AssetStatus.getAll())
 
         val spinnerArrayAdapter = AssetStatusAdapter(
             custom_spinner_dropdown_item,

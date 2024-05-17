@@ -17,10 +17,10 @@ class RouteProcessObject() : Parcelable {
     constructor(parcel: Parcel) : this() {
         userId = parcel.readLong()
         routeId = parcel.readLong()
-        routeProcessDate = parcel.readString() ?: ""
+        routeProcessDate = parcel.readString().orEmpty()
         completed = parcel.readInt()
         transfered = parcel.readInt()
-        transferedDate = parcel.readString() ?: ""
+        transferedDate = parcel.readString().orEmpty()
         routeProcessId = parcel.readLong()
         collectorRouteProcessId = parcel.readLong()
     }

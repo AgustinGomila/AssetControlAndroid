@@ -41,24 +41,22 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.dataBase.asset.AssetDbHelper
-import com.dacosys.assetControl.data.dataBase.location.WarehouseAreaDbHelper
-import com.dacosys.assetControl.data.dataBase.review.AssetReviewContentDbHelper
-import com.dacosys.assetControl.data.model.asset.Asset
-import com.dacosys.assetControl.data.model.asset.AssetCondition
-import com.dacosys.assetControl.data.model.asset.AssetStatus
-import com.dacosys.assetControl.data.model.asset.OwnershipStatus
-import com.dacosys.assetControl.data.model.common.SaveProgress
-import com.dacosys.assetControl.data.model.review.AssetReview
-import com.dacosys.assetControl.data.model.review.AssetReviewContent
-import com.dacosys.assetControl.data.model.review.AssetReviewContentStatus
-import com.dacosys.assetControl.data.model.review.AssetReviewStatus
-import com.dacosys.assetControl.data.model.review.async.SaveReview
-import com.dacosys.assetControl.data.model.review.async.StartReview
-import com.dacosys.assetControl.data.model.review.async.StartReviewProgress
-import com.dacosys.assetControl.data.model.status.ConfirmStatus
-import com.dacosys.assetControl.data.model.status.ConfirmStatus.CREATOR.confirm
-import com.dacosys.assetControl.data.model.status.ConfirmStatus.CREATOR.modify
+import com.dacosys.assetControl.data.async.review.SaveReview
+import com.dacosys.assetControl.data.async.review.StartReview
+import com.dacosys.assetControl.data.enums.asset.AssetCondition
+import com.dacosys.assetControl.data.enums.asset.AssetStatus
+import com.dacosys.assetControl.data.enums.asset.OwnershipStatus
+import com.dacosys.assetControl.data.enums.common.ConfirmStatus
+import com.dacosys.assetControl.data.enums.common.SaveProgress
+import com.dacosys.assetControl.data.enums.review.AssetReviewContentStatus
+import com.dacosys.assetControl.data.enums.review.AssetReviewStatus
+import com.dacosys.assetControl.data.enums.review.StartReviewProgress
+import com.dacosys.assetControl.data.room.entity.asset.Asset
+import com.dacosys.assetControl.data.room.entity.review.AssetReview
+import com.dacosys.assetControl.data.room.entity.review.AssetReviewContent
+import com.dacosys.assetControl.data.room.repository.asset.AssetRepository
+import com.dacosys.assetControl.data.room.repository.location.WarehouseAreaRepository
+import com.dacosys.assetControl.data.room.repository.review.TempReviewContentRepository
 import com.dacosys.assetControl.databinding.AssetReviewContentBottomPanelCollapsedBinding
 import com.dacosys.assetControl.databinding.ProgressBarDialogBinding
 import com.dacosys.assetControl.network.sync.SyncProgress
@@ -68,7 +66,7 @@ import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.ui.activities.asset.AssetCRUDActivity
 import com.dacosys.assetControl.ui.activities.asset.AssetDetailActivity
 import com.dacosys.assetControl.ui.activities.asset.AssetPrintLabelActivity
-import com.dacosys.assetControl.ui.activities.manteinance.AssetManteinanceConditionActivity
+import com.dacosys.assetControl.ui.activities.maintenance.AssetMaintenanceConditionActivity
 import com.dacosys.assetControl.ui.adapters.interfaces.Interfaces
 import com.dacosys.assetControl.ui.adapters.interfaces.Interfaces.AdapterProgress
 import com.dacosys.assetControl.ui.adapters.review.ArcRecyclerAdapter
@@ -143,7 +141,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private fun destroyLocals() {
         // Borramos los Ids temporales que se usaron en la actividad.
-        if (isFinishingByUser) AssetReviewContentDbHelper().deleteTemp()
+        if (isFinishingByUser) TempReviewContentRepository().deleteAll()
 
         adapter?.refreshListeners()
         adapter?.refreshImageControlListeners()
@@ -335,9 +333,9 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         // Guardamos la revisión en una tabla temporal.
         // Revisiones de miles de artículos no pueden pasarse en el intent.
-        AssetReviewContentDbHelper().insertTempList(
-            arId = assetReview?.collectorAssetReviewId ?: 0,
-            reviewList = adapter?.fullList ?: ArrayList<AssetReviewContent>()
+        TempReviewContentRepository().insert(
+            arId = assetReview?.id ?: 0,
+            contents = adapter?.fullList?.toList() ?: listOf()
         )
     }
 
@@ -381,7 +379,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         // Cargamos la revisión desde la tabla temporal
         completeList.clear()
-        val tempCont = AssetReviewContentDbHelper().selectByTempId(assetReview?.collectorAssetReviewId ?: 0)
+        val tempCont = ArrayList(TempReviewContentRepository().selectByTempId(assetReview?.id ?: 0))
         if (tempCont.any()) completeList = tempCont
 
         visibleStatusArray.clear()
@@ -408,11 +406,11 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
             Preference.assetReviewContentVisibleStatus.key,
             Preference.assetReviewContentVisibleStatus.defaultValue as ArrayList<String>
         )
-        if (set == null) set = AssetReviewContentStatus.getAllIdAsString().toSet()
+        if (set == null) set = AssetReviewContentStatus.getAll().map { it.id.toString() }.toSet()
 
         for (i in set) {
             val status = AssetReviewContentStatus.getById(i.toInt())
-            if (status != null && !visibleStatusArray.contains(status)) {
+            if (!visibleStatusArray.contains(status)) {
                 visibleStatusArray.add(status)
             }
         }
@@ -845,7 +843,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
             if (!rejectNewInstances) {
                 rejectNewInstances = true
 
-                val intent = Intent(this, AssetManteinanceConditionActivity::class.java)
+                val intent = Intent(this, AssetMaintenanceConditionActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
                 intent.putExtra("assetId", tempAssetId)
                 startActivity(intent)
@@ -867,17 +865,17 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
             // El activo es desconocido
             // Crear un activo temporal para mostrar los detalles
             tempAsset = Asset(
-                assetId = arc.assetId,
+                id = arc.assetId,
                 code = arc.code,
                 description = arc.description,
                 warehouseId = tempReview.warehouseId,
                 warehouseAreaId = tempReview.warehouseAreaId,
-                active = true,
+                active = 1,
                 ownershipStatus = OwnershipStatus.unknown.id,
                 status = AssetStatus.unknown.id,
                 missingDate = null,
                 itemCategoryId = 0,
-                transferred = false,
+                transferred = 0,
                 originalWarehouseId = 0,
                 originalWarehouseAreaId = 0,
                 labelNumber = null,
@@ -890,7 +888,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
                 lastAssetReviewDate = null
             )
         } else {
-            tempAsset = Asset(tempAssetId, false)
+            tempAsset = Asset(tempAssetId)
         }
 
         if (!rejectNewInstances) {
@@ -970,7 +968,8 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
                         ids.add(i.value)
                     }
 
-                    val a = AssetDbHelper().selectById(ids[0]) ?: return@registerForActivityResult
+                    val id = ids.first() ?: return@registerForActivityResult
+                    val a = AssetRepository().selectById(id) ?: return@registerForActivityResult
 
                     try {
                         scannerHandleScanCompleted(a.code, true)
@@ -999,9 +998,9 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
             // Guardamos la revisión en una tabla temporal.
             // Revisiones de miles de artículos no pueden pasarse en el intent.
-            AssetReviewContentDbHelper().insertTempList(
-                arId = assetReview?.collectorAssetReviewId ?: 0,
-                reviewList = adapter?.fullList ?: ArrayList<AssetReviewContent>()
+            TempReviewContentRepository().insert(
+                arId = assetReview?.id ?: 0,
+                contents = adapter?.fullList?.toList() ?: listOf()
             )
 
             val intent = Intent(this, ArcConfirmActivity::class.java)
@@ -1017,11 +1016,11 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
             try {
                 if (it?.resultCode == RESULT_OK && data != null) {
                     when (Parcels.unwrap<ConfirmStatus>(data.parcelable("confirmStatus"))) {
-                        modify -> {
+                        ConfirmStatus.modify -> {
                             assetReview?.obs = data.getStringExtra("obs") ?: ""
                         }
 
-                        confirm -> {
+                        ConfirmStatus.confirm -> {
                             val obs = data.getStringExtra("obs") ?: ""
                             val completed = data.getBooleanExtra("completed", true)
                             confirmAssetReview(obs, completed)
@@ -1376,8 +1375,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
                 searchWarehouseAreaId = true,
                 searchAssetCode = true,
                 searchAssetSerial = true,
-                searchAssetEan = true,
-                validateId = true
+                searchAssetEan = true
             )
 
             if (sc.warehouseArea != null) {
@@ -1437,7 +1435,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
                             adapter?.updateContent(
                                 assetId = arCont.assetId,
                                 contentStatusId = AssetReviewContentStatus.revised.id,
-                                assetStatusId = sc.asset?.assetStatusId ?: AssetStatus.unknown.id
+                                assetStatusId = sc.asset?.status ?: AssetStatus.unknown.id
                             )
                         }
 
@@ -1472,7 +1470,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
             //    El código no se encuentra en la base de datos
             //    O
             //    El activo existe pero está desactivado
-            if (allowUnknownCodes && (!sc.codeFound || sc.asset != null && sc.asset?.active != true)) {
+            if (allowUnknownCodes && (!sc.codeFound || sc.asset != null && sc.asset?.active != 1)) {
                 val tempReview = assetReview ?: return
 
                 /////////////////////////////////////////////////////////
@@ -1486,12 +1484,12 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
                 collectorContentId--
 
                 finalArc = AssetReviewContent(
-                    assetReviewId = tempReview.collectorAssetReviewId,
-                    assetReviewContentId = collectorContentId,
+                    assetReviewId = tempReview.id,
+                    id = collectorContentId,
                     assetId = unknownAssetId,
-                    assetCode = tempCode.uppercase(Locale.ROOT),
-                    assetDescription = getString(R.string.NO_DATA),
-                    qty = 1F,
+                    code = tempCode.uppercase(Locale.ROOT),
+                    description = getString(R.string.NO_DATA),
+                    qty = 1.0,
                     contentStatusId = AssetReviewContentStatus.unknown.id,
                     originWarehouseAreaId = 0L
                 )
@@ -1543,10 +1541,10 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
                 collectorContentId--
 
                 finalArc = AssetReviewContent(
-                    assetReviewId = tempReview.collectorAssetReviewId,
-                    assetReviewContentId = collectorContentId,
+                    assetReviewId = tempReview.id,
+                    id = collectorContentId,
                     asset = tempAsset,
-                    qty = 1F,
+                    qty = 1.0,
                     contentStatusId = contentStatusId,
                     originWarehouseAreaId = tempAsset.warehouseAreaId
                 )
@@ -1570,18 +1568,19 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private fun assetCrud(arc: AssetReviewContent) {
         val tempReview = assetReview ?: return
-        val tempAsset = Asset()
-
-        tempAsset.assetId = arc.assetId
-        tempAsset.code = arc.code
-        tempAsset.description = ""
-        tempAsset.originalWarehouseAreaId = tempReview.warehouseAreaId
-        tempAsset.originalWarehouseId = tempReview.warehouseId
-        tempAsset.warehouseAreaId = tempReview.warehouseAreaId
-        tempAsset.warehouseId = tempReview.warehouseId
-        tempAsset.active = true
-
-        tempAsset.setDataRead()
+        val tempAsset = Asset(
+            id = arc.assetId,
+            code = arc.code,
+            description = "",
+            ownershipStatus = OwnershipStatus.unknown.id,
+            warehouseAreaId = tempReview.warehouseAreaId,
+            warehouseId = tempReview.warehouseId,
+            status = AssetStatus.unknown.id,
+            itemCategoryId = 0,
+            originalWarehouseAreaId = tempReview.warehouseAreaId,
+            originalWarehouseId = tempReview.warehouseId,
+            active = 1
+        )
 
         if (!rejectNewInstances) {
             _fillAdapter = false // Para onResume al regresar de la actividad
@@ -1609,7 +1608,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
                         try {
                             runOnUiThread {
                                 arc.description = asset.description
-                                arc.assetId = asset.assetId
+                                arc.assetId = asset.id
                                 arc.code = asset.code
                                 arc.contentStatusId = AssetReviewContentStatus.newAsset.id
                             }
@@ -1778,7 +1777,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
             }
 
             menuItemRandomCode -> {
-                val allCodes = AssetDbHelper().selectAllCodes()
+                val allCodes = AssetRepository().selectAllCodes()
                 if (allCodes.any()) scannerCompleted(allCodes[Random().nextInt(allCodes.count())])
                 return super.onOptionsItemSelected(item)
             }
@@ -1789,14 +1788,14 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
             }
 
             menuItemRandomWa -> {
-                val allWa = WarehouseAreaDbHelper().select(true)
-                val waId = allWa[Random().nextInt(allWa.count())].warehouseAreaId
+                val allWa = WarehouseAreaRepository().select(true)
+                val waId = allWa[Random().nextInt(allWa.count())].id
                 if (allWa.any()) scannerCompleted("#WA#${String.format("%05d", waId)}#")
                 return super.onOptionsItemSelected(item)
             }
 
             menuItemRandomSerial -> {
-                val allSerials = AssetDbHelper().selectAllSerials()
+                val allSerials = AssetRepository().selectAllSerials()
                 if (allSerials.any()) scannerCompleted(allSerials[Random().nextInt(allSerials.count())])
                 return super.onOptionsItemSelected(item)
             }
@@ -1989,8 +1988,8 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
         val msg: String = it.msg
         val taskStatus: Int = it.taskStatus
         val arContArray: ArrayList<AssetReviewContent> = it.arContArray
-        val progress: Int? = it.progress
-        val total: Int? = it.total
+        val progress: Int = it.progress ?: 0
+        val total: Int = it.total ?: 0
 
         showProgressDialog(
             getContext().getString(R.string.loanding_review_), msg, taskStatus, progress, total
@@ -2065,12 +2064,14 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
         }
 
         if (allCodes.size <= 0) {
-            allCodes = AssetDbHelper().selectAllCodes()
+            allCodes = ArrayList(AssetRepository().selectAllCodes())
         }
 
         if (allCodesInLocation.size <= 0) {
-            allCodesInLocation = AssetDbHelper().selectAllCodesByWarehouseAreaId(
-                headerFragment?.warehouseArea?.warehouseAreaId ?: 0L
+            allCodesInLocation = ArrayList(
+                AssetRepository().selectAllCodesByWarehouseAreaId(
+                    headerFragment?.warehouseArea?.id ?: 0L
+                )
             )
         }
 
@@ -2146,7 +2147,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
         if (rejectNewInstances) return
         rejectNewInstances = true
 
-        val asset = AssetDbHelper().selectById(itemId)
+        val asset = AssetRepository().selectById(itemId)
 
         if (asset != null) {
             _fillAdapter = false // Para onResume al regresar de la actividad
@@ -2291,7 +2292,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
             try {
                 if (it?.resultCode == RESULT_OK && data != null) {
                     val assetId = adapter?.currentItem()?.assetId ?: return@registerForActivityResult
-                    val asset = AssetDbHelper().selectById(assetId)
+                    val asset = AssetRepository().selectById(assetId)
                     asset?.saveChanges()
                 }
             } catch (ex: Exception) {

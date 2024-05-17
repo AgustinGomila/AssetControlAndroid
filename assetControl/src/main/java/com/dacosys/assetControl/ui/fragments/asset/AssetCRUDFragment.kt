@@ -11,16 +11,21 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.dataBase.asset.AssetDbHelper
-import com.dacosys.assetControl.data.dataBase.category.ItemCategoryDbHelper
-import com.dacosys.assetControl.data.dataBase.location.WarehouseAreaDbHelper
-import com.dacosys.assetControl.data.dataBase.location.WarehouseDbHelper
-import com.dacosys.assetControl.data.model.asset.*
-import com.dacosys.assetControl.data.model.category.ItemCategory
-import com.dacosys.assetControl.data.model.common.CrudCompleted
-import com.dacosys.assetControl.data.model.location.WarehouseArea
-import com.dacosys.assetControl.data.model.user.User
-import com.dacosys.assetControl.data.model.user.permission.PermissionEntry
+import com.dacosys.assetControl.data.crud.asset.AssetCRUD
+import com.dacosys.assetControl.data.enums.asset.AssetCondition
+import com.dacosys.assetControl.data.enums.asset.AssetStatus
+import com.dacosys.assetControl.data.enums.asset.OwnershipStatus
+import com.dacosys.assetControl.data.enums.common.CrudCompleted
+import com.dacosys.assetControl.data.enums.permission.PermissionEntry
+import com.dacosys.assetControl.data.room.entity.asset.Asset
+import com.dacosys.assetControl.data.room.entity.category.ItemCategory
+import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
+import com.dacosys.assetControl.data.room.entity.user.User
+import com.dacosys.assetControl.data.room.repository.asset.AssetRepository
+import com.dacosys.assetControl.data.room.repository.category.ItemCategoryRepository
+import com.dacosys.assetControl.data.room.repository.location.WarehouseAreaRepository
+import com.dacosys.assetControl.data.room.repository.location.WarehouseRepository
+import com.dacosys.assetControl.data.webservice.asset.AssetCollectorObject
 import com.dacosys.assetControl.data.webservice.asset.AssetObject
 import com.dacosys.assetControl.databinding.AssetCrudFragmentBinding
 import com.dacosys.assetControl.ui.activities.category.ItemCategorySelectActivity
@@ -55,31 +60,28 @@ class AssetCRUDFragment : Fragment() {
         savedInstanceState.putParcelable("itemCategory", itemCategory)
         savedInstanceState.putParcelable("currWarehouseArea", currWarehouseArea)
         savedInstanceState.putParcelable("origWarehouseArea", origWarehouseArea)
-        savedInstanceState.putParcelable(
-            "assetStatus",
-            assetStatusSpinnerFragment?.selectedAssetStatus
-        )
+        savedInstanceState.putParcelable("assetStatus", assetStatusSpinnerFragment?.selectedAssetStatus)
         savedInstanceState.putBoolean("active", binding.activeCheckBox.isChecked)
         savedInstanceState.putString(
             "serialNumber",
-            binding.serialNumberEditText.text?.toString() ?: ""
+            binding.serialNumberEditText.text?.toString().orEmpty()
         )
         savedInstanceState.putString(
             "model",
-            binding.modelEditText.text?.toString() ?: ""
+            binding.modelEditText.text?.toString().orEmpty()
         )
         savedInstanceState.putString(
             "manufacturer",
-            binding.manufacturerEditText.text?.toString() ?: ""
+            binding.manufacturerEditText.text?.toString().orEmpty()
         )
-        savedInstanceState.putString("ean", binding.eanEditText.text?.toString() ?: "")
+        savedInstanceState.putString("ean", binding.eanEditText.text?.toString().orEmpty())
         savedInstanceState.putString(
             "code",
-            binding.codeEditText.text?.toString() ?: ""
+            binding.codeEditText.text?.toString().orEmpty()
         )
         savedInstanceState.putString(
             "description",
-            binding.descriptionEditText.text?.toString() ?: ""
+            binding.descriptionEditText.text?.toString().orEmpty()
         )
     }
 
@@ -254,7 +256,7 @@ class AssetCRUDFragment : Fragment() {
                     asset?.description,
                     TextView.BufferType.EDITABLE
                 )
-                binding.activeCheckBox.isChecked = asset?.active ?: true
+                binding.activeCheckBox.isChecked = asset?.active == 1
                 binding.codeEditText.setText(asset?.code, TextView.BufferType.EDITABLE)
                 binding.eanEditText.setText(asset?.ean, TextView.BufferType.EDITABLE)
                 binding.modelEditText.setText(asset?.model, TextView.BufferType.EDITABLE)
@@ -270,19 +272,19 @@ class AssetCRUDFragment : Fragment() {
             assetStatusSpinnerFragment?.selectedAssetStatus = asset?.assetStatus
             itemCategory =
                 if (asset?.itemCategoryId != null) {
-                    ItemCategoryDbHelper().selectById(asset?.itemCategoryId!!)
+                    ItemCategoryRepository().selectById(asset?.itemCategoryId!!)
                 } else {
                     null
                 }
             currWarehouseArea =
                 if (asset?.warehouseAreaId != null) {
-                    WarehouseAreaDbHelper().selectById(asset?.warehouseAreaId!!)
+                    WarehouseAreaRepository().selectById(asset?.warehouseAreaId!!)
                 } else {
                     null
                 }
             origWarehouseArea =
                 if (asset?.warehouseAreaId != null) {
-                    WarehouseAreaDbHelper().selectById(asset?.originalWarehouseAreaId!!)
+                    WarehouseAreaRepository().selectById(asset?.originalWarehouseAreaId!!)
                 } else {
                     null
                 }
@@ -378,10 +380,10 @@ class AssetCRUDFragment : Fragment() {
         var assetId = 0L
         // Existing asset or not
         if (asset != null) {
-            assetId = asset!!.assetId
+            assetId = asset!!.id
         }
 
-        if (AssetDbHelper().codeExists(
+        if (AssetRepository().codeExists(
                 binding.codeEditText.text.trim().toString(),
                 assetId
             )
@@ -469,7 +471,7 @@ class AssetCRUDFragment : Fragment() {
 
             updateAsset()
             if (asset != null) {
-                val tempAsset = com.dacosys.assetControl.data.webservice.asset.AssetCollectorObject(asset ?: return)
+                val tempAsset = AssetCollectorObject(asset ?: return)
                 val updateAsset = AssetCRUD.AssetUpdate()
                 updateAsset.addParams(callback, tempAsset)
                 updateAsset.execute()
@@ -478,26 +480,23 @@ class AssetCRUDFragment : Fragment() {
     }
 
     private fun updateAsset() {
-        if (asset == null ||
-            itemCategory == null ||
-            currWarehouseArea == null ||
-            origWarehouseArea == null ||
-            assetStatusSpinnerFragment?.selectedAssetStatus == null
-        ) {
-            return
-        }
+        val a = asset ?: return
+        val cat = itemCategory ?: return
+        val currWa = currWarehouseArea ?: return
+        val origWa = origWarehouseArea ?: return
+        val status = assetStatusSpinnerFragment?.selectedAssetStatus ?: return
 
         // Create CurrentAsset Object
         // Main Information
-        asset?.description = binding.descriptionEditText.text.trim().toString()
-        asset?.code = binding.codeEditText.text.trim().toString()
-        asset?.itemCategoryId = itemCategory?.itemCategoryId ?: -1
+        a.description = binding.descriptionEditText.text.trim().toString()
+        a.code = binding.codeEditText.text.trim().toString()
+        a.itemCategoryId = cat.id
 
         //////////// Warehouse Area or Repairshop Area
-        val allW = WarehouseDbHelper().select(false)
+        val allW = WarehouseRepository().select(false)
         var isInWarehouse = false
         for (w in allW) {
-            if (asset?.warehouseId == w.warehouseId) {
+            if (a.warehouseId == w.id) {
                 isInWarehouse = true
                 break
             }
@@ -505,74 +504,50 @@ class AssetCRUDFragment : Fragment() {
 
         // Save only if the active is in a Warehouse (not if is in Repairshop)
         if (isInWarehouse) {
-            asset?.warehouseAreaId = currWarehouseArea?.warehouseAreaId ?: -1
-            asset?.warehouseId = currWarehouseArea?.warehouseId ?: -1
+            a.warehouseAreaId = currWa.id
+            a.warehouseId = currWa.warehouseId
         }
         ///////////////
 
-        asset?.originalWarehouseAreaId = origWarehouseArea?.warehouseAreaId ?: -1
-        asset?.originalWarehouseId = origWarehouseArea?.warehouseId ?: -1
+        a.originalWarehouseAreaId = origWa.id
+        a.originalWarehouseId = origWa.warehouseId
 
-        asset?.assetStatusId = assetStatusSpinnerFragment?.selectedAssetStatus?.id ?: -1
+        a.status = status.id
 
         // Secondary Information
-        asset?.serialNumber = binding.serialNumberEditText.text.trim().toString()
-        asset?.ean = binding.eanEditText.text.trim().toString()
-        asset?.active = binding.activeCheckBox.isChecked
+        a.serialNumber = binding.serialNumberEditText.text.trim().toString()
+        a.ean = binding.eanEditText.text.trim().toString()
+        a.active = if (binding.activeCheckBox.isChecked) 1 else 0
     }
 
     private fun createWsAsset(): AssetObject? {
-        if (itemCategory == null ||
-            currWarehouseArea == null ||
-            origWarehouseArea == null ||
-            assetStatusSpinnerFragment?.selectedAssetStatus == null
-        ) {
-            return null
-        }
+        val cat = itemCategory ?: return null
+        val currWa = currWarehouseArea ?: return null
+        val origWa = origWarehouseArea ?: return null
+        val status = assetStatusSpinnerFragment?.selectedAssetStatus ?: return null
 
-        val tempAsset = Asset()
-        tempAsset.setDataRead()
-
-        try {
-            //Create CurrentAsset Object
-            // Main Information
-            tempAsset.description =
-                binding.descriptionEditText.text.trim().toString()
-            tempAsset.code = binding.codeEditText.text.trim().toString()
-
-            tempAsset.itemCategoryId = (itemCategory ?: return null).itemCategoryId
-            tempAsset.parentAssetId = 0L
-            tempAsset.warehouseAreaId = (currWarehouseArea ?: return null).warehouseAreaId
-            tempAsset.warehouseId = (currWarehouseArea ?: return null).warehouseId
-            tempAsset.originalWarehouseAreaId = (origWarehouseArea ?: return null).warehouseAreaId
-            tempAsset.originalWarehouseId = (origWarehouseArea ?: return null).warehouseId
-            tempAsset.assetStatusId = assetStatusSpinnerFragment?.selectedAssetStatus?.id ?: -1
-            tempAsset.ownershipStatusId = OwnershipStatus.owned.id
-            tempAsset.active = binding.activeCheckBox.isChecked
-
-            // Secondary Information
-            tempAsset.manufacturer =
-                binding.manufacturerEditText.text.trim().toString()
-            tempAsset.model = binding.modelEditText.text.trim().toString()
-            tempAsset.serialNumber =
-                binding.serialNumberEditText.text.trim().toString()
-            tempAsset.assetConditionId = AssetCondition.good.id
-            tempAsset.ean = binding.eanEditText.text.trim().toString()
-
-            // Dates
-            tempAsset.missingDate = ""
-            tempAsset.lastAssetReviewDate = ""
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-            MakeText.makeText(
-                binding.root,
-                getString(R.string.error_creating_the_asset),
-                SnackBarType.ERROR
-            )
-            return null
-        }
-
-        return AssetObject(tempAsset)
+        val asset = Asset(
+            id = -1,
+            description = binding.descriptionEditText.text.trim().toString(),
+            code = binding.codeEditText.text.trim().toString(),
+            itemCategoryId = cat.id,
+            parentId = 0L,
+            warehouseAreaId = currWa.id,
+            warehouseId = currWa.warehouseId,
+            originalWarehouseAreaId = origWa.id,
+            originalWarehouseId = origWa.warehouseId,
+            status = status.id,
+            ownershipStatus = OwnershipStatus.owned.id,
+            active = if (binding.activeCheckBox.isChecked) 1 else 0,
+            manufacturer = binding.manufacturerEditText.text.trim().toString(),
+            model = binding.modelEditText.text.trim().toString(),
+            serialNumber = binding.serialNumberEditText.text.trim().toString(),
+            condition = AssetCondition.good.id,
+            ean = binding.eanEditText.text.trim().toString(),
+            missingDate = "",
+            lastAssetReviewDate = "",
+        )
+        return AssetObject(asset)
     }
 
     fun setCode(code: String) {

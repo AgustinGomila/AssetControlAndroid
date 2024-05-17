@@ -6,8 +6,8 @@ import android.os.Bundle
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.model.location.WarehouseArea
-import com.dacosys.assetControl.data.model.table.Table
+import com.dacosys.assetControl.data.enums.common.Table
+import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
 import com.dacosys.assetControl.databinding.WarehouseAreaDetailActivityBinding
 import com.dacosys.assetControl.ui.common.snackbar.MakeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
@@ -61,10 +61,10 @@ class WarehouseAreaDetailActivity : AppCompatActivity() {
 
         binding.showImagesButton.setOnClickListener { showImages() }
 
-        if (warehouseArea != null) {
-            binding.descriptionTextView.text = (warehouseArea ?: return).description
-            binding.warehouseStrTextView.text =
-                ((warehouseArea ?: return).warehouse ?: return).description
+        val wa = warehouseArea
+        if (wa != null) {
+            binding.descriptionTextView.text = wa.description
+            binding.warehouseStrTextView.text = wa.warehouseStr
         }
 
         setupUI(binding.root, this)
@@ -75,7 +75,7 @@ class WarehouseAreaDetailActivity : AppCompatActivity() {
             if (!rejectNewInstances) {
                 rejectNewInstances = true
                 WsFunction().documentContentGetBy12(
-                    programObjectId = Table.warehouseArea.tableId,
+                    programObjectId = Table.warehouseArea.id,
                     objectId1 = (warehouseArea ?: return).warehouseId.toString()
                 ) { it2 -> if (it2 != null) fillResults(it2) }
             }
@@ -107,8 +107,8 @@ class WarehouseAreaDetailActivity : AppCompatActivity() {
 
         val intent = Intent(baseContext, ImageControlGridActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-        intent.putExtra(ImageControlGridActivity.ARG_PROGRAM_OBJECT_ID, Table.warehouseArea.tableId.toLong())
-        intent.putExtra(ImageControlGridActivity.ARG_OBJECT_ID_1, (warehouseArea ?: return).warehouseAreaId.toString())
+        intent.putExtra(ImageControlGridActivity.ARG_PROGRAM_OBJECT_ID, Table.warehouseArea.id.toLong())
+        intent.putExtra(ImageControlGridActivity.ARG_OBJECT_ID_1, (warehouseArea ?: return).id.toString())
         intent.putExtra(ImageControlGridActivity.ARG_DOC_CONT_OBJ_ARRAY_LIST, ArrayList<DocumentContent>())
         startActivity(intent)
     }

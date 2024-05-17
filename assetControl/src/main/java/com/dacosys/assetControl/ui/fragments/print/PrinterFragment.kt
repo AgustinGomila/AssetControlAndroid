@@ -15,16 +15,16 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.dataBase.asset.AssetDbHelper
-import com.dacosys.assetControl.data.dataBase.barcode.BarcodeLabelCustomDbHelper
-import com.dacosys.assetControl.data.dataBase.location.WarehouseAreaDbHelper
-import com.dacosys.assetControl.data.model.asset.Asset
-import com.dacosys.assetControl.data.model.barcode.BarcodeLabelCustom
-import com.dacosys.assetControl.data.model.barcode.BarcodeLabelTarget
-import com.dacosys.assetControl.data.model.barcode.fields.AssetLabelField
-import com.dacosys.assetControl.data.model.barcode.fields.BarcodeLabel
-import com.dacosys.assetControl.data.model.barcode.fields.WarehouseAreaLabelField
-import com.dacosys.assetControl.data.model.location.WarehouseArea
+import com.dacosys.assetControl.data.enums.barcode.BarcodeLabelTarget
+import com.dacosys.assetControl.data.model.barcodeFields.AssetLabelField
+import com.dacosys.assetControl.data.model.barcodeFields.BarcodeLabel
+import com.dacosys.assetControl.data.model.barcodeFields.WarehouseAreaLabelField
+import com.dacosys.assetControl.data.room.entity.asset.Asset
+import com.dacosys.assetControl.data.room.entity.barcode.BarcodeLabelCustom
+import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
+import com.dacosys.assetControl.data.room.repository.asset.AssetRepository
+import com.dacosys.assetControl.data.room.repository.barcode.BarcodeLabelCustomRepository
+import com.dacosys.assetControl.data.room.repository.location.WarehouseAreaRepository
 import com.dacosys.assetControl.databinding.PrinterFragmentBinding
 import com.dacosys.assetControl.ui.activities.asset.AssetPrintLabelActivity
 import com.dacosys.assetControl.ui.activities.location.WarehouseAreaPrintLabelActivity
@@ -56,6 +56,8 @@ import com.google.android.material.textfield.TextInputLayout
 class PrinterFragment : Fragment(), CounterHandler.CounterListener {
     private var fragmentListener: FragmentListener? = null
     private var rejectNewInstances = false
+
+    private val barcodeRepository = BarcodeLabelCustomRepository()
 
     private var ch: CounterHandler? = null
 
@@ -111,12 +113,12 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
         if (barcodeLabelTarget == BarcodeLabelTarget.Asset) {
             prefsPutLong(
                 Preference.defaultBarcodeLabelCustomAsset.key,
-                barcodeLabelCustom?.barcodeLabelCustomId ?: 0L
+                barcodeLabelCustom?.id ?: 0L
             )
         } else if (barcodeLabelTarget == BarcodeLabelTarget.WarehouseArea) {
             prefsPutLong(
                 Preference.defaultBarcodeLabelCustomWa.key,
-                barcodeLabelCustom?.barcodeLabelCustomId ?: 0L
+                barcodeLabelCustom?.id ?: 0L
             )
         }
     }
@@ -168,10 +170,11 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
                 val blcId =
                     prefsGetLong(Preference.defaultBarcodeLabelCustomWa)
                 if (blcId > 0) {
-                    BarcodeLabelCustomDbHelper().selectById(blcId)
+                    barcodeRepository.selectById(blcId)
                 } else {
-                    BarcodeLabelCustomDbHelper().selectByBarcodeLabelTargetId(
-                        barcodeLabelTargetId = (barcodeLabelTarget ?: return).id,
+                    val targetId = barcodeLabelTarget?.id ?: return
+                    barcodeRepository.selectByBarcodeLabelTargetId(
+                        barcodeLabelTargetId = targetId,
                         onlyActive = true
                     ).firstOrNull()
                 }
@@ -181,10 +184,11 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
                 val blcId =
                     prefsGetLong(Preference.defaultBarcodeLabelCustomAsset)
                 if (blcId > 0) {
-                    BarcodeLabelCustomDbHelper().selectById(blcId)
+                    barcodeRepository.selectById(blcId)
                 } else {
-                    BarcodeLabelCustomDbHelper().selectByBarcodeLabelTargetId(
-                        barcodeLabelTargetId = (barcodeLabelTarget ?: return).id,
+                    val targetId = barcodeLabelTarget?.id ?: return
+                    barcodeRepository.selectByBarcodeLabelTargetId(
+                        barcodeLabelTargetId = targetId,
                         onlyActive = true
                     ).firstOrNull()
                 }
@@ -620,7 +624,7 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
         }
 
         val was: ArrayList<WarehouseArea> = ArrayList()
-        val waDb = WarehouseAreaDbHelper()
+        val waDb = WarehouseAreaRepository()
         for (id in waIdArray) {
             val a = waDb.selectById(id)
             if (a != null) {
@@ -641,7 +645,7 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
         }
 
         if (was.size == 1) {
-            if (was[0].warehouseAreaId < 0) {
+            if (was[0].id < 0) {
                 showSnackBar(
                     getString(R.string.the_selected_warehouse_area_was_not_uploaded_to_the_server_and_does_not_have_a_definitive_id),
                     SnackBarType.ERROR
@@ -651,7 +655,7 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
         }
 
         if (barcodeLabelCustom == null ||
-            (barcodeLabelCustom ?: return).barcodeLabelCustomId == 0L
+            (barcodeLabelCustom ?: return).id == 0L
         ) {
             showSnackBar(
                 getString(R.string.no_template_selected),
@@ -685,7 +689,7 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
         }
 
         val assets: ArrayList<Asset> = ArrayList()
-        val aDb = AssetDbHelper()
+        val aDb = AssetRepository()
         for (id in assetIdArray) {
             val a = aDb.selectById(id)
             if (a != null) {
@@ -706,7 +710,7 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
         }
 
         if (assets.size == 1) {
-            if (assets[0].assetId < 0) {
+            if (assets[0].id < 0) {
                 showSnackBar(
                     getString(R.string.the_selected_asset_was_not_uploaded_to_the_server_and_does_not_have_a_definitive_id),
                     SnackBarType.ERROR
@@ -716,7 +720,7 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
         }
 
         if (barcodeLabelCustom == null ||
-            (barcodeLabelCustom ?: return).barcodeLabelCustomId == 0L
+            (barcodeLabelCustom ?: return).id == 0L
         ) {
             showSnackBar(
                 getString(R.string.no_template_selected),

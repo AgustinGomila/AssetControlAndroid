@@ -12,7 +12,7 @@ class DataCollectionRuleObject() : Parcelable {
     constructor(parcel: Parcel) : this() {
         dataCollectionRuleId = parcel.readLong()
         active = parcel.readInt()
-        description = parcel.readString() ?: ""
+        description = parcel.readString().orEmpty()
     }
 
     fun getBySoapObject(so: SoapObject): DataCollectionRuleObject {

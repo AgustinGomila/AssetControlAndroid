@@ -19,12 +19,12 @@ class WarehouseMovementObject() : Parcelable {
 
     constructor(parcel: Parcel) : this() {
         warehouseMovementId = parcel.readLong()
-        warehouseMovementDate = parcel.readString() ?: ""
-        obs = parcel.readString() ?: ""
+        warehouseMovementDate = parcel.readString().orEmpty()
+        obs = parcel.readString().orEmpty()
         userId = parcel.readLong()
         origWarehouseAreaId = parcel.readLong()
         origWarehouseId = parcel.readLong()
-        transferedDate = parcel.readString() ?: ""
+        transferedDate = parcel.readString().orEmpty()
         destWarehouseAreaId = parcel.readLong()
         destWarehouseId = parcel.readLong()
         completed = parcel.readInt()

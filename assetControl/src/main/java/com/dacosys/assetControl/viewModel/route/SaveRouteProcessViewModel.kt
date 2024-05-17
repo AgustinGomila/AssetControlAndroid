@@ -2,7 +2,7 @@ package com.dacosys.assetControl.viewModel.route
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.dacosys.assetControl.data.model.common.SaveProgress
+import com.dacosys.assetControl.data.enums.common.SaveProgress
 
 class SaveRouteProcessViewModel : ViewModel() {
     val saveProgress: MutableLiveData<SaveProgress?> = MutableLiveData()

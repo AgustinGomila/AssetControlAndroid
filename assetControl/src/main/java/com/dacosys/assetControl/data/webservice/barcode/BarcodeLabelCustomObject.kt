@@ -2,7 +2,7 @@ package com.dacosys.assetControl.data.webservice.barcode
 
 import android.os.Parcel
 import android.os.Parcelable
-import com.dacosys.assetControl.data.model.barcode.BarcodeLabelCustom
+import com.dacosys.assetControl.data.room.entity.barcode.BarcodeLabelCustom
 import org.ksoap2.serialization.SoapObject
 
 class BarcodeLabelCustomObject() : Parcelable {
@@ -16,16 +16,16 @@ class BarcodeLabelCustomObject() : Parcelable {
         barcode_label_custom_id = parcel.readLong()
         barcode_label_target_id = parcel.readLong()
         active = parcel.readInt()
-        description = parcel.readString() ?: ""
-        template = parcel.readString() ?: ""
+        description = parcel.readString().orEmpty()
+        template = parcel.readString().orEmpty()
     }
 
     constructor(barcodeLabelCustom: BarcodeLabelCustom) : this() {
         // Main Information
         description = barcodeLabelCustom.description
-        barcode_label_custom_id = barcodeLabelCustom.barcodeLabelCustomId
-        barcode_label_target_id = barcodeLabelCustom.barcodeLabelTargetId ?: 0
-        active = if (barcodeLabelCustom.active) 1 else 0
+        barcode_label_custom_id = barcodeLabelCustom.id
+        barcode_label_target_id = barcodeLabelCustom.barcodeLabelTargetId
+        active = barcodeLabelCustom.active
         template = barcodeLabelCustom.template
     }
 

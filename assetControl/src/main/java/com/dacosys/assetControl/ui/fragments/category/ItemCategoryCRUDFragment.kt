@@ -11,12 +11,12 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.dataBase.category.ItemCategoryDbHelper
-import com.dacosys.assetControl.data.model.category.ItemCategory
-import com.dacosys.assetControl.data.model.category.ItemCategoryCRUD
-import com.dacosys.assetControl.data.model.common.CrudCompleted
-import com.dacosys.assetControl.data.model.user.User
-import com.dacosys.assetControl.data.model.user.permission.PermissionEntry
+import com.dacosys.assetControl.data.crud.category.ItemCategoryCRUD
+import com.dacosys.assetControl.data.enums.common.CrudCompleted
+import com.dacosys.assetControl.data.enums.permission.PermissionEntry
+import com.dacosys.assetControl.data.room.entity.category.ItemCategory
+import com.dacosys.assetControl.data.room.entity.user.User
+import com.dacosys.assetControl.data.room.repository.category.ItemCategoryRepository
 import com.dacosys.assetControl.data.webservice.category.ItemCategoryObject
 import com.dacosys.assetControl.databinding.ItemCategoryCrudFragmentBinding
 import com.dacosys.assetControl.ui.activities.category.ItemCategorySelectActivity
@@ -41,7 +41,7 @@ class ItemCategoryCRUDFragment : Fragment() {
         savedInstanceState.putParcelable("parentCategory", parentCategory)
         savedInstanceState.putString(
             "description",
-            binding.descriptionEditText.text?.toString() ?: ""
+            binding.descriptionEditText.text?.toString().orEmpty()
         )
         savedInstanceState.putBoolean("active", binding.activeCheckBox.isChecked)
     }
@@ -142,11 +142,11 @@ class ItemCategoryCRUDFragment : Fragment() {
                     itemCategory?.description ?: "",
                     TextView.BufferType.EDITABLE
                 )
-                binding.activeCheckBox.isChecked = itemCategory?.active ?: true
+                binding.activeCheckBox.isChecked = itemCategory?.active == 1
             }
             parentCategory =
                 if (itemCategory?.parentId != null && (itemCategory?.parentId ?: -1) > 0) {
-                    ItemCategoryDbHelper().selectById(itemCategory!!.parentId!!)
+                    ItemCategoryRepository().selectById(itemCategory!!.parentId)
                 } else {
                     null
                 }
@@ -210,11 +210,9 @@ class ItemCategoryCRUDFragment : Fragment() {
             }
 
             val tempItemCategory = createWsItemCategory()
-            if (tempItemCategory != null) {
-                val itemCategoryAdd = ItemCategoryCRUD.ItemCategoryAdd()
-                itemCategoryAdd.addParams(callback, tempItemCategory)
-                itemCategoryAdd.execute()
-            }
+            val itemCategoryAdd = ItemCategoryCRUD.ItemCategoryAdd()
+            itemCategoryAdd.addParams(callback, tempItemCategory)
+            itemCategoryAdd.execute()
         } else {
             if (!User.hasPermission(PermissionEntry.ModifyItemCategory)) {
                 MakeText.makeText(
@@ -244,30 +242,16 @@ class ItemCategoryCRUDFragment : Fragment() {
         // Create CurrentItemCategory Object
         // Main Information
         itemCategory?.description = binding.descriptionEditText.text.trim().toString()
-        itemCategory?.parentId = parentCategory?.itemCategoryId
-        itemCategory?.active = binding.activeCheckBox.isChecked
+        itemCategory?.parentId = parentCategory?.id ?: 0
+        itemCategory?.active = if (binding.activeCheckBox.isChecked) 1 else 0
     }
 
-    private fun createWsItemCategory(): ItemCategoryObject? {
-        val tempItemCategory = ItemCategory()
-        tempItemCategory.setDataRead()
-
-        try {
-            //Create CurrentItemCategory Object
-            // Main Information
-            tempItemCategory.description = binding.descriptionEditText.text.trim().toString()
-            tempItemCategory.parentId = parentCategory?.itemCategoryId
-            tempItemCategory.active = binding.activeCheckBox.isChecked
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-            MakeText.makeText(
-                binding.root,
-                getString(R.string.error_creating_the_category),
-                SnackBarType.ERROR
-            )
-            return null
-        }
-
+    private fun createWsItemCategory(): ItemCategoryObject {
+        val tempItemCategory = ItemCategory(
+            description = binding.descriptionEditText.text.trim().toString(),
+            parentId = parentCategory?.id ?: 0,
+            active = if (binding.activeCheckBox.isChecked) 1 else 0
+        )
         return ItemCategoryObject(tempItemCategory)
     }
 

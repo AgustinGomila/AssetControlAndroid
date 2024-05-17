@@ -29,7 +29,7 @@ class RfidType : Parcelable {
 
     constructor(parcel: Parcel) {
         id = parcel.readLong()
-        description = parcel.readString() ?: ""
+        description = parcel.readString().orEmpty()
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {

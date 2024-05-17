@@ -2,7 +2,7 @@ package com.dacosys.assetControl.data.webservice.category
 
 import android.os.Parcel
 import android.os.Parcelable
-import com.dacosys.assetControl.data.model.category.ItemCategory
+import com.dacosys.assetControl.data.room.entity.category.ItemCategory
 import org.ksoap2.serialization.SoapObject
 
 class ItemCategoryObject() : Parcelable {
@@ -16,16 +16,16 @@ class ItemCategoryObject() : Parcelable {
         item_category_id = parcel.readLong()
         parent_id = parcel.readLong()
         active = parcel.readInt()
-        description = parcel.readString() ?: ""
-        item_category_ext_id = parcel.readString() ?: ""
+        description = parcel.readString().orEmpty()
+        item_category_ext_id = parcel.readString().orEmpty()
     }
 
     constructor(itemCategory: ItemCategory) : this() {
         // Main Information
         description = itemCategory.description
-        item_category_id = itemCategory.itemCategoryId
-        parent_id = itemCategory.parentId ?: 0
-        active = if (itemCategory.active) 1 else 0
+        item_category_id = itemCategory.id
+        parent_id = itemCategory.parentId
+        active = itemCategory.active
         item_category_ext_id = ""
     }
 

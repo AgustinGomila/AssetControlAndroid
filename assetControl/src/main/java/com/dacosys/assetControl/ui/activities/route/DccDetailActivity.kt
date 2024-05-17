@@ -8,10 +8,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.AssetControlApp.Companion.currentUser
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.dataBase.datacollection.DataCollectionDbHelper
-import com.dacosys.assetControl.data.dataBase.user.UserDbHelper
-import com.dacosys.assetControl.data.model.dataCollection.DataCollection
-import com.dacosys.assetControl.data.model.table.Table
+import com.dacosys.assetControl.data.enums.common.Table
+import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollection
+import com.dacosys.assetControl.data.room.repository.dataCollection.DataCollectionRepository
+import com.dacosys.assetControl.data.room.repository.user.UserRepository
 import com.dacosys.assetControl.databinding.DccDetailActivityBinding
 import com.dacosys.assetControl.ui.adapters.route.DccAdapter
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
@@ -84,19 +84,19 @@ class DccDetailActivity : AppCompatActivity() {
             val extras = intent.extras
             if (extras != null) {
                 val dcId = extras.getLong("dataCollectionId")
-                dc = DataCollectionDbHelper().selectByCollectorId(dcId)
+                dc = DataCollectionRepository().selectById(dcId)
             }
         }
 
         val tempDc = dc
         if (tempDc != null) {
-            val userName = UserDbHelper().selectById(tempDc.userId)?.name ?: ""
+            val userName = UserRepository().selectById(tempDc.userId)?.name ?: ""
 
             binding.descriptionTextView.text = getDescription(tempDc)
             binding.codeTextView.text = tempDc.assetCode
             binding.userTextView.text = userName
 
-            val dc = DataCollectionDbHelper().selectByCollectorId(tempDc.collectorDataCollectionId)
+            val dc = DataCollectionRepository().selectById(tempDc.id)
             if (dc != null) {
                 fillAdapter(dc)
             }
@@ -118,14 +118,14 @@ class DccDetailActivity : AppCompatActivity() {
 
     private fun getReference(dc: DataCollection): String {
         return if (dc.assetCode.isNotEmpty()) "${getString(R.string.asset)}: ${dc.assetCode}"
-        else if (dc.warehouseAreaId > 0L) "${getString(R.string.area)}: ${dc.warehouseAreaId}"
-        else if (dc.warehouseId > 0L) "${getString(R.string.warehouse)}: ${dc.warehouseId}"
+        else if ((dc.warehouseAreaId ?: 0) > 0L) "${getString(R.string.area)}: ${dc.warehouseAreaId}"
+        else if ((dc.warehouseId ?: 0) > 0L) "${getString(R.string.warehouse)}: ${dc.warehouseId}"
         else ""
     }
 
     private fun fillAdapter(dc: DataCollection) {
         runOnUiThread {
-            val contents = dc.contents
+            val contents = dc.contents()
             val adapter = DccAdapter(this, contents)
             binding.dccList.adapter = adapter
         }
@@ -156,7 +156,7 @@ class DccDetailActivity : AppCompatActivity() {
 
         if (imageControlFragment == null) {
             imageControlFragment = ImageControlButtonsFragment.newInstance(
-                tableId = table.tableId.toLong(),
+                tableId = table.id.toLong(),
                 objectId1 = id.toString()
             )
 
@@ -184,7 +184,7 @@ class DccDetailActivity : AppCompatActivity() {
                 }
             }
         } else {
-            imageControlFragment?.setTableId(table.tableId)
+            imageControlFragment?.setTableId(table.id)
             imageControlFragment?.setObjectId1(id)
             imageControlFragment?.setObjectId2(null)
 

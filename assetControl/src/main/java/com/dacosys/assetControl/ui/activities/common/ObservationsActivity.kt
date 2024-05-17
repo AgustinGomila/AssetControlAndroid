@@ -8,8 +8,8 @@ import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.dataBase.asset.AssetDbHelper
-import com.dacosys.assetControl.data.model.asset.Asset
+import com.dacosys.assetControl.data.room.entity.asset.Asset
+import com.dacosys.assetControl.data.room.repository.asset.AssetRepository
 import com.dacosys.assetControl.databinding.ObservationsActivityBinding
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
@@ -127,9 +127,9 @@ class ObservationsActivity : AppCompatActivity(), Scanner.ScannerListener {
 
         autoText = ""
 
-        val assetArray = AssetDbHelper().selectByCode(tempCode)
+        val assetArray = AssetRepository().selectByCode(tempCode)
         var asset: Asset? = null
-        if (assetArray.size > 0) {
+        if (assetArray.isNotEmpty()) {
             asset = assetArray.first()
         }
 

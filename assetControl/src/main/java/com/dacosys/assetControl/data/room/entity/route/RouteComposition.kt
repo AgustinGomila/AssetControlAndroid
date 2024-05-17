@@ -7,6 +7,7 @@ import com.dacosys.assetControl.data.room.entity.route.RouteComposition.Entry
 
 @Entity(
     tableName = Entry.TABLE_NAME,
+    primaryKeys = [Entry.ROUTE_ID, Entry.LEVEL, Entry.POSITION],
     indices = [
         Index(value = [Entry.ROUTE_ID], name = "IDX_${Entry.TABLE_NAME}_${Entry.ROUTE_ID}"),
         Index(
@@ -21,16 +22,16 @@ import com.dacosys.assetControl.data.room.entity.route.RouteComposition.Entry
     ]
 )
 data class RouteComposition(
-    @ColumnInfo(name = Entry.ROUTE_ID) val routeId: Long,
-    @ColumnInfo(name = Entry.DATA_COLLECTION_RULE_ID) val dataCollectionRuleId: Long,
-    @ColumnInfo(name = Entry.LEVEL) val level: Int,
-    @ColumnInfo(name = Entry.POSITION) val position: Int,
-    @ColumnInfo(name = Entry.ASSET_ID) val assetId: Long?,
-    @ColumnInfo(name = Entry.WAREHOUSE_ID) val warehouseId: Long?,
-    @ColumnInfo(name = Entry.WAREHOUSE_AREA_ID) val warehouseAreaId: Long?,
-    @ColumnInfo(name = Entry.EXPRESSION) val expression: String?,
-    @ColumnInfo(name = Entry.TRUE_RESULT) val trueResult: Int?,
-    @ColumnInfo(name = Entry.FALSE_RESULT) val falseResult: Int?
+    @ColumnInfo(name = Entry.ROUTE_ID) val routeId: Long = 0L,
+    @ColumnInfo(name = Entry.DATA_COLLECTION_RULE_ID) val dataCollectionRuleId: Long = 0L,
+    @ColumnInfo(name = Entry.LEVEL) val level: Int = 0,
+    @ColumnInfo(name = Entry.POSITION) val position: Int = 0,
+    @ColumnInfo(name = Entry.ASSET_ID) val assetId: Long? = null,
+    @ColumnInfo(name = Entry.WAREHOUSE_ID) val warehouseId: Long? = null,
+    @ColumnInfo(name = Entry.WAREHOUSE_AREA_ID) val warehouseAreaId: Long? = null,
+    @ColumnInfo(name = Entry.EXPRESSION) val expression: String? = null,
+    @ColumnInfo(name = Entry.TRUE_RESULT) val trueResult: Int = 0,
+    @ColumnInfo(name = Entry.FALSE_RESULT) val falseResult: Int = 0
 ) {
     object Entry {
         const val TABLE_NAME = "route_composition"

@@ -7,6 +7,7 @@ import com.dacosys.assetControl.data.room.entity.route.RouteProcessSteps.Entry
 
 @Entity(
     tableName = Entry.TABLE_NAME,
+    primaryKeys = [Entry.ROUTE_PROCESS_ID, Entry.LEVEL, Entry.POSITION],
     indices = [
         Index(
             value = [Entry.ROUTE_PROCESS_ID],
@@ -32,12 +33,12 @@ import com.dacosys.assetControl.data.room.entity.route.RouteProcessSteps.Entry
     ]
 )
 data class RouteProcessSteps(
-    @ColumnInfo(name = Entry.ROUTE_PROCESS_ID) val routeProcessId: Long,
-    @ColumnInfo(name = Entry.ROUTE_PROCESS_CONTENT_ID) val routeProcessContentId: Long,
-    @ColumnInfo(name = Entry.LEVEL) val level: Int,
-    @ColumnInfo(name = Entry.POSITION) val position: Int,
-    @ColumnInfo(name = Entry.DATA_COLLECTION_ID) val dataCollectionId: Long,
-    @ColumnInfo(name = Entry.STEP) val step: Int
+    @ColumnInfo(name = Entry.ROUTE_PROCESS_ID) val routeProcessId: Long = 0L,
+    @ColumnInfo(name = Entry.ROUTE_PROCESS_CONTENT_ID) val routeProcessContentId: Long = 0L,
+    @ColumnInfo(name = Entry.LEVEL) val level: Int = 0,
+    @ColumnInfo(name = Entry.POSITION) val position: Int = 0,
+    @ColumnInfo(name = Entry.DATA_COLLECTION_ID) val dataCollectionId: Long? = null,
+    @ColumnInfo(name = Entry.STEP) val step: Int = 0,
 ) {
     object Entry {
         const val TABLE_NAME = "route_process_steps"

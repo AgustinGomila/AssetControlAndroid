@@ -24,8 +24,8 @@ class DataCollectionContentObject() : Parcelable {
         this.attributeId = parcel.readLong()
         this.attributeCompositionId = parcel.readLong()
         this.result = parcel.readInt()
-        this.valueStr = parcel.readString() ?: ""
-        this.dataCollectionDate = parcel.readString() ?: ""
+        this.valueStr = parcel.readString().orEmpty()
+        this.dataCollectionDate = parcel.readString().orEmpty()
         this.dataCollectionContentId = parcel.readLong()
         this.collectorDataCollectionContentId = parcel.readLong()
         this.dataCollectionRuleContentId = parcel.readLong()

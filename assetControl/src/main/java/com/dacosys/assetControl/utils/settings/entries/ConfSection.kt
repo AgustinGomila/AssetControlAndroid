@@ -89,7 +89,7 @@ class ConfSection(confSectionId: Long, description: String) {
             11,
             "PrinterData"
         )
-        var assetControlMantData = ConfSection(
+        var assetControlMainData = ConfSection(
             12,
             "AssetControlMantData"
         )
@@ -146,7 +146,7 @@ class ConfSection(confSectionId: Long, description: String) {
                 webservice2Data,
                 proxyWebService2Data,
                 printerData,
-                assetControlMantData,
+                assetControlMainData,
                 presaleData,
                 medidorMovilData,
                 ftpData,

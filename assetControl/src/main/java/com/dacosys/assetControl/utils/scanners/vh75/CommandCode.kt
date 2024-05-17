@@ -29,7 +29,7 @@ class CommandCode : Parcelable {
 
     constructor(parcel: Parcel) {
         code = parcel.readByte()
-        description = parcel.readString() ?: ""
+        description = parcel.readString().orEmpty()
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {

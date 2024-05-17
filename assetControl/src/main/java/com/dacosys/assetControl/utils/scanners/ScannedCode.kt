@@ -1,9 +1,10 @@
 package com.dacosys.assetControl.utils.scanners
 
 import android.util.Log
-import com.dacosys.assetControl.data.dataBase.asset.AssetDbHelper
-import com.dacosys.assetControl.data.model.asset.Asset
-import com.dacosys.assetControl.data.model.location.WarehouseArea
+import com.dacosys.assetControl.data.room.entity.asset.Asset
+import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
+import com.dacosys.assetControl.data.room.repository.asset.AssetRepository
+import com.dacosys.assetControl.data.room.repository.location.WarehouseAreaRepository
 
 class ScannedCode {
     private var targetInt: Any? = null
@@ -78,15 +79,16 @@ class ScannedCode {
         searchAssetCode: Boolean,
         searchAssetSerial: Boolean,
         searchAssetEan: Boolean,
-        validateId: Boolean,
     ): ScannedCode {
         var currentCode = code
         if (searchWarehouseAreaId) {
             val match: String = searchString(currentCode, """#WA#(\d{5})#""", 1)
             if (match.isNotEmpty()) {
                 return try {
-                    val tempWarehouseArea = WarehouseArea(match.toLong(), validateId)
-                    ScannedCode(tempWarehouseArea)
+                    val tempWarehouseArea = WarehouseAreaRepository().selectById(match.toLong())
+                    if (tempWarehouseArea != null)
+                        ScannedCode(tempWarehouseArea)
+                    else ScannedCode()
                 } catch (ex: Exception) {
                     ScannedCode()
                 }
@@ -111,7 +113,7 @@ class ScannedCode {
                 }
             }
 
-            val assetArray = AssetDbHelper().selectByCode(currentCode)
+            val assetArray = AssetRepository().selectByCode(currentCode)
             try {
                 if (assetArray.size > 0) {
                     return ScannedCode(assetArray[0], labelNumber)
@@ -122,9 +124,9 @@ class ScannedCode {
         }
 
         if (searchAssetSerial) {
-            val assetArray = AssetDbHelper().selectBySerial(currentCode)
+            val assetArray = AssetRepository().selectBySerial(currentCode)
             try {
-                if (assetArray.size > 0) {
+                if (assetArray.isNotEmpty()) {
                     return ScannedCode(assetArray[0])
                 }
             } catch (ex: Exception) {
@@ -133,9 +135,9 @@ class ScannedCode {
         }
 
         if (searchAssetEan) {
-            val assetArray = AssetDbHelper().selectByEan(currentCode)
+            val assetArray = AssetRepository().selectByEan(currentCode)
             try {
-                if (assetArray.size > 0) {
+                if (assetArray.isNotEmpty()) {
                     return ScannedCode(assetArray[0])
                 }
             } catch (ex: Exception) {

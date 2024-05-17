@@ -17,12 +17,12 @@ class AssetReviewObject() : Parcelable {
 
     constructor(parcel: Parcel) : this() {
         assetReviewId = parcel.readLong()
-        assetReviewDate = parcel.readString() ?: ""
-        obs = parcel.readString() ?: ""
+        assetReviewDate = parcel.readString().orEmpty()
+        obs = parcel.readString().orEmpty()
         userId = parcel.readLong()
         warehouseAreaId = parcel.readLong()
         warehouseId = parcel.readLong()
-        modificationDate = parcel.readString() ?: ""
+        modificationDate = parcel.readString().orEmpty()
         collectorAssetReviewId = parcel.readLong()
         statusId = parcel.readInt()
     }

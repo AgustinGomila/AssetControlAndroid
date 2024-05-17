@@ -8,6 +8,7 @@ import androidx.core.app.ActivityCompat
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.webservice.common.SessionObject
+import java.text.DateFormat.getDateTimeInstance
 import java.util.*
 import kotlin.reflect.KClass
 
@@ -45,7 +46,7 @@ class Statics {
         const val AC_ROOT_PATH = "/asset_control"
         const val ERROR_LOG_PATH = "/error_log"
 
-        private var IMAGE_CONTROL_DATABASE_NAME = "imagecontrol.sqlite"
+        var IMAGE_CONTROL_DATABASE_NAME = "imagecontrol.sqlite"
 
         // Estos números se corresponden con package_id https://manager.dacosys.com/package/index
         const val APP_VERSION_ID: Int = 12 // AssetControl Milestone13
@@ -80,6 +81,14 @@ class Statics {
             return Build.VERSION.SDK_INT < Build.VERSION_CODES.S || ActivityCompat.checkSelfPermission(
                 getContext(), Manifest.permission.BLUETOOTH_CONNECT
             ) == PackageManager.PERMISSION_GRANTED
+        }
+
+        fun String.toDate(): Date {
+            return try {
+                getDateTimeInstance().parse(this) ?: Date()
+            } catch (e: java.text.ParseException) {
+                Date()
+            }
         }
     }
 }

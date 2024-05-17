@@ -5,8 +5,8 @@ class DownloadTask(
     fileType: FileType?,
     downloadStatus: DownloadStatus,
     progress: Int = 0,
-    bytesCompleted: Long = 0,
-    bytesTotal: Long = 0,
+    bytesCompleted: Long = 0L,
+    bytesTotal: Long = 0L,
 ) {
     var msg: String = ""
     var fileType: FileType? = null

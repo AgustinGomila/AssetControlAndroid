@@ -15,7 +15,7 @@ import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat
 import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.model.location.WarehouseArea
+import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.getColorWithAlpha
@@ -145,7 +145,7 @@ class WarehouseAreaAdapter : ArrayAdapter<WarehouseArea>, Filterable {
             for (w in warehouseAreas) {
                 if (getAll().contains(w)) {
                     warehouseAreasRemoved.add(w)
-                    checkedIdArray.remove(w.warehouseAreaId)
+                    checkedIdArray.remove(w.id)
                     super.remove(w)
                 }
             }
@@ -334,7 +334,7 @@ class WarehouseAreaAdapter : ArrayAdapter<WarehouseArea>, Filterable {
         for (i in 0 until count) {
             val it = getItem(i)
             if (it != null) {
-                r.add(it.warehouseAreaId)
+                r.add(it.id)
             }
         }
         return r
@@ -375,11 +375,11 @@ class WarehouseAreaAdapter : ArrayAdapter<WarehouseArea>, Filterable {
     fun setChecked(item: WarehouseArea, isChecked: Boolean, suspendRefresh: Boolean = false) {
         val position = getIndex(item)
         if (isChecked) {
-            if (!checkedIdArray.contains(item.warehouseAreaId)) {
-                checkedIdArray.add(item.warehouseAreaId)
+            if (!checkedIdArray.contains(item.id)) {
+                checkedIdArray.add(item.id)
             }
         } else {
-            checkedIdArray.remove(item.warehouseAreaId)
+            checkedIdArray.remove(item.id)
         }
 
         checkedChangedListener?.onCheckedChanged(isChecked, position)
@@ -520,7 +520,7 @@ class WarehouseAreaAdapter : ArrayAdapter<WarehouseArea>, Filterable {
                     //Important to remove previous checkedChangedListener before calling setChecked
                     holder.checkBox!!.setOnCheckedChangeListener(null)
                     holder.checkBox!!.isChecked =
-                        checkedIdArray.contains(warehouseArea.warehouseAreaId)
+                        checkedIdArray.contains(warehouseArea.id)
                     holder.checkBox!!.tag = position
                     holder.checkBox!!.setOnLongClickListener(pressHoldListener)
                     holder.checkBox!!.setOnTouchListener(pressTouchListener)
@@ -565,7 +565,7 @@ class WarehouseAreaAdapter : ArrayAdapter<WarehouseArea>, Filterable {
                 val titleForeColor: Int
                 val isSelected = isSelected(position)
                 when {
-                    !warehouseArea.active -> {
+                    warehouseArea.active -> {
                         v.setBackgroundColor(lightgray)
                         foreColor = if (isSelected) {
                             white

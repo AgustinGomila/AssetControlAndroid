@@ -3,38 +3,49 @@ package com.dacosys.assetControl.data.room.repository.dataCollection
 import com.dacosys.assetControl.data.room.dao.dataCollection.DataCollectionContentDao
 import com.dacosys.assetControl.data.room.database.AcDatabase.Companion.database
 import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionContent
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.runBlocking
 
 class DataCollectionContentRepository {
-    private val dao: DataCollectionContentDao by lazy {
-        database.dataCollectionContentDao()
+    private val dao: DataCollectionContentDao
+        get() = database.dataCollectionContentDao()
+
+    fun selectByDataCollectionId(id: Long) = dao.selectByDataCollectionId(id)
+
+    fun selectByCollectorRouteProcessId(routeProcessId: Long) = dao.selectByCollectorRouteProcessId(routeProcessId)
+
+    fun selectByDataCollectionRuleContentIdAssetId(dcrContId: Long, assetId: Long) =
+        dao.selectByDataCollectionRuleContentIdAssetId(dcrContId, assetId)
+
+    fun selectByDataCollectionRuleContentIdWarehouseId(dcrContId: Long, wId: Long) =
+        dao.selectByDataCollectionRuleContentIdWarehouseId(dcrContId, wId)
+
+    fun selectByDataCollectionRuleContentIdWarehouseAreaId(dcrContId: Long, waId: Long) =
+        dao.selectByDataCollectionRuleContentIdWarehouseAreaId(dcrContId, waId)
+
+    fun insert(id: Long, dcc: DataCollectionContent): Boolean {
+        val r = runBlocking {
+            dcc.dataCollectionId = id
+            dao.insert(dcc)
+            true
+        }
+        return r
     }
 
-    fun getAllDataCollectionContents(): Flow<List<DataCollectionContent>> = dao.getAllDataCollectionContents()
-
-    suspend fun insertDataCollectionContent(dataCollectionContent: DataCollectionContent) {
-        withContext(Dispatchers.IO) {
-            dao.insertDataCollectionContent(dataCollectionContent)
+    fun insert(id: Long, dccList: List<DataCollectionContent>): Boolean {
+        val r = runBlocking {
+            dccList.forEach { it.dataCollectionId = id }
+            dao.insert(dccList)
+            true
         }
+        return r
     }
 
-    suspend fun insertAll(dataCollectionContents: List<DataCollectionContent>) {
-        withContext(Dispatchers.IO) {
-            dao.insertAll(dataCollectionContents)
-        }
+
+    fun deleteByDataCollectionId(dccId: Long) = runBlocking {
+        dao.deleteByDataCollectionId(dccId)
     }
 
-    suspend fun deleteById(id: Long) {
-        withContext(Dispatchers.IO) {
-            dao.deleteById(id)
-        }
-    }
-
-    suspend fun deleteAll() {
-        withContext(Dispatchers.IO) {
-            dao.deleteAll()
-        }
+    fun deleteOrphans() = runBlocking {
+        dao.deleteOrphans()
     }
 }

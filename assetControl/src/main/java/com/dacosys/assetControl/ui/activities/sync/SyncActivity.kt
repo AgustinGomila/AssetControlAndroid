@@ -141,13 +141,13 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
 
     private fun showImageProgressBar(show: Boolean) {
         runOnUiThread {
-            if (show && binding.progressBarLayout.visibility != View.VISIBLE) {
+            if (show && binding.progressBarLayout.visibility != VISIBLE) {
                 binding.progressBarLayout.bringToFront()
-                binding.progressBarLayout.visibility = View.VISIBLE
+                binding.progressBarLayout.visibility = VISIBLE
 
                 ViewCompat.setZ(binding.progressBarLayout, 0F)
-            } else if (!show && binding.progressBarLayout.visibility != View.GONE) {
-                binding.progressBarLayout.visibility = View.GONE
+            } else if (!show && binding.progressBarLayout.visibility != GONE) {
+                binding.progressBarLayout.visibility = GONE
             }
         }
     }
@@ -1046,7 +1046,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
         ItemCategory,
         AssetReview,
         WarehouseMovement,
-        AssetManteinance,
+        AssetMaintenance,
         DataCollection,
         RouteProcess
          */

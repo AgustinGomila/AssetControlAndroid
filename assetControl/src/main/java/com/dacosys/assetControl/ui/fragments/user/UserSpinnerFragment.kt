@@ -8,8 +8,8 @@ import android.widget.AdapterView
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.R.layout.custom_spinner_dropdown_item
-import com.dacosys.assetControl.data.dataBase.user.UserDbHelper
-import com.dacosys.assetControl.data.model.user.User
+import com.dacosys.assetControl.data.room.entity.user.User
+import com.dacosys.assetControl.data.room.repository.user.UserRepository
 import com.dacosys.assetControl.databinding.FragmentSpinnerBinding
 import com.dacosys.assetControl.ui.adapters.user.UserAdapter
 import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelableArrayList
@@ -38,8 +38,8 @@ class UserSpinnerFragment : Fragment() {
                 temp != null -> {
                     val r = temp as User
                     when {
-                        r.userId <= 0 -> ""
-                        else -> r.password
+                        r.id <= 0 -> ""
+                        else -> r.password.orEmpty()
                     }
                 }
 
@@ -54,9 +54,9 @@ class UserSpinnerFragment : Fragment() {
             return when {
                 temp != null -> {
                     val r = temp as User
-                    when (r.userId) {
+                    when (r.id) {
                         0L -> null
-                        else -> r.userId
+                        else -> r.id
                     }
                 }
 
@@ -76,7 +76,7 @@ class UserSpinnerFragment : Fragment() {
                     continue
                 }
 
-                if (equals(id, adapter.getItem(i)!!.userId)) {
+                if (equals(id, adapter.getItem(i)!!.id)) {
                     binding.fragmentSpinner.setSelection(i)
                     break
                 }
@@ -180,7 +180,7 @@ class UserSpinnerFragment : Fragment() {
         oldPos = defaultValue.toInt()
         var result = true
 
-        allUser = UserDbHelper().selectByActiveAndPermission()
+        allUser = ArrayList(UserRepository().selectByActiveAndPermission())
 
         allUser!!.sortWith { v1, v2 -> v1.name.compareTo(v2.name) }
 
@@ -190,24 +190,24 @@ class UserSpinnerFragment : Fragment() {
             allUser!!.add(
                 0,
                 User(
-                    0,
-                    getString(R.string.no_users),
-                    "",
-                    "",
-                    true,
-                    ""
+                    id = 0,
+                    name = getString(R.string.no_users),
+                    externalId = "",
+                    email = "",
+                    active = 1,
+                    password = ""
                 )
             )
         } else if (showGeneralLevel) {
             allUser!!.add(
                 0,
                 User(
-                    0,
-                    getString(R.string.nothing_selected),
-                    "",
-                    "",
-                    true,
-                    ""
+                    id = 0,
+                    name = getString(R.string.nothing_selected),
+                    externalId = "",
+                    email = "",
+                    active = 1,
+                    password = ""
                 )
             )
         }

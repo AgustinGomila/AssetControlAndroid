@@ -36,7 +36,7 @@ class SnackBarType : Parcelable {
 
     constructor(parcel: android.os.Parcel) {
         snackBarTypeId = parcel.readInt()
-        description = parcel.readString() ?: ""
+        description = parcel.readString().orEmpty()
         duration = parcel.readInt()
         backColor = parcel.readInt()
         foreColor = parcel.readInt()

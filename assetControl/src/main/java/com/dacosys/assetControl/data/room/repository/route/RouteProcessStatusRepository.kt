@@ -1,28 +1,18 @@
 package com.dacosys.assetControl.data.room.repository.route
 
+import com.dacosys.assetControl.data.enums.route.RouteProcessStatus
 import com.dacosys.assetControl.data.room.dao.route.RouteProcessStatusDao
 import com.dacosys.assetControl.data.room.database.AcDatabase.Companion.database
-import com.dacosys.assetControl.data.room.entity.route.RouteProcessStatus
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.runBlocking
+import com.dacosys.assetControl.data.room.entity.route.RouteProcessStatus as RouteProcessStatusRoom
 
 class RouteProcessStatusRepository {
-    private val dao: RouteProcessStatusDao by lazy {
-        database.routeProcessStatusDao()
-    }
+    private val dao: RouteProcessStatusDao
+        get() = database.routeProcessStatusDao()
 
-    val allRouteProcessStatus: Flow<List<RouteProcessStatus>> = dao.getAllRouteProcessStatus()
-
-    suspend fun insert(routeProcessStatus: RouteProcessStatus) {
-        withContext(Dispatchers.IO) {
-            dao.insertRouteProcessStatus(routeProcessStatus)
-        }
-    }
-
-    suspend fun delete(routeProcessStatus: RouteProcessStatus) {
-        withContext(Dispatchers.IO) {
-            dao.deleteRouteProcessStatus(routeProcessStatus)
-        }
+    fun sync() = runBlocking {
+        val status = RouteProcessStatus.getAll().map { RouteProcessStatusRoom(it) }.toList()
+        dao.deleteAll()
+        dao.insert(status)
     }
 }

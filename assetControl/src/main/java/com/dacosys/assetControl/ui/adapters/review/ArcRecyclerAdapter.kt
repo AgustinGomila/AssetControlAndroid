@@ -30,14 +30,14 @@ import androidx.recyclerview.widget.RecyclerView.*
 import com.dacosys.assetControl.AssetControlApp.Companion.currentUser
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.model.asset.Asset
-import com.dacosys.assetControl.data.model.asset.AssetStatus
-import com.dacosys.assetControl.data.model.asset.OwnershipStatus
-import com.dacosys.assetControl.data.model.review.AssetReviewContent
-import com.dacosys.assetControl.data.model.review.AssetReviewContentStatus
-import com.dacosys.assetControl.data.model.table.Table
-import com.dacosys.assetControl.data.model.user.User
-import com.dacosys.assetControl.data.model.user.permission.PermissionEntry
+import com.dacosys.assetControl.data.enums.asset.AssetStatus
+import com.dacosys.assetControl.data.enums.asset.OwnershipStatus
+import com.dacosys.assetControl.data.enums.common.Table
+import com.dacosys.assetControl.data.enums.permission.PermissionEntry
+import com.dacosys.assetControl.data.enums.review.AssetReviewContentStatus
+import com.dacosys.assetControl.data.room.entity.asset.Asset
+import com.dacosys.assetControl.data.room.entity.review.AssetReviewContent
+import com.dacosys.assetControl.data.room.entity.user.User
 import com.dacosys.assetControl.databinding.AssetRowBinding
 import com.dacosys.assetControl.databinding.AssetRowExpandedBinding
 import com.dacosys.assetControl.network.utils.ProgressStatus
@@ -68,7 +68,7 @@ class ArcRecyclerAdapter(
     private var showCheckBoxesChanged: (Boolean) -> Unit = { },
     private var showImages: Boolean = false,
     private var showImagesChanged: (Boolean) -> Unit = { },
-    var visibleStatus: ArrayList<AssetReviewContentStatus> = AssetReviewContentStatus.getAll(),
+    var visibleStatus: ArrayList<AssetReviewContentStatus> = ArrayList(AssetReviewContentStatus.getAll()),
     private var filterOptions: FilterOptions = FilterOptions()
 ) : ListAdapter<AssetReviewContent, ViewHolder>(AssetReviewContentDiffUtilCallback), Filterable {
 
@@ -461,7 +461,7 @@ class ArcRecyclerAdapter(
         editImageView.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_DOWN) {
                 editAssetListener?.onEditAssetRequired(
-                    tableId = Table.asset.tableId, itemId = assetId
+                    tableId = Table.asset.id, itemId = assetId
                 )
             }
             true
@@ -477,7 +477,7 @@ class ArcRecyclerAdapter(
         albumImageView.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_DOWN) {
                 albumViewRequiredListener?.onAlbumViewRequired(
-                    tableId = Table.asset.tableId, itemId = assetId
+                    tableId = Table.asset.id, itemId = assetId
                 )
             }
             true
@@ -489,7 +489,7 @@ class ArcRecyclerAdapter(
         addPhotoImageView.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_DOWN) {
                 addPhotoRequiredListener?.onAddPhotoRequired(
-                    tableId = Table.asset.tableId,
+                    tableId = Table.asset.id,
                     itemId = assetId,
                     description = assetDescription,
                     obs = "${getContext().getString(R.string.user)}: ${currentUser()?.name}"
@@ -628,7 +628,7 @@ class ArcRecyclerAdapter(
         Handler(Looper.getMainLooper()).postDelayed({
             adapter.run {
                 ImageAdapter.getImages(context = getContext(), programData = ProgramData(
-                    programObjectId = Table.asset.tableId.toLong(), objId1 = assetId.toString()
+                    programObjectId = Table.asset.id.toLong(), objId1 = assetId.toString()
                 ), onProgress = {
                     when (it.status) {
                         GetImageStatus.STARTING -> {
@@ -800,31 +800,31 @@ class ArcRecyclerAdapter(
      * Se utiliza cuando se edita un ítem y necesita actualizarse
      */
     fun updateItem(asset: Asset, scrollToPos: Boolean = false) {
-        val t = fullList.firstOrNull { it.assetId == asset.assetId } ?: return
+        val t = fullList.firstOrNull { it.assetId == asset.id } ?: return
 
-        t.assetId = asset.assetId
+        t.assetId = asset.id
         t.code = asset.code
         t.description = asset.description
         t.warehouseAreaId = asset.warehouseAreaId
-        t.ownershipStatusId = asset.ownershipStatusId
-        t.assetStatusId = asset.assetStatusId
+        t.ownershipStatusId = asset.ownershipStatus
+        t.assetStatusId = asset.status
         t.itemCategoryId = asset.itemCategoryId
         t.labelNumber = asset.labelNumber ?: 0
         t.manufacturer = asset.manufacturer ?: ""
         t.model = asset.model ?: ""
         t.serialNumber = asset.serialNumber ?: ""
-        t.parentId = asset.parentAssetId ?: 0
+        t.parentId = asset.parentId ?: 0
         t.ean = asset.ean ?: ""
 
         submitList(fullList) {
             run {
-                notifyItemChanged(getIndexById(asset.assetId))
+                notifyItemChanged(getIndexById(asset.id))
 
                 // Notificamos al Listener superior
                 dataSetChangedListener?.onDataSetChanged()
 
                 // Seleccionamos el ítem y hacemos scroll hasta él.
-                selectItemById(asset.assetId, scrollToPos)
+                selectItemById(asset.id, scrollToPos)
             }
         }
     }
@@ -1062,7 +1062,7 @@ class ArcRecyclerAdapter(
 
     @Suppress("MemberVisibilityCanBePrivate", "unused")
     fun getContentByItem(item: Asset): AssetReviewContent? {
-        return currentList.firstOrNull { it.assetId == item.assetId }
+        return currentList.firstOrNull { it.assetId == item.id }
     }
 
     @Suppress("MemberVisibilityCanBePrivate", "unused")
@@ -1147,7 +1147,7 @@ class ArcRecyclerAdapter(
         }
 
         fun bindStatusChange(content: AssetReviewContent) {
-            binding.assetStatus.text = AssetReviewContentStatus.getById(content.contentStatusId)?.description ?: ""
+            binding.assetStatus.text = AssetReviewContentStatus.getById(content.contentStatusId).description
         }
 
         /**
@@ -1206,7 +1206,7 @@ class ArcRecyclerAdapter(
             }
 
             val categoryStr = content.itemCategoryStr
-            val ownershipStr = OwnershipStatus.getById(content.ownershipStatusId)?.description ?: ""
+            val ownershipStr = OwnershipStatus.getById(content.ownershipStatusId).description
 
             if (categoryStr.isEmpty() && ownershipStr.isEmpty()) {
                 binding.dividerInternal3.visibility = GONE
@@ -1327,7 +1327,7 @@ class ArcRecyclerAdapter(
         }
 
         fun bindStatusChange(content: AssetReviewContent) {
-            binding.assetStatus.text = AssetReviewContentStatus.getById(content.contentStatusId)?.description ?: ""
+            binding.assetStatus.text = AssetReviewContentStatus.getById(content.contentStatusId).description
         }
 
         /**

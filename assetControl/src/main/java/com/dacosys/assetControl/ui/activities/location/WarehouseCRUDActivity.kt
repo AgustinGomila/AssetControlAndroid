@@ -11,11 +11,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.AssetControlApp.Companion.currentUser
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.model.common.CrudCompleted
-import com.dacosys.assetControl.data.model.common.CrudResult
-import com.dacosys.assetControl.data.model.common.CrudStatus.*
-import com.dacosys.assetControl.data.model.location.Warehouse
-import com.dacosys.assetControl.data.model.table.Table
+import com.dacosys.assetControl.data.enums.common.CrudCompleted
+import com.dacosys.assetControl.data.enums.common.CrudResult
+import com.dacosys.assetControl.data.enums.common.CrudStatus.*
+import com.dacosys.assetControl.data.enums.common.Table
+import com.dacosys.assetControl.data.room.entity.location.Warehouse
 import com.dacosys.assetControl.databinding.WarehouseCrudActivityBinding
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
@@ -77,7 +77,7 @@ class WarehouseCRUDActivity : AppCompatActivity(), CrudCompleted,
                     SnackBarType.SUCCESS
                 )
                 if (imageControlFragment != null && warehouse != null) {
-                    imageControlFragment?.updateObjectId1(warehouse.warehouseId)
+                    imageControlFragment?.updateObjectId1(warehouse.id)
                     imageControlFragment?.saveImages(false)
                 }
 
@@ -266,7 +266,7 @@ class WarehouseCRUDActivity : AppCompatActivity(), CrudCompleted,
         var warehouseId = 0L
         var description = ""
         if (warehouse != null) {
-            warehouseId = warehouse!!.warehouseId
+            warehouseId = warehouse!!.id
             description = warehouse!!.description
         }
 
@@ -280,7 +280,7 @@ class WarehouseCRUDActivity : AppCompatActivity(), CrudCompleted,
 
         if (imageControlFragment == null) {
             imageControlFragment = ImageControlButtonsFragment.newInstance(
-                tableId = Table.warehouse.tableId.toLong(),
+                tableId = Table.warehouse.id.toLong(),
                 objectId1 = warehouseId.toString()
             )
 
@@ -312,7 +312,7 @@ class WarehouseCRUDActivity : AppCompatActivity(), CrudCompleted,
                 }
             }
         } else {
-            imageControlFragment?.setTableId(Table.warehouse.tableId)
+            imageControlFragment?.setTableId(Table.warehouse.id)
             imageControlFragment?.setObjectId1(warehouseId)
             imageControlFragment?.setObjectId2(null)
 

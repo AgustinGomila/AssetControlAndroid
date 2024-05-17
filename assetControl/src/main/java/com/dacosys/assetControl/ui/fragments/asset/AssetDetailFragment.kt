@@ -8,7 +8,7 @@ import android.view.WindowManager
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.model.asset.Asset
+import com.dacosys.assetControl.data.room.entity.asset.Asset
 import com.dacosys.assetControl.databinding.AssetDetailFragmentBinding
 import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 
@@ -65,102 +65,95 @@ class AssetDetailFragment : DialogFragment() {
     }
 
     private fun fillControls() {
-        if (asset != null) {
-            if (asset!!.code.isEmpty()) {
-                binding.codeAutoResizeTextView.text = ""
-                binding.codeAutoResizeTextView.visibility = View.GONE
-            } else {
-                binding.codeAutoResizeTextView.text = asset!!.code
-                binding.codeAutoResizeTextView.visibility = View.VISIBLE
-            }
+        val a = asset ?: return
 
-            if (asset!!.description.isEmpty()) {
-                binding.descriptionAutoResizeTextView.text = ""
-                binding.descriptionAutoResizeTextView.visibility = View.GONE
-            } else {
-                binding.descriptionAutoResizeTextView.text = asset!!.description
-                binding.descriptionAutoResizeTextView.visibility = View.VISIBLE
-            }
+        if (a.code.isEmpty()) {
+            binding.codeAutoResizeTextView.text = ""
+            binding.codeAutoResizeTextView.visibility = View.GONE
+        } else {
+            binding.codeAutoResizeTextView.text = a.code
+            binding.codeAutoResizeTextView.visibility = View.VISIBLE
+        }
 
-            if (asset!!.assetStatus == null) {
-                binding.statusAutoResizeTextView.text = ""
-                binding.statusAutoResizeTextView.visibility = View.GONE
-            } else {
-                binding.statusAutoResizeTextView.text =
-                    (asset!!.assetStatus ?: return).description
-                binding.statusAutoResizeTextView.visibility = View.VISIBLE
-            }
+        if (a.description.isEmpty()) {
+            binding.descriptionAutoResizeTextView.text = ""
+            binding.descriptionAutoResizeTextView.visibility = View.GONE
+        } else {
+            binding.descriptionAutoResizeTextView.text = a.description
+            binding.descriptionAutoResizeTextView.visibility = View.VISIBLE
+        }
 
-            if (asset!!.warehouseStr.isEmpty()) {
-                binding.warehouseAutoResizeTextView.text = ""
-                binding.warehouseAutoResizeTextView.visibility = View.GONE
-                binding.warehouseTextView.visibility = View.GONE
-            } else {
-                binding.warehouseAutoResizeTextView.text = asset!!.warehouseAreaStr
-                binding.warehouseAutoResizeTextView.visibility = View.VISIBLE
-                binding.warehouseTextView.visibility = View.VISIBLE
-            }
+        binding.statusAutoResizeTextView.text = a.assetStatus.description
+        binding.statusAutoResizeTextView.visibility = View.VISIBLE
 
-            if (asset!!.warehouseAreaStr.isEmpty()) {
-                binding.warehouseAreaAutoResizeTextView.text = ""
-                binding.warehouseAreaAutoResizeTextView.visibility = View.GONE
-                binding.warehouseAreaTextView.visibility = View.GONE
-            } else {
-                binding.warehouseAreaAutoResizeTextView.text =
-                    asset!!.warehouseAreaStr
-                binding.warehouseAreaAutoResizeTextView.visibility = View.VISIBLE
-                binding.warehouseAreaTextView.visibility = View.VISIBLE
-            }
+        if (a.warehouseStr.isEmpty()) {
+            binding.warehouseAutoResizeTextView.text = ""
+            binding.warehouseAutoResizeTextView.visibility = View.GONE
+            binding.warehouseTextView.visibility = View.GONE
+        } else {
+            binding.warehouseAutoResizeTextView.text = a.warehouseAreaStr
+            binding.warehouseAutoResizeTextView.visibility = View.VISIBLE
+            binding.warehouseTextView.visibility = View.VISIBLE
+        }
 
-            if (asset!!.itemCategoryStr.isEmpty()) {
-                binding.categoryAutoResizeTextView.text = ""
-                binding.categoryAutoResizeTextView.visibility = View.GONE
-                binding.categoryTextView.visibility = View.GONE
-            } else {
-                binding.categoryAutoResizeTextView.text = asset!!.itemCategoryStr
-                binding.categoryAutoResizeTextView.visibility = View.VISIBLE
-                binding.categoryTextView.visibility = View.VISIBLE
-            }
+        if (a.warehouseAreaStr.isEmpty()) {
+            binding.warehouseAreaAutoResizeTextView.text = ""
+            binding.warehouseAreaAutoResizeTextView.visibility = View.GONE
+            binding.warehouseAreaTextView.visibility = View.GONE
+        } else {
+            binding.warehouseAreaAutoResizeTextView.text = a.warehouseAreaStr
+            binding.warehouseAreaAutoResizeTextView.visibility = View.VISIBLE
+            binding.warehouseAreaTextView.visibility = View.VISIBLE
+        }
 
-            if (asset!!.serialNumber.isNullOrEmpty()) {
-                binding.serialNumberAutoResizeTextView.text = ""
-                binding.serialNumberAutoResizeTextView.visibility = View.GONE
-                binding.serialNumberTextView.visibility = View.GONE
-            } else {
-                binding.serialNumberAutoResizeTextView.text = asset!!.serialNumber
-                binding.serialNumberAutoResizeTextView.visibility = View.VISIBLE
-                binding.serialNumberTextView.visibility = View.VISIBLE
-            }
+        if (a.itemCategoryStr.isEmpty()) {
+            binding.categoryAutoResizeTextView.text = ""
+            binding.categoryAutoResizeTextView.visibility = View.GONE
+            binding.categoryTextView.visibility = View.GONE
+        } else {
+            binding.categoryAutoResizeTextView.text = a.itemCategoryStr
+            binding.categoryAutoResizeTextView.visibility = View.VISIBLE
+            binding.categoryTextView.visibility = View.VISIBLE
+        }
 
-            if (asset!!.ean.isNullOrEmpty()) {
-                binding.eanAutoResizeTextView.text = ""
-                binding.eanAutoResizeTextView.visibility = View.GONE
-                binding.eanTextView.visibility = View.GONE
-            } else {
-                binding.eanAutoResizeTextView.text = asset!!.ean
-                binding.eanAutoResizeTextView.visibility = View.VISIBLE
-                binding.eanTextView.visibility = View.VISIBLE
-            }
+        if (a.serialNumber.isNullOrEmpty()) {
+            binding.serialNumberAutoResizeTextView.text = ""
+            binding.serialNumberAutoResizeTextView.visibility = View.GONE
+            binding.serialNumberTextView.visibility = View.GONE
+        } else {
+            binding.serialNumberAutoResizeTextView.text = a.serialNumber
+            binding.serialNumberAutoResizeTextView.visibility = View.VISIBLE
+            binding.serialNumberTextView.visibility = View.VISIBLE
+        }
 
-            if (asset!!.manufacturer.isNullOrEmpty()) {
-                binding.manufacturerAutoResizeTextView.text = ""
-                binding.manufacturerAutoResizeTextView.visibility = View.GONE
-                binding.manufacturerTextView.visibility = View.GONE
-            } else {
-                binding.manufacturerAutoResizeTextView.text = asset!!.manufacturer
-                binding.manufacturerAutoResizeTextView.visibility = View.VISIBLE
-                binding.manufacturerTextView.visibility = View.VISIBLE
-            }
+        if (a.ean.isNullOrEmpty()) {
+            binding.eanAutoResizeTextView.text = ""
+            binding.eanAutoResizeTextView.visibility = View.GONE
+            binding.eanTextView.visibility = View.GONE
+        } else {
+            binding.eanAutoResizeTextView.text = a.ean
+            binding.eanAutoResizeTextView.visibility = View.VISIBLE
+            binding.eanTextView.visibility = View.VISIBLE
+        }
 
-            if (asset!!.model.isNullOrEmpty()) {
-                binding.modelAutoResizeTextView.text = ""
-                binding.modelAutoResizeTextView.visibility = View.GONE
-                binding.modelTextView.visibility = View.GONE
-            } else {
-                binding.modelAutoResizeTextView.text = asset!!.model
-                binding.modelAutoResizeTextView.visibility = View.VISIBLE
-                binding.modelTextView.visibility = View.VISIBLE
-            }
+        if (a.manufacturer.isNullOrEmpty()) {
+            binding.manufacturerAutoResizeTextView.text = ""
+            binding.manufacturerAutoResizeTextView.visibility = View.GONE
+            binding.manufacturerTextView.visibility = View.GONE
+        } else {
+            binding.manufacturerAutoResizeTextView.text = a.manufacturer
+            binding.manufacturerAutoResizeTextView.visibility = View.VISIBLE
+            binding.manufacturerTextView.visibility = View.VISIBLE
+        }
+
+        if (a.model.isNullOrEmpty()) {
+            binding.modelAutoResizeTextView.text = ""
+            binding.modelAutoResizeTextView.visibility = View.GONE
+            binding.modelTextView.visibility = View.GONE
+        } else {
+            binding.modelAutoResizeTextView.text = a.model
+            binding.modelAutoResizeTextView.visibility = View.VISIBLE
+            binding.modelTextView.visibility = View.VISIBLE
         }
     }
 

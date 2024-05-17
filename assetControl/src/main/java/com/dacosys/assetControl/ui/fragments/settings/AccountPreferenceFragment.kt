@@ -13,7 +13,6 @@ import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.AssetControlApp.Companion.isLogged
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.dataBase.DataBaseHelper
 import com.dacosys.assetControl.databinding.ProgressViewBinding
 import com.dacosys.assetControl.network.clientPackages.ClientPackagesProgress
 import com.dacosys.assetControl.network.download.DownloadDb
@@ -28,6 +27,7 @@ import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.scanners.GenerateQR
 import com.dacosys.assetControl.utils.settings.config.ConfigHelper
 import com.dacosys.assetControl.utils.settings.config.QRConfigType
+import com.dacosys.assetControl.utils.settings.io.FileHelper
 import com.dacosys.assetControl.utils.settings.preferences.Preferences
 import org.json.JSONObject
 import java.lang.ref.WeakReference
@@ -281,7 +281,7 @@ class AccountPreferenceFragment : PreferenceFragmentCompat(), ClientPackage.Comp
                     getString(R.string.configuration_applied), SnackBarType.INFO
                 )
             )
-            DataBaseHelper.removeDataBases()
+            FileHelper.removeDataBases(requireContext())
             requireActivity().finish()
         } else if (status == ProgressStatus.crashed) {
             if (view != null) showSnackBar(

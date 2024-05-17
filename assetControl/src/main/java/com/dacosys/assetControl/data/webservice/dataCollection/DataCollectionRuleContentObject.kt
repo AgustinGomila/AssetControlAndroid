@@ -20,13 +20,13 @@ class DataCollectionRuleContentObject() : Parcelable {
 
     constructor(parcel: Parcel) : this() {
         this.dataCollectionRuleContentId = parcel.readLong()
-        this.description = parcel.readString() ?: ""
+        this.description = parcel.readString().orEmpty()
         this.dataCollectionRuleId = parcel.readLong()
         this.level = parcel.readInt()
         this.position = parcel.readInt()
         this.attributeId = parcel.readLong()
         this.attributeCompositionId = parcel.readLong()
-        this.expression = parcel.readString() ?: ""
+        this.expression = parcel.readString().orEmpty()
         this.trueResult = parcel.readInt()
         this.falseResult = parcel.readInt()
         this.active = parcel.readInt()

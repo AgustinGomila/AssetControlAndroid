@@ -17,8 +17,8 @@ import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.dataBase.category.ItemCategoryDbHelper
-import com.dacosys.assetControl.data.model.category.ItemCategory
+import com.dacosys.assetControl.data.room.entity.category.ItemCategory
+import com.dacosys.assetControl.data.room.repository.category.ItemCategoryRepository
 import com.dacosys.assetControl.databinding.ItemCategorySelectActivityBinding
 import com.dacosys.assetControl.ui.adapters.category.ItemCategoryAdapter
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
@@ -281,7 +281,7 @@ class ItemCategorySelectActivity :
 
         var itemArray: ArrayList<ItemCategory> = ArrayList()
         try {
-            itemArray = ItemCategoryDbHelper().select(onlyActive)
+            itemArray = ArrayList(ItemCategoryRepository().select(onlyActive))
         } catch (ex: java.lang.Exception) {
             ex.printStackTrace()
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)

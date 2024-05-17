@@ -11,7 +11,6 @@ import android.os.Looper
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.Button
@@ -32,26 +31,26 @@ import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.dataBase.DataBaseHelper
-import com.dacosys.assetControl.data.dataBase.asset.AssetDbHelper
-import com.dacosys.assetControl.data.dataBase.attribute.AttributeCompositionDbHelper
-import com.dacosys.assetControl.data.dataBase.datacollection.DataCollectionContentDbHelper
-import com.dacosys.assetControl.data.dataBase.datacollection.DataCollectionDbHelper
-import com.dacosys.assetControl.data.dataBase.location.WarehouseAreaDbHelper
-import com.dacosys.assetControl.data.dataBase.route.RouteCompositionDbHelper
-import com.dacosys.assetControl.data.dataBase.route.RouteProcessContentDbHelper
-import com.dacosys.assetControl.data.dataBase.route.RouteProcessStepsDbHelper
-import com.dacosys.assetControl.data.model.attribute.AttributeCompositionType
-import com.dacosys.assetControl.data.model.common.SaveProgress
-import com.dacosys.assetControl.data.model.dataCollection.DataCollection
-import com.dacosys.assetControl.data.model.dataCollection.DcrResult
-import com.dacosys.assetControl.data.model.route.*
-import com.dacosys.assetControl.data.model.route.common.ExprResultIntString
-import com.dacosys.assetControl.data.model.route.common.Parameter
-import com.dacosys.assetControl.data.model.route.common.SaveRouteProcess
-import com.dacosys.assetControl.data.model.route.common.SkipAll
-import com.dacosys.assetControl.data.model.user.User
-import com.dacosys.assetControl.data.model.user.permission.PermissionEntry
+import com.dacosys.assetControl.data.enums.attribute.AttributeCompositionType
+import com.dacosys.assetControl.data.enums.common.SaveProgress
+import com.dacosys.assetControl.data.enums.dataCollection.DcrResult
+import com.dacosys.assetControl.data.enums.permission.PermissionEntry
+import com.dacosys.assetControl.data.enums.route.RouteProcessStatus
+import com.dacosys.assetControl.data.model.common.ExprResultIntString
+import com.dacosys.assetControl.data.model.common.Parameter
+import com.dacosys.assetControl.data.model.common.SaveRouteProcess
+import com.dacosys.assetControl.data.model.common.SkipAll
+import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollection
+import com.dacosys.assetControl.data.room.entity.route.*
+import com.dacosys.assetControl.data.room.entity.user.User
+import com.dacosys.assetControl.data.room.repository.asset.AssetRepository
+import com.dacosys.assetControl.data.room.repository.attribute.AttributeCompositionRepository
+import com.dacosys.assetControl.data.room.repository.dataCollection.DataCollectionContentRepository
+import com.dacosys.assetControl.data.room.repository.dataCollection.DataCollectionRepository
+import com.dacosys.assetControl.data.room.repository.location.WarehouseAreaRepository
+import com.dacosys.assetControl.data.room.repository.route.RouteCompositionRepository
+import com.dacosys.assetControl.data.room.repository.route.RouteProcessContentRepository
+import com.dacosys.assetControl.data.room.repository.route.RouteProcessStepsRepository
 import com.dacosys.assetControl.databinding.ProgressBarDialogBinding
 import com.dacosys.assetControl.databinding.RouteProcessContentActivityBinding
 import com.dacosys.assetControl.network.sync.SyncProgress
@@ -515,7 +514,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
                 checkedIdArray = checkedIdArray,
                 showCheckBoxes = false,
                 showCheckBoxesChanged = { },
-                visibleStatus = RouteProcessStatus.getAll()
+                visibleStatus = ArrayList(RouteProcessStatus.getAll())
             )
 
             refreshAdapterListeners()
@@ -556,7 +555,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
     private fun continueRouteProcess(rp: RouteProcess) {
         routeComposition = ArrayList(
-            RouteCompositionDbHelper().selectByRouteId(rp.routeId)
+            RouteCompositionRepository().selectByRouteId(rp.routeId)
                 .sortedWith(compareBy({ it.level }, { it.position }))
         )
 
@@ -564,14 +563,14 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
         ///////////////////////////////////
         // Para controlar la transacción //
-        val db = DataBaseHelper.getWritableDb()
+        // TODO: Eliminar val db = DataBaseHelper.getWritableDb()
         try {
-            db.beginTransaction()
+            // TODO: Eliminar db.beginTransaction()
 
             // Traemos la ruta para continuarla si aún no lo hemos hecho.
             if (!rpcArray.any()) {
                 rpcArray = ArrayList(
-                    RouteProcessContentDbHelper().selectByRouteProcessId(rp.collectorRouteProcessId)
+                    RouteProcessContentRepository().selectByRouteProcessId(rp.id)
                         .sortedWith(compareBy({ it.level }, { it.position }))
                 )
             }
@@ -579,18 +578,18 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             Log.d(this::class.java.simpleName, getString(R.string.obtaining_collected_data))
 
             val tempDccArray = ArrayList(
-                DataCollectionContentDbHelper().selectByCollectorRouteProcessId(rp.collectorRouteProcessId)
+                DataCollectionContentRepository().selectByCollectorRouteProcessId(rp.id)
                     .sortedWith(compareBy({ it.level }, { it.position }))
             )
 
             Log.d(this::class.java.simpleName, getString(R.string.getting_previous_steps))
 
             val allSteps = ArrayList(
-                RouteProcessStepsDbHelper().selectByRouteProcessId(rp.collectorRouteProcessId)
+                RouteProcessStepsRepository().selectByRouteProcessId(rp.id)
                     .sortedWith(compareBy { it.step })
             )
 
-            db.setTransactionSuccessful()
+            // TODO: Eliminar db.setTransactionSuccessful()
 
             // Recorrer la ruta en busca del lugar donde quedó el operador.
             // Ir agregando los pasos a una colección de pasos.
@@ -612,12 +611,13 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
                     val z2 = tempDccArray.size
 
                     for (dcc in tempDccArray) {
-                        if (rpc.dataCollectionId == null || dcc.dataCollectionId == null) {
+                        val dcId = rpc.dataCollectionId
+                        if (dcId == null || dcc.dataCollectionId == null) {
                             continue
                         }
 
-                        val dc = DataCollection(rpc.dataCollectionId ?: return, false)
-                        if (dc.collectorDataCollectionId == dcc.dataCollectionId) {
+                        val dc = DataCollection(id = dcId)
+                        if (dc.id == dcc.dataCollectionId) {
                             z1++
                             Log.d(
                                 this::class.java.simpleName,
@@ -661,7 +661,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         } catch (ex: Exception) {
             ex.printStackTrace()
         } finally {
-            db.endTransaction()
+            // TODO: Eliminar db.endTransaction()
         }
 
         fill(backLevelSteps.last())
@@ -670,11 +670,11 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
     private fun evaluate(rc: RouteComposition, parameters: ArrayList<Parameter>): Any? {
         try {
-            if (rc.expression == null || (rc.expression ?: return null).trim().isEmpty()) {
+            if (rc.expression == null || rc.expression.trim().isEmpty()) {
                 return null
             }
 
-            val e = formatExpression(rc.expression ?: return null, parameters)
+            val e = formatExpression(rc.expression, parameters)
             return try {
                 val res = e.eval().toInt()
                 tempResult.firstOrNull { it.key == res }?.value ?: res
@@ -701,11 +701,11 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
         ///////////////////////////////////
         // Para controlar la transacción //
-        val db = DataBaseHelper.getReadableDb()
+        // TODO: Eliminar val db = DataBaseHelper.getReadableDb()
 
-        val attrCompDbHelper = AttributeCompositionDbHelper()
+        val attrCompDbHelper = AttributeCompositionRepository()
 
-        db.beginTransaction()
+        // TODO: Eliminar db.beginTransaction()
         try {
             for (p in par) {
                 var nextLetter = charValue.toChar().toString()
@@ -730,7 +730,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
                 if (attrComp!!.attributeCompositionTypeId == AttributeCompositionType.TypeOptions.id) {
                     var composition = ""
                     if (attrComp.composition != null) {
-                        composition = attrComp.composition!!.trim().trimEnd(';')
+                        composition = attrComp.composition.trim().trimEnd(';')
                     }
 
                     val allOptions = ArrayList(composition.split(';')).sorted()
@@ -749,11 +749,11 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
                 expression = expression.replace("[" + p.paramName + "]", nextLetter)
             }
 
-            db.setTransactionSuccessful()
+            // TODO: Eliminar db.setTransactionSuccessful()
         } catch (ex: Exception) {
             ex.printStackTrace()
         } finally {
-            db.endTransaction()
+            // TODO: Eliminar db.endTransaction()
         }
 
         // Reemplazar los resultados de tipo secuencia de niveles (ej.: '3,4')
@@ -842,7 +842,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             return
         }
 
-        // -4 - NIVELX
+        // -4 - NIVEL X
         //////////////////
         if (rc.trueResult == DcrResult.levelX.id) {
             if (result != null) {
@@ -991,11 +991,11 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
     private fun fill(level: Int) {
         // Sólo si todavía no fueron cargados.
         // Si accede a una nueva ruta no estarán cargados todavía
-        val routeId = route?.routeId ?: return
+        val routeId = route?.id ?: return
 
         if (routeComposition == null) {
             Log.d(this::class.java.simpleName, getString(R.string.obtaining_route_composition))
-            routeComposition = RouteCompositionDbHelper().selectByRouteId(routeId)
+            routeComposition = ArrayList(RouteCompositionRepository().selectByRouteId(routeId))
         }
 
         if ((routeComposition?.size ?: 0) <= 0) {
@@ -1008,7 +1008,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             return
         }
 
-        val routeProcessId = routeProcess?.collectorRouteProcessId ?: return
+        val routeProcessId = routeProcess?.id ?: return
 
         try {
             GetRouteProcessContent(
@@ -1028,7 +1028,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
     private fun skip() {
         val rpc = adapter?.currentRpc() ?: return
 
-        if (rpc.routeProcessStatusId == RouteProcessStatus.processed.id) {
+        if (rpc.processStatusId == RouteProcessStatus.processed.id) {
             makeText(
                 binding.root, getContext().getString(R.string.already_processed), SnackBarType.INFO
             )
@@ -1085,10 +1085,10 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         dc: DataCollection?,
         refreshLater: Boolean = false,
     ) {
-        rpc.routeProcessStatusId = s.id
+        rpc.processStatusId = s.id
 
         if (dc != null && s != RouteProcessStatus.notProcessed) {
-            rpc.dataCollectionId = dc.collectorDataCollectionId
+            rpc.dataCollectionId = dc.id
         } else {
             rpc.dataCollectionId = null
         }
@@ -1103,7 +1103,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         }
 
         if (!refreshLater) {
-            val index = adapter?.getIndexById(rpc.routeProcessContentId)
+            val index = adapter?.getIndexById(rpc.id)
             if (index != null) adapter?.notifyItemChanged(index, PAYLOADS.STATUS_CHANGE)
         }
 
@@ -1119,7 +1119,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             val rpc = adapter?.currentRpc()
 
             if (rpc != null) {
-                if (rpc.routeProcessStatusId != RouteProcessStatus.processed.id) {
+                if (rpc.processStatusId != RouteProcessStatus.processed.id) {
                     makeText(
                         binding.root,
                         getContext().getString(R.string.not_processed),
@@ -1156,11 +1156,13 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
     private fun positiveReentry() {
         val rpc = adapter?.currentRpc() ?: return
-        val dcId = rpc.dataCollectionId ?: return
+        val dcId = rpc.dataCollectionId
 
-        DataCollectionDbHelper().deleteById(dcId)
-        DataCollectionContentDbHelper().deleteByDataCollectionId(dcId)
-        RouteProcessStepsDbHelper().deleteByCollectorDataCollectionId(dcId)
+        if (dcId != null) {
+            DataCollectionRepository().deleteById(dcId)
+            DataCollectionContentRepository().deleteByDataCollectionId(dcId)
+            RouteProcessStepsRepository().deleteByCollectorDataCollectionId(dcId)
+        }
 
         updateStatus(rpc = rpc, s = RouteProcessStatus.notProcessed, dc = null)
 
@@ -1171,9 +1173,11 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
     private fun detail() {
         val rpc = adapter?.currentRpc() ?: return
+        val assetId = rpc.assetId
+        val waId = rpc.warehouseAreaId
 
-        if (rpc.assetId != null) {
-            val tempAsset = AssetDbHelper().selectById(rpc.assetId)
+        if (assetId != null) {
+            val tempAsset = AssetRepository().selectById(assetId)
             if (tempAsset != null) {
                 if (!rejectNewInstances) {
                     rejectNewInstances = true
@@ -1184,8 +1188,8 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
                     startActivity(intent)
                 }
             }
-        } else if (rpc.warehouseAreaId != null) {
-            val tempWa = WarehouseAreaDbHelper().selectById(rpc.warehouseAreaId)
+        } else if (waId != null) {
+            val tempWa = WarehouseAreaRepository().selectById(waId)
             if (tempWa != null) {
                 if (!rejectNewInstances) {
                     rejectNewInstances = true
@@ -1201,7 +1205,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
     private fun currentData() {
         val rpc = adapter?.currentRpc() ?: return
-        val dcId = rpc.dataCollectionId ?: return
+        val dcId = rpc.dataCollectionId
         if (dcId == 0L) {
             makeText(binding.root, getContext().getString(R.string.not_processed), SnackBarType.INFO)
             return
@@ -1222,7 +1226,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
         val rpc = adapter?.currentRpc() ?: return
 
-        if (rpc.routeProcessStatusId == RouteProcessStatus.processed.id) {
+        if (rpc.processStatusId == RouteProcessStatus.processed.id) {
             makeText(
                 binding.root, getContext().getString(R.string.already_processed), SnackBarType.INFO
             )
@@ -1236,7 +1240,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
     private fun processRouteProcessContent() {
         val rpc = adapter?.currentRpc() ?: return
 
-        if (rpc.routeProcessStatusId != RouteProcessStatus.processed.id) {
+        if (rpc.processStatusId != RouteProcessStatus.processed.id) {
             if (!rejectNewInstances) {
                 rejectNewInstances = true
 
@@ -1500,7 +1504,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         }
 
         // Contenidos recolectados
-        val dcCont = dc.contents
+        val dcCont = dc.contents()
 
         // Tomar los parámetros devueltos por la regla y sus valores
         // Formato de los parámetros en las rutas es igual al de las reglas, pero se
@@ -1514,7 +1518,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
         val parameters: ArrayList<Parameter> = ArrayList()
         for (c in dcCont) {
-            if (c.attributeCompositionId <= 0) {
+            if ((c.attributeCompositionId ?: 0) <= 0) {
                 continue
             }
 
@@ -1620,7 +1624,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         }
         // endregion
 
-        // region -4 - NIVELX
+        // region -4 - NIVEL X
         //////////////////
         if (rc.trueResult == DcrResult.levelX.id || rc.falseResult == DcrResult.levelX.id) {
             if (result != null) {
@@ -1742,8 +1746,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
                 searchWarehouseAreaId = true,
                 searchAssetCode = true,
                 searchAssetSerial = true,
-                searchAssetEan = true,
-                validateId = true
+                searchAssetEan = true
             )
 
             if (sc.codeFound && sc.asset != null && sc.labelNbr == 0) {
@@ -1776,7 +1779,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             if (sc.asset != null) {
                 tempCode = (sc.asset ?: return).code
             } else if (sc.warehouseArea != null) {
-                tempCode = (sc.warehouseArea ?: return).warehouseAreaId.toString()
+                tempCode = (sc.warehouseArea ?: return).id.toString()
             }
 
             var rpc: RouteProcessContent? = null
@@ -1784,11 +1787,11 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             if (adapter != null && allItems.any()) {
                 // Buscar primero en el adaptador de la lista
                 (0 until adapter!!.itemCount).map { adapter!!.getContentByIndex(it) }.filter {
-                    it != null && (sc.asset != null && it.assetCode != null && it.assetCode == tempCode || sc.warehouseArea != null && it.warehouseAreaId != null && it.warehouseAreaId.toString() == tempCode)
+                    it != null && (sc.asset != null && it.assetCode == tempCode || sc.warehouseArea != null && it.warehouseAreaId != null && it.warehouseAreaId.toString() == tempCode)
                 }.forEach {
                     // Process the ROW
                     rpc = if ((it
-                            ?: return@forEach).routeProcessStatusId == RouteProcessStatus.notProcessed.id
+                            ?: return@forEach).processStatusId == RouteProcessStatus.notProcessed.id
                     ) {
                         val res = this.getString(R.string.ok)
                         makeText(binding.root, res, SUCCESS)
@@ -1829,7 +1832,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
         val currentRpc = adapter?.currentRpc()
         if (currentRpc != null) {
-            when (currentRpc.routeProcessStatusId) {
+            when (currentRpc.processStatusId) {
                 RouteProcessStatus.processed.id -> {
                     adapter?.selectNext()
                     if (!saving) demo()
@@ -1910,10 +1913,10 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
                     alertBinding.messageTextView.text = msg
                     alertBinding.progressBarHor.progress = 0
                     alertBinding.progressBarHor.max = 0
-                    alertBinding.progressBarHor.visibility = View.GONE
-                    alertBinding.progressTextView.visibility = View.GONE
+                    alertBinding.progressBarHor.visibility = GONE
+                    alertBinding.progressTextView.visibility = GONE
                     alertBinding.progressBarHor.progressTintList = ColorStateList.valueOf(appColor)
-                    alertBinding.progressBar.visibility = View.VISIBLE
+                    alertBinding.progressBar.visibility = VISIBLE
                     alertBinding.progressBar.progressTintList = ColorStateList.valueOf(appColor)
 
                     progressDialog?.setButton(DialogInterface.BUTTON_NEGATIVE,
@@ -1935,24 +1938,24 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
                         val t = "$progress / $total"
                         alertBinding.progressTextView.text = t
 
-                        if (alertBinding.progressBarHor.visibility == View.GONE) {
-                            alertBinding.progressBarHor.visibility = View.VISIBLE
-                            alertBinding.progressTextView.visibility = View.VISIBLE
+                        if (alertBinding.progressBarHor.visibility == GONE) {
+                            alertBinding.progressBarHor.visibility = VISIBLE
+                            alertBinding.progressTextView.visibility = VISIBLE
                         }
 
-                        if (alertBinding.progressBar.visibility == View.VISIBLE) alertBinding.progressBar.visibility =
-                            View.GONE
+                        if (alertBinding.progressBar.visibility == VISIBLE) alertBinding.progressBar.visibility =
+                            GONE
                     } else {
                         alertBinding.progressBar.progress = 0
                         alertBinding.progressBar.max = 0
                         alertBinding.progressBar.isIndeterminate = true
 
-                        if (alertBinding.progressBarHor.visibility == View.VISIBLE) {
-                            alertBinding.progressBarHor.visibility = View.GONE
-                            alertBinding.progressTextView.visibility = View.GONE
+                        if (alertBinding.progressBarHor.visibility == VISIBLE) {
+                            alertBinding.progressBarHor.visibility = GONE
+                            alertBinding.progressTextView.visibility = GONE
                         }
-                        if (alertBinding.progressBar.visibility == View.GONE) alertBinding.progressBar.visibility =
-                            View.VISIBLE
+                        if (alertBinding.progressBar.visibility == GONE) alertBinding.progressBar.visibility =
+                            VISIBLE
                     }
 
                     progressDialog?.setButton(DialogInterface.BUTTON_NEGATIVE,

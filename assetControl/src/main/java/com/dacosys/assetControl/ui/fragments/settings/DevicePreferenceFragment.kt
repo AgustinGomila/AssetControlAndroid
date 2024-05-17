@@ -64,7 +64,7 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
         }
         setPreferencesFromResource(R.xml.pref_devices, key)
 
-        // Llenar sólo el fragmento que se ve para evitar NullExceptions
+        // Llenar solo el fragmento que se ve para evitar NullExceptions
         when (key) {
             "printer" -> {
                 setPrinterPref()
@@ -305,7 +305,7 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
 
         swPrefBtPrinter?.setOnPreferenceChangeListener { _, newValue ->
             if (newValue == true) swPrefNetPrinter?.isChecked = false
-            else deviceListPref?.entry?.toString() ?: ""
+            else deviceListPref?.entry?.toString().orEmpty()
             true
         }
         swPrefNetPrinter?.setOnPreferenceChangeListener { _, newValue ->

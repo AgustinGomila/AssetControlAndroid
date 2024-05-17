@@ -42,7 +42,7 @@ class SyncRegistryType : Parcelable {
 
     constructor(parcel: Parcel) {
         id = parcel.readInt()
-        description = parcel.readString() ?: ""
+        description = parcel.readString().orEmpty()
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -82,29 +82,29 @@ class SyncRegistryType : Parcelable {
             SyncRegistryType(10, getContext().getString(R.string.manteinance_user), ConfEntry.acLastUpdateRepairman)
         val Repairshop =
             SyncRegistryType(11, getContext().getString(R.string.repairshop), ConfEntry.acLastUpdateRepairshop)
-        val AssetManteinance =
-            SyncRegistryType(12, getContext().getString(R.string.manteinance), ConfEntry.acLastUpdateAssetManteinance)
-        val AssetManteinanceLog = SyncRegistryType(
+        val AssetMaintenance =
+            SyncRegistryType(12, getContext().getString(R.string.manteinance), ConfEntry.acLastUpdateAssetMaintenance)
+        val AssetMaintenanceLog = SyncRegistryType(
             13,
             getContext().getString(R.string.manteinance_log),
-            ConfEntry.acLastUpdateAssetManteinanceLog
+            ConfEntry.acLastUpdateAssetMaintenanceLog
         )
-        val ManteinanceType = SyncRegistryType(
+        val MaintenanceType = SyncRegistryType(
             14,
             getContext().getString(R.string.manteinance_type),
-            ConfEntry.acLastUpdateManteinanceType
+            ConfEntry.acLastUpdateMaintenanceType
         )
-        val ManteinanceTypeGroup = SyncRegistryType(
+        val MaintenanceTypeGroup = SyncRegistryType(
             15,
             getContext().getString(R.string.manteinance_group),
-            ConfEntry.acLastUpdateManteinanceTypeGroup
+            ConfEntry.acLastUpdateMaintenanceTypeGroup
         )
         val CostCentre =
             SyncRegistryType(16, getContext().getString(R.string.cost_centre), ConfEntry.acLastUpdateCostCentre)
-        val AssetManteinanceProgramed = SyncRegistryType(
+        val AssetMaintenanceProgramed = SyncRegistryType(
             17,
             getContext().getString(R.string.programed_manteinance),
-            ConfEntry.acLastUpdateAssetManteinanceProgramed
+            ConfEntry.acLastUpdateAssetMaintenanceProgramed
         )
         val DataCollectionRule =
             SyncRegistryType(18, getContext().getString(R.string.rules), ConfEntry.acLastUpdateDataCollectionRule)
@@ -152,12 +152,12 @@ class SyncRegistryType : Parcelable {
                 Provider,
                 Repairman,
                 Repairshop,
-                AssetManteinance,
-                AssetManteinanceLog,
-                ManteinanceType,
-                ManteinanceTypeGroup,
+                AssetMaintenance,
+                AssetMaintenanceLog,
+                MaintenanceType,
+                MaintenanceTypeGroup,
                 CostCentre,
-                AssetManteinanceProgramed,
+                AssetMaintenanceProgramed,
                 DataCollectionRule,
                 Attribute,
                 AttributeCategory,
@@ -219,7 +219,7 @@ class SyncRegistryType : Parcelable {
                 ItemCategory,
                 AssetReview,
                 WarehouseMovement,
-                AssetManteinance,
+                AssetMaintenance,
                 DataCollection,
                 RouteProcess
             )
@@ -239,7 +239,7 @@ class SyncRegistryType : Parcelable {
                 ItemCategory.id.toString(),
                 AssetReview.id.toString(),
                 WarehouseMovement.id.toString(),
-                AssetManteinance.id.toString(),
+                AssetMaintenance.id.toString(),
                 DataCollection.id.toString(),
                 RouteProcess.id.toString()
             )

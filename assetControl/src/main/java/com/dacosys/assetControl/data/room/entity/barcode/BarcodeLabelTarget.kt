@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.dacosys.assetControl.data.enums.barcode.BarcodeLabelTarget
 import com.dacosys.assetControl.data.room.entity.barcode.BarcodeLabelTarget.Entry
 
 @Entity(
@@ -21,13 +22,18 @@ import com.dacosys.assetControl.data.room.entity.barcode.BarcodeLabelTarget.Entr
 )
 data class BarcodeLabelTarget(
     @PrimaryKey
-    @ColumnInfo(name = Entry.ID) val id: Int,
-    @ColumnInfo(name = Entry.DESCRIPTION) val description: String
+    @ColumnInfo(name = Entry.ID) val id: Int = 0,
+    @ColumnInfo(name = Entry.DESCRIPTION) val description: String = ""
 ) {
     object Entry {
         const val TABLE_NAME = "barcode_label_target"
         const val ID = "_id"
         const val DESCRIPTION = "description"
     }
+
+    constructor(target: BarcodeLabelTarget) : this(
+        id = target.id,
+        description = target.description
+    )
 }
 

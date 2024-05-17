@@ -10,9 +10,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.model.asset.AssetStatus
-import com.dacosys.assetControl.data.model.category.ItemCategory
-import com.dacosys.assetControl.data.model.location.WarehouseArea
+import com.dacosys.assetControl.data.enums.asset.AssetStatus
+import com.dacosys.assetControl.data.room.entity.category.ItemCategory
+import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
 import com.dacosys.assetControl.databinding.AssetSelectFilterFragmentBinding
 import com.dacosys.assetControl.ui.activities.asset.CodeSelectDialogActivity
 import com.dacosys.assetControl.ui.activities.category.ItemCategorySelectActivity
@@ -110,10 +110,10 @@ class AssetSelectFilterFragment : Fragment() {
     }
 
     private fun loadBundleValues(b: Bundle) {
-        itemCategory = b.parcelable(argItemCategory)
-        warehouseArea = b.parcelable(argWarehouseArea)
-        itemCode = b.getString(argItemCode) ?: ""
-        if (b.containsKey(argOnlyActive)) onlyActive = b.getBoolean(argOnlyActive)
+        itemCategory = b.parcelable(ARG_ITEM_CATEGORY)
+        warehouseArea = b.parcelable(ARG_WAREHOUSE_AREA)
+        itemCode = b.getString(ARG_ITEM_CODE) ?: ""
+        if (b.containsKey(ARG_ONLY_ACTIVE)) onlyActive = b.getBoolean(ARG_ONLY_ACTIVE)
 
         visibleStatusArray.clear()
         if (b.containsKey("visibleStatusArray")) {
@@ -138,22 +138,22 @@ class AssetSelectFilterFragment : Fragment() {
             Preference.assetSelectFragmentVisibleStatus.key,
             Preference.assetSelectFragmentVisibleStatus.defaultValue as ArrayList<String>
         )
-        if (set == null) set = AssetStatus.getAllIdAsString().toSet()
+        if (set == null) set = AssetStatus.getAll().map { it.id.toString() }.toSet()
 
         for (i in set) {
             val status = AssetStatus.getById(i.toInt())
-            if (status != null && !visibleStatusArray.contains(status)) {
+            if (!visibleStatusArray.contains(status)) {
                 visibleStatusArray.add(status)
             }
         }
     }
 
     private fun saveBundleValues(b: Bundle) {
-        b.putBoolean(argOnlyActive, onlyActive)
-        b.putString(argItemCode, itemCode)
-        b.putParcelable(argItemCategory, itemCategory)
-        b.putParcelable(argWarehouseArea, warehouseArea)
-        b.putParcelableArrayList(argVisibleStatusArray, visibleStatusArray)
+        b.putBoolean(ARG_ONLY_ACTIVE, onlyActive)
+        b.putString(ARG_ITEM_CODE, itemCode)
+        b.putParcelable(ARG_ITEM_CATEGORY, itemCategory)
+        b.putParcelable(ARG_WAREHOUSE_AREA, warehouseArea)
+        b.putParcelableArrayList(ARG_VISIBLE_STATUS_ARRAY, visibleStatusArray)
     }
 
     private var _binding: AssetSelectFilterFragmentBinding? = null
@@ -236,8 +236,8 @@ class AssetSelectFilterFragment : Fragment() {
         val intent = Intent(requireContext(), CodeSelectDialogActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
         intent.putExtra("title", getString(R.string.search_by_code_description_ean))
-        intent.putExtra(argItemCode, itemCode)
-        intent.putExtra(argVisibleStatusArray, visibleStatusArray)
+        intent.putExtra(ARG_ITEM_CODE, itemCode)
+        intent.putExtra(ARG_VISIBLE_STATUS_ARRAY, visibleStatusArray)
         intent.putExtra("onlyActive", onlyActive)
         resultForItemSelect.launch(intent)
     }
@@ -247,7 +247,7 @@ class AssetSelectFilterFragment : Fragment() {
             val data = it?.data
             try {
                 if (it?.resultCode == AppCompatActivity.RESULT_OK && data != null) {
-                    itemCode = data.getStringExtra(argItemCode) ?: return@registerForActivityResult
+                    itemCode = data.getStringExtra(ARG_ITEM_CODE) ?: return@registerForActivityResult
 
                     setCodeText()
                     sendMessage()
@@ -263,7 +263,7 @@ class AssetSelectFilterFragment : Fragment() {
     private fun showLocationSelectActivity() {
         val intent = Intent(requireContext(), LocationSelectActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-        intent.putExtra(argWarehouseArea, warehouseArea)
+        intent.putExtra(ARG_WAREHOUSE_AREA, warehouseArea)
         intent.putExtra("title", getString(R.string.select_location))
         intent.putExtra("warehouseVisible", true)
         intent.putExtra("warehouseAreaVisible", true)
@@ -277,7 +277,7 @@ class AssetSelectFilterFragment : Fragment() {
             try {
                 if (it?.resultCode == AppCompatActivity.RESULT_OK && data != null) {
                     warehouseArea =
-                        Parcels.unwrap<WarehouseArea>(data.parcelable(argWarehouseArea))
+                        Parcels.unwrap<WarehouseArea>(data.parcelable(ARG_WAREHOUSE_AREA))
                             ?: return@registerForActivityResult
 
                     setWarehouseAreaText()
@@ -294,7 +294,7 @@ class AssetSelectFilterFragment : Fragment() {
     private fun showItemCategorySelectActivity() {
         val intent = Intent(requireContext(), ItemCategorySelectActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-        intent.putExtra(argItemCategory, itemCategory)
+        intent.putExtra(ARG_ITEM_CATEGORY, itemCategory)
         intent.putExtra("title", getString(R.string.select_category))
         intent.putExtra("onlyActive", onlyActive)
         resultForCategorySelect.launch(intent)
@@ -306,7 +306,7 @@ class AssetSelectFilterFragment : Fragment() {
             try {
                 if (it?.resultCode == AppCompatActivity.RESULT_OK && data != null) {
                     itemCategory =
-                        Parcels.unwrap<ItemCategory>(data.parcelable(argItemCategory))
+                        Parcels.unwrap<ItemCategory>(data.parcelable(ARG_ITEM_CATEGORY))
                             ?: return@registerForActivityResult
 
                     setCategoryText()
@@ -360,26 +360,26 @@ class AssetSelectFilterFragment : Fragment() {
 
     private fun setCategoryText() {
         activity?.runOnUiThread {
-            if (itemCategory == null) {
+            val ic = itemCategory
+            if (ic == null) {
                 binding.itemCategoryTextView.typeface = Typeface.DEFAULT
                 binding.itemCategoryTextView.text = getString(R.string.search_by_category)
             } else {
                 binding.itemCategoryTextView.typeface = Typeface.DEFAULT_BOLD
-                binding.itemCategoryTextView.text =
-                    (itemCategory ?: return@runOnUiThread).description
+                binding.itemCategoryTextView.text = ic.description
             }
         }
     }
 
     private fun setWarehouseAreaText() {
         activity?.runOnUiThread {
-            if (warehouseArea == null) {
+            val wa = warehouseArea
+            if (wa == null) {
                 binding.warehouseAreaTextView.typeface = Typeface.DEFAULT
                 binding.warehouseAreaTextView.text = getString(R.string.search_by_area)
             } else {
                 binding.warehouseAreaTextView.typeface = Typeface.DEFAULT_BOLD
-                binding.warehouseAreaTextView.text =
-                    (warehouseArea ?: return@runOnUiThread).description
+                binding.warehouseAreaTextView.text = wa.description
             }
         }
     }
@@ -387,11 +387,11 @@ class AssetSelectFilterFragment : Fragment() {
     companion object {
 
         // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-        private const val argItemCode = "itemCode"
-        private const val argItemCategory = "itemCategory"
-        private const val argWarehouseArea = "warehouseArea"
-        private const val argOnlyActive = "onlyActive"
-        private const val argVisibleStatusArray = "visibleStatusArray"
+        private const val ARG_ITEM_CODE = "itemCode"
+        private const val ARG_ITEM_CATEGORY = "itemCategory"
+        private const val ARG_WAREHOUSE_AREA = "warehouseArea"
+        private const val ARG_ONLY_ACTIVE = "onlyActive"
+        private const val ARG_VISIBLE_STATUS_ARRAY = "visibleStatusArray"
 
         /**
          * Use this factory method to create a new instance of
@@ -405,10 +405,10 @@ class AssetSelectFilterFragment : Fragment() {
             val fragment = AssetSelectFilterFragment()
 
             val args = Bundle()
-            args.putBoolean(argOnlyActive, true)
-            args.putString(argItemCode, itemCode)
-            args.putParcelable(argItemCategory, itemCategory)
-            args.putParcelable(argWarehouseArea, warehouseArea)
+            args.putBoolean(ARG_ONLY_ACTIVE, true)
+            args.putString(ARG_ITEM_CODE, itemCode)
+            args.putParcelable(ARG_ITEM_CATEGORY, itemCategory)
+            args.putParcelable(ARG_WAREHOUSE_AREA, warehouseArea)
 
             fragment.arguments = args
             return fragment

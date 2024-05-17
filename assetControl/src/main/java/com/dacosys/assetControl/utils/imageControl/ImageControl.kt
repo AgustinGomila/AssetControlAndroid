@@ -26,7 +26,7 @@ class ImageControl {
 
             val currentUser = currentUser()
             if (currentUser != null) {
-                imageControl.userId = currentUser.userId
+                imageControl.userId = currentUser.id
                 imageControl.userName = currentUser.name
             }
 

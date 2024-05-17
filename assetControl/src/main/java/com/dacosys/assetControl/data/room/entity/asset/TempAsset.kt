@@ -3,17 +3,17 @@ package com.dacosys.assetControl.data.room.entity.asset
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.dacosys.assetControl.data.room.entity.asset.TempAsset.TempAssetEntry
+import com.dacosys.assetControl.data.room.entity.asset.TempAsset.Entry
 
-@Entity(tableName = TempAssetEntry.TABLE_NAME)
+@Entity(tableName = Entry.TABLE_NAME)
 data class TempAsset(
-    @PrimaryKey
-    @ColumnInfo(name = TempAssetEntry.TEMP_ID)
-    val tempId: Long
+    @PrimaryKey @ColumnInfo(name = Entry.TEMP_ID) val tempId: Long
 ) {
-    object TempAssetEntry {
-        const val TABLE_NAME = "temp_asset"
-        const val TEMP_ID = "temp__id"
+    object Entry {
+        const val TEMP_PREFIX = "temp_"
+
+        const val TABLE_NAME = "${TEMP_PREFIX}_asset"
+        const val TEMP_ID = "${TEMP_PREFIX}_id"
     }
 }
 

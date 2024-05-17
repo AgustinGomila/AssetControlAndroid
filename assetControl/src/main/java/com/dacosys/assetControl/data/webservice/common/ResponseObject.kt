@@ -11,8 +11,8 @@ class ResponseObject() : Parcelable {
 
     constructor(parcel: Parcel) : this() {
         resultCode = parcel.readInt()
-        caption = parcel.readString() ?: ""
-        message = parcel.readString() ?: ""
+        caption = parcel.readString().orEmpty()
+        message = parcel.readString().orEmpty()
     }
 
     fun getBySoapObject(so: SoapObject): ResponseObject {

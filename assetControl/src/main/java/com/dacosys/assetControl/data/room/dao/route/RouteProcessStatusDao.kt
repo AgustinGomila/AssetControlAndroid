@@ -1,20 +1,24 @@
 package com.dacosys.assetControl.data.room.dao.route
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
 import com.dacosys.assetControl.data.room.entity.route.RouteProcessStatus
 import com.dacosys.assetControl.data.room.entity.route.RouteProcessStatus.Entry
-import kotlinx.coroutines.flow.Flow
 
 // DAO
 @Dao
 interface RouteProcessStatusDao {
-    @Query("SELECT * FROM ${Entry.TABLE_NAME}")
-    fun getAllRouteProcessStatus(): Flow<List<RouteProcessStatus>>
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(statuses: List<RouteProcessStatus>)
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertRouteProcessStatus(routeProcessStatus: RouteProcessStatus)
 
-    @Delete
-    suspend fun deleteRouteProcessStatus(routeProcessStatus: RouteProcessStatus)
+    @Query("DELETE $BASIC_FROM")
+    suspend fun deleteAll()
+
+    companion object {
+        const val BASIC_FROM = "FROM ${Entry.TABLE_NAME}"
+    }
 }
 

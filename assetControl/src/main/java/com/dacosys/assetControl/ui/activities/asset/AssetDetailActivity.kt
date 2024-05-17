@@ -8,8 +8,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.AssetControlApp.Companion.currentUser
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.model.asset.Asset
-import com.dacosys.assetControl.data.model.table.Table
+import com.dacosys.assetControl.data.enums.common.Table
+import com.dacosys.assetControl.data.room.entity.asset.Asset
 import com.dacosys.assetControl.databinding.AssetDetailActivityBinding
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setupUI
@@ -94,7 +94,7 @@ class AssetDetailActivity : AppCompatActivity() {
             binding.warehouseAreaTextView.text = (asset ?: return).warehouseAreaStr
             binding.origWarehouseTextView.text = (asset ?: return).originalWarehouseStr
             binding.origWarehouseAreaTextView.text = (asset ?: return).originalWarehouseAreaStr
-            binding.assetStatusTextView.text = ((asset ?: return).assetStatus ?: return).description
+            binding.assetStatusTextView.text = (asset ?: return).assetStatus.description
             binding.manufacturerTextView.text = (asset ?: return).manufacturer
             binding.modelTextView.text = (asset ?: return).model
             binding.serialNumberTextView.text = (asset ?: return).serialNumber
@@ -118,7 +118,7 @@ class AssetDetailActivity : AppCompatActivity() {
         val tempAsset = asset ?: return
         var description = tempAsset.description
         val table = Table.routeProcess
-        val id = tempAsset.assetId
+        val id = tempAsset.id
 
         description = "${table.tableName}: $description"
         if (description.length > 255) {
@@ -129,7 +129,7 @@ class AssetDetailActivity : AppCompatActivity() {
 
         if (imageControlFragment == null) {
             imageControlFragment = ImageControlButtonsFragment.newInstance(
-                tableId = table.tableId.toLong(),
+                tableId = table.id.toLong(),
                 objectId1 = id.toString()
             )
 
@@ -157,7 +157,7 @@ class AssetDetailActivity : AppCompatActivity() {
                 }
             }
         } else {
-            imageControlFragment?.setTableId(table.tableId)
+            imageControlFragment?.setTableId(table.id)
             imageControlFragment?.setObjectId1(id)
             imageControlFragment?.setObjectId2(null)
 

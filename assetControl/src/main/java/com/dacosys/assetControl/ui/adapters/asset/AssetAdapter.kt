@@ -12,8 +12,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat.getColor
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.model.asset.Asset
-import com.dacosys.assetControl.data.model.asset.AssetStatus
+import com.dacosys.assetControl.data.enums.asset.AssetStatus
+import com.dacosys.assetControl.data.room.entity.asset.Asset
 import com.dacosys.assetControl.ui.adapters.asset.AssetRecyclerAdapter.FilterOptions
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.getBestContrastColor
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.isTablet
@@ -79,11 +79,11 @@ class AssetAdapter(
 
     fun setChecked(item: Asset, isChecked: Boolean, suspendRefresh: Boolean = false) {
         if (isChecked) {
-            if (!checkedIdArray.contains(item.assetId)) {
-                checkedIdArray.add(item.assetId)
+            if (!checkedIdArray.contains(item.id)) {
+                checkedIdArray.add(item.id)
             }
         } else {
-            checkedIdArray.remove(item.assetId)
+            checkedIdArray.remove(item.id)
         }
 
         if (!suspendRefresh) {
@@ -194,7 +194,7 @@ class AssetAdapter(
 
                     //Important to remove previous checkedChangedListener before calling setChecked
                     holder.checkBox?.setOnCheckedChangeListener(null)
-                    holder.checkBox?.isChecked = checkedIdArray.contains(item.assetId)
+                    holder.checkBox?.isChecked = checkedIdArray.contains(item.id)
                     holder.checkBox?.tag = position
                     holder.checkBox?.setOnLongClickListener(pressHoldListener)
                     holder.checkBox?.setOnTouchListener(pressTouchListener)
@@ -218,7 +218,7 @@ class AssetAdapter(
         val whitesmoke = getColor(context.resources, R.color.whitesmoke, null)
 
         when (item.active) {
-            true -> {
+            1 -> {
                 v.setBackgroundColor(whitesmoke)
                 holder.codeCheckedTextView?.setTextColor(defaultForeColor)
                 holder.descriptionCheckedTextView?.setTextColor(defaultForeColor)
@@ -396,21 +396,21 @@ class AssetAdapter(
         fun sortItems(originalList: ArrayList<Asset>): ArrayList<Asset> {
             // Get all the parent groups
             val groups = originalList.sortedWith(
-                compareBy({ it.parentAssetId },
+                compareBy({ it.parentId },
                     { it.code },
                     { it.description },
                     { it.serialNumber },
                     { it.ean })
-            ).groupBy { it.parentAssetId }
+            ).groupBy { it.parentId }
 
             // Recursively get the children
             fun follow(asset: Asset): List<Asset> {
-                return listOf(asset) + (groups[asset.assetId] ?: emptyList()).flatMap(::follow)
+                return listOf(asset) + (groups[asset.id] ?: emptyList()).flatMap(::follow)
             }
 
             // Run the follow method on each of the roots
-            return originalList.map { it.parentAssetId }
-                .subtract(originalList.map { it.assetId }.toSet())
+            return originalList.map { it.parentId }
+                .subtract(originalList.map { it.id }.toSet())
                 .flatMap { groups[it] ?: emptyList() }.flatMap(::follow) as ArrayList<Asset>
         }
 

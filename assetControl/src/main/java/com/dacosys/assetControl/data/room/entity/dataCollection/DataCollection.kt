@@ -1,10 +1,12 @@
 package com.dacosys.assetControl.data.room.entity.dataCollection
 
-import androidx.room.ColumnInfo
-import androidx.room.Entity
-import androidx.room.Index
-import androidx.room.PrimaryKey
+import android.os.Parcel
+import android.os.Parcelable
+import androidx.room.*
 import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollection.Entry
+import com.dacosys.assetControl.data.room.repository.dataCollection.DataCollectionContentRepository
+import com.dacosys.assetControl.utils.Statics.Companion.toDate
+import java.util.*
 
 @Entity(
     tableName = Entry.TABLE_NAME,
@@ -41,18 +43,56 @@ import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollection.E
 )
 data class DataCollection(
     @PrimaryKey
-    @ColumnInfo(name = Entry.DATA_COLLECTION_ID) val dataCollectionId: Long,
-    @ColumnInfo(name = Entry.ASSET_ID) val assetId: Long,
-    @ColumnInfo(name = Entry.WAREHOUSE_ID) val warehouseId: Long,
-    @ColumnInfo(name = Entry.WAREHOUSE_AREA_ID) val warehouseAreaId: Long,
-    @ColumnInfo(name = Entry.USER_ID) val userId: Long,
-    @ColumnInfo(name = Entry.DATE_START) val dateStart: Long?,
-    @ColumnInfo(name = Entry.DATE_END) val dateEnd: Long?,
-    @ColumnInfo(name = Entry.COMPLETED) val completed: Int,
-    @ColumnInfo(name = Entry.TRANSFERRED_DATE) val transferredDate: Long?,
-    @ColumnInfo(name = Entry.ID) val id: Long,
-    @ColumnInfo(name = Entry.COLLECTOR_ROUTE_PROCESS_ID) val collectorRouteProcessId: Long
-) {
+    @ColumnInfo(name = Entry.DATA_COLLECTION_ID) var dataCollectionId: Long = 0L,
+    @ColumnInfo(name = Entry.ASSET_ID) var assetId: Long? = null,
+    @ColumnInfo(name = Entry.WAREHOUSE_ID) var warehouseId: Long? = null,
+    @ColumnInfo(name = Entry.WAREHOUSE_AREA_ID) var warehouseAreaId: Long? = null,
+    @ColumnInfo(name = Entry.USER_ID) var userId: Long = 0L,
+    @ColumnInfo(name = Entry.DATE_START) var dateStart: Date? = null,
+    @ColumnInfo(name = Entry.DATE_END) var dateEnd: Date? = null,
+    @ColumnInfo(name = Entry.COMPLETED) var completed: Int = 0,
+    @ColumnInfo(name = Entry.TRANSFERRED_DATE) var transferredDate: Date? = null,
+    @ColumnInfo(name = Entry.ID) var id: Long = 0L,
+    @ColumnInfo(name = Entry.COLLECTOR_ROUTE_PROCESS_ID) var collectorRouteProcessId: Long = 0L,
+    @Ignore var assetStr: String = "",
+    @Ignore var assetCode: String = "",
+    @Ignore var warehouseStr: String = "",
+    @Ignore var warehouseAreaStr: String = "",
+) : Parcelable {
+
+    @Ignore
+    private var contentsRead: Boolean = false
+
+    @Ignore
+    private var mContents: ArrayList<DataCollectionContent> = arrayListOf()
+
+    fun contents(): ArrayList<DataCollectionContent> {
+        if (contentsRead) return mContents
+        else {
+            mContents = ArrayList(DataCollectionContentRepository().selectByDataCollectionId(this.id))
+            contentsRead = true
+            return mContents
+        }
+    }
+
+    constructor(parcel: Parcel) : this(
+        dataCollectionId = parcel.readLong(),
+        assetId = parcel.readValue(Long::class.java.classLoader) as? Long,
+        warehouseId = parcel.readValue(Long::class.java.classLoader) as? Long,
+        warehouseAreaId = parcel.readValue(Long::class.java.classLoader) as? Long,
+        userId = parcel.readLong(),
+        dateStart = parcel.readString().orEmpty().toDate(),
+        dateEnd = parcel.readString().orEmpty().toDate(),
+        completed = parcel.readInt(),
+        transferredDate = parcel.readString().orEmpty().toDate(),
+        id = parcel.readLong(),
+        collectorRouteProcessId = parcel.readLong(),
+        assetStr = parcel.readString().orEmpty(),
+        assetCode = parcel.readString().orEmpty(),
+        warehouseStr = parcel.readString().orEmpty(),
+        warehouseAreaStr = parcel.readString().orEmpty()
+    )
+
     object Entry {
         const val TABLE_NAME = "data_collection"
         const val DATA_COLLECTION_ID = "data_collection_id"
@@ -66,6 +106,44 @@ data class DataCollection(
         const val TRANSFERRED_DATE = "transfered_date"
         const val ID = "_id"
         const val COLLECTOR_ROUTE_PROCESS_ID = "collector_route_process_id"
+
+        const val ASSET_STR = "asset_str"
+        const val ASSET_CODE = "asset_code"
+        const val WAREHOUSE_STR = "warehouse_str"
+        const val WAREHOUSE_AREA_STR = "warehouse_area_str"
     }
+
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeLong(dataCollectionId)
+        parcel.writeValue(assetId)
+        parcel.writeValue(warehouseId)
+        parcel.writeValue(warehouseAreaId)
+        parcel.writeLong(userId)
+        parcel.writeString(dateStart?.toString())
+        parcel.writeString(dateEnd?.toString())
+        parcel.writeInt(completed)
+        parcel.writeString(transferredDate?.toString())
+        parcel.writeLong(id)
+        parcel.writeLong(collectorRouteProcessId)
+        parcel.writeString(assetStr)
+        parcel.writeString(assetCode)
+        parcel.writeString(warehouseStr)
+        parcel.writeString(warehouseAreaStr)
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    companion object CREATOR : Parcelable.Creator<DataCollection> {
+        override fun createFromParcel(parcel: Parcel): DataCollection {
+            return DataCollection(parcel)
+        }
+
+        override fun newArray(size: Int): Array<DataCollection?> {
+            return arrayOfNulls(size)
+        }
+    }
+
 }
 

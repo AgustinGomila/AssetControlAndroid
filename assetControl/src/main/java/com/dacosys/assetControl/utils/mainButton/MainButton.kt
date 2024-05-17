@@ -2,7 +2,7 @@ package com.dacosys.assetControl.utils.mainButton
 
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.model.user.permission.PermissionEntry
+import com.dacosys.assetControl.data.enums.permission.PermissionEntry
 import java.util.*
 
 /**
@@ -90,11 +90,11 @@ class MainButton(
             R.drawable.ic_crud,
             PermissionEntry.CollButtonCRUD
         )
-        var AssetManteinance = MainButton(
+        var AssetMaintenance = MainButton(
             9,
             getContext().getString(R.string.maintenances),
             null,
-            PermissionEntry.CollButtonAssetManteinance
+            PermissionEntry.CollButtonAssetMaintenance
         )
         var Route = MainButton(
             10,
@@ -127,7 +127,7 @@ class MainButton(
                 // RfidLink, <-- Está dentro del Asset CRUD
                 CRUD,
                 PrintLabel,
-                AssetManteinance,
+                AssetMaintenance,
                 Route,
                 DataCollection,
                 Configuration
@@ -149,7 +149,7 @@ class MainButton(
                 // RfidLink, <-- Está dentro del Asset CRUD
                 CRUD,
                 PrintLabel,
-                AssetManteinance,
+                AssetMaintenance,
                 Route,
                 DataCollection
             )

@@ -29,7 +29,7 @@ class QRConfigType : Parcelable {
 
     constructor(parcel: Parcel) {
         id = parcel.readInt()
-        description = parcel.readString() ?: ""
+        description = parcel.readString().orEmpty()
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {

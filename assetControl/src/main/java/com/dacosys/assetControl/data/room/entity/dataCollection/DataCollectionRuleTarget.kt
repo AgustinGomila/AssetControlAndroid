@@ -3,6 +3,7 @@ package com.dacosys.assetControl.data.room.entity.dataCollection
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
+import androidx.room.PrimaryKey
 import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionRuleTarget.Entry
 
 @Entity(
@@ -31,6 +32,7 @@ import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionRu
     ]
 )
 data class DataCollectionRuleTarget(
+    @PrimaryKey(autoGenerate = true) @ColumnInfo(name = Entry.ID) val id: Long = 0,
     @ColumnInfo(name = Entry.DATA_COLLECTION_RULE_ID) val dataCollectionRuleId: Long,
     @ColumnInfo(name = Entry.ASSET_ID) val assetId: Long?,
     @ColumnInfo(name = Entry.WAREHOUSE_ID) val warehouseId: Long?,
@@ -39,6 +41,7 @@ data class DataCollectionRuleTarget(
 ) {
     object Entry {
         const val TABLE_NAME = "data_collection_rule_target"
+        const val ID = "_id"
         const val DATA_COLLECTION_RULE_ID = "data_collection_rule_id"
         const val ASSET_ID = "asset_id"
         const val WAREHOUSE_ID = "warehouse_id"

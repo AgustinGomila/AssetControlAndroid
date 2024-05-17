@@ -23,13 +23,13 @@ import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.dacosys.assetControl.AssetControlApp.Companion.currentUser
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.dataBase.movement.WarehouseMovementContentDbHelper
-import com.dacosys.assetControl.data.model.asset.AssetStatus
-import com.dacosys.assetControl.data.model.location.WarehouseArea
-import com.dacosys.assetControl.data.model.movement.WarehouseMovementContent
-import com.dacosys.assetControl.data.model.movement.WarehouseMovementContentStatus
-import com.dacosys.assetControl.data.model.status.ConfirmStatus
-import com.dacosys.assetControl.data.model.table.Table
+import com.dacosys.assetControl.data.enums.asset.AssetStatus
+import com.dacosys.assetControl.data.enums.common.ConfirmStatus
+import com.dacosys.assetControl.data.enums.common.Table
+import com.dacosys.assetControl.data.enums.movement.WarehouseMovementContentStatus
+import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
+import com.dacosys.assetControl.data.room.entity.movement.WarehouseMovementContent
+import com.dacosys.assetControl.data.room.repository.movement.TempMovementContentRepository
 import com.dacosys.assetControl.databinding.WarehouseMovementContentConfirmActivityBottomPanelCollapsedBinding
 import com.dacosys.assetControl.ui.activities.common.ObservationsActivity
 import com.dacosys.assetControl.ui.adapters.interfaces.Interfaces
@@ -157,12 +157,12 @@ class WmcConfirmActivity : AppCompatActivity(),
 
         // Cargamos la revisión desde la tabla temporal
         completeList.clear()
-        val tempCont = WarehouseMovementContentDbHelper().selectByTempId(1)
+        val tempCont = TempMovementContentRepository().selectByTempId(1)
         if (tempCont.any()) {
             val r: ArrayList<WarehouseMovementContent> = ArrayList()
             for (tempItem in tempCont) {
                 // Tanto los que se van a mover como los que se encontraron en el área
-                if (tempItem.warehouseAreaId != tempWarehouseArea?.warehouseAreaId ||
+                if (tempItem.warehouseAreaId != tempWarehouseArea?.id ||
                     tempItem.assetStatusId == AssetStatus.missing.id
                 ) {
                     r.add(tempItem)
@@ -355,7 +355,7 @@ class WmcConfirmActivity : AppCompatActivity(),
 
         if (imageControlFragment == null) {
             imageControlFragment = ImageControlButtonsFragment.newInstance(
-                tableId = Table.warehouseMovement.tableId.toLong(),
+                tableId = Table.warehouseMovement.id.toLong(),
                 objectId1 = "0"
             )
 
@@ -384,7 +384,7 @@ class WmcConfirmActivity : AppCompatActivity(),
                 }
             }
         } else {
-            imageControlFragment?.setTableId(Table.warehouseMovement.tableId)
+            imageControlFragment?.setTableId(Table.warehouseMovement.id)
             imageControlFragment?.setObjectId1(0)
             imageControlFragment?.setObjectId2(null)
 
@@ -433,7 +433,7 @@ class WmcConfirmActivity : AppCompatActivity(),
                     recyclerView = binding.recyclerView,
                     fullList = contents,
                     checkedIdArray = checkedIdArray,
-                    visibleStatus = WarehouseMovementContentStatus.getAll()
+                    visibleStatus = ArrayList(WarehouseMovementContentStatus.getAll())
                 )
 
                 adapter?.refreshListeners(dataSetChangedListener = this)

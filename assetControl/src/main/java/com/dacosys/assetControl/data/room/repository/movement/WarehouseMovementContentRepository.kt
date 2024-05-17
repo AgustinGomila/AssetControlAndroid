@@ -1,34 +1,65 @@
 package com.dacosys.assetControl.data.room.repository.movement
 
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
+import com.dacosys.assetControl.R
+import com.dacosys.assetControl.data.enums.common.SaveProgress
 import com.dacosys.assetControl.data.room.dao.movement.WarehouseMovementContentDao
 import com.dacosys.assetControl.data.room.database.AcDatabase.Companion.database
+import com.dacosys.assetControl.data.room.entity.movement.WarehouseMovement
 import com.dacosys.assetControl.data.room.entity.movement.WarehouseMovementContent
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.withContext
+import com.dacosys.assetControl.network.utils.ProgressStatus
+import kotlinx.coroutines.runBlocking
 
 class WarehouseMovementContentRepository {
-    private val dao: WarehouseMovementContentDao by lazy {
-        database.warehouseMovementContentDao()
+    private val dao: WarehouseMovementContentDao
+        get() = database.warehouseMovementContentDao()
+
+    fun selectByWarehouseMovementId(wmId: Long) = dao.selectByWarehouseMovementId(wmId)
+
+
+    fun insert(
+        movement: WarehouseMovement,
+        contents: List<WarehouseMovementContent>,
+        progress: (SaveProgress) -> Unit
+    ) {
+        insert(movement.id, contents, progress)
     }
 
-    val allWarehouseMovementContents: Flow<List<WarehouseMovementContent>> = dao.getAllWarehouseMovementContents()
+    fun insert(id: Long, contents: List<WarehouseMovementContent>, progress: (SaveProgress) -> Unit) {
+        runBlocking {
+            // Set new ID
+            contents.forEach { it.warehouseMovementId = id }
 
-    suspend fun insert(content: WarehouseMovementContent) {
-        withContext(Dispatchers.IO) {
-            dao.insertWarehouseMovementContent(content)
+            val total = contents.size
+            dao.insert(contents) {
+                val asset = contents[it - 1]
+                progress.invoke(
+                    SaveProgress(
+                        msg = String.format(
+                            getContext().getString(R.string.adding_asset_),
+                            asset.code
+                        ),
+                        taskStatus = ProgressStatus.running.id,
+                        progress = it,
+                        total = total
+                    )
+                )
+            }
         }
     }
 
-    suspend fun update(content: WarehouseMovementContent) {
-        withContext(Dispatchers.IO) {
-            dao.updateWarehouseMovementContent(content)
+
+    fun update(content: WarehouseMovementContent) = runBlocking {
+        dao.update(content)
+    }
+
+    fun updateAssetId(newValue: Long, oldValue: Long) {
+        runBlocking {
+            dao.updateAssetId(newValue, oldValue)
         }
     }
 
-    suspend fun delete(content: WarehouseMovementContent) {
-        withContext(Dispatchers.IO) {
-            dao.deleteWarehouseMovementContent(content)
-        }
+    fun deleteTransferred() = runBlocking {
+        dao.deleteTransferred()
     }
 }

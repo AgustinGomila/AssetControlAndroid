@@ -5,24 +5,24 @@ import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.AssetControlApp.Companion.getUserId
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.dataBase.asset.AssetDbHelper
-import com.dacosys.assetControl.data.dataBase.category.ItemCategoryDbHelper
-import com.dacosys.assetControl.data.dataBase.datacollection.DataCollectionContentDbHelper
-import com.dacosys.assetControl.data.dataBase.datacollection.DataCollectionDbHelper
-import com.dacosys.assetControl.data.dataBase.location.WarehouseAreaDbHelper
-import com.dacosys.assetControl.data.dataBase.location.WarehouseDbHelper
-import com.dacosys.assetControl.data.dataBase.manteinance.AssetManteinanceDbHelper
-import com.dacosys.assetControl.data.dataBase.movement.WarehouseMovementContentDbHelper
-import com.dacosys.assetControl.data.dataBase.movement.WarehouseMovementDbHelper
-import com.dacosys.assetControl.data.dataBase.review.AssetReviewContentDbHelper
-import com.dacosys.assetControl.data.dataBase.review.AssetReviewDbHelper
-import com.dacosys.assetControl.data.dataBase.route.RouteProcessContentDbHelper
-import com.dacosys.assetControl.data.dataBase.route.RouteProcessDbHelper
-import com.dacosys.assetControl.data.dataBase.user.UserWarehouseAreaDbHelper
-import com.dacosys.assetControl.data.model.review.AssetReviewContentStatus
-import com.dacosys.assetControl.data.model.review.AssetReviewStatus
-import com.dacosys.assetControl.data.model.table.Table
-import com.dacosys.assetControl.data.model.user.User
+import com.dacosys.assetControl.data.enums.common.Table
+import com.dacosys.assetControl.data.enums.review.AssetReviewContentStatus
+import com.dacosys.assetControl.data.enums.review.AssetReviewStatus
+import com.dacosys.assetControl.data.room.repository.asset.AssetRepository
+import com.dacosys.assetControl.data.room.repository.category.ItemCategoryRepository
+import com.dacosys.assetControl.data.room.repository.dataCollection.DataCollectionContentRepository
+import com.dacosys.assetControl.data.room.repository.dataCollection.DataCollectionRepository
+import com.dacosys.assetControl.data.room.repository.location.WarehouseAreaRepository
+import com.dacosys.assetControl.data.room.repository.location.WarehouseRepository
+import com.dacosys.assetControl.data.room.repository.maintenance.AssetMaintenanceRepository
+import com.dacosys.assetControl.data.room.repository.movement.WarehouseMovementContentRepository
+import com.dacosys.assetControl.data.room.repository.movement.WarehouseMovementRepository
+import com.dacosys.assetControl.data.room.repository.review.AssetReviewContentRepository
+import com.dacosys.assetControl.data.room.repository.review.AssetReviewRepository
+import com.dacosys.assetControl.data.room.repository.route.RouteProcessContentRepository
+import com.dacosys.assetControl.data.room.repository.route.RouteProcessRepository
+import com.dacosys.assetControl.data.room.repository.user.UserRepository
+import com.dacosys.assetControl.data.room.repository.user.UserWarehouseAreaRepository
 import com.dacosys.assetControl.data.webservice.asset.AssetObject
 import com.dacosys.assetControl.data.webservice.asset.AssetWs
 import com.dacosys.assetControl.data.webservice.category.ItemCategoryObject
@@ -35,9 +35,9 @@ import com.dacosys.assetControl.data.webservice.location.WarehouseAreaObject
 import com.dacosys.assetControl.data.webservice.location.WarehouseAreaWs
 import com.dacosys.assetControl.data.webservice.location.WarehouseObject
 import com.dacosys.assetControl.data.webservice.location.WarehouseWs
-import com.dacosys.assetControl.data.webservice.manteinance.AssetManteinanceLogObject
-import com.dacosys.assetControl.data.webservice.manteinance.AssetManteinanceObject
-import com.dacosys.assetControl.data.webservice.manteinance.AssetManteinanceWs
+import com.dacosys.assetControl.data.webservice.maintenance.AssetMaintenanceLogObject
+import com.dacosys.assetControl.data.webservice.maintenance.AssetMaintenanceObject
+import com.dacosys.assetControl.data.webservice.maintenance.AssetMaintenanceWs
 import com.dacosys.assetControl.data.webservice.movement.WarehouseMovementContentObject
 import com.dacosys.assetControl.data.webservice.movement.WarehouseMovementObject
 import com.dacosys.assetControl.data.webservice.movement.WarehouseMovementWs
@@ -75,8 +75,19 @@ class SyncUpload(
     private fun checkConnection() {
         fun onConnectionResult(it: MySqlDateResult) {
             if (it.status == ProgressStatus.finished) {
+                val userId = getUserId()
+                if (userId == null) {
+                    onSyncTaskProgress.invoke(
+                        SyncProgress(
+                            msg = getContext().resources.getString(R.string.invalid_user),
+                            progressStatus = ProgressStatus.canceled
+                        )
+                    )
+                    return
+                }
+
                 scope.launch {
-                    doInBackground { onSyncFinish(it) }
+                    doInBackground(userId) { onSyncFinish(it) }
                 }
             } else if (it.status == ProgressStatus.crashed || it.status == ProgressStatus.canceled) {
                 onSyncTaskProgress.invoke(
@@ -115,16 +126,16 @@ class SyncUpload(
     }
 
     private var deferred: Deferred<Boolean>? = null
-    private suspend fun doInBackground(onResult: (Boolean) -> Unit) {
+    private suspend fun doInBackground(userId: Long, onResult: (Boolean) -> Unit) {
         var result = false
         coroutineScope {
-            deferred = async { suspendFunction() }
+            deferred = async { suspendFunction(userId) }
             result = deferred?.await() ?: false
         }
         onResult.invoke(result)
     }
 
-    private suspend fun suspendFunction(): Boolean = withContext(Dispatchers.IO) {
+    private suspend fun suspendFunction(userId: Long): Boolean = withContext(Dispatchers.IO) {
         onSyncTaskProgress.invoke(
             SyncProgress(
                 msg = getContext().getString(R.string.synchronization_starting),
@@ -139,7 +150,7 @@ class SyncUpload(
             warehouse()
             warehouseArea()
             asset()
-            assetReview()
+            assetReview(userId)
             warehouseMovement()
             dataCollection()
             routeProcess()
@@ -168,7 +179,7 @@ class SyncUpload(
                     warehouse()
                     warehouseArea()
                     asset()
-                    assetReview()
+                    assetReview(userId)
                     warehouseMovement()
                 }
 
@@ -180,7 +191,7 @@ class SyncUpload(
                     warehouseMovement()
                 }
 
-                SyncRegistryType.AssetManteinance -> {
+                SyncRegistryType.AssetMaintenance -> {
                     if (prefsGetBoolean(Preference.useAssetControlManteinance)) {
                         itemCategory()
                         warehouse()
@@ -260,20 +271,20 @@ class SyncUpload(
     }
 
     private fun removeOldData() {
-        RouteProcessDbHelper().deleteTransferred()
-        DataCollectionDbHelper().deleteOrphansTransferred()
-        AssetReviewDbHelper().deleteTransferred()
-        WarehouseMovementDbHelper().deleteTransferred()
+        RouteProcessRepository().deleteTransferred()
+        DataCollectionRepository().deleteOrphansTransferred()
+        AssetReviewRepository().deleteTransferred()
+        WarehouseMovementRepository().deleteTransferred()
     }
 
-    private fun assetReview() {
+    private fun assetReview(userId: Long) {
         val registryType = SyncRegistryType.AssetReview
         registryOnProcess.add(registryType)
 
         val arWs = AssetReviewWs()
 
-        val arDb = AssetReviewDbHelper()
-        val arcDb = AssetReviewContentDbHelper()
+        val reviewRepository = AssetReviewRepository()
+        val contentRepository = AssetReviewContentRepository()
 
         var error = false
 
@@ -289,8 +300,8 @@ class SyncUpload(
                 return
             }
 
-            val arAl = arDb.selectByCompleted()
-            if (arAl.size < 1) {
+            val arAl = reviewRepository.selectByCompleted(userId)
+            if (arAl.isEmpty()) {
                 return
             }
 
@@ -308,7 +319,7 @@ class SyncUpload(
                     SyncProgress(
                         totalTask = totalTask,
                         completedTask = currentTask,
-                        uniqueId = ar.collectorAssetReviewId.toString(),
+                        uniqueId = ar.id.toString(),
                         msg = getContext().getString(R.string.synchronizing_asset_reviews),
                         registryType = registryType,
                         progressStatus = ProgressStatus.running
@@ -326,9 +337,9 @@ class SyncUpload(
                     break
                 }
 
-                val arcAl = arcDb.selectByAssetReviewCollectorId(ar.collectorAssetReviewId)
-                if (arcAl.size < 1) {
-                    arDb.deleteById(ar.collectorAssetReviewId)
+                val arcAl = contentRepository.selectByAssetReviewId(ar.id)
+                if (arcAl.isEmpty()) {
+                    reviewRepository.deleteById(ar.id)
                     continue
                 }
 
@@ -359,11 +370,11 @@ class SyncUpload(
 
                 arObj.warehouseId = ar.warehouseId
                 arObj.warehouseAreaId = ar.warehouseAreaId
-                arObj.assetReviewId = ar.collectorAssetReviewId
+                arObj.assetReviewId = ar.id
                 arObj.userId = ar.userId
-                arObj.assetReviewDate = ar.assetReviewDate
-                arObj.obs = ar.obs
-                arObj.modificationDate = ar.modificationDate
+                arObj.assetReviewDate = ar.assetReviewDate.toString()
+                arObj.obs = ar.obs.orEmpty()
+                arObj.modificationDate = ar.modificationDate.toString()
                 arObj.statusId = AssetReviewStatus.transferred.id
 
                 val arId = arWs.assetReviewAdd(
@@ -371,14 +382,14 @@ class SyncUpload(
                 )
 
                 if (arId > 0) {
-                    arDb.updateTransferredNew(arId, ar.collectorAssetReviewId)
+                    reviewRepository.updateTransferredNew(arId, ar.id)
 
                     // Actualizar los Ids del colector con los Ids reales
                     UpdateIdImages(
                         context = getContext(),
-                        programObjectId = Table.assetReview.tableId.toLong(),
+                        programObjectId = Table.assetReview.id.toLong(),
                         newObjectId1 = arId,
-                        localObjectId1 = ar.collectorAssetReviewId,
+                        localObjectId1 = ar.id,
                         onUploadProgress = {
                             if (it.result !in getFinish()) {
                                 // Reportamos solo los progresos
@@ -431,8 +442,8 @@ class SyncUpload(
 
         val wmWs = WarehouseMovementWs()
 
-        val wmDb = WarehouseMovementDbHelper()
-        val wmcDb = WarehouseMovementContentDbHelper()
+        val movementRepository = WarehouseMovementRepository()
+        val contentRepository = WarehouseMovementContentRepository()
 
         var error = false
 
@@ -448,7 +459,7 @@ class SyncUpload(
                 return
             }
 
-            val wmAl = wmDb.selectByNoTransferred()
+            val wmAl = movementRepository.selectByNoTransferred()
             if (wmAl.size < 1) {
                 return
             }
@@ -467,7 +478,7 @@ class SyncUpload(
                     SyncProgress(
                         totalTask = totalTask,
                         completedTask = currentTask,
-                        uniqueId = wm.collectorWarehouseMovementId.toString(),
+                        uniqueId = wm.id.toString(),
                         msg = getContext().getString(R.string.synchronizing_movements),
                         registryType = registryType,
                         progressStatus = ProgressStatus.running
@@ -485,10 +496,9 @@ class SyncUpload(
                     break
                 }
 
-                val wmcAl =
-                    wmcDb.selectByCollectorWarehouseMovementId(wm.collectorWarehouseMovementId)
-                if (wmcAl.size < 1) {
-                    wmDb.deleteById(wm.collectorWarehouseMovementId)
+                val wmcAl = contentRepository.selectByWarehouseMovementId(wm.id)
+                if (wmcAl.isEmpty()) {
+                    movementRepository.deleteById(wm.id)
                     continue
                 }
 
@@ -500,7 +510,7 @@ class SyncUpload(
 
                     val x = WarehouseMovementContentObject()
                     x.assetId = wmc.assetId
-                    x.qty = wmc.qty
+                    x.qty = wmc.qty?.toFloat() ?: 0F
                     x.code = wmc.code
 
                     wmcObjArray.add(x)
@@ -508,28 +518,28 @@ class SyncUpload(
 
                 val wmObj = WarehouseMovementObject()
 
-                wmObj.destWarehouseAreaId = wm.destWarehouseAreaId
-                wmObj.destWarehouseId = wm.destWarehouseId
-                wmObj.origWarehouseAreaId = wm.origWarehouseAreaId
-                wmObj.origWarehouseId = wm.origWarehouseId
-                wmObj.warehouseMovementId = wm.collectorWarehouseMovementId
+                wmObj.destWarehouseAreaId = wm.destinationWarehouseAreaId
+                wmObj.destWarehouseId = wm.destinationWarehouseId
+                wmObj.origWarehouseAreaId = wm.originWarehouseAreaId
+                wmObj.origWarehouseId = wm.originWarehouseId
+                wmObj.warehouseMovementId = wm.id
                 wmObj.userId = wm.userId
-                wmObj.warehouseMovementDate = wm.warehouseMovementDate
-                wmObj.obs = wm.obs
+                wmObj.warehouseMovementDate = wm.warehouseMovementDate.toString()
+                wmObj.obs = wm.obs.orEmpty()
 
                 val wmId = wmWs.warehouseMovementAdd(
                     wmObj, wmcObjArray
                 )
 
                 if (wmId > 0) {
-                    wmDb.updateTransferredNew(wmId, wm.collectorWarehouseMovementId)
+                    movementRepository.updateTransferredNew(wmId, wm.id)
 
                     // Actualizar los Ids del colector con los Ids reales
                     UpdateIdImages(
                         context = getContext(),
-                        programObjectId = Table.warehouseMovement.tableId.toLong(),
+                        programObjectId = Table.warehouseMovement.id.toLong(),
                         newObjectId1 = wmId,
-                        localObjectId1 = wm.collectorWarehouseMovementId,
+                        localObjectId1 = wm.id,
                         onUploadProgress = {
                             if (it.result !in getFinish()) {
                                 // Reportamos solo los progresos
@@ -581,9 +591,9 @@ class SyncUpload(
 
         val assetWs = AssetWs()
 
-        val assetDb = AssetDbHelper()
-        val arcDb = AssetReviewContentDbHelper()
-        val wmcDb = WarehouseMovementContentDbHelper()
+        val assetRepository = AssetRepository()
+        val reviewContentRepository = AssetReviewContentRepository()
+        val movementContentRepository = WarehouseMovementContentRepository()
 
         var error = false
 
@@ -599,8 +609,8 @@ class SyncUpload(
                 return
             }
 
-            val aAl = assetDb.selectNoTransferred()
-            if (aAl.size < 1) {
+            val aAl = assetRepository.selectNoTransferred()
+            if (aAl.isEmpty()) {
                 return
             }
 
@@ -615,12 +625,11 @@ class SyncUpload(
             val allRealId: ArrayList<Long> = ArrayList()
             val totalTask = aAl.size
             for ((currentTask, a) in aAl.toTypedArray().withIndex()) {
-                a.setDataRead()
                 onSyncTaskProgress.invoke(
                     SyncProgress(
                         totalTask = totalTask,
                         completedTask = currentTask,
-                        uniqueId = a.assetId.toString(),
+                        uniqueId = a.id.toString(),
                         msg = getContext().getString(R.string.synchronizing_assets),
                         registryType = registryType,
                         progressStatus = ProgressStatus.running
@@ -639,7 +648,7 @@ class SyncUpload(
                 }
 
                 var realAssetId: Long
-                if (a.assetId > 0) {
+                if (a.id > 0) {
                     realAssetId = assetWs.assetCollectorModify(
                         getUserId() ?: return,
                         com.dacosys.assetControl.data.webservice.asset.AssetCollectorObject(a)
@@ -649,14 +658,14 @@ class SyncUpload(
                     if (realAssetId > 0) {
 
                         // Actualizar el propio activo
-                        assetDb.updateAssetId(realAssetId, a.assetId)
-                        val realAsset = assetDb.selectById(realAssetId)
+                        assetRepository.updateId(realAssetId, a.id)
+                        val realAsset = assetRepository.selectById(realAssetId)
                         if (realAsset != null) {
                             // Actualizar los movimientos asociados
-                            wmcDb.updateAssetId(realAsset, a.assetId)
+                            movementContentRepository.updateAssetId(realAssetId, a.id)
 
                             // Actualizar las revisiones asociadas
-                            arcDb.updateAssetId(realAsset, a.assetId)
+                            reviewContentRepository.updateAssetId(realAssetId, a.id)
                         }
                     }
                 }
@@ -667,9 +676,9 @@ class SyncUpload(
                     // Actualizar los Ids del colector con los Ids reales
                     UpdateIdImages(
                         context = getContext(),
-                        programObjectId = Table.asset.tableId.toLong(),
+                        programObjectId = Table.asset.id.toLong(),
                         newObjectId1 = realAssetId,
-                        localObjectId1 = a.assetId,
+                        localObjectId1 = a.id,
                         onUploadProgress = {
                             if (it.result !in getFinish()) {
                                 // Reportamos solo los progresos
@@ -687,7 +696,7 @@ class SyncUpload(
             }
 
             // Actualizamos todos los activos en una sola consulta.
-            if (!error) error = !assetDb.updateTransferred(allRealId.toTypedArray())
+            if (!error) error = !assetRepository.updateTransferred(allRealId)
         } catch (ex: Exception) {
             ex.printStackTrace()
             // Error remoto
@@ -724,11 +733,11 @@ class SyncUpload(
 
         val warehouseAreaWs = WarehouseAreaWs()
 
-        val waDb = WarehouseAreaDbHelper()
-        val aDb = AssetDbHelper()
-        val uwaDb = UserWarehouseAreaDbHelper()
-        val arDb = AssetReviewDbHelper()
-        val wmDb = WarehouseMovementDbHelper()
+        val areaRepository = WarehouseAreaRepository()
+        val assetRepository = AssetRepository()
+        val userWarehouseAreaRepository = UserWarehouseAreaRepository()
+        val reviewRepository = AssetReviewRepository()
+        val movementRepository = WarehouseMovementRepository()
 
         var error = false
 
@@ -744,7 +753,7 @@ class SyncUpload(
                 return
             }
 
-            val waAl = waDb.selectNoTransfered()
+            val waAl = areaRepository.selectNoTransferred()
             if (waAl.size < 1) {
                 return
             }
@@ -760,12 +769,11 @@ class SyncUpload(
             val allRealId: ArrayList<Long> = ArrayList()
             val totalTask = waAl.size
             for ((currentTask, wa) in waAl.toTypedArray().withIndex()) {
-                wa.setDataRead()
                 onSyncTaskProgress.invoke(
                     SyncProgress(
                         totalTask = totalTask,
                         completedTask = currentTask,
-                        uniqueId = wa.warehouseAreaId.toString(),
+                        uniqueId = wa.id.toString(),
                         msg = getContext().getString(R.string.synchronizing_warehouse_areas),
                         registryType = registryType,
                         progressStatus = ProgressStatus.running
@@ -784,7 +792,7 @@ class SyncUpload(
                 }
 
                 var realWarehouseAreaId: Long
-                if (wa.warehouseAreaId > 0) {
+                if (wa.id > 0) {
                     realWarehouseAreaId = warehouseAreaWs.warehouseAreaModify(
                         getUserId() ?: return, WarehouseAreaObject(wa)
                     )
@@ -795,37 +803,25 @@ class SyncUpload(
 
                     if (realWarehouseAreaId > 0) {
                         // Actualizar la propia área
-                        waDb.updateWarehouseAreaId(
-                            realWarehouseAreaId, wa.warehouseAreaId
-                        )
+                        areaRepository.updateWarehouseAreaId(realWarehouseAreaId, wa.id)
 
                         // Actualizar los activos fijos asociados
-                        aDb.updateWarehouseAreaId(
-                            realWarehouseAreaId, wa.warehouseAreaId
-                        )
+                        assetRepository.updateWarehouseAreaId(realWarehouseAreaId, wa.id)
 
                         // Actualizar las áreas de usuario
-                        uwaDb.updateWarehouseAreaId(
-                            realWarehouseAreaId, wa.warehouseAreaId
-                        )
+                        userWarehouseAreaRepository.updateWarehouseAreaId(realWarehouseAreaId, wa.id)
 
                         // Actualizar las revisiones asociadas
-                        arDb.updateWarehouseAreaId(
-                            realWarehouseAreaId, wa.warehouseAreaId
-                        )
+                        reviewRepository.updateWarehouseAreaId(realWarehouseAreaId, wa.id)
 
                         // Actualizar los movimientos asociados
-                        wmDb.updateOriginWarehouseAreaId(
-                            realWarehouseAreaId, wa.warehouseAreaId
-                        )
-                        wmDb.updateDestWarehouseAreaId(
-                            realWarehouseAreaId, wa.warehouseAreaId
-                        )
+                        movementRepository.updateOriginWarehouseAreaId(realWarehouseAreaId, wa.id)
+                        movementRepository.updateDestinationWarehouseAreaId(realWarehouseAreaId, wa.id)
 
                         // Enviar las áreas del usuario
-                        val uObj = UserObject().getByUser(
-                            User(getUserId() ?: return, false)
-                        )
+                        val userId = getUserId() ?: return
+                        val user = UserRepository().selectById(userId) ?: return
+                        val uObj = UserObject().getByUser(user)
 
                         val uwaObj = UserWarehouseAreaObject()
                         uwaObj.warehouse_area_id = realWarehouseAreaId
@@ -847,9 +843,9 @@ class SyncUpload(
                     // Actualizar los Ids del colector con los Ids reales
                     UpdateIdImages(
                         context = getContext(),
-                        programObjectId = Table.warehouseArea.tableId.toLong(),
+                        programObjectId = Table.warehouseArea.id.toLong(),
                         newObjectId1 = realWarehouseAreaId,
-                        localObjectId1 = wa.warehouseAreaId,
+                        localObjectId1 = wa.id,
                         onUploadProgress = {
                             if (it.result !in getFinish()) {
                                 // Reportamos solo los progresos
@@ -867,7 +863,7 @@ class SyncUpload(
             }
 
             // Actualizamos todos las áreas en una sola consulta.
-            if (!error) error = !waDb.updateTransferred(allRealId.toTypedArray())
+            if (!error) error = !areaRepository.updateTransferred(allRealId)
         } catch (ex: Exception) {
             ex.printStackTrace()
             // Error remoto
@@ -904,11 +900,11 @@ class SyncUpload(
 
         val warehouseWs = WarehouseWs()
 
-        val wDb = WarehouseDbHelper()
-        val waDb = WarehouseAreaDbHelper()
-        val aDb = AssetDbHelper()
-        val arDb = AssetReviewDbHelper()
-        val wmDb = WarehouseMovementDbHelper()
+        val wRepository = WarehouseRepository()
+        val waRepository = WarehouseAreaRepository()
+        val aRepository = AssetRepository()
+        val arRepository = AssetReviewRepository()
+        val wmRepository = WarehouseMovementRepository()
 
         var error = false
 
@@ -924,7 +920,7 @@ class SyncUpload(
                 return
             }
 
-            val wAl = wDb.selectNoTransferred()
+            val wAl = wRepository.selectNoTransferred()
             if (wAl.size < 1) {
                 return
             }
@@ -940,12 +936,11 @@ class SyncUpload(
             val allRealId: ArrayList<Long> = ArrayList()
             val totalTask = wAl.size
             for ((currentTask, w) in wAl.toTypedArray().withIndex()) {
-                w.setDataRead()
                 onSyncTaskProgress.invoke(
                     SyncProgress(
                         totalTask = totalTask,
                         completedTask = currentTask,
-                        uniqueId = w.warehouseId.toString(),
+                        uniqueId = w.id.toString(),
                         msg = getContext().getString(R.string.synchronizing_warehouses),
                         registryType = registryType,
                         progressStatus = ProgressStatus.running
@@ -964,7 +959,7 @@ class SyncUpload(
                 }
 
                 var realWarehouseId: Long
-                if (w.warehouseId > 0) {
+                if (w.id > 0) {
                     realWarehouseId = warehouseWs.warehouseModify(
                         getUserId() ?: return, WarehouseObject(w)
                     )
@@ -975,20 +970,20 @@ class SyncUpload(
 
                     if (realWarehouseId > 0) {
                         // Actualizar el propio depósito
-                        wDb.updateWarehouseId(realWarehouseId, w.warehouseId)
+                        wRepository.updateWarehouseId(realWarehouseId, w.id)
 
                         // Actualizar las áreas asociadas
-                        waDb.updateWarehouseId(realWarehouseId, w.warehouseId)
+                        waRepository.updateWarehouseId(realWarehouseId, w.id)
 
                         // Actualizar los activos fijos asociados
-                        aDb.updateWarehouseId(realWarehouseId, w.warehouseId)
+                        aRepository.updateWarehouseId(realWarehouseId, w.id)
 
                         // Actualizar las revisiones asociadas
-                        arDb.updateWarehouseId(realWarehouseId, w.warehouseId)
+                        arRepository.updateWarehouseId(realWarehouseId, w.id)
 
                         // Actualizar los movimientos asociados
-                        wmDb.updateOriginWarehouseId(realWarehouseId, w.warehouseId)
-                        wmDb.updateDestWarehouseId(realWarehouseId, w.warehouseId)
+                        wmRepository.updateOriginWarehouseId(realWarehouseId, w.id)
+                        wmRepository.updateDestinationWarehouseId(realWarehouseId, w.id)
                     }
                 }
 
@@ -998,9 +993,9 @@ class SyncUpload(
                     // Actualizar los Ids del colector con los Ids reales
                     UpdateIdImages(
                         context = getContext(),
-                        programObjectId = Table.warehouse.tableId.toLong(),
+                        programObjectId = Table.warehouse.id.toLong(),
                         newObjectId1 = realWarehouseId,
-                        localObjectId1 = w.warehouseId,
+                        localObjectId1 = w.id,
                         onUploadProgress = {
                             if (it.result !in getFinish()) {
                                 // Reportamos solo los progresos
@@ -1018,7 +1013,7 @@ class SyncUpload(
             }
 
             // Actualizamos todos las áreas en una sola consulta.
-            if (!error) error = !wDb.updateTransferred(allRealId.toTypedArray())
+            if (!error) error = !wRepository.updateTransferred(allRealId)
         } catch (ex: Exception) {
             ex.printStackTrace()
             // Error remoto
@@ -1055,8 +1050,8 @@ class SyncUpload(
 
         val itemCategoryWs = ItemCategoryWs()
 
-        val icDb = ItemCategoryDbHelper()
-        val aDb = AssetDbHelper()
+        val categoryRepository = ItemCategoryRepository()
+        val assetRepository = AssetRepository()
 
         var error = false
 
@@ -1072,8 +1067,8 @@ class SyncUpload(
                 return
             }
 
-            val icAl = icDb.selectNoTransfered()
-            if (icAl.size < 1) {
+            val icAl = categoryRepository.selectNoTransferred()
+            if (icAl.isEmpty()) {
                 return
             }
 
@@ -1088,12 +1083,11 @@ class SyncUpload(
             val allRealId: ArrayList<Long> = ArrayList()
             val totalTask = icAl.size
             for ((currentTask, ic) in icAl.toTypedArray().withIndex()) {
-                ic.setDataRead()
                 onSyncTaskProgress.invoke(
                     SyncProgress(
                         totalTask = totalTask,
                         completedTask = currentTask,
-                        uniqueId = ic.itemCategoryId.toString(),
+                        uniqueId = ic.id.toString(),
                         msg = getContext().getString(R.string.synchronizing_categories),
                         registryType = registryType,
                         progressStatus = ProgressStatus.running
@@ -1112,7 +1106,7 @@ class SyncUpload(
                 }
 
                 var realItemCategoryId: Long
-                if (ic.itemCategoryId > 0) {
+                if (ic.id > 0) {
                     realItemCategoryId = itemCategoryWs.itemCategoryModify(
                         getUserId() ?: return, ItemCategoryObject(ic)
                     )
@@ -1123,12 +1117,12 @@ class SyncUpload(
 
                     if (realItemCategoryId > 0) {
                         // Actualizar la propia categoría
-                        icDb.updateItemCategoryId(
-                            realItemCategoryId, ic.itemCategoryId
+                        categoryRepository.updateId(
+                            realItemCategoryId, ic.id
                         )
 
                         // Actualizar los activos fijos asociados
-                        aDb.updateItemCategoryId(realItemCategoryId, ic.itemCategoryId)
+                        assetRepository.updateItemCategoryId(realItemCategoryId, ic.id)
                     }
                 }
 
@@ -1138,9 +1132,9 @@ class SyncUpload(
                     // Actualizar los Ids del colector con los Ids reales
                     UpdateIdImages(
                         context = getContext(),
-                        programObjectId = Table.itemCategory.tableId.toLong(),
+                        programObjectId = Table.itemCategory.id.toLong(),
                         newObjectId1 = realItemCategoryId,
-                        localObjectId1 = ic.itemCategoryId,
+                        localObjectId1 = ic.id,
                         onUploadProgress = {
                             if (it.result !in getFinish()) {
                                 // Reportamos solo los progresos
@@ -1158,7 +1152,7 @@ class SyncUpload(
             }
 
             // Actualizamos todos las áreas en una sola consulta.
-            if (!error) error = !icDb.updateTransferred(allRealId.toTypedArray())
+            if (!error) error = !categoryRepository.updateTransferred(allRealId)
         } catch (ex: Exception) {
             ex.printStackTrace()
             // Error remoto
@@ -1195,8 +1189,8 @@ class SyncUpload(
 
         val dcWs = DataCollectionWs()
 
-        val dcDb = DataCollectionDbHelper()
-        val dccDb = DataCollectionContentDbHelper()
+        val collectionRepository = DataCollectionRepository()
+        val contentRepository = DataCollectionContentRepository()
 
         var error = false
 
@@ -1212,8 +1206,8 @@ class SyncUpload(
                 return
             }
 
-            val dcAl = dcDb.selectByNoTransferred()
-            if (dcAl.size < 1) {
+            val dcAl = collectionRepository.selectByNoTransferred()
+            if (dcAl.isEmpty()) {
                 return
             }
 
@@ -1231,7 +1225,7 @@ class SyncUpload(
                     SyncProgress(
                         totalTask = totalTask,
                         completedTask = currentTask,
-                        uniqueId = dc.collectorDataCollectionId.toString(),
+                        uniqueId = dc.dataCollectionId.toString(),
                         msg = getContext().getString(R.string.synchronizing_data_collections),
                         registryType = registryType,
                         progressStatus = ProgressStatus.running
@@ -1249,8 +1243,8 @@ class SyncUpload(
                     break
                 }
 
-                val dccAl = dccDb.selectByCollectorDataCollectionId(dc.collectorDataCollectionId)
-                if (dccAl.size < 1) {
+                val dccAl = contentRepository.selectByDataCollectionId(dc.dataCollectionId)
+                if (dccAl.isEmpty()) {
                     continue
                 }
 
@@ -1261,15 +1255,15 @@ class SyncUpload(
                     }
 
                     val x = DataCollectionContentObject()
-                    x.attributeId = dcc.attributeId
-                    x.attributeCompositionId = dcc.attributeCompositionId
-                    x.dataCollectionDate = dcc.dataCollectionDate
+                    x.attributeId = dcc.attributeId ?: 0
+                    x.attributeCompositionId = dcc.attributeCompositionId ?: 0
+                    x.dataCollectionDate = dcc.dataCollectionDate.toString()
                     x.dataCollectionId = 0L
                     x.dataCollectionContentId = 0L
                     x.dataCollectionRuleContentId = dcc.dataCollectionRuleContentId
-                    x.level = dcc.level
-                    x.position = dcc.position
-                    x.result = dcc.result
+                    x.level = dcc.level ?: 0
+                    x.position = dcc.position ?: 0
+                    x.result = dcc.result ?: 0
                     x.valueStr = dcc.valueStr
 
                     dccObjArray.add(x)
@@ -1277,27 +1271,27 @@ class SyncUpload(
 
                 val dcObj = DataCollectionObject()
 
-                dcObj.assetId = dc.assetId
-                dcObj.dataCollectionId = dc.collectorDataCollectionId
-                dcObj.dateEnd = dc.dateEnd
-                dcObj.dateStart = dc.dateStart
+                dcObj.assetId = dc.assetId ?: 0
+                dcObj.dataCollectionId = dc.dataCollectionId
+                dcObj.dateEnd = dc.dateEnd?.toString().orEmpty()
+                dcObj.dateStart = dc.dateStart?.toString().orEmpty()
                 dcObj.userId = dc.userId
-                dcObj.warehouseAreaId = dc.warehouseAreaId
-                dcObj.warehouseId = dc.warehouseId
+                dcObj.warehouseAreaId = dc.warehouseAreaId ?: 0
+                dcObj.warehouseId = dc.warehouseId ?: 0
 
                 val dcId = dcWs.dataCollectionAdd(
                     dcObj, dccObjArray
                 )
 
                 if (dcId > 0) {
-                    dcDb.updateTransferredNew(dcId, dc.collectorDataCollectionId)
+                    collectionRepository.updateTransferredNew(dcId, dc.dataCollectionId)
 
                     // Actualizar los Ids del colector con los Ids reales
                     UpdateIdImages(
                         context = getContext(),
-                        programObjectId = Table.dataCollection.tableId.toLong(),
+                        programObjectId = Table.dataCollection.id.toLong(),
                         newObjectId1 = dcId,
-                        localObjectId1 = dc.collectorDataCollectionId,
+                        localObjectId1 = dc.dataCollectionId,
                         onUploadProgress = {
                             if (it.result !in getFinish()) {
                                 // Reportamos solo los progresos
@@ -1349,8 +1343,8 @@ class SyncUpload(
 
         val rpWs = RouteProcessWs()
 
-        val rpDb = RouteProcessDbHelper()
-        val rpcDb = RouteProcessContentDbHelper()
+        val processRepository = RouteProcessRepository()
+        val contentRepository = RouteProcessContentRepository()
 
         var error = false
 
@@ -1366,8 +1360,8 @@ class SyncUpload(
                 return
             }
 
-            val rpAl = rpDb.selectByNoTransferred()
-            if (rpAl.size < 1) {
+            val rpAl = processRepository.selectByNoTransferred()
+            if (rpAl.isEmpty()) {
                 return
             }
 
@@ -1385,7 +1379,7 @@ class SyncUpload(
                     SyncProgress(
                         totalTask = totalTask,
                         completedTask = currentTask,
-                        uniqueId = rp.collectorRouteProcessId.toString(),
+                        uniqueId = rp.id.toString(),
                         msg = getContext().getString(R.string.synchronizing_route_process),
                         registryType = registryType,
                         progressStatus = ProgressStatus.running
@@ -1403,8 +1397,8 @@ class SyncUpload(
                     break
                 }
 
-                val rpcAl = rpcDb.selectByCollectorRouteProcessId(rp.collectorRouteProcessId)
-                if (rpcAl.size < 1) {
+                val rpcAl = contentRepository.selectByRouteProcessId(rp.id)
+                if (rpcAl.isEmpty()) {
                     continue
                 }
 
@@ -1416,7 +1410,7 @@ class SyncUpload(
 
                     var dataCollectionId = 0L
                     if (rpc.dataCollectionId != null && (rpc.dataCollectionId ?: return) > 0) {
-                        val dc = DataCollectionDbHelper().selectByCollectorId(
+                        val dc = DataCollectionRepository().selectById(
                             rpc.dataCollectionId ?: return
                         )
                         if (dc != null && dc.dataCollectionId > 0) {
@@ -1434,7 +1428,7 @@ class SyncUpload(
                     x.dataCollectionRuleId = rpc.dataCollectionRuleId
                     x.level = rpc.level
                     x.position = rpc.position
-                    x.routeProcessStatusId = rpc.routeProcessStatusId
+                    x.routeProcessStatusId = rpc.processStatusId
                     x.dataCollectionId = dataCollectionId
 
                     rpcObjArray.add(x)
@@ -1443,13 +1437,13 @@ class SyncUpload(
                 val rpObj = RouteProcessObject()
 
                 rpObj.routeId = rp.routeId
-                rpObj.routeProcessDate = rp.routeProcessDate
+                rpObj.routeProcessDate = rp.routeProcessDate.toString()
                 rpObj.completed = if (rp.completed) {
                     1
                 } else {
                     0
                 }
-                rpObj.routeProcessId = rp.collectorRouteProcessId
+                rpObj.routeProcessId = rp.id
                 rpObj.userId = rp.userId
 
                 val rpId = rpWs.routeProcessAdd(
@@ -1457,14 +1451,14 @@ class SyncUpload(
                 )
 
                 if (rpId > 0) {
-                    rpDb.updateTransferredNew(rpId, rp.collectorRouteProcessId)
+                    processRepository.updateTransferredNew(rpId, rp.id)
 
                     // Actualizar los Ids del colector con los Ids reales
                     UpdateIdImages(
                         context = getContext(),
-                        programObjectId = Table.routeProcess.tableId.toLong(),
+                        programObjectId = Table.routeProcess.id.toLong(),
                         newObjectId1 = rpId,
-                        localObjectId1 = rp.collectorRouteProcessId,
+                        localObjectId1 = rp.id,
                         onUploadProgress = {
                             if (it.result !in getFinish()) {
                                 // Reportamos solo los progresos
@@ -1511,12 +1505,12 @@ class SyncUpload(
     }
 
     private fun assetMaintenance() {
-        val registryType = SyncRegistryType.AssetManteinance
+        val registryType = SyncRegistryType.AssetMaintenance
         registryOnProcess.add(registryType)
 
-        val amWs = AssetManteinanceWs()
+        val amWs = AssetMaintenanceWs()
 
-        val amDb = AssetManteinanceDbHelper()
+        val maintenanceRepository = AssetMaintenanceRepository()
 
         var error = false
 
@@ -1532,8 +1526,8 @@ class SyncUpload(
                 return
             }
 
-            val amAl = amDb.selectNoTransferred()
-            if (amAl.size < 1) {
+            val amAl = maintenanceRepository.selectNoTransferred()
+            if (amAl.isEmpty()) {
                 return
             }
 
@@ -1547,12 +1541,11 @@ class SyncUpload(
 
             val totalTask = amAl.size
             for ((currentTask, am) in amAl.toTypedArray().withIndex()) {
-                am.setDataRead()
                 onSyncTaskProgress.invoke(
                     SyncProgress(
                         totalTask = totalTask,
                         completedTask = currentTask,
-                        uniqueId = am.collectorAssetManteinanceId.toString(),
+                        uniqueId = am.id.toString(),
                         msg = getContext().getString(R.string.synchronizing_maintenance_types),
                         registryType = registryType,
                         progressStatus = ProgressStatus.running
@@ -1570,38 +1563,38 @@ class SyncUpload(
                     break
                 }
 
-                val amObj = AssetManteinanceObject()
+                val amObj = AssetMaintenanceObject()
                 amObj.asset_id = am.assetId
-                amObj.asset_manteinance_id = am.assetManteinanceId
-                amObj.manteinance_type_id = am.manteinanceTypeId
-                amObj.manteinance_status_id = am.manteinanceStatusId
+                amObj.asset_manteinance_id = am.id
+                amObj.manteinance_type_id = am.maintenanceTypeId
+                amObj.manteinance_status_id = am.statusId
                 amObj.repairman_id = (getUserId() ?: return)
 
-                val amLogObj = AssetManteinanceLogObject()
-                amLogObj.description = am.observations
-                amLogObj.asset_manteinance_id = am.assetManteinanceId
-                amLogObj.manteinance_status_id = am.manteinanceStatusId
+                val amLogObj = AssetMaintenanceLogObject()
+                amLogObj.description = am.observations.orEmpty()
+                amLogObj.asset_manteinance_id = am.id
+                amLogObj.manteinance_status_id = am.statusId
                 amLogObj.repairman_id = (getUserId() ?: return)
 
-                val assetMaintenanceId = if (am.assetManteinanceId == 0L) {
-                    amWs.assetManteinanceAdd(
+                val assetMaintenanceId = if (am.id == 0L) {
+                    amWs.assetMaintenanceAdd(
                         getUserId() ?: return, amObj, amLogObj
                     )
                 } else {
-                    amWs.assetManteinanceModify(
+                    amWs.assetMaintenanceModify(
                         getUserId() ?: return, amObj, amLogObj
                     )
                 }
 
                 if (assetMaintenanceId > 0) {
-                    amDb.updateTransferredNew(assetMaintenanceId)
+                    maintenanceRepository.updateTransferredNew(assetMaintenanceId)
 
                     // Actualizar los Ids del colector con los Ids reales
                     UpdateIdImages(
                         context = getContext(),
-                        programObjectId = Table.assetManteinance.tableId.toLong(),
+                        programObjectId = Table.assetMaintenance.id.toLong(),
                         newObjectId1 = assetMaintenanceId,
-                        localObjectId1 = am.assetManteinanceId,
+                        localObjectId1 = am.id,
                         onUploadProgress = {
                             if (it.result !in getFinish()) {
                                 // Reportamos solo los progresos

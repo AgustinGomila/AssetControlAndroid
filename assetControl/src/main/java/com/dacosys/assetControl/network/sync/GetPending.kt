@@ -36,7 +36,7 @@ class GetPending(
         val ic = DownloadDb.getPendingItemCategory()
         val dc = DownloadDb.getPendingDataCollection()
         val rp = DownloadDb.getPendingRouteProcess()
-        val am = DownloadDb.getPendingAssetManteinance()
+        val am = DownloadDb.getPendingAssetMaintenance()
 
         if (ar.any()) syncElements.addAll(ar)
         if (wm.any()) syncElements.addAll(wm)

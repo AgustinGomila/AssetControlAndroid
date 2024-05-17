@@ -11,11 +11,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.AssetControlApp.Companion.currentUser
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.model.category.ItemCategory
-import com.dacosys.assetControl.data.model.common.CrudCompleted
-import com.dacosys.assetControl.data.model.common.CrudResult
-import com.dacosys.assetControl.data.model.common.CrudStatus.*
-import com.dacosys.assetControl.data.model.table.Table
+import com.dacosys.assetControl.data.enums.common.CrudCompleted
+import com.dacosys.assetControl.data.enums.common.CrudResult
+import com.dacosys.assetControl.data.enums.common.CrudStatus.*
+import com.dacosys.assetControl.data.enums.common.Table
+import com.dacosys.assetControl.data.room.entity.category.ItemCategory
 import com.dacosys.assetControl.databinding.ItemCategoryCrudActivityBinding
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
@@ -78,7 +78,7 @@ class ItemCategoryCRUDActivity : AppCompatActivity(), CrudCompleted,
                     binding.root, getString(R.string.category_added_correctly), SnackBarType.SUCCESS
                 )
                 if (imageControlFragment != null && itemCategory != null) {
-                    imageControlFragment?.updateObjectId1(itemCategory.itemCategoryId)
+                    imageControlFragment?.updateObjectId1(itemCategory.id)
                     imageControlFragment?.saveImages(false)
                 }
 
@@ -224,7 +224,7 @@ class ItemCategoryCRUDActivity : AppCompatActivity(), CrudCompleted,
         var itemCategoryId = 0L
         var description = ""
         if (itemCategory != null) {
-            itemCategoryId = itemCategory!!.itemCategoryId
+            itemCategoryId = itemCategory!!.id
             description = itemCategory!!.description
         }
 
@@ -238,7 +238,7 @@ class ItemCategoryCRUDActivity : AppCompatActivity(), CrudCompleted,
 
         if (imageControlFragment == null) {
             imageControlFragment = ImageControlButtonsFragment.newInstance(
-                tableId = Table.itemCategory.tableId.toLong(),
+                tableId = Table.itemCategory.id.toLong(),
                 objectId1 = itemCategoryId.toString()
             )
 
@@ -271,7 +271,7 @@ class ItemCategoryCRUDActivity : AppCompatActivity(), CrudCompleted,
                 }
             }
         } else {
-            imageControlFragment?.setTableId(Table.itemCategory.tableId)
+            imageControlFragment?.setTableId(Table.itemCategory.id)
             imageControlFragment?.setObjectId1(itemCategoryId)
             imageControlFragment?.setObjectId2(null)
 

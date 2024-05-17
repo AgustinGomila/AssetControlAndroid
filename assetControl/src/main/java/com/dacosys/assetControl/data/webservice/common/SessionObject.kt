@@ -9,7 +9,7 @@ class SessionObject() : Parcelable {
     var userId = 0L
 
     constructor(parcel: Parcel) : this() {
-        sessionId = parcel.readString() ?: ""
+        sessionId = parcel.readString().orEmpty()
         userId = parcel.readLong()
     }
 

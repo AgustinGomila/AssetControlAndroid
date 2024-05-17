@@ -1,9 +1,6 @@
 package com.dacosys.assetControl.data.room.entity.dataCollection
 
-import androidx.room.ColumnInfo
-import androidx.room.Entity
-import androidx.room.Index
-import androidx.room.PrimaryKey
+import androidx.room.*
 import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionRuleContent.Entry
 
 @Entity(
@@ -37,19 +34,26 @@ import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionRu
 )
 data class DataCollectionRuleContent(
     @PrimaryKey
-    @ColumnInfo(name = Entry.ID) val id: Long,
-    @ColumnInfo(name = Entry.DATA_COLLECTION_RULE_ID) val dataCollectionRuleId: Long,
-    @ColumnInfo(name = Entry.LEVEL) val level: Int,
-    @ColumnInfo(name = Entry.POSITION) val position: Int,
-    @ColumnInfo(name = Entry.ATTRIBUTE_ID) val attributeId: Long?,
-    @ColumnInfo(name = Entry.ATTRIBUTE_COMPOSITION_ID) val attributeCompositionId: Long?,
-    @ColumnInfo(name = Entry.EXPRESSION) val expression: String?,
-    @ColumnInfo(name = Entry.TRUE_RESULT) val trueResult: Int?,
-    @ColumnInfo(name = Entry.FALSE_RESULT) val falseResult: Int?,
-    @ColumnInfo(name = Entry.DESCRIPTION) val description: String,
-    @ColumnInfo(name = Entry.ACTIVE) val active: Int,
-    @ColumnInfo(name = Entry.MANDATORY) val mandatory: Int
+    @ColumnInfo(name = Entry.ID) var id: Long = 0L,
+    @ColumnInfo(name = Entry.DATA_COLLECTION_RULE_ID) var dataCollectionRuleId: Long = 0L,
+    @ColumnInfo(name = Entry.LEVEL) var level: Int = 0,
+    @ColumnInfo(name = Entry.POSITION) var position: Int = 0,
+    @ColumnInfo(name = Entry.ATTRIBUTE_ID) var attributeId: Long = 0L,
+    @ColumnInfo(name = Entry.ATTRIBUTE_COMPOSITION_ID) var attributeCompositionId: Long = 0L,
+    @ColumnInfo(name = Entry.EXPRESSION) var expression: String? = null,
+    @ColumnInfo(name = Entry.TRUE_RESULT) var trueResult: Int = 0,
+    @ColumnInfo(name = Entry.FALSE_RESULT) var falseResult: Int = 0,
+    @ColumnInfo(name = Entry.DESCRIPTION) var description: String = "",
+    @ColumnInfo(name = Entry.ACTIVE) var mActive: Int = 0,
+    @ColumnInfo(name = Entry.MANDATORY) var mMandatory: Int = 0,
+    @Ignore var attributeStr: String = ""
 ) {
+    @Ignore
+    val active: Boolean = this.mActive == 1
+
+    @Ignore
+    val mandatory: Boolean = this.mMandatory == 1
+
     object Entry {
         const val TABLE_NAME = "data_collection_rule_content"
         const val ID = "_id"
@@ -64,6 +68,8 @@ data class DataCollectionRuleContent(
         const val DESCRIPTION = "description"
         const val ACTIVE = "active"
         const val MANDATORY = "mandatory"
+
+        const val ATTRIBUTE_STR = "attribute_str"
     }
 }
 

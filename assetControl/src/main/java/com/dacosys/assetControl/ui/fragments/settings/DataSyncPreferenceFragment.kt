@@ -19,7 +19,7 @@ import androidx.preference.PreferenceFragmentCompat
 import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.AssetControlApp.Companion.isLogged
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.dataBase.DataBaseHelper
+import com.dacosys.assetControl.data.room.database.AcDatabase
 import com.dacosys.assetControl.network.download.DownloadDb
 import com.dacosys.assetControl.network.sync.SyncDownload
 import com.dacosys.assetControl.ui.common.snackbar.MakeText
@@ -28,6 +28,7 @@ import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.settings.entries.ConfEntry
+import com.dacosys.assetControl.utils.settings.io.FileHelper
 import com.dacosys.assetControl.utils.settings.io.PathHelper
 import com.dacosys.assetControl.utils.settings.preferences.Repository
 import com.google.android.gms.common.api.CommonStatusCodes
@@ -250,34 +251,34 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             val data = it?.data
             try {
-                if ((it?.resultCode == CommonStatusCodes.SUCCESS || it.resultCode == CommonStatusCodes.SUCCESS_CACHE) && data != null) {
-                    val dataFile: Uri? = data.data
-                    if (dataFile != null) {
-                        tempDbFile = PathHelper.getPath(dataFile) ?: ""
-                        if (tempDbFile != "") {
-                            val min = 10000
-                            val max = 99999
-                            DataBaseHelper.DATABASE_NAME = String.format(
-                                "temp%s.sqlite", Random().nextInt(max - min + 1) + min
-                            )
-                            Statics.OFFLINE_MODE = true
+                if (!(it?.resultCode == CommonStatusCodes.SUCCESS || it.resultCode == CommonStatusCodes.SUCCESS_CACHE) || data == null) return@registerForActivityResult
 
-                            val permissions = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                            activity?.let {
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R ||
-                                    hasPermissions(activity as Context, permissions)
-                                ) {
-                                    copyDb()
-                                } else {
-                                    NEXT_STEP = REQUEST_EXTERNAL_STORAGE_FOR_COPY_DB
-                                    permReqLauncher.launch(permissions)
-                                }
-                            }
-                        } else {
-                            if (view != null) MakeText.makeText(
-                                requireView(), getString(R.string.unable_to_open_file), SnackBarType.ERROR
-                            )
-                        }
+                val dataFile: Uri = data.data ?: return@registerForActivityResult
+
+                tempDbFile = PathHelper.getPath(dataFile) ?: ""
+                if (tempDbFile == "") {
+                    if (view != null) MakeText.makeText(
+                        requireView(), getString(R.string.unable_to_open_file), SnackBarType.ERROR
+                    )
+                    return@registerForActivityResult
+                }
+
+                val min = 10000
+                val max = 99999
+                AcDatabase.changeDatabase(
+                    String.format("temp%s.sqlite", Random().nextInt(max - min + 1) + min)
+                )
+                Statics.OFFLINE_MODE = true
+
+                val permissions = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                activity?.let {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R ||
+                        hasPermissions(activity as Context, permissions)
+                    ) {
+                        copyDb()
+                    } else {
+                        NEXT_STEP = REQUEST_EXTERNAL_STORAGE_FOR_COPY_DB
+                        permReqLauncher.launch(permissions)
                     }
                 }
             } catch (ex: Exception) {
@@ -325,7 +326,7 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
         try {
             // Base de datos
             val dbFile = File(
-                AssetControlApp.getContext().getDatabasePath(DataBaseHelper.DATABASE_NAME).toString()
+                AssetControlApp.getContext().getDatabasePath(AcDatabase.DATABASE_NAME).toString()
             )
             if (!dbFile.exists()) {
                 if (view != null) MakeText.makeText(
@@ -335,7 +336,7 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
             }
 
             // Copiar la base a Documentos
-            val result = DataBaseHelper.copyDbToDocuments()
+            val result = FileHelper.copyDbToDocuments(AssetControlApp.getContext())
             val outFile = File(result.outFile)
             if (!outFile.exists()) {
                 if (view != null) MakeText.makeText(
@@ -450,7 +451,7 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
 
     private fun deleteTempDbFiles() {
         var anyDeleted = false
-        val path = AssetControlApp.getContext().getDatabasePath(DataBaseHelper.DATABASE_NAME).parent ?: return
+        val path = AssetControlApp.getContext().getDatabasePath(AcDatabase.DATABASE_NAME).parent ?: return
 
         val dir = File(path)
         val files = dir.listFiles()
@@ -482,36 +483,42 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
     private var tempDbFile: String = ""
 
     private fun copyDbToDocuments() {
+        /**
+        // TODO: Ver esto DB
         try {
-            DataBaseHelper.copyDbToDocuments()
-            if (view != null) showSnackBar(
-                SnackBarEventData(
-                    String.format(
-                        "%s: %s", getString(R.string.database_changed), DataBaseHelper.DATABASE_NAME
-                    ), SnackBarType.INFO
-                )
-            )
+        DataBaseHelper.copyDbToDocuments()
+        if (view != null) showSnackBar(
+        SnackBarEventData(
+        String.format(
+        "%s: %s", getString(R.string.database_changed), AcDatabase.DATABASE_NAME
+        ), SnackBarType.INFO
+        )
+        )
         } catch (ex: java.lang.Exception) {
-            ex.printStackTrace()
+        ex.printStackTrace()
         }
+         **/
     }
 
     private fun copyDb() {
+        /**
+        // TODO: Ver esto DB
         if (tempDbFile == "") return
         try {
-            DataBaseHelper.copyDataBase(tempDbFile)
-            if (view != null) MakeText.makeText(
-                requireView(), String.format(
-                    "%s: %s", getString(R.string.database_changed), DataBaseHelper.DATABASE_NAME
-                ), SnackBarType.INFO
-            )
+        DataBaseHelper.copyDataBase(tempDbFile)
+        if (view != null) MakeText.makeText(
+        requireView(), String.format(
+        "%s: %s", getString(R.string.database_changed), AcDatabase.DATABASE_NAME
+        ), SnackBarType.INFO
+        )
 
-            // Reiniciamos la instancia
-            DataBaseHelper.cleanInstance()
+        // Reiniciamos la instancia
+        DataBaseHelper.cleanInstance()
 
         } catch (ex: java.lang.Exception) {
-            ex.printStackTrace()
+        ex.printStackTrace()
         }
+         **/
     }
 
     private fun askForDownload(): AlertDialog {

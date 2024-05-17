@@ -30,15 +30,15 @@ import androidx.recyclerview.widget.RecyclerView.*
 import com.dacosys.assetControl.AssetControlApp.Companion.currentUser
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.dataBase.asset.AssetDbHelper
-import com.dacosys.assetControl.data.model.asset.Asset
-import com.dacosys.assetControl.data.model.asset.AssetStatus
-import com.dacosys.assetControl.data.model.asset.OwnershipStatus
-import com.dacosys.assetControl.data.model.movement.WarehouseMovementContent
-import com.dacosys.assetControl.data.model.movement.WarehouseMovementContentStatus
-import com.dacosys.assetControl.data.model.table.Table
-import com.dacosys.assetControl.data.model.user.User
-import com.dacosys.assetControl.data.model.user.permission.PermissionEntry
+import com.dacosys.assetControl.data.enums.asset.AssetStatus
+import com.dacosys.assetControl.data.enums.asset.OwnershipStatus
+import com.dacosys.assetControl.data.enums.common.Table
+import com.dacosys.assetControl.data.enums.movement.WarehouseMovementContentStatus
+import com.dacosys.assetControl.data.enums.permission.PermissionEntry
+import com.dacosys.assetControl.data.room.entity.asset.Asset
+import com.dacosys.assetControl.data.room.entity.movement.WarehouseMovementContent
+import com.dacosys.assetControl.data.room.entity.user.User
+import com.dacosys.assetControl.data.room.repository.asset.AssetRepository
 import com.dacosys.assetControl.databinding.AssetRowBinding
 import com.dacosys.assetControl.databinding.AssetRowExpandedBinding
 import com.dacosys.assetControl.ui.adapters.asset.AssetRecyclerAdapter.FilterOptions
@@ -68,7 +68,7 @@ class WmcRecyclerAdapter(
     private var showCheckBoxesChanged: (Boolean) -> Unit = { },
     private var showImages: Boolean = false,
     private var showImagesChanged: (Boolean) -> Unit = { },
-    var visibleStatus: ArrayList<WarehouseMovementContentStatus> = WarehouseMovementContentStatus.getAll(),
+    var visibleStatus: ArrayList<WarehouseMovementContentStatus> = ArrayList(WarehouseMovementContentStatus.getAll()),
     private var filterOptions: FilterOptions = FilterOptions()
 ) : ListAdapter<WarehouseMovementContent, ViewHolder>(WarehouseMovementContentDiffUtilCallback), Filterable {
 
@@ -158,8 +158,7 @@ class WmcRecyclerAdapter(
         }
 
         override fun areContentsTheSame(oldItem: WarehouseMovementContent, newItem: WarehouseMovementContent): Boolean {
-            if (oldItem.warehouseMovementContentId != newItem.warehouseMovementContentId) return false
-            if (oldItem.collectorContentId != newItem.collectorContentId) return false
+            if (oldItem.id != newItem.id) return false
             if (oldItem.contentStatusId != newItem.contentStatusId) return false
             if (oldItem.assetId != newItem.assetId) return false
             if (oldItem.code != newItem.code) return false
@@ -440,7 +439,7 @@ class WmcRecyclerAdapter(
         editImageView.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_DOWN) {
                 editAssetListener?.onEditAssetRequired(
-                    tableId = Table.asset.tableId, itemId = assetId
+                    tableId = Table.asset.id, itemId = assetId
                 )
             }
             true
@@ -456,7 +455,7 @@ class WmcRecyclerAdapter(
         albumImageView.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_DOWN) {
                 albumViewRequiredListener?.onAlbumViewRequired(
-                    tableId = Table.asset.tableId, itemId = assetId
+                    tableId = Table.asset.id, itemId = assetId
                 )
             }
             true
@@ -468,7 +467,7 @@ class WmcRecyclerAdapter(
         addPhotoImageView.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_DOWN) {
                 addPhotoRequiredListener?.onAddPhotoRequired(
-                    tableId = Table.asset.tableId,
+                    tableId = Table.asset.id,
                     itemId = assetId,
                     description = assetDescription,
                     obs = "${getContext().getString(R.string.user)}: ${currentUser()?.name}"
@@ -540,7 +539,7 @@ class WmcRecyclerAdapter(
         Handler(Looper.getMainLooper()).postDelayed({
             adapter.run {
                 ImageAdapter.getImages(context = getContext(), programData = ProgramData(
-                    programObjectId = Table.asset.tableId.toLong(), objId1 = assetId.toString()
+                    programObjectId = Table.asset.id.toLong(), objId1 = assetId.toString()
                 ), onProgress = {
                     when (it.status) {
                         GetImageStatus.STARTING -> {
@@ -727,21 +726,21 @@ class WmcRecyclerAdapter(
      * Se utiliza cuando se edita un activo y necesita actualizarse
      */
     fun updateContent(asset: Asset, scrollToPos: Boolean = false) {
-        val t = fullList.firstOrNull { it.assetId == asset.assetId } ?: return
+        val t = fullList.firstOrNull { it.assetId == asset.id } ?: return
 
-        t.assetId = asset.assetId
+        t.assetId = asset.id
         t.code = asset.code
         t.description = asset.description
-        t.assetStatusId = asset.assetStatusId
+        t.assetStatusId = asset.status
         t.warehouseAreaId = asset.warehouseAreaId
         t.labelNumber = asset.labelNumber ?: 0
-        t.parentId = asset.parentAssetId ?: 0
-        t.qty = 1F
+        t.parentId = asset.parentId ?: 0
+        t.qty = 1.0
         t.warehouseAreaStr = asset.warehouseAreaStr
         t.warehouseStr = asset.warehouseStr
         t.itemCategoryId = asset.itemCategoryId
         t.itemCategoryStr = asset.itemCategoryStr
-        t.ownershipStatusId = asset.ownershipStatusId
+        t.ownershipStatusId = asset.ownershipStatus
         t.manufacturer = asset.manufacturer ?: ""
         t.model = asset.model ?: ""
         t.serialNumber = asset.serialNumber ?: ""
@@ -905,7 +904,7 @@ class WmcRecyclerAdapter(
 
     @Suppress("MemberVisibilityCanBePrivate", "unused")
     fun getContentByItem(item: Asset): WarehouseMovementContent? {
-        return currentList.firstOrNull { it.assetId == item.assetId }
+        return currentList.firstOrNull { it.assetId == item.id }
     }
 
     @Suppress("MemberVisibilityCanBePrivate", "unused")
@@ -938,7 +937,7 @@ class WmcRecyclerAdapter(
     fun currentAsset(): Asset? {
         if (currentIndex == NO_POSITION) return null
         val item = getItem(currentIndex) ?: return null
-        return AssetDbHelper().selectById(item.assetId)
+        return AssetRepository().selectById(item.assetId)
     }
 
     fun countChecked(): Int {
@@ -1076,7 +1075,7 @@ class WmcRecyclerAdapter(
             }
 
             val categoryStr = content.itemCategoryStr
-            val ownershipStr = OwnershipStatus.getById(content.ownershipStatusId)?.description ?: ""
+            val ownershipStr = OwnershipStatus.getById(content.ownershipStatusId).description
 
             if (categoryStr.isEmpty() && ownershipStr.isEmpty()) {
                 binding.dividerInternal3.visibility = GONE

@@ -1,24 +1,300 @@
 package com.dacosys.assetControl.data.room.dao.asset
 
 import androidx.room.*
+import androidx.sqlite.db.SimpleSQLiteQuery
+import androidx.sqlite.db.SupportSQLiteQuery
+import com.dacosys.assetControl.data.enums.asset.AssetStatus
 import com.dacosys.assetControl.data.room.entity.asset.Asset
 import com.dacosys.assetControl.data.room.entity.asset.Asset.Entry
-import kotlinx.coroutines.flow.Flow
+import com.dacosys.assetControl.data.room.entity.category.ItemCategory
+import com.dacosys.assetControl.data.room.entity.location.Warehouse
+import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
 
 @Dao
 interface AssetDao {
-    @Query("SELECT * FROM ${Entry.TABLE_NAME}")
-    fun getAllAssets(): Flow<List<Asset>>
+    @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN $BASIC_ORDER")
+    fun select(): List<Asset>
+
+    @Query(
+        "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
+                "WHERE ${Entry.TABLE_NAME}.${Entry.ID} IN (:ids) " +
+                BASIC_ORDER
+    )
+    fun selectByTempIds(ids: List<Long>): List<Asset>
+
+    @Query(
+        "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
+                "WHERE ${Entry.TABLE_NAME}.${Entry.ACTIVE} = 1 " +
+                BASIC_ORDER
+    )
+    fun selectActive(): List<Asset>
+
+    @Query("SELECT MIN(${Entry.ID}) $BASIC_FROM")
+    fun selectMinId(): Long?
+
+    @RewriteQueriesToDropUnusedColumns
+    @Query(
+        "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
+                "WHERE ${Entry.TABLE_NAME}.${Entry.ID} = :id"
+    )
+    fun selectById(id: Long): Asset?
+
+    @Query(
+        "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
+                "WHERE ${Entry.TABLE_NAME}.${Entry.DESCRIPTION} LIKE '%' || :description || '%' " +
+                BASIC_ORDER
+    )
+    fun selectByDescription(description: String): List<Asset>
+
+    @Query(
+        "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
+                "WHERE ${Entry.TABLE_NAME}.${Entry.CODE} LIKE :code || '%' " +
+                BASIC_ORDER
+    )
+    fun selectByCode(code: String): List<Asset>
+
+    @Query(
+        "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
+                "WHERE ${Entry.TABLE_NAME}.${Entry.SERIAL_NUMBER} LIKE :serialNumber || '%' " +
+                BASIC_ORDER
+    )
+    fun selectBySerialNumber(serialNumber: String): List<Asset>
+
+    @Query(
+        "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
+                "WHERE ${Entry.TABLE_NAME}.${Entry.EAN} LIKE :ean || '%' " +
+                BASIC_ORDER
+    )
+    fun selectByEan(ean: String): List<Asset>
+
+    @RewriteQueriesToDropUnusedColumns
+    @Query(
+        "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
+                "WHERE ${Entry.TABLE_NAME}.${Entry.ID} = :id " +
+                "AND ${Entry.TABLE_NAME}.${Entry.ACTIVE} = 1"
+    )
+    fun selectByIdActive(id: Long): Asset?
+
+    @Query(
+        "SELECT COUNT(*) $BASIC_FROM WHERE (${Entry.CODE} = :code) " +
+                "AND (${Entry.ID} != :assetId)"
+    )
+    suspend fun codeExists(code: String, assetId: Long): Int
+
+    @Query(
+        "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
+                "WHERE ${Entry.TABLE_NAME}.${Entry.TRANSFERRED} = 0 $BASIC_ORDER"
+    )
+    fun selectNoTransferred(): List<Asset>
+
+    @Query(
+        "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
+                "WHERE ${Entry.TABLE_NAME}.${Entry.WAREHOUSE_AREA_ID} = :warehouseAreaId " +
+                "AND ${Entry.TABLE_NAME}.${Entry.ACTIVE} = 1 " +
+                "AND ${Entry.TABLE_NAME}.${Entry.STATUS} != :status $BASIC_ORDER"
+    )
+    fun selectByWarehouseAreaIdActiveNotRemoved(
+        warehouseAreaId: Long,
+        status: Int = AssetStatus.removed.id
+    ): List<Asset>
+
+    @Query("SELECT DISTINCT ${Entry.CODE} $BASIC_FROM ORDER BY ${Entry.CODE}")
+    fun selectDistinctCodes(): List<String>
+
+    @Query("SELECT DISTINCT ${Entry.SERIAL_NUMBER} $BASIC_FROM ORDER BY ${Entry.SERIAL_NUMBER}")
+    fun selectDistinctSerials(): List<String>
+
+    @Query("SELECT DISTINCT ${Entry.CODE} $BASIC_FROM WHERE ${Entry.WAREHOUSE_AREA_ID} = :warehouseAreaId ORDER BY ${Entry.CODE}")
+    fun selectDistinctCodesByWarehouseAreaId(warehouseAreaId: Long): List<String>
+
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAsset(asset: Asset)
+    suspend fun insert(asset: Asset)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(assets: List<Asset>)
+    suspend fun insert(assets: List<Asset>)
+
+    @Transaction
+    suspend fun insert(entities: List<Asset>, completedTask: (Int) -> Unit) {
+        entities.forEachIndexed { index, entity ->
+            insert(entity)
+            completedTask(index + 1)
+        }
+    }
+
 
     @Update
-    suspend fun updateAsset(asset: Asset)
+    suspend fun update(asset: Asset)
 
-    @Query("DELETE FROM ${Entry.TABLE_NAME}")
+    @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.ID} = :newValue WHERE ${Entry.ID} = :oldValue")
+    suspend fun updateId(oldValue: Long, newValue: Long)
+
+    @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.WAREHOUSE_ID} = :newValue WHERE ${Entry.WAREHOUSE_ID} = :oldValue")
+    suspend fun updateWarehouseId(oldValue: Long, newValue: Long)
+
+    @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.WAREHOUSE_AREA_ID} = :newValue WHERE ${Entry.WAREHOUSE_AREA_ID} = :oldValue")
+    suspend fun updateWarehouseAreaId(oldValue: Long, newValue: Long)
+
+    @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.ITEM_CATEGORY_ID} = :newValue WHERE ${Entry.ITEM_CATEGORY_ID} = :oldValue")
+    suspend fun updateItemCategoryId(oldValue: Long, newValue: Long)
+
+    @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.WAREHOUSE_ID} = :warehouseId, ${Entry.WAREHOUSE_AREA_ID} = :warehouseAreaId, ${Entry.TRANSFERRED} = 0, ${Entry.LAST_ASSET_REVIEW_DATE} = :date WHERE ${Entry.ID} IN (:ids)")
+    suspend fun updateOnInventoryRemoved(ids: Array<Long>, warehouseId: Long, warehouseAreaId: Long, date: String)
+
+    @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.WAREHOUSE_ID} = :warehouseId, ${Entry.WAREHOUSE_AREA_ID} = :warehouseAreaId, ${Entry.TRANSFERRED} = 0 WHERE ${Entry.ID} IN (:ids)")
+    suspend fun updateLocation(ids: Array<Long>, warehouseId: Long, warehouseAreaId: Long)
+
+    @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.TRANSFERRED} = 0, ${Entry.STATUS} = :status, ${Entry.MISSING_DATE} = :date WHERE ${Entry.ID} IN (:ids)")
+    suspend fun updateMissing(
+        ids: Array<Long>,
+        status: Int = AssetStatus.missing.id,
+        date: String
+    )
+
+    @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.WAREHOUSE_ID} = :warehouseId, ${Entry.WAREHOUSE_AREA_ID} = :warehouseAreaId, ${Entry.TRANSFERRED} = 0, ${Entry.STATUS} = :status, ${Entry.MISSING_DATE} = NULL, ${Entry.LAST_ASSET_REVIEW_DATE} = :date WHERE ${Entry.ID} IN (:ids)")
+    suspend fun updateOnInventory(
+        ids: Array<Long>,
+        warehouseId: Long,
+        warehouseAreaId: Long,
+        status: Int = AssetStatus.onInventory.id,
+        date: String
+    )
+
+    @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.TRANSFERRED} = 1 WHERE ${Entry.ID} IN (:ids)")
+    suspend fun updateTransferred(
+        ids: Array<Long>
+    )
+
+
+    @Query("DELETE $BASIC_FROM")
     suspend fun deleteAll()
+
+    @Delete
+    suspend fun delete(item: Asset)
+
+    @Query("DELETE $BASIC_FROM WHERE ${Entry.ID} = :id")
+    suspend fun deleteById(id: Long): Int
+
+
+    /**
+     * Get by formatted query
+     *
+     * @param query Ejemplo: [getMultiQuery]
+     * @return Una lista de [Asset]
+     */
+    @RawQuery
+    fun getByQuery(query: SupportSQLiteQuery): List<Asset>
+
+    /**
+     * Get multi query
+     *
+     * @param ean
+     * @param description
+     * @param code
+     * @param serialNumber
+     * @param itemCategoryId
+     * @param warehouseId
+     * @param warehouseAreaId
+     * @param useLike
+     * @param onlyActive
+     * @return
+     */
+    fun getMultiQuery(
+        ean: String = "",
+        description: String = "",
+        code: String = "",
+        serialNumber: String = "",
+        itemCategoryId: Long? = null,
+        warehouseId: Long? = null,
+        warehouseAreaId: Long? = null,
+        useLike: Boolean = false,
+        onlyActive: Boolean = true,
+    ): List<Asset> {
+        var where = String()
+        val args: MutableList<Any> = ArrayList()
+        var condAdded = false
+
+        if (ean.isNotEmpty()) {
+            where += "WHERE "
+            where += "${Entry.TABLE_NAME}.${Entry.EAN} LIKE ?"
+            args.add("${if (useLike) "%" else ""}$ean${if (useLike) "%" else ""}")
+            condAdded = true
+        }
+
+        if (description.isNotEmpty()) {
+            where += if (condAdded) " OR " else "WHERE "
+            where += "${Entry.TABLE_NAME}.${Entry.DESCRIPTION} LIKE ?"
+            args.add("${if (useLike) "%" else ""}$description${if (useLike) "%" else ""}")
+            condAdded = true
+        }
+
+        if (code.isNotEmpty()) {
+            where += if (condAdded) " OR " else "WHERE "
+            where += "${Entry.TABLE_NAME}.${Entry.CODE} LIKE ?"
+            args.add("${if (useLike) "%" else ""}$code${if (useLike) "%" else ""}")
+            condAdded = true
+        }
+
+        if (serialNumber.isNotEmpty()) {
+            where += if (condAdded) " OR " else "WHERE "
+            where += "${Entry.TABLE_NAME}.${Entry.SERIAL_NUMBER} LIKE ?"
+            args.add("${if (useLike) "%" else ""}$serialNumber${if (useLike) "%" else ""}")
+            condAdded = true
+        }
+
+        if (itemCategoryId != null) {
+            where += if (condAdded) " AND " else "WHERE "
+            where += "${Entry.TABLE_NAME}.${Entry.ITEM_CATEGORY_ID} = ?"
+            args.add(itemCategoryId)
+            condAdded = true
+        }
+
+        if (warehouseId != null) {
+            where += if (condAdded) " AND " else "WHERE "
+            where += "${Entry.TABLE_NAME}.${Entry.WAREHOUSE_ID} = ?"
+            args.add(warehouseId)
+            condAdded = true
+        }
+
+        if (warehouseAreaId != null) {
+            where += if (condAdded) " AND " else "WHERE "
+            where += "${Entry.TABLE_NAME}.${Entry.WAREHOUSE_AREA_ID} = ?"
+            args.add(warehouseAreaId)
+            condAdded = true
+        }
+
+        if (onlyActive) {
+            where += if (condAdded) " AND " else "WHERE "
+            where += "${Entry.TABLE_NAME}.${Entry.ACTIVE} = 1"
+        }
+
+        val query = "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN $where $BASIC_ORDER"
+
+        return getByQuery(SimpleSQLiteQuery(query, args.toTypedArray()))
+    }
+
+    companion object {
+        const val BASIC_SELECT = "SELECT ${Entry.TABLE_NAME}.*"
+        const val BASIC_FROM = "FROM ${Entry.TABLE_NAME}"
+        const val BASIC_ORDER =
+            "ORDER BY ${Entry.TABLE_NAME}.${Entry.DESCRIPTION}, ${Entry.TABLE_NAME}.${Entry.CODE}, ${Entry.TABLE_NAME}.${Entry.ID}"
+
+        private val catEntry = ItemCategory.Entry
+        private val wEntry = Warehouse.Entry
+        private val waEntry = WarehouseArea.Entry
+
+        const val BASIC_LEFT_JOIN =
+            " LEFT JOIN ${catEntry.TABLE_NAME} ON ${catEntry.TABLE_NAME}.${catEntry.ID} = ${Entry.TABLE_NAME}.${Entry.ITEM_CATEGORY_ID} " +
+                    "LEFT JOIN ${wEntry.TABLE_NAME} ON ${wEntry.TABLE_NAME}.${wEntry.ID} = ${Entry.TABLE_NAME}.${Entry.WAREHOUSE_ID} " +
+                    "LEFT JOIN ${waEntry.TABLE_NAME} ON ${waEntry.TABLE_NAME}.${waEntry.ID} = ${Entry.TABLE_NAME}.${Entry.WAREHOUSE_AREA_ID} " +
+                    "LEFT JOIN ${wEntry.TABLE_NAME} AS orig_${wEntry.TABLE_NAME} ON orig_${wEntry.TABLE_NAME}.${wEntry.ID} = ${Entry.TABLE_NAME}.${Entry.ORIGINAL_WAREHOUSE_ID} " +
+                    "LEFT JOIN ${waEntry.TABLE_NAME} AS orig_${waEntry.TABLE_NAME} ON orig_${waEntry.TABLE_NAME}.${waEntry.ID} = ${Entry.TABLE_NAME}.${Entry.ORIGINAL_WAREHOUSE_AREA_ID}"
+
+        const val BASIC_JOIN_FIELDS =
+            "${catEntry.TABLE_NAME}.${catEntry.DESCRIPTION} AS ${Entry.ITEM_CATEGORY_STR}," +
+                    "${wEntry.TABLE_NAME}.${wEntry.DESCRIPTION} AS ${Entry.WAREHOUSE_STR}," +
+                    "${waEntry.TABLE_NAME}.${waEntry.DESCRIPTION} AS ${Entry.WAREHOUSE_AREA_STR}," +
+                    "orig_${wEntry.TABLE_NAME}.${wEntry.DESCRIPTION} AS ${Entry.ORIGINAL_WAREHOUSE_STR}," +
+                    "orig_${waEntry.TABLE_NAME}.${waEntry.DESCRIPTION} AS ${Entry.ORIGINAL_WAREHOUSE_AREA_STR}"
+    }
 }

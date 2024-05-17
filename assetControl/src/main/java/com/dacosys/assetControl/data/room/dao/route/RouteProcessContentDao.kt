@@ -1,21 +1,125 @@
 package com.dacosys.assetControl.data.room.dao.route
 
 import androidx.room.*
-import com.dacosys.assetControl.data.room.entity.route.RouteProcessContent
+import com.dacosys.assetControl.data.room.entity.asset.Asset
+import com.dacosys.assetControl.data.room.entity.location.Warehouse
+import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
+import com.dacosys.assetControl.data.room.entity.route.*
 import com.dacosys.assetControl.data.room.entity.route.RouteProcessContent.Entry
-import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface RouteProcessContentDao {
+    @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN $BASIC_ORDER")
+    fun select(): List<RouteProcessContent>
+
+    @Query("SELECT MIN(${Entry.ID}) $BASIC_FROM")
+    fun selectMinId(): Long?
+
+    @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN WHERE ${Entry.TABLE_NAME}.${Entry.ID} = :id")
+    fun selectById(id: Long): RouteProcessContent?
+
+    @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN WHERE ${Entry.TABLE_NAME}.${Entry.ROUTE_PROCESS_ID} = :id")
+    fun selectByRouteProcessId(id: Long): List<RouteProcessContent>
+
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertRouteProcessContent(routeProcessContent: RouteProcessContent)
+    suspend fun insert(content: RouteProcessContent): Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(contents: List<RouteProcessContent>)
+
+    @Transaction
+    suspend fun insert(entities: List<RouteProcessContent>, completedTask: (Int) -> Unit) {
+        entities.forEachIndexed { index, entity ->
+            insert(entity)
+            completedTask(index + 1)
+        }
+    }
+
 
     @Update
-    suspend fun updateRouteProcessContent(routeProcessContent: RouteProcessContent)
+    suspend fun update(content: RouteProcessContent)
+
+    @Query(
+        "UPDATE ${Entry.TABLE_NAME} " +
+                "SET ${Entry.ROUTE_PROCESS_STATUS_ID} = :processStatusId, ${Entry.DATA_COLLECTION_ID} = :dataCollectionId " +
+                "WHERE ${Entry.ROUTE_PROCESS_ID} = :routeProcessId " +
+                "AND ${Entry.ID} = :id " +
+                "AND ${Entry.DATA_COLLECTION_ID} = :dataCollectionRuleId " +
+                "AND ${Entry.DATA_COLLECTION_RULE_ID} = :dataCollectionRuleId " +
+                "AND ${Entry.LEVEL} = :level " +
+                "AND ${Entry.POSITION} = :position "
+    )
+    suspend fun updateStatusNew(
+        id: Long,
+        processStatusId: Int,
+        dataCollectionId: Long,
+        routeProcessId: Long,
+        dataCollectionRuleId: Long,
+        level: Int,
+        position: Int,
+    )
 
     @Delete
-    suspend fun deleteRouteProcessContent(routeProcessContent: RouteProcessContent)
+    suspend fun delete(content: RouteProcessContent)
 
-    @Query("SELECT * FROM ${Entry.TABLE_NAME}")
-    fun getAllRouteProcessContent(): Flow<List<RouteProcessContent>>
+    @Query("DELETE $BASIC_FROM")
+    suspend fun deleteAll()
+
+    @Query("DELETE $BASIC_FROM WHERE ${Entry.ROUTE_PROCESS_ID} = :id")
+    suspend fun deleteByRouteProcessId(id: Long)
+
+
+    @Query(
+        "DELETE $BASIC_FROM " +
+                "WHERE ${Entry.ROUTE_PROCESS_ID} IN ( " +
+                "SELECT ${rpEntry.ROUTE_PROCESS_ID} FROM ${rpEntry.TABLE_NAME} " +
+                "WHERE ${rpEntry.ROUTE_PROCESS_DATE} < :routeProcessDate " +
+                "AND ${rpEntry.TRANSFERRED_DATE} IS NOT NULL " +
+                "AND ${rpEntry.ROUTE_ID} = :routeId )"
+    )
+    suspend fun deleteByRouteIdRouteProcessDate(routeProcessDate: String, routeId: Long)
+
+    companion object {
+        const val BASIC_SELECT = "SELECT ${Entry.TABLE_NAME}.*"
+        const val BASIC_FROM = "FROM ${Entry.TABLE_NAME}"
+        const val BASIC_ORDER = "ORDER BY ${Entry.TABLE_NAME}.${Entry.ROUTE_PROCESS_ID}, " +
+                "${Entry.TABLE_NAME}.${Entry.LEVEL}, " +
+                "${Entry.TABLE_NAME}.${Entry.POSITION}"
+
+        private val aEntry = Asset.Entry
+        private val wEntry = Warehouse.Entry
+        private val waEntry = WarehouseArea.Entry
+        private val rEntry = Route.Entry
+        private val rpEntry = RouteProcess.Entry
+        private val rcEntry = RouteComposition.Entry
+        private val rpsEntry = RouteProcessStatus.Entry
+
+        const val BASIC_JOIN_FIELDS =
+            "${aEntry.TABLE_NAME}.${aEntry.CODE} AS ${Entry.ASSET_CODE}, " +
+                    "${aEntry.TABLE_NAME}.${aEntry.DESCRIPTION} AS ${Entry.ASSET_STR}, " +
+                    "${rEntry.TABLE_NAME}.${rEntry.DESCRIPTION} AS ${Entry.ROUTE_STR}, " +
+                    "${rcEntry.TABLE_NAME}.${rcEntry.ASSET_ID} AS ${Entry.ASSET_ID}, " +
+                    "${rcEntry.TABLE_NAME}.${rcEntry.WAREHOUSE_AREA_ID} AS ${Entry.WAREHOUSE_AREA_ID}, " +
+                    "${rcEntry.TABLE_NAME}.${rcEntry.WAREHOUSE_ID} AS ${Entry.WAREHOUSE_ID}, " +
+                    "${rpEntry.TABLE_NAME}.${rpEntry.ROUTE_PROCESS_ID} AS ${Entry.ROUTE_PROCESS_ID}, " +
+                    "${rpsEntry.TABLE_NAME}.${rpsEntry.DESCRIPTION} AS ${Entry.ROUTE_PROCESS_STATUS_STR}, " +
+                    "${wEntry.TABLE_NAME}.${wEntry.DESCRIPTION} AS ${Entry.WAREHOUSE_STR}, " +
+                    "${waEntry.TABLE_NAME}.${waEntry.DESCRIPTION} AS ${Entry.WAREHOUSE_AREA_STR}, " +
+                    "${rpEntry.TABLE_NAME}.${rpEntry.ROUTE_ID} AS ${Entry.ROUTE_ID} "
+
+
+        const val BASIC_LEFT_JOIN =
+            "LEFT JOIN ${rpEntry.TABLE_NAME} ON ${rpEntry.TABLE_NAME}.${rpEntry.ROUTE_PROCESS_ID} = ${Entry.TABLE_NAME}.${Entry.ROUTE_PROCESS_ID} " +
+                    "LEFT JOIN ${rcEntry.TABLE_NAME} ON ${rcEntry.TABLE_NAME}.${rcEntry.ROUTE_ID} = ${rpEntry.TABLE_NAME}.${rpEntry.ROUTE_ID} AND " +
+                    "${Entry.TABLE_NAME}.${Entry.DATA_COLLECTION_RULE_ID} = ${rcEntry.TABLE_NAME}.${rcEntry.DATA_COLLECTION_RULE_ID} AND " +
+                    "${Entry.TABLE_NAME}.${Entry.LEVEL} = ${rcEntry.TABLE_NAME}.${rcEntry.LEVEL} AND " +
+                    "${Entry.TABLE_NAME}.${Entry.POSITION} = ${rcEntry.TABLE_NAME}.${rcEntry.POSITION} " +
+                    "LEFT JOIN ${rEntry.TABLE_NAME} ON ${rEntry.TABLE_NAME}.${rEntry.ID} = ${rpEntry.TABLE_NAME}.${rpEntry.ROUTE_ID} " +
+                    "LEFT JOIN ${aEntry.TABLE_NAME} ON ${aEntry.TABLE_NAME}.${aEntry.ID} = ${rcEntry.TABLE_NAME}.${rcEntry.ASSET_ID} " +
+                    "LEFT JOIN ${waEntry.TABLE_NAME} ON ${waEntry.TABLE_NAME}.${waEntry.ID} = ${rcEntry.TABLE_NAME}.${rcEntry.WAREHOUSE_AREA_ID} " +
+                    "LEFT JOIN ${wEntry.TABLE_NAME} ON ${wEntry.TABLE_NAME}.${wEntry.ID} = ${rcEntry.TABLE_NAME}.${rcEntry.WAREHOUSE_ID} " +
+                    "LEFT JOIN ${rpsEntry.TABLE_NAME} ON ${rpsEntry.TABLE_NAME}.${rpsEntry.ID} = ${Entry.TABLE_NAME}.${Entry.ROUTE_PROCESS_STATUS_ID}"
+
+    }
 }

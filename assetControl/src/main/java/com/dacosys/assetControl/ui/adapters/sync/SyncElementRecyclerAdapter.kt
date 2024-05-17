@@ -29,15 +29,15 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.*
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.model.asset.Asset
-import com.dacosys.assetControl.data.model.asset.AssetStatus
-import com.dacosys.assetControl.data.model.category.ItemCategory
-import com.dacosys.assetControl.data.model.dataCollection.DataCollection
-import com.dacosys.assetControl.data.model.location.Warehouse
-import com.dacosys.assetControl.data.model.location.WarehouseArea
-import com.dacosys.assetControl.data.model.movement.WarehouseMovement
-import com.dacosys.assetControl.data.model.review.AssetReview
-import com.dacosys.assetControl.data.model.route.RouteProcess
+import com.dacosys.assetControl.data.enums.asset.AssetStatus
+import com.dacosys.assetControl.data.room.entity.asset.Asset
+import com.dacosys.assetControl.data.room.entity.category.ItemCategory
+import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollection
+import com.dacosys.assetControl.data.room.entity.location.Warehouse
+import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
+import com.dacosys.assetControl.data.room.entity.movement.WarehouseMovement
+import com.dacosys.assetControl.data.room.entity.review.AssetReview
+import com.dacosys.assetControl.data.room.entity.route.RouteProcess
 import com.dacosys.assetControl.databinding.*
 import com.dacosys.assetControl.network.sync.SyncRegistryType
 import com.dacosys.assetControl.ui.adapters.interfaces.Interfaces.*
@@ -945,7 +945,7 @@ class SyncElementRecyclerAdapter private constructor(builder: Builder) :
 
             binding.descriptionAutoSize.text = syncElement.description
             binding.code.text = syncElement.code
-            binding.assetStatus.text = AssetStatus.getById(syncElement.assetStatusId)?.description ?: ""
+            binding.assetStatus.text = AssetStatus.getById(syncElement.status).description
 
             setStyle(isSelected)
         }
@@ -1105,7 +1105,7 @@ class SyncElementRecyclerAdapter private constructor(builder: Builder) :
                 syncElement.warehouseAreaStr.isNotEmpty() -> syncElement.warehouseAreaStr
                 else -> ""
             }
-            binding.dataCollectionDate.text = syncElement.dateEnd
+            binding.dataCollectionDate.text = syncElement.dateEnd?.toString()
 
             setStyle(isSelected)
         }
@@ -1144,7 +1144,7 @@ class SyncElementRecyclerAdapter private constructor(builder: Builder) :
             bindCheckBoxVisibility(checkBoxVisibility)
 
             binding.routeStr.text = syncElement.routeStr
-            binding.routeProcessDate.text = syncElement.routeProcessDate
+            binding.routeProcessDate.text = syncElement.routeProcessDate.toString()
 
             setStyle(isSelected)
         }
@@ -1184,15 +1184,15 @@ class SyncElementRecyclerAdapter private constructor(builder: Builder) :
 
             binding.origWarehouseAreaStr.text = syncElement.origWarehouseAreaStr
             binding.destWarehouseAreaStr.text = syncElement.destWarehouseAreaStr
-            binding.obs.text = syncElement.obs
-            if (syncElement.obs.isEmpty()) {
+            binding.obs.text = syncElement.obs.orEmpty()
+            if (syncElement.obs.orEmpty().isEmpty()) {
                 binding.obs.visibility = GONE
                 binding.dividerObs.visibility = GONE
             } else {
                 binding.obs.visibility = VISIBLE
                 binding.dividerObs.visibility = VISIBLE
             }
-            binding.warehouseMovementDate.text = syncElement.warehouseMovementDate
+            binding.warehouseMovementDate.text = syncElement.warehouseMovementDate.toString()
 
             setStyle(isSelected)
         }
@@ -1233,15 +1233,15 @@ class SyncElementRecyclerAdapter private constructor(builder: Builder) :
             bindCheckBoxVisibility(checkBoxVisibility)
 
             binding.warehouseAreaStr.text = syncElement.warehouseAreaStr
-            binding.obs.text = syncElement.obs
-            if (syncElement.obs.isEmpty()) {
+            binding.obs.text = syncElement.obs.orEmpty()
+            if (syncElement.obs.orEmpty().isEmpty()) {
                 binding.obs.visibility = GONE
                 binding.dividerObs.visibility = GONE
             } else {
                 binding.obs.visibility = VISIBLE
                 binding.dividerObs.visibility = VISIBLE
             }
-            binding.assetReviewDate.text = syncElement.assetReviewDate
+            binding.assetReviewDate.text = syncElement.assetReviewDate.toString()
 
             setStyle(isSelected)
         }
@@ -1367,42 +1367,42 @@ class SyncElementRecyclerAdapter private constructor(builder: Builder) :
             when (item) {
                 is Asset -> {
                     registryType = SyncRegistryType.Asset
-                    uniqueId = item.assetId.toString()
+                    uniqueId = item.id.toString()
                 }
 
                 is ItemCategory -> {
                     registryType = SyncRegistryType.ItemCategory
-                    uniqueId = item.itemCategoryId.toString()
+                    uniqueId = item.id.toString()
                 }
 
                 is Warehouse -> {
                     registryType = SyncRegistryType.Warehouse
-                    uniqueId = item.warehouseId.toString()
+                    uniqueId = item.id.toString()
                 }
 
                 is WarehouseArea -> {
                     registryType = SyncRegistryType.WarehouseArea
-                    uniqueId = item.warehouseAreaId.toString()
+                    uniqueId = item.id.toString()
                 }
 
                 is DataCollection -> {
                     registryType = SyncRegistryType.DataCollection
-                    uniqueId = item.collectorDataCollectionId.toString()
+                    uniqueId = item.id.toString()
                 }
 
                 is RouteProcess -> {
                     registryType = SyncRegistryType.RouteProcess
-                    uniqueId = item.collectorRouteProcessId.toString()
+                    uniqueId = item.id.toString()
                 }
 
                 is WarehouseMovement -> {
                     registryType = SyncRegistryType.WarehouseMovement
-                    uniqueId = item.collectorWarehouseMovementId.toString()
+                    uniqueId = item.id.toString()
                 }
 
                 is AssetReview -> {
                     registryType = SyncRegistryType.AssetReview
-                    uniqueId = item.collectorAssetReviewId.toString()
+                    uniqueId = item.id.toString()
                 }
 
                 is Image -> {

@@ -1,30 +1,29 @@
 package com.dacosys.assetControl.network.download
 
-import android.database.sqlite.SQLiteDatabase
 import android.util.Log
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
+import com.dacosys.assetControl.AssetControlApp.Companion.getUserId
 import com.dacosys.assetControl.AssetControlApp.Companion.isLogged
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.dataBase.DataBaseHelper
-import com.dacosys.assetControl.data.dataBase.DataBaseHelper.Companion.DATABASE_NAME
-import com.dacosys.assetControl.data.dataBase.asset.AssetDbHelper
-import com.dacosys.assetControl.data.dataBase.category.ItemCategoryDbHelper
-import com.dacosys.assetControl.data.dataBase.datacollection.DataCollectionDbHelper
-import com.dacosys.assetControl.data.dataBase.location.WarehouseAreaDbHelper
-import com.dacosys.assetControl.data.dataBase.location.WarehouseDbHelper
-import com.dacosys.assetControl.data.dataBase.manteinance.AssetManteinanceDbHelper
-import com.dacosys.assetControl.data.dataBase.movement.WarehouseMovementDbHelper
-import com.dacosys.assetControl.data.dataBase.review.AssetReviewDbHelper
-import com.dacosys.assetControl.data.dataBase.route.RouteProcessDbHelper
-import com.dacosys.assetControl.data.model.asset.Asset
-import com.dacosys.assetControl.data.model.category.ItemCategory
-import com.dacosys.assetControl.data.model.dataCollection.DataCollection
-import com.dacosys.assetControl.data.model.location.Warehouse
-import com.dacosys.assetControl.data.model.location.WarehouseArea
-import com.dacosys.assetControl.data.model.manteinance.AssetManteinance
-import com.dacosys.assetControl.data.model.movement.WarehouseMovement
-import com.dacosys.assetControl.data.model.review.AssetReview
-import com.dacosys.assetControl.data.model.route.RouteProcess
+import com.dacosys.assetControl.data.room.database.AcDatabase
+import com.dacosys.assetControl.data.room.entity.asset.Asset
+import com.dacosys.assetControl.data.room.entity.category.ItemCategory
+import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollection
+import com.dacosys.assetControl.data.room.entity.location.Warehouse
+import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
+import com.dacosys.assetControl.data.room.entity.maintenance.AssetMaintenance
+import com.dacosys.assetControl.data.room.entity.movement.WarehouseMovement
+import com.dacosys.assetControl.data.room.entity.review.AssetReview
+import com.dacosys.assetControl.data.room.entity.route.RouteProcess
+import com.dacosys.assetControl.data.room.repository.asset.AssetRepository
+import com.dacosys.assetControl.data.room.repository.category.ItemCategoryRepository
+import com.dacosys.assetControl.data.room.repository.dataCollection.DataCollectionRepository
+import com.dacosys.assetControl.data.room.repository.location.WarehouseAreaRepository
+import com.dacosys.assetControl.data.room.repository.location.WarehouseRepository
+import com.dacosys.assetControl.data.room.repository.maintenance.AssetMaintenanceRepository
+import com.dacosys.assetControl.data.room.repository.movement.WarehouseMovementRepository
+import com.dacosys.assetControl.data.room.repository.review.AssetReviewRepository
+import com.dacosys.assetControl.data.room.repository.route.RouteProcessRepository
 import com.dacosys.assetControl.data.webservice.common.Webservice.Companion.getWebservice
 import com.dacosys.assetControl.network.serverDate.GetMySqlDate
 import com.dacosys.assetControl.network.serverDate.MySqlDateResult
@@ -35,6 +34,7 @@ import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.settings.entries.ConfEntry
+import com.dacosys.assetControl.utils.settings.io.FileHelper
 import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutString
 import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.resetLastUpdateDates
 import com.dacosys.assetControl.utils.settings.preferences.Repository
@@ -49,39 +49,40 @@ class DownloadDb(
 ) {
     companion object {
         fun getPendingAssetReview(): ArrayList<AssetReview> {
-            return AssetReviewDbHelper().selectByCompleted()
+            val userId = getUserId() ?: return arrayListOf()
+            return ArrayList(AssetReviewRepository().selectByCompleted(userId))
         }
 
         fun getPendingWarehouseMovement(): ArrayList<WarehouseMovement> {
-            return WarehouseMovementDbHelper().selectByNoTransferred()
+            return WarehouseMovementRepository().selectByNoTransferred()
         }
 
         fun getPendingAsset(): ArrayList<Asset> {
-            return AssetDbHelper().selectNoTransferred()
+            return AssetRepository().selectNoTransferred()
         }
 
         fun getPendingWarehouseArea(): ArrayList<WarehouseArea> {
-            return WarehouseAreaDbHelper().selectNoTransfered()
+            return WarehouseAreaRepository().selectNoTransferred()
         }
 
         fun getPendingWarehouse(): ArrayList<Warehouse> {
-            return WarehouseDbHelper().selectNoTransferred()
+            return WarehouseRepository().selectNoTransferred()
         }
 
         fun getPendingItemCategory(): ArrayList<ItemCategory> {
-            return ItemCategoryDbHelper().selectNoTransfered()
+            return ArrayList(ItemCategoryRepository().selectNoTransferred())
         }
 
         fun getPendingDataCollection(): ArrayList<DataCollection> {
-            return DataCollectionDbHelper().selectByNoTransferred()
+            return ArrayList(DataCollectionRepository().selectByNoTransferred())
         }
 
         fun getPendingRouteProcess(): ArrayList<RouteProcess> {
-            return RouteProcessDbHelper().selectByNoTransferred()
+            return ArrayList(RouteProcessRepository().selectByNoTransferred())
         }
 
-        fun getPendingAssetManteinance(): ArrayList<AssetManteinance> {
-            return AssetManteinanceDbHelper().selectNoTransferred()
+        fun getPendingAssetMaintenance(): ArrayList<AssetMaintenance> {
+            return ArrayList(AssetMaintenanceRepository().selectNoTransferred())
         }
 
         private fun pendingDelivery(): Boolean {
@@ -94,7 +95,7 @@ class DownloadDb(
                 getPendingItemCategory().any() -> true
                 getPendingDataCollection().any() -> true
                 getPendingRouteProcess().any() -> true
-                getPendingAssetManteinance().any() -> true
+                getPendingAssetMaintenance().any() -> true
                 else -> false
             }
         }
@@ -193,7 +194,7 @@ class DownloadDb(
             return
         }
 
-        // Si aún no está loggeado y hay datos por enviar, no descargar la base de datos
+        // Si aún no está autentificado y hay datos por enviar, no descargar la base de datos
         if (!isLogged() && pendingDelivery()) {
             onDownloadEvent.invoke(
                 DownloadTask(
@@ -253,7 +254,7 @@ class DownloadDb(
 
     private fun downloadTimeFile() {
         // Leer el archivo antiguo de fecha de creación de la base de datos
-        // en el servidor, si la esta fecha es igual a la del archivo del servidor,
+        // en el servidor, si esta fecha es igual a la del archivo del servidor,
         // no hace falta descargar la base de datos.
         if (timeFileLocation!!.exists()) {
             oldDateTimeStr = getDateTimeStr()
@@ -317,7 +318,7 @@ class DownloadDb(
         val msg = it.msg
 
         if (downloadStatus == DownloadStatus.FINISHED) {
-            DataBaseHelper().close()
+            AcDatabase.cleanInstance()
             prepareDataBase()
         } else {
             onDownloadEvent.invoke(
@@ -349,7 +350,7 @@ class DownloadDb(
 
     private fun syncProgress(it: SyncProgress) {
         when (it.progressStatus) {
-            ProgressStatus.crashed, ProgressStatus.crashed -> {
+            ProgressStatus.crashed, ProgressStatus.canceled -> {
                 ErrorLog.writeLog(
                     null,
                     this::class.java.simpleName,
@@ -477,14 +478,14 @@ class DownloadDb(
             return false
         }
 
-        DataBaseHelper().deleteDb()
-        SQLiteDatabase.releaseMemory()
+        //Remove the current db
+        FileHelper.removeDataBases(getContext())
 
         //Open your local db as the input stream
         val myInput = FileInputStream(dbFileLocation)
 
         // Path to the just created empty db
-        val outFileName = getContext().getDatabasePath(DATABASE_NAME).toString()
+        val outFileName = getContext().getDatabasePath(AcDatabase.DATABASE_NAME).toString()
 
         Log.d(
             this::class.java.simpleName,
@@ -547,9 +548,9 @@ class DownloadDb(
 
                 registries.clear()
                 registries.add(ConfEntry.acLastUpdateRepairshop.description)
-                registries.add(ConfEntry.acLastUpdateAssetManteinance.description)
-                registries.add(ConfEntry.acLastUpdateManteinanceType.description)
-                registries.add(ConfEntry.acLastUpdateManteinanceTypeGroup.description)
+                registries.add(ConfEntry.acLastUpdateAssetMaintenance.description)
+                registries.add(ConfEntry.acLastUpdateMaintenanceType.description)
+                registries.add(ConfEntry.acLastUpdateMaintenanceTypeGroup.description)
                 prefsPutString(
                     registries, Statics.DEFAULT_DATE
                 )

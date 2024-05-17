@@ -12,7 +12,7 @@ import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.R.id.descriptionTextView
 import com.dacosys.assetControl.R.layout.custom_spinner_dropdown_item
-import com.dacosys.assetControl.data.model.user.User
+import com.dacosys.assetControl.data.room.entity.user.User
 
 /**
  * Created by Agustin on 18/01/2017.
@@ -65,7 +65,7 @@ class UserAdapter : ArrayAdapter<User> {
 
                     if (tt1 != null) {
                         tt1.text = user.name
-                        if (user.userId == 0L) {
+                        if (user.id == 0L) {
                             tt1.setTextColor(dimgray)
                         } else {
                             tt1.setTextColor(black)

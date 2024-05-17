@@ -18,12 +18,12 @@ import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.dataBase.location.WarehouseAreaDbHelper
-import com.dacosys.assetControl.data.dataBase.location.WarehouseDbHelper
-import com.dacosys.assetControl.data.model.location.Warehouse
-import com.dacosys.assetControl.data.model.location.WarehouseArea
-import com.dacosys.assetControl.data.model.location.async.WarehouseAreaChangedObserver
-import com.dacosys.assetControl.data.model.location.async.WarehouseChangedObserver
+import com.dacosys.assetControl.data.async.location.WarehouseAreaChangedObserver
+import com.dacosys.assetControl.data.async.location.WarehouseChangedObserver
+import com.dacosys.assetControl.data.room.entity.location.Warehouse
+import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
+import com.dacosys.assetControl.data.room.repository.location.WarehouseAreaRepository
+import com.dacosys.assetControl.data.room.repository.location.WarehouseRepository
 import com.dacosys.assetControl.databinding.LocationSelectActivityBinding
 import com.dacosys.assetControl.ui.adapters.location.WarehouseAdapter
 import com.dacosys.assetControl.ui.adapters.location.WarehouseAreaAdapter
@@ -87,8 +87,7 @@ class LocationSelectActivity : AppCompatActivity(),
                 searchWarehouseAreaId = true,
                 searchAssetCode = false,
                 searchAssetSerial = false,
-                searchAssetEan = false,
-                validateId = true
+                searchAssetEan = false
             )
 
             var locationOk = false
@@ -445,8 +444,7 @@ class LocationSelectActivity : AppCompatActivity(),
 
             oldSelectedWarehouse = warehouse
             warehouse = null
-
-            wChangedListener?.onWarehouseChanged(warehouse)
+            wChangedListener?.onWarehouseChanged(null)
         } else {
             if (oldSelectedWarehouse != null &&
                 (oldSelectedWarehouse ?: return) == w
@@ -456,7 +454,6 @@ class LocationSelectActivity : AppCompatActivity(),
 
             oldSelectedWarehouse = warehouse
             warehouse = w
-
             wChangedListener?.onWarehouseChanged(warehouse)
         }
     }
@@ -493,8 +490,7 @@ class LocationSelectActivity : AppCompatActivity(),
 
             oldSelectedWarehouseArea = warehouseArea
             warehouseArea = null
-
-            waChangedListener?.onWarehouseAreaChanged(warehouseArea)
+            waChangedListener?.onWarehouseAreaChanged(null)
         } else {
             if (oldSelectedWarehouseArea != null &&
                 (oldSelectedWarehouseArea ?: return) == wa
@@ -504,7 +500,6 @@ class LocationSelectActivity : AppCompatActivity(),
 
             oldSelectedWarehouseArea = warehouseArea
             warehouseArea = wa
-
             waChangedListener?.onWarehouseAreaChanged(warehouseArea)
         }
     }
@@ -560,7 +555,7 @@ class LocationSelectActivity : AppCompatActivity(),
         }
 
         try {
-            warehouseArray = WarehouseDbHelper().select(onlyActive)
+            warehouseArray = ArrayList(WarehouseRepository().select(onlyActive))
         } catch (ex: java.lang.Exception) {
             ex.printStackTrace()
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
@@ -611,13 +606,13 @@ class LocationSelectActivity : AppCompatActivity(),
         // limpiar el área.
         if (warehouseArea != null &&
             warehouse != null &&
-            (warehouse ?: return).warehouseId != (warehouseArea ?: return).warehouseId
+            (warehouse ?: return).id != (warehouseArea ?: return).warehouseId
         ) {
             warehouseArea = null
         }
 
         try {
-            warehouseAreaArray = WarehouseAreaDbHelper().select(onlyActive)
+            warehouseAreaArray = ArrayList(WarehouseAreaRepository().select(onlyActive))
         } catch (ex: java.lang.Exception) {
             ex.printStackTrace()
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
@@ -632,7 +627,7 @@ class LocationSelectActivity : AppCompatActivity(),
         val t: ArrayList<WarehouseArea> = ArrayList()
         for (wa in warehouseAreaArray) {
             if (warehouse != null) {
-                if (wa.warehouseId == (warehouse ?: return).warehouseId) {
+                if (wa.warehouseId == (warehouse ?: return).id) {
                     t.add(wa)
                 }
             } else {

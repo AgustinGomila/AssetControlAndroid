@@ -14,7 +14,6 @@ import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.AssetControlApp.Companion.appName
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.dataBase.DataBaseHelper
 import com.dacosys.assetControl.network.checkConn.ImageControlCheckUser
 import com.dacosys.assetControl.network.utils.ClientPackage
 import com.dacosys.assetControl.network.utils.ProgressStatus
@@ -27,6 +26,7 @@ import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.scanners.GenerateQR
 import com.dacosys.assetControl.utils.settings.config.ConfigHelper
 import com.dacosys.assetControl.utils.settings.config.QRConfigType
+import com.dacosys.assetControl.utils.settings.io.FileHelper
 import com.dacosys.assetControl.utils.settings.preferences.Preferences
 import java.io.File
 
@@ -199,12 +199,13 @@ class ImageControlPreferenceFragment : PreferenceFragmentCompat(), ClientPackage
                     getString(R.string.configuration_applied), SnackBarType.INFO
                 )
             )
-            DataBaseHelper.removeDataBases()
-            requireActivity().finish()
+            FileHelper.removeDataBases(requireContext())
+            @Suppress("DEPRECATION") requireActivity().onBackPressed()
         } else if (status == ProgressStatus.crashed) {
             if (view != null) showSnackBar(
                 SnackBarEventData(
-                    getString(R.string.error_setting_user_panel), SnackBarType.ERROR
+                    getString(R.string.error_setting_user_panel),
+                    SnackBarType.ERROR
                 )
             )
         }

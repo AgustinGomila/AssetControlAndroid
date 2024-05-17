@@ -24,7 +24,7 @@ class RouteCompositionObject() : Parcelable {
         assetId = parcel.readLong()
         warehouseId = parcel.readLong()
         warehouseAreaId = parcel.readLong()
-        expression = parcel.readString() ?: ""
+        expression = parcel.readString().orEmpty()
         trueResult = parcel.readInt()
         falseResult = parcel.readInt()
     }

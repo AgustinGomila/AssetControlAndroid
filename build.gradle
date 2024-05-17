@@ -1,8 +1,9 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
-
 buildscript {
     ext {
         kotlinVersion = '1.8.22'
+        roomVersion = '2.6.1'
+        kspVersion = '1.8.10-1.0.9'
     }
 
     repositories {
@@ -12,6 +13,7 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:7.4.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+        classpath "androidx.room:room-gradle-plugin:$roomVersion"
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -26,7 +28,7 @@ allprojects {
     }
 
     ext {
-        roomVersion = '2.5.2'
+        archPersistenceVersion = '1.1.1'
         parcelerVersion = '1.1.13'
         androidTargetSdk = 34
         zxingCore = 'com.google.zxing:core:3.4.1'

@@ -189,9 +189,9 @@
         <activity
                 android:name=".ui.activities.category.ItemCategoryCRUDActivity"
                 android:windowSoftInputMode="adjustResize"/>
-        <activity android:name=".ui.activities.manteinance.AssetManteinanceSelectActivity"/>
-        <activity android:name=".ui.activities.manteinance.AssetManteinanceConditionActivity"/>
-        <activity android:name=".ui.activities.manteinance.AssetManteinanceStatusActivity"/>
+        <activity android:name=".ui.activities.maintenance.AssetMaintenanceSelectActivity"/>
+        <activity android:name=".ui.activities.maintenance.AssetMaintenanceConditionActivity"/>
+        <activity android:name=".ui.activities.maintenance.AssetMaintenanceStatusActivity"/>
         <activity
                 android:name=".ui.activities.sync.SyncActivity"
                 android:configChanges="keyboardHidden"/>

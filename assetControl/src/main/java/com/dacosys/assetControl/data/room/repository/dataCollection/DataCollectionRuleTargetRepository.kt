@@ -3,29 +3,22 @@ package com.dacosys.assetControl.data.room.repository.dataCollection
 import com.dacosys.assetControl.data.room.dao.dataCollection.DataCollectionRuleTargetDao
 import com.dacosys.assetControl.data.room.database.AcDatabase.Companion.database
 import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionRuleTarget
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.runBlocking
 
 class DataCollectionRuleTargetRepository {
-    private val dao: DataCollectionRuleTargetDao by lazy {
-        database.dataCollectionRuleTargetDao()
+    private val dao: DataCollectionRuleTargetDao
+        get() = database.dataCollectionRuleTargetDao()
+
+    fun insert(ruleContent: DataCollectionRuleTarget) = runBlocking {
+        dao.insert(ruleContent)
     }
 
-    suspend fun insertDataCollectionRuleTarget(dataCollectionRuleTarget: DataCollectionRuleTarget) {
-        withContext(Dispatchers.IO) {
-            dao.insertDataCollectionRuleTarget(dataCollectionRuleTarget)
-        }
+    fun insert(contents: List<DataCollectionRuleTarget>) = runBlocking {
+        dao.insert(contents)
     }
 
-    suspend fun insertAll(dataCollectionRuleTargets: List<DataCollectionRuleTarget>) {
-        withContext(Dispatchers.IO) {
-            dao.insertAll(dataCollectionRuleTargets)
-        }
-    }
 
-    suspend fun deleteAll() {
-        withContext(Dispatchers.IO) {
-            dao.deleteAll()
-        }
+    fun deleteByDataCollectionRuleId(ruleId: Long) = runBlocking {
+        dao.deleteByDataCollectionRuleId(ruleId)
     }
 }

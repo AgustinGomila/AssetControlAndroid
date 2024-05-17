@@ -18,9 +18,9 @@ import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.dataBase.route.RouteDbHelper
-import com.dacosys.assetControl.data.model.route.Route
-import com.dacosys.assetControl.data.model.route.Route.CREATOR.getAvailableRoutes
+import com.dacosys.assetControl.data.room.entity.route.Route
+import com.dacosys.assetControl.data.room.entity.route.Route.CREATOR.getAvailableRoutes
+import com.dacosys.assetControl.data.room.repository.route.RouteRepository
 import com.dacosys.assetControl.databinding.RouteSelectDialogActivityBinding
 import com.dacosys.assetControl.ui.adapters.route.RouteAdapter
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
@@ -32,8 +32,6 @@ import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener
 import kotlin.concurrent.thread
 
-
-@Suppress("UNCHECKED_CAST")
 class RouteSelectDialogActivity : AppCompatActivity(),
     ContractsAutoCompleteTextView.OnContractsAvailability, KeyboardVisibilityEventListener {
     override fun onDestroy() {
@@ -102,7 +100,7 @@ class RouteSelectDialogActivity : AppCompatActivity(),
         }
 
         // region Setup CATEGORY_CATEGORY ID AUTOCOMPLETE
-        // Set an route click checkedChangedListener for auto complete text view
+        // Set a route click checkedChangedListener for auto complete text view
         binding.autoCompleteTextView.threshold = 1
         binding.autoCompleteTextView.hint = tempTitle
         binding.autoCompleteTextView.onItemClickListener =
@@ -241,7 +239,7 @@ class RouteSelectDialogActivity : AppCompatActivity(),
         }
     }
 
-    var isFilling = false
+    private var isFilling = false
     private fun fillAdapter() {
         if (isFilling) return
         isFilling = true
@@ -249,7 +247,7 @@ class RouteSelectDialogActivity : AppCompatActivity(),
         val itemArray: ArrayList<Route> = ArrayList()
         try {
             Log.d(this::class.java.simpleName, "Selecting routes...")
-            itemArray.addAll(getAvailableRoutes(RouteDbHelper().select(true)))
+            itemArray.addAll(getAvailableRoutes(RouteRepository().select(true)))
         } catch (ex: java.lang.Exception) {
             ex.printStackTrace()
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)

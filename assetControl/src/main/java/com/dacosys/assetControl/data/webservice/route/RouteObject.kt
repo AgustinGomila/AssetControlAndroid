@@ -12,7 +12,7 @@ class RouteObject() : Parcelable {
     constructor(parcel: Parcel) : this() {
         route_id = parcel.readLong()
         active = parcel.readInt()
-        description = parcel.readString() ?: ""
+        description = parcel.readString().orEmpty()
     }
 
     fun getBySoapObject(so: SoapObject): RouteObject {

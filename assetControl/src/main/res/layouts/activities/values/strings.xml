@@ -355,7 +355,7 @@
     <string name="observations">Observaciones</string>
     <string name="filename">Nombre de archivo</string>
     <string name="does_not_exist_in_the_database">No existe en la base de datos</string>
-    <string name="it_has_a_label_valid_only_in_reports">Tiene una etiqueta sólo válida en reportes</string>
+    <string name="it_has_a_label_valid_only_in_reports">Tiene una etiqueta solo válida en reportes</string>
     <string name="it_has_a_disabled_tag">Tiene una etiqueta deshabilitada</string>
     <string name="assets_and_areas_catalog">Catálogo de activos y áreas</string>
     <string name="print_labels">Impresión de etiquetas</string>
@@ -1016,7 +1016,7 @@
     <string name="level_x">Nivel X</string>
     <string name="temperature">Temperatura</string>
     <string name="weight">Peso</string>
-    <string name="lenght">Longitud</string>
+    <string name="length">Longitud</string>
     <string name="volume">Volumen</string>
     <string name="area_surface">Superficie</string>
     <string name="pressure">Presión</string>

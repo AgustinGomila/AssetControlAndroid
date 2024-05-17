@@ -15,7 +15,7 @@ class AttributeObject() : Parcelable {
         attributeId = parcel.readLong()
         attributeTypeId = parcel.readLong()
         active = parcel.readInt()
-        description = parcel.readString() ?: ""
+        description = parcel.readString().orEmpty()
         attributeCategoryId = parcel.readLong()
     }
 

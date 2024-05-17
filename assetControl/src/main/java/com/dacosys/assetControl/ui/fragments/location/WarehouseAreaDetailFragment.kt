@@ -8,7 +8,7 @@ import android.view.WindowManager
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.model.location.WarehouseArea
+import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
 import com.dacosys.assetControl.databinding.WarehouseAreaDetailFragmentBinding
 import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 
@@ -66,24 +66,24 @@ class WarehouseAreaDetailFragment : DialogFragment() {
     }
 
     private fun fillControls() {
-        if (warehouseArea != null) {
-            if (warehouseArea!!.description.isEmpty()) {
-                binding.descriptionAutoResizeTextView.text = ""
-                binding.descriptionAutoResizeTextView.visibility = View.GONE
-            } else {
-                binding.descriptionAutoResizeTextView.text = warehouseArea!!.description
-                binding.descriptionAutoResizeTextView.visibility = View.VISIBLE
-            }
+        val wa = warehouseArea ?: return
 
-            if (warehouseArea!!.warehouseStr.isEmpty()) {
-                binding.warehouseAutoResizeTextView.text = ""
-                binding.warehouseAutoResizeTextView.visibility = View.GONE
-                binding.warehouseTextView.visibility = View.GONE
-            } else {
-                binding.warehouseAutoResizeTextView.text = warehouseArea!!.warehouseStr
-                binding.warehouseAutoResizeTextView.visibility = View.VISIBLE
-                binding.warehouseTextView.visibility = View.VISIBLE
-            }
+        if (wa.description.isEmpty()) {
+            binding.descriptionAutoResizeTextView.text = ""
+            binding.descriptionAutoResizeTextView.visibility = View.GONE
+        } else {
+            binding.descriptionAutoResizeTextView.text = wa.description
+            binding.descriptionAutoResizeTextView.visibility = View.VISIBLE
+        }
+
+        if (wa.warehouseStr.isEmpty()) {
+            binding.warehouseAutoResizeTextView.text = ""
+            binding.warehouseAutoResizeTextView.visibility = View.GONE
+            binding.warehouseTextView.visibility = View.GONE
+        } else {
+            binding.warehouseAutoResizeTextView.text = wa.warehouseStr
+            binding.warehouseAutoResizeTextView.visibility = View.VISIBLE
+            binding.warehouseTextView.visibility = View.VISIBLE
         }
     }
 

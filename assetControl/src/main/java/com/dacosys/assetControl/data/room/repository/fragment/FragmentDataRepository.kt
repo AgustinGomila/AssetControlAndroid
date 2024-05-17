@@ -3,24 +3,15 @@ package com.dacosys.assetControl.data.room.repository.fragment
 import com.dacosys.assetControl.data.room.dao.fragment.FragmentDataDao
 import com.dacosys.assetControl.data.room.database.AcTempDatabase.Companion.database
 import com.dacosys.assetControl.data.room.entity.fragment.FragmentData
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.runBlocking
 
 class FragmentDataRepository {
-    private val dao: FragmentDataDao by lazy {
-        database.fragmentDataDao()
-    }
+    private val dao: FragmentDataDao
+        get() = database.fragmentDataDao()
 
-    suspend fun insert(fragmentData: FragmentData) {
-        withContext(Dispatchers.IO) {
-            dao.insert(fragmentData)
-        }
-    }
+    fun select() = dao.select()
 
-    suspend fun delete(fragmentData: FragmentData) {
-        withContext(Dispatchers.IO) {
-            dao.delete(fragmentData)
-        }
+    fun insert(fragments: List<FragmentData>) = runBlocking {
+        dao.insert(fragments)
     }
-
 }

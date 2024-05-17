@@ -95,7 +95,7 @@ class DeviceListAdapter(
 
     companion object {
         class PrinterDevice(var mac_address: String, var name: String) : Parcelable {
-            constructor(parcel: Parcel) : this(parcel.readString() ?: "", parcel.readString() ?: "")
+            constructor(parcel: Parcel) : this(parcel.readString().orEmpty(), parcel.readString().orEmpty())
 
             override fun writeToParcel(parcel: Parcel, flags: Int) {
                 parcel.writeString(mac_address)

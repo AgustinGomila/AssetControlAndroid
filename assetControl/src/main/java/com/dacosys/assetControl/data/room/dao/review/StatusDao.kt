@@ -1,0 +1,22 @@
+package com.dacosys.assetControl.data.room.dao.review
+
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import com.dacosys.assetControl.data.room.entity.review.AssetReviewStatus
+import com.dacosys.assetControl.data.room.entity.review.AssetReviewStatus.Entry
+
+@Dao
+interface StatusDao {
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(statuses: List<AssetReviewStatus>)
+
+
+    @Query("DELETE $BASIC_FROM")
+    suspend fun deleteAll()
+
+    companion object {
+        const val BASIC_FROM = "FROM ${Entry.TABLE_NAME}"
+    }
+}

@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.dacosys.assetControl.data.room.entity.attribute.Attribute.Entry
+import com.dacosys.assetControl.data.webservice.attribute.AttributeObject
 
 @Entity(
     tableName = Entry.TABLE_NAME,
@@ -25,11 +26,11 @@ import com.dacosys.assetControl.data.room.entity.attribute.Attribute.Entry
 )
 data class Attribute(
     @PrimaryKey
-    @ColumnInfo(name = Entry.ID) val id: Long,
-    @ColumnInfo(name = Entry.DESCRIPTION) val description: String,
-    @ColumnInfo(name = Entry.ACTIVE) val active: Int,
-    @ColumnInfo(name = Entry.ATTRIBUTE_TYPE_ID) val attributeTypeId: Long,
-    @ColumnInfo(name = Entry.ATTRIBUTE_CATEGORY_ID) val attributeCategoryId: Long
+    @ColumnInfo(name = Entry.ID) val id: Long = 0L,
+    @ColumnInfo(name = Entry.DESCRIPTION) val description: String = "",
+    @ColumnInfo(name = Entry.ACTIVE) val active: Int = 0,
+    @ColumnInfo(name = Entry.ATTRIBUTE_TYPE_ID) val attributeTypeId: Long = 0L,
+    @ColumnInfo(name = Entry.ATTRIBUTE_CATEGORY_ID) val attributeCategoryId: Long = 0L,
 ) {
     object Entry {
         const val TABLE_NAME = "attribute"
@@ -39,4 +40,12 @@ data class Attribute(
         const val ATTRIBUTE_TYPE_ID = "attribute_type_id"
         const val ATTRIBUTE_CATEGORY_ID = "attribute_category_id"
     }
+
+    constructor(attrObj: AttributeObject) : this(
+        id = attrObj.attributeId,
+        description = attrObj.description,
+        active = attrObj.active,
+        attributeTypeId = attrObj.attributeTypeId,
+        attributeCategoryId = attrObj.attributeCategoryId
+    )
 }

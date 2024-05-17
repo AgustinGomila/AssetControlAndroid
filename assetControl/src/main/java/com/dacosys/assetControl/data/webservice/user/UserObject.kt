@@ -2,7 +2,7 @@ package com.dacosys.assetControl.data.webservice.user
 
 import android.os.Parcel
 import android.os.Parcelable
-import com.dacosys.assetControl.data.model.user.User
+import com.dacosys.assetControl.data.room.entity.user.User
 import org.ksoap2.serialization.SoapObject
 
 class UserObject() : Parcelable {
@@ -16,10 +16,10 @@ class UserObject() : Parcelable {
     constructor(parcel: Parcel) : this() {
         user_id = parcel.readLong()
         active = parcel.readInt()
-        name = parcel.readString() ?: ""
-        external_id = parcel.readString() ?: ""
-        email = parcel.readString() ?: ""
-        password = parcel.readString() ?: ""
+        name = parcel.readString().orEmpty()
+        external_id = parcel.readString().orEmpty()
+        email = parcel.readString().orEmpty()
+        password = parcel.readString().orEmpty()
     }
 
     fun getBySoapObject(so: SoapObject): UserObject {
@@ -65,12 +65,12 @@ class UserObject() : Parcelable {
     fun getByUser(user: User): UserObject {
         val x = UserObject()
 
-        x.user_id = user.userId
-        x.active = if (user.active) 1 else 0
+        x.user_id = user.id
+        x.active = user.active
         x.name = user.name
         x.external_id = user.externalId ?: ""
         x.email = user.email
-        x.password = user.password
+        x.password = user.password.orEmpty()
 
         return x
     }

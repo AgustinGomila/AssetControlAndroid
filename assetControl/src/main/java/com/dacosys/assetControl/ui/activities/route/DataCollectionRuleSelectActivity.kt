@@ -10,11 +10,11 @@ import android.view.inputmethod.EditorInfo
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.dataBase.datacollection.DataCollectionRuleDbHelper
-import com.dacosys.assetControl.data.model.asset.Asset
-import com.dacosys.assetControl.data.model.category.ItemCategory
-import com.dacosys.assetControl.data.model.dataCollection.DataCollectionRule
-import com.dacosys.assetControl.data.model.location.WarehouseArea
+import com.dacosys.assetControl.data.room.entity.asset.Asset
+import com.dacosys.assetControl.data.room.entity.category.ItemCategory
+import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionRule
+import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
+import com.dacosys.assetControl.data.room.repository.dataCollection.DataCollectionRuleRepository
 import com.dacosys.assetControl.databinding.DataCollectionRuleSelectActivityBinding
 import com.dacosys.assetControl.ui.adapters.datacollection.DataCollectionRuleAdapter
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
@@ -170,7 +170,7 @@ class DataCollectionRuleSelectActivity : AppCompatActivity() {
             }
         }
 
-        // Captura el toque (ya que no es igual al click) en el control y cambia el DataCollectionRuleReviewContent actual
+        // Captura el toque (ya que no es igual al clic) en el control y cambia el DataCollectionRuleReviewContent actual
         binding.dcRuleListView.setOnTouchListener { v, event ->
             when (event?.action) {
                 MotionEvent.ACTION_DOWN -> {
@@ -252,31 +252,34 @@ class DataCollectionRuleSelectActivity : AppCompatActivity() {
     private fun fillListView() {
         try {
             val desc = binding.etDescription.text.toString()
+            val asset = asset
+            val warehouseArea = warehouseArea
+            val itemCategory = itemCategory
 
             val dcrArray =
                 when {
-                    asset != null -> DataCollectionRuleDbHelper().selectByTargetAssetIdDescription(
-                        (asset ?: return).assetId,
-                        desc,
-                        binding.onlyActiveSwitch.isChecked
+                    asset != null -> DataCollectionRuleRepository().selectByTargetAssetIdDescription(
+                        assetId = asset.id,
+                        description = desc,
+                        onlyActive = binding.onlyActiveSwitch.isChecked
                     )
 
-                    warehouseArea != null -> DataCollectionRuleDbHelper().selectByTargetWarehouseAreaIdDescription(
-                        (warehouseArea ?: return).warehouseAreaId,
-                        desc,
-                        binding.onlyActiveSwitch.isChecked
+                    warehouseArea != null -> DataCollectionRuleRepository().selectByTargetWarehouseAreaIdDescription(
+                        waId = warehouseArea.id,
+                        description = desc,
+                        onlyActive = binding.onlyActiveSwitch.isChecked
                     )
 
-                    itemCategory != null -> DataCollectionRuleDbHelper().selectByTargetItemCategoryIdDescription(
-                        (itemCategory ?: return).itemCategoryId,
-                        desc,
-                        binding.onlyActiveSwitch.isChecked
+                    itemCategory != null -> DataCollectionRuleRepository().selectByTargetItemCategoryIdDescription(
+                        icId = itemCategory.id,
+                        description = desc,
+                        onlyActive = binding.onlyActiveSwitch.isChecked
                     )
 
-                    else -> DataCollectionRuleDbHelper().selectByDescription(desc)
+                    else -> DataCollectionRuleRepository().selectByDescription(desc)
                 }
 
-            fillAdapter(dcrArray)
+            fillAdapter(ArrayList(dcrArray))
         } catch (ex: Exception) {
             ex.printStackTrace()
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)

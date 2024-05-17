@@ -19,12 +19,12 @@ class AttributeCompositionObject() : Parcelable {
         attributeCompositionId = parcel.readLong()
         attributeId = parcel.readLong()
         attributeCompositionTypeId = parcel.readLong()
-        description = parcel.readString() ?: ""
-        composition = parcel.readString() ?: ""
+        description = parcel.readString().orEmpty()
+        composition = parcel.readString().orEmpty()
         used = parcel.readInt()
-        name = parcel.readString() ?: ""
+        name = parcel.readString().orEmpty()
         readOnly = parcel.readInt()
-        defaultValue = parcel.readString() ?: ""
+        defaultValue = parcel.readString().orEmpty()
     }
 
     fun getBySoapObject(so: SoapObject): AttributeCompositionObject {

@@ -40,20 +40,20 @@ class Webservice @Throws(Exception::class) constructor(private var webServiceTyp
             return ws
         }
 
-        private var wsMantInitialized = false
+        private var wsMainInitialized = false
         private lateinit var wsMant: Webservice
 
-        fun getMantWebservice(): Webservice {
-            if (!wsMantInitialized) {
-                wsMant = Webservice(WebServiceType.AssetControlManteinance)
-                wsMantInitialized = true
+        fun getMainWebservice(): Webservice {
+            if (!wsMainInitialized) {
+                wsMant = Webservice(WebServiceType.AssetControlMaintenance)
+                wsMainInitialized = true
             }
             return wsMant
         }
     }
 
     enum class WebServiceType(val id: Long) {
-        AssetControl(1), AssetControlManteinance(2), ImageControl(3), Test(4)
+        AssetControl(1), AssetControlMaintenance(2), ImageControl(3), Test(4)
     }
 
     var namespace = ""
@@ -76,7 +76,7 @@ class Webservice @Throws(Exception::class) constructor(private var webServiceTyp
                 proxyPass = Repository.wsProxyPass
             }
 
-            WebServiceType.AssetControlManteinance -> {
+            WebServiceType.AssetControlMaintenance -> {
                 url = Repository.wsMantUrl
                 namespace = Repository.wsMantNamespace
                 proxyUrl = Repository.wsMantProxy
@@ -183,7 +183,7 @@ class Webservice @Throws(Exception::class) constructor(private var webServiceTyp
 
         val sessionSoapObject: SoapObject = when (webServiceType) {
             WebServiceType.AssetControl,
-            WebServiceType.AssetControlManteinance,
+            WebServiceType.AssetControlMaintenance,
             -> getSessionObject(useConfSession)
 
             else -> return null
@@ -209,7 +209,7 @@ class Webservice @Throws(Exception::class) constructor(private var webServiceTyp
 
         val response = getResponse(soapObject, soapAction) ?: return null
 
-        if (webServiceType == WebServiceType.AssetControl || webServiceType == WebServiceType.AssetControlManteinance) {
+        if (webServiceType == WebServiceType.AssetControl || webServiceType == WebServiceType.AssetControlMaintenance) {
             val respVector = response as Vector<*>
 
             // El último Array del vector siempre es un ResponseObject
@@ -268,7 +268,7 @@ class Webservice @Throws(Exception::class) constructor(private var webServiceTyp
         val soapObject = SoapObject(namespace, methodName)
 
         val response = getResponse(soapObject, soapAction)
-        return response?.toString() ?: ""
+        return response?.toString().orEmpty()
     }
 
     @Throws(Exception::class)
@@ -500,7 +500,7 @@ class Webservice @Throws(Exception::class) constructor(private var webServiceTyp
             try {
                 Log.d(
                     this::class.java.simpleName, String.format(
-                        "%s: %s", soapAction, envelope.bodyOut?.toString() ?: ""
+                        "%s: %s", soapAction, envelope.bodyOut?.toString().orEmpty()
                     )
                 )
 

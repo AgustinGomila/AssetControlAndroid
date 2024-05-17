@@ -12,10 +12,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.TooltipCompat
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.dataBase.location.WarehouseAreaDbHelper
-import com.dacosys.assetControl.data.dataBase.location.WarehouseDbHelper
-import com.dacosys.assetControl.data.model.location.Warehouse
-import com.dacosys.assetControl.data.model.location.WarehouseArea
+import com.dacosys.assetControl.data.room.entity.location.Warehouse
+import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
+import com.dacosys.assetControl.data.room.repository.location.WarehouseAreaRepository
+import com.dacosys.assetControl.data.room.repository.location.WarehouseRepository
 import com.dacosys.assetControl.databinding.LocationHeaderFragmentBinding
 import com.dacosys.assetControl.ui.activities.location.LocationSelectActivity
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
@@ -57,7 +57,7 @@ class LocationHeaderFragment : Fragment() {
     }
 
     fun fill(warehouseAreaId: Long) {
-        this.warehouseArea = WarehouseAreaDbHelper().selectById(warehouseAreaId)
+        this.warehouseArea = WarehouseAreaRepository().selectById(warehouseAreaId)
         if (warehouseArea != null) {
             fill(warehouseArea ?: return)
         }
@@ -65,7 +65,7 @@ class LocationHeaderFragment : Fragment() {
 
     fun fill(warehouseArea: WarehouseArea) {
         this.warehouseArea = warehouseArea
-        this.warehouse = WarehouseDbHelper().selectById(warehouseArea.warehouseId)
+        this.warehouse = WarehouseRepository().selectById(warehouseArea.warehouseId)
 
         fillControls()
     }
@@ -166,7 +166,7 @@ class LocationHeaderFragment : Fragment() {
                     }
 
                     warehouseArea = wa
-                    warehouse = WarehouseDbHelper().selectById(wa.warehouseId)
+                    warehouse = WarehouseRepository().selectById(wa.warehouseId)
 
                     fillControls()
                 }

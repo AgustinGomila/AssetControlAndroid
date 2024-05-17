@@ -16,7 +16,7 @@ import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat
 import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.model.dataCollection.DataCollectionRule
+import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionRule
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.getColorWithAlpha
 import java.lang.ref.WeakReference
 
@@ -293,7 +293,7 @@ class DataCollectionRuleAdapter : ArrayAdapter<DataCollectionRule> {
 
                 if (resource == R.layout.data_collection_rule_row && v != null) {
                     when {
-                        !dataCollectionRule.active -> {
+                        dataCollectionRule.active != 1 -> {
                             v.setBackgroundColor(lightgray)
                             holder.descriptionTextView?.setTextColor(dimgray)
 
@@ -319,7 +319,7 @@ class DataCollectionRuleAdapter : ArrayAdapter<DataCollectionRule> {
                         }
                     }
                 } else if (resource == R.layout.custom_spinner_dropdown_item && v != null) {
-                    if (dataCollectionRule.active && dataCollectionRule.dataCollectionRuleId > 0) {
+                    if (dataCollectionRule.active == 1 && dataCollectionRule.id > 0) {
                         holder.descriptionTextView?.setTextColor(black)
                     } else {
                         holder.descriptionTextView?.setTextColor(dimgray)

@@ -39,15 +39,17 @@ import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.dataBase.asset.AssetDbHelper
-import com.dacosys.assetControl.data.dataBase.barcode.BarcodeLabelCustomDbHelper
-import com.dacosys.assetControl.data.model.asset.Asset
-import com.dacosys.assetControl.data.model.asset.AssetStatus
-import com.dacosys.assetControl.data.model.asset.asset.async.GetAssetAsync
-import com.dacosys.assetControl.data.model.barcode.BarcodeLabelCustom
-import com.dacosys.assetControl.data.model.barcode.BarcodeLabelTarget
-import com.dacosys.assetControl.data.model.category.ItemCategory
-import com.dacosys.assetControl.data.model.location.WarehouseArea
+import com.dacosys.assetControl.data.async.asset.GetAssetAsync
+import com.dacosys.assetControl.data.enums.asset.AssetStatus
+import com.dacosys.assetControl.data.enums.barcode.BarcodeLabelTarget
+import com.dacosys.assetControl.data.room.entity.asset.Asset
+import com.dacosys.assetControl.data.room.entity.asset.TempAsset
+import com.dacosys.assetControl.data.room.entity.barcode.BarcodeLabelCustom
+import com.dacosys.assetControl.data.room.entity.category.ItemCategory
+import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
+import com.dacosys.assetControl.data.room.repository.asset.AssetRepository
+import com.dacosys.assetControl.data.room.repository.asset.TempAssetRepository
+import com.dacosys.assetControl.data.room.repository.barcode.BarcodeLabelCustomRepository
 import com.dacosys.assetControl.databinding.AssetPrintLabelActivityTopPanelCollapsedBinding
 import com.dacosys.assetControl.network.utils.Connection.Companion.autoSend
 import com.dacosys.assetControl.network.utils.ProgressStatus
@@ -104,7 +106,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
     private var isFinishingByUser = false
     private fun destroyLocals() {
         // Borramos los Ids temporales que se usaron en la actividad.
-        if (isFinishingByUser) AssetDbHelper().deleteTemp()
+        if (isFinishingByUser) TempAssetRepository().deleteAll()
 
         adapter?.refreshListeners()
         adapter?.refreshImageControlListeners()
@@ -185,7 +187,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         }
 
     private val visibleStatus: ArrayList<AssetStatus>
-        get() = assetSelectFilterFragment?.visibleStatusArray ?: AssetStatus.getAll()
+        get() = assetSelectFilterFragment?.visibleStatusArray ?: ArrayList(AssetStatus.getAll())
 
     override fun onSaveInstanceState(savedInstanceState: Bundle) {
         super.onSaveInstanceState(savedInstanceState)
@@ -209,7 +211,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         }
 
         // Guardar en la DB temporalmente los ítems listados
-        AssetDbHelper().insertTempId(ArrayList(adapter?.fullList?.map { it.assetId } ?: listOf()))
+        TempAssetRepository().insert(adapter?.fullList?.map { TempAsset(it.id) } ?: listOf())
 
         b.putString("searchText", searchText)
     }
@@ -246,7 +248,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         tempTitle = getString(R.string.select_asset)
 
         val id = prefsGetLong(Preference.defaultBarcodeLabelCustomAsset)
-        val blc = BarcodeLabelCustomDbHelper().selectById(id)
+        val blc = BarcodeLabelCustomRepository().selectById(id)
         if (blc != null) {
             printerFragment?.barcodeLabelCustom = blc
         }
@@ -284,10 +286,10 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
             searchText = savedInstanceState.getString("searchText") ?: ""
 
             // Cargar la lista desde la DB local
-            completeList = AssetDbHelper().selectTempId()
+            completeList = ArrayList(AssetRepository().selectByTempIds())
         } else {
             // Borramos los Ids temporales al crear la actividad por primera vez.
-            AssetDbHelper().deleteTemp()
+            TempAssetRepository().deleteAll()
 
             val extras = intent.extras
             if (extras != null) loadBundleValues(extras) else loadDefaultValues()
@@ -499,7 +501,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
             var assetArray: ArrayList<Asset> = ArrayList()
 
             if (!multiSelect && asset != null) {
-                data.putParcelableArrayListExtra("ids", arrayListOf(ParcelLong(asset.assetId)))
+                data.putParcelableArrayListExtra("ids", arrayListOf(ParcelLong(asset.id)))
                 setResult(RESULT_OK, data)
             } else if (multiSelect) {
                 if (countChecked > 0 || asset != null) {
@@ -509,7 +511,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
                     }
                     data.putParcelableArrayListExtra(
                         "ids",
-                        assetArray.map { ParcelLong(it.assetId) } as ArrayList<ParcelLong>)
+                        assetArray.map { ParcelLong(it.id) } as ArrayList<ParcelLong>)
                     setResult(RESULT_OK, data)
                 } else {
                     setResult(RESULT_CANCELED)
@@ -827,8 +829,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
                 searchWarehouseAreaId = false,
                 searchAssetCode = true,
                 searchAssetSerial = true,
-                searchAssetEan = true,
-                validateId = true
+                searchAssetEan = true
             )
 
             val asset = if (sc.asset != null) {
@@ -888,7 +889,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         // Opciones de visibilidad del menú
         val allStatus = AssetStatus.getAll()
         val s = visibleStatus
-        for (i in 0 until allStatus.size) {
+        for (i in allStatus.indices) {
             menu.add(0, allStatus[i].id, i + menuItems, allStatus[i].description)
                 .setChecked(s.contains(allStatus[i])).isCheckable = true
         }
@@ -906,7 +907,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         colors.add(colorMissing)
         //endregion Icon colors
 
-        for (i in 0 until allStatus.size) {
+        for (i in allStatus.indices) {
             val icon = ContextCompat.getDrawable(this, R.drawable.ic_lens)
             icon?.mutate()?.colorFilter =
                 BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
@@ -1119,7 +1120,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
                 if (it?.resultCode == RESULT_OK && data != null) {
                     val asset = adapter?.currentAsset() ?: return@registerForActivityResult
                     asset.saveChanges()
-                    val pos = adapter?.getIndexById(asset.assetId) ?: RecyclerView.NO_POSITION
+                    val pos = adapter?.getIndexById(asset.id) ?: RecyclerView.NO_POSITION
                     adapter?.notifyItemChanged(pos)
                 }
             } catch (ex: Exception) {
@@ -1236,7 +1237,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
             }
         }
 
-        if (assetArray.isNotEmpty()) printerFragment?.printAssetById(ArrayList(assetArray.map { it.assetId }))
+        if (assetArray.isNotEmpty()) printerFragment?.printAssetById(ArrayList(assetArray.map { it.id }))
     }
 
     private var qtyTextViewFocused: Boolean = false

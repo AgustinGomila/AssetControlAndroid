@@ -23,10 +23,10 @@ class DataCollectionObject() : Parcelable {
         warehouseId = parcel.readLong()
         warehouseAreaId = parcel.readLong()
         userId = parcel.readLong()
-        dateStart = parcel.readString() ?: ""
-        dateEnd = parcel.readString() ?: ""
+        dateStart = parcel.readString().orEmpty()
+        dateEnd = parcel.readString().orEmpty()
         completed = parcel.readInt()
-        transferedDate = parcel.readString() ?: ""
+        transferedDate = parcel.readString().orEmpty()
         collectorDataCollectionId = parcel.readLong()
         collectorRouteProcessId = parcel.readLong()
     }

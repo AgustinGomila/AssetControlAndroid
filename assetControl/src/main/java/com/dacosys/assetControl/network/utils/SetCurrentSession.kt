@@ -52,8 +52,8 @@ class SetCurrentSession(private var onSessionCreated: (Boolean) -> Unit = {}) {
         }
 
         val user = currentUser() ?: return@withContext false
-        val userId = user.userId
-        val userPass = user.password
+        val userId = user.id
+        val userPass = user.password.orEmpty()
 
         val operatingSystem =
             "Android ${Build.VERSION.RELEASE} (SDK ${Build.VERSION.SDK_INT})"

@@ -19,9 +19,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import com.dacosys.assetControl.AssetControlApp.Companion.appName
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.dataBase.DataBaseHelper.Companion.removeDataBases
 import com.dacosys.assetControl.databinding.InitConfigActivityBinding
 import com.dacosys.assetControl.network.clientPackages.ClientPackagesProgress
 import com.dacosys.assetControl.network.utils.ClientPackage
@@ -45,6 +45,7 @@ import com.dacosys.assetControl.utils.settings.config.ConfigHelper
 import com.dacosys.assetControl.utils.settings.config.Preference
 import com.dacosys.assetControl.utils.settings.config.QRConfigType
 import com.dacosys.assetControl.utils.settings.config.QRConfigType.CREATOR.QRConfigClientAccount
+import com.dacosys.assetControl.utils.settings.io.FileHelper
 import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.cleanPrefs
 import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetString
@@ -64,7 +65,7 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         if (status == ProgressStatus.finished) {
             makeText(binding.root, getString(R.string.configuration_applied), SnackBarType.SUCCESS)
-            removeDataBases()
+            FileHelper.removeDataBases(getContext())
             finish()
         }
     }

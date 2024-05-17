@@ -1,29 +1,49 @@
 package com.dacosys.assetControl.data.room.repository.user
 
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
+import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.room.dao.user.UserPermissionDao
 import com.dacosys.assetControl.data.room.database.AcDatabase.Companion.database
 import com.dacosys.assetControl.data.room.entity.user.UserPermission
+import com.dacosys.assetControl.data.webservice.user.UserPermissionObject
+import com.dacosys.assetControl.network.sync.SyncProgress
+import com.dacosys.assetControl.network.sync.SyncRegistryType
+import com.dacosys.assetControl.network.utils.ProgressStatus
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.runBlocking
 
 class UserPermissionRepository {
-    private val dao: UserPermissionDao by lazy {
-        database.userPermissionDao()
+    private val dao: UserPermissionDao
+        get() = database.userPermissionDao()
+
+    fun selectByUserIdUserPermissionId(userId: Long, permissionId: Long): UserPermission? {
+        return dao.selectByUserIdUserPermissionId(userId, permissionId)
     }
 
-    suspend fun insert(userPermission: UserPermission) {
-        withContext(Dispatchers.IO) {
-            dao.insert(userPermission)
+
+    fun insert(contents: List<UserPermissionObject>, progress: (SyncProgress) -> Unit) {
+        runBlocking {
+            val total = contents.size
+
+            val upList: ArrayList<UserPermission> = arrayListOf()
+            contents.mapTo(upList) { UserPermission(it) }
+
+            dao.insert(upList) {
+                progress.invoke(
+                    SyncProgress(
+                        totalTask = total,
+                        completedTask = it,
+                        msg = getContext().getString(R.string.synchronizing_user_permissions),
+                        registryType = SyncRegistryType.UserPermission,
+                        progressStatus = ProgressStatus.running
+                    )
+                )
+            }
         }
     }
 
-    suspend fun delete(userPermission: UserPermission) {
-        withContext(Dispatchers.IO) {
-            dao.delete(userPermission)
-        }
-    }
 
-    fun getUserPermissionsByUserId(userId: Long): List<UserPermission> {
-        return dao.getUserPermissionsByUserId(userId)
+    fun deleteAll() = runBlocking(Dispatchers.IO) {
+        dao.deleteAll()
     }
 }

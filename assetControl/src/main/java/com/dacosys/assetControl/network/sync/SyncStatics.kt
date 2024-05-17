@@ -1,9 +1,9 @@
 package com.dacosys.assetControl.network.sync
 
-import com.dacosys.assetControl.data.dataBase.barcode.BarcodeLabelTargetDbHelper
-import com.dacosys.assetControl.data.dataBase.manteinance.ManteinanceStatusDbHelper
-import com.dacosys.assetControl.data.dataBase.review.AssetReviewStatusDbHelper
-import com.dacosys.assetControl.data.dataBase.route.RouteProcessStatusDbHelper
+import com.dacosys.assetControl.data.room.repository.barcode.BarcodeLabelTargetRepository
+import com.dacosys.assetControl.data.room.repository.maintenance.MaintenanceStatusRepository
+import com.dacosys.assetControl.data.room.repository.review.AssetReviewStatusRepository
+import com.dacosys.assetControl.data.room.repository.route.RouteProcessStatusRepository
 import kotlinx.coroutines.*
 
 class SyncStatics {
@@ -21,10 +21,11 @@ class SyncStatics {
 
     private suspend fun suspendFunction() = withContext(Dispatchers.IO) {
         val t = listOf(
-            async { AssetReviewStatusDbHelper().sync() },
-            async { RouteProcessStatusDbHelper().sync() },
-            async { ManteinanceStatusDbHelper().sync() },
-            async { BarcodeLabelTargetDbHelper().sync() })
+            async { AssetReviewStatusRepository().sync() },
+            async { RouteProcessStatusRepository().sync() },
+            async { MaintenanceStatusRepository().sync() },
+            async { BarcodeLabelTargetRepository().sync() }
+        )
 
         // De esta manera se mantiene la ejecución de los threads
         // dentro del bucle y sale recién cuando terminó con el último

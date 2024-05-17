@@ -16,7 +16,7 @@ import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat
 import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.model.route.Route
+import com.dacosys.assetControl.data.room.entity.route.Route
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.getColorWithAlpha
@@ -155,7 +155,7 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
             for (w in routes) {
                 if (getAll().contains(w)) {
                     routesRemoved.add(w)
-                    checkedIdArray.remove(w.routeId)
+                    checkedIdArray.remove(w.id)
                     super.remove(w)
                 }
             }
@@ -408,7 +408,7 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
         for (i in 0 until count) {
             val it = getItem(i)
             if (it != null) {
-                r.add(it.routeId)
+                r.add(it.id)
             }
         }
         return r
@@ -449,11 +449,11 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
     fun setChecked(item: Route, isChecked: Boolean, suspendRefresh: Boolean = false) {
         val position = getIndex(item)
         if (isChecked) {
-            if (!checkedIdArray.contains(item.routeId)) {
-                checkedIdArray.add(item.routeId)
+            if (!checkedIdArray.contains(item.id)) {
+                checkedIdArray.add(item.id)
             }
         } else {
-            checkedIdArray.remove(item.routeId)
+            checkedIdArray.remove(item.id)
         }
 
         checkedChangedListener?.onCheckedChanged(isChecked, position)
@@ -574,8 +574,8 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
             val route = getItem(position)
 
             if (route != null) {
-                val onProcess = routeIdOnProcess.contains(route.routeId)
-                val toSend = routeIdToSend.contains(route.routeId)
+                val onProcess = routeIdOnProcess.contains(route.id)
+                val toSend = routeIdToSend.contains(route.id)
                 holder.descriptionTextView?.text = route.description
 
                 val str = when {
@@ -619,7 +619,7 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
 
                     //Important to remove previous checkedChangedListener before calling setChecked
                     holder.checkBox!!.setOnCheckedChangeListener(null)
-                    holder.checkBox!!.isChecked = checkedIdArray.contains(route.routeId)
+                    holder.checkBox!!.isChecked = checkedIdArray.contains(route.id)
                     holder.checkBox!!.tag = position
                     holder.checkBox!!.setOnLongClickListener(pressHoldListener)
                     holder.checkBox!!.setOnTouchListener(pressTouchListener)
@@ -678,7 +678,7 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
                 val titleForeColor: Int
                 val isSelected = isSelected(position)
                 when {
-                    !route.active -> {
+                    route.active != 1 -> {
                         v.setBackgroundColor(lightgray)
                         foreColor = if (isSelected) {
                             white
@@ -766,8 +766,8 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
             val route = getItem(position)
 
             if (route != null) {
-                val onProcess = routeIdOnProcess.contains(route.routeId)
-                val toSend = routeIdToSend.contains(route.routeId)
+                val onProcess = routeIdOnProcess.contains(route.id)
+                val toSend = routeIdToSend.contains(route.id)
                 holder.descriptionTextView?.text = route.description
 
                 if (holder.checkBox != null) {
@@ -804,7 +804,7 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
 
                     //Important to remove previous checkedChangedListener before calling setChecked
                     holder.checkBox!!.setOnCheckedChangeListener(null)
-                    holder.checkBox!!.isChecked = checkedIdArray.contains(route.routeId)
+                    holder.checkBox!!.isChecked = checkedIdArray.contains(route.id)
                     holder.checkBox!!.tag = position
                     holder.checkBox!!.setOnLongClickListener(pressHoldListener)
                     holder.checkBox!!.setOnTouchListener(pressTouchListener)
@@ -841,7 +841,7 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
                         )
 
                     when {
-                        !route.active -> {
+                        route.active != 1 -> {
                             v.setBackgroundColor(lightgray)
                             holder.descriptionTextView?.setTextColor(dimgray)
 
@@ -906,7 +906,7 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
                     val titleForeColor: Int
                     val isSelected = isSelected(position)
                     when {
-                        !route.active -> {
+                        route.active != 1 -> {
                             v.setBackgroundColor(lightgray)
                             foreColor = if (isSelected) {
                                 white

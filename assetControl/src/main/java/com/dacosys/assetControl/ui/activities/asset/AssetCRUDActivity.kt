@@ -17,13 +17,13 @@ import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.dacosys.assetControl.AssetControlApp.Companion.currentUser
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.dataBase.asset.AssetDbHelper
-import com.dacosys.assetControl.data.model.asset.Asset
-import com.dacosys.assetControl.data.model.asset.AssetStatus
-import com.dacosys.assetControl.data.model.common.CrudCompleted
-import com.dacosys.assetControl.data.model.common.CrudResult
-import com.dacosys.assetControl.data.model.common.CrudStatus.*
-import com.dacosys.assetControl.data.model.table.Table
+import com.dacosys.assetControl.data.enums.asset.AssetStatus
+import com.dacosys.assetControl.data.enums.common.CrudCompleted
+import com.dacosys.assetControl.data.enums.common.CrudResult
+import com.dacosys.assetControl.data.enums.common.CrudStatus.*
+import com.dacosys.assetControl.data.enums.common.Table
+import com.dacosys.assetControl.data.room.entity.asset.Asset
+import com.dacosys.assetControl.data.room.repository.asset.AssetRepository
 import com.dacosys.assetControl.databinding.AssetCrudActivityBinding
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
@@ -95,7 +95,7 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
                     binding.root, getString(R.string.asset_added_correctly), SnackBarType.SUCCESS
                 )
                 if (imageControlFragment != null && asset != null) {
-                    imageControlFragment?.updateObjectId1(asset.assetId)
+                    imageControlFragment?.updateObjectId1(asset.id)
                     imageControlFragment?.saveImages(false)
                 }
 
@@ -286,7 +286,7 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
         var description = ""
 
         if (asset != null) {
-            assetId = (asset ?: return).assetId
+            assetId = (asset ?: return).id
             description = (asset ?: return).description
         }
 
@@ -300,7 +300,7 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         if (imageControlFragment == null) {
             imageControlFragment = ImageControlButtonsFragment.newInstance(
-                tableId = Table.asset.tableId.toLong(),
+                tableId = Table.asset.id.toLong(),
                 objectId1 = assetId.toString()
             )
 
@@ -332,7 +332,7 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
                 }
             }
         } else {
-            imageControlFragment?.setTableId(Table.asset.tableId)
+            imageControlFragment?.setTableId(Table.asset.id)
             imageControlFragment?.setObjectId1(assetId)
             imageControlFragment?.setObjectId2(null)
 
@@ -386,7 +386,8 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
                         ids.add(i.value)
                     }
 
-                    val a = AssetDbHelper().selectById(ids[0]) ?: return@registerForActivityResult
+                    val id = ids.first() ?: return@registerForActivityResult
+                    val a = AssetRepository().selectById(id) ?: return@registerForActivityResult
 
                     try {
                         changeAsset(a)
@@ -440,8 +441,7 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
                 searchWarehouseAreaId = false,
                 searchAssetCode = true,
                 searchAssetSerial = true,
-                searchAssetEan = true,
-                validateId = true
+                searchAssetEan = true
             )
 
             if (sc.codeFound && sc.asset != null) {

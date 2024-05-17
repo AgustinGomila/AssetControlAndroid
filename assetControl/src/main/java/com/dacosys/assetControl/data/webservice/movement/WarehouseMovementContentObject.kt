@@ -15,7 +15,7 @@ class WarehouseMovementContentObject() : Parcelable {
         this.warehouseMovementId = parcel.readLong()
         this.warehouseMovementContentId = parcel.readLong()
         this.assetId = parcel.readLong()
-        this.code = parcel.readString() ?: ""
+        this.code = parcel.readString().orEmpty()
         this.qty = parcel.readFloat()
     }
 

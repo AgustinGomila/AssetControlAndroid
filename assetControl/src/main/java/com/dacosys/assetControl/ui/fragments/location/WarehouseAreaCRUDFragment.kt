@@ -11,13 +11,13 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.dataBase.location.WarehouseDbHelper
-import com.dacosys.assetControl.data.model.common.CrudCompleted
-import com.dacosys.assetControl.data.model.location.Warehouse
-import com.dacosys.assetControl.data.model.location.WarehouseArea
-import com.dacosys.assetControl.data.model.location.WarehouseAreaCRUD
-import com.dacosys.assetControl.data.model.user.User
-import com.dacosys.assetControl.data.model.user.permission.PermissionEntry
+import com.dacosys.assetControl.data.crud.location.WarehouseAreaCRUD
+import com.dacosys.assetControl.data.enums.common.CrudCompleted
+import com.dacosys.assetControl.data.enums.permission.PermissionEntry
+import com.dacosys.assetControl.data.room.entity.location.Warehouse
+import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
+import com.dacosys.assetControl.data.room.entity.user.User
+import com.dacosys.assetControl.data.room.repository.location.WarehouseRepository
 import com.dacosys.assetControl.data.webservice.location.WarehouseAreaObject
 import com.dacosys.assetControl.databinding.WarehouseAreaCrudFragmentBinding
 import com.dacosys.assetControl.ui.activities.location.LocationSelectActivity
@@ -42,7 +42,7 @@ class WarehouseAreaCRUDFragment : Fragment() {
         savedInstanceState.putParcelable("warehouse", warehouse)
         savedInstanceState.putString(
             "description",
-            binding.descriptionEditText.text?.toString() ?: ""
+            binding.descriptionEditText.text?.toString().orEmpty()
         )
         savedInstanceState.putBoolean("active", binding.activeCheckBox.isChecked)
     }
@@ -57,8 +57,8 @@ class WarehouseAreaCRUDFragment : Fragment() {
         if (savedInstanceState != null) {
             active = savedInstanceState.getBoolean("active")
             description = savedInstanceState.getString("description") ?: ""
-            warehouseArea = savedInstanceState.parcelable("warehouseArea")
-            warehouse = savedInstanceState.parcelable("warehouse")
+            warehouseArea = savedInstanceState.parcelable<WarehouseArea>("warehouseArea")
+            warehouse = savedInstanceState.parcelable<Warehouse>("warehouse")
         }
     }
 
@@ -129,10 +129,12 @@ class WarehouseAreaCRUDFragment : Fragment() {
         }
 
     private fun fillControls(restoreState: Boolean) {
-        if (warehouseArea == null && !restoreState) {
+        val wa = warehouseArea
+        if (wa == null && !restoreState) {
             clearControl()
             return
         }
+        if (wa == null) return
 
         if (restoreState) {
             if (_binding != null) {
@@ -141,18 +143,10 @@ class WarehouseAreaCRUDFragment : Fragment() {
             }
         } else {
             if (_binding != null) {
-                binding.descriptionEditText.setText(
-                    warehouseArea?.description ?: "",
-                    TextView.BufferType.EDITABLE
-                )
-                binding.activeCheckBox.isChecked = warehouseArea?.active ?: true
+                binding.descriptionEditText.setText(wa.description, TextView.BufferType.EDITABLE)
+                binding.activeCheckBox.isChecked = wa.active
             }
-            warehouse =
-                if (warehouseArea?.warehouseId != null) {
-                    WarehouseDbHelper().selectById((warehouseArea ?: return).warehouseId)
-                } else {
-                    null
-                }
+            warehouse = WarehouseRepository().selectById(wa.warehouseId)
         }
 
         setWarehouseText()
@@ -250,37 +244,26 @@ class WarehouseAreaCRUDFragment : Fragment() {
     }
 
     private fun updateWarehouseArea() {
-        if (warehouseArea == null || warehouse == null) {
-            return
-        }
+        val wa = warehouseArea ?: return
+        val wId = warehouse?.id ?: return
 
         // Create CurrentWarehouseArea Object
         // Main Information
-        (warehouseArea ?: return).description = binding.descriptionEditText.text.trim().toString()
-        (warehouseArea ?: return).warehouseId = (warehouse ?: return).warehouseId
-        (warehouseArea ?: return).active = binding.activeCheckBox.isChecked
+
+        wa.description = binding.descriptionEditText.text.trim().toString()
+        wa.warehouseId = wId
+        wa.active = binding.activeCheckBox.isChecked
     }
 
     private fun createWsWarehouseArea(): WarehouseAreaObject? {
-        val tempWarehouseArea = WarehouseArea()
-        tempWarehouseArea.setDataRead()
+        val wId = warehouse?.id ?: return null
 
-        try {
-            //Create CurrentWarehouseArea Object
-            // Main Information
-            tempWarehouseArea.description = binding.descriptionEditText.text.trim().toString()
-            tempWarehouseArea.warehouseId = (warehouse ?: return null).warehouseId
-            tempWarehouseArea.active = binding.activeCheckBox.isChecked
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-            makeText(
-                binding.root,
-                getString(R.string.error_creating_the_warehouse_area),
-                SnackBarType.ERROR
-            )
-            return null
-        }
-
+        val tempWarehouseArea = WarehouseArea(
+            description = binding.descriptionEditText.text.trim().toString(),
+            mActive = if (binding.activeCheckBox.isChecked) 1 else 0,
+            warehouseId = wId,
+            transferred = 0
+        )
         return WarehouseAreaObject(tempWarehouseArea)
     }
 

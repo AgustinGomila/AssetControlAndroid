@@ -1,14 +1,15 @@
 package com.dacosys.assetControl.ui.fragments.route
 
 import android.util.Log
-import com.dacosys.assetControl.data.dataBase.attribute.AttributeCompositionDbHelper
-import com.dacosys.assetControl.data.model.asset.UnitType
-import com.dacosys.assetControl.data.model.asset.UnitTypeCategory
-import com.dacosys.assetControl.data.model.attribute.AttributeComposition
-import com.dacosys.assetControl.data.model.attribute.AttributeCompositionType
-import com.dacosys.assetControl.data.model.dataCollection.DataCollectionRuleContent
-import com.dacosys.assetControl.data.model.route.common.ExprResultIntString
-import com.dacosys.assetControl.data.model.route.common.Parameter
+import com.dacosys.assetControl.data.enums.attribute.AttributeCompositionType
+import com.dacosys.assetControl.data.enums.unit.UnitType
+import com.dacosys.assetControl.data.enums.unit.UnitTypeCategory
+import com.dacosys.assetControl.data.model.common.ExprResultIntString
+import com.dacosys.assetControl.data.model.common.Parameter
+import com.dacosys.assetControl.data.room.entity.attribute.AttributeComposition
+import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionRuleContent
+import com.dacosys.assetControl.data.room.entity.fragment.FragmentData
+import com.dacosys.assetControl.data.room.repository.attribute.AttributeCompositionRepository
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.udojava.evalex.Expression
 import java.text.SimpleDateFormat
@@ -48,11 +49,9 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
             val tempDcrCont = dataCollectionRuleContent ?: return null
 
             if (tempDcrCont.attributeCompositionId > 0) {
-                val attrComp = AttributeComposition(
-                    id = tempDcrCont.attributeCompositionId,
-                    doChecks = false
-                )
-                generateFragment(attrComp)
+                val attrComp = AttributeCompositionRepository().selectById(tempDcrCont.attributeCompositionId)
+                if (attrComp != null)
+                    generateFragment(attrComp)
             }
         }
         return currentFragment
@@ -80,16 +79,16 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
         }
 
     val level: Int
-        get() = dataCollectionRuleContent!!.level
+        get() = dataCollectionRuleContent?.level ?: 0
 
     val position: Int
-        get() = dataCollectionRuleContent!!.position
+        get() = dataCollectionRuleContent?.position ?: 0
 
     val isAttribute: Boolean
-        get() = dataCollectionRuleContent!!.attributeCompositionId <= 0
+        get() = (dataCollectionRuleContent?.attributeCompositionId ?: 0) <= 0
 
     val attrCompId: Long
-        get() = dataCollectionRuleContent!!.attributeCompositionId
+        get() = dataCollectionRuleContent?.attributeCompositionId ?: 0
 
     var dataCollectionRuleContent: DataCollectionRuleContent? = null
         set(value) {
@@ -99,12 +98,9 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
             }
 
             if (value.attributeCompositionId > 0) {
-                val attrComp = AttributeComposition(
-                    id = value.attributeCompositionId,
-                    doChecks = false
-                )
-
-                attributeCompositionType = attrComp.attributeCompositionType
+                val attrComp = AttributeCompositionRepository().selectById(value.attributeCompositionId)
+                if (attrComp != null)
+                    attributeCompositionType = AttributeCompositionType.getById(attrComp.attributeCompositionTypeId)
             }
         }
 
@@ -130,7 +126,7 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
             attrCompType == AttributeCompositionType.TypeIntNumber -> {
                 currentFragment = DecimalFragment.newInstance(
                     decimalPlaces = 0,
-                    description = attrComp.description,
+                    description = attrComp.description.orEmpty(),
                     value = lastV as Float?
                 )
                 (currentFragment as DecimalFragment).setListener(this)
@@ -140,7 +136,7 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
                     attrCompType == AttributeCompositionType.TypeCurrency -> {
                 currentFragment = DecimalFragment.newInstance(
                     decimalPlaces = 3,
-                    description = attrComp.description,
+                    description = attrComp.description.orEmpty(),
                     value = lastV as Float?
                 )
                 (currentFragment as DecimalFragment).setListener(this)
@@ -148,7 +144,7 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
 
             attrCompType == AttributeCompositionType.TypeBool -> {
                 currentFragment = BooleanFragment.newInstance(
-                    description = attrComp.description,
+                    description = attrComp.description.orEmpty(),
                     value = lastV as Boolean?
                 )
                 (currentFragment as BooleanFragment).setListener(this)
@@ -157,7 +153,7 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
             attrCompType == AttributeCompositionType.TypeTextLong ||
                     attrCompType == AttributeCompositionType.TypeTextShort -> {
                 currentFragment = StringFragment.newInstance(
-                    description = attrComp.description,
+                    description = attrComp.description.orEmpty(),
                     value = lastV as String?
                 )
                 (currentFragment as StringFragment).setListener(this)
@@ -165,7 +161,7 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
 
             attrCompType == AttributeCompositionType.TypeTime -> {
                 currentFragment = TimeFragment.newInstance(
-                    description = attrComp.description,
+                    description = attrComp.description.orEmpty(),
                     value = lastV as Calendar?
                 )
                 (currentFragment as TimeFragment).setListener(this)
@@ -173,7 +169,7 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
 
             attrCompType == AttributeCompositionType.TypeDate -> {
                 currentFragment = DateFragment.newInstance(
-                    description = attrComp.description,
+                    description = attrComp.description.orEmpty(),
                     value = lastV as Calendar?
                 )
                 (currentFragment as DateFragment).setListener(this)
@@ -182,12 +178,12 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
             attrCompType == AttributeCompositionType.TypeOptions -> {
                 var composition = ""
                 if (attrComp.composition != null) {
-                    composition = (attrComp.composition ?: return)
+                    composition = attrComp.composition
                 }
 
                 currentFragment = CommaSeparatedSpinnerFragment.newInstance(
                     commaSeparatedOptions = composition,
-                    description = attrComp.description,
+                    description = attrComp.description.orEmpty(),
                     value = lastV as String?
                 )
                 (currentFragment as CommaSeparatedSpinnerFragment).setListener(this)
@@ -199,7 +195,7 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
                     AttributeCompositionType.TypeUnitVolume -> {
                         currentFragment = UnitTypeSpinnerFragment.newInstance(
                             unitTypeCat = UnitTypeCategory.volume,
-                            description = attrComp.description,
+                            description = attrComp.description.orEmpty(),
                             value = lastV as UnitType?
                         )
                         (currentFragment as UnitTypeSpinnerFragment).setListener(this)
@@ -208,7 +204,7 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
                     AttributeCompositionType.TypeUnitWeight -> {
                         currentFragment = UnitTypeSpinnerFragment.newInstance(
                             unitTypeCat = UnitTypeCategory.weight,
-                            description = attrComp.description,
+                            description = attrComp.description.orEmpty(),
                             value = lastV as UnitType?
                         )
                         (currentFragment as UnitTypeSpinnerFragment).setListener(this)
@@ -217,7 +213,7 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
                     AttributeCompositionType.TypeUnitTemperature -> {
                         currentFragment = UnitTypeSpinnerFragment.newInstance(
                             unitTypeCat = UnitTypeCategory.temperature,
-                            description = attrComp.description,
+                            description = attrComp.description.orEmpty(),
                             value = lastV as UnitType?
                         )
                         (currentFragment as UnitTypeSpinnerFragment).setListener(this)
@@ -226,7 +222,7 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
                     AttributeCompositionType.TypeUnitPressure -> {
                         currentFragment = UnitTypeSpinnerFragment.newInstance(
                             unitTypeCat = UnitTypeCategory.pressure,
-                            description = attrComp.description,
+                            description = attrComp.description.orEmpty(),
                             value = lastV as UnitType?
                         )
                         (currentFragment as UnitTypeSpinnerFragment).setListener(this)
@@ -234,8 +230,8 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
 
                     AttributeCompositionType.TypeUnitLenght -> {
                         currentFragment = UnitTypeSpinnerFragment.newInstance(
-                            unitTypeCat = UnitTypeCategory.lenght,
-                            description = attrComp.description,
+                            unitTypeCat = UnitTypeCategory.length,
+                            description = attrComp.description.orEmpty(),
                             value = lastV as UnitType?
                         )
                         (currentFragment as UnitTypeSpinnerFragment).setListener(this)
@@ -244,7 +240,7 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
                     AttributeCompositionType.TypeUnitArea -> {
                         currentFragment = UnitTypeSpinnerFragment.newInstance(
                             unitTypeCat = UnitTypeCategory.area,
-                            description = attrComp.description,
+                            description = attrComp.description.orEmpty(),
                             value = lastV as UnitType?
                         )
                         (currentFragment as UnitTypeSpinnerFragment).setListener(this)
@@ -326,27 +322,23 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
         var expression = exp
         val parameters: ArrayList<Parameter> = ArrayList()
 
-        val attrCompDbHelper = AttributeCompositionDbHelper()
+        val compositionRepository = AttributeCompositionRepository()
 
         for (p in par) {
             val nextLetter = charValue.toChar().toString()
             charValue++
 
-            // Reemplazar los valores de texto por valores númericos que puedan ser comparados
+            // Reemplazar los valores de texto por valores numéricos que puedan ser comparados
             // a partir del AttributeCompositionId del ParamName
             val attrCompId = p.paramName.split('.').last().toLong()
-            val attrComp = attrCompDbHelper.selectById(attrCompId)
+            val attrComp = compositionRepository.selectById(attrCompId) ?: continue
             var pValue: Int
 
-            if (attrComp!!.attributeCompositionTypeId == AttributeCompositionType.TypeOptions.id) {
-                var composition = ""
-                if (attrComp.composition != null) {
-                    composition = attrComp.composition!!.trim().trimEnd(';')
-                }
-
+            if (attrComp.attributeCompositionTypeId == AttributeCompositionType.TypeOptions.id) {
+                val composition = attrComp.composition!!.trim().trimEnd(';')
                 val allOptions = ArrayList(composition.split(';')).sorted()
 
-                // Reemplazo los valores en texto por un Id a fin de poder ser comparados
+                // Reemplazo los valores en texto por el ID a fin de poder ser comparados
                 for (a in allOptions) {
                     pValue = allOptions.indexOf(a)
                     expression = expression.replace("'$a'", pValue.toString())
@@ -360,8 +352,8 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
             expression = expression.replace("[" + p.paramName + "]", nextLetter)
         }
 
-        // Reemplazar los resultados de tipo secuencia de niveles (ej: '3,4')
-        // por un valor númerico falso para poder devolverse como resultado
+        // Reemplazar los resultados de tipo secuencia de niveles (ej.: '3,4')
+        // por un valor numérico falso para poder devolverse como resultado
         var pat = Pattern.compile("'([^']*)'")
         var fakeValue = 9000
         var m = pat.matcher(expression)
@@ -392,10 +384,10 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
         return e
     }
 
-    private fun addOwnParameter(dcrc: DataCollectionRuleContent, value: Any?) {
-        val paramName = dcrc.level.toString() + separator +
-                dcrc.position + separator +
-                dcrc.attributeCompositionId
+    private fun addOwnParameter(ruleContent: DataCollectionRuleContent, value: Any?) {
+        val paramName = ruleContent.level.toString() + separator +
+                ruleContent.position + separator +
+                ruleContent.attributeCompositionId
 
         ownParameters.remove(ownParameters.first { it.paramName == paramName })
         ownParameters.add(Parameter(paramName, value))
@@ -469,10 +461,10 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
 
     fun getFragmentData(): FragmentData {
         return FragmentData(
-            dcrContId = dataCollectionRuleContent?.dataCollectionRuleContentId,
-            attrCompTypeId = attributeCompositionType?.id,
+            dataCollectionRuleContentId = dataCollectionRuleContent?.id ?: 0,
+            attributeCompositionTypeId = attributeCompositionType?.id ?: 0,
             valueStr = lastValue?.valueStr.toString(),
-            isEnabled = isEnabled
+            mEnabled = if (isEnabled) 1 else 0
         )
     }
 

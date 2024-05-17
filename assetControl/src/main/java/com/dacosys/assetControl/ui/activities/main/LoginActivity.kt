@@ -7,7 +7,6 @@ import android.annotation.SuppressLint
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.res.ColorStateList
-import android.database.sqlite.SQLiteDatabase
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
@@ -31,14 +30,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.ViewCompat
+import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.AssetControlApp.Companion.appName
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.AssetControlApp.Companion.setCurrentUserId
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.dataBase.DataBaseHelper
-import com.dacosys.assetControl.data.dataBase.user.UserDbHelper
-import com.dacosys.assetControl.data.model.user.User
+import com.dacosys.assetControl.data.room.database.AcDatabase
+import com.dacosys.assetControl.data.room.database.AcTempDatabase
+import com.dacosys.assetControl.data.room.entity.user.User
+import com.dacosys.assetControl.data.room.repository.user.UserRepository
 import com.dacosys.assetControl.databinding.LoginActivityBinding
 import com.dacosys.assetControl.network.clientPackages.ClientPackagesProgress
 import com.dacosys.assetControl.network.download.DownloadDb
@@ -82,6 +83,7 @@ import com.dacosys.assetControl.utils.settings.preferences.Repository
 import com.dacosys.assetControl.viewModel.sync.DownloadDbViewModel
 import com.dacosys.assetControl.viewModel.sync.SyncViewModel
 import com.dacosys.imageControl.network.upload.SendPending
+import com.dacosys.imageControl.room.database.IcDatabase
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import io.github.cdimascio.dotenv.DotenvBuilder
@@ -210,11 +212,9 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         if (downloadStatus == CRASHED) {
             // Error al descargar
             showSnackBar(SnackBarEventData(msg, SnackBarType.ERROR))
-
             setButton(ButtonStyle.REFRESH)
 
             showProgressBar(false)
-
             syncing = false
             return
         } else if (downloadStatus == CANCELED) {
@@ -222,9 +222,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
             showSnackBar(SnackBarEventData(msg, SnackBarType.INFO))
 
             refresh()
-
             showProgressBar(false)
-
             syncing = false
             return
         }
@@ -240,7 +238,6 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                 // FINISHED = Ok
                 refresh()
                 showProgressBar(false)
-
                 syncing = false
                 return
             }
@@ -256,8 +253,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
 
             CANCELED,
             CRASHED,
-            INFO,
-            -> {
+            INFO -> {
             }
         }
     }
@@ -286,8 +282,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                 setButton(ButtonStyle.BUSY)
 
                 // Cerramos la base...
-                DataBaseHelper().close()
-                SQLiteDatabase.releaseMemory()
+                closeCurrentInstances()
 
                 // Enviar las imágenes pendientes...
                 if (Repository.useImageControl && Statics.AUTO_SEND_ON_STARTUP)
@@ -625,12 +620,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         setButton(ButtonStyle.BUSY)
 
         try {
-            /* Des-inicializamos IC para evitar que se
-               suban imágenes pendientes antes de loggearse.
-               Escenario en el que el usuario ha vuelto a esta
-               actividad después haber estado loggeado.
-             */
-            closeImageControl()
+            closeCurrentInstances()
 
             // Comprobar validez de la fecha del dispositivo
             if (!Statics.deviceDateIsValid()) {
@@ -654,13 +644,6 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                 syncing = false
                 return
             }
-
-            /////////////// BASE DE DATOS SQLITE ///////////////////
-            // Acá arranca la base de datos, si no existe se crea // 
-            // Si existe una sesión previa se cierra.             //
-            DataBaseHelper.beginDataBase()
-            ///////////// FIN INICIALIZACIÓN SQLITE ////////////////
-
         } catch (ex: Exception) {
             ex.printStackTrace()
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
@@ -686,6 +669,19 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
             DownloadDb(onDownloadEvent = { downloadDbViewModel.setDownloadTask(it) },
                 onSnackBarEvent = { downloadDbViewModel.setUiEvent(it) })
         }
+    }
+
+    private fun closeCurrentInstances() {
+        /** Cerramos ImageControl para evitar que se
+         *  suban imágenes pendientes antes de autentificarse.
+         *  Escenario en el que el usuario ha vuelto a esta
+         *  actividad después haber estado autentificado.
+         */
+        closeImageControl()
+
+        AcDatabase.cleanInstance()
+        AcTempDatabase.cleanInstance()
+        IcDatabase.cleanInstance()
     }
 
     private fun refresh() {
@@ -877,13 +873,13 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                 val userPass = confJson.getString("log_password")
 
                 if (userName.isNotEmpty() && userPass.isNotEmpty()) {
-                    val user = UserDbHelper().selectUserByNameOrEmail(userName)
+                    val user = UserRepository().selectByNameOrEmail(userName)
                     if (user != null) {
                         runOnUiThread {
                             attemptLogin(
-                                userId = user.userId,
+                                userId = user.id,
                                 encondedPass = userPass,
-                                password = user.password
+                                password = user.password.orEmpty()
                             )
                         }
                     } else {

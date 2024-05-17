@@ -2,7 +2,7 @@ package com.dacosys.assetControl.data.webservice.location
 
 import android.os.Parcel
 import android.os.Parcelable
-import com.dacosys.assetControl.data.model.location.Warehouse
+import com.dacosys.assetControl.data.room.entity.location.Warehouse
 import org.ksoap2.serialization.SoapObject
 
 class WarehouseObject() : Parcelable {
@@ -14,14 +14,14 @@ class WarehouseObject() : Parcelable {
     constructor(parcel: Parcel) : this() {
         warehouse_id = parcel.readLong()
         active = parcel.readInt()
-        description = parcel.readString() ?: ""
-        warehouse_ext_id = parcel.readString() ?: ""
+        description = parcel.readString().orEmpty()
+        warehouse_ext_id = parcel.readString().orEmpty()
     }
 
     constructor(warehouse: Warehouse) : this() {
         // Main Information
         description = warehouse.description
-        warehouse_id = warehouse.warehouseId
+        warehouse_id = warehouse.id
         active = if (warehouse.active) 1 else 0
         warehouse_ext_id = ""
     }

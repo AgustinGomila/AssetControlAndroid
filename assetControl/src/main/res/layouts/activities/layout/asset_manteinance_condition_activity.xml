@@ -5,7 +5,7 @@
                                                    android:id="@+id/asset_manteinance_condition"
                                                    android:layout_width="match_parent"
                                                    android:layout_height="match_parent"
-                                                   tools:context="com.dacosys.assetControl.ui.activities.asset.activities.AssetManteinanceConditionActivity">
+                                                   tools:context="com.dacosys.assetControl.ui.activities.maintenance.AssetMaintenanceConditionActivity">
 
     <androidx.appcompat.widget.Toolbar
             android:id="@+id/top_appbar"
@@ -74,7 +74,7 @@
 
     <androidx.fragment.app.FragmentContainerView
             android:id="@+id/manteinanceTypeFragment"
-            android:name="com.dacosys.assetControl.ui.fragments.manteinance.ManteinanceTypeSpinnerFragment"
+            android:name="com.dacosys.assetControl.ui.fragments.manteinance.MaintenanceTypeSpinnerFragment"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="2dp"

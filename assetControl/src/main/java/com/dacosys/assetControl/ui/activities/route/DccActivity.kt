@@ -28,25 +28,30 @@ import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.dacosys.assetControl.AssetControlApp.Companion.currentUser
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.dataBase.attribute.AttributeCompositionDbHelper
-import com.dacosys.assetControl.data.dataBase.datacollection.DataCollectionContentDbHelper
-import com.dacosys.assetControl.data.dataBase.datacollection.DataCollectionDbHelper
-import com.dacosys.assetControl.data.dataBase.datacollection.DataCollectionRuleContentDbHelper
-import com.dacosys.assetControl.data.dataBase.datacollection.FragmentDataDbHelper
-import com.dacosys.assetControl.data.model.asset.Asset
-import com.dacosys.assetControl.data.model.asset.UnitType
-import com.dacosys.assetControl.data.model.attribute.AttributeComposition
-import com.dacosys.assetControl.data.model.attribute.AttributeCompositionType
-import com.dacosys.assetControl.data.model.category.ItemCategory
-import com.dacosys.assetControl.data.model.dataCollection.*
-import com.dacosys.assetControl.data.model.location.WarehouseArea
-import com.dacosys.assetControl.data.model.route.RouteProcess
-import com.dacosys.assetControl.data.model.route.RouteProcessContent
-import com.dacosys.assetControl.data.model.route.common.KeyLevelPos
-import com.dacosys.assetControl.data.model.route.common.Parameter
-import com.dacosys.assetControl.data.model.table.Table
-import com.dacosys.assetControl.data.model.user.User
-import com.dacosys.assetControl.data.model.user.permission.PermissionEntry
+import com.dacosys.assetControl.data.enums.attribute.AttributeCompositionType
+import com.dacosys.assetControl.data.enums.common.Table
+import com.dacosys.assetControl.data.enums.dataCollection.DcrResult
+import com.dacosys.assetControl.data.enums.permission.PermissionEntry
+import com.dacosys.assetControl.data.enums.unit.UnitType
+import com.dacosys.assetControl.data.model.common.KeyLevelPos
+import com.dacosys.assetControl.data.model.common.Parameter
+import com.dacosys.assetControl.data.room.entity.asset.Asset
+import com.dacosys.assetControl.data.room.entity.category.ItemCategory
+import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollection
+import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionContent
+import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionRule
+import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionRuleContent
+import com.dacosys.assetControl.data.room.entity.fragment.FragmentData
+import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
+import com.dacosys.assetControl.data.room.entity.route.RouteProcessContent
+import com.dacosys.assetControl.data.room.entity.user.User
+import com.dacosys.assetControl.data.room.repository.attribute.AttributeCompositionRepository
+import com.dacosys.assetControl.data.room.repository.dataCollection.DataCollectionContentRepository
+import com.dacosys.assetControl.data.room.repository.dataCollection.DataCollectionRepository
+import com.dacosys.assetControl.data.room.repository.dataCollection.DataCollectionRuleContentRepository
+import com.dacosys.assetControl.data.room.repository.dataCollection.DataCollectionRuleRepository
+import com.dacosys.assetControl.data.room.repository.fragment.FragmentDataRepository
+import com.dacosys.assetControl.data.room.repository.route.RouteProcessRepository
 import com.dacosys.assetControl.databinding.DataCollectionContentActivityBinding
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
@@ -54,6 +59,7 @@ import com.dacosys.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.ui.fragments.route.*
 import com.dacosys.assetControl.utils.Statics
+import com.dacosys.assetControl.utils.Statics.Companion.toDate
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.misc.UTCDataTime
 import com.dacosys.assetControl.utils.scanners.JotterListener
@@ -285,7 +291,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
             fragCollectionCreated = true
         } else {
             // Carga del estado del adaptador desde la DB temporal
-            val allFragData = FragmentDataDbHelper().tempTableSelect()
+            val allFragData = ArrayList(FragmentDataRepository().select())
             createFragmentCollection(allFragData)
         }
 
@@ -308,16 +314,17 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         rpc = tempRpc
         val rpc = rpc ?: return
 
-        dcr = DataCollectionRule(id = rpc.dataCollectionRuleId, doChecks = false)
+        dcr = DataCollectionRuleRepository().selectById(id = rpc.dataCollectionRuleId)
         val dcr = dcr ?: return
 
-        val rp = RouteProcess(id = rpc.routeProcessId, doChecks = false)
-        collectorRouteProcessId = rp.collectorRouteProcessId
+        val rp = RouteProcessRepository().selectById(id = rpc.routeProcessId) ?: return
+        collectorRouteProcessId = rp.id
 
-        dcrContArray = ArrayList(
-            DataCollectionRuleContentDbHelper().selectByDataCollectionRuleIdActive(dcr.dataCollectionRuleId)
-                .sortedWith(compareBy({ it.level }, { it.position }))
-        )
+        dcrContArray =
+            ArrayList(
+                DataCollectionRuleContentRepository().selectByDataCollectionRuleIdActive(dcr.id)
+                    .sortedWith(compareBy({ it.level }, { it.position }))
+            )
     }
 
     private fun setPanels() {
@@ -408,11 +415,11 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         val rpc = rpc ?: return
 
         var description = "${dcr.description}, ${
-            if (rpc.assetStr != null && (rpc.assetStr ?: return).isNotEmpty()) {
+            if (rpc.assetStr.isNotEmpty()) {
                 rpc.assetStr
-            } else if (rpc.warehouseAreaStr != null && (rpc.warehouseAreaStr ?: return).isNotEmpty()) {
+            } else if (rpc.warehouseAreaStr.isNotEmpty()) {
                 rpc.warehouseAreaStr
-            } else if (rpc.warehouseStr != null && (rpc.warehouseStr ?: return).isNotEmpty()) {
+            } else if (rpc.warehouseStr.isNotEmpty()) {
                 rpc.warehouseStr
             } else {
                 getString(R.string.no_name)
@@ -430,7 +437,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         if (imageControlFragment == null) {
             imageControlFragment = ImageControlButtonsFragment.newInstance(
-                Table.routeProcess.tableId.toLong(), rpc.routeProcessId.toString()
+                Table.routeProcess.id.toLong(), rpc.routeProcessId.toString()
             )
 
             setFragmentValues(description, reference, obs)
@@ -458,7 +465,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
                 }
             }
         } else {
-            imageControlFragment?.setTableId(Table.routeProcess.tableId)
+            imageControlFragment?.setTableId(Table.routeProcess.id)
             imageControlFragment?.setObjectId1(rpc.routeProcessId)
             imageControlFragment?.setObjectId2(null)
 
@@ -541,14 +548,13 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         // Construyo un control por cada contenido de la regla
         for (fd in fdArray) {
-            if (fd.dcrContId == null) continue
-            val dcrCont = DataCollectionRuleContentDbHelper().selectById(fd.dcrContId) ?: continue
+            val dcrCont = DataCollectionRuleContentRepository().selectById(fd.dataCollectionRuleContentId) ?: continue
 
             try {
                 val y = GeneralFragment(this)
                 y.dataCollectionRuleContent = dcrCont
 
-                val tempAttrCompTypeId = fd.attrCompTypeId ?: 0
+                val tempAttrCompTypeId = fd.attributeCompositionTypeId
                 if (tempAttrCompTypeId > 0) {
                     val attrCompType =
                         AttributeCompositionType.getById(tempAttrCompTypeId) ?: continue
@@ -587,11 +593,12 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
 
                 val tempAttrCompId = dcrCont.attributeCompositionId
                 if (tempAttrCompId > 0) {
-                    val attrComp = AttributeComposition(id = tempAttrCompId, doChecks = false)
-                    val attrCompType = attrComp.attributeCompositionType ?: continue
-
-                    y.attributeCompositionType = attrCompType
-                    y.valueStr = attrComp.defaultValue
+                    val attrComp = AttributeCompositionRepository().selectById(id = tempAttrCompId)
+                    if (attrComp != null) {
+                        val attrCompType = AttributeCompositionType.getById(attrComp.attributeCompositionTypeId)
+                        y.attributeCompositionType = attrCompType
+                        y.valueStr = attrComp.defaultValue
+                    }
                 }
                 y.isEnabled = true
 
@@ -629,7 +636,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         for (f in attrFrags) {
             if (f.isAttribute) {
                 val dcrCont = f.dataCollectionRuleContent ?: return
-                val str = dcrCont.description + " - " + dcrCont.attributeStr
+                val str = "${dcrCont.description} - ${dcrCont.attributeStr}"
 
                 runOnUiThread {
                     binding.attributeTextView.setText(str, TextView.BufferType.EDITABLE)
@@ -846,48 +853,53 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         binding.enableCheckBox.isChecked = f.isEnabled
 
         if (rpc != null && f.dataCollectionRuleContent != null) {
-            val dccDbHelper = DataCollectionContentDbHelper()
+            val contentRepository = DataCollectionContentRepository()
             val dcrCont = f.dataCollectionRuleContent ?: return
+
+            val assetId = rpc.assetId ?: 0
+            val warehouseAreaId = rpc.warehouseAreaId ?: 0
+            val warehouseId = rpc.warehouseId ?: 0
+
             when {
-                rpc.assetId != null && (rpc.assetId ?: return) > 0 -> {
-                    binding.codeTextView.setText(rpc.assetCode ?: "", TextView.BufferType.EDITABLE)
+                rpc.assetId != null && assetId > 0 -> {
+                    binding.codeTextView.setText(rpc.assetCode, TextView.BufferType.EDITABLE)
                     binding.descriptionTextView.setText(
-                        rpc.assetStr ?: "", TextView.BufferType.EDITABLE
+                        rpc.assetStr, TextView.BufferType.EDITABLE
                     )
 
                     tempDcc = ArrayList(
-                        dccDbHelper.selectByDataCollectionRuleContentIdAssetId(
-                            dcrCont.dataCollectionRuleContentId, rpc.assetId ?: return
+                        contentRepository.selectByDataCollectionRuleContentIdAssetId(
+                            dcrCont.id, assetId
                         ).sortedWith(compareBy { it.dataCollectionDate }).reversed()
                     )
                 }
 
-                rpc.warehouseId != null && (rpc.warehouseId ?: return) > 0 -> {
+                rpc.warehouseId != null && warehouseId > 0 -> {
                     binding.codeTextView.setText(
                         rpc.warehouseId.toString(), TextView.BufferType.EDITABLE
                     )
                     binding.descriptionTextView.setText(
-                        rpc.warehouseStr ?: "", TextView.BufferType.EDITABLE
+                        rpc.warehouseStr, TextView.BufferType.EDITABLE
                     )
 
                     tempDcc = ArrayList(
-                        dccDbHelper.selectByDataCollectionRuleContentIdWarehouseId(
-                            dcrCont.dataCollectionRuleContentId, rpc.warehouseId ?: return
+                        contentRepository.selectByDataCollectionRuleContentIdWarehouseId(
+                            dcrCont.id, warehouseId
                         ).sortedWith(compareBy { it.dataCollectionDate }).reversed()
                     )
                 }
 
-                rpc.warehouseAreaId != null && (rpc.warehouseAreaId ?: return) > 0 -> {
+                rpc.warehouseAreaId != null && warehouseAreaId > 0 -> {
                     binding.codeTextView.setText(
                         rpc.warehouseAreaId.toString(), TextView.BufferType.EDITABLE
                     )
                     binding.descriptionTextView.setText(
-                        rpc.warehouseAreaStr ?: "", TextView.BufferType.EDITABLE
+                        rpc.warehouseAreaStr, TextView.BufferType.EDITABLE
                     )
 
                     tempDcc = ArrayList(
-                        dccDbHelper.selectByDataCollectionRuleContentIdWarehouseAreaId(
-                            dcrCont.dataCollectionRuleContentId, rpc.warehouseAreaId ?: return
+                        contentRepository.selectByDataCollectionRuleContentIdWarehouseAreaId(
+                            dcrCont.id, warehouseAreaId
                         ).sortedWith(compareBy { it.dataCollectionDate }).reversed()
                     )
                 }
@@ -919,7 +931,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
             return
         }
 
-        val attrCompArray = AttributeCompositionDbHelper().selectByAttributeId(
+        val attrCompArray = AttributeCompositionRepository().selectByAttributeId(
             (currentFragment?.dataCollectionRuleContent ?: return).attributeId
         )
         val currentAttrCompId =
@@ -927,7 +939,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         var currentIndex = 0
         for (attrComp in attrCompArray) {
-            if (attrComp.attributeCompositionId == currentAttrCompId) {
+            if (attrComp.id == currentAttrCompId) {
                 currentIndex++
                 break
             }
@@ -977,7 +989,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
             return
         }
 
-        val attrCompArray = AttributeCompositionDbHelper().selectByAttributeId(
+        val attrCompArray = AttributeCompositionRepository().selectByAttributeId(
             (currentFragment?.dataCollectionRuleContent ?: return).attributeId
         )
         val currentAttrCompId =
@@ -985,7 +997,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         var currentIndex = 0
         for (attrComp in attrCompArray) {
-            if (attrComp.attributeCompositionId == currentAttrCompId) {
+            if (attrComp.id == currentAttrCompId) {
                 currentIndex++
                 break
             }
@@ -1100,7 +1112,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         // Elimino cada registro que empieza con el virtual ID.
         val dataToRemove: ArrayList<DataCollectionContent> = ArrayList()
         for (dc in dcContArray) {
-            if (dc.collectorDataCollectionContentId.toString().startsWith(completePath)) {
+            if (dc.id.toString().startsWith(completePath)) {
                 dataToRemove.add(dc)
             }
         }
@@ -1110,9 +1122,10 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         // Agrego el nuevo registro si el control está activo
         if (f.isEnabled) {
+            val ruleContent = f.dataCollectionRuleContent ?: return
             // Agregando datos a la colección, ID virtual: completePath
             val dcc = DataCollectionContent(
-                dcrc = f.dataCollectionRuleContent ?: return,
+                ruleContent = ruleContent,
                 virtualId = virtualId,
                 result = result,
                 valueStr = valueStr
@@ -1230,7 +1243,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
             }
 
             if (result != null) {
-                val res = if (result == true) {
+                val res: Int = if (result == true) {
                     dcrCont.trueResult
                 } else {
                     dcrCont.falseResult
@@ -1307,21 +1320,29 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         ///////////////////////////////////////////
         ///////////// DATA COLLECTION /////////////
-        val dcDbHelper = DataCollectionDbHelper()
+        val collectionRepository = DataCollectionRepository()
 
         val r = ThreadLocalRandom.current()
         val fakeRouteProcessId = r.nextLong(-888888 - -999999)
+        val routeProcessId = collectorRouteProcessId
 
         var dc: DataCollection? = null
+        val rpc = rpc
+        val targetAsset = targetAsset
+        val targetWarehouseArea = targetWarehouseArea
+
         when {
-            rpc != null -> dc =
-                dcDbHelper.insert(rpc ?: return, dataStart, collectorRouteProcessId ?: return)
+            rpc != null && routeProcessId != null -> {
+                dc = collectionRepository.insert(rpc, dataStart.toDate(), routeProcessId)
+            }
 
-            targetAsset != null -> dc =
-                dcDbHelper.insert(targetAsset ?: return, dataStart, fakeRouteProcessId)
+            targetAsset != null -> {
+                dc = collectionRepository.insert(targetAsset, dataStart.toDate(), fakeRouteProcessId)
+            }
 
-            targetWarehouseArea != null -> dc =
-                dcDbHelper.insert(targetWarehouseArea ?: return, dataStart, fakeRouteProcessId)
+            targetWarehouseArea != null -> {
+                dc = collectionRepository.insert(targetWarehouseArea, dataStart.toDate(), fakeRouteProcessId)
+            }
         }
 
         if (dc == null) {
@@ -1339,7 +1360,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         ///////// DATA COLLECTION CONTENT /////////
         var error = false
 
-        val dccDbHelper = DataCollectionContentDbHelper()
+        val contentRepository = DataCollectionContentRepository()
         for (dcc in dcContArray) {
             qty++
             Log.d(
@@ -1347,7 +1368,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
                 "${getString(R.string.saving_data_collection)} $qty/$total"
             )
 
-            if (!dccDbHelper.insert(dc.collectorDataCollectionId, dcc)) {
+            if (!contentRepository.insert(dc.id, dcc)) {
                 error = true
                 break
             }
@@ -1653,9 +1674,8 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private fun saveFragStatus() {
         currentFragment?.saveLastValue()
-        val allFragData: ArrayList<FragmentData> =
-            allFrags.mapTo(ArrayList()) { it.getFragmentData() }
-        FragmentDataDbHelper().tempTableInsert(allFragData.toTypedArray())
+        val allFragData = allFrags.map { it.getFragmentData() }.toList()
+        FragmentDataRepository().insert(allFragData)
     }
 
     override fun onFragmentStarted() {}
@@ -1741,15 +1761,17 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
             }
 
             AttributeCompositionType.TypeOptions -> {
-                val attrComp = AttributeComposition(fragment.attrCompId, true)
-                var composition = ""
-                if (attrComp.composition != null) {
-                    composition = (attrComp.composition ?: return).trim().trimEnd(';')
-                }
-                val allOptions = ArrayList(composition.split(';')).sorted()
-                val random: Int = ThreadLocalRandom.current().nextInt(0, allOptions.size)
+                val attrComp = AttributeCompositionRepository().selectById(fragment.attrCompId)
+                if (attrComp != null) {
+                    var composition = ""
+                    if (attrComp.composition != null) {
+                        composition = attrComp.composition.trim().trimEnd(';')
+                    }
+                    val allOptions = ArrayList(composition.split(';')).sorted()
+                    val random: Int = ThreadLocalRandom.current().nextInt(0, allOptions.size)
 
-                fragment.valueStr = allOptions[random]
+                    fragment.valueStr = allOptions[random]
+                }
             }
         }
 

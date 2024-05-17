@@ -16,8 +16,8 @@ import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat
 import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.model.review.AssetReview
-import com.dacosys.assetControl.data.model.review.AssetReviewStatus
+import com.dacosys.assetControl.data.enums.review.AssetReviewStatus
+import com.dacosys.assetControl.data.room.entity.review.AssetReview
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.getColorWithAlpha
@@ -144,7 +144,7 @@ class AssetReviewAdapter :
             for (w in assetReviews) {
                 if (getAll().contains(w)) {
                     assetReviewsRemoved.add(w)
-                    checkedIdArray.remove(w.collectorAssetReviewId)
+                    checkedIdArray.remove(w.id)
                     super.remove(w)
                 }
             }
@@ -170,7 +170,7 @@ class AssetReviewAdapter :
 
         var res = ""
         for (assetReview in assetReviewArray) {
-            res += "${assetReview.collectorAssetReviewId}, "
+            res += "${assetReview.id}, "
         }
 
         if (res.endsWith(", ")) {
@@ -245,7 +245,7 @@ class AssetReviewAdapter :
         for (i in 0 until count) {
             val it = getItem(i)
             if (it != null) {
-                r.add(it.collectorAssetReviewId)
+                r.add(it.id)
             }
         }
         return r
@@ -286,11 +286,11 @@ class AssetReviewAdapter :
     fun setChecked(item: AssetReview, isChecked: Boolean, suspendRefresh: Boolean = false) {
         val position = getIndex(item)
         if (isChecked) {
-            if (!checkedIdArray.contains(item.collectorAssetReviewId)) {
-                checkedIdArray.add(item.collectorAssetReviewId)
+            if (!checkedIdArray.contains(item.id)) {
+                checkedIdArray.add(item.id)
             }
         } else {
-            checkedIdArray.remove(item.collectorAssetReviewId)
+            checkedIdArray.remove(item.id)
         }
 
         checkedChangedListener?.onCheckedChanged(isChecked, position)
@@ -587,13 +587,12 @@ class AssetReviewAdapter :
             if (assetReview != null) {
                 holder.wStrTextView?.text = assetReview.warehouseStr
                 holder.waStrTextView?.text = assetReview.warehouseAreaStr
-                holder.assetReviewDateTextView?.text = assetReview.assetReviewDate
-                holder.modificationDateTextView?.text = assetReview.modificationDate
+                holder.assetReviewDateTextView?.text = assetReview.assetReviewDate.toString()
+                holder.modificationDateTextView?.text = assetReview.modificationDate.toString()
                 holder.userNameTextView?.text = assetReview.userStr
-                holder.statusTextView?.text =
-                    AssetReviewStatus.getById(assetReview.statusId)!!.description
-                holder.obsTextView?.text = assetReview.obs
-                if (assetReview.obs.isEmpty()) {
+                holder.statusTextView?.text = AssetReviewStatus.getById(assetReview.statusId).description
+                holder.obsTextView?.text = assetReview.obs.orEmpty()
+                if (assetReview.obs.orEmpty().isEmpty()) {
                     holder.obsTextView?.visibility = GONE
                 } else {
                     holder.obsTextView?.visibility = VISIBLE
@@ -603,7 +602,7 @@ class AssetReviewAdapter :
                     //Important to remove previous checkedChangedListener before calling setChecked
                     holder.checkBox!!.setOnCheckedChangeListener(null)
                     holder.checkBox!!.isChecked =
-                        checkedIdArray.contains(assetReview.collectorAssetReviewId)
+                        checkedIdArray.contains(assetReview.id)
                     holder.checkBox!!.tag = position
                     holder.checkBox!!.setOnClickListener { }
                     holder.checkBox!!.setOnCheckedChangeListener { _, isChecked ->
@@ -751,7 +750,7 @@ class AssetReviewAdapter :
 
                     for (i in 0 until assetReviewArray.size) {
                         filterableItem = assetReviewArray[i]
-                        if (filterableItem.obs.lowercase(Locale.getDefault())
+                        if (filterableItem.obs.orEmpty().lowercase(Locale.getDefault())
                                 .contains(filterString)
                         ) {
                             r.add(filterableItem)

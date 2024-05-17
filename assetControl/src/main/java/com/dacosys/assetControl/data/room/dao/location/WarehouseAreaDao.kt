@@ -1,27 +1,104 @@
 package com.dacosys.assetControl.data.room.dao.location
 
 import androidx.room.*
+import com.dacosys.assetControl.data.room.entity.location.Warehouse
 import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
 import com.dacosys.assetControl.data.room.entity.location.WarehouseArea.Entry
-import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface WarehouseAreaDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertWarehouseArea(warehouseArea: WarehouseArea)
+    @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN $BASIC_ORDER")
+    fun select(): List<WarehouseArea>
+
+    @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN WHERE ${Entry.TABLE_NAME}.${Entry.ACTIVE} = 1 $BASIC_ORDER")
+    fun selectActive(): List<WarehouseArea>
+
+    @Query("SELECT MIN(${Entry.ID}) $BASIC_FROM")
+    fun selectMinId(): Long?
+
+    @RewriteQueriesToDropUnusedColumns
+    @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN WHERE ${Entry.TABLE_NAME}.${Entry.ID} = :id")
+    fun selectById(id: Long): WarehouseArea?
+
+    @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN WHERE ${Entry.TABLE_NAME}.${Entry.TRANSFERRED} = 0 $BASIC_ORDER")
+    fun selectNoTransferred(): List<WarehouseArea>
+
+    @Query(
+        "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
+                "WHERE ${Entry.TABLE_NAME}.${Entry.DESCRIPTION} LIKE '%' || :wDescription || '%'  " +
+                "AND ${Entry.TABLE_NAME}.${Entry.DESCRIPTION} LIKE '%' || :waDescription || '%'  " +
+                BASIC_ORDER
+    )
+    fun selectByDescription(wDescription: String, waDescription: String): List<WarehouseArea>
+
+    @Query(
+        "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
+                "WHERE ${Entry.TABLE_NAME}.${Entry.DESCRIPTION} LIKE '%' || :wDescription || '%'  " +
+                "AND ${Entry.TABLE_NAME}.${Entry.DESCRIPTION} LIKE '%' || :waDescription || '%'  " +
+                "AND ${Entry.TABLE_NAME}.${Entry.ACTIVE} = 1 " +
+                BASIC_ORDER
+    )
+    fun selectByDescriptionActive(wDescription: String, waDescription: String): List<WarehouseArea>
+
+    @Query(
+        "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
+                "WHERE ${Entry.TABLE_NAME}.${Entry.ID} IN (:ids) " +
+                BASIC_ORDER
+    )
+    fun selectByTempIds(ids: List<Long>): List<WarehouseArea>
+
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAllWarehouseAreas(warehouseAreas: List<WarehouseArea>)
+    suspend fun insert(warehouseArea: WarehouseArea)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(areas: List<WarehouseArea>)
+
+    @Transaction
+    suspend fun insert(entities: List<WarehouseArea>, completedTask: (Int) -> Unit) {
+        entities.forEachIndexed { index, entity ->
+            insert(entity)
+            completedTask(index + 1)
+        }
+    }
+
 
     @Update
-    suspend fun updateWarehouseArea(warehouseArea: WarehouseArea)
+    suspend fun update(area: WarehouseArea)
+
+    @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.WAREHOUSE_ID} = :newValue WHERE ${Entry.WAREHOUSE_ID} = :oldValue")
+    suspend fun updateWarehouseId(oldValue: Long, newValue: Long)
+
+    @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.ID} = :newValue WHERE ${Entry.ID} = :oldValue")
+    suspend fun updateWarehouseAreaId(oldValue: Long, newValue: Long)
+
+    @Query(
+        "UPDATE ${Entry.TABLE_NAME} " +
+                "SET ${Entry.TRANSFERRED} = 1 " +
+                "WHERE ${Entry.ID} IN (:ids)"
+    )
+    suspend fun updateTransferred(
+        ids: Array<Long>
+    )
+
 
     @Delete
-    suspend fun deleteWarehouseArea(warehouseArea: WarehouseArea)
+    suspend fun delete(warehouseArea: WarehouseArea)
 
-    @Query("DELETE FROM ${Entry.TABLE_NAME}")
-    suspend fun deleteAllWarehouseAreas()
+    @Query("DELETE $BASIC_FROM")
+    suspend fun deleteAll()
 
-    @Query("SELECT * FROM ${Entry.TABLE_NAME}")
-    fun getAllWarehouseAreas(): Flow<List<WarehouseArea>>
+
+    companion object {
+        private val wEntry = Warehouse.Entry
+
+        const val BASIC_SELECT = "SELECT ${Entry.TABLE_NAME}.*"
+        const val BASIC_FROM = "FROM ${Entry.TABLE_NAME}"
+        const val BASIC_ORDER = "ORDER BY ${Entry.TABLE_NAME}.${Entry.DESCRIPTION}, " +
+                "${wEntry.TABLE_NAME}.${wEntry.DESCRIPTION}"
+
+        const val BASIC_LEFT_JOIN =
+            "LEFT JOIN ${wEntry.TABLE_NAME} ON ${wEntry.TABLE_NAME}.${wEntry.ID} = ${Entry.TABLE_NAME}.${Entry.WAREHOUSE_ID}"
+        const val BASIC_JOIN_FIELDS = "${wEntry.TABLE_NAME}.${wEntry.DESCRIPTION} AS ${Entry.WAREHOUSE_STR}"
+    }
 }

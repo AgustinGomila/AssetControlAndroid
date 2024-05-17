@@ -17,9 +17,9 @@ import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.dataBase.barcode.BarcodeLabelCustomDbHelper
-import com.dacosys.assetControl.data.model.barcode.BarcodeLabelCustom
-import com.dacosys.assetControl.data.model.barcode.BarcodeLabelTarget
+import com.dacosys.assetControl.data.enums.barcode.BarcodeLabelTarget
+import com.dacosys.assetControl.data.room.entity.barcode.BarcodeLabelCustom
+import com.dacosys.assetControl.data.room.repository.barcode.BarcodeLabelCustomRepository
 import com.dacosys.assetControl.databinding.CodeSelectActivityBinding
 import com.dacosys.assetControl.ui.adapters.barcode.BarcodeLabelCustomAdapter
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
@@ -258,17 +258,16 @@ class TemplateSelectDialogActivity : AppCompatActivity(),
     var isFilling = false
     private fun fillAdapter() {
         if (isFilling) return
+        val target = barcodeLabelTarget ?: return
         isFilling = true
 
         var itemArray: ArrayList<BarcodeLabelCustom> = ArrayList()
         try {
             Log.d(this::class.java.simpleName, "Selecting item templates...")
             itemArray =
-                if (barcodeLabelTarget != null)
-                    BarcodeLabelCustomDbHelper().selectByBarcodeLabelTargetId(
-                        (barcodeLabelTarget ?: return).id, onlyActive
-                    )
-                else BarcodeLabelCustomDbHelper().select(onlyActive)
+                ArrayList(
+                    BarcodeLabelCustomRepository().selectByBarcodeLabelTargetId(target.id, onlyActive)
+                )
         } catch (ex: java.lang.Exception) {
             ex.printStackTrace()
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)

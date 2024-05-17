@@ -3,9 +3,9 @@ package com.dacosys.assetControl.network.sync
 import android.util.Log
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.dataBase.user.UserDbHelper
-import com.dacosys.assetControl.data.dataBase.user.UserPermissionDbHelper
-import com.dacosys.assetControl.data.dataBase.user.UserWarehouseAreaDbHelper
+import com.dacosys.assetControl.data.room.repository.user.UserPermissionRepository
+import com.dacosys.assetControl.data.room.repository.user.UserRepository
+import com.dacosys.assetControl.data.room.repository.user.UserWarehouseAreaRepository
 import com.dacosys.assetControl.data.webservice.common.Webservice.Companion.getWebservice
 import com.dacosys.assetControl.data.webservice.user.*
 import com.dacosys.assetControl.network.serverDate.GetMySqlDate
@@ -22,6 +22,13 @@ class SyncInitialUser(
 ) {
     private val registryType = SyncRegistryType.User
 
+    private val ws get() = UserWs()
+    private val upWs get() = UserPermissionWs()
+    private val uwaWs get() = UserWarehouseAreaWs()
+    private val userRepository get() = UserRepository()
+    private val userPermissionRepository get() = UserPermissionRepository()
+    private val userWarehouseAreaRepository get() = UserWarehouseAreaRepository()
+
     private val scope = CoroutineScope(Job() + Dispatchers.IO)
 
     fun cancel() {
@@ -30,18 +37,14 @@ class SyncInitialUser(
 
     private suspend fun doInBackground() {
         coroutineScope {
-            launch { suspendFunction() }
+            launch { initialUser() }
         }
-    }
-
-    private suspend fun suspendFunction() = withContext(Dispatchers.IO) {
-        return@withContext initialUser()
     }
 
     ////////////////////////////////////////////////////
     // Descarga de usuarios, permisos, áreas del usuario
     // previo a iniciar sesión
-    private fun initialUser() {
+    private suspend fun initialUser() = withContext(Dispatchers.IO) {
         val qty =
             prefsGetInt(ConfEntry.acSyncQtyRegistry)
 
@@ -55,20 +58,13 @@ class SyncInitialUser(
             )
         }
 
-        val ws = UserWs()
-        val upWs = UserPermissionWs()
-        val uwaWs = UserWarehouseAreaWs()
-
-        val db = UserDbHelper()
-        val upDb = UserPermissionDbHelper()
-        val uwaDb = UserWarehouseAreaDbHelper()
-
         // Eliminar datos antiguos de los usuarios
-        db.deleteAll()
-        upDb.deleteAll()
-        uwaDb.deleteAll()
+        userRepository.deleteAll()
+        userPermissionRepository.deleteAll()
+        userWarehouseAreaRepository.deleteAll()
 
-        val date = (registryType.confEntry ?: return).defaultValue.toString()
+        val confEntry = registryType.confEntry ?: return@withContext
+        val date = confEntry.defaultValue.toString()
 
         val countTotal: Int?
 
@@ -95,24 +91,21 @@ class SyncInitialUser(
 
                     try {
                         if (objArray.isNotEmpty()) {
-                            db.sync(
-                                objArray = objArray,
-                                onSyncTaskProgress = { scope.launch { onUiEvent(it) } },
-                                currentCount = currentCount,
-                                countTotal = countTotal
+                            userRepository.sync(
+                                assetsObj = objArray,
+                                onSyncProgress = { scope.launch { onUiEvent(it) } },
+                                count = currentCount,
+                                total = countTotal
                             )
 
                             val total = objArray.size
                             currentCount += total
                             for ((index, obj) in objArray.withIndex()) {
                                 // user permission
-                                userPermission(upWs.initialUserPermissionGet(obj.user_id), upDb)
+                                userPermission(upWs.initialUserPermissionGet(obj.user_id))
 
                                 // user warehouse area
-                                userWarehouseArea(
-                                    uwaWs.initialUserWarehouseAreaGet(obj.user_id),
-                                    uwaDb
-                                )
+                                userWarehouseArea(uwaWs.initialUserWarehouseAreaGet(obj.user_id))
 
                                 scope.launch {
                                     onUiEvent(
@@ -159,7 +152,7 @@ class SyncInitialUser(
                     )
                 )
             }
-            return
+            return@withContext
         }
 
         checkConnection()
@@ -206,12 +199,11 @@ class SyncInitialUser(
     }
 
     fun userPermission(
-        objArray: Array<UserPermissionObject>?,
-        aDb: UserPermissionDbHelper
+        objArray: Array<UserPermissionObject>?
     ) {
         try {
             if (!objArray.isNullOrEmpty()) {
-                aDb.insert(objArray) { scope.launch { onUiEvent(it) } }
+                UserPermissionRepository().insert(objArray.toList()) { scope.launch { onUiEvent(it) } }
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
@@ -221,12 +213,11 @@ class SyncInitialUser(
     }
 
     fun userWarehouseArea(
-        objArray: Array<UserWarehouseAreaObject>?,
-        aDb: UserWarehouseAreaDbHelper
+        objArray: Array<UserWarehouseAreaObject>?
     ) {
         try {
             if (!objArray.isNullOrEmpty()) {
-                aDb.insert(objArray) { scope.launch { onUiEvent(it) } }
+                UserWarehouseAreaRepository().insert(objArray.toList()) { scope.launch { onUiEvent(it) } }
             }
         } catch (ex: Exception) {
             ex.printStackTrace()

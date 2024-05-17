@@ -12,7 +12,7 @@ import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.R.id.descriptionTextView
 import com.dacosys.assetControl.R.layout.custom_spinner_dropdown_item
-import com.dacosys.assetControl.data.model.asset.AssetStatus
+import com.dacosys.assetControl.data.enums.asset.AssetStatus
 
 /**
  * Created by Agustin on 18/01/2017.

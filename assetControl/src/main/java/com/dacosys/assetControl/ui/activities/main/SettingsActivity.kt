@@ -15,7 +15,6 @@ import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.AssetControlApp.Companion.getUserId
 import com.dacosys.assetControl.AssetControlApp.Companion.isLogged
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.dataBase.DataBaseHelper.Companion.removeDataBases
 import com.dacosys.assetControl.databinding.SettingsActivityBinding
 import com.dacosys.assetControl.network.checkConn.CheckWsConnection
 import com.dacosys.assetControl.network.clientPackages.ClientPackagesProgress
@@ -36,6 +35,7 @@ import com.dacosys.assetControl.utils.settings.config.QRConfigType
 import com.dacosys.assetControl.utils.settings.config.QRConfigType.CREATOR.QRConfigApp
 import com.dacosys.assetControl.utils.settings.config.QRConfigType.CREATOR.QRConfigClientAccount
 import com.dacosys.assetControl.utils.settings.config.QRConfigType.CREATOR.QRConfigWebservice
+import com.dacosys.assetControl.utils.settings.io.FileHelper
 import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
 import org.json.JSONObject
 import java.lang.ref.WeakReference
@@ -125,7 +125,7 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
             makeText(
                 binding.settings, getString(R.string.configuration_applied), INFO
             )
-            removeDataBases()
+            FileHelper.removeDataBases(getContext())
             finish()
         } else if (status == ProgressStatus.crashed) {
             makeText(
@@ -222,7 +222,7 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
         fun doTriggerWork(activity: SettingsActivity, qrConfigType: QRConfigType) {
             if (isLogged() && (qrConfigType == QRConfigWebservice || qrConfigType == QRConfigClientAccount))
                 return
-            
+
             currentQRConfigType = qrConfigType
             JotterListener.trigger(activity)
         }

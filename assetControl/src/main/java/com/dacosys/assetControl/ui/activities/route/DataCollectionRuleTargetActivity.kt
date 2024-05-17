@@ -10,11 +10,11 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.dataBase.asset.AssetDbHelper
-import com.dacosys.assetControl.data.model.asset.Asset
-import com.dacosys.assetControl.data.model.category.ItemCategory
-import com.dacosys.assetControl.data.model.dataCollection.DataCollectionRule
-import com.dacosys.assetControl.data.model.location.WarehouseArea
+import com.dacosys.assetControl.data.room.entity.asset.Asset
+import com.dacosys.assetControl.data.room.entity.category.ItemCategory
+import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionRule
+import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
+import com.dacosys.assetControl.data.room.repository.asset.AssetRepository
 import com.dacosys.assetControl.databinding.DataCollectionRuleTargetActivityBinding
 import com.dacosys.assetControl.ui.activities.asset.AssetPrintLabelActivity
 import com.dacosys.assetControl.ui.activities.location.LocationSelectActivity
@@ -104,7 +104,8 @@ class DataCollectionRuleTargetActivity : AppCompatActivity() {
                         ids.add(i.value)
                     }
 
-                    val a = AssetDbHelper().selectById(ids[0]) ?: return@registerForActivityResult
+                    val id = ids.first() ?: return@registerForActivityResult
+                    val a = AssetRepository().selectById(id) ?: return@registerForActivityResult
 
                     try {
                         if (!rejectNewInstances) {

@@ -19,9 +19,9 @@ import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.dataBase.asset.AssetDbHelper
-import com.dacosys.assetControl.data.model.asset.Asset
-import com.dacosys.assetControl.data.model.asset.AssetStatus
+import com.dacosys.assetControl.data.enums.asset.AssetStatus
+import com.dacosys.assetControl.data.room.entity.asset.Asset
+import com.dacosys.assetControl.data.room.repository.asset.AssetRepository
 import com.dacosys.assetControl.databinding.CodeSelectActivityBinding
 import com.dacosys.assetControl.ui.adapters.asset.AssetAdapter
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
@@ -144,7 +144,7 @@ class CodeSelectDialogActivity : AppCompatActivity(),
         if (set != null) {
             for (i in set) {
                 val status = AssetStatus.getById(i.toInt())
-                if (status != null && !visibleStatusArray.contains(status)) {
+                if (!visibleStatusArray.contains(status)) {
                     visibleStatusArray.add(status)
                 }
             }
@@ -257,7 +257,7 @@ class CodeSelectDialogActivity : AppCompatActivity(),
         var itemArray: ArrayList<Asset> = ArrayList()
         try {
             Log.d(this::class.java.simpleName, "Selecting assets...")
-            itemArray = AssetDbHelper().select(onlyActive)
+            itemArray = ArrayList(AssetRepository().select(onlyActive))
         } catch (ex: java.lang.Exception) {
             ex.printStackTrace()
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)

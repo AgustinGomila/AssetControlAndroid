@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R.layout.custom_spinner_dropdown_item
-import com.dacosys.assetControl.data.model.asset.AssetCondition
+import com.dacosys.assetControl.data.enums.asset.AssetCondition
 import com.dacosys.assetControl.databinding.FragmentSpinnerBinding
 import com.dacosys.assetControl.ui.adapters.asset.AssetConditionAdapter
 import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelableArrayList
@@ -22,7 +22,7 @@ import org.parceler.Parcels
  * create an instance of this fragment.
  */
 class AssetConditionSpinnerFragment : Fragment() {
-    private var allAssetCondition: ArrayList<AssetCondition>? = ArrayList()
+    private var allAssetCondition: ArrayList<AssetCondition> = arrayListOf()
     private var oldPos = -1
     private var mCallback: OnItemSelectedListener? = null
 
@@ -70,8 +70,7 @@ class AssetConditionSpinnerFragment : Fragment() {
         }
 
         if (arguments != null) {
-            allAssetCondition =
-                requireArguments().parcelableArrayList(ARG_ALL_ASSET_CONDITION)
+            allAssetCondition = requireArguments().parcelableArrayList(ARG_ALL_ASSET_CONDITION) ?: arrayListOf()
         }
     }
 
@@ -145,11 +144,11 @@ class AssetConditionSpinnerFragment : Fragment() {
 
     private fun fillAdapter() {
         oldPos = -1
-        allAssetCondition = AssetCondition.getAll()
+        allAssetCondition = ArrayList(AssetCondition.getAll())
 
         val spinnerAssetConditionAdapter = AssetConditionAdapter(
             custom_spinner_dropdown_item,
-            allAssetCondition ?: return,
+            allAssetCondition,
             binding.fragmentSpinner
         )
 

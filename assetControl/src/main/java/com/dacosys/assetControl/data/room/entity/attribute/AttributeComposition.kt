@@ -25,15 +25,15 @@ import com.dacosys.assetControl.data.room.entity.attribute.AttributeComposition.
 )
 data class AttributeComposition(
     @PrimaryKey
-    @ColumnInfo(name = Entry.ID) val id: Long,
-    @ColumnInfo(name = Entry.ATTRIBUTE_ID) val attributeId: Long,
-    @ColumnInfo(name = Entry.ATTRIBUTE_COMPOSITION_TYPE_ID) val attributeCompositionTypeId: Long,
-    @ColumnInfo(name = Entry.DESCRIPTION) val description: String?,
-    @ColumnInfo(name = Entry.COMPOSITION) val composition: String?,
-    @ColumnInfo(name = Entry.USED) val used: Int,
-    @ColumnInfo(name = Entry.NAME) val name: String,
-    @ColumnInfo(name = Entry.READ_ONLY) val readOnly: Int,
-    @ColumnInfo(name = Entry.DEFAULT_VALUE) val defaultValue: String
+    @ColumnInfo(name = Entry.ID) val id: Long = 0L,
+    @ColumnInfo(name = Entry.ATTRIBUTE_ID) val attributeId: Long = 0L,
+    @ColumnInfo(name = Entry.ATTRIBUTE_COMPOSITION_TYPE_ID) val attributeCompositionTypeId: Long = 0L,
+    @ColumnInfo(name = Entry.DESCRIPTION) val description: String? = null,
+    @ColumnInfo(name = Entry.COMPOSITION) val composition: String? = null,
+    @ColumnInfo(name = Entry.USED) val used: Int = 0,
+    @ColumnInfo(name = Entry.NAME) val name: String = "",
+    @ColumnInfo(name = Entry.READ_ONLY) val readOnly: Int = 0,
+    @ColumnInfo(name = Entry.DEFAULT_VALUE) val defaultValue: String = "",
 ) {
     object Entry {
         const val TABLE_NAME = "attribute_composition"

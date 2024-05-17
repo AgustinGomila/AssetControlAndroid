@@ -14,7 +14,7 @@ class AttributeCategoryObject() : Parcelable {
         attributeCategoryId = parcel.readLong()
         parentId = parcel.readLong()
         active = parcel.readInt()
-        description = parcel.readString() ?: ""
+        description = parcel.readString().orEmpty()
     }
 
     fun getBySoapObject(so: SoapObject): AttributeCategoryObject {

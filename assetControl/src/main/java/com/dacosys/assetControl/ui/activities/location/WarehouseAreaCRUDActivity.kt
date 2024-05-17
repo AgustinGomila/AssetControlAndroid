@@ -14,11 +14,11 @@ import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.AssetControlApp.Companion.currentUser
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.model.common.CrudCompleted
-import com.dacosys.assetControl.data.model.common.CrudResult
-import com.dacosys.assetControl.data.model.common.CrudStatus.*
-import com.dacosys.assetControl.data.model.location.WarehouseArea
-import com.dacosys.assetControl.data.model.table.Table
+import com.dacosys.assetControl.data.enums.common.CrudCompleted
+import com.dacosys.assetControl.data.enums.common.CrudResult
+import com.dacosys.assetControl.data.enums.common.CrudStatus.*
+import com.dacosys.assetControl.data.enums.common.Table
+import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
 import com.dacosys.assetControl.databinding.WarehouseAreaCrudActivityBinding
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
@@ -92,7 +92,7 @@ class WarehouseAreaCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
                     SnackBarType.SUCCESS
                 )
                 if (imageControlFragment != null && warehouseArea != null) {
-                    imageControlFragment?.updateObjectId1(warehouseArea.warehouseAreaId)
+                    imageControlFragment?.updateObjectId1(warehouseArea.id)
                     imageControlFragment?.saveImages(false)
                 }
 
@@ -208,7 +208,7 @@ class WarehouseAreaCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
         var warehouseAreaId = 0L
         var description = ""
         if (warehouseArea != null) {
-            warehouseAreaId = (warehouseArea ?: return).warehouseAreaId
+            warehouseAreaId = (warehouseArea ?: return).id
             description = (warehouseArea ?: return).description
         }
 
@@ -222,7 +222,7 @@ class WarehouseAreaCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         if (imageControlFragment == null) {
             imageControlFragment = ImageControlButtonsFragment.newInstance(
-                tableId = Table.warehouseArea.tableId.toLong(),
+                tableId = Table.warehouseArea.id.toLong(),
                 objectId1 = warehouseAreaId.toString()
             )
 
@@ -254,7 +254,7 @@ class WarehouseAreaCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
                 }
             }
         } else {
-            imageControlFragment?.setTableId(Table.warehouseArea.tableId)
+            imageControlFragment?.setTableId(Table.warehouseArea.id)
             imageControlFragment?.setObjectId1(warehouseAreaId)
             imageControlFragment?.setObjectId2(null)
 
@@ -376,8 +376,7 @@ class WarehouseAreaCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
                 searchWarehouseAreaId = true,
                 searchAssetCode = false,
                 searchAssetSerial = false,
-                searchAssetEan = false,
-                validateId = true
+                searchAssetEan = false
             )
 
             if (sc.codeFound && sc.warehouseArea != null) {

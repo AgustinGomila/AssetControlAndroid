@@ -21,12 +21,13 @@ import androidx.transition.ChangeBounds
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.dataBase.barcode.BarcodeLabelCustomDbHelper
-import com.dacosys.assetControl.data.dataBase.location.WarehouseAreaDbHelper
-import com.dacosys.assetControl.data.model.barcode.BarcodeLabelCustom
-import com.dacosys.assetControl.data.model.barcode.BarcodeLabelTarget
-import com.dacosys.assetControl.data.model.location.WarehouseArea
-import com.dacosys.assetControl.data.model.location.async.GetLocationAsync
+import com.dacosys.assetControl.data.async.location.GetLocationAsync
+import com.dacosys.assetControl.data.enums.barcode.BarcodeLabelTarget
+import com.dacosys.assetControl.data.room.entity.barcode.BarcodeLabelCustom
+import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
+import com.dacosys.assetControl.data.room.repository.barcode.BarcodeLabelCustomRepository
+import com.dacosys.assetControl.data.room.repository.location.TempWarehouseAreaRepository
+import com.dacosys.assetControl.data.room.repository.location.WarehouseAreaRepository
 import com.dacosys.assetControl.databinding.WarehouseAreaPrintLabelActivityTopPanelCollapsedBinding
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.ui.adapters.location.WarehouseAreaAdapter
@@ -64,7 +65,11 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
         super.onDestroy()
     }
 
+    private var isFinishingByUser = false
     private fun destroyLocals() {
+        // Borramos los Ids temporales que se usaron en la actividad.
+        if (isFinishingByUser) TempWarehouseAreaRepository().deleteAll()
+
         adapter?.refreshListeners()
         warehouseAreaSelectFilterFragment?.onDestroy()
         printerFragment?.onDestroy()
@@ -119,15 +124,15 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
         }
 
         // Guardar en la DB temporalmente los ítems listados
-        if (fixedItemList) WarehouseAreaDbHelper().insertTempId(
+        if (fixedItemList) TempWarehouseAreaRepository().insert(
             adapter?.getAllId() ?: ArrayList()
         )
     }
 
     private fun loadBundleValues(b: Bundle) {
         // region Recuperar el título de la ventana
-        val t1 = b.getString("title")
-        tempTitle = if (!t1.isNullOrEmpty()) t1 else getString(R.string.select_warehouse_area)
+        val t1 = b.getString("title") ?: ""
+        tempTitle = t1.ifEmpty { getString(R.string.select_warehouse_area) }
         // endregion
 
         // PANELS
@@ -147,13 +152,13 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
 
         fixedItemList = b.getBoolean("fixedItemList")
         // Cargar la lista desde la DB local
-        if (fixedItemList) completeList = WarehouseAreaDbHelper().selectTempId()
+        if (fixedItemList) completeList = ArrayList(WarehouseAreaRepository().selectByTempIds())
     }
 
     private fun loadDefaultValues() {
         tempTitle = getString(R.string.select_warehouse_area)
         val id = prefsGetLong(Preference.defaultBarcodeLabelCustomWa)
-        val blc = BarcodeLabelCustomDbHelper().selectById(id)
+        val blc = BarcodeLabelCustomRepository().selectById(id)
         if (blc != null) printerFragment?.barcodeLabelCustom = blc
     }
 
@@ -187,6 +192,9 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
         if (savedInstanceState != null) {
             loadBundleValues(savedInstanceState)
         } else {
+            // Borramos los Ids temporales al crear la actividad por primera vez.
+            TempWarehouseAreaRepository().deleteAll()
+
             val extras = intent.extras
             if (extras != null) loadBundleValues(extras) else loadDefaultValues()
         }
@@ -249,7 +257,7 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
 
             if (!multiSelect && warehouseArea != null) {
                 data.putParcelableArrayListExtra(
-                    "ids", arrayListOf(ParcelLong(warehouseArea.warehouseAreaId))
+                    "ids", arrayListOf(ParcelLong(warehouseArea.id))
                 )
                 setResult(RESULT_OK, data)
             } else if (multiSelect && warehouseAreaIdArray != null && warehouseAreaIdArray.size > 0) {
@@ -264,6 +272,7 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
             setResult(RESULT_CANCELED)
         }
 
+        isFinishingByUser = true
         finish()
     }
 
@@ -588,8 +597,7 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
                 searchWarehouseAreaId = true,
                 searchAssetCode = false,
                 searchAssetSerial = false,
-                searchAssetEan = false,
-                validateId = true
+                searchAssetEan = false
             )
 
             val warehouseArea = if (sc.warehouseArea != null) {
@@ -614,6 +622,8 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
     }
 
     private fun isBackPressed() {
+        isFinishingByUser = true
+
         closeKeyboard(this)
         setResult(RESULT_CANCELED)
         finish()

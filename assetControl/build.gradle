@@ -1,6 +1,9 @@
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-kapt'
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
+    id("androidx.room")
+}
 
 android {
     //// Esto sirve la actualizar el número de versión con cada compilación
@@ -91,6 +94,12 @@ android {
         proguardFiles = ['proguard-rules.pro']
         manifestPlaceholders = [:]
     }
+
+    room {
+        schemaDirectory "$projectDir/schemas"
+        // generateKotlin = true
+    }
+
     sourceSets {
         main {
             res.srcDirs =
@@ -203,6 +212,15 @@ dependencies {
 
     // .env Support
     implementation 'io.github.cdimascio:dotenv-java:3.0.0'
+
+    // Room
+    api("androidx.room:room-runtime:$roomVersion")
+    kapt("androidx.room:room-compiler:$roomVersion")
+    implementation "androidx.room:room-runtime:$roomVersion"
+
+    // Kotlin Extensions and Coroutines support for Room
+    implementation "androidx.room:room-ktx:$roomVersion"
+    // annotationProcessor "androidx.room:room-compiler:$roomVersion"
 }
 
 repositories {

@@ -18,8 +18,8 @@ class AssetReviewContentObject() : Parcelable {
         this.assetReviewId = parcel.readLong()
         this.assetReviewContentId = parcel.readLong()
         this.assetId = parcel.readLong()
-        this.code = parcel.readString() ?: ""
-        this.description = parcel.readString() ?: ""
+        this.code = parcel.readString().orEmpty()
+        this.description = parcel.readString().orEmpty()
         this.qty = parcel.readFloat()
         this.contentStatusId = parcel.readInt()
         this.originWarehouseAreaId = parcel.readLong()

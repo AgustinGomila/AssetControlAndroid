@@ -7,7 +7,7 @@
                                                    android:layout_height="match_parent"
                                                    android:orientation="vertical"
                                                    android:weightSum="1"
-                                                   tools:context="com.dacosys.assetControl.ui.activities.manteinance.AssetManteinanceSelectActivity">
+                                                   tools:context="com.dacosys.assetControl.ui.activities.maintenance.AssetMaintenanceSelectActivity">
 
     <androidx.appcompat.widget.Toolbar
             android:id="@+id/top_appbar"
@@ -21,7 +21,7 @@
             app:title="@string/maintenance_status"/>
 
     <ListView
-            android:id="@+id/assetManteinanceListView"
+            android:id="@+id/assetMaintenanceListView"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginLeft="2dp"

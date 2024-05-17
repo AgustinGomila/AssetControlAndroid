@@ -2,7 +2,7 @@ package com.dacosys.assetControl.data.webservice.asset
 
 import android.os.Parcel
 import android.os.Parcelable
-import com.dacosys.assetControl.data.model.asset.Asset
+import com.dacosys.assetControl.data.room.entity.asset.Asset
 import org.ksoap2.serialization.SoapObject
 
 
@@ -53,46 +53,46 @@ class AssetObject() : Parcelable {
     constructor(parcel: Parcel) : this() {
         asset_id = parcel.readLong()
         parent_id = parcel.readLong()
-        code = parcel.readString() ?: ""
+        code = parcel.readString().orEmpty()
         price = parcel.readDouble()
         warehouse_id = parcel.readLong()
         warehouse_area_id = parcel.readLong()
         active = parcel.readInt()
-        reason = parcel.readString() ?: ""
-        serial_number = parcel.readString() ?: ""
-        obs = parcel.readString() ?: ""
+        reason = parcel.readString().orEmpty()
+        serial_number = parcel.readString().orEmpty()
+        obs = parcel.readString().orEmpty()
         ownership_status = parcel.readInt()
-        warranty_due = parcel.readString() ?: ""
+        warranty_due = parcel.readString().orEmpty()
         status = parcel.readInt()
-        missing_date = parcel.readString() ?: ""
-        removed_date = parcel.readString() ?: ""
-        description = parcel.readString() ?: ""
-        manufacturer = parcel.readString() ?: ""
-        ean = parcel.readString() ?: ""
-        model = parcel.readString() ?: ""
+        missing_date = parcel.readString().orEmpty()
+        removed_date = parcel.readString().orEmpty()
+        description = parcel.readString().orEmpty()
+        manufacturer = parcel.readString().orEmpty()
+        ean = parcel.readString().orEmpty()
+        model = parcel.readString().orEmpty()
         item_category_id = parcel.readLong()
         cost_centre_id = parcel.readLong()
-        invoice_nr = parcel.readString() ?: ""
+        invoice_nr = parcel.readString().orEmpty()
         provider_id = parcel.readLong()
-        purchase_date = parcel.readString() ?: ""
+        purchase_date = parcel.readString().orEmpty()
         amortization_month = parcel.readInt()
         original_warehouse_id = parcel.readLong()
         original_warehouse_area_id = parcel.readLong()
         label_number = parcel.readInt()
-        insurance_company = parcel.readString() ?: ""
-        insurance_policy = parcel.readString() ?: ""
+        insurance_company = parcel.readString().orEmpty()
+        insurance_policy = parcel.readString().orEmpty()
         auto_insurance = parcel.readInt()
         sensor_matic = parcel.readInt()
         rental_cost = parcel.readDouble()
         rental_payment_mode = parcel.readInt()
         lease_cost = parcel.readDouble()
         lease_payment_mode = parcel.readInt()
-        lease_date = parcel.readString() ?: ""
+        lease_date = parcel.readString().orEmpty()
         lease_residual_value = parcel.readDouble()
-        rental_date = parcel.readString() ?: ""
+        rental_date = parcel.readString().orEmpty()
         condition = parcel.readInt()
-        asset_ext_id = parcel.readString() ?: ""
-        last_asset_review_date = parcel.readString() ?: ""
+        asset_ext_id = parcel.readString().orEmpty()
+        last_asset_review_date = parcel.readString().orEmpty()
     }
 
     constructor(asset: Asset) : this() {
@@ -110,15 +110,15 @@ class AssetObject() : Parcelable {
         original_warehouse_area_id = asset.originalWarehouseAreaId
         original_warehouse_id = asset.originalWarehouseId
 
-        status = asset.assetStatusId
-        ownership_status = asset.ownershipStatusId
-        active = if (asset.active) 1 else 0
+        status = asset.status
+        ownership_status = asset.ownershipStatus
+        active = asset.active
 
         // Secondary Information
         manufacturer = asset.manufacturer ?: ""
         model = asset.model ?: ""
         serial_number = asset.serialNumber ?: ""
-        condition = asset.assetConditionId
+        condition = asset.condition ?: 0
         obs = ""
         provider_id = 0L
         ean = asset.ean ?: ""

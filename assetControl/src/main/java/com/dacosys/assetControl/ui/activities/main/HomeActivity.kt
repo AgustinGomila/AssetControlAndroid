@@ -42,11 +42,12 @@ import com.dacosys.assetControl.AssetControlApp.Companion.isLogged
 import com.dacosys.assetControl.AssetControlApp.Companion.setCurrentUserId
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.dataBase.DataBaseHelper.Companion.cleanTemporaryTables
-import com.dacosys.assetControl.data.dataBase.review.AssetReviewDbHelper
-import com.dacosys.assetControl.data.model.location.WarehouseArea
-import com.dacosys.assetControl.data.model.user.User
-import com.dacosys.assetControl.data.model.user.permission.PermissionEntry
+import com.dacosys.assetControl.data.enums.permission.PermissionEntry
+import com.dacosys.assetControl.data.room.database.AcTempDatabase
+import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
+import com.dacosys.assetControl.data.room.entity.user.User
+import com.dacosys.assetControl.data.room.repository.review.AssetReviewRepository
+import com.dacosys.assetControl.data.room.repository.user.UserRepository
 import com.dacosys.assetControl.databinding.HomeActivityBinding
 import com.dacosys.assetControl.network.download.DownloadDb
 import com.dacosys.assetControl.network.sync.Sync
@@ -56,7 +57,7 @@ import com.dacosys.assetControl.network.utils.Connection.Companion.isOnline
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.ui.activities.code.CodeCheckActivity
 import com.dacosys.assetControl.ui.activities.common.CRUDActivity
-import com.dacosys.assetControl.ui.activities.manteinance.AssetManteinanceSelectActivity
+import com.dacosys.assetControl.ui.activities.maintenance.AssetMaintenanceSelectActivity
 import com.dacosys.assetControl.ui.activities.movement.WmcActivity
 import com.dacosys.assetControl.ui.activities.print.PrintLabelActivity
 import com.dacosys.assetControl.ui.activities.review.ArcActivity
@@ -87,6 +88,7 @@ import com.dacosys.assetControl.utils.settings.preferences.Repository
 import com.dacosys.assetControl.viewModel.sync.SyncViewModel
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import kotlinx.coroutines.runBlocking
 import me.weishu.reflection.Reflection
 import org.parceler.Parcels
 import java.lang.reflect.Field
@@ -150,8 +152,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
                 searchWarehouseAreaId = true,
                 searchAssetCode = false,
                 searchAssetSerial = false,
-                searchAssetEan = false,
-                validateId = true
+                searchAssetEan = false
             )
 
             val warehouseArea = if (sc.warehouseArea != null) {
@@ -209,7 +210,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
     @Throws(PackageManager.NameNotFoundException::class)
     private fun initLayoutActivity() {
         // Limpiamos las tablas temporales que puedan tener datos.
-        cleanTemporaryTables()
+        runBlocking { AcTempDatabase.cleanDatabase() }
 
         setupHeaderPanel()
         setupSyncPanel()
@@ -317,11 +318,11 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
                 }
             }
 
-            MainButton.AssetManteinance -> {
+            MainButton.AssetMaintenance -> {
                 if (!rejectNewInstances) {
                     rejectNewInstances = true
 
-                    val intent = Intent(baseContext, AssetManteinanceSelectActivity::class.java)
+                    val intent = Intent(baseContext, AssetMaintenanceSelectActivity::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
                     startActivity(intent)
                 }
@@ -524,8 +525,8 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
         /// USUARIO
         val currentUser = currentUser()
         if (currentUser != null) {
-            val user = User(currentUser.userId, false)
-            binding.userTextView.text = user.name
+            val user = UserRepository().selectById(currentUser.id)
+            binding.userTextView.text = user?.name.orEmpty()
         }
 
         /// VERSION
@@ -692,7 +693,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
 
         for (b in t) {
             // Omitir el botón de mantenimientos
-            if (b.mainButtonId == MainButton.AssetManteinance.mainButtonId && !prefsGetBoolean(
+            if (b.mainButtonId == MainButton.AssetMaintenance.mainButtonId && !prefsGetBoolean(
                     Preference.useAssetControlManteinance
                 )
             ) {
@@ -833,11 +834,12 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
         makeText(binding.root, warehouseArea.description, SnackBarType.INFO)
 
         // Agregar un AssetReview del área
-        val ar = AssetReviewDbHelper().insert(warehouseArea)
-        if (ar == null) {
+        val arId = AssetReviewRepository().insert(warehouseArea)
+        if (arId <= 0) {
             rejectNewInstances = false
             return
         }
+        val ar = AssetReviewRepository().selectById(arId)
 
         val intent = Intent(baseContext, ArcActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP

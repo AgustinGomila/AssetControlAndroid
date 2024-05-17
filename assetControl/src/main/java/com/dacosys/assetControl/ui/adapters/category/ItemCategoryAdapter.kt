@@ -10,7 +10,7 @@ import androidx.core.content.res.ResourcesCompat
 import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.model.category.ItemCategory
+import com.dacosys.assetControl.data.room.entity.category.ItemCategory
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.isTablet
 import java.util.*
 
@@ -30,7 +30,7 @@ class ItemCategoryAdapter(
         for (i in 0 until count) {
             val it = getItem(i)
             if (it != null) {
-                r.add(it.itemCategoryId)
+                r.add(it.id)
             }
         }
         return r
@@ -159,7 +159,7 @@ class ItemCategoryAdapter(
 
                 if (resource == R.layout.item_category_row && v != null) {
                     when {
-                        !itemCategory.active -> {
+                        itemCategory.active != 1 -> {
                             v.setBackgroundColor(lightgray)
                             holder.descriptionTextView?.setTextColor(dimgray)
                             holder.parentCategoryTextView?.setTextColor(dimgray)
@@ -172,7 +172,7 @@ class ItemCategoryAdapter(
                         }
                     }
                 } else if (resource == R.layout.custom_spinner_dropdown_item && v != null) {
-                    if (itemCategory.active && itemCategory.itemCategoryId > 0) {
+                    if (itemCategory.active == 1 && itemCategory.id > 0) {
                         holder.descriptionTextView?.setTextColor(black)
                     } else {
                         holder.descriptionTextView?.setTextColor(dimgray)

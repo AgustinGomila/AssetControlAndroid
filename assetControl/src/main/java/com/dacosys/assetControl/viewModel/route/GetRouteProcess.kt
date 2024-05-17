@@ -2,12 +2,11 @@ package com.dacosys.assetControl.viewModel.route
 
 import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.dataBase.DataBaseHelper
-import com.dacosys.assetControl.data.dataBase.attribute.AttributeCompositionDbHelper
-import com.dacosys.assetControl.data.dataBase.datacollection.DataCollectionRuleContentDbHelper
-import com.dacosys.assetControl.data.dataBase.route.RouteProcessDbHelper
-import com.dacosys.assetControl.data.model.route.Route
-import com.dacosys.assetControl.data.model.route.RouteProcess
+import com.dacosys.assetControl.data.room.entity.route.Route
+import com.dacosys.assetControl.data.room.entity.route.RouteProcess
+import com.dacosys.assetControl.data.room.repository.attribute.AttributeCompositionRepository
+import com.dacosys.assetControl.data.room.repository.dataCollection.DataCollectionRuleContentRepository
+import com.dacosys.assetControl.data.room.repository.route.RouteProcessRepository
 import kotlinx.coroutines.*
 
 class GetRouteProcess(
@@ -32,29 +31,30 @@ class GetRouteProcess(
 
     private suspend fun suspendFunction(): RouteProcessResult = withContext(Dispatchers.IO) {
         val routeProcess: RouteProcess?
+        val contentRepository = DataCollectionRuleContentRepository()
+        val compositionRepository = AttributeCompositionRepository()
 
         ///////////////////////////////////
         // Para controlar la transacción //
-        val db = DataBaseHelper.getWritableDb()
+        // TODO: Eliminar val db = DataBaseHelper.getWritableDb()
 
-        val rpDbH = RouteProcessDbHelper()
+        val processRepository = RouteProcessRepository()
 
         try {
-            db.beginTransaction()
+            // TODO: Eliminar db.beginTransaction()
 
             // Comprobamos la integridad de las composiciones de todos los atributos de la ruta.
-            val allAttrCompIdRoute =
-                DataCollectionRuleContentDbHelper().selectAttributeCompositionIdByRouteId(route.routeId)
-            val allAComp = AttributeCompositionDbHelper().select()
+            val allAttrCompIdRoute = contentRepository.selectAttributeCompositionIdByRouteId(route.id)
+            val allAComp = compositionRepository.select()
 
             val allAttrCompIdAvailable = ArrayList<Long>()
             for (aC in allAComp) {
-                allAttrCompIdAvailable.add(aC.attributeCompositionId)
+                allAttrCompIdAvailable.add(aC.id)
             }
 
             if (!allAttrCompIdAvailable.containsAll(allAttrCompIdRoute)) {
 
-                db.setTransactionSuccessful()
+                // TODO: Eliminar db.setTransactionSuccessful()
 
                 // LA RUTA ESTA INCOMPLETA
                 return@withContext RouteProcessResult(
@@ -67,27 +67,27 @@ class GetRouteProcess(
                 )
             }
 
-            val rpArray = rpDbH.selectByRouteIdNoCompleted(route.routeId)
+            val rpArray = processRepository.selectByRouteIdNoCompleted(route.id)
 
             // Si no hay procesos abiertos para esa ruta, abro uno nuevo
             // Si no utilizo el existente
             if (rpArray.size <= 0) {
                 // NUEVO PROCESO DE RUTA
-                val rpCollId = rpDbH.insert(route)
-                routeProcess = rpDbH.selectById(rpCollId)
+                val rpCollId = processRepository.insert(route)
+                routeProcess = processRepository.selectById(rpCollId)
 
-                db.setTransactionSuccessful()
+                // TODO: Eliminar db.setTransactionSuccessful()
 
                 return@withContext RouteProcessResult(routeProcess, true)
             } else {
                 // Comprobar que la composición de la ruta del proceso abierto
-                // coincida con la composición de la ruta en la base de datos
+                // coincida con la composición de la ruta en la base de datos,
                 // ya que si se actualizó la ruta, el proceso es inválido
                 routeProcess = rpArray[0]
-                val rpcArray = routeProcess.contents
-                val rcArray = route.composition
+                val rpcArray = routeProcess.contents()
+                val rcArray = route.composition()
 
-                db.setTransactionSuccessful()
+                // TODO: Eliminar db.setTransactionSuccessful()
 
                 if (rcArray.size <= 0) {
 
@@ -137,7 +137,7 @@ class GetRouteProcess(
                 )
             }
         } finally {
-            db.endTransaction()
+            // TODO: Eliminar db.endTransaction()
         }
     }
 

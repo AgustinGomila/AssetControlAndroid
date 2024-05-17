@@ -504,12 +504,12 @@ class ConfEntry(
             String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
-        var acLastUpdateAssetManteinance = ConfEntry(
+        var acLastUpdateAssetMaintenance = ConfEntry(
             956, "LastUpdateAssetManteinance", ConfSection.assetControlData,
             String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
-        var acLastUpdateAssetManteinanceLog = ConfEntry(
+        var acLastUpdateAssetMaintenanceLog = ConfEntry(
             957, "LastUpdateAssetManteinanceLog", ConfSection.assetControlData,
             String::class.javaObjectType, Statics.DEFAULT_DATE
         )
@@ -524,12 +524,12 @@ class ConfEntry(
             String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
-        var acLastUpdateManteinanceType = ConfEntry(
+        var acLastUpdateMaintenanceType = ConfEntry(
             906, "LastUpdateManteinanceType", ConfSection.assetControlData,
             String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
-        var acLastUpdateManteinanceTypeGroup = ConfEntry(
+        var acLastUpdateMaintenanceTypeGroup = ConfEntry(
             907, "LastUpdateManteinanceTypeGroup", ConfSection.assetControlData,
             String::class.javaObjectType, Statics.DEFAULT_DATE
         )
@@ -767,12 +767,12 @@ class ConfEntry(
             String::class.javaObjectType, ""
         )
 
-        private var acControlAssetManteinanceProgramed = ConfEntry(
+        private var acControlAssetMaintenanceProgramed = ConfEntry(
             953, "ControlAssetManteinanceProgramed", ConfSection.assetControlData,
             String::class.javaObjectType, ""
         )
 
-        private var acControlManteinanceTypeSelect = ConfEntry(
+        private var acControlMaintenanceTypeSelect = ConfEntry(
             954, "ControlManteinanceTypeSelect", ConfSection.assetControlData,
             String::class.javaObjectType, ""
         )
@@ -792,7 +792,7 @@ class ConfEntry(
             Int::class.javaObjectType, 20
         )
 
-        private var acManteinanceDays = ConfEntry(
+        private var acMaintenanceDays = ConfEntry(
             958, "ManteinanceDays", ConfSection.assetControlData,
             Int::class.javaObjectType, 7
         )
@@ -802,7 +802,7 @@ class ConfEntry(
             String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
-        var acLastUpdateAssetManteinanceProgramed = ConfEntry(
+        var acLastUpdateAssetMaintenanceProgramed = ConfEntry(
             960, "LastUpdateAssetManteinanceProgramed", ConfSection.assetControlData,
             String::class.javaObjectType, Statics.DEFAULT_DATE
         )
@@ -1130,236 +1130,236 @@ class ConfEntry(
 
         //</editor-fold>
 
-        //<editor-fold desc="1300 - AssetControl Manteinance Data"
+        //<editor-fold desc="1300 - AssetControl Maintenance Data"
 
         private var acmControlAsset = ConfEntry(
-            1300, "ControlAsset", ConfSection.assetControlMantData,
+            1300, "ControlAsset", ConfSection.assetControlMainData,
             String::class.javaObjectType, ""
         )
 
         private var acmControlRepairman = ConfEntry(
-            1301, "ControlRepairman", ConfSection.assetControlMantData,
+            1301, "ControlRepairman", ConfSection.assetControlMainData,
             String::class.javaObjectType, ""
         )
 
-        private var acmControlAssetWithManteinanceProgramedMainForm = ConfEntry(
-            1302, "ControlAssetWithManteinanceProgramed", ConfSection.assetControlMantData,
+        private var acmControlAssetWithMaintenanceProgramedMainForm = ConfEntry(
+            1302, "ControlAssetWithManteinanceProgramed", ConfSection.assetControlMainData,
             Int::class.javaObjectType,
             ""
         )
 
         private var acmControlAssetOnRepairshopMainForm = ConfEntry(
-            1303, "ControlAssetOnRepairshop", ConfSection.assetControlMantData,
+            1303, "ControlAssetOnRepairshop", ConfSection.assetControlMainData,
             String::class.javaObjectType, ""
         )
 
-        private var acmControlAssetManteinanceMainForm = ConfEntry(
-            1304, "ControlAssetManteinance", ConfSection.assetControlMantData,
+        private var acmControlAssetMaintenanceMainForm = ConfEntry(
+            1304, "ControlAssetManteinance", ConfSection.assetControlMainData,
             String::class.javaObjectType, ""
         )
 
         private var acmControlActionLogMainForm = ConfEntry(
-            1305, "ControlActionLog", ConfSection.assetControlMantData,
+            1305, "ControlActionLog", ConfSection.assetControlMainData,
             String::class.javaObjectType, ""
         )
 
         private var acmControlAssetSelect = ConfEntry(
-            1306, "ControlAssetSelect", ConfSection.assetControlMantData,
+            1306, "ControlAssetSelect", ConfSection.assetControlMainData,
             String::class.javaObjectType, ""
         )
 
         private var acmControlAssetInGeneral = ConfEntry(
-            1307, "ControlAssetInGeneral", ConfSection.assetControlMantData,
+            1307, "ControlAssetInGeneral", ConfSection.assetControlMainData,
             String::class.javaObjectType, ""
         )
 
-        private var acmControlAssetManteinanceProgramed = ConfEntry(
-            1308, "ControlAssetManteinanceProgramed", ConfSection.assetControlMantData,
+        private var acmControlAssetMaintenanceProgramed = ConfEntry(
+            1308, "ControlAssetManteinanceProgramed", ConfSection.assetControlMainData,
             String::class.javaObjectType, ""
         )
 
-        private var acmControlManteinanceTypeSelect = ConfEntry(
-            1309, "ControlManteinanceTypeSelect", ConfSection.assetControlMantData,
+        private var acmControlMaintenanceTypeSelect = ConfEntry(
+            1309, "ControlManteinanceTypeSelect", ConfSection.assetControlMainData,
             String::class.javaObjectType, ""
         )
 
         private var acmControlAssetReceptionContentSpecial = ConfEntry(
-            1310, "ControlAssetReceptionContentSpecial", ConfSection.assetControlMantData,
+            1310, "ControlAssetReceptionContentSpecial", ConfSection.assetControlMainData,
             String::class.javaObjectType, ""
         )
 
         private var acmControlAssetRemissionContentSpecial = ConfEntry(
-            1311, "ControlAssetRemissionContentSpecial", ConfSection.assetControlMantData,
+            1311, "ControlAssetRemissionContentSpecial", ConfSection.assetControlMainData,
             String::class.javaObjectType, ""
         )
 
         private var acmControlWarehouseMovementContent = ConfEntry(
-            1312, "ControlWarehouseMovementContent", ConfSection.assetControlMantData,
+            1312, "ControlWarehouseMovementContent", ConfSection.assetControlMainData,
             String::class.javaObjectType, ""
         )
 
         private var acmControlWarehouseMovementSelect = ConfEntry(
-            1313, "ControlWarehouseMovementSelect", ConfSection.assetControlMantData,
+            1313, "ControlWarehouseMovementSelect", ConfSection.assetControlMainData,
             String::class.javaObjectType, ""
         )
 
-        private var acmReportAssetManteinance = ConfEntry(
-            1314, "ReportAssetManteinance", ConfSection.assetControlMantData,
+        private var acmReportAssetMaintenance = ConfEntry(
+            1314, "ReportAssetManteinance", ConfSection.assetControlMainData,
             String::class.javaObjectType, ""
         )
 
         private var acmReportWarehouseMovement = ConfEntry(
-            1315, "ReportWarehouseMovement", ConfSection.assetControlMantData,
+            1315, "ReportWarehouseMovement", ConfSection.assetControlMainData,
             String::class.javaObjectType, ""
         )
 
-        private var acmReportAssetManteinanceProgramed = ConfEntry(
-            1316, "ReportAssetManteinanceProgramed", ConfSection.assetControlMantData,
+        private var acmReportAssetMaintenanceProgramed = ConfEntry(
+            1316, "ReportAssetManteinanceProgramed", ConfSection.assetControlMainData,
             String::class.javaObjectType, ""
         )
 
-        private var acmControlAssetManteinanceLog = ConfEntry(
-            1317, "ControlAssetManteinanceLog", ConfSection.assetControlMantData,
+        private var acmControlAssetMaintenanceLog = ConfEntry(
+            1317, "ControlAssetManteinanceLog", ConfSection.assetControlMainData,
             String::class.javaObjectType, ""
         )
 
         private var acmImageControlDocument = ConfEntry(
-            1318, "ImageControlDocument", ConfSection.assetControlMantData,
+            1318, "ImageControlDocument", ConfSection.assetControlMainData,
             String::class.javaObjectType, ""
         )
 
         // ACM AppData
         private var acmInterval = ConfEntry(
-            1319, "Interval", ConfSection.assetControlMantData,
+            1319, "Interval", ConfSection.assetControlMainData,
             Int::class.javaObjectType, (60000 * 15)
         )
 
         private var acmPingTimeOut = ConfEntry(
-            1320, "PingTimeOut", ConfSection.assetControlMantData,
+            1320, "PingTimeOut", ConfSection.assetControlMainData,
             Int::class.javaObjectType, 120
         )
 
         private var acmDownloadDbStartup = ConfEntry(
-            1321, "DownloadDbStartup", ConfSection.assetControlMantData,
+            1321, "DownloadDbStartup", ConfSection.assetControlMainData,
             Boolean::class.javaObjectType, false
         )
 
         private var acmLastUpdateAsset = ConfEntry(
-            1322, "LastUpdateAsset", ConfSection.assetControlMantData,
+            1322, "LastUpdateAsset", ConfSection.assetControlMainData,
             String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
-        private var acmLastUpdateAssetManteinance = ConfEntry(
-            1323, "LastUpdateAssetManteinance", ConfSection.assetControlMantData,
+        private var acmLastUpdateAssetMaintenance = ConfEntry(
+            1323, "LastUpdateAssetManteinance", ConfSection.assetControlMainData,
             String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
-        private var acmLastUpdateAssetManteinanceLog = ConfEntry(
-            1324, "LastUpdateAssetManteinanceLog", ConfSection.assetControlMantData,
+        private var acmLastUpdateAssetMaintenanceLog = ConfEntry(
+            1324, "LastUpdateAssetManteinanceLog", ConfSection.assetControlMainData,
             Int::class.javaObjectType,
             Statics.DEFAULT_DATE
         )
 
         private var acmLastUpdateItemCategory = ConfEntry(
-            1325, "LastUpdateItemCategory", ConfSection.assetControlMantData,
+            1325, "LastUpdateItemCategory", ConfSection.assetControlMainData,
             String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
-        private var acmLastUpdateManteinanceType = ConfEntry(
-            1326, "LastUpdateManteinanceType", ConfSection.assetControlMantData,
+        private var acmLastUpdateMaintenanceType = ConfEntry(
+            1326, "LastUpdateManteinanceType", ConfSection.assetControlMainData,
             String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
-        private var acmLastUpdateManteinanceTypeGroup = ConfEntry(
-            1327, "LastUpdateManteinanceTypeGroup", ConfSection.assetControlMantData,
+        private var acmLastUpdateMaintenanceTypeGroup = ConfEntry(
+            1327, "LastUpdateManteinanceTypeGroup", ConfSection.assetControlMainData,
             Int::class.javaObjectType,
             Statics.DEFAULT_DATE
         )
 
         private var acmLastUpdateProviders = ConfEntry(
-            1328, "LastUpdateProviders", ConfSection.assetControlMantData,
+            1328, "LastUpdateProviders", ConfSection.assetControlMainData,
             String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         private var acmLastUpdateRepairman = ConfEntry(
-            1329, "LastUpdateRepairman", ConfSection.assetControlMantData,
+            1329, "LastUpdateRepairman", ConfSection.assetControlMainData,
             String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         private var acmLastUpdateRepairshop = ConfEntry(
-            1330, "LastUpdateRepairshop", ConfSection.assetControlMantData,
+            1330, "LastUpdateRepairshop", ConfSection.assetControlMainData,
             String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         private var acmLastUpdateUser = ConfEntry(
-            1331, "LastUpdateUser", ConfSection.assetControlMantData,
+            1331, "LastUpdateUser", ConfSection.assetControlMainData,
             String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         private var acmLastUpdateWarehouse = ConfEntry(
-            1332, "LastUpdateWarehouse", ConfSection.assetControlMantData,
+            1332, "LastUpdateWarehouse", ConfSection.assetControlMainData,
             String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         private var acmLastUpdateWarehouseArea = ConfEntry(
-            1333, "LastUpdateWarehouseArea", ConfSection.assetControlMantData,
+            1333, "LastUpdateWarehouseArea", ConfSection.assetControlMainData,
             String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         private var acmLastUpdateWarehouseMovement = ConfEntry(
-            1334, "LastUpdateWarehouseMovement", ConfSection.assetControlMantData,
+            1334, "LastUpdateWarehouseMovement", ConfSection.assetControlMainData,
             Int::class.javaObjectType,
             Statics.DEFAULT_DATE
         )
 
         private var acmLastUpdateWarehouseMovementContent = ConfEntry(
-            1335, "LastUpdateWarehouseMovementContent", ConfSection.assetControlMantData,
+            1335, "LastUpdateWarehouseMovementContent", ConfSection.assetControlMainData,
             Int::class.javaObjectType,
             Statics.DEFAULT_DATE
         )
 
         private var acmManteinanceDays = ConfEntry(
-            1336, "ManteinanceDays", ConfSection.assetControlMantData,
+            1336, "ManteinanceDays", ConfSection.assetControlMainData,
             Int::class.javaObjectType, 7
         )
 
         private var acmDaysToShow = ConfEntry(
-            1337, "DaysToShow", ConfSection.assetControlMantData,
+            1337, "DaysToShow", ConfSection.assetControlMainData,
             Int::class.javaObjectType, 7
         )
 
         private var acmMaxActionLogs = ConfEntry(
-            1338, "MaxActionLogs", ConfSection.assetControlMantData,
+            1338, "MaxActionLogs", ConfSection.assetControlMainData,
             Int::class.javaObjectType, 100
         )
 
         private var acmSoftwareConfigured = ConfEntry(
-            1339, "SoftwareConfigured", ConfSection.assetControlMantData,
+            1339, "SoftwareConfigured", ConfSection.assetControlMainData,
             Boolean::class.javaObjectType, false
         )
 
         private var acmAddLabelNumberOnBarcode = ConfEntry(
-            1340, "AddLabelNumberOnBarcode", ConfSection.assetControlMantData,
+            1340, "AddLabelNumberOnBarcode", ConfSection.assetControlMainData,
             Boolean::class.javaObjectType, false
         )
 
         private var acmSyncQtyRegistry = ConfEntry(
-            1341, "SyncQtyRegistry", ConfSection.assetControlMantData,
+            1341, "SyncQtyRegistry", ConfSection.assetControlMainData,
             Int::class.javaObjectType, 20
         )
 
         private var acmMaxSimulThreads = ConfEntry(
-            1342, "MaxSimulThreads", ConfSection.assetControlMantData,
+            1342, "MaxSimulThreads", ConfSection.assetControlMainData,
             Int::class.javaObjectType, 3
         )
 
         private var acmLastUpdate = ConfEntry(
-            1343, "LastUpdate", ConfSection.assetControlMantData,
+            1343, "LastUpdate", ConfSection.assetControlMainData,
             String::class.javaObjectType, Statics.DEFAULT_DATE
         )
 
         private var acmControlErrorLogMainForm = ConfEntry(
-            1344, "ControlErrorLogMainForm", ConfSection.assetControlMantData,
+            1344, "ControlErrorLogMainForm", ConfSection.assetControlMainData,
             String::class.javaObjectType, ""
         )
 
@@ -2049,7 +2049,7 @@ class ConfEntry(
             String::class.javaObjectType, ""
         )
 
-        private var ACCEDgAssetManteinance = ConfEntry(
+        private var ACCEDgAssetMaintenance = ConfEntry(
             2309, "ACCEDgAssetManteinance", ConfSection.dataGridCEData,
             String::class.javaObjectType, ""
         )
@@ -2242,7 +2242,7 @@ class ConfEntry(
                 ACCEDgSelectWarehouseArea,
                 ACCEDgSelectOriginDestWarehouse,
                 ACCEDgPrintWarehouse,
-                ACCEDgAssetManteinance,
+                ACCEDgAssetMaintenance,
                 ACCEDgSetup,
                 ACCEDgAssetReview
             )
@@ -2263,7 +2263,7 @@ class ConfEntry(
                 ACCEDgSelectWarehouseArea,
                 ACCEDgSelectOriginDestWarehouse,
                 ACCEDgPrintWarehouse,
-                ACCEDgAssetManteinance,
+                ACCEDgAssetMaintenance,
                 ACCEDgSetup,
                 ACCEDgAssetReview
             )
@@ -2397,14 +2397,14 @@ class ConfEntry(
                 acAutoSend,
                 acLastUpdate,
                 acLastUpdateAsset,
-                acLastUpdateAssetManteinance,
-                acLastUpdateAssetManteinanceLog,
+                acLastUpdateAssetMaintenance,
+                acLastUpdateAssetMaintenanceLog,
                 acLastUpdateAssetReview,
                 acLastUpdateCostCentre,
-                acLastUpdateAssetManteinanceProgramed,
+                acLastUpdateAssetMaintenanceProgramed,
                 acLastUpdateItemCategory,
-                acLastUpdateManteinanceType,
-                acLastUpdateManteinanceTypeGroup,
+                acLastUpdateMaintenanceType,
+                acLastUpdateMaintenanceTypeGroup,
                 acLastUpdateProviders,
                 acLastUpdateRepairman,
                 acLastUpdateRepairshop,
@@ -2446,7 +2446,7 @@ class ConfEntry(
                 acReportAssetStatus,
                 acReportAssetUnsubscribe,
                 acReportWarehouseMovement,
-                acManteinanceDays,
+                acMaintenanceDays,
                 acSyncQtyRegistry,
 
                 // Control data
@@ -2472,8 +2472,8 @@ class ConfEntry(
                 acControlWarehouseMovementContentSpecial,
                 acControlWarehouseMovementContentReport,
                 acControlAssetReviewContentSpecial,
-                acControlAssetManteinanceProgramed,
-                acControlManteinanceTypeSelect,
+                acControlAssetMaintenanceProgramed,
+                acControlMaintenanceTypeSelect,
                 acControlAssetMovements,
                 acControlImageControlDocumentMainForm,
                 acControlRoute,
@@ -2534,32 +2534,32 @@ class ConfEntry(
                 acmControlActionLogMainForm,
                 acmControlAsset,
                 acmControlAssetInGeneral,
-                acmControlAssetManteinanceMainForm,
-                acmControlAssetManteinanceProgramed,
+                acmControlAssetMaintenanceMainForm,
+                acmControlAssetMaintenanceProgramed,
                 acmControlAssetOnRepairshopMainForm,
                 acmControlAssetSelect,
-                acmControlAssetWithManteinanceProgramedMainForm,
-                acmControlManteinanceTypeSelect,
+                acmControlAssetWithMaintenanceProgramedMainForm,
+                acmControlMaintenanceTypeSelect,
                 acmControlRepairman,
                 acmControlAssetReceptionContentSpecial,
                 acmControlAssetRemissionContentSpecial,
                 acmControlWarehouseMovementContent,
                 acmControlWarehouseMovementSelect,
-                acmControlAssetManteinanceLog,
-                acmReportAssetManteinance,
+                acmControlAssetMaintenanceLog,
+                acmReportAssetMaintenance,
                 acmReportWarehouseMovement,
-                acmReportAssetManteinanceProgramed,
+                acmReportAssetMaintenanceProgramed,
                 acmImageControlDocument,
                 acmMaxSimulThreads,
                 acmLastUpdate,
                 acmInterval,
                 acmPingTimeOut,
                 acmLastUpdateAsset,
-                acmLastUpdateAssetManteinance,
-                acmLastUpdateAssetManteinanceLog,
+                acmLastUpdateAssetMaintenance,
+                acmLastUpdateAssetMaintenanceLog,
                 acmLastUpdateItemCategory,
-                acmLastUpdateManteinanceType,
-                acmLastUpdateManteinanceTypeGroup,
+                acmLastUpdateMaintenanceType,
+                acmLastUpdateMaintenanceTypeGroup,
                 acmLastUpdateProviders,
                 acmLastUpdateRepairman,
                 acmLastUpdateRepairshop,

@@ -13,7 +13,7 @@ import androidx.core.content.res.ResourcesCompat
 import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.model.barcode.BarcodeLabelCustom
+import com.dacosys.assetControl.data.room.entity.barcode.BarcodeLabelCustom
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.isTablet
 import java.util.*
 
@@ -131,11 +131,11 @@ class BarcodeLabelCustomAdapter(
     ) {
         val position = getIndex(item)
         if (isChecked) {
-            if (!checkedIdArray.contains(item.barcodeLabelCustomId)) {
-                checkedIdArray.add(item.barcodeLabelCustomId)
+            if (!checkedIdArray.contains(item.id)) {
+                checkedIdArray.add(item.id)
             }
         } else {
-            checkedIdArray.remove(item.barcodeLabelCustomId)
+            checkedIdArray.remove(item.id)
         }
 
         checkedChangedListener?.onCheckedChanged(isChecked, position)
@@ -230,7 +230,7 @@ class BarcodeLabelCustomAdapter(
                     holder.checkBox!!.setOnLongClickListener(null)
                     holder.checkBox!!.setOnTouchListener(null)
                     holder.checkBox!!.isChecked =
-                        checkedIdArray.contains(barcodeLabelCustom.barcodeLabelCustomId)
+                        checkedIdArray.contains(barcodeLabelCustom.id)
                     holder.checkBox!!.tag = position
                     holder.checkBox!!.setOnLongClickListener(pressHoldListener)
                     holder.checkBox!!.setOnTouchListener(pressTouchListener)
@@ -265,7 +265,7 @@ class BarcodeLabelCustomAdapter(
                     )
 
                 when {
-                    !barcodeLabelCustom.active -> {
+                    barcodeLabelCustom.active != 1 -> {
                         v.setBackgroundColor(lightgray)
                         holder.descriptionTextView?.setTextColor(dimgray)
 

@@ -20,13 +20,13 @@ import androidx.transition.ChangeBounds
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.dataBase.route.RouteDbHelper
-import com.dacosys.assetControl.data.dataBase.route.RouteProcessContentDbHelper
-import com.dacosys.assetControl.data.dataBase.route.RouteProcessDbHelper
-import com.dacosys.assetControl.data.dataBase.route.RouteProcessStepsDbHelper
-import com.dacosys.assetControl.data.model.route.Route
-import com.dacosys.assetControl.data.model.route.Route.CREATOR.getAvailableRoutes
-import com.dacosys.assetControl.data.model.route.RouteProcess
+import com.dacosys.assetControl.data.room.entity.route.Route
+import com.dacosys.assetControl.data.room.entity.route.Route.CREATOR.getAvailableRoutes
+import com.dacosys.assetControl.data.room.entity.route.RouteProcess
+import com.dacosys.assetControl.data.room.repository.route.RouteProcessContentRepository
+import com.dacosys.assetControl.data.room.repository.route.RouteProcessRepository
+import com.dacosys.assetControl.data.room.repository.route.RouteProcessStepsRepository
+import com.dacosys.assetControl.data.room.repository.route.RouteRepository
 import com.dacosys.assetControl.databinding.RouteSelectActivityBinding
 import com.dacosys.assetControl.ui.adapters.route.RouteAdapter
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
@@ -301,9 +301,9 @@ class RouteSelectActivity : AppCompatActivity(),
         if (adapter != null) {
             val currentRoute = adapter?.currentRoute() ?: return
 
-            val rpArray = RouteProcessDbHelper().selectByRouteIdNoCompleted(currentRoute.routeId)
+            val rpArray = processRepository.selectByRouteIdNoCompleted(currentRoute.id)
 
-            if (rpArray.size < 1) {
+            if (rpArray.isEmpty()) {
                 makeText(
                     binding.root,
                     getString(R.string.no_processes_started),
@@ -338,19 +338,22 @@ class RouteSelectActivity : AppCompatActivity(),
         }
     }
 
+    private val processRepository = RouteProcessRepository()
+    private val contentRepository = RouteProcessContentRepository()
+    private val stepsRepository = RouteProcessStepsRepository()
+
     private fun removeRouteProcess(rp: RouteProcess) {
-        RouteProcessDbHelper().deleteById(rp.collectorRouteProcessId)
-        RouteProcessContentDbHelper().deleteByRouteProcessId(rp.collectorRouteProcessId)
-        RouteProcessStepsDbHelper().deleteByRouteProcessId(rp.collectorRouteProcessId)
+        processRepository.deleteById(rp.id)
+        contentRepository.deleteByRouteProcessId(rp.id)
+        stepsRepository.deleteByRouteProcessId(rp.id)
     }
 
     private val routeIdToSend: ArrayList<Long>
         get() {
             val result: ArrayList<Long> = ArrayList()
             try {
-                val rDbH = RouteProcessDbHelper()
-                val tsArray = rDbH.selectByNoTransferred()
-                if (tsArray.size > 0) {
+                val tsArray = processRepository.selectByNoTransferred()
+                if (tsArray.isNotEmpty()) {
                     for (rp in tsArray) {
                         result.add(rp.routeId)
                     }
@@ -366,9 +369,8 @@ class RouteSelectActivity : AppCompatActivity(),
         get() {
             val result: ArrayList<Long> = ArrayList()
             try {
-                val rDbH = RouteProcessDbHelper()
-                val rpArray = rDbH.selectByNoCompleted()
-                if (rpArray.size > 0) {
+                val rpArray = processRepository.selectByNoCompleted()
+                if (rpArray.isNotEmpty()) {
                     for (rp in rpArray) {
                         result.add(rp.routeId)
                     }
@@ -390,10 +392,7 @@ class RouteSelectActivity : AppCompatActivity(),
 
             result.addAll(
                 getAvailableRoutes(
-                    RouteDbHelper().selectByDescription(
-                        r,
-                        onlyActive
-                    )
+                    RouteRepository().selectByDescription(r, onlyActive)
                 )
             )
             return result

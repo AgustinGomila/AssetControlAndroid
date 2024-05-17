@@ -23,12 +23,12 @@ import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.dacosys.assetControl.AssetControlApp.Companion.currentUser
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.dataBase.review.AssetReviewContentDbHelper
-import com.dacosys.assetControl.data.model.review.AssetReview
-import com.dacosys.assetControl.data.model.review.AssetReviewContent
-import com.dacosys.assetControl.data.model.review.AssetReviewContentStatus
-import com.dacosys.assetControl.data.model.status.ConfirmStatus
-import com.dacosys.assetControl.data.model.table.Table
+import com.dacosys.assetControl.data.enums.common.ConfirmStatus
+import com.dacosys.assetControl.data.enums.common.Table
+import com.dacosys.assetControl.data.enums.review.AssetReviewContentStatus
+import com.dacosys.assetControl.data.room.entity.review.AssetReview
+import com.dacosys.assetControl.data.room.entity.review.AssetReviewContent
+import com.dacosys.assetControl.data.room.repository.review.TempReviewContentRepository
 import com.dacosys.assetControl.databinding.AssetReviewContentConfirmBottomPanelCollapsedBinding
 import com.dacosys.assetControl.ui.activities.common.ObservationsActivity
 import com.dacosys.assetControl.ui.adapters.interfaces.Interfaces
@@ -183,7 +183,7 @@ class ArcConfirmActivity : AppCompatActivity(),
 
         // Cargamos la revisión desde la tabla temporal
         completeList.clear()
-        val tempCont = AssetReviewContentDbHelper().selectByTempId(assetReview?.collectorAssetReviewId ?: 0)
+        val tempCont = ArrayList(TempReviewContentRepository().selectByTempId(assetReview?.id ?: 0))
         if (tempCont.any()) completeList = tempCont
 
         setHeaderTextBox()
@@ -368,8 +368,8 @@ class ArcConfirmActivity : AppCompatActivity(),
         if (imageControlFragment == null) {
             imageControlFragment =
                 ImageControlButtonsFragment.newInstance(
-                    tableId = Table.assetReview.tableId.toLong(),
-                    objectId1 = ar.collectorAssetReviewId.toString()
+                    tableId = Table.assetReview.id.toLong(),
+                    objectId1 = ar.id.toString()
                 )
         }
 
@@ -397,8 +397,8 @@ class ArcConfirmActivity : AppCompatActivity(),
                 }
             }
         } else {
-            imageControlFragment?.setTableId(Table.assetReview.tableId)
-            imageControlFragment?.setObjectId1(ar.collectorAssetReviewId)
+            imageControlFragment?.setTableId(Table.assetReview.id)
+            imageControlFragment?.setObjectId1(ar.id)
             imageControlFragment?.setObjectId2(null)
 
             setFragmentValues(description, "", obs)
@@ -457,7 +457,7 @@ class ArcConfirmActivity : AppCompatActivity(),
                     checkedIdArray = checkedIdArray,
                     showImages = showImages,
                     showImagesChanged = { showImages = it },
-                    visibleStatus = AssetReviewContentStatus.getAllConfirm()
+                    visibleStatus = ArrayList(AssetReviewContentStatus.getAllConfirm())
                 )
 
                 adapter?.refreshListeners(dataSetChangedListener = this)

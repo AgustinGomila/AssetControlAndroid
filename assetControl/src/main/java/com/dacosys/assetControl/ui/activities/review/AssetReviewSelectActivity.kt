@@ -28,14 +28,15 @@ import androidx.transition.ChangeBounds
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
+import com.dacosys.assetControl.AssetControlApp.Companion.getUserId
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.dataBase.location.WarehouseAreaDbHelper
-import com.dacosys.assetControl.data.dataBase.review.AssetReviewContentDbHelper
-import com.dacosys.assetControl.data.dataBase.review.AssetReviewDbHelper
-import com.dacosys.assetControl.data.model.location.WarehouseArea
-import com.dacosys.assetControl.data.model.review.AssetReview
-import com.dacosys.assetControl.data.model.review.AssetReviewStatus
-import com.dacosys.assetControl.data.model.table.Table
+import com.dacosys.assetControl.data.enums.common.Table
+import com.dacosys.assetControl.data.enums.review.AssetReviewStatus
+import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
+import com.dacosys.assetControl.data.room.entity.review.AssetReview
+import com.dacosys.assetControl.data.room.repository.location.WarehouseAreaRepository
+import com.dacosys.assetControl.data.room.repository.review.AssetReviewContentRepository
+import com.dacosys.assetControl.data.room.repository.review.AssetReviewRepository
 import com.dacosys.assetControl.databinding.AssetReviewSelectActivityBinding
 import com.dacosys.assetControl.ui.activities.location.LocationSelectActivity
 import com.dacosys.assetControl.ui.adapters.review.AssetReviewAdapter
@@ -172,11 +173,11 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
             Preference.assetReviewVisibleStatus.key,
             Preference.assetReviewVisibleStatus.defaultValue as ArrayList<String>
         )
-        if (set == null) set = AssetReviewStatus.getAllIdAsString().toSet()
+        if (set == null) set = AssetReviewStatus.getAll().map { it.id.toString() }.toSet()
 
         for (i in set) {
             val status = AssetReviewStatus.getById(i.toInt())
-            if (status != null && !visibleStatusArray.contains(status)) {
+            if (!visibleStatusArray.contains(status)) {
                 visibleStatusArray.add(status)
             }
         }
@@ -370,8 +371,8 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
                 alert.setMessage(getString(R.string.do_you_want_to_delete_the_selected_revision_question))
                 alert.setNegativeButton(R.string.cancel, null)
                 alert.setPositiveButton(R.string.accept) { _, _ ->
-                    AssetReviewDbHelper().deleteById(ar.collectorAssetReviewId)
-                    AssetReviewContentDbHelper().deleteByAssetReviewId(ar.collectorAssetReviewId)
+                    AssetReviewRepository().deleteById(ar.id)
+                    AssetReviewContentRepository().deleteByAssetReviewId(ar.id)
                     removeAssetReviewImages()
 
                     adapter?.remove(ar)
@@ -394,8 +395,8 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
 
             try {
                 val programData = ProgramData(
-                    programObjectId = Table.assetReview.tableId.toLong(),
-                    objId1 = ar.collectorAssetReviewId.toString()
+                    programObjectId = Table.assetReview.id.toLong(),
+                    objId1 = ar.id.toString()
                 )
 
                 ImageCoroutines().get(context = getContext(), programData = programData) {
@@ -412,8 +413,8 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
                     // la base de datos local de ImageControl
                     ImageCoroutines().delete(
                         context = getContext(),
-                        programObjectId = Table.assetReview.tableId.toLong(),
-                        objectId1 = ar.collectorAssetReviewId.toString()
+                        programObjectId = Table.assetReview.id.toLong(),
+                        objectId1 = ar.id.toString()
                     )
                 }
             } catch (ex: java.lang.Exception) {
@@ -425,7 +426,7 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private fun assetReviewNew() {
         // Si hay más de uno debe seleccionar la ubicación
-        // Comprobar que sólo exista uno en la ubicación seleccionada.
+        // Comprobar que solo exista uno en la ubicación seleccionada.
         if (!rejectNewInstances) {
             rejectNewInstances = true
             JotterListener.lockScanner(this, true)
@@ -461,15 +462,21 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
         }
 
     private fun fillListView() {
+        val userId = getUserId() ?: return
+
         val w = waSelectFilterFragment?.wDescription ?: ""
         val wa = waSelectFilterFragment?.waDescription ?: ""
         val onlyActive = waSelectFilterFragment?.onlyActive ?: true
 
-        val assetReviewList = AssetReviewDbHelper().selectByDescription(
-            wDescription = w,
-            waDescription = wa,
-            onlyActive = onlyActive
-        )
+        val assetReviewList =
+            ArrayList(
+                AssetReviewRepository().selectByDescription(
+                    wDescription = w,
+                    waDescription = wa,
+                    userId = userId,
+                    onlyActive = onlyActive
+                )
+            )
 
         fillAdapter(assetReviewList)
     }
@@ -516,7 +523,8 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
         makeText(binding.assetReviewSelect, warehouseArea.description, SnackBarType.INFO)
 
         // Agregar un AssetReview del área
-        val ar = AssetReviewDbHelper().insert(warehouseArea)
+        val arId = AssetReviewRepository().insert(warehouseArea)
+        val ar = AssetReviewRepository().selectById(arId)
         if (ar != null) {
             if (!rejectNewInstances) {
                 rejectNewInstances = true
@@ -742,7 +750,7 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
     private fun demo() {
         if (!Statics.DEMO_MODE) return
 
-        val allWarehouseArea = WarehouseAreaDbHelper().select(true)
+        val allWarehouseArea = WarehouseAreaRepository().select(true)
         if (!allWarehouseArea.any()) return
 
         val warehouseArea =
@@ -789,8 +797,7 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
                 searchWarehouseAreaId = true,
                 searchAssetCode = false,
                 searchAssetSerial = false,
-                searchAssetEan = false,
-                validateId = true
+                searchAssetEan = false
             )
 
             val warehouseArea = if (sc.warehouseArea != null) {

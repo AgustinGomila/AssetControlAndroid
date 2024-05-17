@@ -6,19 +6,22 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionRuleTarget
 import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionRuleTarget.Entry
-import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface DataCollectionRuleTargetDao {
-    @Query("SELECT * FROM ${Entry.TABLE_NAME}")
-    fun getAllDataCollectionRuleTargets(): Flow<List<DataCollectionRuleTarget>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertDataCollectionRuleTarget(dataCollectionRuleTarget: DataCollectionRuleTarget)
+    suspend fun insert(target: DataCollectionRuleTarget)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(dataCollectionRuleTargets: List<DataCollectionRuleTarget>)
+    suspend fun insert(targets: List<DataCollectionRuleTarget>)
 
-    @Query("DELETE FROM ${Entry.TABLE_NAME}")
-    suspend fun deleteAll()
+
+    @Query("DELETE $BASIC_FROM WHERE ${Entry.DATA_COLLECTION_RULE_ID} = :ruleId")
+    suspend fun deleteByDataCollectionRuleId(ruleId: Long)
+
+    companion object {
+        const val BASIC_SELECT = "SELECT ${Entry.TABLE_NAME}.*"
+        const val BASIC_FROM = "FROM ${Entry.TABLE_NAME}"
+    }
 }

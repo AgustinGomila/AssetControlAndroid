@@ -19,8 +19,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.menu.MenuBuilder
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.dataBase.asset.AssetDbHelper
-import com.dacosys.assetControl.data.dataBase.location.WarehouseAreaDbHelper
+import com.dacosys.assetControl.data.room.repository.asset.AssetRepository
+import com.dacosys.assetControl.data.room.repository.location.WarehouseAreaRepository
 import com.dacosys.assetControl.databinding.CodeCheckActivityBinding
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
@@ -224,7 +224,7 @@ class CodeCheckActivity : AppCompatActivity(),
             }
 
             menuItemRandomCode -> {
-                val allCodes = AssetDbHelper().selectAllCodes()
+                val allCodes = AssetRepository().selectAllCodes()
                 if (allCodes.any()) scannerCompleted(allCodes[Random().nextInt(allCodes.count())])
                 return super.onOptionsItemSelected(item)
             }
@@ -235,14 +235,14 @@ class CodeCheckActivity : AppCompatActivity(),
             }
 
             menuItemRandomWa -> {
-                val allWa = WarehouseAreaDbHelper().select(true)
-                val waId = allWa[Random().nextInt(allWa.count())].warehouseAreaId
+                val allWa = WarehouseAreaRepository().select(true)
+                val waId = allWa[Random().nextInt(allWa.count())].id
                 if (allWa.any()) scannerCompleted("#WA#${String.format("%05d", waId)}#")
                 return super.onOptionsItemSelected(item)
             }
 
             menuItemRandomSerial -> {
-                val allSerials = AssetDbHelper().selectAllSerials()
+                val allSerials = AssetRepository().selectAllSerials()
                 if (allSerials.any()) scannerCompleted(allSerials[Random().nextInt(allSerials.count())])
                 return super.onOptionsItemSelected(item)
             }
@@ -336,8 +336,7 @@ class CodeCheckActivity : AppCompatActivity(),
                 searchWarehouseAreaId = true,
                 searchAssetCode = true,
                 searchAssetSerial = true,
-                searchAssetEan = true,
-                validateId = true
+                searchAssetEan = true
             )
 
             if (sc.codeFound) {

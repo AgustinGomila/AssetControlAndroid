@@ -2,7 +2,7 @@ package com.dacosys.assetControl.data.webservice.asset
 
 import android.os.Parcel
 import android.os.Parcelable
-import com.dacosys.assetControl.data.model.asset.Asset
+import com.dacosys.assetControl.data.room.entity.asset.Asset
 import org.ksoap2.serialization.SoapObject
 
 class AssetCollectorObject() : Parcelable {
@@ -28,26 +28,26 @@ class AssetCollectorObject() : Parcelable {
     constructor(parcel: Parcel) : this() {
         asset_id = parcel.readLong()
         parent_id = parcel.readLong()
-        code = parcel.readString() ?: ""
+        code = parcel.readString().orEmpty()
         warehouse_id = parcel.readLong()
         warehouse_area_id = parcel.readLong()
         active = parcel.readInt()
         ownership_status = parcel.readInt()
         status = parcel.readInt()
-        missing_date = parcel.readString() ?: ""
-        description = parcel.readString() ?: ""
+        missing_date = parcel.readString().orEmpty()
+        description = parcel.readString().orEmpty()
         item_category_id = parcel.readLong()
         original_warehouse_id = parcel.readLong()
         original_warehouse_area_id = parcel.readLong()
         label_number = parcel.readInt()
         condition = parcel.readInt()
-        serial_number = parcel.readString() ?: ""
-        ean = parcel.readString() ?: ""
-        last_asset_review_date = parcel.readString() ?: ""
+        serial_number = parcel.readString().orEmpty()
+        ean = parcel.readString().orEmpty()
+        last_asset_review_date = parcel.readString().orEmpty()
     }
 
     constructor(asset: Asset) : this() {
-        asset_id = asset.assetId
+        asset_id = asset.id
         description = asset.description
         code = asset.code
         item_category_id = asset.itemCategoryId
@@ -55,13 +55,13 @@ class AssetCollectorObject() : Parcelable {
         warehouse_id = asset.warehouseId
         original_warehouse_area_id = asset.originalWarehouseAreaId
         original_warehouse_id = asset.originalWarehouseId
-        status = asset.assetStatusId
-        ownership_status = asset.ownershipStatusId
-        active = if (asset.active) 1 else 0
+        status = asset.status
+        ownership_status = asset.ownershipStatus
+        active = asset.active
         missing_date = asset.missingDate ?: ""
         label_number = asset.labelNumber ?: 0
-        condition = asset.assetConditionId
-        parent_id = asset.parentAssetId ?: 0
+        condition = asset.condition ?: 0
+        parent_id = asset.parentId ?: 0
         ean = asset.ean ?: ""
         serial_number = asset.serialNumber ?: ""
         last_asset_review_date = asset.lastAssetReviewDate ?: ""

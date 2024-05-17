@@ -3,30 +3,30 @@ package com.dacosys.assetControl.network.sync
 import android.util.Log
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.dataBase.asset.AssetDbHelper
-import com.dacosys.assetControl.data.dataBase.attribute.AttributeCategoryDbHelper
-import com.dacosys.assetControl.data.dataBase.attribute.AttributeCompositionDbHelper
-import com.dacosys.assetControl.data.dataBase.attribute.AttributeDbHelper
-import com.dacosys.assetControl.data.dataBase.barcode.BarcodeLabelCustomDbHelper
-import com.dacosys.assetControl.data.dataBase.category.ItemCategoryDbHelper
-import com.dacosys.assetControl.data.dataBase.datacollection.DataCollectionRuleContentDbHelper
-import com.dacosys.assetControl.data.dataBase.datacollection.DataCollectionRuleDbHelper
-import com.dacosys.assetControl.data.dataBase.datacollection.DataCollectionRuleTargetDbHelper
-import com.dacosys.assetControl.data.dataBase.location.WarehouseAreaDbHelper
-import com.dacosys.assetControl.data.dataBase.location.WarehouseDbHelper
-import com.dacosys.assetControl.data.dataBase.manteinance.ManteinanceTypeDbHelper
-import com.dacosys.assetControl.data.dataBase.manteinance.ManteinanceTypeGroupDbHelper
-import com.dacosys.assetControl.data.dataBase.route.RouteCompositionDbHelper
-import com.dacosys.assetControl.data.dataBase.route.RouteDbHelper
-import com.dacosys.assetControl.data.dataBase.user.UserDbHelper
-import com.dacosys.assetControl.data.dataBase.user.UserPermissionDbHelper
-import com.dacosys.assetControl.data.dataBase.user.UserWarehouseAreaDbHelper
-import com.dacosys.assetControl.data.model.attribute.AttributeComposition
-import com.dacosys.assetControl.data.model.dataCollection.DataCollectionRuleContent
-import com.dacosys.assetControl.data.model.dataCollection.DataCollectionRuleTarget
-import com.dacosys.assetControl.data.model.manteinance.ManteinanceType
-import com.dacosys.assetControl.data.model.manteinance.ManteinanceTypeGroup
-import com.dacosys.assetControl.data.model.route.RouteComposition
+import com.dacosys.assetControl.data.room.entity.attribute.AttributeComposition
+import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionRuleContent
+import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionRuleTarget
+import com.dacosys.assetControl.data.room.entity.maintenance.MaintenanceType
+import com.dacosys.assetControl.data.room.entity.maintenance.MaintenanceTypeGroup
+import com.dacosys.assetControl.data.room.entity.route.RouteComposition
+import com.dacosys.assetControl.data.room.repository.asset.AssetRepository
+import com.dacosys.assetControl.data.room.repository.attribute.AttributeCategoryRepository
+import com.dacosys.assetControl.data.room.repository.attribute.AttributeCompositionRepository
+import com.dacosys.assetControl.data.room.repository.attribute.AttributeRepository
+import com.dacosys.assetControl.data.room.repository.barcode.BarcodeLabelCustomRepository
+import com.dacosys.assetControl.data.room.repository.category.ItemCategoryRepository
+import com.dacosys.assetControl.data.room.repository.dataCollection.DataCollectionRuleContentRepository
+import com.dacosys.assetControl.data.room.repository.dataCollection.DataCollectionRuleRepository
+import com.dacosys.assetControl.data.room.repository.dataCollection.DataCollectionRuleTargetRepository
+import com.dacosys.assetControl.data.room.repository.location.WarehouseAreaRepository
+import com.dacosys.assetControl.data.room.repository.location.WarehouseRepository
+import com.dacosys.assetControl.data.room.repository.maintenance.MaintenanceTypeGroupRepository
+import com.dacosys.assetControl.data.room.repository.maintenance.MaintenanceTypeRepository
+import com.dacosys.assetControl.data.room.repository.route.RouteCompositionRepository
+import com.dacosys.assetControl.data.room.repository.route.RouteRepository
+import com.dacosys.assetControl.data.room.repository.user.UserPermissionRepository
+import com.dacosys.assetControl.data.room.repository.user.UserRepository
+import com.dacosys.assetControl.data.room.repository.user.UserWarehouseAreaRepository
 import com.dacosys.assetControl.data.webservice.asset.AssetWs
 import com.dacosys.assetControl.data.webservice.attribute.AttributeCategoryWs
 import com.dacosys.assetControl.data.webservice.attribute.AttributeCompositionWs
@@ -40,8 +40,8 @@ import com.dacosys.assetControl.data.webservice.dataCollection.DataCollectionRul
 import com.dacosys.assetControl.data.webservice.dataCollection.DataCollectionRuleWs
 import com.dacosys.assetControl.data.webservice.location.WarehouseAreaWs
 import com.dacosys.assetControl.data.webservice.location.WarehouseWs
-import com.dacosys.assetControl.data.webservice.manteinance.ManteinanceTypeGroupWs
-import com.dacosys.assetControl.data.webservice.manteinance.ManteinanceTypeWs
+import com.dacosys.assetControl.data.webservice.maintenance.MaintenanceTypeWs
+import com.dacosys.assetControl.data.webservice.maintenance.ManteinanceTypeGroupWs
 import com.dacosys.assetControl.data.webservice.route.RouteCompositionWs
 import com.dacosys.assetControl.data.webservice.route.RouteWs
 import com.dacosys.assetControl.data.webservice.user.UserPermissionWs
@@ -169,7 +169,7 @@ class SyncDownload(
 
             if (prefsGetBoolean(Preference.useAssetControlManteinance)) {
                 t.union(
-                    listOf(async { manteinanceType() }, async { manteinanceTypeGroup() })
+                    listOf(async { maintenanceType() }, async { maintenanceTypeGroup() })
                 )
             }
 
@@ -230,7 +230,7 @@ class SyncDownload(
 
         registryOnProcess.add(registryType)
         val ws = AssetWs()
-        val aDb = AssetDbHelper()
+        val assetRepository = AssetRepository()
 
         val date = prefsGetString(
             registryType.confEntry ?: return
@@ -256,11 +256,11 @@ class SyncDownload(
                     pos++
 
                     try {
-                        aDb.sync(
-                            objArray = objArray,
-                            onSyncTaskProgress = { scope.launch { onUiEvent(it) } },
-                            currentCount = currentCount,
-                            countTotal = countTotal
+                        assetRepository.sync(
+                            assetsObj = objArray,
+                            onSyncProgress = { scope.launch { onUiEvent(it) } },
+                            count = currentCount,
+                            total = countTotal
                         )
                         currentCount += objArray.size
                     } catch (ex: Exception) {
@@ -331,7 +331,7 @@ class SyncDownload(
 
         registryOnProcess.add(registryType)
         val ws = ItemCategoryWs()
-        val icDb = ItemCategoryDbHelper()
+        val categoryRepository = ItemCategoryRepository()
 
         val date = prefsGetString(
             registryType.confEntry ?: return
@@ -357,11 +357,11 @@ class SyncDownload(
                     pos++
 
                     try {
-                        icDb.sync(
-                            objArray = objArray,
+                        categoryRepository.sync(
+                            icObj = objArray,
                             onSyncProgress = { scope.launch { onUiEvent(it) } },
-                            currentCount = currentCount,
-                            countTotal = countTotal
+                            count = currentCount,
+                            total = countTotal
                         )
                         currentCount += objArray.size
                     } catch (ex: Exception) {
@@ -420,6 +420,7 @@ class SyncDownload(
         }
     }
 
+    @Suppress("unused")
     private suspend fun user() {
         val registryType = SyncRegistryType.User
         onUiEvent(
@@ -435,14 +436,14 @@ class SyncDownload(
         val upWs = UserPermissionWs()
         val uwaWs = UserWarehouseAreaWs()
 
-        val db = UserDbHelper()
-        val upDb = UserPermissionDbHelper()
-        val uwaDb = UserWarehouseAreaDbHelper()
+        val userRepository = UserRepository()
+        val permissionRepository = UserPermissionRepository()
+        val userAreaRepository = UserWarehouseAreaRepository()
 
         // Eliminar datos antiguos de los usuarios
-        db.deleteAll()
-        upDb.deleteAll()
-        uwaDb.deleteAll()
+        userRepository.deleteAll()
+        permissionRepository.deleteAll()
+        userAreaRepository.deleteAll()
 
         val date = prefsGetString(
             registryType.confEntry ?: return
@@ -469,11 +470,11 @@ class SyncDownload(
 
                     try {
                         if (objArray.isNotEmpty()) {
-                            db.sync(
-                                objArray = objArray,
-                                onSyncTaskProgress = { scope.launch { onUiEvent(it) } },
-                                currentCount = currentCount,
-                                countTotal = countTotal
+                            userRepository.sync(
+                                assetsObj = objArray,
+                                onSyncProgress = { scope.launch { onUiEvent(it) } },
+                                count = currentCount,
+                                total = countTotal
                             )
 
                             currentCount += objArray.size
@@ -482,14 +483,12 @@ class SyncDownload(
                             for ((index, obj) in objArray.withIndex()) {
                                 // user permission
                                 SyncInitialUser { scope.launch { onUiEvent(it) } }.userPermission(
-                                    objArray = upWs.userPermissionGet(obj.user_id),
-                                    aDb = upDb
+                                    objArray = upWs.userPermissionGet(obj.user_id)
                                 )
 
                                 // user warehouse area
                                 SyncInitialUser { scope.launch { onUiEvent(it) } }.userWarehouseArea(
-                                    objArray = uwaWs.userWarehouseAreaGet(obj.user_id),
-                                    aDb = uwaDb
+                                    objArray = uwaWs.userWarehouseAreaGet(obj.user_id)
                                 )
 
                                 scope.launch {
@@ -573,7 +572,7 @@ class SyncDownload(
 
         registryOnProcess.add(registryType)
         val ws = WarehouseWs()
-        val wDb = WarehouseDbHelper()
+        val warehouseRepository = WarehouseRepository()
 
         val date = prefsGetString(
             registryType.confEntry ?: return
@@ -599,11 +598,11 @@ class SyncDownload(
                     pos++
 
                     try {
-                        wDb.sync(
-                            objArray = objArray,
+                        warehouseRepository.sync(
+                            wObj = objArray,
                             onSyncProgress = { scope.launch { onUiEvent(it) } },
-                            currentCount = currentCount,
-                            countTotal = countTotal
+                            count = currentCount,
+                            total = countTotal
                         )
                         currentCount += objArray.size
                     } catch (ex: Exception) {
@@ -674,7 +673,7 @@ class SyncDownload(
 
         registryOnProcess.add(registryType)
         val ws = WarehouseAreaWs()
-        val waDb = WarehouseAreaDbHelper()
+        val areaRepository = WarehouseAreaRepository()
 
         val date = prefsGetString(
             registryType.confEntry ?: return
@@ -700,11 +699,11 @@ class SyncDownload(
                     pos++
 
                     try {
-                        waDb.sync(
-                            objArray = objArray,
+                        areaRepository.sync(
+                            areaObjects = objArray,
                             onSyncProgress = { scope.launch { onUiEvent(it) } },
-                            currentCount = currentCount,
-                            countTotal = countTotal
+                            count = currentCount,
+                            total = countTotal
                         )
                         currentCount += objArray.size
                     } catch (ex: Exception) {
@@ -777,8 +776,8 @@ class SyncDownload(
         val ws = AttributeWs()
         val upWs = AttributeCompositionWs()
 
-        val aDb = AttributeDbHelper()
-        val acDb = AttributeCompositionDbHelper()
+        val attributeRepository = AttributeRepository()
+        val compositionRepository = AttributeCompositionRepository()
 
         val date = prefsGetString(
             registryType.confEntry ?: return
@@ -804,15 +803,15 @@ class SyncDownload(
                     pos++
 
                     try {
-                        aDb.sync(
-                            objArray = objArray,
+                        attributeRepository.sync(
+                            attributeObjects = objArray,
                             onSyncProgress = { scope.launch { onUiEvent(it) } },
-                            currentCount = currentCount,
-                            countTotal = countTotal
+                            count = currentCount,
+                            total = countTotal
                         )
                         currentCount += objArray.size
                         attributeComposition(
-                            ws = upWs, aDb = acDb, attr = objArray
+                            ws = upWs, compositionRepository = compositionRepository, attr = objArray
                         )
                     } catch (ex: Exception) {
                         ex.printStackTrace()
@@ -872,13 +871,13 @@ class SyncDownload(
 
     private suspend fun attributeComposition(
         ws: AttributeCompositionWs,
-        aDb: AttributeCompositionDbHelper,
+        compositionRepository: AttributeCompositionRepository,
         attr: Array<AttributeObject>,
     ) {
         try {
             val ids = ArrayList<Long>()
             attr.mapTo(ids) { it.attributeId }
-            aDb.deleteByAttrIdArray(ids)
+            compositionRepository.deleteByIds(ids)
 
             val allAttrComp: ArrayList<AttributeComposition> = ArrayList()
             var currentCount = 0
@@ -899,15 +898,15 @@ class SyncDownload(
                 if (!objArray.isNullOrEmpty()) {
                     for (obj in objArray) {
                         val attributeComposition = AttributeComposition(
-                            obj.attributeCompositionId,
-                            obj.attributeId,
-                            obj.attributeCompositionTypeId,
-                            obj.description,
-                            obj.composition,
-                            obj.used == 1,
-                            obj.name,
-                            obj.readOnly == 1,
-                            obj.defaultValue
+                            id = obj.attributeCompositionId,
+                            attributeId = obj.attributeId,
+                            attributeCompositionTypeId = obj.attributeCompositionTypeId,
+                            description = obj.description,
+                            composition = obj.composition,
+                            used = obj.used,
+                            name = obj.name,
+                            readOnly = obj.readOnly,
+                            defaultValue = obj.defaultValue
                         )
 
                         Log.d(
@@ -918,7 +917,7 @@ class SyncDownload(
                     }
                 }
             }
-            aDb.insertChunked(allAttrComp)
+            compositionRepository.insert(allAttrComp)
         } catch (ex: Exception) {
             ex.printStackTrace()
             // Error remoto
@@ -938,7 +937,7 @@ class SyncDownload(
         )
         registryOnProcess.add(registryType)
         val ws = AttributeCategoryWs()
-        val acDb = AttributeCategoryDbHelper()
+        val categoryRepository = AttributeCategoryRepository()
 
         val date = prefsGetString(
             registryType.confEntry ?: return
@@ -964,11 +963,11 @@ class SyncDownload(
                     pos++
 
                     try {
-                        acDb.sync(
-                            objArray = objArray,
+                        categoryRepository.sync(
+                            categoryObjects = objArray,
                             onSyncProgress = { scope.launch { onUiEvent(it) } },
-                            currentCount = currentCount,
-                            countTotal = countTotal
+                            count = currentCount,
+                            total = countTotal
                         )
                         currentCount += objArray.size
                     } catch (ex: Exception) {
@@ -1041,8 +1040,8 @@ class SyncDownload(
         val ws = RouteWs()
         val upWs = RouteCompositionWs()
 
-        val rDb = RouteDbHelper()
-        val rcDb = RouteCompositionDbHelper()
+        val routeRepository = RouteRepository()
+        val compositionRepository = RouteCompositionRepository()
 
         val date = prefsGetString(
             registryType.confEntry ?: return
@@ -1068,18 +1067,18 @@ class SyncDownload(
                     pos++
 
                     try {
-                        rDb.sync(
-                            objArray = objArray,
+                        routeRepository.sync(
+                            routeObjects = objArray,
                             onSyncProgress = { scope.launch { onUiEvent(it) } },
-                            currentCount = currentCount,
-                            countTotal = countTotal
+                            count = currentCount,
+                            total = countTotal
                         )
                         currentCount += objArray.size
 
                         for (obj in objArray) {
                             // route composition
                             routeComposition(
-                                ws = upWs, aDb = rcDb, routeId = obj.route_id
+                                ws = upWs, compositionRepository = compositionRepository, routeId = obj.route_id
                             )
                         }
                     } catch (ex: Exception) {
@@ -1140,12 +1139,12 @@ class SyncDownload(
 
     private suspend fun routeComposition(
         ws: RouteCompositionWs,
-        aDb: RouteCompositionDbHelper,
+        compositionRepository: RouteCompositionRepository,
         routeId: Long,
     ) {
         try {
             val objArray = ws.routeCompositionGet(routeId)
-            aDb.deleteByRouteId(routeId)
+            compositionRepository.deleteByRouteId(routeId)
 
             if (!objArray.isNullOrEmpty()) {
                 val countTotal = objArray.size
@@ -1178,7 +1177,7 @@ class SyncDownload(
                         )
                         rc.add(routeComposition)
                     }
-                    aDb.insert(rc)
+                    compositionRepository.insert(rc)
                 } catch (ex: Exception) {
                     ex.printStackTrace()
                     // Error local
@@ -1209,9 +1208,9 @@ class SyncDownload(
         val upWs = DataCollectionRuleContentWs()
         val uwaWs = DataCollectionRuleTargetWs()
 
-        val dcrDb = DataCollectionRuleDbHelper()
-        val dcrcDb = DataCollectionRuleContentDbHelper()
-        val dcrtDb = DataCollectionRuleTargetDbHelper()
+        val collectionRuleRepository = DataCollectionRuleRepository()
+        val ruleContentRepository = DataCollectionRuleContentRepository()
+        val ruleTargetRepository = DataCollectionRuleTargetRepository()
 
         val date = prefsGetString(
             registryType.confEntry ?: return
@@ -1237,11 +1236,11 @@ class SyncDownload(
                     pos++
 
                     try {
-                        dcrDb.sync(
-                            objArray = objArray,
+                        collectionRuleRepository.sync(
+                            routeObjects = objArray,
                             onSyncProgress = { scope.launch { onUiEvent(it) } },
-                            currentCount = currentCount,
-                            countTotal = countTotal
+                            count = currentCount,
+                            total = countTotal
                         )
                         currentCount += objArray.size
 
@@ -1249,14 +1248,14 @@ class SyncDownload(
                             // dataCollectionRule content
                             dataCollectionRuleContent(
                                 ws = upWs,
-                                aDb = dcrcDb,
+                                ruleContentRepository = ruleContentRepository,
                                 dataCollectionRuleId = obj.dataCollectionRuleId
                             )
 
                             // dataCollectionRule warehouse area
                             dataCollectionRuleTarget(
                                 ws = uwaWs,
-                                aDb = dcrtDb,
+                                ruleTargetRepository = ruleTargetRepository,
                                 dataCollectionRuleId = obj.dataCollectionRuleId
                             )
                         }
@@ -1318,18 +1317,18 @@ class SyncDownload(
 
     private suspend fun dataCollectionRuleContent(
         ws: DataCollectionRuleContentWs,
-        aDb: DataCollectionRuleContentDbHelper,
+        ruleContentRepository: DataCollectionRuleContentRepository,
         dataCollectionRuleId: Long,
     ) {
         try {
             val objArray = ws.dataCollectionRuleContentGet(dataCollectionRuleId)
-            aDb.deleteByDataCollectionRuleId(dataCollectionRuleId)
+            ruleContentRepository.deleteByDataCollectionRuleId(dataCollectionRuleId)
 
             if (!objArray.isNullOrEmpty()) {
                 val countTotal = objArray.size
                 var currentCount = 0
                 try {
-                    val dcrc: ArrayList<DataCollectionRuleContent> = ArrayList()
+                    val contents: ArrayList<DataCollectionRuleContent> = ArrayList()
                     for (obj in objArray) {
                         currentCount++
                         onUiEvent(
@@ -1343,7 +1342,7 @@ class SyncDownload(
                         )
 
                         val dataCollectionRuleContent = DataCollectionRuleContent(
-                            dataCollectionRuleContentId = obj.dataCollectionRuleContentId,
+                            id = obj.dataCollectionRuleContentId,
                             description = obj.description,
                             dataCollectionRuleId = obj.dataCollectionRuleId,
                             level = obj.level,
@@ -1353,12 +1352,12 @@ class SyncDownload(
                             expression = obj.expression,
                             trueResult = obj.trueResult,
                             falseResult = obj.falseResult,
-                            active = obj.active == 1,
-                            mandatory = obj.mandatory == 1
+                            mActive = obj.active,
+                            mMandatory = obj.mandatory
                         )
-                        dcrc.add(dataCollectionRuleContent)
+                        contents.add(dataCollectionRuleContent)
                     }
-                    aDb.insert(dcrc)
+                    ruleContentRepository.insert(contents)
                 } catch (ex: Exception) {
                     ex.printStackTrace()
                     // Error local
@@ -1376,18 +1375,18 @@ class SyncDownload(
 
     private suspend fun dataCollectionRuleTarget(
         ws: DataCollectionRuleTargetWs,
-        aDb: DataCollectionRuleTargetDbHelper,
+        ruleTargetRepository: DataCollectionRuleTargetRepository,
         dataCollectionRuleId: Long,
     ) {
         try {
             val objArray = ws.dataCollectionRuleTargetGet(dataCollectionRuleId)
-            aDb.deleteByDataCollectionRuleId(dataCollectionRuleId)
+            ruleTargetRepository.deleteByDataCollectionRuleId(dataCollectionRuleId)
 
             if (!objArray.isNullOrEmpty()) {
                 val countTotal = objArray.size
                 var currentCount = 0
                 try {
-                    val dcrt: ArrayList<DataCollectionRuleTarget> = ArrayList()
+                    val targets: ArrayList<DataCollectionRuleTarget> = ArrayList()
                     for (obj in objArray) {
                         currentCount++
                         onUiEvent(
@@ -1407,9 +1406,9 @@ class SyncDownload(
                             warehouseAreaId = obj.warehouseAreaId,
                             itemCategoryId = obj.itemCategoryId
                         )
-                        dcrt.add(dataCollectionRuleTarget)
+                        targets.add(dataCollectionRuleTarget)
                     }
-                    aDb.insert(dcrt)
+                    ruleTargetRepository.insert(targets)
                 } catch (ex: Exception) {
                     ex.printStackTrace()
                     // Error local
@@ -1425,8 +1424,8 @@ class SyncDownload(
         }
     }
 
-    private suspend fun manteinanceType() {
-        val registryType = SyncRegistryType.ManteinanceType
+    private suspend fun maintenanceType() {
+        val registryType = SyncRegistryType.MaintenanceType
         onUiEvent(
             SyncProgress(
                 msg = getContext().getString(R.string.starting_maintenance_type_synchronization),
@@ -1436,8 +1435,8 @@ class SyncDownload(
         )
 
         registryOnProcess.add(registryType)
-        val ws = ManteinanceTypeWs()
-        val mtDb = ManteinanceTypeDbHelper()
+        val ws = MaintenanceTypeWs()
+        val typeRepository = MaintenanceTypeRepository()
 
         val date = prefsGetString(
             registryType.confEntry ?: return
@@ -1449,14 +1448,14 @@ class SyncDownload(
         var currentCount = 0
         var pos = 0
         try {
-            countTotal = ws.manteinanceTypeCount(date)
+            countTotal = ws.maintenanceTypeCount(date)
             if (countTotal == null) {
                 errorOccurred = true
             } else {
                 while (groupCount < countTotal) {
                     if (!scope.isActive) break
 
-                    val objArray = ws.manteinanceTypeGetAllLimit(pos, qty, date)
+                    val objArray = ws.maintenanceTypeGetAllLimit(pos, qty, date)
                     if (!objArray.any()) break
 
                     groupCount += objArray.size
@@ -1488,14 +1487,14 @@ class SyncDownload(
                                 return
                             }
 
-                            val manteinanceType = ManteinanceType(
-                                obj.manteinance_type_id,
-                                obj.description,
-                                obj.active == 1,
-                                obj.manteinance_type_group_id
+                            val maintenanceType = MaintenanceType(
+                                id = obj.manteinance_type_id,
+                                description = obj.description,
+                                active = obj.active,
+                                manteinanceTypeGroupId = obj.manteinance_type_group_id
                             )
 
-                            if (mtDb.update(manteinanceType)) {
+                            if (typeRepository.update(maintenanceType)) {
                                 Log.d(
                                     this::class.java.simpleName,
                                     "SQLITE-QUERY-UPDATE-->" + obj.manteinance_type_id
@@ -1507,7 +1506,7 @@ class SyncDownload(
                                         "SQLITE-QUERY-INSERT-->" + obj.manteinance_type_id
                                     )
 
-                                    mtDb.insert(manteinanceType)
+                                    typeRepository.insert(maintenanceType)
                                 } catch (ex: Exception) {
                                     // Posible inserción sobre Id existente
                                     ErrorLog.writeLog(null, this::class.java.simpleName, ex)
@@ -1570,8 +1569,8 @@ class SyncDownload(
         }
     }
 
-    private suspend fun manteinanceTypeGroup() {
-        val registryType = SyncRegistryType.ManteinanceTypeGroup
+    private suspend fun maintenanceTypeGroup() {
+        val registryType = SyncRegistryType.MaintenanceTypeGroup
         onUiEvent(
             SyncProgress(
                 msg = getContext().getString(R.string.starting_maintenance_type_group_synchronization),
@@ -1582,7 +1581,7 @@ class SyncDownload(
 
         registryOnProcess.add(registryType)
         val ws = ManteinanceTypeGroupWs()
-        val mtgDb = ManteinanceTypeGroupDbHelper()
+        val groupRepository = MaintenanceTypeGroupRepository()
 
         val date = prefsGetString(
             registryType.confEntry ?: return
@@ -1633,23 +1632,25 @@ class SyncDownload(
                                 return
                             }
 
-                            val manteinanceTypeGroup = ManteinanceTypeGroup(
-                                obj.manteinanceTypeGroupId, obj.description, obj.active == 1
+                            val typeGroup = MaintenanceTypeGroup(
+                                id = obj.maintenanceTypeGroupId,
+                                description = obj.description,
+                                active = obj.active
                             )
 
-                            if (mtgDb.update(manteinanceTypeGroup)) {
+                            if (groupRepository.update(typeGroup)) {
                                 Log.d(
                                     this::class.java.simpleName,
-                                    "SQLITE-QUERY-UPDATE-->" + obj.manteinanceTypeGroupId
+                                    "SQLITE-QUERY-UPDATE-->" + obj.maintenanceTypeGroupId
                                 )
                             } else {
                                 try {
                                     Log.d(
                                         this::class.java.simpleName,
-                                        "SQLITE-QUERY-INSERT-->" + obj.manteinanceTypeGroupId
+                                        "SQLITE-QUERY-INSERT-->" + obj.maintenanceTypeGroupId
                                     )
 
-                                    mtgDb.insert(manteinanceTypeGroup)
+                                    groupRepository.insert(typeGroup)
                                 } catch (ex: Exception) {
                                     // Posible inserción sobre Id existente
                                     ErrorLog.writeLog(
@@ -1726,7 +1727,7 @@ class SyncDownload(
 
         registryOnProcess.add(registryType)
         val ws = BarcodeLabelCustomWs()
-        val blcDb = BarcodeLabelCustomDbHelper()
+        val barcodeRepository = BarcodeLabelCustomRepository()
 
         val date = prefsGetString(
             registryType.confEntry ?: return
@@ -1752,11 +1753,11 @@ class SyncDownload(
                     pos++
 
                     try {
-                        blcDb.sync(
-                            objArray = objArray,
+                        barcodeRepository.sync(
+                            assetsObj = objArray,
                             onSyncProgress = { scope.launch { onUiEvent(it) } },
-                            currentCount = currentCount,
-                            countTotal = countTotal
+                            count = currentCount,
+                            total = countTotal
                         )
                         currentCount += objArray.size
                     } catch (ex: Exception) {

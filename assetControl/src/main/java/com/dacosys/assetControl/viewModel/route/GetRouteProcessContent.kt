@@ -3,9 +3,8 @@ package com.dacosys.assetControl.viewModel.route
 import android.util.Log
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.dataBase.DataBaseHelper
-import com.dacosys.assetControl.data.dataBase.route.RouteProcessContentDbHelper
-import com.dacosys.assetControl.data.model.route.RouteProcessContent
+import com.dacosys.assetControl.data.room.entity.route.RouteProcessContent
+import com.dacosys.assetControl.data.room.repository.route.RouteProcessContentRepository
 import kotlinx.coroutines.*
 
 class GetRouteProcessContent(
@@ -39,10 +38,10 @@ class GetRouteProcessContent(
 
             ///////////////////////////////////
             // Para controlar la transacción //
-            val db = DataBaseHelper.getWritableDb()
+            // TODO Eliminar DB, val db = DataBaseHelper.getWritableDb()
 
             try {
-                db.beginTransaction()
+                // TODO Eliminar DB, db.beginTransaction()
 
                 if (rpContArray.size < 1) {
                     Log.d(
@@ -53,10 +52,10 @@ class GetRouteProcessContent(
                     // Necesita llamarse al GetByRouteProcessComplete para que se inserten
                     // los registros aún no recolectados de la ruta
                     val tempRpCont =
-                        RouteProcessContentDbHelper().selectByRouteProcessComplete(
-                            routeId,
-                            routeProcessId,
-                            null
+                        RouteProcessContentRepository().selectByRouteProcessComplete(
+                            routeId = routeId,
+                            routeProcessId = routeProcessId,
+                            dataCollection = null
                         )
 
                     for (rpCont in tempRpCont) {
@@ -90,10 +89,10 @@ class GetRouteProcessContent(
                         )
                 }
 
-                db.setTransactionSuccessful()
+                // TODO Eliminar DB, db.setTransactionSuccessful()
 
             } finally {
-                db.endTransaction()
+                // TODO Eliminar DB, db.endTransaction()
             }
 
             return@withContext GetRouteProcessContentResult(

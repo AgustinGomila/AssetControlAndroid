@@ -1,41 +1,45 @@
 package com.dacosys.assetControl.data.room.repository.attribute
 
+import com.dacosys.assetControl.AssetControlApp.Companion.getContext
+import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.room.dao.attribute.AttributeCategoryDao
 import com.dacosys.assetControl.data.room.database.AcDatabase.Companion.database
 import com.dacosys.assetControl.data.room.entity.attribute.AttributeCategory
+import com.dacosys.assetControl.data.webservice.attribute.AttributeCategoryObject
+import com.dacosys.assetControl.network.sync.SyncProgress
+import com.dacosys.assetControl.network.sync.SyncRegistryType
+import com.dacosys.assetControl.network.utils.ProgressStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class AttributeCategoryRepository {
-    private val dao: AttributeCategoryDao by lazy {
-        database.attributeCategoryDao()
-    }
+    private val dao: AttributeCategoryDao
+        get() = database.attributeCategoryDao()
 
-    fun getAllAttributeCategories() = dao.getAllAttributeCategories()
+    suspend fun sync(
+        categoryObjects: Array<AttributeCategoryObject>,
+        onSyncProgress: (SyncProgress) -> Unit = {},
+        count: Int = 0,
+        total: Int = 0,
+    ) {
+        val registryType = SyncRegistryType.AttributeCategory
 
-    fun getById(id: Long) = dao.getById(id)
+        val categories: ArrayList<AttributeCategory> = arrayListOf()
+        categoryObjects.mapTo(categories) { AttributeCategory(it) }
+        val partial = categories.count()
 
-    suspend fun insertAttributeCategory(attributeCategory: AttributeCategory) {
         withContext(Dispatchers.IO) {
-            dao.insertAttributeCategory(attributeCategory)
-        }
-    }
-
-    suspend fun insertAll(attributeCategories: List<AttributeCategory>) {
-        withContext(Dispatchers.IO) {
-            dao.insertAll(attributeCategories)
-        }
-    }
-
-    suspend fun deleteById(id: Long) {
-        withContext(Dispatchers.IO) {
-            dao.deleteById(id)
-        }
-    }
-
-    suspend fun deleteAll() {
-        withContext(Dispatchers.IO) {
-            dao.deleteAll()
+            dao.insert(categories) {
+                onSyncProgress.invoke(
+                    SyncProgress(
+                        totalTask = partial + total,
+                        completedTask = it + count,
+                        msg = getContext().getString(R.string.synchronizing_attribute_categories),
+                        registryType = registryType,
+                        progressStatus = ProgressStatus.running
+                    )
+                )
+            }
         }
     }
 }

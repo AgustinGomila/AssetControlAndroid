@@ -10,9 +10,12 @@ import android.os.Handler
 import android.os.Looper
 import android.text.InputType
 import android.util.Log
-import android.view.*
+import android.view.KeyEvent
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View.GONE
 import android.view.View.VISIBLE
+import android.view.WindowManager
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -31,20 +34,20 @@ import androidx.transition.TransitionManager
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.dataBase.asset.AssetDbHelper
-import com.dacosys.assetControl.data.dataBase.location.WarehouseAreaDbHelper
-import com.dacosys.assetControl.data.dataBase.movement.WarehouseMovementContentDbHelper
-import com.dacosys.assetControl.data.model.asset.Asset
-import com.dacosys.assetControl.data.model.common.SaveProgress
-import com.dacosys.assetControl.data.model.location.Warehouse
-import com.dacosys.assetControl.data.model.location.WarehouseArea
-import com.dacosys.assetControl.data.model.movement.WarehouseMovementContent
-import com.dacosys.assetControl.data.model.movement.WarehouseMovementContentStatus
-import com.dacosys.assetControl.data.model.movement.async.SaveMovement
-import com.dacosys.assetControl.data.model.status.ConfirmStatus
-import com.dacosys.assetControl.data.model.status.ConfirmStatus.CREATOR.cancel
-import com.dacosys.assetControl.data.model.status.ConfirmStatus.CREATOR.confirm
-import com.dacosys.assetControl.data.model.status.ConfirmStatus.CREATOR.modify
+import com.dacosys.assetControl.data.async.movement.SaveMovement
+import com.dacosys.assetControl.data.enums.common.ConfirmStatus
+import com.dacosys.assetControl.data.enums.common.ConfirmStatus.CREATOR.cancel
+import com.dacosys.assetControl.data.enums.common.ConfirmStatus.CREATOR.confirm
+import com.dacosys.assetControl.data.enums.common.ConfirmStatus.CREATOR.modify
+import com.dacosys.assetControl.data.enums.common.SaveProgress
+import com.dacosys.assetControl.data.enums.movement.WarehouseMovementContentStatus
+import com.dacosys.assetControl.data.room.entity.asset.Asset
+import com.dacosys.assetControl.data.room.entity.location.Warehouse
+import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
+import com.dacosys.assetControl.data.room.entity.movement.WarehouseMovementContent
+import com.dacosys.assetControl.data.room.repository.asset.AssetRepository
+import com.dacosys.assetControl.data.room.repository.location.WarehouseAreaRepository
+import com.dacosys.assetControl.data.room.repository.movement.TempMovementContentRepository
 import com.dacosys.assetControl.databinding.ProgressBarDialogBinding
 import com.dacosys.assetControl.databinding.WarehouseMovementContentBottomPanelCollapsedBinding
 import com.dacosys.assetControl.network.sync.SyncProgress
@@ -114,7 +117,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
     private var isFinishingByUser = false
     private fun destroyLocals() {
         // Borramos los Ids temporales que se usaron en la actividad.
-        if (isFinishingByUser) WarehouseMovementContentDbHelper().deleteTemp()
+        if (isFinishingByUser) TempMovementContentRepository().deleteAll()
 
         adapter?.refreshListeners()
         adapter?.refreshImageControlListeners()
@@ -123,7 +126,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     override fun onLocationChanged(warehouse: Warehouse, warehouseArea: WarehouseArea) {
-        adapter?.locationChange(warehouseArea.warehouseAreaId)
+        adapter?.locationChange(warehouseArea.id)
     }
 
     override fun onRefresh() {
@@ -195,9 +198,9 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         // Guardamos el movimiento en una tabla temporal.
         // Movimientos de miles de artículos no pueden pasarse en el intent.
-        WarehouseMovementContentDbHelper().insertTempList(
+        TempMovementContentRepository().insert(
             wmId = 1,
-            movementList = adapter?.fullList ?: ArrayList()
+            contents = adapter?.fullList?.toList() ?: listOf()
         )
     }
 
@@ -222,7 +225,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         // Cargamos el movimiento desde la tabla temporal
         completeList.clear()
-        val tempCont = WarehouseMovementContentDbHelper().selectByTempId(1)
+        val tempCont = ArrayList(TempMovementContentRepository().selectByTempId(1))
         if (tempCont.any()) completeList = tempCont
 
         _fillAdapter = true
@@ -291,7 +294,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
         binding.okButton.setOnClickListener {
             if (allowClicks) {
                 val assetToMove = adapter?.assetsToMove ?: 0
-                val assetFounded = adapter?.assetsFounded(headerFragment?.warehouseArea?.warehouseAreaId ?: 0) ?: 0
+                val assetFounded = adapter?.assetsFounded(headerFragment?.warehouseArea?.id ?: 0) ?: 0
 
                 if (assetToMove <= 0 && assetFounded <= 0) {
                     makeText(
@@ -493,7 +496,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
                     showCheckBoxesChanged = { showCheckBoxes = it },
                     showImages = showImages,
                     showImagesChanged = { showImages = it },
-                    visibleStatus = WarehouseMovementContentStatus.getAll()
+                    visibleStatus = ArrayList(WarehouseMovementContentStatus.getAll())
                 )
 
                 refreshAdapterListeners()
@@ -662,8 +665,9 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
                     }
 
                     val codes: ArrayList<String> = ArrayList()
-                    val aDb = AssetDbHelper()
+                    val aDb = AssetRepository()
                     for (id in ids) {
+                        if (id == null) continue
                         val a = aDb.selectById(id) ?: continue
                         codes.add(a.code)
                     }
@@ -705,9 +709,9 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
             // Guardamos la revisión en una tabla temporal.
             // Revisiones de miles de artículos no pueden pasarse en el intent.
-            WarehouseMovementContentDbHelper().insertTempList(
+            TempMovementContentRepository().insert(
                 wmId = 1,
-                movementList = adapter?.fullList ?: ArrayList()
+                contents = adapter?.fullList?.toList() ?: listOf()
             )
 
             val intent = Intent(this, WmcConfirmActivity::class.java)
@@ -742,7 +746,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
         }
 
     private fun processWarehouseMovement() {
-        val destWaId = (headerFragment?.warehouseArea ?: return).warehouseAreaId
+        val destWaId = (headerFragment?.warehouseArea ?: return).id
         val allWmc: ArrayList<WarehouseMovementContent> = ArrayList()
 
         // Procesar la lista, cambiar los estados si son incorrectos.
@@ -836,8 +840,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
                     searchWarehouseAreaId = true,
                     searchAssetCode = true,
                     searchAssetSerial = true,
-                    searchAssetEan = true,
-                    validateId = true
+                    searchAssetEan = true
                 )
 
                 val scWa = sc.warehouseArea
@@ -920,7 +923,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
                     if (tempWarehouseArea != null) {
                         /////////////////////////////////////////////////////////
                         // STATUS 2 = Si el activo está en la misma área, dejamos que lo agregue.
-                        if (tempAsset.warehouseAreaId == tempWarehouseArea.warehouseAreaId) {
+                        if (tempAsset.warehouseAreaId == tempWarehouseArea.id) {
                             contStatus = WarehouseMovementContentStatus.noNeedToMove
 
                             val res = getString(R.string.is_already_in_the_area)
@@ -931,8 +934,8 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
                     collectorContentId--
 
                     val finalWmc = WarehouseMovementContent(
-                        warehouseMovementId = 0,
-                        warehouseMovementContentId = collectorContentId,
+                        movementId = 0,
+                        id = collectorContentId,
                         asset = tempAsset,
                         contentStatusId = contStatus.id
                     )
@@ -1033,7 +1036,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
             }
 
             menuItemRandomCode -> {
-                val allCodes = AssetDbHelper().selectAllCodes()
+                val allCodes = AssetRepository().selectAllCodes()
                 if (allCodes.any()) scannerCompleted(allCodes[Random().nextInt(allCodes.count())])
                 return super.onOptionsItemSelected(item)
             }
@@ -1044,14 +1047,14 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
             }
 
             menuItemRandomWa -> {
-                val allWa = WarehouseAreaDbHelper().select(true)
-                val waId = allWa[Random().nextInt(allWa.count())].warehouseAreaId
+                val allWa = WarehouseAreaRepository().select(true)
+                val waId = allWa[Random().nextInt(allWa.count())].id
                 if (allWa.any()) scannerCompleted("#WA#${String.format("%05d", waId)}#")
                 return super.onOptionsItemSelected(item)
             }
 
             menuItemRandomSerial -> {
-                val allSerials = AssetDbHelper().selectAllSerials()
+                val allSerials = AssetRepository().selectAllSerials()
                 if (allSerials.any()) scannerCompleted(allSerials[Random().nextInt(allSerials.count())])
                 return super.onOptionsItemSelected(item)
             }

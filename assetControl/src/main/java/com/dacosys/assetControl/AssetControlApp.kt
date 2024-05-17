@@ -3,8 +3,8 @@ package com.dacosys.assetControl
 import android.app.Application
 import android.content.Context
 import androidx.preference.PreferenceManager
-import com.dacosys.assetControl.data.dataBase.user.UserDbHelper
-import com.dacosys.assetControl.data.model.user.User
+import com.dacosys.assetControl.data.room.entity.user.User
+import com.dacosys.assetControl.data.room.repository.user.UserRepository
 import com.dacosys.assetControl.utils.Statics.Companion.INTERNAL_IMAGE_CONTROL_APP_ID
 import com.dacosys.assetControl.utils.imageControl.ImageControl.Companion.imageControl
 import com.dacosys.assetControl.utils.scanners.JotterListener
@@ -70,9 +70,9 @@ class AssetControlApp : Application() {
          * @return
          */
         fun currentUser(): User? {
-            return if (currentUserId != null) {
-                UserDbHelper().selectById(currentUserId ?: return null)
-            } else null
+            val userId = currentUserId
+            return if (userId != null) UserRepository().selectById(userId)
+            else null
         }
 
         fun isLogged(): Boolean {

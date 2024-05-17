@@ -7,11 +7,11 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.model.common.CrudCompleted
-import com.dacosys.assetControl.data.model.location.Warehouse
-import com.dacosys.assetControl.data.model.location.WarehouseCRUD
-import com.dacosys.assetControl.data.model.user.User
-import com.dacosys.assetControl.data.model.user.permission.PermissionEntry
+import com.dacosys.assetControl.data.crud.location.WarehouseCRUD
+import com.dacosys.assetControl.data.enums.common.CrudCompleted
+import com.dacosys.assetControl.data.enums.permission.PermissionEntry
+import com.dacosys.assetControl.data.room.entity.location.Warehouse
+import com.dacosys.assetControl.data.room.entity.user.User
 import com.dacosys.assetControl.data.webservice.location.WarehouseObject
 import com.dacosys.assetControl.databinding.WarehouseCrudFragmentBinding
 import com.dacosys.assetControl.ui.common.snackbar.MakeText
@@ -29,7 +29,7 @@ class WarehouseCRUDFragment : Fragment() {
         savedInstanceState.putParcelable("warehouse", warehouse)
         savedInstanceState.putString(
             "description",
-            binding.descriptionEditText.text?.toString() ?: ""
+            binding.descriptionEditText.text?.toString().orEmpty()
         )
         savedInstanceState.putBoolean("active", binding.activeCheckBox.isChecked)
     }
@@ -95,7 +95,7 @@ class WarehouseCRUDFragment : Fragment() {
                     warehouse?.description ?: "",
                     TextView.BufferType.EDITABLE
                 )
-                binding.activeCheckBox.isChecked = warehouse?.active ?: true
+                binding.activeCheckBox.isChecked = warehouse?.active ?: false
             }
         }
     }
@@ -140,11 +140,9 @@ class WarehouseCRUDFragment : Fragment() {
             }
 
             val tempWarehouse = createWsWarehouse()
-            if (tempWarehouse != null) {
-                val warehouseAdd = WarehouseCRUD.WarehouseAdd()
-                warehouseAdd.addParams(callback, tempWarehouse)
-                warehouseAdd.execute()
-            }
+            val warehouseAdd = WarehouseCRUD.WarehouseAdd()
+            warehouseAdd.addParams(callback, tempWarehouse)
+            warehouseAdd.execute()
         } else {
             if (!User.hasPermission(PermissionEntry.ModifyWarehouse)) {
                 MakeText.makeText(
@@ -177,25 +175,9 @@ class WarehouseCRUDFragment : Fragment() {
         warehouse?.active = binding.activeCheckBox.isChecked
     }
 
-    private fun createWsWarehouse(): WarehouseObject? {
-        val tempWarehouse = Warehouse()
-        tempWarehouse.setDataRead()
-
-        try {
-            //Create CurrentWarehouse Object
-            // Main Information
-            tempWarehouse.description = binding.descriptionEditText.text.trim().toString()
-            tempWarehouse.active = binding.activeCheckBox.isChecked
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-            MakeText.makeText(
-                binding.root,
-                getString(R.string.error_creating_the_category),
-                SnackBarType.ERROR
-            )
-            return null
-        }
-
+    private fun createWsWarehouse(): WarehouseObject {
+        val tempWarehouse = Warehouse(description = binding.descriptionEditText.text.trim().toString())
+        tempWarehouse.active = binding.activeCheckBox.isChecked
         return WarehouseObject(tempWarehouse)
     }
 

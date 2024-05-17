@@ -1,8 +1,7 @@
 package com.dacosys.assetControl.utils.settings.config
 
-import com.dacosys.assetControl.data.model.asset.AssetStatus
-import com.dacosys.assetControl.data.model.review.AssetReviewContentStatus
-import com.dacosys.assetControl.data.model.review.AssetReviewStatus
+import com.dacosys.assetControl.data.enums.asset.AssetStatus
+import com.dacosys.assetControl.data.enums.review.AssetReviewStatus
 import com.dacosys.assetControl.network.sync.SyncRegistryType
 import java.util.*
 
@@ -743,20 +742,20 @@ class Preference(key: String, defaultValue: Any, debugValue: Any) {
 
         var assetReviewVisibleStatus = Preference(
             "asset_review_visible_status",
-            defaultValue = AssetReviewStatus.getAllIdAsString(),
-            debugValue = AssetReviewStatus.getAllIdAsString()
+            defaultValue = ArrayList(AssetReviewStatus.getAll().map { it.id.toString() }),
+            debugValue = ArrayList(AssetReviewStatus.getAll().map { it.id.toString() })
         )
 
         var assetReviewContentVisibleStatus = Preference(
             "asset_review_content_visible_status",
-            defaultValue = AssetReviewContentStatus.getAllIdAsString(),
-            debugValue = AssetReviewContentStatus.getAllIdAsString()
+            defaultValue = ArrayList(AssetReviewStatus.getAll().map { it.id.toString() }),
+            debugValue = ArrayList(AssetReviewStatus.getAll().map { it.id.toString() })
         )
 
         var assetSelectFragmentVisibleStatus = Preference(
             "asset_select_fragment_visible_status",
-            defaultValue = AssetStatus.getAllIdAsString(),
-            debugValue = AssetStatus.getAllIdAsString()
+            defaultValue = ArrayList(AssetStatus.getAll().map { it.id.toString() }),
+            debugValue = ArrayList(AssetStatus.getAll().map { it.id.toString() })
         )
 
         var useNfc = Preference(
