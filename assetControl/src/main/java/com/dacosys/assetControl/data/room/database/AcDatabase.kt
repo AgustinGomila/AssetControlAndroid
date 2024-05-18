@@ -1,5 +1,7 @@
 package com.dacosys.assetControl.data.room.database
 
+import android.database.sqlite.SQLiteDatabase
+import android.database.sqlite.SQLiteException
 import android.util.Log
 import androidx.room.Database
 import androidx.room.Room
@@ -55,6 +57,7 @@ import com.dacosys.assetControl.data.room.entity.route.*
 import com.dacosys.assetControl.data.room.entity.user.User
 import com.dacosys.assetControl.data.room.entity.user.UserPermission
 import com.dacosys.assetControl.data.room.entity.user.UserWarehouseArea
+import java.io.File
 
 @TypeConverters(Converters::class)
 @Database(
@@ -130,8 +133,8 @@ abstract class AcDatabase : RoomDatabase() {
 
     companion object {
         private val TAG = this::class.java.enclosingClass?.simpleName ?: this::class.java.simpleName
-        const val DATABASE_VERSION = 2
-        const val DATABASE_NAME = "assetcontroldb.sqlite"
+        const val DATABASE_VERSION = 1
+        const val DATABASE_NAME = "ac.sqlite"
         private var currentDatabaseName = DATABASE_NAME
 
         private val context get() = getContext()
@@ -149,6 +152,13 @@ abstract class AcDatabase : RoomDatabase() {
         private fun createDatabase(): AcDatabase {
             var instance = INSTANCE
             if (instance == null) {
+
+                // La base de datos no tiene número de versión, se trata como una base SQLite
+                // de Milestone13 y se fuerza la migración a primera versión de Room
+                if (getDatabaseVersion() == 0) {
+                    runMigrationZero()
+                }
+
                 instance = Room.databaseBuilder(
                     context = context,
                     klass = AcDatabase::class.java,
@@ -161,6 +171,29 @@ abstract class AcDatabase : RoomDatabase() {
                 Log.i(TAG, "NEW Instance: $INSTANCE")
             }
             return instance
+        }
+
+        private fun getDatabaseVersion(): Int {
+            var version = 0
+
+            val dbPath = context.getDatabasePath(DATABASE_NAME).absolutePath
+            val dbFile = File(dbPath)
+            if (dbFile.exists()) {
+                var db: SQLiteDatabase? = null
+                try {
+                    db = SQLiteDatabase.openDatabase(
+                        dbPath,
+                        null,
+                        SQLiteDatabase.OPEN_READONLY
+                    )
+                    version = db.version
+                } catch (e: SQLiteException) {
+                    version = 0
+                } finally {
+                    db?.close()
+                }
+            }
+            return version
         }
 
         fun cleanInstance() {
@@ -188,5 +221,51 @@ abstract class AcDatabase : RoomDatabase() {
                 // Since we didn't alter the table, there's nothing else to do here.
             }
         }
+
+        /**
+         * Run migration zero
+         * Migración que convierte la base de datos SQLite (version 0) en la primera versión de Room
+         */
+        private fun runMigrationZero() {
+            val dbPath = context.getDatabasePath(DATABASE_NAME).absolutePath
+            val dbFile = File(dbPath)
+            if (dbFile.exists()) {
+                var db: SQLiteDatabase? = null
+                try {
+                    db = SQLiteDatabase.openDatabase(
+                        dbPath,
+                        null,
+                        SQLiteDatabase.OPEN_READWRITE
+                    )
+                    runMigration(SQLiteDB(db), migrationZero)
+                } catch (e: SQLiteException) {
+                    println(e)
+                } finally {
+                    db?.close()
+                }
+            }
+        }
+
+        /**
+         * Room migration zero
+         * Script de creación de la tabla maestra de Room (version 1)
+         * @return
+         */
+        private fun roomMigrationZero(): List<String> {
+            return listOf(
+                "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+                "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4b1c4bc453ef7099e4247e4bddcfdefa')"
+            )
+        }
+
+        private val migrationZero: List<String>
+            get() {
+                val r = mutableListOf<String>()
+
+                r.addAll(roomMigrationZero())
+                r.addAll(Asset.migrationZero())
+
+                return r
+            }
     }
 }

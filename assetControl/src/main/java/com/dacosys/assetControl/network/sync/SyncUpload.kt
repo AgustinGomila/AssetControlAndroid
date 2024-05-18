@@ -3,6 +3,7 @@ package com.dacosys.assetControl.network.sync
 import android.util.Log
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.AssetControlApp.Companion.getUserId
+import com.dacosys.assetControl.AssetControlApp.Companion.isLogged
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.enums.common.Table
@@ -1641,12 +1642,16 @@ class SyncUpload(
     }
 
     init {
-        if (registryOnProcess.size > 0) {
-            onSyncTaskProgress.invoke(
-                SyncProgress(progressStatus = ProgressStatus.canceled)
-            )
+        if (!isLogged()) {
+            onSyncFinish(true)
         } else {
-            checkConnection()
+            if (registryOnProcess.size > 0) {
+                onSyncTaskProgress.invoke(
+                    SyncProgress(progressStatus = ProgressStatus.canceled)
+                )
+            } else {
+                checkConnection()
+            }
         }
     }
 }
