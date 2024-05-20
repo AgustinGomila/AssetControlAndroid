@@ -17,13 +17,11 @@ class UserRepository {
     private val dao: UserDao
         get() = database.userDao()
 
-    fun getAll() = dao.select()
+    fun selectById(id: Long) = runBlocking { dao.selectById(id) }
 
-    fun selectById(id: Long) = dao.selectById(id)
+    fun selectByNameOrEmail(text: String) = runBlocking { dao.selectByNameOrEmail(text) }
 
-    fun selectByNameOrEmail(text: String) = dao.selectByNameOrEmail(text)
-
-    fun selectByActiveAndPermission() = dao.selectByActiveAndPermission()
+    fun selectByActiveAndPermission() = runBlocking { dao.selectByActiveAndPermission() }
 
 
     suspend fun sync(

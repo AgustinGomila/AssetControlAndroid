@@ -10,16 +10,16 @@ import com.dacosys.assetControl.data.room.entity.route.RouteProcessContent.Entry
 @Dao
 interface RouteProcessContentDao {
     @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN $BASIC_ORDER")
-    fun select(): List<RouteProcessContent>
+    suspend fun select(): List<RouteProcessContent>
 
     @Query("SELECT MIN(${Entry.ID}) $BASIC_FROM")
-    fun selectMinId(): Long?
+    suspend fun selectMinId(): Long?
 
     @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN WHERE ${Entry.TABLE_NAME}.${Entry.ID} = :id")
-    fun selectById(id: Long): RouteProcessContent?
+    suspend fun selectById(id: Long): RouteProcessContent?
 
     @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN WHERE ${Entry.TABLE_NAME}.${Entry.ROUTE_PROCESS_ID} = :id")
-    fun selectByRouteProcessId(id: Long): List<RouteProcessContent>
+    suspend fun selectByRouteProcessId(id: Long): List<RouteProcessContent>
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

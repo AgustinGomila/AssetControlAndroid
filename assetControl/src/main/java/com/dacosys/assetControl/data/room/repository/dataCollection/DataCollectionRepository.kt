@@ -14,12 +14,12 @@ class DataCollectionRepository {
     private val dao: DataCollectionDao
         get() = database.dataCollectionDao()
 
-    fun selectById(id: Long) = dao.selectByCollectorId(id)
+    fun selectById(id: Long) = runBlocking { dao.selectByCollectorId(id) }
 
-    fun selectByNoTransferred() = dao.selectByNoTransferred()
+    fun selectByNoTransferred() = runBlocking { dao.selectByNoTransferred() }
 
     private val nextId: Long
-        get() = (dao.selectMaxId() ?: 0) + 1
+        get() = runBlocking { (dao.selectMaxId() ?: 0) + 1 }
 
 
     fun insert(rpc: RouteProcessContent, dateStart: Date, routeProcessId: Long): DataCollection? {

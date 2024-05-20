@@ -92,8 +92,6 @@ class AssetMaintenanceConditionActivity : AppCompatActivity(),
         if (currentAsset != null) {
             val tempObsText = binding.obsEditText.text.toString()
 
-            var error = false
-
             // Save Maintenance
             if (typeSpinnerFragment?.selectedType != null &&
                 (typeSpinnerFragment?.selectedType?.id
@@ -126,45 +124,14 @@ class AssetMaintenanceConditionActivity : AppCompatActivity(),
                     SnackBarType.INFO
                 )
                 return
-
-                /*
-                if (assetManteinance != null) { // VER ESTO!!! ¿Qué es esto?
-                    val amDbHelper = AssetMaintenanceRepository()
-                    amDbHelper.deleteByAssetId(assetManteinance!!.assetId)
-                }
-                */
             }
 
-            if (!error) {
-                // Save Asset Condition
-                if (conditionSpinnerFragment?.selectedAssetCondition != null) {
-                    if (currentAsset != null &&
-                        currentAsset?.assetCondition != conditionSpinnerFragment?.selectedAssetCondition
-                    ) {
-                        currentAsset?.condition = conditionSpinnerFragment?.selectedAssetCondition?.id ?: -1
-                        currentAsset?.transferred = 0
-
-                        if (currentAsset?.saveChanges() == false) {
-                            error = true
-                        }
-                    }
-                }
-            }
-
-            if (!error) {
-                makeText(
-                    binding.root,
-                    getString(R.string.maintenance_saved_correctly),
-                    SnackBarType.SUCCESS
-                )
-                finish()
-            } else {
-                makeText(
-                    binding.root,
-                    getString(R.string.failed_to_save_maintenance),
-                    SnackBarType.ERROR
-                )
-            }
+            makeText(
+                binding.root,
+                getString(R.string.maintenance_saved_correctly),
+                SnackBarType.SUCCESS
+            )
+            finish()
         }
     }
 

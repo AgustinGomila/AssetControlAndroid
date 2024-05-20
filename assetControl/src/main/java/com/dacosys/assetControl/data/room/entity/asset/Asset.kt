@@ -110,7 +110,7 @@ data class Asset(
         status = a.status,
         missingDate = a.missing_date,
         itemCategoryId = a.item_category_id,
-        transferred = 0,
+        transferred = 1,
         originalWarehouseId = a.original_warehouse_id,
         originalWarehouseAreaId = a.original_warehouse_area_id,
         labelNumber = a.label_number,
@@ -135,7 +135,7 @@ data class Asset(
         status = aco.status,
         missingDate = aco.missing_date,
         itemCategoryId = aco.item_category_id,
-        transferred = 0,
+        transferred = 1,
         originalWarehouseId = aco.original_warehouse_id,
         originalWarehouseAreaId = aco.original_warehouse_area_id,
         labelNumber = aco.label_number,
@@ -209,10 +209,6 @@ data class Asset(
         const val WAREHOUSE_AREA_STR = "warehouse_area_str"
         const val ORIGINAL_WAREHOUSE_STR = "orig_warehouse_str"
         const val ORIGINAL_WAREHOUSE_AREA_STR = "orig_warehouse_area_str"
-        const val COST_CENTRE_STR = "cost_centre_str"
-        const val STATUS_STR = "status_str"
-        const val OWNERSHIP_STATUS_STR = "ownership_status_str"
-        const val CONDITION_STR = "condition_str"
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {

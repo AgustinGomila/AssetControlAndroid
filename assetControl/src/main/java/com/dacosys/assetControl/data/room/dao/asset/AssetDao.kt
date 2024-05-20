@@ -13,59 +13,59 @@ import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
 @Dao
 interface AssetDao {
     @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN $BASIC_ORDER")
-    fun select(): List<Asset>
+    suspend fun select(): List<Asset>
 
     @Query(
         "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
                 "WHERE ${Entry.TABLE_NAME}.${Entry.ID} IN (:ids) " +
                 BASIC_ORDER
     )
-    fun selectByTempIds(ids: List<Long>): List<Asset>
+    suspend fun selectByTempIds(ids: List<Long>): List<Asset>
 
     @Query(
         "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
                 "WHERE ${Entry.TABLE_NAME}.${Entry.ACTIVE} = 1 " +
                 BASIC_ORDER
     )
-    fun selectActive(): List<Asset>
+    suspend fun selectActive(): List<Asset>
 
     @Query("SELECT MIN(${Entry.ID}) $BASIC_FROM")
-    fun selectMinId(): Long?
+    suspend fun selectMinId(): Long?
 
     @RewriteQueriesToDropUnusedColumns
     @Query(
         "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
                 "WHERE ${Entry.TABLE_NAME}.${Entry.ID} = :id"
     )
-    fun selectById(id: Long): Asset?
+    suspend fun selectById(id: Long): Asset?
 
     @Query(
         "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
                 "WHERE ${Entry.TABLE_NAME}.${Entry.DESCRIPTION} LIKE '%' || :description || '%' " +
                 BASIC_ORDER
     )
-    fun selectByDescription(description: String): List<Asset>
+    suspend fun selectByDescription(description: String): List<Asset>
 
     @Query(
         "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
                 "WHERE ${Entry.TABLE_NAME}.${Entry.CODE} LIKE :code || '%' " +
                 BASIC_ORDER
     )
-    fun selectByCode(code: String): List<Asset>
+    suspend fun selectByCode(code: String): List<Asset>
 
     @Query(
         "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
                 "WHERE ${Entry.TABLE_NAME}.${Entry.SERIAL_NUMBER} LIKE :serialNumber || '%' " +
                 BASIC_ORDER
     )
-    fun selectBySerialNumber(serialNumber: String): List<Asset>
+    suspend fun selectBySerialNumber(serialNumber: String): List<Asset>
 
     @Query(
         "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
                 "WHERE ${Entry.TABLE_NAME}.${Entry.EAN} LIKE :ean || '%' " +
                 BASIC_ORDER
     )
-    fun selectByEan(ean: String): List<Asset>
+    suspend fun selectByEan(ean: String): List<Asset>
 
     @RewriteQueriesToDropUnusedColumns
     @Query(
@@ -73,7 +73,7 @@ interface AssetDao {
                 "WHERE ${Entry.TABLE_NAME}.${Entry.ID} = :id " +
                 "AND ${Entry.TABLE_NAME}.${Entry.ACTIVE} = 1"
     )
-    fun selectByIdActive(id: Long): Asset?
+    suspend fun selectByIdActive(id: Long): Asset?
 
     @Query(
         "SELECT COUNT(*) $BASIC_FROM WHERE (${Entry.CODE} = :code) " +
@@ -85,7 +85,7 @@ interface AssetDao {
         "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
                 "WHERE ${Entry.TABLE_NAME}.${Entry.TRANSFERRED} = 0 $BASIC_ORDER"
     )
-    fun selectNoTransferred(): List<Asset>
+    suspend fun selectNoTransferred(): List<Asset>
 
     @Query(
         "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
@@ -93,19 +93,19 @@ interface AssetDao {
                 "AND ${Entry.TABLE_NAME}.${Entry.ACTIVE} = 1 " +
                 "AND ${Entry.TABLE_NAME}.${Entry.STATUS} != :status $BASIC_ORDER"
     )
-    fun selectByWarehouseAreaIdActiveNotRemoved(
+    suspend fun selectByWarehouseAreaIdActiveNotRemoved(
         warehouseAreaId: Long,
         status: Int = AssetStatus.removed.id
     ): List<Asset>
 
     @Query("SELECT DISTINCT ${Entry.CODE} $BASIC_FROM ORDER BY ${Entry.CODE}")
-    fun selectDistinctCodes(): List<String>
+    suspend fun selectDistinctCodes(): List<String>
 
     @Query("SELECT DISTINCT ${Entry.SERIAL_NUMBER} $BASIC_FROM ORDER BY ${Entry.SERIAL_NUMBER}")
-    fun selectDistinctSerials(): List<String>
+    suspend fun selectDistinctSerials(): List<String>
 
     @Query("SELECT DISTINCT ${Entry.CODE} $BASIC_FROM WHERE ${Entry.WAREHOUSE_AREA_ID} = :warehouseAreaId ORDER BY ${Entry.CODE}")
-    fun selectDistinctCodesByWarehouseAreaId(warehouseAreaId: Long): List<String>
+    suspend fun selectDistinctCodesByWarehouseAreaId(warehouseAreaId: Long): List<String>
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

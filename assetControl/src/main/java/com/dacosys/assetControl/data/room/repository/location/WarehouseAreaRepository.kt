@@ -17,28 +17,29 @@ class WarehouseAreaRepository {
     private val dao: WarehouseAreaDao
         get() = database.warehouseAreaDao()
 
-    val getAll: List<WarehouseArea> = dao.select()
+    val getAll: List<WarehouseArea> = runBlocking { dao.select() }
 
-    fun selectById(id: Long) = dao.selectById(id)
+    fun selectById(id: Long) = runBlocking { dao.selectById(id) }
 
-    fun selectNoTransferred() = ArrayList(dao.selectNoTransferred())
+    fun selectNoTransferred() = runBlocking { ArrayList(dao.selectNoTransferred()) }
 
-    fun select(onlyActive: Boolean): List<WarehouseArea> {
-        return if (onlyActive) dao.selectActive()
+    fun select(onlyActive: Boolean): List<WarehouseArea> = runBlocking {
+        if (onlyActive) dao.selectActive()
         else dao.select()
     }
 
-    fun selectByDescription(wDescription: String, waDescription: String, onlyActive: Boolean) =
+    fun selectByDescription(wDescription: String, waDescription: String, onlyActive: Boolean) = runBlocking {
         if (onlyActive) dao.selectByDescriptionActive(wDescription, waDescription)
         else dao.selectByDescription(wDescription, waDescription)
-
-    fun selectByTempIds(): List<WarehouseArea> {
-        val tempAreas = TempWarehouseAreaRepository().select()
-        val ids = tempAreas.map { it.tempId }.toList()
-        return dao.selectByTempIds(ids)
     }
 
-    val minId get() = dao.selectMinId() ?: -1
+    fun selectByTempIds(): List<WarehouseArea> = runBlocking {
+        val tempAreas = TempWarehouseAreaRepository().select()
+        val ids = tempAreas.map { it.tempId }.toList()
+        dao.selectByTempIds(ids)
+    }
+
+    val minId get() = runBlocking { dao.selectMinId() ?: -1 }
 
     fun insert(warehouseArea: WarehouseArea) = runBlocking {
         dao.insert(warehouseArea)

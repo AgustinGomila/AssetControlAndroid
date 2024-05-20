@@ -9,7 +9,7 @@ class FragmentDataRepository {
     private val dao: FragmentDataDao
         get() = database.fragmentDataDao()
 
-    fun select() = dao.select()
+    fun select() = runBlocking { dao.select() }
 
     fun insert(fragments: List<FragmentData>) = runBlocking {
         dao.insert(fragments)

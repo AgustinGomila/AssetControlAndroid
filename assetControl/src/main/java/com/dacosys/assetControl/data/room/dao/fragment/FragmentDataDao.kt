@@ -10,7 +10,7 @@ import com.dacosys.assetControl.data.room.entity.fragment.FragmentData.Entry
 @Dao
 interface FragmentDataDao {
     @Query("$BASIC_SELECT $BASIC_FROM")
-    fun select(): List<FragmentData>
+    suspend fun select(): List<FragmentData>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(assets: List<FragmentData>)

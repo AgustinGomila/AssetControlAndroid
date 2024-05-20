@@ -16,23 +16,23 @@ class RouteProcessRepository {
     private val dao: RouteProcessDao
         get() = database.routeProcessDao()
 
-    fun selectById(id: Long) = dao.selectById(id)
+    fun selectById(id: Long) = runBlocking { dao.selectById(id) }
 
-    fun selectByRouteIdNoCompleted(routeId: Long) = dao.selectByRouteIdNoCompleted(routeId)
+    fun selectByRouteIdNoCompleted(routeId: Long) = runBlocking { dao.selectByRouteIdNoCompleted(routeId) }
 
-    fun selectByNoTransferred() = dao.selectByNoTransferred()
+    fun selectByNoTransferred() = runBlocking { dao.selectByNoTransferred() }
 
-    private fun selectTransferred() = dao.selectTransferred()
+    private fun selectTransferred() = runBlocking { dao.selectTransferred() }
 
-    fun selectByNoCompleted() = dao.selectByNoCompleted()
+    fun selectByNoCompleted() = runBlocking { dao.selectByNoCompleted() }
 
     private val nextId: Long
-        get() = (dao.selectMaxId() ?: 0) + 1
+        get() = runBlocking { (dao.selectMaxId() ?: 0) + 1 }
 
 
-    fun insert(route: Route): Long {
+    fun insert(route: Route): Long = runBlocking {
         val nextId = nextId
-        val userId = getUserId() ?: return 0
+        val userId = getUserId() ?: 0
 
         runBlocking {
             val rp = RouteProcess(
@@ -48,7 +48,7 @@ class RouteProcessRepository {
             dao.insert(rp)
         }
 
-        return nextId
+        nextId
     }
 
 

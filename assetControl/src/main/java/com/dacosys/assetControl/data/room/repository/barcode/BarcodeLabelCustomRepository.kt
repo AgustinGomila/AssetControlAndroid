@@ -10,17 +10,20 @@ import com.dacosys.assetControl.network.sync.SyncProgress
 import com.dacosys.assetControl.network.sync.SyncRegistryType
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
 class BarcodeLabelCustomRepository {
     private val dao: BarcodeLabelCustomDao
         get() = database.barcodeLabelCustomDao()
 
-    fun selectById(id: Long) = dao.selectById(id)
+    fun selectById(id: Long) = runBlocking { dao.selectById(id) }
 
-    fun selectByBarcodeLabelTargetId(barcodeLabelTargetId: Int, onlyActive: Boolean) =
-        if (onlyActive) dao.selectByBarcodeLabelTargetIdActive(barcodeLabelTargetId)
-        else dao.selectByBarcodeLabelTargetId(barcodeLabelTargetId)
+    fun selectByBarcodeLabelTargetId(barcodeLabelTargetId: Int, onlyActive: Boolean): List<BarcodeLabelCustom> =
+        runBlocking {
+            if (onlyActive) dao.selectByBarcodeLabelTargetIdActive(barcodeLabelTargetId)
+            else dao.selectByBarcodeLabelTargetId(barcodeLabelTargetId)
+        }
 
 
     suspend fun sync(

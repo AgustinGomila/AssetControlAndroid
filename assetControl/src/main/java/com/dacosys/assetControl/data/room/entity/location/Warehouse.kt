@@ -38,7 +38,7 @@ data class Warehouse(
         id = wObj.warehouse_id,
         description = wObj.description,
         mActive = wObj.active,
-        transferred = 0
+        transferred = 1
     )
 
     object Entry {

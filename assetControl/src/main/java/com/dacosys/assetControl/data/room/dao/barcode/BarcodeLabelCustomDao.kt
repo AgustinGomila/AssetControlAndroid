@@ -7,13 +7,13 @@ import com.dacosys.assetControl.data.room.entity.barcode.BarcodeLabelCustom.Entr
 @Dao
 interface BarcodeLabelCustomDao {
     @Query("$BASIC_SELECT $BASIC_FROM WHERE ${Entry.TABLE_NAME}.${Entry.ID} = :id $BASIC_ORDER")
-    fun selectById(id: Long): BarcodeLabelCustom?
+    suspend fun selectById(id: Long): BarcodeLabelCustom?
 
     @Query("$BASIC_SELECT $BASIC_FROM WHERE ${Entry.TABLE_NAME}.${Entry.BARCODE_LABEL_TARGET_ID} = :targetId $BASIC_ORDER")
-    fun selectByBarcodeLabelTargetId(targetId: Int): List<BarcodeLabelCustom>
+    suspend fun selectByBarcodeLabelTargetId(targetId: Int): List<BarcodeLabelCustom>
 
     @Query("$BASIC_SELECT $BASIC_FROM WHERE ${Entry.TABLE_NAME}.${Entry.BARCODE_LABEL_TARGET_ID} = :targetId AND ${Entry.TABLE_NAME}.${Entry.ACTIVE} = 1 $BASIC_ORDER")
-    fun selectByBarcodeLabelTargetIdActive(targetId: Int): List<BarcodeLabelCustom>
+    suspend fun selectByBarcodeLabelTargetIdActive(targetId: Int): List<BarcodeLabelCustom>
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

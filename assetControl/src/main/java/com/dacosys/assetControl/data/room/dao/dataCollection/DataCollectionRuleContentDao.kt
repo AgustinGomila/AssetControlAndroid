@@ -11,23 +11,23 @@ import com.dacosys.assetControl.data.room.entity.route.RouteComposition
 @Dao
 interface DataCollectionRuleContentDao {
     @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN $BASIC_ORDER")
-    fun select(): List<DataCollectionRuleContent>
+    suspend fun select(): List<DataCollectionRuleContent>
 
     @Query(
         "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
                 "WHERE ${Entry.TABLE_NAME}.${Entry.ACTIVE} = 1 $BASIC_ORDER"
     )
-    fun selectActive(): List<DataCollectionRuleContent>
+    suspend fun selectActive(): List<DataCollectionRuleContent>
 
     @Query("SELECT MIN(${Entry.ID}) $BASIC_FROM")
-    fun selectMinId(): Long?
+    suspend fun selectMinId(): Long?
 
     @RewriteQueriesToDropUnusedColumns
     @Query(
         "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
                 "WHERE ${Entry.TABLE_NAME}.${Entry.ID} = :id"
     )
-    fun selectById(id: Long): DataCollectionRuleContent?
+    suspend fun selectById(id: Long): DataCollectionRuleContent?
 
     @Query(
         "SELECT ${Entry.ATTRIBUTE_COMPOSITION_ID} $BASIC_FROM $ATTR_COMP_BASIC_JOIN_FIELDS " +
@@ -35,7 +35,7 @@ interface DataCollectionRuleContentDao {
                 "AND ${Entry.TABLE_NAME}.${Entry.ATTRIBUTE_COMPOSITION_ID} IS NOT NULL " +
                 "AND ${Entry.TABLE_NAME}.${Entry.ATTRIBUTE_COMPOSITION_ID} > 0"
     )
-    fun selectAttributeCompositionIdByRouteId(routeId: Long): List<Long>
+    suspend fun selectAttributeCompositionIdByRouteId(routeId: Long): List<Long>
 
     @RewriteQueriesToDropUnusedColumns
     @Query(
@@ -43,7 +43,7 @@ interface DataCollectionRuleContentDao {
                 "WHERE ${Entry.TABLE_NAME}.${Entry.DATA_COLLECTION_RULE_ID} = :ruleId " +
                 "AND ${Entry.TABLE_NAME}.${Entry.ACTIVE} = 1"
     )
-    fun selectByDataCollectionRuleIdActive(ruleId: Long): List<DataCollectionRuleContent>
+    suspend fun selectByDataCollectionRuleIdActive(ruleId: Long): List<DataCollectionRuleContent>
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

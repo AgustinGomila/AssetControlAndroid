@@ -79,6 +79,8 @@ data class WarehouseMovement(
 
         const val ORIGIN_WAREHOUSE_AREA_STR = "origin_warehouse_area_str"
         const val ORIGIN_WAREHOUSE_STR = "origin_warehouse_str"
+        const val DESTINATION_WAREHOUSE_AREA_STR = "destination_warehouse_area_str"
+        const val DESTINATION_WAREHOUSE_STR = "destination_warehouse_str"
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {

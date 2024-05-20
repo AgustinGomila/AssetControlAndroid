@@ -10,7 +10,9 @@ class RouteProcessStepsRepository {
         get() = database.routeProcessStepsDao()
 
 
-    fun selectByRouteProcessId(routeProcessId: Long) = dao.selectByRouteProcessId(routeProcessId)
+    fun selectByRouteProcessId(routeProcessId: Long) = runBlocking {
+        dao.selectByRouteProcessId(routeProcessId)
+    }
 
 
     fun insert(content: RouteProcessSteps) {

@@ -8,28 +8,25 @@ import com.dacosys.assetControl.data.room.entity.user.UserPermission.Entry as up
 
 @Dao
 interface UserDao {
-    @Query("$BASIC_SELECT $BASIC_FROM")
-    fun select(): List<User>
-
     @Query(
         "$BASIC_SELECT $BASIC_FROM " +
                 "WHERE ${Entry.TABLE_NAME}.${Entry.ID} = :id"
     )
-    fun selectById(id: Long): User?
+    suspend fun selectById(id: Long): User?
 
     @Query(
         "$BASIC_SELECT $BASIC_FROM " +
                 "WHERE ${Entry.TABLE_NAME}.${Entry.EMAIL} = :mailOrName " +
                 "OR ${Entry.TABLE_NAME}.${Entry.NAME} = :mailOrName"
     )
-    fun selectByNameOrEmail(mailOrName: String): User?
+    suspend fun selectByNameOrEmail(mailOrName: String): User?
 
     @Query(
         "$BASIC_SELECT $BASIC_FROM $BASIC_LEFT_JOIN " +
                 "WHERE ${Entry.TABLE_NAME}.${Entry.ACTIVE} = 1 " +
                 "AND ${upEntry.TABLE_NAME}.${upEntry.PERMISSION_ID} = :permission"
     )
-    fun selectByActiveAndPermission(permission: Long = PermissionEntry.UseCollectorProgram.id): List<User>
+    suspend fun selectByActiveAndPermission(permission: Long = PermissionEntry.UseCollectorProgram.id): List<User>
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

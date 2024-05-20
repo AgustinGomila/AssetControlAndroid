@@ -23,38 +23,38 @@ class AssetRepository {
     private val dao: AssetDao
         get() = database.assetDao()
 
-    fun select() = dao.select()
-
-    fun selectByTempIds(): List<Asset> {
+    fun selectByTempIds(): List<Asset> = runBlocking {
         val tempAssets = TempAssetRepository().select()
         val ids = tempAssets.map { it.tempId }.toList()
-        return dao.selectByTempIds(ids)
+        dao.selectByTempIds(ids)
     }
 
-    fun selectAllCodes() = dao.selectDistinctCodes()
+    fun selectAllCodes() = runBlocking { dao.selectDistinctCodes() }
 
-    fun selectAllCodesByWarehouseAreaId(warehouseAreaId: Long) =
+    fun selectAllCodesByWarehouseAreaId(warehouseAreaId: Long) = runBlocking {
         dao.selectDistinctCodesByWarehouseAreaId(warehouseAreaId)
-
-    fun selectAllSerials() = dao.selectDistinctSerials()
-
-    fun selectById(id: Long) = dao.selectById(id)
-
-    fun selectByCode(code: String) = dao.selectByCode(code)
-
-    fun selectBySerial(serial: String) = dao.selectBySerialNumber(serial)
-
-    fun selectByEan(ean: String) = dao.selectByEan(ean)
-
-    fun selectNoTransferred() = ArrayList(dao.selectNoTransferred())
-
-    fun select(onlyActive: Boolean): List<Asset> {
-        return if (onlyActive) dao.selectActive()
-        else dao.select()
     }
 
-    fun selectByWarehouseAreaIdActiveNotRemoved(warehouseAreaId: Long) =
+    fun selectAllSerials() = runBlocking { dao.selectDistinctSerials() }
+
+    fun selectById(id: Long) = runBlocking { dao.selectById(id) }
+
+    fun selectByCode(code: String) = runBlocking { dao.selectByCode(code) }
+
+    fun selectBySerial(serial: String) = runBlocking { dao.selectBySerialNumber(serial) }
+
+    fun selectByEan(ean: String) = runBlocking { dao.selectByEan(ean) }
+
+    fun selectNoTransferred() = runBlocking { ArrayList(dao.selectNoTransferred()) }
+
+    fun select(onlyActive: Boolean): List<Asset> = runBlocking {
+        if (onlyActive) dao.selectActive()
+        dao.select()
+    }
+
+    fun selectByWarehouseAreaIdActiveNotRemoved(warehouseAreaId: Long) = runBlocking {
         dao.selectByWarehouseAreaIdActiveNotRemoved(warehouseAreaId)
+    }
 
     fun codeExists(code: String, assetId: Long): Boolean {
         val r = runBlocking {
@@ -70,7 +70,7 @@ class AssetRepository {
     }
 
 
-    val minId get() = dao.selectMinId() ?: -1
+    val minId get() = runBlocking { dao.selectMinId() ?: -1 }
 
     fun insert(asset: Asset) = runBlocking {
         dao.insert(asset)

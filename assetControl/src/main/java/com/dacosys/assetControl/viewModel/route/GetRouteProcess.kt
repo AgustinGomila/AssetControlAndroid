@@ -71,7 +71,7 @@ class GetRouteProcess(
 
             // Si no hay procesos abiertos para esa ruta, abro uno nuevo
             // Si no utilizo el existente
-            if (rpArray.size <= 0) {
+            if (rpArray.isEmpty()) {
                 // NUEVO PROCESO DE RUTA
                 val rpCollId = processRepository.insert(route)
                 routeProcess = processRepository.selectById(rpCollId)

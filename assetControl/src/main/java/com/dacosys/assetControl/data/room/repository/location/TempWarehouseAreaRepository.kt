@@ -11,7 +11,7 @@ class TempWarehouseAreaRepository {
     private val dao: TempWarehouseAreaDao
         get() = database.tempWarehouseAreaDao()
 
-    fun select() = dao.select()
+    fun select() = runBlocking { dao.select() }
 
     fun insert(ids: List<Long>) = runBlocking {
         val areas = ids.map { TempWarehouseArea(it) }.toList()

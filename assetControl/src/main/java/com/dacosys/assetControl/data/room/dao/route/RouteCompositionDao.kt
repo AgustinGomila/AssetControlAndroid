@@ -10,7 +10,7 @@ import com.dacosys.assetControl.data.room.entity.route.RouteComposition.Entry
 @Dao
 interface RouteCompositionDao {
     @Query("$BASIC_SELECT $BASIC_FROM WHERE ${Entry.ROUTE_ID} = :routeId")
-    fun selectByRouteId(routeId: Long): List<RouteComposition>
+    suspend fun selectByRouteId(routeId: Long): List<RouteComposition>
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

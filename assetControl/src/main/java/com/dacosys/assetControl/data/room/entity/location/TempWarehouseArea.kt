@@ -10,7 +10,7 @@ data class TempWarehouseArea(
     @PrimaryKey @ColumnInfo(name = Entry.TEMP_ID) val tempId: Long
 ) {
     object Entry {
-        const val TEMP_PREFIX = "temp_"
+        private const val TEMP_PREFIX = "temp_"
 
         const val TABLE_NAME = "${TEMP_PREFIX}_warehouse_area"
         const val TEMP_ID = "${TEMP_PREFIX}_id"

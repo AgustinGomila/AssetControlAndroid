@@ -9,7 +9,7 @@ class RouteCompositionRepository {
     private val dao: RouteCompositionDao
         get() = database.routeCompositionDao()
 
-    fun selectByRouteId(routeId: Long) = dao.selectByRouteId(routeId)
+    fun selectByRouteId(routeId: Long) = runBlocking { dao.selectByRouteId(routeId) }
 
 
     fun insert(compositions: List<RouteComposition>) = runBlocking {

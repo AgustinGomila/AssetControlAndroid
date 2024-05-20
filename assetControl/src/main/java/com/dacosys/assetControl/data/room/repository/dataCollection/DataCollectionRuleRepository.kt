@@ -10,27 +10,35 @@ import com.dacosys.assetControl.network.sync.SyncProgress
 import com.dacosys.assetControl.network.sync.SyncRegistryType
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
 class DataCollectionRuleRepository {
     private val dao: DataCollectionRuleDao
         get() = database.dataCollectionRuleDao()
 
-    fun selectById(id: Long) = dao.selectById(id)
+    fun selectById(id: Long) = runBlocking {
+        dao.selectById(id)
+    }
 
-    fun selectByDescription(description: String) = dao.selectByDescription(description)
+    fun selectByDescription(description: String) = runBlocking {
+        dao.selectByDescription(description)
+    }
 
-    fun selectByTargetAssetIdDescription(assetId: Long, description: String, onlyActive: Boolean) =
+    fun selectByTargetAssetIdDescription(assetId: Long, description: String, onlyActive: Boolean) = runBlocking {
         if (onlyActive) dao.selectByTargetAssetIdDescriptionActive(assetId, description)
         else dao.selectByTargetAssetIdDescription(assetId, description)
+    }
 
-    fun selectByTargetWarehouseAreaIdDescription(waId: Long, description: String, onlyActive: Boolean) =
+    fun selectByTargetWarehouseAreaIdDescription(waId: Long, description: String, onlyActive: Boolean) = runBlocking {
         if (onlyActive) dao.selectByTargetWarehouseAreaIdDescriptionActive(waId, description)
         else dao.selectByTargetWarehouseAreaIdDescription(waId, description)
+    }
 
-    fun selectByTargetItemCategoryIdDescription(icId: Long, description: String, onlyActive: Boolean) =
+    fun selectByTargetItemCategoryIdDescription(icId: Long, description: String, onlyActive: Boolean) = runBlocking {
         if (onlyActive) dao.selectByTargetItemCategoryIdDescriptionActive(icId, description)
         else dao.selectByTargetItemCategoryIdDescription(icId, description)
+    }
 
 
     suspend fun sync(

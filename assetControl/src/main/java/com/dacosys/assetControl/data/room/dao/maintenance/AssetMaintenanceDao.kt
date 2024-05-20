@@ -11,21 +11,21 @@ import com.dacosys.assetControl.data.room.entity.maintenance.MaintenanceType
 @Dao
 interface AssetMaintenanceDao {
     @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN $BASIC_ORDER")
-    fun select(): List<AssetMaintenance>
+    suspend fun select(): List<AssetMaintenance>
 
     @Query(
         "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
                 "WHERE ${aEntry.TABLE_NAME}.${aEntry.ACTIVE} = 1 " +
                 BASIC_ORDER
     )
-    fun selectActive(): List<AssetMaintenance>
+    suspend fun selectActive(): List<AssetMaintenance>
 
     @Query(
         "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
                 "WHERE ${Entry.TABLE_NAME}.${Entry.TRANSFERRED} = 0 " +
                 BASIC_ORDER
     )
-    fun selectNoTransferred(): List<AssetMaintenance>
+    suspend fun selectNoTransferred(): List<AssetMaintenance>
 
     @Query(
         "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
@@ -33,10 +33,10 @@ interface AssetMaintenanceDao {
                 "AND ${Entry.TABLE_NAME}.${Entry.ASSET_ID} = :assetId " +
                 BASIC_ORDER
     )
-    fun selectByAssetIdNotTransferred(assetId: Long): AssetMaintenance?
+    suspend fun selectByAssetIdNotTransferred(assetId: Long): AssetMaintenance?
 
     @Query("SELECT MAX(${Entry.ID}) $BASIC_FROM")
-    fun selectMaxId(): Long?
+    suspend fun selectMaxId(): Long?
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -57,7 +57,7 @@ interface AssetMaintenanceDao {
      * @return Una lista de [AssetMaintenance]
      */
     @RawQuery
-    fun getByQuery(query: SupportSQLiteQuery): List<AssetMaintenance>
+    suspend fun getByQuery(query: SupportSQLiteQuery): List<AssetMaintenance>
 
     /**
      * Get multi query
@@ -73,7 +73,7 @@ interface AssetMaintenanceDao {
      * @param onlyActive
      * @return
      */
-    fun getMultiQuery(
+    suspend fun getMultiQuery(
         ean: String = "",
         description: String = "",
         code: String = "",

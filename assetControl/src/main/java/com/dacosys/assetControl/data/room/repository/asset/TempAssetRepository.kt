@@ -9,7 +9,7 @@ class TempAssetRepository {
     private val dao: TempAssetDao
         get() = database.tempAssetDao()
 
-    fun select() = dao.select()
+    fun select() = runBlocking { dao.select() }
 
     fun insert(assets: List<TempAsset>) = runBlocking {
         dao.insert(assets)

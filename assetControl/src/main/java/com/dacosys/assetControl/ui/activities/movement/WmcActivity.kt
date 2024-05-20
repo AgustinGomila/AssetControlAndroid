@@ -206,8 +206,8 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private fun loadBundleValues(b: Bundle) {
         // region Recuperar el título de la ventana
-        val t1 = b.getString("title")
-        tempTitle = if (!t1.isNullOrEmpty()) t1 else getString(R.string.assets_movement)
+        val t1 = b.getString("title") ?: ""
+        tempTitle = t1.ifEmpty { getString(R.string.assets_movement) }
         // endregion
 
         tempWarehouseArea = Parcels.unwrap<WarehouseArea>(b.parcelable("warehouseArea"))

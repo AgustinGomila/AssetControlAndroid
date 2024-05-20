@@ -8,11 +8,11 @@ import com.dacosys.assetControl.data.room.entity.review.TempReviewContent.Entry
 
 @Dao
 interface TempReviewContentDao {
-    @Query("SELECT MAX(${Entry.WAREHOUSE_MOVEMENT_CONTENT_ID}) $BASIC_FROM")
-    fun selectMaxId(): Long?
+    @Query("SELECT MAX(${Entry.ID}) $BASIC_FROM")
+    suspend fun selectMaxId(): Long?
 
-    @Query("$BASIC_SELECT $BASIC_FROM WHERE ${Entry.TABLE_NAME}.${Entry.WAREHOUSE_MOVEMENT_ID} = :arId $BASIC_ORDER")
-    fun selectByTempIds(arId: Long): List<TempReviewContent>
+    @Query("$BASIC_SELECT $BASIC_FROM WHERE ${Entry.TABLE_NAME}.${Entry.ASSET_REVIEW_ID} = :arId $BASIC_ORDER")
+    suspend fun selectByTempIds(arId: Long): List<TempReviewContent>
 
 
     @Insert

@@ -10,7 +10,7 @@ import com.dacosys.assetControl.data.room.entity.asset.TempAsset.Entry
 @Dao
 interface TempAssetDao {
     @Query("$BASIC_SELECT $BASIC_FROM")
-    fun select(): List<TempAsset>
+    suspend fun select(): List<TempAsset>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(assets: List<TempAsset>)

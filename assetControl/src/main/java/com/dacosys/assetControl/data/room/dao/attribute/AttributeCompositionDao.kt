@@ -10,13 +10,13 @@ import com.dacosys.assetControl.data.room.entity.attribute.AttributeComposition.
 @Dao
 interface AttributeCompositionDao {
     @Query("SELECT * FROM ${Entry.TABLE_NAME}")
-    fun select(): List<AttributeComposition>
+    suspend fun select(): List<AttributeComposition>
 
     @Query("SELECT * FROM ${Entry.TABLE_NAME} WHERE ${Entry.ID} = :id")
-    fun selectById(id: Long): AttributeComposition?
+    suspend fun selectById(id: Long): AttributeComposition?
 
     @Query("SELECT * FROM ${Entry.TABLE_NAME} WHERE ${Entry.ATTRIBUTE_ID} = :attrId")
-    fun selectByAttributeId(attrId: Long): List<AttributeComposition>
+    suspend fun selectByAttributeId(attrId: Long): List<AttributeComposition>
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -24,5 +24,5 @@ interface AttributeCompositionDao {
 
 
     @Query("DELETE FROM ${Entry.TABLE_NAME} WHERE ${Entry.ATTRIBUTE_ID} IN (:ids)")
-    fun deleteByIds(ids: List<Long>)
+    suspend fun deleteByIds(ids: List<Long>)
 }

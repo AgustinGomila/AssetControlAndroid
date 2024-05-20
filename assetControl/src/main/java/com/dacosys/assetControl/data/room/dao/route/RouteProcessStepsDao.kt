@@ -12,7 +12,7 @@ import com.dacosys.assetControl.data.room.entity.route.RouteProcessSteps.Entry
 interface RouteProcessStepsDao {
 
     @Query("$BASIC_SELECT $BASIC_FROM WHERE ${Entry.TABLE_NAME}.${Entry.ROUTE_PROCESS_ID} = :routeProcessId $BASIC_ORDER")
-    fun selectByRouteProcessId(routeProcessId: Long): List<RouteProcessSteps>
+    suspend fun selectByRouteProcessId(routeProcessId: Long): List<RouteProcessSteps>
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

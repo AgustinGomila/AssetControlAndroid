@@ -14,16 +14,16 @@ import com.dacosys.assetControl.data.room.entity.review.AssetReviewContent.Entry
 @Dao
 interface AssetReviewContentDao {
     @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN $BASIC_ORDER")
-    fun select(): List<AssetReviewContent>
+    suspend fun select(): List<AssetReviewContent>
 
     @Query("SELECT MIN(${Entry.ID}) $BASIC_FROM")
-    fun selectMinId(): Long?
+    suspend fun selectMinId(): Long?
 
     @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN WHERE ${Entry.TABLE_NAME}.${Entry.ID} = :id")
-    fun selectById(id: Long): AssetReviewContent?
+    suspend fun selectById(id: Long): AssetReviewContent?
 
     @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN WHERE ${Entry.TABLE_NAME}.${Entry.ASSET_REVIEW_ID} = :id")
-    fun selectByAssetReviewId(id: Long): List<AssetReviewContent>
+    suspend fun selectByAssetReviewId(id: Long): List<AssetReviewContent>
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

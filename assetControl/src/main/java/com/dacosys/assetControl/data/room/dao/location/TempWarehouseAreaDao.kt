@@ -10,7 +10,7 @@ import com.dacosys.assetControl.data.room.entity.location.TempWarehouseArea.Entr
 @Dao
 interface TempWarehouseAreaDao {
     @Query("$BASIC_SELECT $BASIC_FROM")
-    fun select(): List<TempWarehouseArea>
+    suspend fun select(): List<TempWarehouseArea>
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

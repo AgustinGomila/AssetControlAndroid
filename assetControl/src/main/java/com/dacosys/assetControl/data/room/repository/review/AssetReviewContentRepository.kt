@@ -15,11 +15,11 @@ class AssetReviewContentRepository {
     private val dao: AssetReviewContentDao
         get() = database.assetReviewContentDao()
 
-    fun select() = dao.select()
+    fun select() = runBlocking { dao.select() }
 
-    fun selectByAssetReviewId(id: Long) = dao.selectByAssetReviewId(id)
+    fun selectByAssetReviewId(id: Long) = runBlocking { dao.selectByAssetReviewId(id) }
 
-    val minId get() = dao.selectMinId() ?: -1
+    val minId get() = runBlocking { dao.selectMinId() ?: -1 }
 
 
     fun insert(review: AssetReview, contents: List<AssetReviewContent>, progress: (SaveProgress) -> Unit) =

@@ -81,7 +81,7 @@ data class AssetReviewContent(
     )
 
     constructor(tContent: TempReviewContent) : this(
-        id = tContent.assetReviewContentId,
+        id = tContent.id,
         assetReviewId = tContent.assetReviewId,
         assetId = tContent.assetId,
         code = tContent.code,

@@ -9,11 +9,11 @@ class AttributeCompositionRepository {
     private val dao: AttributeCompositionDao
         get() = database.attributeCompositionDao()
 
-    fun select() = dao.select()
+    fun select() = runBlocking { dao.select() }
 
-    fun selectById(id: Long) = dao.selectById(id)
+    fun selectById(id: Long) = runBlocking { dao.selectById(id) }
 
-    fun selectByAttributeId(id: Long) = dao.selectByAttributeId(id)
+    fun selectByAttributeId(id: Long) = runBlocking { dao.selectByAttributeId(id) }
 
 
     fun insert(compositions: List<AttributeComposition>) = runBlocking {

@@ -115,7 +115,7 @@ class ScannedCode {
 
             val assetArray = AssetRepository().selectByCode(currentCode)
             try {
-                if (assetArray.size > 0) {
+                if (assetArray.isNotEmpty()) {
                     return ScannedCode(assetArray[0], labelNumber)
                 }
             } catch (ex: Exception) {

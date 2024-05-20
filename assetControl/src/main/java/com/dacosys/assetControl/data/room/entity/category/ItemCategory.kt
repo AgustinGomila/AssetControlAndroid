@@ -42,7 +42,7 @@ data class ItemCategory(
         description = ic.description,
         active = ic.active,
         parentId = ic.parent_id,
-        transferred = 0
+        transferred = 1
     )
 
     object Entry {

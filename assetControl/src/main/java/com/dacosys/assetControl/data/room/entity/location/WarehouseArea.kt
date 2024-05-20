@@ -44,7 +44,7 @@ data class WarehouseArea(
         description = waObj.description,
         mActive = waObj.active,
         warehouseId = waObj.warehouse_id,
-        transferred = 0,
+        transferred = 1,
     )
 
     object Entry {
@@ -106,11 +106,11 @@ data class WarehouseArea(
                 """
             INSERT INTO warehouse_area (
                 `_id`, `description`, `active`,
-                `warehouse_id`, `transferred`  
+                `warehouse_id`, `transferred` 
             )
             SELECT
                 `_id`, `description`, `active`,
-                `warehouse_id`, `transferred` 
+                `warehouse_id`, `transferred`
             FROM warehouse_area_temp
         """.trimIndent()
             )

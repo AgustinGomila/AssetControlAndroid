@@ -8,19 +8,19 @@ import com.dacosys.assetControl.data.room.entity.location.Warehouse.Entry
 @Dao
 interface WarehouseDao {
     @Query("$BASIC_SELECT $BASIC_FROM $BASIC_ORDER")
-    fun select(): List<Warehouse>
+    suspend fun select(): List<Warehouse>
 
     @Query("$BASIC_SELECT $BASIC_FROM WHERE ${Entry.ACTIVE} = 1 $BASIC_ORDER")
-    fun selectActive(): List<Warehouse>
+    suspend fun selectActive(): List<Warehouse>
 
     @Query("SELECT MIN(${Entry.ID}) $BASIC_FROM")
-    fun selectMinId(): Long?
+    suspend fun selectMinId(): Long?
 
     @Query("$BASIC_SELECT $BASIC_FROM WHERE ${Entry.TABLE_NAME}.${Entry.ID} = :id")
-    fun selectById(id: Long): Warehouse?
+    suspend fun selectById(id: Long): Warehouse?
 
     @Query("$BASIC_SELECT $BASIC_FROM WHERE ${Entry.TRANSFERRED} = 0 $BASIC_ORDER")
-    fun selectNoTransferred(): List<Warehouse>
+    suspend fun selectNoTransferred(): List<Warehouse>
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

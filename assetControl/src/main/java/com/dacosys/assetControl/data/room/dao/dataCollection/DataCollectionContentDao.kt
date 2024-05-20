@@ -17,14 +17,14 @@ interface DataCollectionContentDao {
                 "WHERE ${dcEntry.TABLE_NAME}.${dcEntry.COLLECTOR_ROUTE_PROCESS_ID} = :routeProcessId " +
                 BASIC_ORDER
     )
-    fun selectByCollectorRouteProcessId(routeProcessId: Long): List<DataCollectionContent>
+    suspend fun selectByCollectorRouteProcessId(routeProcessId: Long): List<DataCollectionContent>
 
     @Query(
         "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN $SPECIAL_LEFT_JOIN" +
                 "WHERE ${dcEntry.TABLE_NAME}.${Entry.DATA_COLLECTION_ID} = :id " +
                 BASIC_ORDER
     )
-    fun selectByDataCollectionId(id: Long): List<DataCollectionContent>
+    suspend fun selectByDataCollectionId(id: Long): List<DataCollectionContent>
 
     @Query(
         "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN $SPECIAL_LEFT_JOIN" +
@@ -32,7 +32,10 @@ interface DataCollectionContentDao {
                 "AND ${dcEntry.TABLE_NAME}.${dcEntry.ASSET_ID} = :assetId " +
                 BASIC_ORDER
     )
-    fun selectByDataCollectionRuleContentIdAssetId(ruleContentId: Long, assetId: Long): List<DataCollectionContent>
+    suspend fun selectByDataCollectionRuleContentIdAssetId(
+        ruleContentId: Long,
+        assetId: Long
+    ): List<DataCollectionContent>
 
     @Query(
         "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN $SPECIAL_LEFT_JOIN" +
@@ -40,7 +43,10 @@ interface DataCollectionContentDao {
                 "AND ${dcEntry.TABLE_NAME}.${dcEntry.WAREHOUSE_ID} = :wId " +
                 BASIC_ORDER
     )
-    fun selectByDataCollectionRuleContentIdWarehouseId(ruleContentId: Long, wId: Long): List<DataCollectionContent>
+    suspend fun selectByDataCollectionRuleContentIdWarehouseId(
+        ruleContentId: Long,
+        wId: Long
+    ): List<DataCollectionContent>
 
     @Query(
         "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN $SPECIAL_LEFT_JOIN" +
@@ -48,7 +54,10 @@ interface DataCollectionContentDao {
                 "AND ${dcEntry.TABLE_NAME}.${dcEntry.WAREHOUSE_AREA_ID} = :waId " +
                 BASIC_ORDER
     )
-    fun selectByDataCollectionRuleContentIdWarehouseAreaId(ruleContentId: Long, waId: Long): List<DataCollectionContent>
+    suspend fun selectByDataCollectionRuleContentIdWarehouseAreaId(
+        ruleContentId: Long,
+        waId: Long
+    ): List<DataCollectionContent>
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

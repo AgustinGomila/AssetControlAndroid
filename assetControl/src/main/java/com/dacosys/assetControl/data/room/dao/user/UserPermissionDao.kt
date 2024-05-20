@@ -6,6 +6,10 @@ import com.dacosys.assetControl.data.room.entity.user.UserPermission.Entry
 
 @Dao
 interface UserPermissionDao {
+    @Query("$BASIC_SELECT $BASIC_FROM WHERE ${Entry.USER_ID} = :userId AND ${Entry.PERMISSION_ID} = :permissionId")
+    suspend fun selectByUserIdUserPermissionId(userId: Long, permissionId: Long): UserPermission?
+
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(asset: UserPermission)
 
@@ -23,8 +27,6 @@ interface UserPermissionDao {
     @Query("DELETE $BASIC_FROM")
     suspend fun deleteAll()
 
-    @Query("$BASIC_SELECT $BASIC_FROM WHERE ${Entry.USER_ID} = :userId AND ${Entry.PERMISSION_ID} = :permissionId")
-    fun selectByUserIdUserPermissionId(userId: Long, permissionId: Long): UserPermission?
 
     companion object {
         const val BASIC_SELECT = "SELECT ${Entry.TABLE_NAME}.*"

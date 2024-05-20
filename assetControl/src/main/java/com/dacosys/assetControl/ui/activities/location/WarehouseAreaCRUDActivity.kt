@@ -545,5 +545,5 @@ class WarehouseAreaCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
         scannerCompleted(scanCode)
     }
 
-    //endregion READERS Reception    
+    //endregion READERS Reception
 }

@@ -9,17 +9,17 @@ class AssetMaintenanceRepository {
     private val dao: AssetMaintenanceDao
         get() = database.assetMaintenanceCollectorDao()
 
-    fun select(onlyActive: Boolean): List<AssetMaintenance> {
-        return if (onlyActive) dao.selectActive()
+    fun select(onlyActive: Boolean): List<AssetMaintenance> = runBlocking {
+        if (onlyActive) dao.selectActive()
         else dao.select()
     }
 
-    fun selectNoTransferred() = dao.selectNoTransferred()
+    fun selectNoTransferred() = runBlocking { dao.selectNoTransferred() }
 
-    fun selectByAssetIdNotTransferred(assetId: Long) = dao.selectByAssetIdNotTransferred(assetId)
+    fun selectByAssetIdNotTransferred(assetId: Long) = runBlocking { dao.selectByAssetIdNotTransferred(assetId) }
 
     private val nextId: Long
-        get() = (dao.selectMaxId() ?: 0) + 1
+        get() = runBlocking { (dao.selectMaxId() ?: 0) + 1 }
 
 
     fun insert(maintenance: AssetMaintenance) = runBlocking {
@@ -48,15 +48,17 @@ class AssetMaintenanceRepository {
         warehouseAreaId: Long? = null,
         useLike: Boolean = true,
         onlyActive: Boolean = true,
-    ) = dao.getMultiQuery(
-        ean = ean,
-        description = description,
-        code = code,
-        serialNumber = serialNumber,
-        itemCategoryId = itemCategoryId,
-        warehouseId = warehouseId,
-        warehouseAreaId = warehouseAreaId,
-        useLike = useLike,
-        onlyActive = onlyActive
-    )
+    ) = runBlocking {
+        dao.getMultiQuery(
+            ean = ean,
+            description = description,
+            code = code,
+            serialNumber = serialNumber,
+            itemCategoryId = itemCategoryId,
+            warehouseId = warehouseId,
+            warehouseAreaId = warehouseAreaId,
+            useLike = useLike,
+            onlyActive = onlyActive
+        )
+    }
 }

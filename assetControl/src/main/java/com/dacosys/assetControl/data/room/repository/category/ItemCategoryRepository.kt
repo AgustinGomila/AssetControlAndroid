@@ -17,15 +17,16 @@ class ItemCategoryRepository {
     private val dao: ItemCategoryDao
         get() = database.itemCategoryDao()
 
-    fun select(onlyActive: Boolean) =
+    fun select(onlyActive: Boolean) = runBlocking {
         if (onlyActive) dao.selectActive()
         else dao.select()
+    }
 
-    fun selectById(id: Long) = dao.selectById(id)
+    fun selectById(id: Long) = runBlocking { dao.selectById(id) }
 
-    fun selectNoTransferred() = dao.selectNoTransferred()
+    fun selectNoTransferred() = runBlocking { dao.selectNoTransferred() }
 
-    val minId get() = dao.selectMinId() ?: -1
+    val minId get() = runBlocking { dao.selectMinId() ?: -1 }
 
 
     fun insert(category: ItemCategory) {

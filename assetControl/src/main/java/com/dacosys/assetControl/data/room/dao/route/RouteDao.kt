@@ -7,17 +7,17 @@ import com.dacosys.assetControl.data.room.entity.route.Route.Entry
 @Dao
 interface RouteDao {
     @Query("$BASIC_SELECT $BASIC_FROM $BASIC_ORDER")
-    fun select(): List<Route>
+    suspend fun select(): List<Route>
 
     @Query("$BASIC_SELECT $BASIC_FROM WHERE ${Entry.TABLE_NAME}.${Entry.ACTIVE} = 1 $BASIC_ORDER")
-    fun selectActive(): List<Route>
+    suspend fun selectActive(): List<Route>
 
     @Query(
         "$BASIC_SELECT $BASIC_FROM " +
                 "WHERE ${Entry.TABLE_NAME}.${Entry.DESCRIPTION} LIKE '%' || :description || '%'  " +
                 BASIC_ORDER
     )
-    fun selectByDescription(description: String): List<Route>
+    suspend fun selectByDescription(description: String): List<Route>
 
     @Query(
         "$BASIC_SELECT $BASIC_FROM " +
@@ -25,7 +25,7 @@ interface RouteDao {
                 "AND ${Entry.TABLE_NAME}.${Entry.ACTIVE} = 1 " +
                 BASIC_ORDER
     )
-    fun selectByDescriptionOnlyActive(description: String): List<Route>
+    suspend fun selectByDescriptionOnlyActive(description: String): List<Route>
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

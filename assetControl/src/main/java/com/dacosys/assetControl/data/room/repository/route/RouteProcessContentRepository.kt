@@ -14,9 +14,9 @@ class RouteProcessContentRepository {
     private val dao: RouteProcessContentDao
         get() = database.routeProcessContentDao()
 
-    fun select() = dao.select()
+    fun select() = runBlocking { dao.select() }
 
-    fun selectByRouteProcessId(id: Long) = dao.selectByRouteProcessId(id)
+    fun selectByRouteProcessId(id: Long) = runBlocking { dao.selectByRouteProcessId(id) }
 
     fun selectByRouteProcessComplete(
         routeId: Long,
@@ -73,7 +73,7 @@ class RouteProcessContentRepository {
     }
 
 
-    val minId get() = dao.selectMinId() ?: -1
+    val minId get() = runBlocking { dao.selectMinId() ?: -1 }
 
     fun insert(content: RouteProcessContent): Long {
         val r = runBlocking {

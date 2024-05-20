@@ -16,8 +16,8 @@ class UserPermissionRepository {
     private val dao: UserPermissionDao
         get() = database.userPermissionDao()
 
-    fun selectByUserIdUserPermissionId(userId: Long, permissionId: Long): UserPermission? {
-        return dao.selectByUserIdUserPermissionId(userId, permissionId)
+    fun selectByUserIdUserPermissionId(userId: Long, permissionId: Long): UserPermission? = runBlocking {
+        dao.selectByUserIdUserPermissionId(userId, permissionId)
     }
 
 

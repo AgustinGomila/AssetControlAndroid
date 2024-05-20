@@ -9,7 +9,7 @@ class MaintenanceTypeRepository {
     private val dao: MaintenanceTypeDao
         get() = database.maintenanceTypeDao()
 
-    fun getAll(): List<MaintenanceType> = dao.select()
+    fun getAll(): List<MaintenanceType> = runBlocking { dao.select() }
 
 
     fun insert(type: MaintenanceType) = runBlocking {

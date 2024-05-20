@@ -11,10 +11,10 @@ class TempMovementContentRepository {
         get() = database.tempMovementContentDao()
 
     private val nextId: Long
-        get() = (dao.selectMaxId() ?: 0) + 1
+        get() = runBlocking { (dao.selectMaxId() ?: 0) + 1 }
 
     fun selectByTempId(wmId: Long): List<WarehouseMovementContent> {
-        val tempContent = dao.selectByTempIds(wmId)
+        val tempContent = runBlocking { dao.selectByTempIds(wmId) }
 
         val content: ArrayList<WarehouseMovementContent> = arrayListOf()
         tempContent.mapTo(content) { WarehouseMovementContent(it) }
@@ -31,10 +31,12 @@ class TempMovementContentRepository {
         contents.forEach { it.warehouseMovementId = wmId }
 
         val tempContents: ArrayList<TempMovementContent> = arrayListOf()
-        contents.mapTo(tempContents) { TempMovementContent(it) }
+        contents.mapTo(tempContents) {
+            TempMovementContent(it)
+        }
 
         tempContents.forEach {
-            it.warehouseMovementContentId = nextId
+            it.id = nextId
             dao.insert(it)
         }
     }

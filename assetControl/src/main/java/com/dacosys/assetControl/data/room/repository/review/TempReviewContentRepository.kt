@@ -11,15 +11,15 @@ class TempReviewContentRepository {
         get() = database.tempReviewContentDao()
 
     private val nextId: Long
-        get() = (dao.selectMaxId() ?: 0) + 1
+        get() = runBlocking { (dao.selectMaxId() ?: 0) + 1 }
 
-    fun selectByTempId(arId: Long): List<AssetReviewContent> {
+    fun selectByTempId(arId: Long): List<AssetReviewContent> = runBlocking {
         val tempContent = dao.selectByTempIds(arId)
 
         val content: ArrayList<AssetReviewContent> = arrayListOf()
         tempContent.mapTo(content) { AssetReviewContent(it) }
 
-        return content
+        content
     }
 
 
@@ -34,7 +34,7 @@ class TempReviewContentRepository {
         contents.mapTo(tempContents) { TempReviewContent(it) }
 
         tempContents.forEach {
-            it.assetReviewContentId = nextId
+            it.id = nextId
             dao.insert(it)
         }
     }

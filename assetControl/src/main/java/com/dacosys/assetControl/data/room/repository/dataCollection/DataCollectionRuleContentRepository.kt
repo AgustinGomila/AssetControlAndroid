@@ -9,11 +9,15 @@ class DataCollectionRuleContentRepository {
     private val dao: DataCollectionRuleContentDao
         get() = database.dataCollectionRuleContentDao()
 
-    fun selectById(id: Long) = dao.selectById(id)
+    fun selectById(id: Long) = runBlocking { dao.selectById(id) }
 
-    fun selectAttributeCompositionIdByRouteId(routeId: Long) = dao.selectAttributeCompositionIdByRouteId(routeId)
+    fun selectAttributeCompositionIdByRouteId(routeId: Long) = runBlocking {
+        dao.selectAttributeCompositionIdByRouteId(routeId)
+    }
 
-    fun selectByDataCollectionRuleIdActive(ruleId: Long) = dao.selectByDataCollectionRuleIdActive(ruleId)
+    fun selectByDataCollectionRuleIdActive(ruleId: Long) = runBlocking {
+        dao.selectByDataCollectionRuleIdActive(ruleId)
+    }
 
 
     fun insert(ruleContent: DataCollectionRuleContent) = runBlocking {

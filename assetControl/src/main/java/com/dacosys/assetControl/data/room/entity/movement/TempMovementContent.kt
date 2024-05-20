@@ -14,8 +14,8 @@ import com.dacosys.assetControl.data.room.entity.movement.TempMovementContent.En
             name = "IDX_${Entry.TABLE_NAME}_${Entry.WAREHOUSE_MOVEMENT_ID}"
         ),
         Index(
-            value = [Entry.WAREHOUSE_MOVEMENT_CONTENT_ID],
-            name = "IDX_${Entry.TABLE_NAME}_${Entry.WAREHOUSE_MOVEMENT_CONTENT_ID}"
+            value = [Entry.ID],
+            name = "IDX_${Entry.TABLE_NAME}_${Entry.ID}"
         ),
         Index(value = [Entry.ASSET_ID], name = "IDX_${Entry.TABLE_NAME}_${Entry.ASSET_ID}"),
         Index(value = [Entry.CODE], name = "IDX_${Entry.TABLE_NAME}_${Entry.CODE}"),
@@ -40,9 +40,8 @@ import com.dacosys.assetControl.data.room.entity.movement.TempMovementContent.En
 )
 data class TempMovementContent(
     @ColumnInfo(name = Entry.WAREHOUSE_MOVEMENT_ID) var warehouseMovementId: Long,
-    @ColumnInfo(name = Entry.WAREHOUSE_MOVEMENT_CONTENT_ID) var warehouseMovementContentId: Long,
+    @PrimaryKey @ColumnInfo(name = Entry.ID) var id: Long,
     @ColumnInfo(name = Entry.CONTENT_STATUS) val contentStatus: Int,
-    @PrimaryKey
     @ColumnInfo(name = Entry.ASSET_ID) val assetId: Long,
     @ColumnInfo(name = Entry.CODE) val code: String,
     @ColumnInfo(name = Entry.DESCRIPTION) val description: String,
@@ -63,7 +62,7 @@ data class TempMovementContent(
 ) {
     constructor(content: WarehouseMovementContent) : this(
         warehouseMovementId = content.warehouseMovementId,
-        warehouseMovementContentId = 0,
+        id = content.id,
         contentStatus = content.contentStatusId,
         assetId = content.assetId,
         code = content.code,
@@ -86,8 +85,8 @@ data class TempMovementContent(
 
     object Entry {
         const val TABLE_NAME = "temp_warehouse_movement_content"
+        const val ID = "_id"
         const val WAREHOUSE_MOVEMENT_ID = "warehouse_movement_id"
-        const val WAREHOUSE_MOVEMENT_CONTENT_ID = "warehouse_movement_content_id"
         const val CONTENT_STATUS = "content_status"
         const val ASSET_ID = "asset_id"
         const val CODE = "code"

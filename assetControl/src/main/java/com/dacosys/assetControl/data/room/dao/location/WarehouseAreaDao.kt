@@ -8,20 +8,20 @@ import com.dacosys.assetControl.data.room.entity.location.WarehouseArea.Entry
 @Dao
 interface WarehouseAreaDao {
     @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN $BASIC_ORDER")
-    fun select(): List<WarehouseArea>
+    suspend fun select(): List<WarehouseArea>
 
     @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN WHERE ${Entry.TABLE_NAME}.${Entry.ACTIVE} = 1 $BASIC_ORDER")
-    fun selectActive(): List<WarehouseArea>
+    suspend fun selectActive(): List<WarehouseArea>
 
     @Query("SELECT MIN(${Entry.ID}) $BASIC_FROM")
-    fun selectMinId(): Long?
+    suspend fun selectMinId(): Long?
 
     @RewriteQueriesToDropUnusedColumns
     @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN WHERE ${Entry.TABLE_NAME}.${Entry.ID} = :id")
-    fun selectById(id: Long): WarehouseArea?
+    suspend fun selectById(id: Long): WarehouseArea?
 
     @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN WHERE ${Entry.TABLE_NAME}.${Entry.TRANSFERRED} = 0 $BASIC_ORDER")
-    fun selectNoTransferred(): List<WarehouseArea>
+    suspend fun selectNoTransferred(): List<WarehouseArea>
 
     @Query(
         "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
@@ -29,7 +29,7 @@ interface WarehouseAreaDao {
                 "AND ${Entry.TABLE_NAME}.${Entry.DESCRIPTION} LIKE '%' || :waDescription || '%'  " +
                 BASIC_ORDER
     )
-    fun selectByDescription(wDescription: String, waDescription: String): List<WarehouseArea>
+    suspend fun selectByDescription(wDescription: String, waDescription: String): List<WarehouseArea>
 
     @Query(
         "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
@@ -38,14 +38,14 @@ interface WarehouseAreaDao {
                 "AND ${Entry.TABLE_NAME}.${Entry.ACTIVE} = 1 " +
                 BASIC_ORDER
     )
-    fun selectByDescriptionActive(wDescription: String, waDescription: String): List<WarehouseArea>
+    suspend fun selectByDescriptionActive(wDescription: String, waDescription: String): List<WarehouseArea>
 
     @Query(
         "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
                 "WHERE ${Entry.TABLE_NAME}.${Entry.ID} IN (:ids) " +
                 BASIC_ORDER
     )
-    fun selectByTempIds(ids: List<Long>): List<WarehouseArea>
+    suspend fun selectByTempIds(ids: List<Long>): List<WarehouseArea>
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

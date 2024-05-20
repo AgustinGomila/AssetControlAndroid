@@ -8,11 +8,11 @@ import com.dacosys.assetControl.data.room.entity.movement.TempMovementContent.En
 
 @Dao
 interface TempMovementContentDao {
-    @Query("SELECT MAX(${Entry.WAREHOUSE_MOVEMENT_CONTENT_ID}) $BASIC_FROM")
-    fun selectMaxId(): Long?
+    @Query("SELECT MAX(${Entry.ID}) $BASIC_FROM")
+    suspend fun selectMaxId(): Long?
 
     @Query("$BASIC_SELECT $BASIC_FROM WHERE ${Entry.TABLE_NAME}.${Entry.WAREHOUSE_MOVEMENT_ID} = :wmId $BASIC_ORDER")
-    fun selectByTempIds(wmId: Long): List<TempMovementContent>
+    suspend fun selectByTempIds(wmId: Long): List<TempMovementContent>
 
 
     @Insert

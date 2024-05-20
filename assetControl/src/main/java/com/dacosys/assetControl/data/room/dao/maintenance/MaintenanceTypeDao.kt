@@ -7,7 +7,7 @@ import com.dacosys.assetControl.data.room.entity.maintenance.MaintenanceType.Ent
 @Dao
 interface MaintenanceTypeDao {
     @Query("$BASIC_SELECT $BASIC_FROM")
-    fun select(): List<MaintenanceType>
+    suspend fun select(): List<MaintenanceType>
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

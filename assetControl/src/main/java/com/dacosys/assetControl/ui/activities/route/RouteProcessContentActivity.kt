@@ -703,7 +703,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         // Para controlar la transacción //
         // TODO: Eliminar val db = DataBaseHelper.getReadableDb()
 
-        val attrCompDbHelper = AttributeCompositionRepository()
+        val compositionRepository = AttributeCompositionRepository()
 
         // TODO: Eliminar db.beginTransaction()
         try {
@@ -724,7 +724,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
                 // Reemplazar los valores de texto por valores numéricos que puedan ser comparados
                 // a partir del AttributeCompositionId del ParamName
                 val attrCompId = p.paramName.split('.').last().toLong()
-                val attrComp = attrCompDbHelper.selectById(attrCompId)
+                val attrComp = compositionRepository.selectById(attrCompId)
                 var pValue: Int
 
                 if (attrComp!!.attributeCompositionTypeId == AttributeCompositionType.TypeOptions.id) {

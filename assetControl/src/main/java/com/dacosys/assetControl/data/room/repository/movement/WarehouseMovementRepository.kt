@@ -11,7 +11,7 @@ class WarehouseMovementRepository {
     private val dao: WarehouseMovementDao
         get() = database.warehouseMovementDao()
 
-    fun selectByNoTransferred() = ArrayList(dao.selectByNoTransferred())
+    fun selectByNoTransferred() = runBlocking { ArrayList(dao.selectByNoTransferred()) }
 
     suspend fun insert(warehouseMovement: WarehouseMovement) {
         withContext(Dispatchers.IO) {

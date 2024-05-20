@@ -106,7 +106,7 @@ data class WarehouseMovementContent(
     )
 
     constructor(tContent: TempMovementContent) : this(
-        id = tContent.warehouseMovementContentId,
+        id = tContent.id,
         warehouseMovementId = tContent.warehouseMovementId,
         assetId = tContent.assetId,
         code = tContent.code,

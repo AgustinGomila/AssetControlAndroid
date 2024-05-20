@@ -455,5 +455,5 @@ class CodeSelectDialogActivity : AppCompatActivity(),
         scannerCompleted(scanCode)
     }
 
-    //endregion READERS Reception    
+    //endregion READERS Reception
 }

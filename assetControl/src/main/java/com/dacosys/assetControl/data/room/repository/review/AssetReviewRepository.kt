@@ -13,17 +13,19 @@ class AssetReviewRepository {
     private val dao: AssetReviewDao
         get() = database.assetReviewDao()
 
-    fun selectById(id: Long) = dao.selectById(id)
+    fun selectById(id: Long) = runBlocking { dao.selectById(id) }
 
     fun selectByDescription(wDescription: String, waDescription: String, userId: Long, onlyActive: Boolean) =
-        if (onlyActive) dao.selectByDescriptionActive(wDescription, waDescription, userId)
-        else dao.selectByDescription(wDescription, waDescription, userId)
+        runBlocking {
+            if (onlyActive) dao.selectByDescriptionActive(wDescription, waDescription, userId)
+            else dao.selectByDescription(wDescription, waDescription, userId)
+        }
 
-    fun selectByCompleted(userId: Long) = dao.selectByCompleted(userId = userId)
+    fun selectByCompleted(userId: Long) = runBlocking { dao.selectByCompleted(userId = userId) }
 
 
     private val nextId: Long
-        get() = (dao.selectMaxId() ?: 0) + 1
+        get() = runBlocking { (dao.selectMaxId() ?: 0) + 1 }
 
 
     fun insert(warehouseArea: WarehouseArea): Long {

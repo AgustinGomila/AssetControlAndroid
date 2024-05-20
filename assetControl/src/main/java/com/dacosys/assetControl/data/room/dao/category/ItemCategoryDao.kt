@@ -8,20 +8,20 @@ import com.dacosys.assetControl.data.room.entity.category.ItemCategory.Entry
 @Dao
 interface ItemCategoryDao {
     @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM_ALIAS $BASIC_LEFT_JOIN $BASIC_ORDER")
-    fun select(): List<ItemCategory>
+    suspend fun select(): List<ItemCategory>
 
     @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM_ALIAS $BASIC_LEFT_JOIN WHERE $ALIAS.${Entry.ACTIVE} = 1 $BASIC_ORDER")
-    fun selectActive(): List<ItemCategory>
+    suspend fun selectActive(): List<ItemCategory>
 
     @Query("SELECT MIN(${Entry.ID}) $BASIC_FROM")
-    fun selectMinId(): Long?
+    suspend fun selectMinId(): Long?
 
     @RewriteQueriesToDropUnusedColumns
     @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM_ALIAS $BASIC_LEFT_JOIN WHERE $ALIAS.${Entry.ID} = :id")
-    fun selectById(id: Long): ItemCategory?
+    suspend fun selectById(id: Long): ItemCategory?
 
     @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM_ALIAS $BASIC_LEFT_JOIN WHERE $ALIAS.${Entry.TRANSFERRED} = 0 $BASIC_ORDER")
-    fun selectNoTransferred(): List<ItemCategory>
+    suspend fun selectNoTransferred(): List<ItemCategory>
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

@@ -18,14 +18,16 @@ class WarehouseRepository {
     private val dao: WarehouseDao
         get() = database.warehouseDao()
 
-    fun select(onlyActive: Boolean) =
-        if (onlyActive) dao.selectActive() else dao.select()
+    fun select(onlyActive: Boolean) = runBlocking {
+        if (onlyActive) dao.selectActive()
+        else dao.select()
+    }
 
-    fun selectById(id: Long) = dao.selectById(id)
+    fun selectById(id: Long) = runBlocking { dao.selectById(id) }
 
-    fun selectNoTransferred() = ArrayList(dao.selectNoTransferred())
+    fun selectNoTransferred() = runBlocking { ArrayList(dao.selectNoTransferred()) }
 
-    val minId get() = dao.selectMinId() ?: -1
+    val minId get() = runBlocking { dao.selectMinId() ?: -1 }
 
 
     fun insert(warehouse: Warehouse) = runBlocking {

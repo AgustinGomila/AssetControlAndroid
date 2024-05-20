@@ -10,19 +10,22 @@ import com.dacosys.assetControl.network.sync.SyncProgress
 import com.dacosys.assetControl.network.sync.SyncRegistryType
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
 class RouteRepository {
     private val dao: RouteDao
         get() = database.routeDao()
 
-    fun select(onlyActive: Boolean) =
+    fun select(onlyActive: Boolean) = runBlocking {
         if (onlyActive) dao.select()
         else dao.selectActive()
+    }
 
-    fun selectByDescription(desc: String, onlyActive: Boolean) =
+    fun selectByDescription(desc: String, onlyActive: Boolean) = runBlocking {
         if (onlyActive) dao.selectByDescription(desc)
         else dao.selectByDescriptionOnlyActive(desc)
+    }
 
 
     suspend fun sync(

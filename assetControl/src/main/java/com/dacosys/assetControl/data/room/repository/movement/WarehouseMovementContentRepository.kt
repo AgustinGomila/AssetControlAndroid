@@ -14,7 +14,7 @@ class WarehouseMovementContentRepository {
     private val dao: WarehouseMovementContentDao
         get() = database.warehouseMovementContentDao()
 
-    fun selectByWarehouseMovementId(wmId: Long) = dao.selectByWarehouseMovementId(wmId)
+    fun selectByWarehouseMovementId(wmId: Long) = runBlocking { dao.selectByWarehouseMovementId(wmId) }
 
 
     fun insert(
