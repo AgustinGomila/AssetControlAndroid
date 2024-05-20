@@ -22,7 +22,7 @@ class MaintenanceTypeObject() : Parcelable {
         // Main Information
         description = maintenanceType.description
         manteinance_type_id = maintenanceType.id
-        manteinance_type_group_id = maintenanceType.manteinanceTypeGroupId
+        manteinance_type_group_id = maintenanceType.maintenanceTypeGroupId
         active = maintenanceType.active
     }
 

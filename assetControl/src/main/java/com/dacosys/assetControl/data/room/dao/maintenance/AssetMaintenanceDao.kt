@@ -164,6 +164,6 @@ interface AssetMaintenanceDao {
         const val BASIC_JOIN_FIELDS =
             "${aEntry.TABLE_NAME}.${aEntry.DESCRIPTION} AS ${Entry.ASSET_STR}," +
                     "${aEntry.TABLE_NAME}.${aEntry.CODE} AS ${Entry.ASSET_CODE}," +
-                    "${mtEntry.TABLE_NAME}.${mtEntry.DESCRIPTION} AS ${Entry.MANTEINANCE_TYPE_STR}"
+                    "${mtEntry.TABLE_NAME}.${mtEntry.DESCRIPTION} AS ${Entry.MAINTENANCE_TYPE_STR}"
     }
 }

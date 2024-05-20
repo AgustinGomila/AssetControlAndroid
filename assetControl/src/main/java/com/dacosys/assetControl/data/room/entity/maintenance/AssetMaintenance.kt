@@ -95,14 +95,14 @@ data class AssetMaintenance(
         const val ID = "_id"
         const val ASSET_ID = "asset_id"
         const val OBSERVATIONS = "observations"
-        const val TRANSFERRED = "transfered"
+        const val TRANSFERRED = "transferred"
         const val MAINTENANCE_STATUS_ID = "maintenance_status_id"
         const val ASSET_MAINTENANCE_ID = "asset_maintenance_id"
         const val MAINTENANCE_TYPE_ID = "maintenance_type_id"
 
         const val ASSET_STR = "asset_str"
         const val ASSET_CODE = "asset_code"
-        const val MANTEINANCE_TYPE_STR = "manteinance_type_str"
+        const val MAINTENANCE_TYPE_STR = "maintenance_type_str"
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -129,6 +129,57 @@ data class AssetMaintenance(
 
         override fun newArray(size: Int): Array<AssetMaintenance?> {
             return arrayOfNulls(size)
+        }
+
+        /**
+         * Migration zero
+         * Migración desde la base de datos SQLite (version 0) a la primera versión de Room.
+         * No utilizar constantes para la definición de nombres para evitar incoherencias en el futuro.
+         * @return
+         */
+        fun migrationZero(): List<String> {
+            val r: ArrayList<String> = arrayListOf()
+            r.add("ALTER TABLE asset_manteinance_collector RENAME TO asset_manteinance_collector_temp")
+            r.add(
+                """
+            CREATE TABLE IF NOT EXISTS `asset_maintenance`
+            (
+                `_id`                   INTEGER NOT NULL,
+                `asset_id`              INTEGER NOT NULL,
+                `observations`          TEXT,
+                `transferred`           INTEGER,
+                `maintenance_status_id` INTEGER NOT NULL,
+                `asset_maintenance_id`  INTEGER NOT NULL,
+                `maintenance_type_id`   INTEGER NOT NULL,
+                PRIMARY KEY (`_id`)
+            );
+        """.trimIndent()
+            )
+            r.add(
+                """
+            INSERT INTO asset_maintenance (
+                _id, asset_id, observations, transferred,
+                maintenance_status_id, asset_maintenance_id,
+                maintenance_type_id
+            )
+            SELECT
+                _id, asset_id, observations, transfered,
+                manteinance_status_id, asset_manteinance_id,
+                manteinance_type_id
+            FROM asset_manteinance_collector_temp
+        """.trimIndent()
+            )
+            r.add("DROP TABLE asset_manteinance_collector_temp")
+            r.add("DROP INDEX IF EXISTS `IDX_asset_manteinance_collector_manteinance_status_id`;")
+            r.add("DROP INDEX IF EXISTS `IDX_asset_manteinance_collector_asset_manteinance_id`;")
+            r.add("DROP INDEX IF EXISTS `IDX_asset_manteinance_collector_manteinance_type_id`;")
+            r.add("DROP INDEX IF EXISTS `IDX_asset_manteinance_collector__id`;")
+            r.add("CREATE INDEX IF NOT EXISTS `IDX_asset_maintenance_asset_id` ON `asset_maintenance` (`asset_id`);")
+            r.add("CREATE INDEX IF NOT EXISTS `IDX_asset_maintenance_maintenance_status_id` ON `asset_maintenance` (`maintenance_status_id`);")
+            r.add("CREATE INDEX IF NOT EXISTS `IDX_asset_maintenance_asset_maintenance_id` ON `asset_maintenance` (`asset_maintenance_id`);")
+            r.add("CREATE INDEX IF NOT EXISTS `IDX_asset_maintenance_maintenance_type_id` ON `asset_maintenance` (`maintenance_type_id`);")
+            r.add("CREATE INDEX IF NOT EXISTS `IDX_asset_maintenance__id` ON `asset_maintenance` (`_id`);")
+            return r
         }
     }
 }

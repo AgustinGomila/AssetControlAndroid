@@ -159,16 +159,6 @@ data class AssetReviewContent(
         const val EAN = "ean"
     }
 
-    companion object CREATOR : Parcelable.Creator<AssetReviewContent> {
-        override fun createFromParcel(parcel: Parcel): AssetReviewContent {
-            return AssetReviewContent(parcel)
-        }
-
-        override fun newArray(size: Int): Array<AssetReviewContent?> {
-            return arrayOfNulls(size)
-        }
-    }
-
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeLong(id)
         parcel.writeLong(assetReviewId)
@@ -195,5 +185,68 @@ data class AssetReviewContent(
 
     override fun describeContents(): Int {
         return 0
+    }
+
+    companion object CREATOR : Parcelable.Creator<AssetReviewContent> {
+        override fun createFromParcel(parcel: Parcel): AssetReviewContent {
+            return AssetReviewContent(parcel)
+        }
+
+        override fun newArray(size: Int): Array<AssetReviewContent?> {
+            return arrayOfNulls(size)
+        }
+
+        /**
+         * Migration zero
+         * Migración desde la base de datos SQLite (version 0) a la primera versión de Room.
+         * No utilizar constantes para la definición de nombres para evitar incoherencias en el futuro.
+         * @return
+         */
+        fun migrationZero(): List<String> {
+            val r: ArrayList<String> = arrayListOf()
+            r.add("ALTER TABLE asset_review_content RENAME TO asset_review_content_temp")
+            r.add(
+                """
+            CREATE TABLE IF NOT EXISTS `asset_review_content`
+            (
+                `_id`                      INTEGER NOT NULL,
+                `asset_review_id`          INTEGER NOT NULL,
+                `asset_id`                 INTEGER NOT NULL,
+                `code`                     TEXT    NOT NULL,
+                `description`              TEXT    NOT NULL,
+                `qty`                      REAL,
+                `content_status_id`        INTEGER NOT NULL,
+                `origin_warehouse_area_id` INTEGER NOT NULL,
+                PRIMARY KEY (`_id`)
+            );
+        """.trimIndent()
+            )
+            r.add(
+                """
+            INSERT INTO asset_review_content (
+                _id, asset_review_id,
+                asset_id, code, description,
+                qty, content_status_id, origin_warehouse_area_id
+            )
+            SELECT
+                asset_review_content_id, asset_review_id,
+                asset_id, code, description,
+                qty, content_status_id, origin_warehouse_area_id
+            FROM asset_review_content_temp
+        """.trimIndent()
+            )
+            r.add("DROP TABLE asset_review_content_temp")
+            r.add("DROP INDEX IF EXISTS `IDX_asset_review_content_asset_review_id`;")
+            r.add("DROP INDEX IF EXISTS `IDX_asset_review_content_asset_id`;")
+            r.add("DROP INDEX IF EXISTS `IDX_asset_review_content_code`;")
+            r.add("DROP INDEX IF EXISTS `IDX_asset_review_content_description`;")
+            r.add("DROP INDEX IF EXISTS `IDX_asset_review_content_origin_warehouse_area_id`;")
+            r.add("CREATE INDEX IF NOT EXISTS `IDX_asset_review_content_asset_review_id` ON `asset_review_content` (`asset_review_id`);")
+            r.add("CREATE INDEX IF NOT EXISTS `IDX_asset_review_content_asset_id` ON `asset_review_content` (`asset_id`);")
+            r.add("CREATE INDEX IF NOT EXISTS `IDX_asset_review_content_code` ON `asset_review_content` (`code`);")
+            r.add("CREATE INDEX IF NOT EXISTS `IDX_asset_review_content_description` ON `asset_review_content` (`description`);")
+            r.add("CREATE INDEX IF NOT EXISTS `IDX_asset_review_content_origin_warehouse_area_id` ON `asset_review_content` (`origin_warehouse_area_id`);")
+            return r
+        }
     }
 }

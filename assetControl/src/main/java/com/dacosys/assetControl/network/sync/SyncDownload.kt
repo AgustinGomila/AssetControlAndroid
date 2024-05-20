@@ -1491,7 +1491,7 @@ class SyncDownload(
                                 id = obj.manteinance_type_id,
                                 description = obj.description,
                                 active = obj.active,
-                                manteinanceTypeGroupId = obj.manteinance_type_group_id
+                                maintenanceTypeGroupId = obj.manteinance_type_group_id
                             )
 
                             if (typeRepository.update(maintenanceType)) {

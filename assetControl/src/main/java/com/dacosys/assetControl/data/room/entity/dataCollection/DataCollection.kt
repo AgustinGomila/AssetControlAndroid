@@ -103,7 +103,7 @@ data class DataCollection(
         const val DATE_START = "date_start"
         const val DATE_END = "date_end"
         const val COMPLETED = "completed"
-        const val TRANSFERRED_DATE = "transfered_date"
+        const val TRANSFERRED_DATE = "transferred_date"
         const val ID = "_id"
         const val COLLECTOR_ROUTE_PROCESS_ID = "collector_route_process_id"
 
@@ -143,7 +143,68 @@ data class DataCollection(
         override fun newArray(size: Int): Array<DataCollection?> {
             return arrayOfNulls(size)
         }
-    }
 
+        /**
+         * Migration zero
+         * Migración desde la base de datos SQLite (version 0) a la primera versión de Room.
+         * No utilizar constantes para la definición de nombres para evitar incoherencias en el futuro.
+         * @return
+         */
+        fun migrationZero(): List<String> {
+            val r: ArrayList<String> = arrayListOf()
+            r.add("ALTER TABLE data_collection RENAME TO data_collection_temp")
+            r.add(
+                """
+            CREATE TABLE IF NOT EXISTS `data_collection`
+            (
+                `data_collection_id`         INTEGER NOT NULL,
+                `asset_id`                   INTEGER,
+                `warehouse_id`               INTEGER,
+                `warehouse_area_id`          INTEGER,
+                `user_id`                    INTEGER NOT NULL,
+                `date_start`                 INTEGER,
+                `date_end`                   INTEGER,
+                `completed`                  INTEGER NOT NULL,
+                `transferred_date`           INTEGER,
+                `_id`                        INTEGER NOT NULL,
+                `collector_route_process_id` INTEGER NOT NULL,
+                PRIMARY KEY (`data_collection_id`)
+            );
+        """.trimIndent()
+            )
+            r.add(
+                """
+            INSERT INTO data_collection (
+                data_collection_id, asset_id, warehouse_id, warehouse_area_id,
+                user_id, date_start, date_end,
+                completed, transferred_date, _id,
+                collector_route_process_id
+            )
+            SELECT
+               data_collection_id, asset_id, warehouse_id, warehouse_area_id,
+                user_id, date_start, date_end,
+                completed, transfered_date, _id,
+                collector_route_process_id
+            FROM data_collection_temp
+        """.trimIndent()
+            )
+            r.add("DROP TABLE data_collection_temp")
+            r.add("DROP INDEX IF EXISTS `IDX_data_collection_data_collection_id`;")
+            r.add("DROP INDEX IF EXISTS `IDX_data_collection_asset_id`;")
+            r.add("DROP INDEX IF EXISTS `IDX_data_collection_warehouse_id`;")
+            r.add("DROP INDEX IF EXISTS `IDX_data_collection_warehouse_area_id`;")
+            r.add("DROP INDEX IF EXISTS `IDX_data_collection_user_id`;")
+            r.add("DROP INDEX IF EXISTS `IDX_data_collection__id`;")
+            r.add("DROP INDEX IF EXISTS `IDX_data_collection_collector_route_process_id`;")
+            r.add("CREATE INDEX IF NOT EXISTS `IDX_data_collection_data_collection_id` ON `data_collection` (`data_collection_id`);")
+            r.add("CREATE INDEX IF NOT EXISTS `IDX_data_collection_asset_id` ON `data_collection` (`asset_id`);")
+            r.add("CREATE INDEX IF NOT EXISTS `IDX_data_collection_warehouse_id` ON `data_collection` (`warehouse_id`);")
+            r.add("CREATE INDEX IF NOT EXISTS `IDX_data_collection_warehouse_area_id` ON `data_collection` (`warehouse_area_id`);")
+            r.add("CREATE INDEX IF NOT EXISTS `IDX_data_collection_user_id` ON `data_collection` (`user_id`);")
+            r.add("CREATE INDEX IF NOT EXISTS `IDX_data_collection__id` ON `data_collection` (`_id`);")
+            r.add("CREATE INDEX IF NOT EXISTS `IDX_data_collection_collector_route_process_id` ON `data_collection` (`collector_route_process_id`);")
+            return r
+        }
+    }
 }
 

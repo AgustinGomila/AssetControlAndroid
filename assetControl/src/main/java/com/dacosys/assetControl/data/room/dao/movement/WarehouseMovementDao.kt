@@ -9,7 +9,7 @@ import java.util.*
 interface WarehouseMovementDao {
     @Query(
         "$BASIC_SELECT $BASIC_FROM " +
-                "WHERE ${Entry.TABLE_NAME}.${Entry.TRANSFERED_DATE} IS NULL " +
+                "WHERE ${Entry.TABLE_NAME}.${Entry.TRANSFERRED_DATE} IS NULL " +
                 "AND ${Entry.TABLE_NAME}.${Entry.COMPLETED} = 1"
     )
     fun selectByNoTransferred(): List<WarehouseMovement>
@@ -32,14 +32,14 @@ interface WarehouseMovementDao {
     @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.DESTINATION_WAREHOUSE_ID} = :newValue WHERE ${Entry.DESTINATION_WAREHOUSE_ID} = :oldValue")
     suspend fun updateDestinationWarehouseId(oldValue: Long, newValue: Long)
 
-    @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.ID} = :newValue, ${Entry.TRANSFERED_DATE} = :date WHERE ${Entry.ID} = :oldValue")
+    @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.ID} = :newValue, ${Entry.TRANSFERRED_DATE} = :date WHERE ${Entry.ID} = :oldValue")
     suspend fun updateId(oldValue: Long, newValue: Long, date: Date = Date())
 
 
     @Query("DELETE $BASIC_FROM WHERE ${Entry.ID} = :id")
     suspend fun deleteById(id: Long)
 
-    @Query("DELETE $BASIC_FROM WHERE ${Entry.TRANSFERED_DATE} IS NOT NULL")
+    @Query("DELETE $BASIC_FROM WHERE ${Entry.TRANSFERRED_DATE} IS NOT NULL")
     suspend fun deleteTransferred()
 
 

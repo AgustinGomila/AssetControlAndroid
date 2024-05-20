@@ -61,6 +61,42 @@ data class DataCollectionRule(
         override fun newArray(size: Int): Array<DataCollectionRule?> {
             return arrayOfNulls(size)
         }
+
+        /**
+         * Migration zero
+         * Migración desde la base de datos SQLite (version 0) a la primera versión de Room.
+         * No utilizar constantes para la definición de nombres para evitar incoherencias en el futuro.
+         * @return
+         */
+        fun migrationZero(): List<String> {
+            val r: ArrayList<String> = arrayListOf()
+            r.add("ALTER TABLE data_collection_rule RENAME TO data_collection_rule_temp")
+            r.add(
+                """
+            CREATE TABLE IF NOT EXISTS `data_collection_rule`
+            (
+                `_id`         INTEGER NOT NULL,
+                `description` TEXT    NOT NULL,
+                `active`      INTEGER NOT NULL,
+                PRIMARY KEY (`_id`)
+            );
+        """.trimIndent()
+            )
+            r.add(
+                """
+            INSERT INTO data_collection_rule (
+                `_id`, `description`, `active`
+            )
+            SELECT
+                `_id`, `description`, `active`
+            FROM data_collection_rule_temp
+        """.trimIndent()
+            )
+            r.add("DROP TABLE data_collection_rule_temp")
+            r.add("DROP INDEX IF EXISTS `IDX_data_collection_rule_description`;")
+            r.add("CREATE INDEX IF NOT EXISTS `IDX_data_collection_rule_description` ON `data_collection_rule` (`description`);")
+            return r
+        }
     }
 }
 

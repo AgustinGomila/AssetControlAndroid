@@ -71,8 +71,8 @@ data class RouteProcess(
         const val ROUTE_ID = "route_id"
         const val ROUTE_PROCESS_DATE = "route_process_date"
         const val COMPLETED = "completed"
-        const val TRANSFERRED = "transfered"
-        const val TRANSFERRED_DATE = "transfered_date"
+        const val TRANSFERRED = "transferred"
+        const val TRANSFERRED_DATE = "transferred_date"
         const val ROUTE_PROCESS_ID = "route_process_id"
         const val ID = "_id"
 
@@ -102,6 +102,55 @@ data class RouteProcess(
 
         override fun newArray(size: Int): Array<RouteProcess?> {
             return arrayOfNulls(size)
+        }
+
+        /**
+         * Migration zero
+         * Migración desde la base de datos SQLite (version 0) a la primera versión de Room.
+         * No utilizar constantes para la definición de nombres para evitar incoherencias en el futuro.
+         * @return
+         */
+        fun migrationZero(): List<String> {
+            val r: ArrayList<String> = arrayListOf()
+            r.add("ALTER TABLE route_process RENAME TO route_process_temp")
+            r.add(
+                """
+            CREATE TABLE IF NOT EXISTS `route_process`
+            (
+                `user_id`            INTEGER NOT NULL,
+                `route_id`           INTEGER NOT NULL,
+                `route_process_id`   INTEGER NOT NULL,
+                `route_process_date` INTEGER NOT NULL,
+                `completed`          INTEGER NOT NULL,
+                `transferred`        INTEGER,
+                `transferred_date`   INTEGER,
+                `_id`                INTEGER NOT NULL,
+                PRIMARY KEY (`_id`)
+            );
+        """.trimIndent()
+            )
+            r.add(
+                """
+            INSERT INTO route_process (
+                `user_id`, `route_id`, `route_process_id`,
+                `route_process_date`, `completed`,
+                `transferred`, `transferred_date`, `_id`
+            )
+            SELECT
+                `user_id`, `route_id`, `route_process_id`,
+                `route_process_date`, `completed`,
+                `transfered`, `transfered_date`, `_id`
+            FROM route_process_temp
+        """.trimIndent()
+            )
+            r.add("DROP TABLE route_process_temp")
+            r.add("DROP INDEX IF EXISTS `IDX_route_process_user_id`;")
+            r.add("DROP INDEX IF EXISTS `IDX_route_process_route_id`;")
+            r.add("DROP INDEX IF EXISTS `IDX_route_process_route_process_id`;")
+            r.add("CREATE INDEX IF NOT EXISTS `IDX_route_process_user_id` ON `route_process` (`user_id`);")
+            r.add("CREATE INDEX IF NOT EXISTS `IDX_route_process_route_id` ON `route_process` (`route_id`);")
+            r.add("CREATE INDEX IF NOT EXISTS `IDX_route_process_route_process_id` ON `route_process` (`route_process_id`);")
+            return r
         }
     }
 }

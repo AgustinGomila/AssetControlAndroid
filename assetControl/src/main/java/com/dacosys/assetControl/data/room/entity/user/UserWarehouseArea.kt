@@ -40,4 +40,49 @@ data class UserWarehouseArea(
         count = uwaObj.count,
         check = uwaObj.check
     )
+
+    companion object {
+        /**
+         * Migration zero
+         * Migración desde la base de datos SQLite (version 0) a la primera versión de Room.
+         * No utilizar constantes para la definición de nombres para evitar incoherencias en el futuro.
+         * @return
+         */
+        fun migrationZero(): List<String> {
+            val r: ArrayList<String> = arrayListOf()
+            r.add("ALTER TABLE user_warehouse_area RENAME TO user_warehouse_area_temp")
+            r.add(
+                """
+            CREATE TABLE IF NOT EXISTS `user_warehouse_area`
+            (
+                `user_id`           INTEGER NOT NULL,
+                `warehouse_area_id` INTEGER NOT NULL,
+                `see`               INTEGER NOT NULL,
+                `move`              INTEGER NOT NULL,
+                `count`             INTEGER NOT NULL,
+                `check`             INTEGER NOT NULL,
+                PRIMARY KEY (`user_id`, `warehouse_area_id`)
+            );
+        """.trimIndent()
+            )
+            r.add(
+                """
+            INSERT INTO user_warehouse_area (
+                `user_id`, `warehouse_area_id`,
+                `see`, `move`, `count`, `check`
+            )
+            SELECT
+                `user_id`, `warehouse_area_id`,
+                `see`, `move`, `count`, `check`
+            FROM user_warehouse_area_temp
+        """.trimIndent()
+            )
+            r.add("DROP TABLE user_warehouse_area_temp")
+            r.add("DROP INDEX IF EXISTS `IDX_user_warehouse_area_user_id`;")
+            r.add("DROP INDEX IF EXISTS `IDX_user_warehouse_area_warehouse_area_id`;")
+            r.add("CREATE INDEX IF NOT EXISTS `IDX_user_warehouse_area_user_id` ON `user_warehouse_area` (`user_id`);")
+            r.add("CREATE INDEX IF NOT EXISTS `IDX_user_warehouse_area_warehouse_area_id` ON `user_warehouse_area` (`warehouse_area_id`);")
+            return r
+        }
+    }
 }

@@ -194,7 +194,7 @@ class MaintenanceTypeSpinnerFragment : Fragment() {
                     id = 0,
                     description = getString(R.string.no_maintenances),
                     active = 1,
-                    manteinanceTypeGroupId = 0
+                    maintenanceTypeGroupId = 0
                 )
             )
         } else if (showGeneralLevel) {
@@ -203,7 +203,7 @@ class MaintenanceTypeSpinnerFragment : Fragment() {
                     id = 0,
                     description = getString(R.string.nothing_selected),
                     active = 1,
-                    manteinanceTypeGroupId = 0
+                    maintenanceTypeGroupId = 0
                 )
             )
         }

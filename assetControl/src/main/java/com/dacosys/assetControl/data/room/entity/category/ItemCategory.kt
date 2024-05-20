@@ -51,7 +51,7 @@ data class ItemCategory(
         const val DESCRIPTION = "description"
         const val ACTIVE = "active"
         const val PARENT_ID = "parent_id"
-        const val TRANSFERRED = "transfered"
+        const val TRANSFERRED = "transferred"
 
         const val PARENT_STR = "parent_str"
     }
@@ -76,6 +76,48 @@ data class ItemCategory(
 
         override fun newArray(size: Int): Array<ItemCategory?> {
             return arrayOfNulls(size)
+        }
+
+        /**
+         * Migration zero
+         * Migración desde la base de datos SQLite (version 0) a la primera versión de Room.
+         * No utilizar constantes para la definición de nombres para evitar incoherencias en el futuro.
+         * @return
+         */
+        fun migrationZero(): List<String> {
+            val r: ArrayList<String> = arrayListOf()
+            r.add("ALTER TABLE item_category RENAME TO item_category_temp")
+            r.add(
+                """
+            CREATE TABLE IF NOT EXISTS `item_category`
+            (
+                `_id`         INTEGER NOT NULL,
+                `description` TEXT    NOT NULL,
+                `active`      INTEGER NOT NULL,
+                `parent_id`   INTEGER NOT NULL,
+                `transferred` INTEGER,
+                PRIMARY KEY (`_id`)
+            );
+        """.trimIndent()
+            )
+            r.add(
+                """
+            INSERT INTO item_category (
+                `_id`, `description`, `active`,
+                `parent_id`, `transferred`
+            )
+            SELECT
+                `_id`, `description`, `active`,
+                `parent_id`, `transferred`
+            FROM item_category_temp
+        """.trimIndent()
+            )
+            r.add("DROP TABLE item_category_temp")
+            r.add("DROP INDEX IF EXISTS `IDX_item_category_description`;")
+            r.add("DROP INDEX IF EXISTS `IDX_item_category_parent_id`;")
+            r.add("CREATE INDEX IF NOT EXISTS `IDX_item_category_description` ON `item_category` (`description`);")
+            r.add("CREATE INDEX IF NOT EXISTS `IDX_item_category_parent_id` ON `item_category` (`parent_id`);")
+            return r
         }
     }
 }

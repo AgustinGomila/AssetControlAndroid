@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "4b1c4bc453ef7099e4247e4bddcfdefa",
+    "identityHash": "486c994e9e261a6da726faa6728eb512",
     "entities": [
       {
         "tableName": "asset",
@@ -220,7 +220,7 @@
       },
       {
         "tableName": "asset_maintenance_collector",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER NOT NULL, `asset_id` INTEGER NOT NULL, `observations` TEXT, `transfered` INTEGER, `maintenance_status_id` INTEGER NOT NULL, `asset_maintenance_id` INTEGER NOT NULL, `maintenance_type_id` INTEGER NOT NULL, PRIMARY KEY(`_id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER NOT NULL, `asset_id` INTEGER NOT NULL, `observations` TEXT, `transferred` INTEGER, `maintenance_status_id` INTEGER NOT NULL, `asset_maintenance_id` INTEGER NOT NULL, `maintenance_type_id` INTEGER NOT NULL, PRIMARY KEY(`_id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -242,7 +242,7 @@
           },
           {
             "fieldPath": "mTransferred",
-            "columnName": "transfered",
+            "columnName": "transferred",
             "affinity": "INTEGER",
             "notNull": false
           },
@@ -862,7 +862,7 @@
       },
       {
         "tableName": "data_collection",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`data_collection_id` INTEGER NOT NULL, `asset_id` INTEGER, `warehouse_id` INTEGER, `warehouse_area_id` INTEGER, `user_id` INTEGER NOT NULL, `date_start` INTEGER, `date_end` INTEGER, `completed` INTEGER NOT NULL, `transfered_date` INTEGER, `_id` INTEGER NOT NULL, `collector_route_process_id` INTEGER NOT NULL, PRIMARY KEY(`data_collection_id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`data_collection_id` INTEGER NOT NULL, `asset_id` INTEGER, `warehouse_id` INTEGER, `warehouse_area_id` INTEGER, `user_id` INTEGER NOT NULL, `date_start` INTEGER, `date_end` INTEGER, `completed` INTEGER NOT NULL, `transferred_date` INTEGER, `_id` INTEGER NOT NULL, `collector_route_process_id` INTEGER NOT NULL, PRIMARY KEY(`data_collection_id`))",
         "fields": [
           {
             "fieldPath": "dataCollectionId",
@@ -914,7 +914,7 @@
           },
           {
             "fieldPath": "transferredDate",
-            "columnName": "transfered_date",
+            "columnName": "transferred_date",
             "affinity": "INTEGER",
             "notNull": false
           },
@@ -1429,7 +1429,7 @@
       },
       {
         "tableName": "item_category",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER NOT NULL, `description` TEXT NOT NULL, `active` INTEGER NOT NULL, `parent_id` INTEGER NOT NULL, `transfered` INTEGER, PRIMARY KEY(`_id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER NOT NULL, `description` TEXT NOT NULL, `active` INTEGER NOT NULL, `parent_id` INTEGER NOT NULL, `transferred` INTEGER, PRIMARY KEY(`_id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -1457,7 +1457,7 @@
           },
           {
             "fieldPath": "transferred",
-            "columnName": "transfered",
+            "columnName": "transferred",
             "affinity": "INTEGER",
             "notNull": false
           }
@@ -1491,7 +1491,7 @@
         "foreignKeys": []
       },
       {
-        "tableName": "manteinance_status",
+        "tableName": "maintenance_status",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER NOT NULL, `description` TEXT NOT NULL, PRIMARY KEY(`_id`))",
         "fields": [
           {
@@ -1515,29 +1515,29 @@
         },
         "indices": [
           {
-            "name": "IDX_manteinance_status__id",
+            "name": "IDX_maintenance_status__id",
             "unique": false,
             "columnNames": [
               "_id"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_manteinance_status__id` ON `${TABLE_NAME}` (`_id`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_maintenance_status__id` ON `${TABLE_NAME}` (`_id`)"
           },
           {
-            "name": "IDX_manteinance_status_description",
+            "name": "IDX_maintenance_status_description",
             "unique": false,
             "columnNames": [
               "description"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_manteinance_status_description` ON `${TABLE_NAME}` (`description`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_maintenance_status_description` ON `${TABLE_NAME}` (`description`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "manteinance_type",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER NOT NULL, `description` TEXT NOT NULL, `active` INTEGER NOT NULL, `manteinance_type_group_id` INTEGER NOT NULL, PRIMARY KEY(`_id`))",
+        "tableName": "maintenance_type",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER NOT NULL, `description` TEXT NOT NULL, `active` INTEGER NOT NULL, `maintenance_type_group_id` INTEGER NOT NULL, PRIMARY KEY(`_id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -1558,8 +1558,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "manteinanceTypeGroupId",
-            "columnName": "manteinance_type_group_id",
+            "fieldPath": "maintenanceTypeGroupId",
+            "columnName": "maintenance_type_group_id",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -1572,28 +1572,28 @@
         },
         "indices": [
           {
-            "name": "IDX_manteinance_type_manteinance_type_group_id",
+            "name": "IDX_maintenance_type_maintenance_type_group_id",
             "unique": false,
             "columnNames": [
-              "manteinance_type_group_id"
+              "maintenance_type_group_id"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_manteinance_type_manteinance_type_group_id` ON `${TABLE_NAME}` (`manteinance_type_group_id`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_maintenance_type_maintenance_type_group_id` ON `${TABLE_NAME}` (`maintenance_type_group_id`)"
           },
           {
-            "name": "IDX_manteinance_type_description",
+            "name": "IDX_maintenance_type_description",
             "unique": false,
             "columnNames": [
               "description"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_manteinance_type_description` ON `${TABLE_NAME}` (`description`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_maintenance_type_description` ON `${TABLE_NAME}` (`description`)"
           }
         ],
         "foreignKeys": []
       },
       {
-        "tableName": "manteinance_type_group",
+        "tableName": "maintenance_type_group",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER NOT NULL, `description` TEXT NOT NULL, `active` INTEGER NOT NULL, PRIMARY KEY(`_id`))",
         "fields": [
           {
@@ -1623,13 +1623,13 @@
         },
         "indices": [
           {
-            "name": "IDX_manteinance_type_group_description",
+            "name": "IDX_maintenance_type_group_description",
             "unique": false,
             "columnNames": [
               "description"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_manteinance_type_group_description` ON `${TABLE_NAME}` (`description`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_maintenance_type_group_description` ON `${TABLE_NAME}` (`description`)"
           }
         ],
         "foreignKeys": []
@@ -1818,7 +1818,7 @@
       },
       {
         "tableName": "route_process",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`user_id` INTEGER NOT NULL, `route_id` INTEGER NOT NULL, `route_process_id` INTEGER NOT NULL, `route_process_date` INTEGER NOT NULL, `completed` INTEGER NOT NULL, `transfered` INTEGER, `transfered_date` INTEGER, `_id` INTEGER NOT NULL, PRIMARY KEY(`_id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`user_id` INTEGER NOT NULL, `route_id` INTEGER NOT NULL, `route_process_id` INTEGER NOT NULL, `route_process_date` INTEGER NOT NULL, `completed` INTEGER NOT NULL, `transferred` INTEGER, `transferred_date` INTEGER, `_id` INTEGER NOT NULL, PRIMARY KEY(`_id`))",
         "fields": [
           {
             "fieldPath": "userId",
@@ -1852,13 +1852,13 @@
           },
           {
             "fieldPath": "transferred",
-            "columnName": "transfered",
+            "columnName": "transferred",
             "affinity": "INTEGER",
             "notNull": false
           },
           {
             "fieldPath": "transferredDate",
-            "columnName": "transfered_date",
+            "columnName": "transferred_date",
             "affinity": "INTEGER",
             "notNull": false
           },
@@ -2530,7 +2530,7 @@
       },
       {
         "tableName": "warehouse_movement",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER NOT NULL, `warehouse_movement_id` INTEGER NOT NULL, `warehouse_movement_date` INTEGER NOT NULL, `obs` TEXT, `user_id` INTEGER NOT NULL, `origin_warehouse_area_id` INTEGER NOT NULL, `origin_warehouse_id` INTEGER NOT NULL, `transfered_date` INTEGER, `destination_warehouse_area_id` INTEGER NOT NULL, `destination_warehouse_id` INTEGER NOT NULL, `completed` INTEGER, PRIMARY KEY(`_id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER NOT NULL, `warehouse_movement_id` INTEGER NOT NULL, `warehouse_movement_date` INTEGER NOT NULL, `obs` TEXT, `user_id` INTEGER NOT NULL, `origin_warehouse_area_id` INTEGER NOT NULL, `origin_warehouse_id` INTEGER NOT NULL, `transferred_date` INTEGER, `destination_warehouse_area_id` INTEGER NOT NULL, `destination_warehouse_id` INTEGER NOT NULL, `completed` INTEGER, PRIMARY KEY(`_id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -2575,8 +2575,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "transferedDate",
-            "columnName": "transfered_date",
+            "fieldPath": "transferredDate",
+            "columnName": "transferred_date",
             "affinity": "INTEGER",
             "notNull": false
           },
@@ -2739,7 +2739,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4b1c4bc453ef7099e4247e4bddcfdefa')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '486c994e9e261a6da726faa6728eb512')"
     ]
   }
 }

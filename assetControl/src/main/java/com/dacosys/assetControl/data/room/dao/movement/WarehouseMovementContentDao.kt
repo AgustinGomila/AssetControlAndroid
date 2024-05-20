@@ -39,7 +39,7 @@ interface WarehouseMovementContentDao {
         "DELETE $BASIC_FROM WHERE ${Entry.WAREHOUSE_MOVEMENT_ID} " +
                 "IN (SELECT ${wmEntry.TABLE_NAME}.${wmEntry.ID} " +
                 "FROM ${wmEntry.TABLE_NAME} " +
-                "WHERE ${wmEntry.TABLE_NAME}.${wmEntry.TRANSFERED_DATE} IS NOT NULL )"
+                "WHERE ${wmEntry.TABLE_NAME}.${wmEntry.TRANSFERRED_DATE} IS NOT NULL )"
     )
     suspend fun deleteTransferred()
 

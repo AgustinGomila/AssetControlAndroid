@@ -254,16 +254,57 @@ abstract class AcDatabase : RoomDatabase() {
         private fun roomMigrationZero(): List<String> {
             return listOf(
                 "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-                "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4b1c4bc453ef7099e4247e4bddcfdefa')"
+                "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '${IDENTITY_HASH_V1}')"
             )
         }
+
+        private const val IDENTITY_HASH_V1 = "486c994e9e261a6da726faa6728eb512"
 
         private val migrationZero: List<String>
             get() {
                 val r = mutableListOf<String>()
 
                 r.addAll(roomMigrationZero())
+
                 r.addAll(Asset.migrationZero())
+                r.addAll(AssetMaintenance.migrationZero())
+                r.addAll(AssetReview.migrationZero())
+                r.addAll(AssetReviewContent.migrationZero())
+                r.addAll(AssetReviewStatus.migrationZero())
+                r.addAll(Attribute.migrationZero())
+                r.addAll(AttributeCategory.migrationZero())
+                r.addAll(AttributeComposition.migrationZero())
+
+                r.addAll(BarcodeLabelCustom.migrationZero())
+                r.addAll(BarcodeLabelTarget.migrationZero())
+
+                r.addAll(DataCollection.migrationZero())
+                r.addAll(DataCollectionContent.migrationZero())
+                r.addAll(DataCollectionRule.migrationZero())
+                r.addAll(DataCollectionRuleContent.migrationZero())
+                r.addAll(DataCollectionRuleTarget.migrationZero())
+
+                r.addAll(ItemCategory.migrationZero())
+
+                r.addAll(MaintenanceStatus.migrationZero())
+                r.addAll(MaintenanceType.migrationZero())
+                r.addAll(MaintenanceTypeGroup.migrationZero())
+
+                r.addAll(Route.migrationZero())
+                r.addAll(RouteComposition.migrationZero())
+                r.addAll(RouteProcess.migrationZero())
+                r.addAll(RouteProcessContent.migrationZero())
+                r.addAll(RouteProcessStatus.migrationZero())
+                r.addAll(RouteProcessSteps.migrationZero())
+
+                r.addAll(User.migrationZero())
+                r.addAll(UserPermission.migrationZero())
+                r.addAll(UserWarehouseArea.migrationZero())
+
+                r.addAll(Warehouse.migrationZero())
+                r.addAll(WarehouseArea.migrationZero())
+                r.addAll(WarehouseMovement.migrationZero())
+                r.addAll(WarehouseMovementContent.migrationZero())
 
                 return r
             }
