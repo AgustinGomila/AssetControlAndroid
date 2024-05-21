@@ -17,7 +17,7 @@ import androidx.core.graphics.BlendModeCompat
 import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.enums.review.AssetReviewStatus
-import com.dacosys.assetControl.data.room.entity.review.AssetReview
+import com.dacosys.assetControl.data.room.dto.review.AssetReview
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.getColorWithAlpha
@@ -591,8 +591,8 @@ class AssetReviewAdapter :
                 holder.modificationDateTextView?.text = assetReview.modificationDate.toString()
                 holder.userNameTextView?.text = assetReview.userStr
                 holder.statusTextView?.text = AssetReviewStatus.getById(assetReview.statusId).description
-                holder.obsTextView?.text = assetReview.obs.orEmpty()
-                if (assetReview.obs.orEmpty().isEmpty()) {
+                holder.obsTextView?.text = assetReview.obs
+                if (assetReview.obs.isEmpty()) {
                     holder.obsTextView?.visibility = GONE
                 } else {
                     holder.obsTextView?.visibility = VISIBLE
@@ -750,7 +750,7 @@ class AssetReviewAdapter :
 
                     for (i in 0 until assetReviewArray.size) {
                         filterableItem = assetReviewArray[i]
-                        if (filterableItem.obs.orEmpty().lowercase(Locale.getDefault())
+                        if (filterableItem.obs.lowercase(Locale.getDefault())
                                 .contains(filterString)
                         ) {
                             r.add(filterableItem)

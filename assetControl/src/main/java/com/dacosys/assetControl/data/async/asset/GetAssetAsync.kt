@@ -2,9 +2,9 @@ package com.dacosys.assetControl.data.async.asset
 
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.room.entity.asset.Asset
-import com.dacosys.assetControl.data.room.entity.category.ItemCategory
-import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
+import com.dacosys.assetControl.data.room.dto.asset.Asset
+import com.dacosys.assetControl.data.room.dto.category.ItemCategory
+import com.dacosys.assetControl.data.room.dto.location.WarehouseArea
 import com.dacosys.assetControl.data.room.repository.asset.AssetRepository
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.utils.errorLog.ErrorLog

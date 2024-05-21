@@ -1,9 +1,10 @@
 package com.dacosys.assetControl.data.room.dao.dataCollection
 
 import androidx.room.*
-import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionRule
-import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionRule.Entry
-import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionRuleTarget
+import com.dacosys.assetControl.data.room.dto.dataCollection.DataCollectionRule
+import com.dacosys.assetControl.data.room.dto.dataCollection.DataCollectionRule.Entry
+import com.dacosys.assetControl.data.room.dto.dataCollection.DataCollectionRuleTarget
+import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionRuleEntity
 
 @Dao
 interface DataCollectionRuleDao {
@@ -63,12 +64,12 @@ interface DataCollectionRuleDao {
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(rule: DataCollectionRule)
+    suspend fun insert(rule: DataCollectionRuleEntity)
 
     @Transaction
     suspend fun insert(entities: List<DataCollectionRule>, completedTask: (Int) -> Unit) {
         entities.forEachIndexed { index, entity ->
-            insert(entity)
+            insert(DataCollectionRuleEntity(entity))
             completedTask(index + 1)
         }
     }

@@ -19,9 +19,9 @@ import com.dacosys.assetControl.data.enums.barcode.BarcodeLabelTarget
 import com.dacosys.assetControl.data.model.barcodeFields.AssetLabelField
 import com.dacosys.assetControl.data.model.barcodeFields.BarcodeLabel
 import com.dacosys.assetControl.data.model.barcodeFields.WarehouseAreaLabelField
-import com.dacosys.assetControl.data.room.entity.asset.Asset
-import com.dacosys.assetControl.data.room.entity.barcode.BarcodeLabelCustom
-import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
+import com.dacosys.assetControl.data.room.dto.asset.Asset
+import com.dacosys.assetControl.data.room.dto.barcode.BarcodeLabelCustom
+import com.dacosys.assetControl.data.room.dto.location.WarehouseArea
 import com.dacosys.assetControl.data.room.repository.asset.AssetRepository
 import com.dacosys.assetControl.data.room.repository.barcode.BarcodeLabelCustomRepository
 import com.dacosys.assetControl.data.room.repository.location.WarehouseAreaRepository
@@ -624,9 +624,9 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
         }
 
         val was: ArrayList<WarehouseArea> = ArrayList()
-        val waDb = WarehouseAreaRepository()
+        val areaRepository = WarehouseAreaRepository()
         for (id in waIdArray) {
-            val a = waDb.selectById(id)
+            val a = areaRepository.selectById(id)
             if (a != null) {
                 was.add(a)
             }
@@ -689,9 +689,9 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
         }
 
         val assets: ArrayList<Asset> = ArrayList()
-        val aDb = AssetRepository()
+        val assetRepository = AssetRepository()
         for (id in assetIdArray) {
-            val a = aDb.selectById(id)
+            val a = assetRepository.selectById(id)
             if (a != null) {
                 assets.add(a)
             }

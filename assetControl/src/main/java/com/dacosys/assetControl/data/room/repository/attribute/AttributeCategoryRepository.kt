@@ -4,7 +4,7 @@ import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.room.dao.attribute.AttributeCategoryDao
 import com.dacosys.assetControl.data.room.database.AcDatabase.Companion.database
-import com.dacosys.assetControl.data.room.entity.attribute.AttributeCategory
+import com.dacosys.assetControl.data.room.dto.attribute.AttributeCategory
 import com.dacosys.assetControl.data.webservice.attribute.AttributeCategoryObject
 import com.dacosys.assetControl.network.sync.SyncProgress
 import com.dacosys.assetControl.network.sync.SyncRegistryType

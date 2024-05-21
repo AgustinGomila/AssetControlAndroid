@@ -14,9 +14,9 @@ import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.crud.location.WarehouseAreaCRUD
 import com.dacosys.assetControl.data.enums.common.CrudCompleted
 import com.dacosys.assetControl.data.enums.permission.PermissionEntry
-import com.dacosys.assetControl.data.room.entity.location.Warehouse
-import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
-import com.dacosys.assetControl.data.room.entity.user.User
+import com.dacosys.assetControl.data.room.dto.location.Warehouse
+import com.dacosys.assetControl.data.room.dto.location.WarehouseArea
+import com.dacosys.assetControl.data.room.dto.user.User
 import com.dacosys.assetControl.data.room.repository.location.WarehouseRepository
 import com.dacosys.assetControl.data.webservice.location.WarehouseAreaObject
 import com.dacosys.assetControl.databinding.WarehouseAreaCrudFragmentBinding

@@ -2,8 +2,8 @@ package com.dacosys.assetControl.data.room.repository.review
 
 import com.dacosys.assetControl.data.room.dao.review.TempReviewContentDao
 import com.dacosys.assetControl.data.room.database.AcTempDatabase.Companion.database
-import com.dacosys.assetControl.data.room.entity.review.AssetReviewContent
-import com.dacosys.assetControl.data.room.entity.review.TempReviewContent
+import com.dacosys.assetControl.data.room.dto.review.AssetReviewContent
+import com.dacosys.assetControl.data.room.entity.review.TempReviewContentEntity
 import kotlinx.coroutines.runBlocking
 
 class TempReviewContentRepository {
@@ -23,15 +23,15 @@ class TempReviewContentRepository {
     }
 
 
-    fun insert(content: TempReviewContent) = runBlocking {
+    fun insert(content: TempReviewContentEntity) = runBlocking {
         dao.insert(content)
     }
 
     fun insert(arId: Long, contents: List<AssetReviewContent>) = runBlocking {
         contents.forEach { it.assetReviewId = arId }
 
-        val tempContents: ArrayList<TempReviewContent> = arrayListOf()
-        contents.mapTo(tempContents) { TempReviewContent(it) }
+        val tempContents: ArrayList<TempReviewContentEntity> = arrayListOf()
+        contents.mapTo(tempContents) { TempReviewContentEntity(it) }
 
         tempContents.forEach {
             it.id = nextId

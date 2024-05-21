@@ -20,8 +20,8 @@ import androidx.constraintlayout.widget.ConstraintSet
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.async.location.WarehouseAreaChangedObserver
 import com.dacosys.assetControl.data.async.location.WarehouseChangedObserver
-import com.dacosys.assetControl.data.room.entity.location.Warehouse
-import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
+import com.dacosys.assetControl.data.room.dto.location.Warehouse
+import com.dacosys.assetControl.data.room.dto.location.WarehouseArea
 import com.dacosys.assetControl.data.room.repository.location.WarehouseAreaRepository
 import com.dacosys.assetControl.data.room.repository.location.WarehouseRepository
 import com.dacosys.assetControl.databinding.LocationSelectActivityBinding

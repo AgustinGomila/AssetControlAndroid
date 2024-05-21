@@ -4,13 +4,13 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.dacosys.assetControl.data.room.entity.maintenance.MaintenanceStatus
-import com.dacosys.assetControl.data.room.entity.maintenance.MaintenanceStatus.Entry
+import com.dacosys.assetControl.data.room.dto.maintenance.MaintenanceStatus.Entry
+import com.dacosys.assetControl.data.room.entity.maintenance.MaintenanceStatusEntity
 
 @Dao
 interface MaintenanceStatusDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(statuses: List<MaintenanceStatus>)
+    suspend fun insert(statuses: List<MaintenanceStatusEntity>)
 
 
     @Query("DELETE $BASIC_FROM")

@@ -2,7 +2,8 @@ package com.dacosys.assetControl.data.room.repository.route
 
 import com.dacosys.assetControl.data.room.dao.route.RouteCompositionDao
 import com.dacosys.assetControl.data.room.database.AcDatabase.Companion.database
-import com.dacosys.assetControl.data.room.entity.route.RouteComposition
+import com.dacosys.assetControl.data.room.dto.route.RouteComposition
+import com.dacosys.assetControl.data.room.entity.route.RouteCompositionEntity
 import kotlinx.coroutines.runBlocking
 
 class RouteCompositionRepository {
@@ -13,7 +14,7 @@ class RouteCompositionRepository {
 
 
     fun insert(compositions: List<RouteComposition>) = runBlocking {
-        dao.insert(compositions)
+        dao.insert(compositions.map { RouteCompositionEntity(it) })
     }
 
 

@@ -1,11 +1,15 @@
 package com.dacosys.assetControl.data.room.dao.route
 
 import androidx.room.*
-import com.dacosys.assetControl.data.room.entity.asset.Asset
-import com.dacosys.assetControl.data.room.entity.location.Warehouse
-import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
-import com.dacosys.assetControl.data.room.entity.route.*
-import com.dacosys.assetControl.data.room.entity.route.RouteProcessContent.Entry
+import com.dacosys.assetControl.data.room.dto.asset.Asset
+import com.dacosys.assetControl.data.room.dto.location.Warehouse
+import com.dacosys.assetControl.data.room.dto.location.WarehouseArea
+import com.dacosys.assetControl.data.room.dto.route.Route
+import com.dacosys.assetControl.data.room.dto.route.RouteComposition
+import com.dacosys.assetControl.data.room.dto.route.RouteProcess
+import com.dacosys.assetControl.data.room.dto.route.RouteProcessContent
+import com.dacosys.assetControl.data.room.dto.route.RouteProcessContent.Entry
+import com.dacosys.assetControl.data.room.entity.route.RouteProcessContentEntity
 
 @Dao
 interface RouteProcessContentDao {
@@ -15,30 +19,28 @@ interface RouteProcessContentDao {
     @Query("SELECT MIN(${Entry.ID}) $BASIC_FROM")
     suspend fun selectMinId(): Long?
 
-    @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN WHERE ${Entry.TABLE_NAME}.${Entry.ID} = :id")
+    @Query(
+        "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
+                "WHERE ${Entry.TABLE_NAME}.${Entry.ID} = :id"
+    )
     suspend fun selectById(id: Long): RouteProcessContent?
 
-    @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN WHERE ${Entry.TABLE_NAME}.${Entry.ROUTE_PROCESS_ID} = :id")
+    @Query(
+        "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
+                "WHERE ${Entry.TABLE_NAME}.${Entry.ROUTE_PROCESS_ID} = :id"
+    )
     suspend fun selectByRouteProcessId(id: Long): List<RouteProcessContent>
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(content: RouteProcessContent): Long
+    suspend fun insert(content: RouteProcessContentEntity): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(contents: List<RouteProcessContent>)
-
-    @Transaction
-    suspend fun insert(entities: List<RouteProcessContent>, completedTask: (Int) -> Unit) {
-        entities.forEachIndexed { index, entity ->
-            insert(entity)
-            completedTask(index + 1)
-        }
-    }
+    suspend fun insert(entities: List<RouteProcessContentEntity>): List<Long>
 
 
     @Update
-    suspend fun update(content: RouteProcessContent)
+    suspend fun update(content: RouteProcessContentEntity)
 
     @Query(
         "UPDATE ${Entry.TABLE_NAME} " +
@@ -61,7 +63,7 @@ interface RouteProcessContentDao {
     )
 
     @Delete
-    suspend fun delete(content: RouteProcessContent)
+    suspend fun delete(content: RouteProcessContentEntity)
 
     @Query("DELETE $BASIC_FROM")
     suspend fun deleteAll()
@@ -93,20 +95,17 @@ interface RouteProcessContentDao {
         private val rEntry = Route.Entry
         private val rpEntry = RouteProcess.Entry
         private val rcEntry = RouteComposition.Entry
-        private val rpsEntry = RouteProcessStatus.Entry
 
         const val BASIC_JOIN_FIELDS =
-            "${aEntry.TABLE_NAME}.${aEntry.CODE} AS ${Entry.ASSET_CODE}, " +
+            "${rcEntry.TABLE_NAME}.${rcEntry.ASSET_ID} AS ${Entry.ASSET_ID}, " +
+                    "${aEntry.TABLE_NAME}.${aEntry.CODE} AS ${Entry.ASSET_CODE}, " +
                     "${aEntry.TABLE_NAME}.${aEntry.DESCRIPTION} AS ${Entry.ASSET_STR}, " +
+                    "${rpEntry.TABLE_NAME}.${rpEntry.ROUTE_ID} AS ${Entry.ROUTE_ID}, " +
                     "${rEntry.TABLE_NAME}.${rEntry.DESCRIPTION} AS ${Entry.ROUTE_STR}, " +
-                    "${rcEntry.TABLE_NAME}.${rcEntry.ASSET_ID} AS ${Entry.ASSET_ID}, " +
-                    "${rcEntry.TABLE_NAME}.${rcEntry.WAREHOUSE_AREA_ID} AS ${Entry.WAREHOUSE_AREA_ID}, " +
                     "${rcEntry.TABLE_NAME}.${rcEntry.WAREHOUSE_ID} AS ${Entry.WAREHOUSE_ID}, " +
-                    "${rpEntry.TABLE_NAME}.${rpEntry.ROUTE_PROCESS_ID} AS ${Entry.ROUTE_PROCESS_ID}, " +
-                    "${rpsEntry.TABLE_NAME}.${rpsEntry.DESCRIPTION} AS ${Entry.ROUTE_PROCESS_STATUS_STR}, " +
                     "${wEntry.TABLE_NAME}.${wEntry.DESCRIPTION} AS ${Entry.WAREHOUSE_STR}, " +
-                    "${waEntry.TABLE_NAME}.${waEntry.DESCRIPTION} AS ${Entry.WAREHOUSE_AREA_STR}, " +
-                    "${rpEntry.TABLE_NAME}.${rpEntry.ROUTE_ID} AS ${Entry.ROUTE_ID} "
+                    "${rcEntry.TABLE_NAME}.${rcEntry.WAREHOUSE_AREA_ID} AS ${Entry.WAREHOUSE_AREA_ID}, " +
+                    "${waEntry.TABLE_NAME}.${waEntry.DESCRIPTION} AS ${Entry.WAREHOUSE_AREA_STR} "
 
 
         const val BASIC_LEFT_JOIN =
@@ -118,8 +117,6 @@ interface RouteProcessContentDao {
                     "LEFT JOIN ${rEntry.TABLE_NAME} ON ${rEntry.TABLE_NAME}.${rEntry.ID} = ${rpEntry.TABLE_NAME}.${rpEntry.ROUTE_ID} " +
                     "LEFT JOIN ${aEntry.TABLE_NAME} ON ${aEntry.TABLE_NAME}.${aEntry.ID} = ${rcEntry.TABLE_NAME}.${rcEntry.ASSET_ID} " +
                     "LEFT JOIN ${waEntry.TABLE_NAME} ON ${waEntry.TABLE_NAME}.${waEntry.ID} = ${rcEntry.TABLE_NAME}.${rcEntry.WAREHOUSE_AREA_ID} " +
-                    "LEFT JOIN ${wEntry.TABLE_NAME} ON ${wEntry.TABLE_NAME}.${wEntry.ID} = ${rcEntry.TABLE_NAME}.${rcEntry.WAREHOUSE_ID} " +
-                    "LEFT JOIN ${rpsEntry.TABLE_NAME} ON ${rpsEntry.TABLE_NAME}.${rpsEntry.ID} = ${Entry.TABLE_NAME}.${Entry.ROUTE_PROCESS_STATUS_ID}"
-
+                    "LEFT JOIN ${wEntry.TABLE_NAME} ON ${wEntry.TABLE_NAME}.${wEntry.ID} = ${waEntry.TABLE_NAME}.${waEntry.WAREHOUSE_ID} "
     }
 }

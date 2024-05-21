@@ -3,7 +3,7 @@ package com.dacosys.assetControl.viewModel.route
 import android.util.Log
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.room.entity.route.RouteProcessContent
+import com.dacosys.assetControl.data.room.dto.route.RouteProcessContent
 import com.dacosys.assetControl.data.room.repository.route.RouteProcessContentRepository
 import kotlinx.coroutines.*
 

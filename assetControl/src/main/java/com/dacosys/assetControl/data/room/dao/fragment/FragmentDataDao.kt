@@ -4,16 +4,16 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.dacosys.assetControl.data.room.entity.fragment.FragmentData
-import com.dacosys.assetControl.data.room.entity.fragment.FragmentData.Entry
+import com.dacosys.assetControl.data.room.entity.fragment.FragmentDataEntity
+import com.dacosys.assetControl.data.room.entity.fragment.FragmentDataEntity.Entry
 
 @Dao
 interface FragmentDataDao {
     @Query("$BASIC_SELECT $BASIC_FROM")
-    suspend fun select(): List<FragmentData>
+    suspend fun select(): List<FragmentDataEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(assets: List<FragmentData>)
+    suspend fun insert(assets: List<FragmentDataEntity>)
 
     @Query("DELETE $BASIC_FROM")
     suspend fun deleteAll()

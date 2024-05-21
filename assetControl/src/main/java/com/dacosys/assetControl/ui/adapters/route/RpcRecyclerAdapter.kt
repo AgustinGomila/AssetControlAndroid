@@ -25,8 +25,8 @@ import androidx.recyclerview.widget.RecyclerView.*
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.enums.route.RouteProcessStatus
-import com.dacosys.assetControl.data.room.entity.asset.Asset
-import com.dacosys.assetControl.data.room.entity.route.RouteProcessContent
+import com.dacosys.assetControl.data.room.dto.asset.Asset
+import com.dacosys.assetControl.data.room.dto.route.RouteProcessContent
 import com.dacosys.assetControl.databinding.RouteProcessContentRowBinding
 import com.dacosys.assetControl.ui.adapters.asset.AssetRecyclerAdapter.FilterOptions
 import com.dacosys.assetControl.ui.adapters.interfaces.Interfaces.*
@@ -99,18 +99,18 @@ class RpcRecyclerAdapter(
             if (oldItem.dataCollectionRuleId != newItem.dataCollectionRuleId) return false
             if (oldItem.level != newItem.level) return false
             if (oldItem.position != newItem.position) return false
-            if (oldItem.processStatusId != newItem.processStatusId) return false
+            if (oldItem.routeProcessStatusId != newItem.routeProcessStatusId) return false
             if (oldItem.dataCollectionId != newItem.dataCollectionId) return false
             if (oldItem.id != newItem.id) return false
             if (oldItem.assetId != newItem.assetId) return false
-            if (oldItem.assetStr != newItem.assetStr) return false
-            if (oldItem.assetCode != newItem.assetCode) return false
+            if (oldItem.assetDescription != newItem.assetDescription) return false
+            if (oldItem.code != newItem.code) return false
             if (oldItem.warehouseId != newItem.warehouseId) return false
-            if (oldItem.warehouseStr != newItem.warehouseStr) return false
+            if (oldItem.warehouseDescription != newItem.warehouseDescription) return false
             if (oldItem.warehouseAreaId != newItem.warehouseAreaId) return false
-            if (oldItem.warehouseAreaStr != newItem.warehouseAreaStr) return false
+            if (oldItem.warehouseAreaDescription != newItem.warehouseAreaDescription) return false
             if (oldItem.routeId != newItem.routeId) return false
-            if (oldItem.routeStr != newItem.routeStr) return false
+            if (oldItem.routeDescription != newItem.routeDescription) return false
             return true
         }
     }
@@ -383,7 +383,7 @@ class RpcRecyclerAdapter(
                     var currentScrolled = getItem(scrollPos)
 
                     // Comprobamos si es visible el ítem del Scroll
-                    if (currentScrolled.processStatusId in vsIds)
+                    if (currentScrolled.routeProcessStatusId in vsIds)
                         firstVisible = currentScrolled
                     else {
                         // Si no es visible, intentar encontrar el próximo visible.
@@ -391,7 +391,7 @@ class RpcRecyclerAdapter(
                             scrollPos++
                             if (itemCount > scrollPos) {
                                 currentScrolled = getItem(scrollPos)
-                                if (currentScrolled.processStatusId in vsIds)
+                                if (currentScrolled.routeProcessStatusId in vsIds)
                                     firstVisible = currentScrolled
                             } else break
                         }
@@ -410,7 +410,7 @@ class RpcRecyclerAdapter(
                             filterableItem = fullList[i]
 
                             // Descartamos aquellos que no debe ser visibles
-                            if (filterableItem.processStatusId !in vsIds) continue
+                            if (filterableItem.routeProcessStatusId !in vsIds) continue
 
                             if (isFilterable(filterableItem, filterString)) {
                                 r.add(filterableItem)
@@ -427,11 +427,11 @@ class RpcRecyclerAdapter(
             }
 
             fun isFilterable(content: RouteProcessContent, filterString: String): Boolean =
-                content.assetStr.contains(filterString, true) ||
-                        content.assetCode.contains(filterString, true) ||
-                        content.routeStr.contains(filterString, true) ||
-                        content.warehouseStr.contains(filterString, true) ||
-                        content.warehouseAreaStr.contains(filterString, true)
+                content.assetDescription.contains(filterString, true) ||
+                        content.code.contains(filterString, true) ||
+                        content.routeDescription.contains(filterString, true) ||
+                        content.warehouseDescription.contains(filterString, true) ||
+                        content.warehouseAreaDescription.contains(filterString, true)
 
             @Suppress("UNCHECKED_CAST")
             override fun publishResults(
@@ -547,7 +547,7 @@ class RpcRecyclerAdapter(
     }
 
     fun firstNotProcessedIndex(): Int {
-        val f = currentList.firstOrNull { it.processStatusId == RouteProcessStatus.notProcessed.id }
+        val f = currentList.firstOrNull { it.routeProcessStatusId == RouteProcessStatus.notProcessed.id }
         return if (f == null) NO_POSITION else getIndex(f)
     }
 
@@ -561,7 +561,7 @@ class RpcRecyclerAdapter(
 
     @Suppress("unused")
     private fun getItemsByStatus(statusId: Int): ArrayList<RouteProcessContent> {
-        return ArrayList(fullList.mapNotNull { if (it.processStatusId == statusId) it else null })
+        return ArrayList(fullList.mapNotNull { if (it.routeProcessStatusId == statusId) it else null })
     }
 
     /**
@@ -658,7 +658,7 @@ class RpcRecyclerAdapter(
 
     @Suppress("MemberVisibilityCanBePrivate", "unused")
     fun getContentByCode(code: String): RouteProcessContent? {
-        return currentList.firstOrNull { it.assetCode == code }
+        return currentList.firstOrNull { it.code == code }
     }
 
     fun getAllChecked(): ArrayList<RouteProcessContent> {
@@ -680,7 +680,7 @@ class RpcRecyclerAdapter(
     fun selectPrev() {
         if (!fullList.any()) return
 
-        if (!fullList.any { it.processStatusId == RouteProcessStatus.notProcessed.id }) {
+        if (!fullList.any { it.routeProcessStatusId == RouteProcessStatus.notProcessed.id }) {
             selectFirst()
             return
         }
@@ -703,7 +703,7 @@ class RpcRecyclerAdapter(
                 continue
             }
 
-            val processStatusId = z.processStatusId
+            val processStatusId = z.routeProcessStatusId
 
             if (processStatusId == RouteProcessStatus.processed.id ||
                 processStatusId == RouteProcessStatus.skipped.id
@@ -729,7 +729,7 @@ class RpcRecyclerAdapter(
     fun selectNext() {
         if (!fullList.any()) return
 
-        if (!fullList.any { it.processStatusId == RouteProcessStatus.notProcessed.id }) {
+        if (!fullList.any { it.routeProcessStatusId == RouteProcessStatus.notProcessed.id }) {
             selectLast()
             return
         }
@@ -752,7 +752,7 @@ class RpcRecyclerAdapter(
                 continue
             }
 
-            val processStatusId = z.processStatusId
+            val processStatusId = z.routeProcessStatusId
 
             if (processStatusId == RouteProcessStatus.processed.id ||
                 processStatusId == RouteProcessStatus.skipped.id
@@ -782,19 +782,19 @@ class RpcRecyclerAdapter(
     @Suppress("unused", "MemberVisibilityCanBePrivate")
     val processed: Int
         get() = fullList.count {
-            it.processStatusId == RouteProcessStatus.processed.id
+            it.routeProcessStatusId == RouteProcessStatus.processed.id
         }
 
     @Suppress("unused", "MemberVisibilityCanBePrivate")
     val notProcessed: Int
         get() = fullList.count {
-            it.processStatusId == RouteProcessStatus.notProcessed.id
+            it.routeProcessStatusId == RouteProcessStatus.notProcessed.id
         }
 
     @Suppress("unused", "MemberVisibilityCanBePrivate")
     val skipped: Int
         get() = fullList.count {
-            it.processStatusId == RouteProcessStatus.skipped.id
+            it.routeProcessStatusId == RouteProcessStatus.skipped.id
         }
 
     fun firstVisiblePos(): Int {
@@ -850,13 +850,13 @@ class RpcRecyclerAdapter(
             bindStatusChange(content = content)
 
             binding.routeProcessStatusStr.text = content.routeProcessStatusStr
-            binding.assetStr.text = content.assetStr
-            binding.assetCode.text = content.assetCode
-            binding.warehouseAreaStr.text = content.warehouseAreaStr
-            binding.warehouseStr.text = content.warehouseStr
+            binding.assetStr.text = content.assetDescription
+            binding.assetCode.text = content.code
+            binding.warehouseAreaStr.text = content.warehouseAreaDescription
+            binding.warehouseStr.text = content.warehouseDescription
 
-            if (content.warehouseAreaStr.isEmpty() &&
-                content.warehouseStr.isEmpty()
+            if (content.warehouseAreaDescription.isEmpty() &&
+                content.warehouseDescription.isEmpty()
             ) {
                 binding.warehouseAreaStr.visibility = GONE
                 binding.warehouseStr.visibility = GONE
@@ -879,7 +879,7 @@ class RpcRecyclerAdapter(
 
             val backColor: Drawable
             val foreColor: Int
-            when (content.processStatusId) {
+            when (content.routeProcessStatusId) {
                 RouteProcessStatus.processed.id -> {
                     backColor = layoutProcessed!!
                     foreColor = layoutProcessedSelectedForeColor
@@ -932,13 +932,13 @@ class RpcRecyclerAdapter(
             bindStatusChange(content = content)
 
             binding.routeProcessStatusStr.text = content.routeProcessStatusStr
-            binding.assetStr.text = content.assetStr
-            binding.assetCode.text = content.assetCode
-            binding.warehouseAreaStr.text = content.warehouseAreaStr
-            binding.warehouseStr.text = content.warehouseStr
+            binding.assetStr.text = content.assetDescription
+            binding.assetCode.text = content.code
+            binding.warehouseAreaStr.text = content.warehouseAreaDescription
+            binding.warehouseStr.text = content.warehouseDescription
 
-            if (content.warehouseAreaStr.isEmpty() &&
-                content.warehouseStr.isEmpty()
+            if (content.warehouseAreaDescription.isEmpty() &&
+                content.warehouseDescription.isEmpty()
             ) {
                 binding.warehouseAreaStr.visibility = GONE
                 binding.warehouseStr.visibility = GONE
@@ -961,7 +961,7 @@ class RpcRecyclerAdapter(
 
             val backColor: Drawable
             val foreColor: Int
-            when (content.processStatusId) {
+            when (content.routeProcessStatusId) {
                 RouteProcessStatus.processed.id -> {
                     backColor = layoutProcessed!!
                     foreColor = layoutProcessedForeColor
@@ -1026,7 +1026,7 @@ class RpcRecyclerAdapter(
      */
     private fun sortedVisibleList(list: MutableList<RouteProcessContent>?): MutableList<RouteProcessContent> {
         val croppedList = (list
-            ?: mutableListOf()).mapNotNull { if (it.processStatusId in visibleStatus.map { it2 -> it2.id }) it else null }
+            ?: mutableListOf()).mapNotNull { if (it.routeProcessStatusId in visibleStatus.map { it2 -> it2.id }) it else null }
         return sortItems(croppedList.toMutableList())
     }
 

@@ -3,7 +3,7 @@ package com.dacosys.assetControl.data.webservice.maintenance
 import android.os.Parcel
 import android.os.Parcelable
 import com.dacosys.assetControl.AssetControlApp.Companion.getUserId
-import com.dacosys.assetControl.data.room.entity.maintenance.AssetMaintenance
+import com.dacosys.assetControl.data.room.dto.maintenance.AssetMaintenance
 import org.ksoap2.serialization.SoapObject
 
 class AssetMaintenanceLogObject() : Parcelable {
@@ -37,7 +37,7 @@ class AssetMaintenanceLogObject() : Parcelable {
     constructor(assetMaintenance: AssetMaintenance) : this() {
         // Main Information
         asset_manteinance_id = assetMaintenance.id
-        manteinance_status_id = assetMaintenance.statusId
+        manteinance_status_id = assetMaintenance.maintenanceStatusId
         description = assetMaintenance.observations.orEmpty()
         log_date = "" // TODO: Ver valor correcto para este campo
         asset_id = assetMaintenance.assetId

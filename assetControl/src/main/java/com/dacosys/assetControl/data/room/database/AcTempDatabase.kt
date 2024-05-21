@@ -11,21 +11,21 @@ import com.dacosys.assetControl.data.room.dao.location.TempWarehouseAreaDao
 import com.dacosys.assetControl.data.room.dao.movement.TempMovementContentDao
 import com.dacosys.assetControl.data.room.dao.review.TempReviewContentDao
 import com.dacosys.assetControl.data.room.database.AcTempDatabase.Companion.DATABASE_VERSION
-import com.dacosys.assetControl.data.room.entity.asset.TempAsset
-import com.dacosys.assetControl.data.room.entity.fragment.FragmentData
-import com.dacosys.assetControl.data.room.entity.location.TempWarehouseArea
-import com.dacosys.assetControl.data.room.entity.movement.TempMovementContent
-import com.dacosys.assetControl.data.room.entity.review.TempReviewContent
+import com.dacosys.assetControl.data.room.entity.asset.TempAssetEntity
+import com.dacosys.assetControl.data.room.entity.fragment.FragmentDataEntity
+import com.dacosys.assetControl.data.room.entity.location.TempWarehouseAreaEntity
+import com.dacosys.assetControl.data.room.entity.movement.TempMovementContentEntity
+import com.dacosys.assetControl.data.room.entity.review.TempReviewContentEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 @TypeConverters(Converters::class)
 @Database(
-    entities = [FragmentData::class,
-        TempAsset::class,
-        TempWarehouseArea::class,
-        TempMovementContent::class,
-        TempReviewContent::class],
+    entities = [FragmentDataEntity::class,
+        TempAssetEntity::class,
+        TempWarehouseAreaEntity::class,
+        TempMovementContentEntity::class,
+        TempReviewContentEntity::class],
     version = DATABASE_VERSION
 )
 abstract class AcTempDatabase : RoomDatabase() {

@@ -13,7 +13,7 @@ import androidx.core.content.res.ResourcesCompat
 import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.room.entity.barcode.BarcodeLabelCustom
+import com.dacosys.assetControl.data.room.dto.barcode.BarcodeLabelCustom
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.isTablet
 import java.util.*
 

@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionContent
+import com.dacosys.assetControl.data.room.dto.dataCollection.DataCollectionContent
 
 class DccAdapter(
     context: Context,

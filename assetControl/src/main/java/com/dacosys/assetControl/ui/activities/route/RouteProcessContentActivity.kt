@@ -40,9 +40,9 @@ import com.dacosys.assetControl.data.model.common.ExprResultIntString
 import com.dacosys.assetControl.data.model.common.Parameter
 import com.dacosys.assetControl.data.model.common.SaveRouteProcess
 import com.dacosys.assetControl.data.model.common.SkipAll
-import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollection
-import com.dacosys.assetControl.data.room.entity.route.*
-import com.dacosys.assetControl.data.room.entity.user.User
+import com.dacosys.assetControl.data.room.dto.dataCollection.DataCollection
+import com.dacosys.assetControl.data.room.dto.route.*
+import com.dacosys.assetControl.data.room.dto.user.User
 import com.dacosys.assetControl.data.room.repository.asset.AssetRepository
 import com.dacosys.assetControl.data.room.repository.attribute.AttributeCompositionRepository
 import com.dacosys.assetControl.data.room.repository.dataCollection.DataCollectionContentRepository
@@ -331,8 +331,8 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         saving = b.getBoolean("saving")
 
         // region Recuperar el título de la ventana
-        val t0 = b.getString("title")
-        tempTitle = if (!t0.isNullOrEmpty()) t0 else getString(R.string.route_process)
+        val t0 = b.getString("title") ?: ""
+        tempTitle = t0.ifEmpty { getString(R.string.route_process) }
         // endregion
 
         // Panels
@@ -475,6 +475,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         }
 
         val routeProcess = it.routeProcess ?: return
+
         this.routeProcess = routeProcess
 
         if (it.newProcess) {
@@ -998,7 +999,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             routeComposition = ArrayList(RouteCompositionRepository().selectByRouteId(routeId))
         }
 
-        if ((routeComposition?.size ?: 0) <= 0) {
+        if (routeComposition?.any() != true) {
             closeKeyboard(this)
 
             val data = Intent()
@@ -1028,7 +1029,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
     private fun skip() {
         val rpc = adapter?.currentRpc() ?: return
 
-        if (rpc.processStatusId == RouteProcessStatus.processed.id) {
+        if (rpc.routeProcessStatusId == RouteProcessStatus.processed.id) {
             makeText(
                 binding.root, getContext().getString(R.string.already_processed), SnackBarType.INFO
             )
@@ -1085,7 +1086,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         dc: DataCollection?,
         refreshLater: Boolean = false,
     ) {
-        rpc.processStatusId = s.id
+        rpc.routeProcessStatusId = s.id
 
         if (dc != null && s != RouteProcessStatus.notProcessed) {
             rpc.dataCollectionId = dc.id
@@ -1119,7 +1120,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             val rpc = adapter?.currentRpc()
 
             if (rpc != null) {
-                if (rpc.processStatusId != RouteProcessStatus.processed.id) {
+                if (rpc.routeProcessStatusId != RouteProcessStatus.processed.id) {
                     makeText(
                         binding.root,
                         getContext().getString(R.string.not_processed),
@@ -1226,7 +1227,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
         val rpc = adapter?.currentRpc() ?: return
 
-        if (rpc.processStatusId == RouteProcessStatus.processed.id) {
+        if (rpc.routeProcessStatusId == RouteProcessStatus.processed.id) {
             makeText(
                 binding.root, getContext().getString(R.string.already_processed), SnackBarType.INFO
             )
@@ -1240,7 +1241,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
     private fun processRouteProcessContent() {
         val rpc = adapter?.currentRpc() ?: return
 
-        if (rpc.processStatusId != RouteProcessStatus.processed.id) {
+        if (rpc.routeProcessStatusId != RouteProcessStatus.processed.id) {
             if (!rejectNewInstances) {
                 rejectNewInstances = true
 
@@ -1787,11 +1788,11 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             if (adapter != null && allItems.any()) {
                 // Buscar primero en el adaptador de la lista
                 (0 until adapter!!.itemCount).map { adapter!!.getContentByIndex(it) }.filter {
-                    it != null && (sc.asset != null && it.assetCode == tempCode || sc.warehouseArea != null && it.warehouseAreaId != null && it.warehouseAreaId.toString() == tempCode)
+                    it != null && (sc.asset != null && it.code == tempCode || sc.warehouseArea != null && it.warehouseAreaId != null && it.warehouseAreaId.toString() == tempCode)
                 }.forEach {
                     // Process the ROW
                     rpc = if ((it
-                            ?: return@forEach).processStatusId == RouteProcessStatus.notProcessed.id
+                            ?: return@forEach).routeProcessStatusId == RouteProcessStatus.notProcessed.id
                     ) {
                         val res = this.getString(R.string.ok)
                         makeText(binding.root, res, SUCCESS)
@@ -1832,7 +1833,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
         val currentRpc = adapter?.currentRpc()
         if (currentRpc != null) {
-            when (currentRpc.processStatusId) {
+            when (currentRpc.routeProcessStatusId) {
                 RouteProcessStatus.processed.id -> {
                     adapter?.selectNext()
                     if (!saving) demo()

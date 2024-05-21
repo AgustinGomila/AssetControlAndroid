@@ -6,9 +6,9 @@ import com.dacosys.assetControl.data.enums.unit.UnitType
 import com.dacosys.assetControl.data.enums.unit.UnitTypeCategory
 import com.dacosys.assetControl.data.model.common.ExprResultIntString
 import com.dacosys.assetControl.data.model.common.Parameter
-import com.dacosys.assetControl.data.room.entity.attribute.AttributeComposition
-import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionRuleContent
-import com.dacosys.assetControl.data.room.entity.fragment.FragmentData
+import com.dacosys.assetControl.data.room.dto.attribute.AttributeComposition
+import com.dacosys.assetControl.data.room.dto.dataCollection.DataCollectionRuleContent
+import com.dacosys.assetControl.data.room.entity.fragment.FragmentDataEntity
 import com.dacosys.assetControl.data.room.repository.attribute.AttributeCompositionRepository
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.udojava.evalex.Expression
@@ -459,8 +459,8 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
         return result
     }
 
-    fun getFragmentData(): FragmentData {
-        return FragmentData(
+    fun getFragmentData(): FragmentDataEntity {
+        return FragmentDataEntity(
             dataCollectionRuleContentId = dataCollectionRuleContent?.id ?: 0,
             attributeCompositionTypeId = attributeCompositionType?.id ?: 0,
             valueStr = lastValue?.valueStr.toString(),

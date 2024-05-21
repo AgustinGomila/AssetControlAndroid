@@ -3,7 +3,7 @@ package com.dacosys.assetControl.data.crud.location
 import com.dacosys.assetControl.data.enums.common.CrudCompleted
 import com.dacosys.assetControl.data.enums.common.CrudResult
 import com.dacosys.assetControl.data.enums.common.CrudStatus.*
-import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
+import com.dacosys.assetControl.data.room.dto.location.WarehouseArea
 import com.dacosys.assetControl.data.room.repository.location.WarehouseAreaRepository
 import com.dacosys.assetControl.data.webservice.location.WarehouseAreaObject
 import com.dacosys.assetControl.network.sync.SyncRegistryType

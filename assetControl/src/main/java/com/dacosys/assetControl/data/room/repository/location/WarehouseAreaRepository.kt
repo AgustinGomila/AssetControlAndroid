@@ -4,7 +4,8 @@ import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.room.dao.location.WarehouseAreaDao
 import com.dacosys.assetControl.data.room.database.AcDatabase.Companion.database
-import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
+import com.dacosys.assetControl.data.room.dto.location.WarehouseArea
+import com.dacosys.assetControl.data.room.entity.location.WarehouseAreaEntity
 import com.dacosys.assetControl.data.webservice.location.WarehouseAreaObject
 import com.dacosys.assetControl.network.sync.SyncProgress
 import com.dacosys.assetControl.network.sync.SyncRegistryType
@@ -42,7 +43,7 @@ class WarehouseAreaRepository {
     val minId get() = runBlocking { dao.selectMinId() ?: -1 }
 
     fun insert(warehouseArea: WarehouseArea) = runBlocking {
-        dao.insert(warehouseArea)
+        dao.insert(WarehouseAreaEntity(warehouseArea))
     }
 
     fun update(warehouseArea: WarehouseAreaObject) {
@@ -52,7 +53,7 @@ class WarehouseAreaRepository {
 
     fun update(warehouseArea: WarehouseArea): Boolean {
         val r = runBlocking {
-            dao.update(warehouseArea)
+            dao.update(WarehouseAreaEntity(warehouseArea))
             true
         }
         return r

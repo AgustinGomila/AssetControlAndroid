@@ -3,8 +3,9 @@ package com.dacosys.assetControl.data.room.repository.route
 import com.dacosys.assetControl.data.enums.route.RouteProcessStatus
 import com.dacosys.assetControl.data.room.dao.route.RouteProcessContentDao
 import com.dacosys.assetControl.data.room.database.AcDatabase.Companion.database
-import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollection
-import com.dacosys.assetControl.data.room.entity.route.RouteProcessContent
+import com.dacosys.assetControl.data.room.dto.dataCollection.DataCollection
+import com.dacosys.assetControl.data.room.dto.route.RouteProcessContent
+import com.dacosys.assetControl.data.room.entity.route.RouteProcessContentEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -25,8 +26,7 @@ class RouteProcessContentRepository {
     ): List<RouteProcessContent> {
         val rpContArray = selectByRouteProcessId(routeProcessId)
         val rCompArray = RouteCompositionRepository().selectByRouteId(routeId)
-
-        var anyInsert = false
+        val rpcList: MutableList<RouteProcessContent> = mutableListOf()
 
         if (rCompArray.isNotEmpty()) {
             for (rComp in rCompArray) {
@@ -47,51 +47,83 @@ class RouteProcessContentRepository {
                 }
 
                 if (!isIn) {
-                    anyInsert = true
-
                     var dataCollectionId: Long? = null
                     if (dataCollection != null) {
-                        dataCollectionId = dataCollection.dataCollectionId
+                        dataCollectionId = dataCollection.id
                     }
 
-                    val rpc = RouteProcessContent(
-                        routeProcessId = routeProcessId,
-                        dataCollectionRuleId = rComp.dataCollectionRuleId,
-                        level = rComp.level,
-                        position = rComp.position,
-                        routeProcessStatusId = RouteProcessStatus.notProcessed.id.toLong(),
-                        dataCollectionId = dataCollectionId
+                    rpcList.add(
+                        RouteProcessContent(
+                            routeProcessId = routeProcessId,
+                            dataCollectionRuleId = rComp.dataCollectionRuleId,
+                            level = rComp.level,
+                            position = rComp.position,
+                            routeProcessStatusId = RouteProcessStatus.notProcessed.id,
+                            dataCollectionId = dataCollectionId
+                        )
                     )
-                    insert(rpc)
                 }
             }
         }
 
-        return if (anyInsert) {
-            selectByRouteProcessId(routeProcessId)
-        } else rpContArray
+        if (rpcList.any()) {
+            val ids = insert(rpcList)
+            println(ids)
+            return selectByRouteProcessId(routeProcessId)
+        } else
+            return rpContArray
     }
-
 
     val minId get() = runBlocking { dao.selectMinId() ?: -1 }
 
-    fun insert(content: RouteProcessContent): Long {
+
+    fun insert(content: List<RouteProcessContent>): List<Long> {
         val r = runBlocking {
             insertSuspend(content)
         }
         return r
     }
 
-    private suspend fun insertSuspend(content: RouteProcessContent): Long {
-        val r = withContext(Dispatchers.IO) {
-            dao.insert(content)
+    /**
+     * Insert
+     *
+     * @param content
+     * @return New ID
+     */
+    fun insert(content: RouteProcessContent): Long =
+        runBlocking {
+            insertSuspend(content)
+        }
+
+    /**
+     * Insert suspend
+     *
+     * @param content
+     * @return List of new IDs
+     */
+    private suspend fun insertSuspend(content: List<RouteProcessContent>): List<Long> {
+        val r: MutableList<Long> = mutableListOf()
+        withContext(Dispatchers.IO) {
+            dao.insert(content.map { RouteProcessContentEntity(it) })
         }
         return r
     }
 
+    /**
+     * Insert suspend
+     *
+     * @param content
+     * @return New ID
+     */
+    private suspend fun insertSuspend(content: RouteProcessContent): Long =
+        withContext(Dispatchers.IO) {
+            dao.insert(RouteProcessContentEntity(content))
+        }
+
+
     fun update(content: RouteProcessContent): Boolean {
         val r = runBlocking {
-            dao.update(content)
+            dao.update(RouteProcessContentEntity(content))
             true
         }
         return r
@@ -108,7 +140,7 @@ class RouteProcessContentRepository {
     fun updateStatusNew(rpc: RouteProcessContent) = runBlocking {
         dao.updateStatusNew(
             id = rpc.id,
-            processStatusId = rpc.processStatusId,
+            processStatusId = rpc.routeProcessStatusId,
             dataCollectionId = rpc.dataCollectionId ?: 0,
             routeProcessId = rpc.routeProcessId,
             dataCollectionRuleId = rpc.dataCollectionRuleId,

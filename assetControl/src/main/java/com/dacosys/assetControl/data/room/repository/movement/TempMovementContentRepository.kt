@@ -2,8 +2,8 @@ package com.dacosys.assetControl.data.room.repository.movement
 
 import com.dacosys.assetControl.data.room.dao.movement.TempMovementContentDao
 import com.dacosys.assetControl.data.room.database.AcTempDatabase.Companion.database
-import com.dacosys.assetControl.data.room.entity.movement.TempMovementContent
-import com.dacosys.assetControl.data.room.entity.movement.WarehouseMovementContent
+import com.dacosys.assetControl.data.room.dto.movement.WarehouseMovementContent
+import com.dacosys.assetControl.data.room.entity.movement.TempMovementContentEntity
 import kotlinx.coroutines.runBlocking
 
 class TempMovementContentRepository {
@@ -23,16 +23,16 @@ class TempMovementContentRepository {
     }
 
 
-    fun insert(content: TempMovementContent) = runBlocking {
+    fun insert(content: TempMovementContentEntity) = runBlocking {
         dao.insert(content)
     }
 
     fun insert(wmId: Long, contents: List<WarehouseMovementContent>) = runBlocking {
         contents.forEach { it.warehouseMovementId = wmId }
 
-        val tempContents: ArrayList<TempMovementContent> = arrayListOf()
+        val tempContents: ArrayList<TempMovementContentEntity> = arrayListOf()
         contents.mapTo(tempContents) {
-            TempMovementContent(it)
+            TempMovementContentEntity(it)
         }
 
         tempContents.forEach {

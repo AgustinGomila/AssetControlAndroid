@@ -1,8 +1,9 @@
 package com.dacosys.assetControl.data.room.dao.user
 
 import androidx.room.*
-import com.dacosys.assetControl.data.room.entity.user.UserPermission
-import com.dacosys.assetControl.data.room.entity.user.UserPermission.Entry
+import com.dacosys.assetControl.data.room.dto.user.UserPermission
+import com.dacosys.assetControl.data.room.dto.user.UserPermission.Entry
+import com.dacosys.assetControl.data.room.entity.user.UserPermissionEntity
 
 @Dao
 interface UserPermissionDao {
@@ -11,15 +12,15 @@ interface UserPermissionDao {
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(asset: UserPermission)
+    suspend fun insert(asset: UserPermissionEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(assets: List<UserPermission>)
+    suspend fun insert(assets: List<UserPermissionEntity>)
 
     @Transaction
     suspend fun insert(entities: List<UserPermission>, completedTask: (Int) -> Unit) {
         entities.forEachIndexed { index, entity ->
-            insert(entity)
+            insert(UserPermissionEntity(entity))
             completedTask(index + 1)
         }
     }

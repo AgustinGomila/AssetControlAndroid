@@ -4,8 +4,9 @@ import com.dacosys.assetControl.AssetControlApp.Companion.getUserId
 import com.dacosys.assetControl.data.enums.review.AssetReviewStatus
 import com.dacosys.assetControl.data.room.dao.review.AssetReviewDao
 import com.dacosys.assetControl.data.room.database.AcDatabase.Companion.database
-import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
-import com.dacosys.assetControl.data.room.entity.review.AssetReview
+import com.dacosys.assetControl.data.room.dto.location.WarehouseArea
+import com.dacosys.assetControl.data.room.dto.review.AssetReview
+import com.dacosys.assetControl.data.room.entity.review.AssetReviewEntity
 import kotlinx.coroutines.runBlocking
 import java.util.*
 
@@ -31,12 +32,13 @@ class AssetReviewRepository {
     fun insert(warehouseArea: WarehouseArea): Long {
         val nextId = nextId
         val userId = getUserId() ?: return 0
+        val newId: Long
 
         runBlocking {
             val assetReview = AssetReview(
                 id = nextId,
                 assetReviewDate = Date(),
-                obs = "",
+                observations = "",
                 userId = userId,
                 warehouseAreaId = warehouseArea.id,
                 warehouseId = warehouseArea.warehouseId,
@@ -45,10 +47,10 @@ class AssetReviewRepository {
                 warehouseAreaStr = warehouseArea.description,
                 warehouseStr = warehouseArea.warehouseStr,
             )
-            dao.insert(assetReview)
+            newId = dao.insert(AssetReviewEntity(assetReview))
         }
 
-        return nextId
+        return newId
     }
 
 

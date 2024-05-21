@@ -1,8 +1,9 @@
 package com.dacosys.assetControl.data.room.dao.route
 
 import androidx.room.*
-import com.dacosys.assetControl.data.room.entity.route.Route
-import com.dacosys.assetControl.data.room.entity.route.Route.Entry
+import com.dacosys.assetControl.data.room.dto.route.Route
+import com.dacosys.assetControl.data.room.dto.route.Route.Entry
+import com.dacosys.assetControl.data.room.entity.route.RouteEntity
 
 @Dao
 interface RouteDao {
@@ -29,22 +30,22 @@ interface RouteDao {
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(route: Route)
+    suspend fun insert(route: RouteEntity)
 
     @Transaction
     suspend fun insert(entities: List<Route>, completedTask: (Int) -> Unit) {
         entities.forEachIndexed { index, entity ->
-            insert(entity)
+            insert(RouteEntity(entity))
             completedTask(index + 1)
         }
     }
 
 
     @Update
-    suspend fun update(route: Route)
+    suspend fun update(route: RouteEntity)
 
     @Delete
-    suspend fun delete(route: Route)
+    suspend fun delete(route: RouteEntity)
 
     companion object {
         const val BASIC_SELECT = "SELECT *"

@@ -1,7 +1,7 @@
 package com.dacosys.assetControl.data.enums.review
 
-import com.dacosys.assetControl.data.room.entity.review.AssetReview
-import com.dacosys.assetControl.data.room.entity.review.AssetReviewContent
+import com.dacosys.assetControl.data.room.dto.review.AssetReview
+import com.dacosys.assetControl.data.room.dto.review.AssetReviewContent
 
 data class StartReviewProgress(
     var msg: String = "",

@@ -2,7 +2,7 @@ package com.dacosys.assetControl.data.webservice.barcode
 
 import android.os.Parcel
 import android.os.Parcelable
-import com.dacosys.assetControl.data.room.entity.barcode.BarcodeLabelCustom
+import com.dacosys.assetControl.data.room.dto.barcode.BarcodeLabelCustom
 import org.ksoap2.serialization.SoapObject
 
 class BarcodeLabelCustomObject() : Parcelable {

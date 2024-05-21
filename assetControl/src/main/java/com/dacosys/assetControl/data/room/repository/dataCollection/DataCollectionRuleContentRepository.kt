@@ -2,7 +2,8 @@ package com.dacosys.assetControl.data.room.repository.dataCollection
 
 import com.dacosys.assetControl.data.room.dao.dataCollection.DataCollectionRuleContentDao
 import com.dacosys.assetControl.data.room.database.AcDatabase.Companion.database
-import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionRuleContent
+import com.dacosys.assetControl.data.room.dto.dataCollection.DataCollectionRuleContent
+import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionRuleContentEntity
 import kotlinx.coroutines.runBlocking
 
 class DataCollectionRuleContentRepository {
@@ -21,11 +22,11 @@ class DataCollectionRuleContentRepository {
 
 
     fun insert(ruleContent: DataCollectionRuleContent) = runBlocking {
-        dao.insert(ruleContent)
+        dao.insert(DataCollectionRuleContentEntity(ruleContent))
     }
 
     fun insert(contents: List<DataCollectionRuleContent>) = runBlocking {
-        dao.insert(contents)
+        dao.insert(contents.map { DataCollectionRuleContentEntity(it) })
     }
 
 

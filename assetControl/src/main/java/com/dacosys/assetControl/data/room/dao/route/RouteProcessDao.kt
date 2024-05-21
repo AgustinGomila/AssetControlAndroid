@@ -1,9 +1,10 @@
 package com.dacosys.assetControl.data.room.dao.route
 
 import androidx.room.*
-import com.dacosys.assetControl.data.room.entity.route.Route
-import com.dacosys.assetControl.data.room.entity.route.RouteProcess
-import com.dacosys.assetControl.data.room.entity.route.RouteProcess.Entry
+import com.dacosys.assetControl.data.room.dto.route.Route
+import com.dacosys.assetControl.data.room.dto.route.RouteProcess
+import com.dacosys.assetControl.data.room.dto.route.RouteProcess.Entry
+import com.dacosys.assetControl.data.room.entity.route.RouteProcessEntity
 import java.util.*
 
 @Dao
@@ -11,19 +12,35 @@ interface RouteProcessDao {
     @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN")
     suspend fun select(): List<RouteProcess>
 
-    @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN WHERE ${Entry.TABLE_NAME}.${Entry.ROUTE_ID} = :routeId")
+    @Query(
+        "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
+                "WHERE ${Entry.TABLE_NAME}.${Entry.ROUTE_ID} = :routeId " +
+                "AND ${Entry.TABLE_NAME}.${Entry.COMPLETED} = 0"
+    )
     suspend fun selectByRouteIdNoCompleted(routeId: Long): List<RouteProcess>
 
-    @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN WHERE ${Entry.TABLE_NAME}.${Entry.TRANSFERRED} = 0")
+    @Query(
+        "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
+                "WHERE ${Entry.TABLE_NAME}.${Entry.TRANSFERRED} = 0"
+    )
     suspend fun selectByNoTransferred(): List<RouteProcess>
 
-    @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN WHERE ${Entry.TABLE_NAME}.${Entry.TRANSFERRED_DATE} IS NOT NULL")
+    @Query(
+        "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
+                "WHERE ${Entry.TABLE_NAME}.${Entry.TRANSFERRED_DATE} IS NOT NULL"
+    )
     suspend fun selectTransferred(): List<RouteProcess>
 
-    @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN WHERE ${Entry.TABLE_NAME}.${Entry.COMPLETED} = 0")
+    @Query(
+        "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
+                "WHERE ${Entry.TABLE_NAME}.${Entry.COMPLETED} = 0"
+    )
     suspend fun selectByNoCompleted(): List<RouteProcess>
 
-    @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN WHERE ${Entry.TABLE_NAME}.${Entry.ID} = :rpId")
+    @Query(
+        "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
+                "WHERE ${Entry.TABLE_NAME}.${Entry.ID} = :rpId"
+    )
     suspend fun selectById(rpId: Long): RouteProcess?
 
     @Query("SELECT MAX(${Entry.ID}) $BASIC_FROM")
@@ -31,18 +48,18 @@ interface RouteProcessDao {
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(routeProcess: RouteProcess)
+    suspend fun insert(routeProcess: RouteProcessEntity): Long
 
 
     @Update
-    suspend fun update(content: RouteProcess)
+    suspend fun update(content: RouteProcessEntity)
 
     @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.ID} = :newValue, ${Entry.TRANSFERRED_DATE} = :date WHERE ${Entry.ID} = :oldValue")
     suspend fun updateId(oldValue: Long, newValue: Long, date: Date = Date())
 
 
     @Delete
-    suspend fun delete(routeProcess: RouteProcess)
+    suspend fun delete(routeProcess: RouteProcessEntity)
 
     @Query("DELETE $BASIC_FROM WHERE ${Entry.ID} = :id")
     suspend fun deleteById(id: Long): Int

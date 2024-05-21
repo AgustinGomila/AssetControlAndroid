@@ -52,33 +52,30 @@ CREATE INDEX IF NOT EXISTS `IDX_asset_maintenance__id` ON `asset_maintenance` (`
 
 CREATE TABLE IF NOT EXISTS `asset_review`
 (
-    `_id`               INTEGER NOT NULL,
-    `asset_review_date` INTEGER NOT NULL,
+    `_id`               INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    `asset_review_date` INTEGER                           NOT NULL,
     `obs`               TEXT,
-    `user_id`           INTEGER NOT NULL,
-    `warehouse_area_id` INTEGER NOT NULL,
-    `warehouse_id`      INTEGER NOT NULL,
-    `modification_date` INTEGER NOT NULL,
-    `status_id`         INTEGER NOT NULL,
-    PRIMARY KEY (`_id`)
+    `user_id`           INTEGER                           NOT NULL,
+    `warehouse_area_id` INTEGER                           NOT NULL,
+    `warehouse_id`      INTEGER                           NOT NULL,
+    `modification_date` INTEGER                           NOT NULL,
+    `status_id`         INTEGER                           NOT NULL
 );
 
 CREATE INDEX IF NOT EXISTS `IDX_asset_review_user_id` ON `asset_review` (`user_id`);
 CREATE INDEX IF NOT EXISTS `IDX_asset_review_warehouse_area_id` ON `asset_review` (`warehouse_area_id`);
 CREATE INDEX IF NOT EXISTS `IDX_asset_review_warehouse_id` ON `asset_review` (`warehouse_id`);
-CREATE INDEX IF NOT EXISTS `IDX_asset_review__id` ON `asset_review` (`_id`);
 
 CREATE TABLE IF NOT EXISTS `asset_review_content`
 (
-    `_id`                      INTEGER NOT NULL,
-    `asset_review_id`          INTEGER NOT NULL,
-    `asset_id`                 INTEGER NOT NULL,
-    `code`                     TEXT    NOT NULL,
-    `description`              TEXT    NOT NULL,
+    `_id`                      INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    `asset_review_id`          INTEGER                           NOT NULL,
+    `asset_id`                 INTEGER                           NOT NULL,
+    `code`                     TEXT                              NOT NULL,
+    `description`              TEXT                              NOT NULL,
     `qty`                      REAL,
-    `content_status_id`        INTEGER NOT NULL,
-    `origin_warehouse_area_id` INTEGER NOT NULL,
-    PRIMARY KEY (`_id`)
+    `content_status_id`        INTEGER                           NOT NULL,
+    `origin_warehouse_area_id` INTEGER                           NOT NULL
 );
 
 CREATE INDEX IF NOT EXISTS `IDX_asset_review_content_asset_review_id` ON `asset_review_content` (`asset_review_id`);
@@ -320,15 +317,14 @@ CREATE INDEX IF NOT EXISTS `IDX_route_composition_warehouse_area_id` ON `route_c
 
 CREATE TABLE IF NOT EXISTS `route_process`
 (
-    `user_id`            INTEGER NOT NULL,
-    `route_id`           INTEGER NOT NULL,
-    `route_process_id`   INTEGER NOT NULL,
-    `route_process_date` INTEGER NOT NULL,
-    `completed`          INTEGER NOT NULL,
+    `user_id`            INTEGER                           NOT NULL,
+    `route_id`           INTEGER                           NOT NULL,
+    `route_process_id`   INTEGER                           NOT NULL,
+    `route_process_date` INTEGER                           NOT NULL,
+    `completed`          INTEGER                           NOT NULL,
     `transferred`        INTEGER,
     `transferred_date`   INTEGER,
-    `_id`                INTEGER NOT NULL,
-    PRIMARY KEY (`_id`)
+    `_id`                INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS `IDX_route_process_user_id` ON `route_process` (`user_id`);
 CREATE INDEX IF NOT EXISTS `IDX_route_process_route_id` ON `route_process` (`route_id`);
@@ -336,14 +332,13 @@ CREATE INDEX IF NOT EXISTS `IDX_route_process_route_process_id` ON `route_proces
 
 CREATE TABLE IF NOT EXISTS `route_process_content`
 (
-    `route_process_content_id` INTEGER NOT NULL,
-    `route_process_id`         INTEGER NOT NULL,
-    `data_collection_rule_id`  INTEGER NOT NULL,
-    `level`                    INTEGER NOT NULL,
-    `position`                 INTEGER NOT NULL,
-    `route_process_status_id`  INTEGER NOT NULL,
-    `data_collection_id`       INTEGER,
-    PRIMARY KEY (`route_process_content_id`)
+    `_id`                     INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    `route_process_id`        INTEGER                           NOT NULL,
+    `data_collection_rule_id` INTEGER                           NOT NULL,
+    `level`                   INTEGER                           NOT NULL,
+    `position`                INTEGER                           NOT NULL,
+    `route_process_status_id` INTEGER                           NOT NULL,
+    `data_collection_id`      INTEGER
 );
 CREATE INDEX IF NOT EXISTS `IDX_route_process_content_route_process_id` ON `route_process_content` (`route_process_id`);
 CREATE INDEX IF NOT EXISTS `IDX_route_process_content_data_collection_rule_id` ON `route_process_content` (`data_collection_rule_id`);
@@ -351,7 +346,6 @@ CREATE INDEX IF NOT EXISTS `IDX_route_process_content_level` ON `route_process_c
 CREATE INDEX IF NOT EXISTS `IDX_route_process_content_position` ON `route_process_content` (`position`);
 CREATE INDEX IF NOT EXISTS `IDX_route_process_content_route_process_status_id` ON `route_process_content` (`route_process_status_id`);
 CREATE INDEX IF NOT EXISTS `IDX_route_process_content_data_collection_id` ON `route_process_content` (`data_collection_id`);
-CREATE INDEX IF NOT EXISTS `IDX_route_process_content_route_process_content_id` ON `route_process_content` (`route_process_content_id`);
 
 CREATE TABLE IF NOT EXISTS `route_process_status`
 (
@@ -448,18 +442,17 @@ CREATE INDEX IF NOT EXISTS `IDX_warehouse_area_warehouse_id` ON `warehouse_area`
 
 CREATE TABLE IF NOT EXISTS `warehouse_movement`
 (
-    `_id`                           INTEGER NOT NULL,
-    `warehouse_movement_id`         INTEGER NOT NULL,
-    `warehouse_movement_date`       INTEGER NOT NULL,
+    `_id`                           INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    `warehouse_movement_id`         INTEGER                           NOT NULL,
+    `warehouse_movement_date`       INTEGER                           NOT NULL,
     `obs`                           TEXT,
-    `user_id`                       INTEGER NOT NULL,
-    `origin_warehouse_area_id`      INTEGER NOT NULL,
-    `origin_warehouse_id`           INTEGER NOT NULL,
+    `user_id`                       INTEGER                           NOT NULL,
+    `origin_warehouse_area_id`      INTEGER                           NOT NULL,
+    `origin_warehouse_id`           INTEGER                           NOT NULL,
     `transferred_date`              INTEGER,
-    `destination_warehouse_area_id` INTEGER NOT NULL,
-    `destination_warehouse_id`      INTEGER NOT NULL,
-    `completed`                     INTEGER,
-    PRIMARY KEY (`_id`)
+    `destination_warehouse_area_id` INTEGER                           NOT NULL,
+    `destination_warehouse_id`      INTEGER                           NOT NULL,
+    `completed`                     INTEGER
 );
 CREATE INDEX IF NOT EXISTS `IDX_warehouse_movement_warehouse_movement_id` ON `warehouse_movement` (`warehouse_movement_id`);
 CREATE INDEX IF NOT EXISTS `IDX_warehouse_movement_user_id` ON `warehouse_movement` (`user_id`);
@@ -470,12 +463,11 @@ CREATE INDEX IF NOT EXISTS `IDX_warehouse_movement_destination_warehouse_id` ON 
 
 CREATE TABLE IF NOT EXISTS `warehouse_movement_content`
 (
-    `_id`                   INTEGER NOT NULL,
-    `warehouse_movement_id` INTEGER NOT NULL,
-    `asset_id`              INTEGER NOT NULL,
-    `code`                  TEXT    NOT NULL,
-    `qty`                   REAL,
-    PRIMARY KEY (`_id`)
+    `_id`                   INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    `warehouse_movement_id` INTEGER                           NOT NULL,
+    `asset_id`              INTEGER                           NOT NULL,
+    `code`                  TEXT                              NOT NULL,
+    `qty`                   REAL
 );
 CREATE INDEX IF NOT EXISTS `IDX_warehouse_movement_content_warehouse_movement_id` ON `warehouse_movement_content` (`warehouse_movement_id`);
 CREATE INDEX IF NOT EXISTS `IDX_warehouse_movement_content_asset_id` ON `warehouse_movement_content` (`asset_id`);

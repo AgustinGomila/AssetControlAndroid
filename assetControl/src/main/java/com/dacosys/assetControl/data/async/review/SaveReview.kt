@@ -6,10 +6,10 @@ import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.enums.common.SaveProgress
 import com.dacosys.assetControl.data.enums.review.AssetReviewContentStatus
 import com.dacosys.assetControl.data.enums.review.AssetReviewStatus
-import com.dacosys.assetControl.data.room.entity.movement.WarehouseMovement
-import com.dacosys.assetControl.data.room.entity.movement.WarehouseMovementContent
-import com.dacosys.assetControl.data.room.entity.review.AssetReview
-import com.dacosys.assetControl.data.room.entity.review.AssetReviewContent
+import com.dacosys.assetControl.data.room.dto.movement.WarehouseMovement
+import com.dacosys.assetControl.data.room.dto.movement.WarehouseMovementContent
+import com.dacosys.assetControl.data.room.dto.review.AssetReview
+import com.dacosys.assetControl.data.room.dto.review.AssetReviewContent
 import com.dacosys.assetControl.data.room.repository.asset.AssetRepository
 import com.dacosys.assetControl.data.room.repository.movement.WarehouseMovementContentRepository
 import com.dacosys.assetControl.data.room.repository.movement.WarehouseMovementRepository

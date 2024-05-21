@@ -2,7 +2,7 @@ package com.dacosys.assetControl.data.room.repository.fragment
 
 import com.dacosys.assetControl.data.room.dao.fragment.FragmentDataDao
 import com.dacosys.assetControl.data.room.database.AcTempDatabase.Companion.database
-import com.dacosys.assetControl.data.room.entity.fragment.FragmentData
+import com.dacosys.assetControl.data.room.entity.fragment.FragmentDataEntity
 import kotlinx.coroutines.runBlocking
 
 class FragmentDataRepository {
@@ -11,7 +11,7 @@ class FragmentDataRepository {
 
     fun select() = runBlocking { dao.select() }
 
-    fun insert(fragments: List<FragmentData>) = runBlocking {
+    fun insert(fragments: List<FragmentDataEntity>) = runBlocking {
         dao.insert(fragments)
     }
 }

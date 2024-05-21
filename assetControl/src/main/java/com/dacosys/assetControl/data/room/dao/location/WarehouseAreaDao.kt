@@ -1,26 +1,35 @@
 package com.dacosys.assetControl.data.room.dao.location
 
 import androidx.room.*
-import com.dacosys.assetControl.data.room.entity.location.Warehouse
-import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
-import com.dacosys.assetControl.data.room.entity.location.WarehouseArea.Entry
+import com.dacosys.assetControl.data.room.dto.location.Warehouse
+import com.dacosys.assetControl.data.room.dto.location.WarehouseArea
+import com.dacosys.assetControl.data.room.dto.location.WarehouseArea.Entry
+import com.dacosys.assetControl.data.room.entity.location.WarehouseAreaEntity
 
 @Dao
 interface WarehouseAreaDao {
     @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN $BASIC_ORDER")
     suspend fun select(): List<WarehouseArea>
 
-    @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN WHERE ${Entry.TABLE_NAME}.${Entry.ACTIVE} = 1 $BASIC_ORDER")
+    @Query(
+        "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
+                "WHERE ${Entry.TABLE_NAME}.${Entry.ACTIVE} = 1 $BASIC_ORDER"
+    )
     suspend fun selectActive(): List<WarehouseArea>
 
     @Query("SELECT MIN(${Entry.ID}) $BASIC_FROM")
     suspend fun selectMinId(): Long?
 
-    @RewriteQueriesToDropUnusedColumns
-    @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN WHERE ${Entry.TABLE_NAME}.${Entry.ID} = :id")
+    @Query(
+        "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
+                "WHERE ${Entry.TABLE_NAME}.${Entry.ID} = :id"
+    )
     suspend fun selectById(id: Long): WarehouseArea?
 
-    @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN WHERE ${Entry.TABLE_NAME}.${Entry.TRANSFERRED} = 0 $BASIC_ORDER")
+    @Query(
+        "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
+                "WHERE ${Entry.TABLE_NAME}.${Entry.TRANSFERRED} = 0 $BASIC_ORDER"
+    )
     suspend fun selectNoTransferred(): List<WarehouseArea>
 
     @Query(
@@ -49,22 +58,22 @@ interface WarehouseAreaDao {
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(warehouseArea: WarehouseArea)
+    suspend fun insert(warehouseArea: WarehouseAreaEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(areas: List<WarehouseArea>)
+    suspend fun insert(areas: List<WarehouseAreaEntity>)
 
     @Transaction
     suspend fun insert(entities: List<WarehouseArea>, completedTask: (Int) -> Unit) {
         entities.forEachIndexed { index, entity ->
-            insert(entity)
+            insert(WarehouseAreaEntity(entity))
             completedTask(index + 1)
         }
     }
 
 
     @Update
-    suspend fun update(area: WarehouseArea)
+    suspend fun update(area: WarehouseAreaEntity)
 
     @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.WAREHOUSE_ID} = :newValue WHERE ${Entry.WAREHOUSE_ID} = :oldValue")
     suspend fun updateWarehouseId(oldValue: Long, newValue: Long)
@@ -83,7 +92,7 @@ interface WarehouseAreaDao {
 
 
     @Delete
-    suspend fun delete(warehouseArea: WarehouseArea)
+    suspend fun delete(warehouseArea: WarehouseAreaEntity)
 
     @Query("DELETE $BASIC_FROM")
     suspend fun deleteAll()

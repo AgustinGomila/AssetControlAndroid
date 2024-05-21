@@ -12,8 +12,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.TooltipCompat
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.room.entity.location.Warehouse
-import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
+import com.dacosys.assetControl.data.room.dto.location.Warehouse
+import com.dacosys.assetControl.data.room.dto.location.WarehouseArea
 import com.dacosys.assetControl.data.room.repository.location.WarehouseAreaRepository
 import com.dacosys.assetControl.data.room.repository.location.WarehouseRepository
 import com.dacosys.assetControl.databinding.LocationHeaderFragmentBinding

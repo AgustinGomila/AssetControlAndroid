@@ -3,7 +3,7 @@ package com.dacosys.assetControl.data.webservice.maintenance
 import android.os.Parcel
 import android.os.Parcelable
 import com.dacosys.assetControl.AssetControlApp.Companion.getUserId
-import com.dacosys.assetControl.data.room.entity.maintenance.AssetMaintenance
+import com.dacosys.assetControl.data.room.dto.maintenance.AssetMaintenance
 import org.ksoap2.serialization.SoapObject
 
 class AssetMaintenanceObject() : Parcelable {
@@ -25,7 +25,7 @@ class AssetMaintenanceObject() : Parcelable {
         // Main Information
         asset_manteinance_id = assetMaintenance.id
         manteinance_type_id = assetMaintenance.maintenanceTypeId
-        manteinance_status_id = assetMaintenance.statusId
+        manteinance_status_id = assetMaintenance.maintenanceStatusId
         asset_id = assetMaintenance.assetId
         repairman_id = getUserId() ?: 0
     }

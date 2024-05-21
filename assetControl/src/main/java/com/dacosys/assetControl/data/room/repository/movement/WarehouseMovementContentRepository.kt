@@ -5,8 +5,8 @@ import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.enums.common.SaveProgress
 import com.dacosys.assetControl.data.room.dao.movement.WarehouseMovementContentDao
 import com.dacosys.assetControl.data.room.database.AcDatabase.Companion.database
-import com.dacosys.assetControl.data.room.entity.movement.WarehouseMovement
-import com.dacosys.assetControl.data.room.entity.movement.WarehouseMovementContent
+import com.dacosys.assetControl.data.room.dto.movement.WarehouseMovement
+import com.dacosys.assetControl.data.room.dto.movement.WarehouseMovementContent
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import kotlinx.coroutines.runBlocking
 
@@ -49,15 +49,12 @@ class WarehouseMovementContentRepository {
     }
 
 
-    fun update(content: WarehouseMovementContent) = runBlocking {
-        dao.update(content)
-    }
-
     fun updateAssetId(newValue: Long, oldValue: Long) {
         runBlocking {
             dao.updateAssetId(newValue, oldValue)
         }
     }
+
 
     fun deleteTransferred() = runBlocking {
         dao.deleteTransferred()

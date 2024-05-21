@@ -2,7 +2,7 @@ package com.dacosys.assetControl.data.webservice.user
 
 import android.os.Parcel
 import android.os.Parcelable
-import com.dacosys.assetControl.data.room.entity.user.User
+import com.dacosys.assetControl.data.room.dto.user.User
 import org.ksoap2.serialization.SoapObject
 
 class UserObject() : Parcelable {

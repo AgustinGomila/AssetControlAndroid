@@ -328,8 +328,8 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
 
     private fun loadBundleValues(b: Bundle) {
         // region Recuperar el título de la ventana
-        val t1 = b.getString("title")
-        tempTitle = if (!t1.isNullOrEmpty()) t1 else getString(R.string.select_asset_review)
+        val t1 = b.getString("title") ?: ""
+        tempTitle = t1.ifEmpty { getString(R.string.select_asset_review) }
         // endregion
 
         val syncStatus = b.getString("CURRENT_MODE") ?: ""

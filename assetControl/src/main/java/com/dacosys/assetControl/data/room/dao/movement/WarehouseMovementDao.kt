@@ -1,10 +1,11 @@
 package com.dacosys.assetControl.data.room.dao.movement
 
 import androidx.room.*
-import com.dacosys.assetControl.data.room.entity.location.Warehouse
-import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
-import com.dacosys.assetControl.data.room.entity.movement.WarehouseMovement
-import com.dacosys.assetControl.data.room.entity.movement.WarehouseMovement.Entry
+import com.dacosys.assetControl.data.room.dto.location.Warehouse
+import com.dacosys.assetControl.data.room.dto.location.WarehouseArea
+import com.dacosys.assetControl.data.room.dto.movement.WarehouseMovement
+import com.dacosys.assetControl.data.room.dto.movement.WarehouseMovement.Entry
+import com.dacosys.assetControl.data.room.entity.movement.WarehouseMovementEntity
 import java.util.*
 
 @Dao
@@ -16,25 +17,42 @@ interface WarehouseMovementDao {
     )
     suspend fun selectByNoTransferred(): List<WarehouseMovement>
 
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(warehouseMovement: WarehouseMovement)
+    suspend fun insert(warehouseMovement: WarehouseMovementEntity): Long
+
 
     @Update
-    suspend fun update(warehouseMovement: WarehouseMovement)
+    suspend fun update(warehouseMovement: WarehouseMovementEntity)
 
-    @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.ORIGIN_WAREHOUSE_AREA_ID} = :newValue WHERE ${Entry.ORIGIN_WAREHOUSE_AREA_ID} = :oldValue")
+    @Query(
+        "UPDATE ${Entry.TABLE_NAME} SET ${Entry.ORIGIN_WAREHOUSE_AREA_ID} = :newValue " +
+                "WHERE ${Entry.ORIGIN_WAREHOUSE_AREA_ID} = :oldValue"
+    )
     suspend fun updateOriginWarehouseAreaId(oldValue: Long, newValue: Long)
 
-    @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.DESTINATION_WAREHOUSE_AREA_ID} = :newValue WHERE ${Entry.DESTINATION_WAREHOUSE_AREA_ID} = :oldValue")
+    @Query(
+        "UPDATE ${Entry.TABLE_NAME} SET ${Entry.DESTINATION_WAREHOUSE_AREA_ID} = :newValue " +
+                "WHERE ${Entry.DESTINATION_WAREHOUSE_AREA_ID} = :oldValue"
+    )
     suspend fun updateDestinationWarehouseAreaId(oldValue: Long, newValue: Long)
 
-    @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.ORIGIN_WAREHOUSE_ID} = :newValue WHERE ${Entry.ORIGIN_WAREHOUSE_ID} = :oldValue")
+    @Query(
+        "UPDATE ${Entry.TABLE_NAME} SET ${Entry.ORIGIN_WAREHOUSE_ID} = :newValue " +
+                "WHERE ${Entry.ORIGIN_WAREHOUSE_ID} = :oldValue"
+    )
     suspend fun updateOriginWarehouseId(oldValue: Long, newValue: Long)
 
-    @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.DESTINATION_WAREHOUSE_ID} = :newValue WHERE ${Entry.DESTINATION_WAREHOUSE_ID} = :oldValue")
+    @Query(
+        "UPDATE ${Entry.TABLE_NAME} SET ${Entry.DESTINATION_WAREHOUSE_ID} = :newValue " +
+                "WHERE ${Entry.DESTINATION_WAREHOUSE_ID} = :oldValue"
+    )
     suspend fun updateDestinationWarehouseId(oldValue: Long, newValue: Long)
 
-    @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.ID} = :newValue, ${Entry.TRANSFERRED_DATE} = :date WHERE ${Entry.ID} = :oldValue")
+    @Query(
+        "UPDATE ${Entry.TABLE_NAME} SET ${Entry.ID} = :newValue, ${Entry.TRANSFERRED_DATE} = :date " +
+                "WHERE ${Entry.ID} = :oldValue"
+    )
     suspend fun updateId(oldValue: Long, newValue: Long, date: Date = Date())
 
 
@@ -52,16 +70,24 @@ interface WarehouseMovementDao {
         private val wEntry = Warehouse.Entry
         private val waEntry = WarehouseArea.Entry
 
+        private const val ORIG_PREFIX = "orig"
+        private const val DEST_PREFIX = "dest"
+
         const val BASIC_LEFT_JOIN =
-            "LEFT JOIN ${wEntry.TABLE_NAME} AS orig_${wEntry.TABLE_NAME} ON orig_${wEntry.TABLE_NAME}.${wEntry.ID} = ${Entry.TABLE_NAME}.${Entry.ORIGIN_WAREHOUSE_ID} " +
-                    "LEFT JOIN ${waEntry.TABLE_NAME} AS orig_${waEntry.TABLE_NAME} ON orig_${waEntry.TABLE_NAME}.${waEntry.ID} = ${Entry.TABLE_NAME}.${Entry.ORIGIN_WAREHOUSE_AREA_ID} " +
-                    "LEFT JOIN ${wEntry.TABLE_NAME} AS dest_${wEntry.TABLE_NAME} ON dest_${wEntry.TABLE_NAME}.${wEntry.ID} = ${Entry.TABLE_NAME}.${Entry.DESTINATION_WAREHOUSE_ID} " +
-                    "LEFT JOIN ${waEntry.TABLE_NAME} AS dest_${waEntry.TABLE_NAME} ON dest_${waEntry.TABLE_NAME}.${waEntry.ID} = ${Entry.TABLE_NAME}.${Entry.DESTINATION_WAREHOUSE_AREA_ID} "
+            "LEFT JOIN ${waEntry.TABLE_NAME} AS ${ORIG_PREFIX}_${waEntry.TABLE_NAME} " +
+                    "ON ${ORIG_PREFIX}_${waEntry.TABLE_NAME}.${waEntry.ID} = ${Entry.TABLE_NAME}.${Entry.ORIGIN_WAREHOUSE_AREA_ID} " +
+                    "LEFT JOIN ${wEntry.TABLE_NAME} AS ${ORIG_PREFIX}_${wEntry.TABLE_NAME} " +
+                    "ON ${ORIG_PREFIX}_${wEntry.TABLE_NAME}.${wEntry.ID} = ${ORIG_PREFIX}_${waEntry.TABLE_NAME}.${waEntry.WAREHOUSE_ID} " +
+                    "LEFT JOIN ${waEntry.TABLE_NAME} AS ${DEST_PREFIX}_${waEntry.TABLE_NAME} " +
+                    "ON ${DEST_PREFIX}_${waEntry.TABLE_NAME}.${waEntry.ID} = ${Entry.TABLE_NAME}.${Entry.DESTINATION_WAREHOUSE_AREA_ID} " +
+                    "LEFT JOIN ${wEntry.TABLE_NAME} AS ${DEST_PREFIX}_${wEntry.TABLE_NAME} " +
+                    "ON ${DEST_PREFIX}_${wEntry.TABLE_NAME}.${wEntry.ID} = ${DEST_PREFIX}_${waEntry.TABLE_NAME}.${waEntry.WAREHOUSE_ID} "
+
 
         const val BASIC_JOIN_FIELDS =
-            "dest_${wEntry.TABLE_NAME}.${wEntry.DESCRIPTION} AS ${Entry.DESTINATION_WAREHOUSE_STR}," +
-                    "dest_${wEntry.TABLE_NAME}.${wEntry.DESCRIPTION} AS ${Entry.DESTINATION_WAREHOUSE_AREA_STR}," +
-                    "orig_${wEntry.TABLE_NAME}.${wEntry.DESCRIPTION} AS ${Entry.ORIGIN_WAREHOUSE_STR}," +
-                    "orig_${wEntry.TABLE_NAME}.${wEntry.DESCRIPTION} AS ${Entry.ORIGIN_WAREHOUSE_AREA_STR}"
+            "${DEST_PREFIX}_${wEntry.TABLE_NAME}.${wEntry.DESCRIPTION} AS ${Entry.DESTINATION_WAREHOUSE_STR}," +
+                    "${DEST_PREFIX}_${waEntry.TABLE_NAME}.${waEntry.DESCRIPTION} AS ${Entry.DESTINATION_WAREHOUSE_AREA_STR}," +
+                    "${ORIG_PREFIX}_${wEntry.TABLE_NAME}.${wEntry.DESCRIPTION} AS ${Entry.ORIGIN_WAREHOUSE_STR}," +
+                    "${ORIG_PREFIX}_${waEntry.TABLE_NAME}.${waEntry.DESCRIPTION} AS ${Entry.ORIGIN_WAREHOUSE_AREA_STR}"
     }
 }

@@ -1,46 +1,54 @@
 package com.dacosys.assetControl.data.room.dao.category
 
 import androidx.room.*
-import com.dacosys.assetControl.data.room.entity.category.ItemCategory
-import com.dacosys.assetControl.data.room.entity.category.ItemCategory.Entry
-
+import com.dacosys.assetControl.data.room.dto.category.ItemCategory
+import com.dacosys.assetControl.data.room.dto.category.ItemCategory.Entry
+import com.dacosys.assetControl.data.room.entity.category.ItemCategoryEntity
 
 @Dao
 interface ItemCategoryDao {
     @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM_ALIAS $BASIC_LEFT_JOIN $BASIC_ORDER")
     suspend fun select(): List<ItemCategory>
 
-    @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM_ALIAS $BASIC_LEFT_JOIN WHERE $ALIAS.${Entry.ACTIVE} = 1 $BASIC_ORDER")
+    @Query(
+        "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM_ALIAS $BASIC_LEFT_JOIN " +
+                "WHERE $ALIAS.${Entry.ACTIVE} = 1 $BASIC_ORDER"
+    )
     suspend fun selectActive(): List<ItemCategory>
 
     @Query("SELECT MIN(${Entry.ID}) $BASIC_FROM")
     suspend fun selectMinId(): Long?
 
-    @RewriteQueriesToDropUnusedColumns
-    @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM_ALIAS $BASIC_LEFT_JOIN WHERE $ALIAS.${Entry.ID} = :id")
+    @Query(
+        "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM_ALIAS $BASIC_LEFT_JOIN " +
+                "WHERE $ALIAS.${Entry.ID} = :id"
+    )
     suspend fun selectById(id: Long): ItemCategory?
 
-    @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM_ALIAS $BASIC_LEFT_JOIN WHERE $ALIAS.${Entry.TRANSFERRED} = 0 $BASIC_ORDER")
+    @Query(
+        "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM_ALIAS $BASIC_LEFT_JOIN " +
+                "WHERE $ALIAS.${Entry.TRANSFERRED} = 0 $BASIC_ORDER"
+    )
     suspend fun selectNoTransferred(): List<ItemCategory>
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(itemCategory: ItemCategory)
+    suspend fun insert(itemCategory: ItemCategoryEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(categories: List<ItemCategory>)
+    suspend fun insert(categories: List<ItemCategoryEntity>)
 
     @Transaction
     suspend fun insert(entities: List<ItemCategory>, completedTask: (Int) -> Unit) {
         entities.forEachIndexed { index, entity ->
-            insert(entity)
+            insert(ItemCategoryEntity(entity))
             completedTask(index + 1)
         }
     }
 
 
     @Update
-    suspend fun update(asset: ItemCategory)
+    suspend fun update(category: ItemCategoryEntity)
 
     @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.ID} = :newValue WHERE ${Entry.ID} = :oldValue")
     suspend fun updateId(oldValue: Long, newValue: Long)
@@ -56,7 +64,7 @@ interface ItemCategoryDao {
 
 
     @Delete
-    suspend fun delete(itemCategory: ItemCategory)
+    suspend fun delete(itemCategory: ItemCategoryEntity)
 
     @Query("DELETE $BASIC_FROM")
     suspend fun deleteAll()

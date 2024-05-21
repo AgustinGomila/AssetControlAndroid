@@ -3,7 +3,7 @@ package com.dacosys.assetControl
 import android.app.Application
 import android.content.Context
 import androidx.preference.PreferenceManager
-import com.dacosys.assetControl.data.room.entity.user.User
+import com.dacosys.assetControl.data.room.dto.user.User
 import com.dacosys.assetControl.data.room.repository.user.UserRepository
 import com.dacosys.assetControl.utils.Statics.Companion.INTERNAL_IMAGE_CONTROL_APP_ID
 import com.dacosys.assetControl.utils.imageControl.ImageControl.Companion.imageControl

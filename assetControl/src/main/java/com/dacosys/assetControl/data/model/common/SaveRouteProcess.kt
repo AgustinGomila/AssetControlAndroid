@@ -4,9 +4,9 @@ import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.enums.common.SaveProgress
 import com.dacosys.assetControl.data.enums.route.RouteProcessStatus
-import com.dacosys.assetControl.data.room.entity.route.RouteProcess
-import com.dacosys.assetControl.data.room.entity.route.RouteProcessContent
-import com.dacosys.assetControl.data.room.entity.route.RouteProcessSteps
+import com.dacosys.assetControl.data.room.dto.route.RouteProcess
+import com.dacosys.assetControl.data.room.dto.route.RouteProcessContent
+import com.dacosys.assetControl.data.room.dto.route.RouteProcessSteps
 import com.dacosys.assetControl.data.room.repository.route.RouteProcessContentRepository
 import com.dacosys.assetControl.data.room.repository.route.RouteProcessStepsRepository
 import com.dacosys.assetControl.network.sync.SyncProgress
@@ -114,8 +114,8 @@ class SaveRouteProcess {
                     )
                 )
 
-                var statusId = rpc.processStatusId
-                if (rpc.processStatusId == RouteProcessStatus.unknown.id) {
+                var statusId = rpc.routeProcessStatusId
+                if (rpc.routeProcessStatusId == RouteProcessStatus.unknown.id) {
                     statusId = RouteProcessStatus.notProcessed.id
                 }
 
@@ -125,7 +125,7 @@ class SaveRouteProcess {
                 val dataCollectionId = rpc.dataCollectionId
 
                 if (rpc.routeProcessId == routeProcessId) {
-                    rpc.processStatusId = statusId
+                    rpc.routeProcessStatusId = statusId
                     contentRepository.updateStatusNew(rpc)
                 } else {
                     val newId = contentRepository.insert(
@@ -134,7 +134,7 @@ class SaveRouteProcess {
                             dataCollectionRuleId = rpc.dataCollectionRuleId,
                             level = level,
                             position = position,
-                            routeProcessStatusId = statusId.toLong(),
+                            routeProcessStatusId = statusId,
                             dataCollectionId = null
                         )
                     )

@@ -11,8 +11,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.enums.asset.AssetStatus
-import com.dacosys.assetControl.data.room.entity.category.ItemCategory
-import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
+import com.dacosys.assetControl.data.room.dto.category.ItemCategory
+import com.dacosys.assetControl.data.room.dto.location.WarehouseArea
 import com.dacosys.assetControl.databinding.AssetSelectFilterFragmentBinding
 import com.dacosys.assetControl.ui.activities.asset.CodeSelectDialogActivity
 import com.dacosys.assetControl.ui.activities.category.ItemCategorySelectActivity

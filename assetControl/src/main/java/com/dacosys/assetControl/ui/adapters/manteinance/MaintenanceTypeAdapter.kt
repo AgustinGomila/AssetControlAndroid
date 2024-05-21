@@ -12,7 +12,7 @@ import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.R.id.descriptionTextView
 import com.dacosys.assetControl.R.layout.custom_spinner_dropdown_item
-import com.dacosys.assetControl.data.room.entity.maintenance.MaintenanceType
+import com.dacosys.assetControl.data.room.dto.maintenance.MaintenanceType
 
 /**
  * Created by Agustin on 18/01/2017.

@@ -7,7 +7,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.enums.common.Table
-import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
+import com.dacosys.assetControl.data.room.dto.location.WarehouseArea
 import com.dacosys.assetControl.databinding.WarehouseAreaDetailActivityBinding
 import com.dacosys.assetControl.ui.common.snackbar.MakeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType

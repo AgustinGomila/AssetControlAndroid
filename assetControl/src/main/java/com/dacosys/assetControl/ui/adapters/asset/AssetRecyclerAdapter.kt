@@ -34,8 +34,8 @@ import com.dacosys.assetControl.data.enums.asset.AssetStatus
 import com.dacosys.assetControl.data.enums.asset.OwnershipStatus
 import com.dacosys.assetControl.data.enums.common.Table
 import com.dacosys.assetControl.data.enums.permission.PermissionEntry
-import com.dacosys.assetControl.data.room.entity.asset.Asset
-import com.dacosys.assetControl.data.room.entity.user.User
+import com.dacosys.assetControl.data.room.dto.asset.Asset
+import com.dacosys.assetControl.data.room.dto.user.User
 import com.dacosys.assetControl.databinding.AssetRowBinding
 import com.dacosys.assetControl.databinding.AssetRowExpandedBinding
 import com.dacosys.assetControl.ui.adapters.interfaces.Interfaces.*

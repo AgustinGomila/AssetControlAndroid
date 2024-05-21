@@ -17,7 +17,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.room.entity.category.ItemCategory
+import com.dacosys.assetControl.data.room.dto.category.ItemCategory
 import com.dacosys.assetControl.data.room.repository.category.ItemCategoryRepository
 import com.dacosys.assetControl.databinding.ItemCategorySelectActivityBinding
 import com.dacosys.assetControl.ui.adapters.category.ItemCategoryAdapter

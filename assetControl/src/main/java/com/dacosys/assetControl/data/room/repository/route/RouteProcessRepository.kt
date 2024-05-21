@@ -3,8 +3,9 @@ package com.dacosys.assetControl.data.room.repository.route
 import com.dacosys.assetControl.AssetControlApp.Companion.getUserId
 import com.dacosys.assetControl.data.room.dao.route.RouteProcessDao
 import com.dacosys.assetControl.data.room.database.AcDatabase.Companion.database
-import com.dacosys.assetControl.data.room.entity.route.Route
-import com.dacosys.assetControl.data.room.entity.route.RouteProcess
+import com.dacosys.assetControl.data.room.dto.route.Route
+import com.dacosys.assetControl.data.room.dto.route.RouteProcess
+import com.dacosys.assetControl.data.room.entity.route.RouteProcessEntity
 import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.getUTCDateTimeAsDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -33,6 +34,7 @@ class RouteProcessRepository {
     fun insert(route: Route): Long = runBlocking {
         val nextId = nextId
         val userId = getUserId() ?: 0
+        var newId: Long
 
         runBlocking {
             val rp = RouteProcess(
@@ -45,10 +47,10 @@ class RouteProcessRepository {
                 transferredDate = null,
                 routeStr = route.description
             )
-            dao.insert(rp)
+            newId = dao.insert(RouteProcessEntity(rp))
         }
 
-        nextId
+        newId
     }
 
 
@@ -61,7 +63,7 @@ class RouteProcessRepository {
 
     private suspend fun updateSuspend(content: RouteProcess): Boolean {
         withContext(Dispatchers.IO) {
-            dao.update(content)
+            dao.update(RouteProcessEntity(content))
         }
         return true
     }

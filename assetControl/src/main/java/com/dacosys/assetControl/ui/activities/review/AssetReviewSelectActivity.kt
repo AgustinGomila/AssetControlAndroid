@@ -32,8 +32,8 @@ import com.dacosys.assetControl.AssetControlApp.Companion.getUserId
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.enums.common.Table
 import com.dacosys.assetControl.data.enums.review.AssetReviewStatus
-import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
-import com.dacosys.assetControl.data.room.entity.review.AssetReview
+import com.dacosys.assetControl.data.room.dto.location.WarehouseArea
+import com.dacosys.assetControl.data.room.dto.review.AssetReview
 import com.dacosys.assetControl.data.room.repository.location.WarehouseAreaRepository
 import com.dacosys.assetControl.data.room.repository.review.AssetReviewContentRepository
 import com.dacosys.assetControl.data.room.repository.review.AssetReviewRepository
@@ -137,8 +137,8 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private fun loadBundleValues(b: Bundle) {
         // region Recuperar el título de la ventana
-        val t1 = b.getString("title")
-        tempTitle = if (!t1.isNullOrEmpty()) t1 else getString(R.string.select_asset_review)
+        val t1 = b.getString("title") ?: ""
+        tempTitle = t1.ifEmpty { getString(R.string.select_asset_review) }
         // endregion
 
         // PANELS

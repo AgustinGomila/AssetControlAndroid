@@ -26,8 +26,8 @@ import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.enums.common.ConfirmStatus
 import com.dacosys.assetControl.data.enums.common.Table
 import com.dacosys.assetControl.data.enums.review.AssetReviewContentStatus
-import com.dacosys.assetControl.data.room.entity.review.AssetReview
-import com.dacosys.assetControl.data.room.entity.review.AssetReviewContent
+import com.dacosys.assetControl.data.room.dto.review.AssetReview
+import com.dacosys.assetControl.data.room.dto.review.AssetReviewContent
 import com.dacosys.assetControl.data.room.repository.review.TempReviewContentRepository
 import com.dacosys.assetControl.databinding.AssetReviewContentConfirmBottomPanelCollapsedBinding
 import com.dacosys.assetControl.ui.activities.common.ObservationsActivity

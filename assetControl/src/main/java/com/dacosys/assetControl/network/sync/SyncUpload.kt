@@ -1429,7 +1429,7 @@ class SyncUpload(
                     x.dataCollectionRuleId = rpc.dataCollectionRuleId
                     x.level = rpc.level
                     x.position = rpc.position
-                    x.routeProcessStatusId = rpc.processStatusId
+                    x.routeProcessStatusId = rpc.routeProcessStatusId
                     x.dataCollectionId = dataCollectionId
 
                     rpcObjArray.add(x)
@@ -1568,13 +1568,13 @@ class SyncUpload(
                 amObj.asset_id = am.assetId
                 amObj.asset_manteinance_id = am.id
                 amObj.manteinance_type_id = am.maintenanceTypeId
-                amObj.manteinance_status_id = am.statusId
+                amObj.manteinance_status_id = am.maintenanceStatusId
                 amObj.repairman_id = (getUserId() ?: return)
 
                 val amLogObj = AssetMaintenanceLogObject()
                 amLogObj.description = am.observations.orEmpty()
                 amLogObj.asset_manteinance_id = am.id
-                amLogObj.manteinance_status_id = am.statusId
+                amLogObj.manteinance_status_id = am.maintenanceStatusId
                 amLogObj.repairman_id = (getUserId() ?: return)
 
                 val assetMaintenanceId = if (am.id == 0L) {

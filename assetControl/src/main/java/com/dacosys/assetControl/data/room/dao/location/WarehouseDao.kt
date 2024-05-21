@@ -1,9 +1,9 @@
 package com.dacosys.assetControl.data.room.dao.location
 
 import androidx.room.*
-import com.dacosys.assetControl.data.room.entity.location.Warehouse
-import com.dacosys.assetControl.data.room.entity.location.Warehouse.Entry
-
+import com.dacosys.assetControl.data.room.dto.location.Warehouse
+import com.dacosys.assetControl.data.room.dto.location.Warehouse.Entry
+import com.dacosys.assetControl.data.room.entity.location.WarehouseEntity
 
 @Dao
 interface WarehouseDao {
@@ -24,22 +24,22 @@ interface WarehouseDao {
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(warehouse: Warehouse)
+    suspend fun insert(warehouse: WarehouseEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(warehouses: List<Warehouse>)
+    suspend fun insert(warehouses: List<WarehouseEntity>)
 
     @Transaction
     suspend fun insert(entities: List<Warehouse>, completedTask: (Int) -> Unit) {
         entities.forEachIndexed { index, entity ->
-            insert(entity)
+            insert(WarehouseEntity(entity))
             completedTask(index + 1)
         }
     }
 
 
     @Update
-    suspend fun update(warehouse: Warehouse)
+    suspend fun update(warehouse: WarehouseEntity)
 
     @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.ID} = :newValue WHERE ${Entry.ID} = :oldValue")
     suspend fun updateId(oldValue: Long, newValue: Long)
@@ -55,7 +55,7 @@ interface WarehouseDao {
 
 
     @Delete
-    suspend fun delete(warehouse: Warehouse)
+    suspend fun delete(warehouse: WarehouseEntity)
 
     @Query("DELETE $BASIC_FROM")
     suspend fun deleteAll()

@@ -2,14 +2,14 @@ package com.dacosys.assetControl.data.room.dao.review
 
 import androidx.room.*
 import com.dacosys.assetControl.data.enums.review.AssetReviewStatus
-import com.dacosys.assetControl.data.room.entity.asset.Asset
-import com.dacosys.assetControl.data.room.entity.category.ItemCategory
-import com.dacosys.assetControl.data.room.entity.location.Warehouse
-import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
-import com.dacosys.assetControl.data.room.entity.review.AssetReview
-import com.dacosys.assetControl.data.room.entity.review.AssetReviewContent
-import com.dacosys.assetControl.data.room.entity.review.AssetReviewContent.Entry
-
+import com.dacosys.assetControl.data.room.dto.asset.Asset
+import com.dacosys.assetControl.data.room.dto.category.ItemCategory
+import com.dacosys.assetControl.data.room.dto.location.Warehouse
+import com.dacosys.assetControl.data.room.dto.location.WarehouseArea
+import com.dacosys.assetControl.data.room.dto.review.AssetReview
+import com.dacosys.assetControl.data.room.dto.review.AssetReviewContent
+import com.dacosys.assetControl.data.room.dto.review.AssetReviewContent.Entry
+import com.dacosys.assetControl.data.room.entity.review.AssetReviewContentEntity
 
 @Dao
 interface AssetReviewContentDao {
@@ -19,37 +19,40 @@ interface AssetReviewContentDao {
     @Query("SELECT MIN(${Entry.ID}) $BASIC_FROM")
     suspend fun selectMinId(): Long?
 
-    @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN WHERE ${Entry.TABLE_NAME}.${Entry.ID} = :id")
+    @Query(
+        "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
+                "WHERE ${Entry.TABLE_NAME}.${Entry.ID} = :id"
+    )
     suspend fun selectById(id: Long): AssetReviewContent?
 
-    @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN WHERE ${Entry.TABLE_NAME}.${Entry.ASSET_REVIEW_ID} = :id")
+    @Query(
+        "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
+                "WHERE ${Entry.TABLE_NAME}.${Entry.ASSET_REVIEW_ID} = :id"
+    )
     suspend fun selectByAssetReviewId(id: Long): List<AssetReviewContent>
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(content: AssetReviewContent)
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(contents: List<AssetReviewContent>)
+    suspend fun insert(content: AssetReviewContentEntity): Long
 
     @Transaction
     suspend fun insert(entities: List<AssetReviewContent>, completedTask: (Int) -> Unit) {
         entities.forEachIndexed { index, entity ->
-            insert(entity)
+            insert(AssetReviewContentEntity(entity))
             completedTask(index + 1)
         }
     }
 
 
     @Update
-    suspend fun update(content: AssetReviewContent)
+    suspend fun update(content: AssetReviewContentEntity)
 
     @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.ASSET_ID} = :newValue WHERE ${Entry.ASSET_ID} = :oldValue")
     suspend fun updateAssetId(oldValue: Long, newValue: Long)
 
 
     @Delete
-    suspend fun delete(content: AssetReviewContent)
+    suspend fun delete(content: AssetReviewContentEntity)
 
     @Query("DELETE $BASIC_FROM")
     suspend fun deleteAll()
@@ -87,6 +90,7 @@ interface AssetReviewContentDao {
 
         const val BASIC_JOIN_FIELDS = "${aEntry.TABLE_NAME}.${aEntry.DESCRIPTION} AS ${Entry.DESCRIPTION}," +
                 "${aEntry.TABLE_NAME}.${aEntry.CODE} AS ${Entry.CODE}," +
+                "${aEntry.TABLE_NAME}.${aEntry.STATUS} AS ${Entry.ASSET_STATUS_ID}," +
                 "${aEntry.TABLE_NAME}.${aEntry.PARENT_ID} AS ${Entry.PARENT_ID}," +
                 "${aEntry.TABLE_NAME}.${aEntry.WAREHOUSE_AREA_ID} AS ${Entry.WAREHOUSE_AREA_ID}," +
                 "${aEntry.TABLE_NAME}.${aEntry.LABEL_NUMBER} AS ${Entry.LABEL_NUMBER}," +

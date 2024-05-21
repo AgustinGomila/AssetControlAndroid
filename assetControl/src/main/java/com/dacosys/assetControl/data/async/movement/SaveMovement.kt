@@ -7,8 +7,8 @@ import com.dacosys.assetControl.data.enums.asset.AssetStatus
 import com.dacosys.assetControl.data.enums.common.SaveProgress
 import com.dacosys.assetControl.data.enums.common.Table
 import com.dacosys.assetControl.data.enums.movement.WarehouseMovementContentStatus
-import com.dacosys.assetControl.data.room.entity.movement.WarehouseMovement
-import com.dacosys.assetControl.data.room.entity.movement.WarehouseMovementContent
+import com.dacosys.assetControl.data.room.dto.movement.WarehouseMovement
+import com.dacosys.assetControl.data.room.dto.movement.WarehouseMovementContent
 import com.dacosys.assetControl.data.room.repository.asset.AssetRepository
 import com.dacosys.assetControl.data.room.repository.movement.WarehouseMovementContentRepository
 import com.dacosys.assetControl.data.room.repository.movement.WarehouseMovementRepository

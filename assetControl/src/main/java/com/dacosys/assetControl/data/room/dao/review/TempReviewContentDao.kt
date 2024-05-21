@@ -3,8 +3,8 @@ package com.dacosys.assetControl.data.room.dao.review
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
-import com.dacosys.assetControl.data.room.entity.review.TempReviewContent
-import com.dacosys.assetControl.data.room.entity.review.TempReviewContent.Entry
+import com.dacosys.assetControl.data.room.entity.review.TempReviewContentEntity
+import com.dacosys.assetControl.data.room.entity.review.TempReviewContentEntity.Entry
 
 @Dao
 interface TempReviewContentDao {
@@ -12,14 +12,14 @@ interface TempReviewContentDao {
     suspend fun selectMaxId(): Long?
 
     @Query("$BASIC_SELECT $BASIC_FROM WHERE ${Entry.TABLE_NAME}.${Entry.ASSET_REVIEW_ID} = :arId $BASIC_ORDER")
-    suspend fun selectByTempIds(arId: Long): List<TempReviewContent>
+    suspend fun selectByTempIds(arId: Long): List<TempReviewContentEntity>
 
 
     @Insert
-    suspend fun insert(content: TempReviewContent)
+    suspend fun insert(content: TempReviewContentEntity)
 
     @Insert
-    suspend fun insert(contents: List<TempReviewContent>)
+    suspend fun insert(contents: List<TempReviewContentEntity>)
 
     @Query("DELETE FROM ${Entry.TABLE_NAME}")
     suspend fun deleteAll()

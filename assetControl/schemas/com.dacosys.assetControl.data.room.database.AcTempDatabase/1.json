@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "267738d01c1d4fbf87823fbdbd091c37",
+    "identityHash": "cd48ceade7ae2f1747deb25996349e07",
     "entities": [
       {
         "tableName": "fragment_data",
@@ -62,12 +62,12 @@
         "foreignKeys": []
       },
       {
-        "tableName": "temp__asset",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`temp__id` INTEGER NOT NULL, PRIMARY KEY(`temp__id`))",
+        "tableName": "temp_asset",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`temp_id` INTEGER NOT NULL, PRIMARY KEY(`temp_id`))",
         "fields": [
           {
             "fieldPath": "tempId",
-            "columnName": "temp__id",
+            "columnName": "temp_id",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -75,19 +75,19 @@
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "temp__id"
+            "temp_id"
           ]
         },
         "indices": [],
         "foreignKeys": []
       },
       {
-        "tableName": "temp__warehouse_area",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`temp__id` INTEGER NOT NULL, PRIMARY KEY(`temp__id`))",
+        "tableName": "temp_warehouse_area",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`temp_id` INTEGER NOT NULL, PRIMARY KEY(`temp_id`))",
         "fields": [
           {
             "fieldPath": "tempId",
-            "columnName": "temp__id",
+            "columnName": "temp_id",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -95,7 +95,7 @@
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "temp__id"
+            "temp_id"
           ]
         },
         "indices": [],
@@ -543,7 +543,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '267738d01c1d4fbf87823fbdbd091c37')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'cd48ceade7ae2f1747deb25996349e07')"
     ]
   }
 }

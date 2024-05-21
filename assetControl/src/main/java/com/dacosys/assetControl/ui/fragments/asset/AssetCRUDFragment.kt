@@ -17,10 +17,10 @@ import com.dacosys.assetControl.data.enums.asset.AssetStatus
 import com.dacosys.assetControl.data.enums.asset.OwnershipStatus
 import com.dacosys.assetControl.data.enums.common.CrudCompleted
 import com.dacosys.assetControl.data.enums.permission.PermissionEntry
-import com.dacosys.assetControl.data.room.entity.asset.Asset
-import com.dacosys.assetControl.data.room.entity.category.ItemCategory
-import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
-import com.dacosys.assetControl.data.room.entity.user.User
+import com.dacosys.assetControl.data.room.dto.asset.Asset
+import com.dacosys.assetControl.data.room.dto.category.ItemCategory
+import com.dacosys.assetControl.data.room.dto.location.WarehouseArea
+import com.dacosys.assetControl.data.room.dto.user.User
 import com.dacosys.assetControl.data.room.repository.asset.AssetRepository
 import com.dacosys.assetControl.data.room.repository.category.ItemCategoryRepository
 import com.dacosys.assetControl.data.room.repository.location.WarehouseAreaRepository

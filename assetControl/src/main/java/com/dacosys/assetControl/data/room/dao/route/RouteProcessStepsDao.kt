@@ -4,9 +4,10 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.dacosys.assetControl.data.room.entity.route.RouteProcess
-import com.dacosys.assetControl.data.room.entity.route.RouteProcessSteps
-import com.dacosys.assetControl.data.room.entity.route.RouteProcessSteps.Entry
+import com.dacosys.assetControl.data.room.dto.route.RouteProcess
+import com.dacosys.assetControl.data.room.dto.route.RouteProcessSteps
+import com.dacosys.assetControl.data.room.dto.route.RouteProcessSteps.Entry
+import com.dacosys.assetControl.data.room.entity.route.RouteProcessStepsEntity
 
 @Dao
 interface RouteProcessStepsDao {
@@ -16,10 +17,10 @@ interface RouteProcessStepsDao {
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(content: RouteProcessSteps)
+    suspend fun insert(content: RouteProcessStepsEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(contents: List<RouteProcessSteps>)
+    suspend fun insert(contents: List<RouteProcessStepsEntity>)
 
 
     @Query("DELETE $BASIC_FROM WHERE ${Entry.ROUTE_PROCESS_ID} = :id")

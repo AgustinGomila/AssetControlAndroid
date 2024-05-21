@@ -13,7 +13,7 @@ import androidx.core.content.res.ResourcesCompat.getColor
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.enums.asset.AssetStatus
-import com.dacosys.assetControl.data.room.entity.asset.Asset
+import com.dacosys.assetControl.data.room.dto.asset.Asset
 import com.dacosys.assetControl.ui.adapters.asset.AssetRecyclerAdapter.FilterOptions
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.getBestContrastColor
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.isTablet

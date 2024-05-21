@@ -3,10 +3,11 @@ package com.dacosys.assetControl.data.room.dao.maintenance
 import androidx.room.*
 import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.sqlite.db.SupportSQLiteQuery
-import com.dacosys.assetControl.data.room.entity.asset.Asset
-import com.dacosys.assetControl.data.room.entity.maintenance.AssetMaintenance
-import com.dacosys.assetControl.data.room.entity.maintenance.AssetMaintenance.Entry
-import com.dacosys.assetControl.data.room.entity.maintenance.MaintenanceType
+import com.dacosys.assetControl.data.room.dto.asset.Asset
+import com.dacosys.assetControl.data.room.dto.maintenance.AssetMaintenance
+import com.dacosys.assetControl.data.room.dto.maintenance.AssetMaintenance.Entry
+import com.dacosys.assetControl.data.room.dto.maintenance.MaintenanceType
+import com.dacosys.assetControl.data.room.entity.maintenance.AssetMaintenanceEntity
 
 @Dao
 interface AssetMaintenanceDao {
@@ -40,14 +41,14 @@ interface AssetMaintenanceDao {
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(maintenance: AssetMaintenance)
+    suspend fun insert(maintenance: AssetMaintenanceEntity)
 
 
     @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.TRANSFERRED} = 1 WHERE ${Entry.ID} = :id")
     suspend fun updateTransferred(id: Long)
 
     @Update
-    suspend fun update(maintenance: AssetMaintenance)
+    suspend fun update(maintenance: AssetMaintenanceEntity)
 
 
     /**

@@ -2,7 +2,8 @@ package com.dacosys.assetControl.data.room.repository.maintenance
 
 import com.dacosys.assetControl.data.room.dao.maintenance.MaintenanceTypeDao
 import com.dacosys.assetControl.data.room.database.AcDatabase.Companion.database
-import com.dacosys.assetControl.data.room.entity.maintenance.MaintenanceType
+import com.dacosys.assetControl.data.room.dto.maintenance.MaintenanceType
+import com.dacosys.assetControl.data.room.entity.maintenance.MaintenanceTypeEntity
 import kotlinx.coroutines.runBlocking
 
 class MaintenanceTypeRepository {
@@ -13,13 +14,13 @@ class MaintenanceTypeRepository {
 
 
     fun insert(type: MaintenanceType) = runBlocking {
-        dao.insert(type)
+        dao.insert(MaintenanceTypeEntity(type))
     }
 
 
     fun update(type: MaintenanceType): Boolean {
         val r = runBlocking {
-            dao.update(type)
+            dao.update(MaintenanceTypeEntity(type))
             true
         }
         return r

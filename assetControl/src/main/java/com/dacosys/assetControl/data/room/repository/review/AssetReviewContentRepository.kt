@@ -5,8 +5,8 @@ import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.enums.common.SaveProgress
 import com.dacosys.assetControl.data.room.dao.review.AssetReviewContentDao
 import com.dacosys.assetControl.data.room.database.AcDatabase.Companion.database
-import com.dacosys.assetControl.data.room.entity.review.AssetReview
-import com.dacosys.assetControl.data.room.entity.review.AssetReviewContent
+import com.dacosys.assetControl.data.room.dto.review.AssetReview
+import com.dacosys.assetControl.data.room.dto.review.AssetReviewContent
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import kotlinx.coroutines.runBlocking
 
@@ -48,25 +48,11 @@ class AssetReviewContentRepository {
         }
     }
 
-    fun insert(content: AssetReviewContent) = runBlocking {
-        dao.insert(content)
-    }
-
-    fun insert(contents: List<AssetReviewContent>) = runBlocking {
-        dao.insert(contents)
-    }
-
-    fun update(content: AssetReviewContent): Boolean {
-        val r = runBlocking {
-            dao.update(content)
-            true
-        }
-        return r
-    }
 
     fun updateAssetId(newValue: Long, oldValue: Long) = runBlocking {
         dao.updateAssetId(newValue, oldValue)
     }
+
 
     fun deleteByAssetReviewId(id: Long) = runBlocking {
         dao.deleteByAssetReviewId(id)

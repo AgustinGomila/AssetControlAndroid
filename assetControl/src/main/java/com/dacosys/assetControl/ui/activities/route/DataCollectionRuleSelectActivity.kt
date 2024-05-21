@@ -10,10 +10,10 @@ import android.view.inputmethod.EditorInfo
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.room.entity.asset.Asset
-import com.dacosys.assetControl.data.room.entity.category.ItemCategory
-import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionRule
-import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
+import com.dacosys.assetControl.data.room.dto.asset.Asset
+import com.dacosys.assetControl.data.room.dto.category.ItemCategory
+import com.dacosys.assetControl.data.room.dto.dataCollection.DataCollectionRule
+import com.dacosys.assetControl.data.room.dto.location.WarehouseArea
 import com.dacosys.assetControl.data.room.repository.dataCollection.DataCollectionRuleRepository
 import com.dacosys.assetControl.databinding.DataCollectionRuleSelectActivityBinding
 import com.dacosys.assetControl.ui.adapters.datacollection.DataCollectionRuleAdapter
@@ -82,8 +82,8 @@ class DataCollectionRuleSelectActivity : AppCompatActivity() {
 
     private fun loadBundleValues(b: Bundle) {
         // region Recuperar el título de la ventana
-        val t1 = b.getString("title")
-        tempTitle = if (!t1.isNullOrEmpty()) t1 else getString(R.string.select_rule)
+        val t1 = b.getString("title") ?: ""
+        tempTitle = t1.ifEmpty { getString(R.string.select_rule) }
         // endregion
 
         binding.onlyActiveSwitch.isChecked = b.getBoolean("onlyActive")

@@ -1,6 +1,6 @@
 package com.dacosys.assetControl.data.model.barcodeFields
 
-import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
+import com.dacosys.assetControl.data.room.dto.location.WarehouseArea
 import java.util.*
 
 class WarehouseAreaLabelField(warehouseArea: WarehouseArea) {

@@ -5,17 +5,17 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.dacosys.assetControl.data.enums.review.AssetReviewStatus
-import com.dacosys.assetControl.data.room.entity.location.Warehouse
-import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
-import com.dacosys.assetControl.data.room.entity.review.AssetReview
-import com.dacosys.assetControl.data.room.entity.review.AssetReview.Entry
-import com.dacosys.assetControl.data.room.entity.user.User
-import com.dacosys.assetControl.data.room.entity.user.UserWarehouseArea
+import com.dacosys.assetControl.data.room.dto.location.Warehouse
+import com.dacosys.assetControl.data.room.dto.location.WarehouseArea
+import com.dacosys.assetControl.data.room.dto.review.AssetReview
+import com.dacosys.assetControl.data.room.dto.review.AssetReview.Entry
+import com.dacosys.assetControl.data.room.dto.user.User
+import com.dacosys.assetControl.data.room.dto.user.UserWarehouseArea
+import com.dacosys.assetControl.data.room.entity.review.AssetReviewEntity
 import java.util.*
 
 @Dao
 interface AssetReviewDao {
-
     @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN WHERE ${Entry.TABLE_NAME}.${Entry.ID} = :id")
     suspend fun selectById(id: Long): AssetReview?
 
@@ -52,7 +52,7 @@ interface AssetReviewDao {
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(assetReview: AssetReview)
+    suspend fun insert(assetReview: AssetReviewEntity): Long
 
 
     @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.WAREHOUSE_AREA_ID} = :newValue WHERE ${Entry.WAREHOUSE_AREA_ID} = :oldValue")

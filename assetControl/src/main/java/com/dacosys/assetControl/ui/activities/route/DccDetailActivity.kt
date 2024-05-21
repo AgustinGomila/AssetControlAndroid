@@ -9,7 +9,7 @@ import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.AssetControlApp.Companion.currentUser
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.enums.common.Table
-import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollection
+import com.dacosys.assetControl.data.room.dto.dataCollection.DataCollection
 import com.dacosys.assetControl.data.room.repository.dataCollection.DataCollectionRepository
 import com.dacosys.assetControl.data.room.repository.user.UserRepository
 import com.dacosys.assetControl.databinding.DccDetailActivityBinding

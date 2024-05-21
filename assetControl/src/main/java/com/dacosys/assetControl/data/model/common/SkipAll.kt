@@ -4,7 +4,7 @@ import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.enums.common.SaveProgress
 import com.dacosys.assetControl.data.enums.route.RouteProcessStatus
-import com.dacosys.assetControl.data.room.entity.route.RouteProcessContent
+import com.dacosys.assetControl.data.room.dto.route.RouteProcessContent
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import kotlinx.coroutines.*
@@ -58,7 +58,7 @@ class SkipAll(
                     )
                 )
 
-                if (rpc.processStatusId != RouteProcessStatus.processed.id) {
+                if (rpc.routeProcessStatusId != RouteProcessStatus.processed.id) {
                     if (!updateStatus(rpc = rpc)) {
                         onProgress.invoke(
                             SaveProgress(
@@ -89,7 +89,7 @@ class SkipAll(
     }
 
     private fun updateStatus(rpc: RouteProcessContent): Boolean {
-        rpc.processStatusId = RouteProcessStatus.skipped.id
+        rpc.routeProcessStatusId = RouteProcessStatus.skipped.id
 
         // Actualizar la base de datos
         return rpc.saveChanges()

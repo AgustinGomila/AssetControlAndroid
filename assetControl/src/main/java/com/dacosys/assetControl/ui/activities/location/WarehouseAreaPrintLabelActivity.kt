@@ -23,8 +23,8 @@ import androidx.transition.TransitionManager
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.async.location.GetLocationAsync
 import com.dacosys.assetControl.data.enums.barcode.BarcodeLabelTarget
-import com.dacosys.assetControl.data.room.entity.barcode.BarcodeLabelCustom
-import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
+import com.dacosys.assetControl.data.room.dto.barcode.BarcodeLabelCustom
+import com.dacosys.assetControl.data.room.dto.location.WarehouseArea
 import com.dacosys.assetControl.data.room.repository.barcode.BarcodeLabelCustomRepository
 import com.dacosys.assetControl.data.room.repository.location.TempWarehouseAreaRepository
 import com.dacosys.assetControl.data.room.repository.location.WarehouseAreaRepository

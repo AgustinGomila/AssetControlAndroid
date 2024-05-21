@@ -14,8 +14,8 @@ import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.crud.category.ItemCategoryCRUD
 import com.dacosys.assetControl.data.enums.common.CrudCompleted
 import com.dacosys.assetControl.data.enums.permission.PermissionEntry
-import com.dacosys.assetControl.data.room.entity.category.ItemCategory
-import com.dacosys.assetControl.data.room.entity.user.User
+import com.dacosys.assetControl.data.room.dto.category.ItemCategory
+import com.dacosys.assetControl.data.room.dto.user.User
 import com.dacosys.assetControl.data.room.repository.category.ItemCategoryRepository
 import com.dacosys.assetControl.data.webservice.category.ItemCategoryObject
 import com.dacosys.assetControl.databinding.ItemCategoryCrudFragmentBinding

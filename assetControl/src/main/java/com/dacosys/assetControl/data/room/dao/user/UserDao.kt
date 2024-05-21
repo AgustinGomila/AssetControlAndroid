@@ -2,9 +2,10 @@ package com.dacosys.assetControl.data.room.dao.user
 
 import androidx.room.*
 import com.dacosys.assetControl.data.enums.permission.PermissionEntry
-import com.dacosys.assetControl.data.room.entity.user.User
-import com.dacosys.assetControl.data.room.entity.user.User.Entry
-import com.dacosys.assetControl.data.room.entity.user.UserPermission.Entry as upEntry
+import com.dacosys.assetControl.data.room.dto.user.User
+import com.dacosys.assetControl.data.room.dto.user.User.Entry
+import com.dacosys.assetControl.data.room.entity.user.UserEntity
+import com.dacosys.assetControl.data.room.dto.user.UserPermission.Entry as upEntry
 
 @Dao
 interface UserDao {
@@ -30,22 +31,22 @@ interface UserDao {
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(asset: User)
+    suspend fun insert(asset: UserEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(assets: List<User>)
+    suspend fun insert(assets: List<UserEntity>)
 
     @Transaction
     suspend fun insert(entities: List<User>, completedTask: (Int) -> Unit) {
         entities.forEachIndexed { index, entity ->
-            insert(entity)
+            insert(UserEntity(entity))
             completedTask(index + 1)
         }
     }
 
 
     @Update
-    suspend fun update(user: User)
+    suspend fun update(user: UserEntity)
 
 
     @Query("DELETE $BASIC_FROM")

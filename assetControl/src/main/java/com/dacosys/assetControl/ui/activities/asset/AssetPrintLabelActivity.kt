@@ -42,11 +42,11 @@ import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.async.asset.GetAssetAsync
 import com.dacosys.assetControl.data.enums.asset.AssetStatus
 import com.dacosys.assetControl.data.enums.barcode.BarcodeLabelTarget
-import com.dacosys.assetControl.data.room.entity.asset.Asset
-import com.dacosys.assetControl.data.room.entity.asset.TempAsset
-import com.dacosys.assetControl.data.room.entity.barcode.BarcodeLabelCustom
-import com.dacosys.assetControl.data.room.entity.category.ItemCategory
-import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
+import com.dacosys.assetControl.data.room.dto.asset.Asset
+import com.dacosys.assetControl.data.room.dto.barcode.BarcodeLabelCustom
+import com.dacosys.assetControl.data.room.dto.category.ItemCategory
+import com.dacosys.assetControl.data.room.dto.location.WarehouseArea
+import com.dacosys.assetControl.data.room.entity.asset.TempAssetEntity
 import com.dacosys.assetControl.data.room.repository.asset.AssetRepository
 import com.dacosys.assetControl.data.room.repository.asset.TempAssetRepository
 import com.dacosys.assetControl.data.room.repository.barcode.BarcodeLabelCustomRepository
@@ -211,15 +211,15 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         }
 
         // Guardar en la DB temporalmente los ítems listados
-        TempAssetRepository().insert(adapter?.fullList?.map { TempAsset(it.id) } ?: listOf())
+        TempAssetRepository().insert(adapter?.fullList?.map { TempAssetEntity(it.id) } ?: listOf())
 
         b.putString("searchText", searchText)
     }
 
     private fun loadBundleValues(b: Bundle) {
         // region Recuperar el título de la ventana
-        val t1 = b.getString("title")
-        tempTitle = if (!t1.isNullOrEmpty()) t1 else getString(R.string.select_asset)
+        val t1 = b.getString("title") ?: ""
+        tempTitle = t1.ifEmpty { getString(R.string.select_asset) }
         // endregion
 
         // PANELS

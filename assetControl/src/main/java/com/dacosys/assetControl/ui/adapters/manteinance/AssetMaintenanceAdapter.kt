@@ -17,7 +17,7 @@ import androidx.core.graphics.BlendModeCompat
 import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.enums.maintenance.MaintenanceStatus
-import com.dacosys.assetControl.data.room.entity.maintenance.AssetMaintenance
+import com.dacosys.assetControl.data.room.dto.maintenance.AssetMaintenance
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.getColorWithAlpha
 import java.lang.ref.WeakReference
 
@@ -353,7 +353,7 @@ class AssetMaintenanceAdapter : ArrayAdapter<AssetMaintenance> {
                     var backColor = white
                     var foreColor = black
                     val isSelected = isSelected(position)
-                    when (maintenance.statusId) {
+                    when (maintenance.maintenanceStatusId) {
                         MaintenanceStatus.repair.id -> {
                             backColor = firebrick
                             foreColor = white

@@ -1,6 +1,6 @@
 package com.dacosys.assetControl.data.model.barcodeFields
 
-import com.dacosys.assetControl.data.room.entity.asset.Asset
+import com.dacosys.assetControl.data.room.dto.asset.Asset
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.settings.entries.ConfEntry
 import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean

@@ -4,17 +4,17 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionRuleTarget
-import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionRuleTarget.Entry
+import com.dacosys.assetControl.data.room.dto.dataCollection.DataCollectionRuleTarget.Entry
+import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionRuleTargetEntity
 
 @Dao
 interface DataCollectionRuleTargetDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(target: DataCollectionRuleTarget)
+    suspend fun insert(target: DataCollectionRuleTargetEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(targets: List<DataCollectionRuleTarget>)
+    suspend fun insert(targets: List<DataCollectionRuleTargetEntity>)
 
 
     @Query("DELETE $BASIC_FROM WHERE ${Entry.DATA_COLLECTION_RULE_ID} = :ruleId")

@@ -15,7 +15,7 @@ import com.dacosys.assetControl.data.enums.common.CrudCompleted
 import com.dacosys.assetControl.data.enums.common.CrudResult
 import com.dacosys.assetControl.data.enums.common.CrudStatus.*
 import com.dacosys.assetControl.data.enums.common.Table
-import com.dacosys.assetControl.data.room.entity.category.ItemCategory
+import com.dacosys.assetControl.data.room.dto.category.ItemCategory
 import com.dacosys.assetControl.databinding.ItemCategoryCrudActivityBinding
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType

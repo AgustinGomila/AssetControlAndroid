@@ -18,8 +18,8 @@ import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.room.entity.route.Route
-import com.dacosys.assetControl.data.room.entity.route.Route.CREATOR.getAvailableRoutes
+import com.dacosys.assetControl.data.room.dto.route.Route
+import com.dacosys.assetControl.data.room.dto.route.Route.CREATOR.getAvailableRoutes
 import com.dacosys.assetControl.data.room.repository.route.RouteRepository
 import com.dacosys.assetControl.databinding.RouteSelectDialogActivityBinding
 import com.dacosys.assetControl.ui.adapters.route.RouteAdapter

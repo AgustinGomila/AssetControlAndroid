@@ -51,9 +51,9 @@ import com.dacosys.assetControl.data.enums.common.SaveProgress
 import com.dacosys.assetControl.data.enums.review.AssetReviewContentStatus
 import com.dacosys.assetControl.data.enums.review.AssetReviewStatus
 import com.dacosys.assetControl.data.enums.review.StartReviewProgress
-import com.dacosys.assetControl.data.room.entity.asset.Asset
-import com.dacosys.assetControl.data.room.entity.review.AssetReview
-import com.dacosys.assetControl.data.room.entity.review.AssetReviewContent
+import com.dacosys.assetControl.data.room.dto.asset.Asset
+import com.dacosys.assetControl.data.room.dto.review.AssetReview
+import com.dacosys.assetControl.data.room.dto.review.AssetReviewContent
 import com.dacosys.assetControl.data.room.repository.asset.AssetRepository
 import com.dacosys.assetControl.data.room.repository.location.WarehouseAreaRepository
 import com.dacosys.assetControl.data.room.repository.review.TempReviewContentRepository
@@ -350,8 +350,8 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
         _startReview = b.getBoolean("startReview")
 
         // region Recuperar el título de la ventana
-        val t1 = b.getString("title")
-        tempTitle = if (!t1.isNullOrEmpty()) t1 else getString(R.string.asset_review)
+        val t1 = b.getString("title") ?: ""
+        tempTitle = t1.ifEmpty { getString(R.string.asset_review) }
         // endregion
 
         assetReview = Parcels.unwrap<AssetReview>(b.parcelable("assetReview"))

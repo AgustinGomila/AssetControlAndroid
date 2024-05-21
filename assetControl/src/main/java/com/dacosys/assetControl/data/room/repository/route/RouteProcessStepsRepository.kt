@@ -2,7 +2,8 @@ package com.dacosys.assetControl.data.room.repository.route
 
 import com.dacosys.assetControl.data.room.dao.route.RouteProcessStepsDao
 import com.dacosys.assetControl.data.room.database.AcDatabase.Companion.database
-import com.dacosys.assetControl.data.room.entity.route.RouteProcessSteps
+import com.dacosys.assetControl.data.room.dto.route.RouteProcessSteps
+import com.dacosys.assetControl.data.room.entity.route.RouteProcessStepsEntity
 import kotlinx.coroutines.runBlocking
 
 class RouteProcessStepsRepository {
@@ -17,7 +18,7 @@ class RouteProcessStepsRepository {
 
     fun insert(content: RouteProcessSteps) {
         runBlocking {
-            dao.insert(content)
+            dao.insert(RouteProcessStepsEntity(content))
         }
     }
 

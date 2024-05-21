@@ -27,8 +27,8 @@ import com.dacosys.assetControl.data.enums.asset.AssetStatus
 import com.dacosys.assetControl.data.enums.common.ConfirmStatus
 import com.dacosys.assetControl.data.enums.common.Table
 import com.dacosys.assetControl.data.enums.movement.WarehouseMovementContentStatus
-import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
-import com.dacosys.assetControl.data.room.entity.movement.WarehouseMovementContent
+import com.dacosys.assetControl.data.room.dto.location.WarehouseArea
+import com.dacosys.assetControl.data.room.dto.movement.WarehouseMovementContent
 import com.dacosys.assetControl.data.room.repository.movement.TempMovementContentRepository
 import com.dacosys.assetControl.databinding.WarehouseMovementContentConfirmActivityBottomPanelCollapsedBinding
 import com.dacosys.assetControl.ui.activities.common.ObservationsActivity
@@ -155,7 +155,7 @@ class WmcConfirmActivity : AppCompatActivity(),
             }
         }
 
-        // Cargamos la revisión desde la tabla temporal
+        // Cargamos el movimiento desde la tabla temporal
         completeList.clear()
         val tempCont = TempMovementContentRepository().selectByTempId(1)
         if (tempCont.any()) {

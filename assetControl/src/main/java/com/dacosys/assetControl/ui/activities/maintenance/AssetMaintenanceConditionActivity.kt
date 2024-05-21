@@ -8,9 +8,9 @@ import androidx.appcompat.app.AppCompatActivity
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.enums.asset.AssetCondition
 import com.dacosys.assetControl.data.enums.maintenance.MaintenanceStatus
-import com.dacosys.assetControl.data.room.entity.asset.Asset
-import com.dacosys.assetControl.data.room.entity.maintenance.AssetMaintenance
-import com.dacosys.assetControl.data.room.entity.maintenance.MaintenanceType
+import com.dacosys.assetControl.data.room.dto.asset.Asset
+import com.dacosys.assetControl.data.room.dto.maintenance.AssetMaintenance
+import com.dacosys.assetControl.data.room.dto.maintenance.MaintenanceType
 import com.dacosys.assetControl.data.room.repository.asset.AssetRepository
 import com.dacosys.assetControl.data.room.repository.maintenance.AssetMaintenanceRepository
 import com.dacosys.assetControl.databinding.AssetManteinanceConditionActivityBinding
@@ -99,7 +99,7 @@ class AssetMaintenanceConditionActivity : AppCompatActivity(),
             ) {
                 if (assetMaintenance != null) {
                     assetMaintenance?.observations = tempObsText
-                    assetMaintenance?.statusId = MaintenanceStatus.repair.id
+                    assetMaintenance?.maintenanceStatusId = MaintenanceStatus.repair.id
                     assetMaintenance?.maintenanceTypeId = typeSpinnerFragment?.selectedType?.id ?: -1
                     assetMaintenance?.transferred = false
                     assetMaintenance?.saveChanges()

@@ -44,8 +44,8 @@ import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.enums.permission.PermissionEntry
 import com.dacosys.assetControl.data.room.database.AcTempDatabase
-import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
-import com.dacosys.assetControl.data.room.entity.user.User
+import com.dacosys.assetControl.data.room.dto.location.WarehouseArea
+import com.dacosys.assetControl.data.room.dto.user.User
 import com.dacosys.assetControl.data.room.repository.review.AssetReviewRepository
 import com.dacosys.assetControl.data.room.repository.user.UserRepository
 import com.dacosys.assetControl.databinding.HomeActivityBinding

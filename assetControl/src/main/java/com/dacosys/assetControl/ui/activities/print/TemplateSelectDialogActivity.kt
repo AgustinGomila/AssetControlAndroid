@@ -18,7 +18,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.enums.barcode.BarcodeLabelTarget
-import com.dacosys.assetControl.data.room.entity.barcode.BarcodeLabelCustom
+import com.dacosys.assetControl.data.room.dto.barcode.BarcodeLabelCustom
 import com.dacosys.assetControl.data.room.repository.barcode.BarcodeLabelCustomRepository
 import com.dacosys.assetControl.databinding.CodeSelectActivityBinding
 import com.dacosys.assetControl.ui.adapters.barcode.BarcodeLabelCustomAdapter

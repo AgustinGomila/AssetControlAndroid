@@ -2,7 +2,8 @@ package com.dacosys.assetControl.data.room.repository.maintenance
 
 import com.dacosys.assetControl.data.room.dao.maintenance.AssetMaintenanceDao
 import com.dacosys.assetControl.data.room.database.AcDatabase.Companion.database
-import com.dacosys.assetControl.data.room.entity.maintenance.AssetMaintenance
+import com.dacosys.assetControl.data.room.dto.maintenance.AssetMaintenance
+import com.dacosys.assetControl.data.room.entity.maintenance.AssetMaintenanceEntity
 import kotlinx.coroutines.runBlocking
 
 class AssetMaintenanceRepository {
@@ -24,12 +25,12 @@ class AssetMaintenanceRepository {
 
     fun insert(maintenance: AssetMaintenance) = runBlocking {
         maintenance.id = nextId
-        dao.insert(maintenance)
+        dao.insert(AssetMaintenanceEntity(maintenance))
     }
 
 
     fun update(maintenance: AssetMaintenance) = runBlocking {
-        dao.update(maintenance)
+        dao.update(AssetMaintenanceEntity(maintenance))
     }
 
     fun updateTransferredNew(id: Long) = runBlocking {

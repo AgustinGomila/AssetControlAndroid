@@ -220,7 +220,7 @@ dependencies {
 
     // Kotlin Extensions and Coroutines support for Room
     implementation "androidx.room:room-ktx:$roomVersion"
-    // annotationProcessor "androidx.room:room-compiler:$roomVersion"
+    annotationProcessor "androidx.room:room-compiler:$roomVersion"
 }
 
 repositories {

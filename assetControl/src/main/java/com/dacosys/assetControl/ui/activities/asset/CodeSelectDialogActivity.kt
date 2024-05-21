@@ -20,7 +20,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.enums.asset.AssetStatus
-import com.dacosys.assetControl.data.room.entity.asset.Asset
+import com.dacosys.assetControl.data.room.dto.asset.Asset
 import com.dacosys.assetControl.data.room.repository.asset.AssetRepository
 import com.dacosys.assetControl.databinding.CodeSelectActivityBinding
 import com.dacosys.assetControl.ui.adapters.asset.AssetAdapter

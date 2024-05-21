@@ -2,7 +2,8 @@ package com.dacosys.assetControl.data.room.repository.movement
 
 import com.dacosys.assetControl.data.room.dao.movement.WarehouseMovementDao
 import com.dacosys.assetControl.data.room.database.AcDatabase.Companion.database
-import com.dacosys.assetControl.data.room.entity.movement.WarehouseMovement
+import com.dacosys.assetControl.data.room.dto.movement.WarehouseMovement
+import com.dacosys.assetControl.data.room.entity.movement.WarehouseMovementEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -13,15 +14,17 @@ class WarehouseMovementRepository {
 
     fun selectByNoTransferred() = runBlocking { ArrayList(dao.selectByNoTransferred()) }
 
+
     suspend fun insert(warehouseMovement: WarehouseMovement) {
         withContext(Dispatchers.IO) {
-            dao.insert(warehouseMovement)
+            dao.insert(WarehouseMovementEntity(warehouseMovement))
         }
     }
 
+
     fun update(warehouseMovement: WarehouseMovement) {
         runBlocking(Dispatchers.IO) {
-            dao.update(warehouseMovement)
+            dao.update(WarehouseMovementEntity(warehouseMovement))
         }
     }
 

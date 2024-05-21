@@ -4,7 +4,7 @@ import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.room.dao.user.UserWarehouseAreaDao
 import com.dacosys.assetControl.data.room.database.AcDatabase.Companion.database
-import com.dacosys.assetControl.data.room.entity.user.UserWarehouseArea
+import com.dacosys.assetControl.data.room.dto.user.UserWarehouseArea
 import com.dacosys.assetControl.data.webservice.user.UserWarehouseAreaObject
 import com.dacosys.assetControl.network.sync.SyncProgress
 import com.dacosys.assetControl.network.sync.SyncRegistryType

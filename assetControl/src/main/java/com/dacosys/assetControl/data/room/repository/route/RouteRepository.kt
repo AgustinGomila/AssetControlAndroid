@@ -4,7 +4,7 @@ import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.room.dao.route.RouteDao
 import com.dacosys.assetControl.data.room.database.AcDatabase.Companion.database
-import com.dacosys.assetControl.data.room.entity.route.Route
+import com.dacosys.assetControl.data.room.dto.route.Route
 import com.dacosys.assetControl.data.webservice.route.RouteObject
 import com.dacosys.assetControl.network.sync.SyncProgress
 import com.dacosys.assetControl.network.sync.SyncRegistryType

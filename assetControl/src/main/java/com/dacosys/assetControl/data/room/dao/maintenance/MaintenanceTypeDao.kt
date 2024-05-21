@@ -1,8 +1,9 @@
 package com.dacosys.assetControl.data.room.dao.maintenance
 
 import androidx.room.*
-import com.dacosys.assetControl.data.room.entity.maintenance.MaintenanceType
-import com.dacosys.assetControl.data.room.entity.maintenance.MaintenanceType.Entry
+import com.dacosys.assetControl.data.room.dto.maintenance.MaintenanceType
+import com.dacosys.assetControl.data.room.dto.maintenance.MaintenanceType.Entry
+import com.dacosys.assetControl.data.room.entity.maintenance.MaintenanceTypeEntity
 
 @Dao
 interface MaintenanceTypeDao {
@@ -11,14 +12,14 @@ interface MaintenanceTypeDao {
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(type: MaintenanceType)
+    suspend fun insert(type: MaintenanceTypeEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(typeList: List<MaintenanceType>)
+    suspend fun insert(typeList: List<MaintenanceTypeEntity>)
 
 
     @Update
-    suspend fun update(type: MaintenanceType)
+    suspend fun update(type: MaintenanceTypeEntity)
 
 
     @Query("DELETE $BASIC_FROM")

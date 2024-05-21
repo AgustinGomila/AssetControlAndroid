@@ -10,8 +10,8 @@ import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.crud.location.WarehouseCRUD
 import com.dacosys.assetControl.data.enums.common.CrudCompleted
 import com.dacosys.assetControl.data.enums.permission.PermissionEntry
-import com.dacosys.assetControl.data.room.entity.location.Warehouse
-import com.dacosys.assetControl.data.room.entity.user.User
+import com.dacosys.assetControl.data.room.dto.location.Warehouse
+import com.dacosys.assetControl.data.room.dto.user.User
 import com.dacosys.assetControl.data.webservice.location.WarehouseObject
 import com.dacosys.assetControl.databinding.WarehouseCrudFragmentBinding
 import com.dacosys.assetControl.ui.common.snackbar.MakeText

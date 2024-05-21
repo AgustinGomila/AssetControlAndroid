@@ -3,10 +3,11 @@ package com.dacosys.assetControl.data.room.repository.dataCollection
 import com.dacosys.assetControl.AssetControlApp.Companion.getUserId
 import com.dacosys.assetControl.data.room.dao.dataCollection.DataCollectionDao
 import com.dacosys.assetControl.data.room.database.AcDatabase.Companion.database
-import com.dacosys.assetControl.data.room.entity.asset.Asset
-import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollection
-import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
-import com.dacosys.assetControl.data.room.entity.route.RouteProcessContent
+import com.dacosys.assetControl.data.room.dto.asset.Asset
+import com.dacosys.assetControl.data.room.dto.dataCollection.DataCollection
+import com.dacosys.assetControl.data.room.dto.location.WarehouseArea
+import com.dacosys.assetControl.data.room.dto.route.RouteProcessContent
+import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionEntity
 import kotlinx.coroutines.runBlocking
 import java.util.*
 
@@ -29,10 +30,10 @@ class DataCollectionRepository {
             val assetId = rpc.assetId ?: 0L
             val warehouseAreaId = rpc.warehouseAreaId ?: 0L
             val warehouseId = rpc.warehouseId ?: 0L
-            val newId = nextId
+            val nextId = nextId
 
             val d = DataCollection(
-                id = newId,
+                id = nextId,
                 assetId = assetId,
                 warehouseId = warehouseId,
                 warehouseAreaId = warehouseAreaId,
@@ -42,7 +43,7 @@ class DataCollectionRepository {
                 completed = 1,
                 collectorRouteProcessId = routeProcessId
             )
-            dao.insert(d)
+            dao.insert(DataCollectionEntity(d))
             return@runBlocking d
         }
         return r
@@ -64,7 +65,7 @@ class DataCollectionRepository {
                 completed = 1,
                 collectorRouteProcessId = routeProcessId
             )
-            dao.insert(d)
+            dao.insert(DataCollectionEntity(d))
             return@runBlocking d
         }
         return r
@@ -88,7 +89,7 @@ class DataCollectionRepository {
                 completed = 1,
                 collectorRouteProcessId = routeProcessId
             )
-            dao.insert(d)
+            dao.insert(DataCollectionEntity(d))
             return@runBlocking d
         }
         return r

@@ -2,7 +2,7 @@ package com.dacosys.assetControl.data.webservice.category
 
 import android.os.Parcel
 import android.os.Parcelable
-import com.dacosys.assetControl.data.room.entity.category.ItemCategory
+import com.dacosys.assetControl.data.room.dto.category.ItemCategory
 import org.ksoap2.serialization.SoapObject
 
 class ItemCategoryObject() : Parcelable {

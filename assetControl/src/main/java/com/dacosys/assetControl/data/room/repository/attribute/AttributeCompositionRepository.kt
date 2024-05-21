@@ -2,7 +2,8 @@ package com.dacosys.assetControl.data.room.repository.attribute
 
 import com.dacosys.assetControl.data.room.dao.attribute.AttributeCompositionDao
 import com.dacosys.assetControl.data.room.database.AcDatabase.Companion.database
-import com.dacosys.assetControl.data.room.entity.attribute.AttributeComposition
+import com.dacosys.assetControl.data.room.dto.attribute.AttributeComposition
+import com.dacosys.assetControl.data.room.entity.attribute.AttributeCompositionEntity
 import kotlinx.coroutines.runBlocking
 
 class AttributeCompositionRepository {
@@ -17,7 +18,7 @@ class AttributeCompositionRepository {
 
 
     fun insert(compositions: List<AttributeComposition>) = runBlocking {
-        dao.insert(compositions)
+        dao.insert(compositions.map { AttributeCompositionEntity(it) })
     }
 
 

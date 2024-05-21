@@ -35,9 +35,9 @@ import com.dacosys.assetControl.data.enums.asset.OwnershipStatus
 import com.dacosys.assetControl.data.enums.common.Table
 import com.dacosys.assetControl.data.enums.permission.PermissionEntry
 import com.dacosys.assetControl.data.enums.review.AssetReviewContentStatus
-import com.dacosys.assetControl.data.room.entity.asset.Asset
-import com.dacosys.assetControl.data.room.entity.review.AssetReviewContent
-import com.dacosys.assetControl.data.room.entity.user.User
+import com.dacosys.assetControl.data.room.dto.asset.Asset
+import com.dacosys.assetControl.data.room.dto.review.AssetReviewContent
+import com.dacosys.assetControl.data.room.dto.user.User
 import com.dacosys.assetControl.databinding.AssetRowBinding
 import com.dacosys.assetControl.databinding.AssetRowExpandedBinding
 import com.dacosys.assetControl.network.utils.ProgressStatus
@@ -731,7 +731,7 @@ class ArcRecyclerAdapter(
             fun isFilterable(content: AssetReviewContent, filterString: String): Boolean =
                 content.description.contains(filterString, true) ||
                         content.code.contains(filterString, true) ||
-                        content.ean.contains(filterString, true)
+                        content.ean.orEmpty().contains(filterString, true)
 
             @Suppress("UNCHECKED_CAST")
             override fun publishResults(
@@ -1182,7 +1182,7 @@ class ArcRecyclerAdapter(
             val manufacturerStr = content.manufacturer
             val modelStr = content.model
 
-            if (manufacturerStr.isEmpty() && modelStr.isEmpty()) {
+            if (manufacturerStr.orEmpty().isEmpty() && modelStr.orEmpty().isEmpty()) {
                 binding.dividerInternal1.visibility = GONE
                 binding.manufacturerConstraintLayout.visibility = GONE
             } else {
@@ -1221,7 +1221,7 @@ class ArcRecyclerAdapter(
             val serialNumberStr = content.serialNumber
             val eanStr = content.ean
 
-            if (serialNumberStr.isEmpty() && eanStr.isEmpty()) {
+            if (serialNumberStr.orEmpty().isEmpty() && eanStr.orEmpty().isEmpty()) {
                 binding.dividerInternal4.visibility = GONE
                 binding.serialNumberConstraintLayout.visibility = GONE
             } else {
@@ -1352,7 +1352,7 @@ class ArcRecyclerAdapter(
             val manufacturerStr = content.manufacturer
             val modelStr = content.model
 
-            if (manufacturerStr.isEmpty() && modelStr.isEmpty()) {
+            if (manufacturerStr.orEmpty().isEmpty() && modelStr.orEmpty().isEmpty()) {
                 binding.manufacturerConstraintLayout.visibility = GONE
             } else {
                 binding.manufacturerConstraintLayout.visibility = VISIBLE

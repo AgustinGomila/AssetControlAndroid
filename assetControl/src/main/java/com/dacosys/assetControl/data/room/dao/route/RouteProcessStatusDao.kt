@@ -4,14 +4,13 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.dacosys.assetControl.data.room.entity.route.RouteProcessStatus
-import com.dacosys.assetControl.data.room.entity.route.RouteProcessStatus.Entry
+import com.dacosys.assetControl.data.room.dto.route.RouteProcessStatus.Entry
+import com.dacosys.assetControl.data.room.entity.route.RouteProcessStatusEntity
 
-// DAO
 @Dao
 interface RouteProcessStatusDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(statuses: List<RouteProcessStatus>)
+    suspend fun insert(statuses: List<RouteProcessStatusEntity>)
 
 
     @Query("DELETE $BASIC_FROM")

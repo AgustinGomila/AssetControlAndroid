@@ -2,8 +2,8 @@ package com.dacosys.assetControl.viewModel.route
 
 import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.room.entity.route.Route
-import com.dacosys.assetControl.data.room.entity.route.RouteProcess
+import com.dacosys.assetControl.data.room.dto.route.Route
+import com.dacosys.assetControl.data.room.dto.route.RouteProcess
 import com.dacosys.assetControl.data.room.repository.attribute.AttributeCompositionRepository
 import com.dacosys.assetControl.data.room.repository.dataCollection.DataCollectionRuleContentRepository
 import com.dacosys.assetControl.data.room.repository.route.RouteProcessRepository
@@ -78,7 +78,9 @@ class GetRouteProcess(
 
                 // TODO: Eliminar db.setTransactionSuccessful()
 
-                return@withContext RouteProcessResult(routeProcess, true)
+                return@withContext RouteProcessResult(
+                    routeProcess = routeProcess,
+                    newProcess = true)
             } else {
                 // Comprobar que la composición de la ruta del proceso abierto
                 // coincida con la composición de la ruta en la base de datos,

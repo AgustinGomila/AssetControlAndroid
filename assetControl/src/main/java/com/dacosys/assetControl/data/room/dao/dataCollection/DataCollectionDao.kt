@@ -4,17 +4,21 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.dacosys.assetControl.data.room.entity.asset.Asset
-import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollection
-import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollection.Entry
-import com.dacosys.assetControl.data.room.entity.location.Warehouse
-import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
-import com.dacosys.assetControl.data.room.entity.route.RouteProcess
+import com.dacosys.assetControl.data.room.dto.asset.Asset
+import com.dacosys.assetControl.data.room.dto.dataCollection.DataCollection
+import com.dacosys.assetControl.data.room.dto.dataCollection.DataCollection.Entry
+import com.dacosys.assetControl.data.room.dto.location.Warehouse
+import com.dacosys.assetControl.data.room.dto.location.WarehouseArea
+import com.dacosys.assetControl.data.room.dto.route.RouteProcess
+import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionEntity
 import java.util.*
 
 @Dao
 interface DataCollectionDao {
-    @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN WHERE ${Entry.TABLE_NAME}.${Entry.ID} = :id")
+    @Query(
+        "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
+                "WHERE ${Entry.TABLE_NAME}.${Entry.ID} = :id"
+    )
     suspend fun selectByCollectorId(id: Long): DataCollection?
 
     @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN $NO_TRANSFERRED_LEFT_JOIN $NO_TRANSFERRED_WHERE")
@@ -25,7 +29,7 @@ interface DataCollectionDao {
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(content: DataCollection)
+    suspend fun insert(content: DataCollectionEntity)
 
 
     @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.ID} = :newValue, ${Entry.TRANSFERRED_DATE} = :date WHERE ${Entry.ID} = :oldValue")

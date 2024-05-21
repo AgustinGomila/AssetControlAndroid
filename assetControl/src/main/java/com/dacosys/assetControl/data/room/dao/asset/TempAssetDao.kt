@@ -4,16 +4,16 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.dacosys.assetControl.data.room.entity.asset.TempAsset
-import com.dacosys.assetControl.data.room.entity.asset.TempAsset.Entry
+import com.dacosys.assetControl.data.room.entity.asset.TempAssetEntity
+import com.dacosys.assetControl.data.room.entity.asset.TempAssetEntity.Entry
 
 @Dao
 interface TempAssetDao {
     @Query("$BASIC_SELECT $BASIC_FROM")
-    suspend fun select(): List<TempAsset>
+    suspend fun select(): List<TempAssetEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(assets: List<TempAsset>)
+    suspend fun insert(assets: List<TempAssetEntity>)
 
 
     @Query("DELETE $BASIC_FROM")

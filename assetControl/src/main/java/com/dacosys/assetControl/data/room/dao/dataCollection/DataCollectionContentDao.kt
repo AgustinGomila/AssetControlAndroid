@@ -4,11 +4,12 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.dacosys.assetControl.data.room.entity.attribute.AttributeComposition
-import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollection
-import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionContent
-import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionContent.Entry
-import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionRuleContent
+import com.dacosys.assetControl.data.room.dto.attribute.AttributeComposition
+import com.dacosys.assetControl.data.room.dto.dataCollection.DataCollection
+import com.dacosys.assetControl.data.room.dto.dataCollection.DataCollectionContent
+import com.dacosys.assetControl.data.room.dto.dataCollection.DataCollectionContent.Entry
+import com.dacosys.assetControl.data.room.dto.dataCollection.DataCollectionRuleContent
+import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionContentEntity
 
 @Dao
 interface DataCollectionContentDao {
@@ -61,10 +62,10 @@ interface DataCollectionContentDao {
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(content: DataCollectionContent)
+    suspend fun insert(content: DataCollectionContentEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(contents: List<DataCollectionContent>)
+    suspend fun insert(contents: List<DataCollectionContentEntity>)
 
 
     @Query("DELETE FROM ${Entry.TABLE_NAME} WHERE ${Entry.DATA_COLLECTION_ID} = :id")

@@ -4,7 +4,7 @@ import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.room.dao.barcode.BarcodeLabelCustomDao
 import com.dacosys.assetControl.data.room.database.AcDatabase.Companion.database
-import com.dacosys.assetControl.data.room.entity.barcode.BarcodeLabelCustom
+import com.dacosys.assetControl.data.room.dto.barcode.BarcodeLabelCustom
 import com.dacosys.assetControl.data.webservice.barcode.BarcodeLabelCustomObject
 import com.dacosys.assetControl.network.sync.SyncProgress
 import com.dacosys.assetControl.network.sync.SyncRegistryType

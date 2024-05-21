@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "486c994e9e261a6da726faa6728eb512",
+    "identityHash": "a0c122df466d0d0177a24fffdbd44b9c",
     "entities": [
       {
         "tableName": "asset",
@@ -322,7 +322,7 @@
       },
       {
         "tableName": "asset_review",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER NOT NULL, `asset_review_date` INTEGER NOT NULL, `obs` TEXT, `user_id` INTEGER NOT NULL, `warehouse_area_id` INTEGER NOT NULL, `warehouse_id` INTEGER NOT NULL, `modification_date` INTEGER NOT NULL, `status_id` INTEGER NOT NULL, PRIMARY KEY(`_id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `asset_review_date` INTEGER NOT NULL, `obs` TEXT, `user_id` INTEGER NOT NULL, `warehouse_area_id` INTEGER NOT NULL, `warehouse_id` INTEGER NOT NULL, `modification_date` INTEGER NOT NULL, `status_id` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -374,7 +374,7 @@
           }
         ],
         "primaryKey": {
-          "autoGenerate": false,
+          "autoGenerate": true,
           "columnNames": [
             "_id"
           ]
@@ -406,15 +406,6 @@
             ],
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `IDX_asset_review_warehouse_id` ON `${TABLE_NAME}` (`warehouse_id`)"
-          },
-          {
-            "name": "IDX_asset_review__id",
-            "unique": false,
-            "columnNames": [
-              "_id"
-            ],
-            "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_asset_review__id` ON `${TABLE_NAME}` (`_id`)"
           }
         ],
         "foreignKeys": []
@@ -1818,8 +1809,14 @@
       },
       {
         "tableName": "route_process",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`user_id` INTEGER NOT NULL, `route_id` INTEGER NOT NULL, `route_process_id` INTEGER NOT NULL, `route_process_date` INTEGER NOT NULL, `completed` INTEGER NOT NULL, `transferred` INTEGER, `transferred_date` INTEGER, `_id` INTEGER NOT NULL, PRIMARY KEY(`_id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `user_id` INTEGER NOT NULL, `route_id` INTEGER NOT NULL, `route_process_id` INTEGER NOT NULL, `route_process_date` INTEGER NOT NULL, `completed` INTEGER NOT NULL, `transferred` INTEGER, `transferred_date` INTEGER)",
         "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
           {
             "fieldPath": "userId",
             "columnName": "user_id",
@@ -1861,16 +1858,10 @@
             "columnName": "transferred_date",
             "affinity": "INTEGER",
             "notNull": false
-          },
-          {
-            "fieldPath": "id",
-            "columnName": "_id",
-            "affinity": "INTEGER",
-            "notNull": true
           }
         ],
         "primaryKey": {
-          "autoGenerate": false,
+          "autoGenerate": true,
           "columnNames": [
             "_id"
           ]
@@ -1908,11 +1899,11 @@
       },
       {
         "tableName": "route_process_content",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`route_process_content_id` INTEGER NOT NULL, `route_process_id` INTEGER NOT NULL, `data_collection_rule_id` INTEGER NOT NULL, `level` INTEGER NOT NULL, `position` INTEGER NOT NULL, `route_process_status_id` INTEGER NOT NULL, `data_collection_id` INTEGER, PRIMARY KEY(`route_process_content_id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `route_process_id` INTEGER NOT NULL, `data_collection_rule_id` INTEGER NOT NULL, `level` INTEGER NOT NULL, `position` INTEGER NOT NULL, `route_process_status_id` INTEGER NOT NULL, `data_collection_id` INTEGER)",
         "fields": [
           {
             "fieldPath": "id",
-            "columnName": "route_process_content_id",
+            "columnName": "_id",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -1954,9 +1945,9 @@
           }
         ],
         "primaryKey": {
-          "autoGenerate": false,
+          "autoGenerate": true,
           "columnNames": [
-            "route_process_content_id"
+            "_id"
           ]
         },
         "indices": [
@@ -2013,15 +2004,6 @@
             ],
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `IDX_route_process_content_data_collection_id` ON `${TABLE_NAME}` (`data_collection_id`)"
-          },
-          {
-            "name": "IDX_route_process_content_route_process_content_id",
-            "unique": false,
-            "columnNames": [
-              "route_process_content_id"
-            ],
-            "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_route_process_content_route_process_content_id` ON `${TABLE_NAME}` (`route_process_content_id`)"
           }
         ],
         "foreignKeys": []
@@ -2530,7 +2512,7 @@
       },
       {
         "tableName": "warehouse_movement",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER NOT NULL, `warehouse_movement_id` INTEGER NOT NULL, `warehouse_movement_date` INTEGER NOT NULL, `obs` TEXT, `user_id` INTEGER NOT NULL, `origin_warehouse_area_id` INTEGER NOT NULL, `origin_warehouse_id` INTEGER NOT NULL, `transferred_date` INTEGER, `destination_warehouse_area_id` INTEGER NOT NULL, `destination_warehouse_id` INTEGER NOT NULL, `completed` INTEGER, PRIMARY KEY(`_id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `warehouse_movement_id` INTEGER NOT NULL, `warehouse_movement_date` INTEGER NOT NULL, `obs` TEXT, `user_id` INTEGER NOT NULL, `origin_warehouse_area_id` INTEGER NOT NULL, `origin_warehouse_id` INTEGER NOT NULL, `transferred_date` INTEGER, `destination_warehouse_area_id` INTEGER NOT NULL, `destination_warehouse_id` INTEGER NOT NULL, `completed` INTEGER)",
         "fields": [
           {
             "fieldPath": "id",
@@ -2600,7 +2582,7 @@
           }
         ],
         "primaryKey": {
-          "autoGenerate": false,
+          "autoGenerate": true,
           "columnNames": [
             "_id"
           ]
@@ -2665,7 +2647,7 @@
       },
       {
         "tableName": "warehouse_movement_content",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER NOT NULL, `warehouse_movement_id` INTEGER NOT NULL, `asset_id` INTEGER NOT NULL, `code` TEXT NOT NULL, `qty` REAL, PRIMARY KEY(`_id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `warehouse_movement_id` INTEGER NOT NULL, `asset_id` INTEGER NOT NULL, `code` TEXT NOT NULL, `qty` REAL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -2699,7 +2681,7 @@
           }
         ],
         "primaryKey": {
-          "autoGenerate": false,
+          "autoGenerate": true,
           "columnNames": [
             "_id"
           ]
@@ -2739,7 +2721,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '486c994e9e261a6da726faa6728eb512')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a0c122df466d0d0177a24fffdbd44b9c')"
     ]
   }
 }

@@ -2,7 +2,7 @@ package com.dacosys.assetControl.data.webservice.asset
 
 import android.os.Parcel
 import android.os.Parcelable
-import com.dacosys.assetControl.data.room.entity.asset.Asset
+import com.dacosys.assetControl.data.room.dto.asset.Asset
 import org.ksoap2.serialization.SoapObject
 
 

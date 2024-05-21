@@ -4,7 +4,8 @@ import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.room.dao.location.WarehouseDao
 import com.dacosys.assetControl.data.room.database.AcDatabase.Companion.database
-import com.dacosys.assetControl.data.room.entity.location.Warehouse
+import com.dacosys.assetControl.data.room.dto.location.Warehouse
+import com.dacosys.assetControl.data.room.entity.location.WarehouseEntity
 import com.dacosys.assetControl.data.webservice.location.WarehouseObject
 import com.dacosys.assetControl.network.sync.SyncProgress
 import com.dacosys.assetControl.network.sync.SyncRegistryType
@@ -31,13 +32,13 @@ class WarehouseRepository {
 
 
     fun insert(warehouse: Warehouse) = runBlocking {
-        dao.insert(warehouse)
+        dao.insert(WarehouseEntity(warehouse))
     }
 
 
     fun update(warehouse: Warehouse): Boolean {
         val r = runBlocking {
-            dao.update(warehouse)
+            dao.update(WarehouseEntity(warehouse))
             true
         }
         return r

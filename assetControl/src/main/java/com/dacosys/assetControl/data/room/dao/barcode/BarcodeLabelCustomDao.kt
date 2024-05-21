@@ -1,8 +1,9 @@
 package com.dacosys.assetControl.data.room.dao.barcode
 
 import androidx.room.*
-import com.dacosys.assetControl.data.room.entity.barcode.BarcodeLabelCustom
-import com.dacosys.assetControl.data.room.entity.barcode.BarcodeLabelCustom.Entry
+import com.dacosys.assetControl.data.room.dto.barcode.BarcodeLabelCustom
+import com.dacosys.assetControl.data.room.dto.barcode.BarcodeLabelCustom.Entry
+import com.dacosys.assetControl.data.room.entity.barcode.BarcodeLabelCustomEntity
 
 @Dao
 interface BarcodeLabelCustomDao {
@@ -17,15 +18,15 @@ interface BarcodeLabelCustomDao {
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(label: BarcodeLabelCustom)
+    suspend fun insert(label: BarcodeLabelCustomEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(labels: List<BarcodeLabelCustom>)
+    suspend fun insert(labels: List<BarcodeLabelCustomEntity>)
 
     @Transaction
     suspend fun insert(entities: List<BarcodeLabelCustom>, completedTask: (Int) -> Unit) {
         entities.forEachIndexed { index, entity ->
-            insert(entity)
+            insert(BarcodeLabelCustomEntity(entity))
             completedTask(index + 1)
         }
     }

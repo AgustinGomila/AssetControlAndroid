@@ -3,7 +3,7 @@ package com.dacosys.assetControl.data.crud.category
 import com.dacosys.assetControl.data.enums.common.CrudCompleted
 import com.dacosys.assetControl.data.enums.common.CrudResult
 import com.dacosys.assetControl.data.enums.common.CrudStatus.*
-import com.dacosys.assetControl.data.room.entity.category.ItemCategory
+import com.dacosys.assetControl.data.room.dto.category.ItemCategory
 import com.dacosys.assetControl.data.room.repository.category.ItemCategoryRepository
 import com.dacosys.assetControl.data.webservice.category.ItemCategoryObject
 import com.dacosys.assetControl.network.sync.SyncRegistryType

@@ -5,12 +5,13 @@ import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.enums.asset.AssetStatus
 import com.dacosys.assetControl.data.room.dao.asset.AssetDao
 import com.dacosys.assetControl.data.room.database.AcDatabase.Companion.database
-import com.dacosys.assetControl.data.room.entity.asset.Asset
-import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
-import com.dacosys.assetControl.data.room.entity.movement.WarehouseMovement
-import com.dacosys.assetControl.data.room.entity.movement.WarehouseMovementContent
-import com.dacosys.assetControl.data.room.entity.review.AssetReview
-import com.dacosys.assetControl.data.room.entity.review.AssetReviewContent
+import com.dacosys.assetControl.data.room.dto.asset.Asset
+import com.dacosys.assetControl.data.room.dto.location.WarehouseArea
+import com.dacosys.assetControl.data.room.dto.movement.WarehouseMovement
+import com.dacosys.assetControl.data.room.dto.movement.WarehouseMovementContent
+import com.dacosys.assetControl.data.room.dto.review.AssetReview
+import com.dacosys.assetControl.data.room.dto.review.AssetReviewContent
+import com.dacosys.assetControl.data.room.entity.asset.AssetEntity
 import com.dacosys.assetControl.data.room.repository.location.WarehouseAreaRepository
 import com.dacosys.assetControl.data.webservice.asset.AssetObject
 import com.dacosys.assetControl.network.sync.SyncProgress
@@ -73,7 +74,7 @@ class AssetRepository {
     val minId get() = runBlocking { dao.selectMinId() ?: -1 }
 
     fun insert(asset: Asset) = runBlocking {
-        dao.insert(asset)
+        dao.insert(AssetEntity(asset))
     }
 
     suspend fun sync(
@@ -105,7 +106,7 @@ class AssetRepository {
 
     fun update(asset: Asset): Boolean {
         val r = runBlocking {
-            dao.update(asset)
+            dao.update(AssetEntity(asset))
             true
         }
         return r

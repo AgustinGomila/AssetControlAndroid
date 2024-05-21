@@ -4,8 +4,9 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.dacosys.assetControl.data.room.entity.route.RouteComposition
-import com.dacosys.assetControl.data.room.entity.route.RouteComposition.Entry
+import com.dacosys.assetControl.data.room.dto.route.RouteComposition
+import com.dacosys.assetControl.data.room.dto.route.RouteComposition.Entry
+import com.dacosys.assetControl.data.room.entity.route.RouteCompositionEntity
 
 @Dao
 interface RouteCompositionDao {
@@ -14,10 +15,7 @@ interface RouteCompositionDao {
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(asset: RouteComposition)
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(assets: List<RouteComposition>)
+    suspend fun insert(assets: List<RouteCompositionEntity>)
 
 
     @Query("DELETE FROM ${Entry.TABLE_NAME} WHERE ${Entry.ROUTE_ID} = :id")
@@ -29,4 +27,3 @@ interface RouteCompositionDao {
         const val BASIC_FROM = "FROM ${Entry.TABLE_NAME}"
     }
 }
-

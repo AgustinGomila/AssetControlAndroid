@@ -8,7 +8,7 @@ import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.room.entity.asset.Asset
+import com.dacosys.assetControl.data.room.dto.asset.Asset
 import com.dacosys.assetControl.data.room.repository.asset.AssetRepository
 import com.dacosys.assetControl.databinding.ObservationsActivityBinding
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText

@@ -20,9 +20,9 @@ import androidx.transition.ChangeBounds
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.room.entity.route.Route
-import com.dacosys.assetControl.data.room.entity.route.Route.CREATOR.getAvailableRoutes
-import com.dacosys.assetControl.data.room.entity.route.RouteProcess
+import com.dacosys.assetControl.data.room.dto.route.Route
+import com.dacosys.assetControl.data.room.dto.route.Route.CREATOR.getAvailableRoutes
+import com.dacosys.assetControl.data.room.dto.route.RouteProcess
 import com.dacosys.assetControl.data.room.repository.route.RouteProcessContentRepository
 import com.dacosys.assetControl.data.room.repository.route.RouteProcessRepository
 import com.dacosys.assetControl.data.room.repository.route.RouteProcessStepsRepository
@@ -99,8 +99,8 @@ class RouteSelectActivity : AppCompatActivity(),
 
     private fun loadBundleValues(b: Bundle) {
         // region Recuperar el título de la ventana
-        val t1 = b.getString("title")
-        tempTitle = if (!t1.isNullOrEmpty()) t1 else getString(R.string.select_route)
+        val t1 = b.getString("title") ?: ""
+        tempTitle = t1.ifEmpty { getString(R.string.select_route) }
         // endregion
 
         // PANELS

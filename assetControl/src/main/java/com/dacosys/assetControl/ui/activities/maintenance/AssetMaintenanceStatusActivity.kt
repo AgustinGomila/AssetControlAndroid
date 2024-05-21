@@ -6,8 +6,8 @@ import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.enums.maintenance.MaintenanceStatus
-import com.dacosys.assetControl.data.room.entity.maintenance.AssetMaintenance
-import com.dacosys.assetControl.data.room.entity.maintenance.MaintenanceType
+import com.dacosys.assetControl.data.room.dto.maintenance.AssetMaintenance
+import com.dacosys.assetControl.data.room.dto.maintenance.MaintenanceType
 import com.dacosys.assetControl.databinding.AssetManteinanceStatusActivityBinding
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
@@ -95,7 +95,7 @@ class AssetMaintenanceStatusActivity : AppCompatActivity(),
         }
 
         maintenance?.observations = binding.obsEditText.text.toString()
-        maintenance?.statusId = statusSpinnerFragment?.selectedMaintenanceStatus?.id ?: -1
+        maintenance?.maintenanceStatusId = statusSpinnerFragment?.selectedMaintenanceStatus?.id ?: -1
         maintenance?.maintenanceTypeId = typeSpinnerFragment?.selectedType?.id ?: -1
         maintenance?.transferred = false
 

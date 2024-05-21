@@ -2,7 +2,7 @@ package com.dacosys.assetControl.data.webservice.location
 
 import android.os.Parcel
 import android.os.Parcelable
-import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
+import com.dacosys.assetControl.data.room.dto.location.WarehouseArea
 import org.ksoap2.serialization.SoapObject
 
 class WarehouseAreaObject() : Parcelable {

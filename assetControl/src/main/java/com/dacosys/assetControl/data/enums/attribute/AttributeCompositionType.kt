@@ -3,7 +3,7 @@ package com.dacosys.assetControl.data.enums.attribute
 import android.os.Parcel
 import android.os.Parcelable
 import com.dacosys.assetControl.data.enums.unit.UnitType
-import com.dacosys.assetControl.data.room.entity.asset.Asset
+import com.dacosys.assetControl.data.room.dto.asset.Asset
 import java.sql.Time
 import java.util.*
 

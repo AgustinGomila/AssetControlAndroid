@@ -15,7 +15,7 @@ import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat
 import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
+import com.dacosys.assetControl.data.room.dto.location.WarehouseArea
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.getColorWithAlpha

@@ -35,16 +35,16 @@ import com.dacosys.assetControl.data.enums.permission.PermissionEntry
 import com.dacosys.assetControl.data.enums.unit.UnitType
 import com.dacosys.assetControl.data.model.common.KeyLevelPos
 import com.dacosys.assetControl.data.model.common.Parameter
-import com.dacosys.assetControl.data.room.entity.asset.Asset
-import com.dacosys.assetControl.data.room.entity.category.ItemCategory
-import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollection
-import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionContent
-import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionRule
-import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionRuleContent
-import com.dacosys.assetControl.data.room.entity.fragment.FragmentData
-import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
-import com.dacosys.assetControl.data.room.entity.route.RouteProcessContent
-import com.dacosys.assetControl.data.room.entity.user.User
+import com.dacosys.assetControl.data.room.dto.asset.Asset
+import com.dacosys.assetControl.data.room.dto.category.ItemCategory
+import com.dacosys.assetControl.data.room.dto.dataCollection.DataCollection
+import com.dacosys.assetControl.data.room.dto.dataCollection.DataCollectionContent
+import com.dacosys.assetControl.data.room.dto.dataCollection.DataCollectionRule
+import com.dacosys.assetControl.data.room.dto.dataCollection.DataCollectionRuleContent
+import com.dacosys.assetControl.data.room.dto.location.WarehouseArea
+import com.dacosys.assetControl.data.room.dto.route.RouteProcessContent
+import com.dacosys.assetControl.data.room.dto.user.User
+import com.dacosys.assetControl.data.room.entity.fragment.FragmentDataEntity
 import com.dacosys.assetControl.data.room.repository.attribute.AttributeCompositionRepository
 import com.dacosys.assetControl.data.room.repository.dataCollection.DataCollectionContentRepository
 import com.dacosys.assetControl.data.room.repository.dataCollection.DataCollectionRepository
@@ -415,18 +415,18 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         val rpc = rpc ?: return
 
         var description = "${dcr.description}, ${
-            if (rpc.assetStr.isNotEmpty()) {
-                rpc.assetStr
-            } else if (rpc.warehouseAreaStr.isNotEmpty()) {
-                rpc.warehouseAreaStr
-            } else if (rpc.warehouseStr.isNotEmpty()) {
-                rpc.warehouseStr
+            if (rpc.assetDescription.isNotEmpty()) {
+                rpc.assetDescription
+            } else if (rpc.warehouseAreaDescription.isNotEmpty()) {
+                rpc.warehouseAreaDescription
+            } else if (rpc.warehouseDescription.isNotEmpty()) {
+                rpc.warehouseDescription
             } else {
                 getString(R.string.no_name)
             }
         }"
 
-        val reference = "${getString(R.string.asset)}: ${rpc.assetCode}"
+        val reference = "${getString(R.string.asset)}: ${rpc.code}"
         val obs = "${getString(R.string.user)}: ${currentUser()?.name}"
 
         val tableName = Table.routeProcess.tableName
@@ -542,7 +542,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         }
     }
 
-    private fun createFragmentCollection(fdArray: ArrayList<FragmentData>) {
+    private fun createFragmentCollection(fdArray: ArrayList<FragmentDataEntity>) {
         // Limpiar toda la colección de controles
         allFrags.clear()
 
@@ -862,9 +862,9 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
 
             when {
                 rpc.assetId != null && assetId > 0 -> {
-                    binding.codeTextView.setText(rpc.assetCode, TextView.BufferType.EDITABLE)
+                    binding.codeTextView.setText(rpc.code, TextView.BufferType.EDITABLE)
                     binding.descriptionTextView.setText(
-                        rpc.assetStr, TextView.BufferType.EDITABLE
+                        rpc.assetDescription, TextView.BufferType.EDITABLE
                     )
 
                     tempDcc = ArrayList(
@@ -879,7 +879,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
                         rpc.warehouseId.toString(), TextView.BufferType.EDITABLE
                     )
                     binding.descriptionTextView.setText(
-                        rpc.warehouseStr, TextView.BufferType.EDITABLE
+                        rpc.warehouseDescription, TextView.BufferType.EDITABLE
                     )
 
                     tempDcc = ArrayList(
@@ -894,7 +894,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
                         rpc.warehouseAreaId.toString(), TextView.BufferType.EDITABLE
                     )
                     binding.descriptionTextView.setText(
-                        rpc.warehouseAreaStr, TextView.BufferType.EDITABLE
+                        rpc.warehouseAreaDescription, TextView.BufferType.EDITABLE
                     )
 
                     tempDcc = ArrayList(
@@ -931,11 +931,10 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
             return
         }
 
-        val attrCompArray = AttributeCompositionRepository().selectByAttributeId(
-            (currentFragment?.dataCollectionRuleContent ?: return).attributeId
-        )
-        val currentAttrCompId =
-            (currentFragment?.dataCollectionRuleContent ?: return).attributeCompositionId
+        val dcrCont = currentFragment?.dataCollectionRuleContent ?: return
+
+        val attrCompArray = AttributeCompositionRepository().selectByAttributeId(dcrCont.attributeId)
+        val currentAttrCompId = dcrCont.attributeCompositionId
 
         var currentIndex = 0
         for (attrComp in attrCompArray) {
@@ -1127,8 +1126,8 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
             val dcc = DataCollectionContent(
                 ruleContent = ruleContent,
                 virtualId = virtualId,
-                result = result,
-                valueStr = valueStr
+                anyResult = result,
+                valueString = valueStr
             )
 
             dcContArray.add(dcc)
@@ -1810,10 +1809,10 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         val tableId = imageControlFragment?.tableId ?: return
 
         val dcrDescription = dcr?.description ?: ""
-        val rpcAsset = rpc?.assetStr ?: ""
-        val rpcWa = rpc?.warehouseAreaStr ?: ""
-        val rpcW = rpc?.warehouseStr
-        val rpcAssetCode = rpc?.assetCode ?: ""
+        val rpcAsset = rpc?.assetDescription ?: ""
+        val rpcWa = rpc?.warehouseAreaDescription ?: ""
+        val rpcW = rpc?.warehouseDescription
+        val rpcAssetCode = rpc?.code ?: ""
 
         Log.d(this::class.java.simpleName, "Guardando imagen de Demostración...")
 

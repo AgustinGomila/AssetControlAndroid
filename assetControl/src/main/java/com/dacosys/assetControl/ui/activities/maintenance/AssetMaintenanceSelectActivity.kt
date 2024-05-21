@@ -12,7 +12,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.data.room.entity.maintenance.AssetMaintenance
+import com.dacosys.assetControl.data.room.dto.maintenance.AssetMaintenance
 import com.dacosys.assetControl.data.room.repository.asset.AssetRepository
 import com.dacosys.assetControl.data.room.repository.maintenance.AssetMaintenanceRepository
 import com.dacosys.assetControl.databinding.AssetManteinanceSelectActivityBinding
@@ -98,8 +98,8 @@ class AssetMaintenanceSelectActivity : AppCompatActivity(),
         currentAssetMaintenance = b.parcelable("currentAssetMaintenance")
         amantChecked = (b.parcelableArrayList("amantChecked") ?: return)
 
-        val t1 = b.getString("title")
-        if (!t1.isNullOrEmpty()) tempTitle = t1
+        val t1 = b.getString("title") ?: ""
+        if (t1.isNotEmpty()) tempTitle = t1
     }
 
     private fun loadDefaultValues() {

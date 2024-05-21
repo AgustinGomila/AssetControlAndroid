@@ -41,10 +41,10 @@ import com.dacosys.assetControl.data.enums.common.ConfirmStatus.CREATOR.confirm
 import com.dacosys.assetControl.data.enums.common.ConfirmStatus.CREATOR.modify
 import com.dacosys.assetControl.data.enums.common.SaveProgress
 import com.dacosys.assetControl.data.enums.movement.WarehouseMovementContentStatus
-import com.dacosys.assetControl.data.room.entity.asset.Asset
-import com.dacosys.assetControl.data.room.entity.location.Warehouse
-import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
-import com.dacosys.assetControl.data.room.entity.movement.WarehouseMovementContent
+import com.dacosys.assetControl.data.room.dto.asset.Asset
+import com.dacosys.assetControl.data.room.dto.location.Warehouse
+import com.dacosys.assetControl.data.room.dto.location.WarehouseArea
+import com.dacosys.assetControl.data.room.dto.movement.WarehouseMovementContent
 import com.dacosys.assetControl.data.room.repository.asset.AssetRepository
 import com.dacosys.assetControl.data.room.repository.location.WarehouseAreaRepository
 import com.dacosys.assetControl.data.room.repository.movement.TempMovementContentRepository
@@ -665,10 +665,10 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
                     }
 
                     val codes: ArrayList<String> = ArrayList()
-                    val aDb = AssetRepository()
+                    val assetRepository = AssetRepository()
                     for (id in ids) {
                         if (id == null) continue
-                        val a = aDb.selectById(id) ?: continue
+                        val a = assetRepository.selectById(id) ?: continue
                         codes.add(a.code)
                     }
 

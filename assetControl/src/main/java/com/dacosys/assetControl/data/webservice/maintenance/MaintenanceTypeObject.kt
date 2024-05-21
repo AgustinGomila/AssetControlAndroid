@@ -2,7 +2,7 @@ package com.dacosys.assetControl.data.webservice.maintenance
 
 import android.os.Parcel
 import android.os.Parcelable
-import com.dacosys.assetControl.data.room.entity.maintenance.MaintenanceType
+import com.dacosys.assetControl.data.room.dto.maintenance.MaintenanceType
 import org.ksoap2.serialization.SoapObject
 
 class MaintenanceTypeObject() : Parcelable {

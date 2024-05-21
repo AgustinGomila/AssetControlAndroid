@@ -2,7 +2,8 @@ package com.dacosys.assetControl.data.room.repository.dataCollection
 
 import com.dacosys.assetControl.data.room.dao.dataCollection.DataCollectionContentDao
 import com.dacosys.assetControl.data.room.database.AcDatabase.Companion.database
-import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionContent
+import com.dacosys.assetControl.data.room.dto.dataCollection.DataCollectionContent
+import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionContentEntity
 import kotlinx.coroutines.runBlocking
 
 class DataCollectionContentRepository {
@@ -30,7 +31,7 @@ class DataCollectionContentRepository {
     fun insert(id: Long, dcc: DataCollectionContent): Boolean {
         val r = runBlocking {
             dcc.dataCollectionId = id
-            dao.insert(dcc)
+            dao.insert(DataCollectionContentEntity(dcc))
             true
         }
         return r
@@ -39,7 +40,7 @@ class DataCollectionContentRepository {
     fun insert(id: Long, dccList: List<DataCollectionContent>): Boolean {
         val r = runBlocking {
             dccList.forEach { it.dataCollectionId = id }
-            dao.insert(dccList)
+            dao.insert(dccList.map { DataCollectionContentEntity(it) })
             true
         }
         return r

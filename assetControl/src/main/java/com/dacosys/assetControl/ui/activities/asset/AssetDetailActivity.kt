@@ -9,7 +9,7 @@ import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.AssetControlApp.Companion.currentUser
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.enums.common.Table
-import com.dacosys.assetControl.data.room.entity.asset.Asset
+import com.dacosys.assetControl.data.room.dto.asset.Asset
 import com.dacosys.assetControl.databinding.AssetDetailActivityBinding
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setupUI

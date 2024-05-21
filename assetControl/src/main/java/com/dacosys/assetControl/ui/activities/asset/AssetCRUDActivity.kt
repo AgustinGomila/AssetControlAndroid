@@ -22,7 +22,7 @@ import com.dacosys.assetControl.data.enums.common.CrudCompleted
 import com.dacosys.assetControl.data.enums.common.CrudResult
 import com.dacosys.assetControl.data.enums.common.CrudStatus.*
 import com.dacosys.assetControl.data.enums.common.Table
-import com.dacosys.assetControl.data.room.entity.asset.Asset
+import com.dacosys.assetControl.data.room.dto.asset.Asset
 import com.dacosys.assetControl.data.room.repository.asset.AssetRepository
 import com.dacosys.assetControl.databinding.AssetCrudActivityBinding
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText

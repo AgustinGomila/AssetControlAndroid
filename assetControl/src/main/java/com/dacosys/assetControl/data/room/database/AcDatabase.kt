@@ -34,66 +34,66 @@ import com.dacosys.assetControl.data.room.dao.user.UserDao
 import com.dacosys.assetControl.data.room.dao.user.UserPermissionDao
 import com.dacosys.assetControl.data.room.dao.user.UserWarehouseAreaDao
 import com.dacosys.assetControl.data.room.database.AcDatabase.Companion.DATABASE_VERSION
-import com.dacosys.assetControl.data.room.entity.asset.Asset
-import com.dacosys.assetControl.data.room.entity.attribute.Attribute
-import com.dacosys.assetControl.data.room.entity.attribute.AttributeCategory
-import com.dacosys.assetControl.data.room.entity.attribute.AttributeComposition
-import com.dacosys.assetControl.data.room.entity.barcode.BarcodeLabelCustom
-import com.dacosys.assetControl.data.room.entity.barcode.BarcodeLabelTarget
-import com.dacosys.assetControl.data.room.entity.category.ItemCategory
+import com.dacosys.assetControl.data.room.entity.asset.AssetEntity
+import com.dacosys.assetControl.data.room.entity.attribute.AttributeCategoryEntity
+import com.dacosys.assetControl.data.room.entity.attribute.AttributeCompositionEntity
+import com.dacosys.assetControl.data.room.entity.attribute.AttributeEntity
+import com.dacosys.assetControl.data.room.entity.barcode.BarcodeLabelCustomEntity
+import com.dacosys.assetControl.data.room.entity.barcode.BarcodeLabelTargetEntity
+import com.dacosys.assetControl.data.room.entity.category.ItemCategoryEntity
 import com.dacosys.assetControl.data.room.entity.dataCollection.*
-import com.dacosys.assetControl.data.room.entity.location.Warehouse
-import com.dacosys.assetControl.data.room.entity.location.WarehouseArea
-import com.dacosys.assetControl.data.room.entity.maintenance.AssetMaintenance
-import com.dacosys.assetControl.data.room.entity.maintenance.MaintenanceStatus
-import com.dacosys.assetControl.data.room.entity.maintenance.MaintenanceType
-import com.dacosys.assetControl.data.room.entity.maintenance.MaintenanceTypeGroup
-import com.dacosys.assetControl.data.room.entity.movement.WarehouseMovement
-import com.dacosys.assetControl.data.room.entity.movement.WarehouseMovementContent
-import com.dacosys.assetControl.data.room.entity.review.AssetReview
-import com.dacosys.assetControl.data.room.entity.review.AssetReviewContent
-import com.dacosys.assetControl.data.room.entity.review.AssetReviewStatus
+import com.dacosys.assetControl.data.room.entity.location.WarehouseAreaEntity
+import com.dacosys.assetControl.data.room.entity.location.WarehouseEntity
+import com.dacosys.assetControl.data.room.entity.maintenance.AssetMaintenanceEntity
+import com.dacosys.assetControl.data.room.entity.maintenance.MaintenanceStatusEntity
+import com.dacosys.assetControl.data.room.entity.maintenance.MaintenanceTypeEntity
+import com.dacosys.assetControl.data.room.entity.maintenance.MaintenanceTypeGroupEntity
+import com.dacosys.assetControl.data.room.entity.movement.WarehouseMovementContentEntity
+import com.dacosys.assetControl.data.room.entity.movement.WarehouseMovementEntity
+import com.dacosys.assetControl.data.room.entity.review.AssetReviewContentEntity
+import com.dacosys.assetControl.data.room.entity.review.AssetReviewEntity
+import com.dacosys.assetControl.data.room.entity.review.AssetReviewStatusEntity
 import com.dacosys.assetControl.data.room.entity.route.*
-import com.dacosys.assetControl.data.room.entity.user.User
-import com.dacosys.assetControl.data.room.entity.user.UserPermission
-import com.dacosys.assetControl.data.room.entity.user.UserWarehouseArea
+import com.dacosys.assetControl.data.room.entity.user.UserEntity
+import com.dacosys.assetControl.data.room.entity.user.UserPermissionEntity
+import com.dacosys.assetControl.data.room.entity.user.UserWarehouseAreaEntity
 import java.io.File
 
 @TypeConverters(Converters::class)
 @Database(
     entities = [
-        Asset::class,
-        AssetMaintenance::class,
-        AssetReview::class,
-        AssetReviewContent::class,
-        Attribute::class,
-        AttributeCategory::class,
-        AttributeComposition::class,
-        BarcodeLabelCustom::class,
-        BarcodeLabelTarget::class,
-        DataCollection::class,
-        DataCollectionContent::class,
-        DataCollectionRule::class,
-        DataCollectionRuleContent::class,
-        DataCollectionRuleTarget::class,
-        ItemCategory::class,
-        MaintenanceStatus::class,
-        MaintenanceType::class,
-        MaintenanceTypeGroup::class,
-        Route::class,
-        RouteComposition::class,
-        RouteProcess::class,
-        RouteProcessContent::class,
-        RouteProcessStatus::class,
-        RouteProcessSteps::class,
-        AssetReviewStatus::class,
-        User::class,
-        UserPermission::class,
-        UserWarehouseArea::class,
-        Warehouse::class,
-        WarehouseArea::class,
-        WarehouseMovement::class,
-        WarehouseMovementContent::class,
+        AssetEntity::class,
+        AssetMaintenanceEntity::class,
+        AssetReviewEntity::class,
+        AssetReviewContentEntity::class,
+        AttributeEntity::class,
+        AttributeCategoryEntity::class,
+        AttributeCompositionEntity::class,
+        BarcodeLabelCustomEntity::class,
+        BarcodeLabelTargetEntity::class,
+        DataCollectionEntity::class,
+        DataCollectionContentEntity::class,
+        DataCollectionRuleEntity::class,
+        DataCollectionRuleContentEntity::class,
+        DataCollectionRuleTargetEntity::class,
+        ItemCategoryEntity::class,
+        MaintenanceStatusEntity::class,
+        MaintenanceTypeEntity::class,
+        MaintenanceTypeGroupEntity::class,
+        RouteEntity::class,
+        RouteCompositionEntity::class,
+        RouteProcessEntity::class,
+        RouteProcessContentEntity::class,
+        RouteProcessStatusEntity::class,
+        RouteProcessStepsEntity::class,
+        AssetReviewStatusEntity::class,
+        UserEntity::class,
+        UserPermissionEntity::class,
+        UserWarehouseAreaEntity::class,
+        WarehouseEntity::class,
+        WarehouseAreaEntity::class,
+        WarehouseMovementEntity::class,
+        WarehouseMovementContentEntity::class,
     ],
     version = DATABASE_VERSION
 )
@@ -258,7 +258,7 @@ abstract class AcDatabase : RoomDatabase() {
             )
         }
 
-        private const val IDENTITY_HASH_V1 = "486c994e9e261a6da726faa6728eb512"
+        private const val IDENTITY_HASH_V1 = "a0c122df466d0d0177a24fffdbd44b9c"
 
         private val migrationZero: List<String>
             get() {
@@ -266,45 +266,45 @@ abstract class AcDatabase : RoomDatabase() {
 
                 r.addAll(roomMigrationZero())
 
-                r.addAll(Asset.migrationZero())
-                r.addAll(AssetMaintenance.migrationZero())
-                r.addAll(AssetReview.migrationZero())
-                r.addAll(AssetReviewContent.migrationZero())
-                r.addAll(AssetReviewStatus.migrationZero())
-                r.addAll(Attribute.migrationZero())
-                r.addAll(AttributeCategory.migrationZero())
-                r.addAll(AttributeComposition.migrationZero())
+                r.addAll(AssetEntity.migrationZero())
+                r.addAll(AssetMaintenanceEntity.migrationZero())
+                r.addAll(AssetReviewEntity.migrationZero())
+                r.addAll(AssetReviewContentEntity.migrationZero())
+                r.addAll(AssetReviewStatusEntity.migrationZero())
+                r.addAll(AttributeEntity.migrationZero())
+                r.addAll(AttributeCategoryEntity.migrationZero())
+                r.addAll(AttributeCompositionEntity.migrationZero())
 
-                r.addAll(BarcodeLabelCustom.migrationZero())
-                r.addAll(BarcodeLabelTarget.migrationZero())
+                r.addAll(BarcodeLabelCustomEntity.migrationZero())
+                r.addAll(BarcodeLabelTargetEntity.migrationZero())
 
-                r.addAll(DataCollection.migrationZero())
-                r.addAll(DataCollectionContent.migrationZero())
-                r.addAll(DataCollectionRule.migrationZero())
-                r.addAll(DataCollectionRuleContent.migrationZero())
-                r.addAll(DataCollectionRuleTarget.migrationZero())
+                r.addAll(DataCollectionEntity.migrationZero())
+                r.addAll(DataCollectionContentEntity.migrationZero())
+                r.addAll(DataCollectionRuleEntity.migrationZero())
+                r.addAll(DataCollectionRuleContentEntity.migrationZero())
+                r.addAll(DataCollectionRuleTargetEntity.migrationZero())
 
-                r.addAll(ItemCategory.migrationZero())
+                r.addAll(ItemCategoryEntity.migrationZero())
 
-                r.addAll(MaintenanceStatus.migrationZero())
-                r.addAll(MaintenanceType.migrationZero())
-                r.addAll(MaintenanceTypeGroup.migrationZero())
+                r.addAll(MaintenanceStatusEntity.migrationZero())
+                r.addAll(MaintenanceTypeEntity.migrationZero())
+                r.addAll(MaintenanceTypeGroupEntity.migrationZero())
 
-                r.addAll(Route.migrationZero())
-                r.addAll(RouteComposition.migrationZero())
-                r.addAll(RouteProcess.migrationZero())
-                r.addAll(RouteProcessContent.migrationZero())
-                r.addAll(RouteProcessStatus.migrationZero())
-                r.addAll(RouteProcessSteps.migrationZero())
+                r.addAll(RouteEntity.migrationZero())
+                r.addAll(RouteCompositionEntity.migrationZero())
+                r.addAll(RouteProcessEntity.migrationZero())
+                r.addAll(RouteProcessContentEntity.migrationZero())
+                r.addAll(RouteProcessStatusEntity.migrationZero())
+                r.addAll(RouteProcessStepsEntity.migrationZero())
 
-                r.addAll(User.migrationZero())
-                r.addAll(UserPermission.migrationZero())
-                r.addAll(UserWarehouseArea.migrationZero())
+                r.addAll(UserEntity.migrationZero())
+                r.addAll(UserPermissionEntity.migrationZero())
+                r.addAll(UserWarehouseAreaEntity.migrationZero())
 
-                r.addAll(Warehouse.migrationZero())
-                r.addAll(WarehouseArea.migrationZero())
-                r.addAll(WarehouseMovement.migrationZero())
-                r.addAll(WarehouseMovementContent.migrationZero())
+                r.addAll(WarehouseEntity.migrationZero())
+                r.addAll(WarehouseAreaEntity.migrationZero())
+                r.addAll(WarehouseMovementEntity.migrationZero())
+                r.addAll(WarehouseMovementContentEntity.migrationZero())
 
                 return r
             }

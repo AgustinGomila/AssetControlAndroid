@@ -4,8 +4,9 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.dacosys.assetControl.data.room.entity.attribute.AttributeComposition
-import com.dacosys.assetControl.data.room.entity.attribute.AttributeComposition.Entry
+import com.dacosys.assetControl.data.room.dto.attribute.AttributeComposition
+import com.dacosys.assetControl.data.room.dto.attribute.AttributeComposition.Entry
+import com.dacosys.assetControl.data.room.entity.attribute.AttributeCompositionEntity
 
 @Dao
 interface AttributeCompositionDao {
@@ -20,7 +21,7 @@ interface AttributeCompositionDao {
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(contents: List<AttributeComposition>)
+    suspend fun insert(contents: List<AttributeCompositionEntity>)
 
 
     @Query("DELETE FROM ${Entry.TABLE_NAME} WHERE ${Entry.ATTRIBUTE_ID} IN (:ids)")

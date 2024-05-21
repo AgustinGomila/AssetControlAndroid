@@ -3,7 +3,7 @@ package com.dacosys.assetControl.data.crud.asset
 import com.dacosys.assetControl.data.enums.common.CrudCompleted
 import com.dacosys.assetControl.data.enums.common.CrudResult
 import com.dacosys.assetControl.data.enums.common.CrudStatus.*
-import com.dacosys.assetControl.data.room.entity.asset.Asset
+import com.dacosys.assetControl.data.room.dto.asset.Asset
 import com.dacosys.assetControl.data.room.repository.asset.AssetRepository
 import com.dacosys.assetControl.data.webservice.asset.AssetCollectorObject
 import com.dacosys.assetControl.data.webservice.asset.AssetObject

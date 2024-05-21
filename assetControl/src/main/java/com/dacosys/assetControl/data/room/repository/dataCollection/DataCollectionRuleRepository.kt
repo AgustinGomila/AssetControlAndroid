@@ -4,7 +4,7 @@ import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.room.dao.dataCollection.DataCollectionRuleDao
 import com.dacosys.assetControl.data.room.database.AcDatabase.Companion.database
-import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionRule
+import com.dacosys.assetControl.data.room.dto.dataCollection.DataCollectionRule
 import com.dacosys.assetControl.data.webservice.dataCollection.DataCollectionRuleObject
 import com.dacosys.assetControl.network.sync.SyncProgress
 import com.dacosys.assetControl.network.sync.SyncRegistryType

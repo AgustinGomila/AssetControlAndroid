@@ -4,7 +4,8 @@ import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.room.dao.category.ItemCategoryDao
 import com.dacosys.assetControl.data.room.database.AcDatabase.Companion.database
-import com.dacosys.assetControl.data.room.entity.category.ItemCategory
+import com.dacosys.assetControl.data.room.dto.category.ItemCategory
+import com.dacosys.assetControl.data.room.entity.category.ItemCategoryEntity
 import com.dacosys.assetControl.data.webservice.category.ItemCategoryObject
 import com.dacosys.assetControl.network.sync.SyncProgress
 import com.dacosys.assetControl.network.sync.SyncRegistryType
@@ -31,14 +32,14 @@ class ItemCategoryRepository {
 
     fun insert(category: ItemCategory) {
         runBlocking {
-            dao.insert(category)
+            dao.insert(ItemCategoryEntity(category))
         }
     }
 
 
     fun update(category: ItemCategory): Boolean {
         val r = runBlocking {
-            dao.update(category)
+            dao.update(ItemCategoryEntity(category))
             true
         }
         return r
