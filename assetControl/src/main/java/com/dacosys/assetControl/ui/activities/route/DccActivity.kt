@@ -415,18 +415,18 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         val rpc = rpc ?: return
 
         var description = "${dcr.description}, ${
-            if (rpc.assetDescription.isNotEmpty()) {
-                rpc.assetDescription
-            } else if (rpc.warehouseAreaDescription.isNotEmpty()) {
-                rpc.warehouseAreaDescription
-            } else if (rpc.warehouseDescription.isNotEmpty()) {
-                rpc.warehouseDescription
+            if (rpc.assetStr.isNotEmpty()) {
+                rpc.assetStr
+            } else if (rpc.warehouseAreaStr.isNotEmpty()) {
+                rpc.warehouseAreaStr
+            } else if (rpc.warehouseStr.isNotEmpty()) {
+                rpc.warehouseStr
             } else {
                 getString(R.string.no_name)
             }
         }"
 
-        val reference = "${getString(R.string.asset)}: ${rpc.code}"
+        val reference = "${getString(R.string.asset)}: ${rpc.assetCode}"
         val obs = "${getString(R.string.user)}: ${currentUser()?.name}"
 
         val tableName = Table.routeProcess.tableName
@@ -862,9 +862,9 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
 
             when {
                 rpc.assetId != null && assetId > 0 -> {
-                    binding.codeTextView.setText(rpc.code, TextView.BufferType.EDITABLE)
+                    binding.codeTextView.setText(rpc.assetCode, TextView.BufferType.EDITABLE)
                     binding.descriptionTextView.setText(
-                        rpc.assetDescription, TextView.BufferType.EDITABLE
+                        rpc.assetStr, TextView.BufferType.EDITABLE
                     )
 
                     tempDcc = ArrayList(
@@ -879,7 +879,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
                         rpc.warehouseId.toString(), TextView.BufferType.EDITABLE
                     )
                     binding.descriptionTextView.setText(
-                        rpc.warehouseDescription, TextView.BufferType.EDITABLE
+                        rpc.warehouseStr, TextView.BufferType.EDITABLE
                     )
 
                     tempDcc = ArrayList(
@@ -894,7 +894,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
                         rpc.warehouseAreaId.toString(), TextView.BufferType.EDITABLE
                     )
                     binding.descriptionTextView.setText(
-                        rpc.warehouseAreaDescription, TextView.BufferType.EDITABLE
+                        rpc.warehouseAreaStr, TextView.BufferType.EDITABLE
                     )
 
                     tempDcc = ArrayList(
@@ -1127,7 +1127,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
                 ruleContent = ruleContent,
                 virtualId = virtualId,
                 anyResult = result,
-                valueString = valueStr
+                valueStr = valueStr
             )
 
             dcContArray.add(dcc)
@@ -1809,10 +1809,10 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         val tableId = imageControlFragment?.tableId ?: return
 
         val dcrDescription = dcr?.description ?: ""
-        val rpcAsset = rpc?.assetDescription ?: ""
-        val rpcWa = rpc?.warehouseAreaDescription ?: ""
-        val rpcW = rpc?.warehouseDescription
-        val rpcAssetCode = rpc?.code ?: ""
+        val rpcAsset = rpc?.assetStr ?: ""
+        val rpcWa = rpc?.warehouseAreaStr ?: ""
+        val rpcW = rpc?.warehouseStr
+        val rpcAssetCode = rpc?.assetCode ?: ""
 
         Log.d(this::class.java.simpleName, "Guardando imagen de Demostración...")
 

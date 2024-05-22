@@ -10,6 +10,20 @@ class DataCollectionRuleTarget(
     @ColumnInfo(name = Entry.WAREHOUSE_AREA_ID) val warehouseAreaId: Long?,
     @ColumnInfo(name = Entry.ITEM_CATEGORY_ID) val itemCategoryId: Long?
 ) {
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as DataCollectionRuleTarget
+
+        return id == other.id
+    }
+
+    override fun hashCode(): Int {
+        return id.hashCode()
+    }
+
     object Entry {
         const val TABLE_NAME = "data_collection_rule_target"
         const val ID = "_id"

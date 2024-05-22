@@ -19,7 +19,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.room.dto.route.Route
-import com.dacosys.assetControl.data.room.dto.route.Route.CREATOR.getAvailableRoutes
 import com.dacosys.assetControl.data.room.repository.route.RouteRepository
 import com.dacosys.assetControl.databinding.RouteSelectDialogActivityBinding
 import com.dacosys.assetControl.ui.adapters.route.RouteAdapter
@@ -247,7 +246,7 @@ class RouteSelectDialogActivity : AppCompatActivity(),
         val itemArray: ArrayList<Route> = ArrayList()
         try {
             Log.d(this::class.java.simpleName, "Selecting routes...")
-            itemArray.addAll(getAvailableRoutes(RouteRepository().select(true)))
+            itemArray.addAll(RouteRepository().select(true))
         } catch (ex: java.lang.Exception) {
             ex.printStackTrace()
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)

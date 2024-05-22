@@ -213,8 +213,6 @@ class WarehouseAreaAdapter : ArrayAdapter<WarehouseArea>, Filterable {
 
         lastSelectedPos = currentPos()
 
-        refresh()
-
         activity.runOnUiThread {
             if (smoothScroll) {
                 listView?.smoothScrollToPosition(scrollPos)
@@ -299,10 +297,9 @@ class WarehouseAreaAdapter : ArrayAdapter<WarehouseArea>, Filterable {
     }
 
     fun firstVisiblePos(): Int {
-        var pos = (listView ?: return -1).firstVisiblePosition
-        if ((listView ?: return -1).childCount > 1 && (listView
-                ?: return -1).getChildAt(0).top < 0
-        ) pos++
+        val lv = listView ?: return -1
+        var pos = lv.firstVisiblePosition
+        if (lv.childCount > 1 && lv.getChildAt(0).top < 0) pos++
         return pos
     }
 
@@ -408,7 +405,9 @@ class WarehouseAreaAdapter : ArrayAdapter<WarehouseArea>, Filterable {
                 }
 
                 l.setOnItemClickListener { _, _, position, _ ->
-                    selectItem(position)
+                    val fv = firstVisiblePos()
+                    val scroll = if (position < fv) position else fv
+                    selectItem(position, scroll, false)
                 }
             }
         }

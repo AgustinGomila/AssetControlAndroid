@@ -103,14 +103,14 @@ class RpcRecyclerAdapter(
             if (oldItem.dataCollectionId != newItem.dataCollectionId) return false
             if (oldItem.id != newItem.id) return false
             if (oldItem.assetId != newItem.assetId) return false
-            if (oldItem.assetDescription != newItem.assetDescription) return false
-            if (oldItem.code != newItem.code) return false
+            if (oldItem.assetStr != newItem.assetStr) return false
+            if (oldItem.assetCode != newItem.assetCode) return false
             if (oldItem.warehouseId != newItem.warehouseId) return false
-            if (oldItem.warehouseDescription != newItem.warehouseDescription) return false
+            if (oldItem.warehouseStr != newItem.warehouseStr) return false
             if (oldItem.warehouseAreaId != newItem.warehouseAreaId) return false
-            if (oldItem.warehouseAreaDescription != newItem.warehouseAreaDescription) return false
+            if (oldItem.warehouseAreaStr != newItem.warehouseAreaStr) return false
             if (oldItem.routeId != newItem.routeId) return false
-            if (oldItem.routeDescription != newItem.routeDescription) return false
+            if (oldItem.routeStr != newItem.routeStr) return false
             return true
         }
     }
@@ -427,11 +427,11 @@ class RpcRecyclerAdapter(
             }
 
             fun isFilterable(content: RouteProcessContent, filterString: String): Boolean =
-                content.assetDescription.contains(filterString, true) ||
-                        content.code.contains(filterString, true) ||
-                        content.routeDescription.contains(filterString, true) ||
-                        content.warehouseDescription.contains(filterString, true) ||
-                        content.warehouseAreaDescription.contains(filterString, true)
+                content.assetStr.contains(filterString, true) ||
+                        content.assetCode.contains(filterString, true) ||
+                        content.routeStr.contains(filterString, true) ||
+                        content.warehouseStr.contains(filterString, true) ||
+                        content.warehouseAreaStr.contains(filterString, true)
 
             @Suppress("UNCHECKED_CAST")
             override fun publishResults(
@@ -658,7 +658,7 @@ class RpcRecyclerAdapter(
 
     @Suppress("MemberVisibilityCanBePrivate", "unused")
     fun getContentByCode(code: String): RouteProcessContent? {
-        return currentList.firstOrNull { it.code == code }
+        return currentList.firstOrNull { it.assetCode == code }
     }
 
     fun getAllChecked(): ArrayList<RouteProcessContent> {
@@ -850,13 +850,13 @@ class RpcRecyclerAdapter(
             bindStatusChange(content = content)
 
             binding.routeProcessStatusStr.text = content.routeProcessStatusStr
-            binding.assetStr.text = content.assetDescription
-            binding.assetCode.text = content.code
-            binding.warehouseAreaStr.text = content.warehouseAreaDescription
-            binding.warehouseStr.text = content.warehouseDescription
+            binding.assetStr.text = content.assetStr
+            binding.assetCode.text = content.assetCode
+            binding.warehouseAreaStr.text = content.warehouseAreaStr
+            binding.warehouseStr.text = content.warehouseStr
 
-            if (content.warehouseAreaDescription.isEmpty() &&
-                content.warehouseDescription.isEmpty()
+            if (content.warehouseAreaStr.isEmpty() &&
+                content.warehouseStr.isEmpty()
             ) {
                 binding.warehouseAreaStr.visibility = GONE
                 binding.warehouseStr.visibility = GONE
@@ -932,13 +932,13 @@ class RpcRecyclerAdapter(
             bindStatusChange(content = content)
 
             binding.routeProcessStatusStr.text = content.routeProcessStatusStr
-            binding.assetStr.text = content.assetDescription
-            binding.assetCode.text = content.code
-            binding.warehouseAreaStr.text = content.warehouseAreaDescription
-            binding.warehouseStr.text = content.warehouseDescription
+            binding.assetStr.text = content.assetStr
+            binding.assetCode.text = content.assetCode
+            binding.warehouseAreaStr.text = content.warehouseAreaStr
+            binding.warehouseStr.text = content.warehouseStr
 
-            if (content.warehouseAreaDescription.isEmpty() &&
-                content.warehouseDescription.isEmpty()
+            if (content.warehouseAreaStr.isEmpty() &&
+                content.warehouseStr.isEmpty()
             ) {
                 binding.warehouseAreaStr.visibility = GONE
                 binding.warehouseStr.visibility = GONE

@@ -31,14 +31,14 @@ class GetRouteProcess(
 
     private suspend fun suspendFunction(): RouteProcessResult = withContext(Dispatchers.IO) {
         val routeProcess: RouteProcess?
+
         val contentRepository = DataCollectionRuleContentRepository()
         val compositionRepository = AttributeCompositionRepository()
+        val processRepository = RouteProcessRepository()
 
         ///////////////////////////////////
         // Para controlar la transacción //
         // TODO: Eliminar val db = DataBaseHelper.getWritableDb()
-
-        val processRepository = RouteProcessRepository()
 
         try {
             // TODO: Eliminar db.beginTransaction()
@@ -67,31 +67,37 @@ class GetRouteProcess(
                 )
             }
 
-            val rpArray = processRepository.selectByRouteIdNoCompleted(route.id)
+            val uncompletedProcess = processRepository.selectByRouteIdNoCompleted(route.id)
 
-            // Si no hay procesos abiertos para esa ruta, abro uno nuevo
-            // Si no utilizo el existente
-            if (rpArray.isEmpty()) {
-                // NUEVO PROCESO DE RUTA
-                val rpCollId = processRepository.insert(route)
-                routeProcess = processRepository.selectById(rpCollId)
+            // Si no hay procesos abiertos para esa ruta, creamos uno nuevo.
+            // Si no, continuamos el proceso existente.
+
+            if (uncompletedProcess.isEmpty()) {
+
+                // Iniciar NUEVO PROCESO DE RUTA
+
+                val routeProcessId = processRepository.insert(route)
+                routeProcess = processRepository.selectById(routeProcessId)
 
                 // TODO: Eliminar db.setTransactionSuccessful()
 
                 return@withContext RouteProcessResult(
                     routeProcess = routeProcess,
-                    newProcess = true)
+                    newProcess = true
+                )
             } else {
+
                 // Comprobar que la composición de la ruta del proceso abierto
                 // coincida con la composición de la ruta en la base de datos,
                 // ya que si se actualizó la ruta, el proceso es inválido
-                routeProcess = rpArray[0]
-                val rpcArray = routeProcess.contents()
-                val rcArray = route.composition()
+
+                routeProcess = uncompletedProcess[0]
+                val processContents = routeProcess.contents()
+                val routeComposition = route.composition()
 
                 // TODO: Eliminar db.setTransactionSuccessful()
 
-                if (rcArray.size <= 0) {
+                if (routeComposition.size <= 0) {
 
                     // RUTA está vacía
                     return@withContext RouteProcessResult(
@@ -105,16 +111,20 @@ class GetRouteProcess(
                 }
 
                 var error = false
-                for (rpc in rpcArray) {
-                    if (!rcArray.any { it.level == rpc.level && it.position == rpc.position }) {
+                for (rpc in processContents) {
+                    if (!routeComposition.any {
+                            it.level == rpc.level && it.position == rpc.position
+                        }) {
                         error = true
                         break
                     }
                 }
 
                 if (!error) {
-                    for (rc in rcArray) {
-                        if (!rpcArray.any { it.level == rc.level && it.position == rc.position }) {
+                    for (rc in routeComposition) {
+                        if (!processContents.any {
+                                it.level == rc.level && it.position == rc.position
+                            }) {
                             error = true
                             break
                         }

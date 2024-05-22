@@ -74,8 +74,6 @@ class RouteProcessContentRepository {
             return rpContArray
     }
 
-    val minId get() = runBlocking { dao.selectMinId() ?: -1 }
-
 
     fun insert(content: List<RouteProcessContent>): List<Long> {
         val r = runBlocking {

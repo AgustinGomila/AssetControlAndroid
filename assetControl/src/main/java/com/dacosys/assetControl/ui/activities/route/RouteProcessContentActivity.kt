@@ -1788,7 +1788,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             if (adapter != null && allItems.any()) {
                 // Buscar primero en el adaptador de la lista
                 (0 until adapter!!.itemCount).map { adapter!!.getContentByIndex(it) }.filter {
-                    it != null && (sc.asset != null && it.code == tempCode || sc.warehouseArea != null && it.warehouseAreaId != null && it.warehouseAreaId.toString() == tempCode)
+                    it != null && (sc.asset != null && it.assetCode == tempCode || sc.warehouseArea != null && it.warehouseAreaId != null && it.warehouseAreaId.toString() == tempCode)
                 }.forEach {
                     // Process the ROW
                     rpc = if ((it

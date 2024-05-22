@@ -19,7 +19,9 @@ class AssetReviewContentRepository {
 
     fun selectByAssetReviewId(id: Long) = runBlocking { dao.selectByAssetReviewId(id) }
 
-    val minId get() = runBlocking { dao.selectMinId() ?: -1 }
+    val maxId get() = runBlocking { dao.selectMaxId() ?: -1 }
+
+    val nextId = maxId + 1
 
 
     fun insert(review: AssetReview, contents: List<AssetReviewContent>, progress: (SaveProgress) -> Unit) =

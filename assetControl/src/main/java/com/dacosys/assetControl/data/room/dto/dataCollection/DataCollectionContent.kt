@@ -3,6 +3,7 @@ package com.dacosys.assetControl.data.room.dto.dataCollection
 import android.os.Parcel
 import android.os.Parcelable
 import androidx.room.ColumnInfo
+import androidx.room.Ignore
 import com.dacosys.assetControl.utils.Statics.Companion.toDate
 import java.util.*
 
@@ -14,13 +15,16 @@ class DataCollectionContent(
     @ColumnInfo(name = Entry.ATTRIBUTE_ID) var attributeId: Long? = null,
     @ColumnInfo(name = Entry.ATTRIBUTE_COMPOSITION_ID) var attributeCompositionId: Long? = null,
     @ColumnInfo(name = Entry.RESULT) var result: Int? = null,
-    @ColumnInfo(name = Entry.VALUE_STR) var valueStr: String = "",
+    @ColumnInfo(name = Entry.VALUE_STR) var valueString: String? = null,
     @ColumnInfo(name = Entry.DATA_COLLECTION_DATE) var dataCollectionDate: Date = Date(),
     @ColumnInfo(name = Entry.ID) var id: Long = 0L,
     @ColumnInfo(name = Entry.DATA_COLLECTION_RULE_CONTENT_ID) var dataCollectionRuleContentId: Long = 0L,
-    @ColumnInfo(name = Entry.DATA_COLLECTION_RULE_CONTENT_STR) var dataCollectionRuleContentStr: String = "",
+    @ColumnInfo(name = Entry.DATA_COLLECTION_RULE_CONTENT_STR) var dataCollectionRuleContentStr: String? = null,
     @ColumnInfo(name = Entry.ATTRIBUTE_COMPOSITION_STR) var attributeCompositionStr: String = ""
 ) : Parcelable {
+
+    @Ignore
+    val valueStr = valueString.orEmpty()
 
     constructor(parcel: Parcel) : this(
         dataCollectionContentId = parcel.readLong(),
@@ -30,7 +34,7 @@ class DataCollectionContent(
         attributeId = parcel.readValue(Long::class.java.classLoader) as? Long,
         attributeCompositionId = parcel.readValue(Long::class.java.classLoader) as? Long,
         result = parcel.readValue(Int::class.java.classLoader) as? Int,
-        valueStr = parcel.readString().orEmpty(),
+        valueString = parcel.readString().orEmpty(),
         dataCollectionDate = parcel.readString().orEmpty().toDate(),
         id = parcel.readLong(),
         dataCollectionRuleContentId = parcel.readLong(),
@@ -42,7 +46,7 @@ class DataCollectionContent(
         ruleContent: DataCollectionRuleContent,
         virtualId: Long,
         anyResult: Any?,
-        valueString: String,
+        valueStr: String,
     ) : this() {
         if (ruleContent.attributeCompositionId > 0) {
             attributeCompositionId = ruleContent.attributeCompositionId
@@ -65,7 +69,7 @@ class DataCollectionContent(
                 result = if (anyResult) 1 else 0
             }
         }
-        valueStr = valueString
+        valueString = valueStr
     }
 
     object Entry {
@@ -104,6 +108,19 @@ class DataCollectionContent(
 
     override fun describeContents(): Int {
         return 0
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as DataCollectionContent
+
+        return id == other.id
+    }
+
+    override fun hashCode(): Int {
+        return id.hashCode()
     }
 
     companion object CREATOR : Parcelable.Creator<DataCollectionContent> {

@@ -1,7 +1,6 @@
 package com.dacosys.assetControl.data.room.dto.barcode
 
 import androidx.room.ColumnInfo
-import com.dacosys.assetControl.data.enums.barcode.BarcodeLabelTarget
 
 data class BarcodeLabelTarget(
     @ColumnInfo(name = Entry.ID) val id: Int = 0,
@@ -9,6 +8,19 @@ data class BarcodeLabelTarget(
 ) {
     override fun toString(): String {
         return description
+    }
+
+    override fun hashCode(): Int {
+        return id
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as BarcodeLabelTarget
+
+        return id == other.id
     }
 
     constructor(target: BarcodeLabelTarget) : this(

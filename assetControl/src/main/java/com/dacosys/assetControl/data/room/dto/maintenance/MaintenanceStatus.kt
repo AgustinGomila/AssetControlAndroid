@@ -1,7 +1,6 @@
 package com.dacosys.assetControl.data.room.dto.maintenance
 
 import androidx.room.ColumnInfo
-import com.dacosys.assetControl.data.enums.maintenance.MaintenanceStatus
 
 class MaintenanceStatus(
     @ColumnInfo(name = Entry.ID) val id: Int = 0,
@@ -10,6 +9,19 @@ class MaintenanceStatus(
 
     override fun toString(): String {
         return description
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as MaintenanceStatus
+
+        return id == other.id
+    }
+
+    override fun hashCode(): Int {
+        return id
     }
 
     object Entry {

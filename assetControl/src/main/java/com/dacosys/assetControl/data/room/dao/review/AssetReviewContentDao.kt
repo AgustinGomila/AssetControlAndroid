@@ -16,8 +16,8 @@ interface AssetReviewContentDao {
     @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN $BASIC_ORDER")
     suspend fun select(): List<AssetReviewContent>
 
-    @Query("SELECT MIN(${Entry.ID}) $BASIC_FROM")
-    suspend fun selectMinId(): Long?
+    @Query("SELECT MAX(${Entry.ID}) $BASIC_FROM")
+    suspend fun selectMaxId(): Long?
 
     @Query(
         "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
@@ -76,17 +76,17 @@ interface AssetReviewContentDao {
                 "${Entry.TABLE_NAME}.${Entry.DESCRIPTION}, " +
                 "${Entry.TABLE_NAME}.${Entry.CODE}"
 
-        private val arEntry = AssetReview.Entry
         private val aEntry = Asset.Entry
+        private val arEntry = AssetReview.Entry
+        private val icEntry = ItemCategory.Entry
         private val wEntry = Warehouse.Entry
         private val waEntry = WarehouseArea.Entry
-        private val icEntry = ItemCategory.Entry
 
         const val BASIC_LEFT_JOIN =
-            "LEFT JOIN ${aEntry.TABLE_NAME} ON ${aEntry.TABLE_NAME}.${aEntry.ID} = ${Entry.TABLE_NAME}.${Entry.ASSET_ID} " +
-                    "LEFT JOIN ${waEntry.TABLE_NAME} ON ${waEntry.TABLE_NAME}.${waEntry.ID} = ${Entry.TABLE_NAME}.${Entry.ORIGIN_WAREHOUSE_AREA_ID} " +
-                    "LEFT JOIN ${wEntry.TABLE_NAME} ON ${wEntry.TABLE_NAME}.${wEntry.ID} = ${waEntry.TABLE_NAME}.${waEntry.WAREHOUSE_ID} " +
-                    "LEFT JOIN ${icEntry.TABLE_NAME} ON ${icEntry.TABLE_NAME}.${icEntry.ID} = ${aEntry.TABLE_NAME}.${aEntry.ITEM_CATEGORY_ID}"
+            "LEFT JOIN ${aEntry.TABLE_NAME} ON ${Entry.TABLE_NAME}.${Entry.ASSET_ID} = ${aEntry.TABLE_NAME}.${aEntry.ID} " +
+                    "LEFT JOIN ${waEntry.TABLE_NAME} ON ${Entry.TABLE_NAME}.${Entry.ORIGIN_WAREHOUSE_AREA_ID} = ${waEntry.TABLE_NAME}.${waEntry.ID} " +
+                    "LEFT JOIN ${wEntry.TABLE_NAME} ON ${waEntry.TABLE_NAME}.${waEntry.WAREHOUSE_ID} = ${wEntry.TABLE_NAME}.${wEntry.ID} " +
+                    "LEFT JOIN ${icEntry.TABLE_NAME} ON ${aEntry.TABLE_NAME}.${aEntry.ITEM_CATEGORY_ID} = ${icEntry.TABLE_NAME}.${icEntry.ID}"
 
         const val BASIC_JOIN_FIELDS = "${aEntry.TABLE_NAME}.${aEntry.DESCRIPTION} AS ${Entry.DESCRIPTION}," +
                 "${aEntry.TABLE_NAME}.${aEntry.CODE} AS ${Entry.CODE}," +

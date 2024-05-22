@@ -54,6 +54,19 @@ class BarcodeLabelCustom(
         return 0
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as BarcodeLabelCustom
+
+        return id == other.id
+    }
+
+    override fun hashCode(): Int {
+        return id.hashCode()
+    }
+
     companion object CREATOR : Parcelable.Creator<BarcodeLabelCustom> {
         override fun createFromParcel(parcel: Parcel): BarcodeLabelCustom {
             return BarcodeLabelCustom(parcel)

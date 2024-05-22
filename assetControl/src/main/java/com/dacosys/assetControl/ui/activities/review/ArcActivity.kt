@@ -56,6 +56,7 @@ import com.dacosys.assetControl.data.room.dto.review.AssetReview
 import com.dacosys.assetControl.data.room.dto.review.AssetReviewContent
 import com.dacosys.assetControl.data.room.repository.asset.AssetRepository
 import com.dacosys.assetControl.data.room.repository.location.WarehouseAreaRepository
+import com.dacosys.assetControl.data.room.repository.review.AssetReviewContentRepository
 import com.dacosys.assetControl.data.room.repository.review.TempReviewContentRepository
 import com.dacosys.assetControl.databinding.AssetReviewContentBottomPanelCollapsedBinding
 import com.dacosys.assetControl.databinding.ProgressBarDialogBinding
@@ -280,7 +281,6 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
     private val allowQuickReview: Boolean by lazy { prefsGetBoolean(Preference.quickReviews) }
 
     private var unknownAssetId: Long = 0
-    private var collectorContentId: Long = 0
 
     private var allowClicks = true
     private var rejectNewInstances = false
@@ -1271,7 +1271,6 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
             val startReview = StartReview()
             startReview.addParams(assetReview = ar,
                 isNew = isNew,
-                lastCollectorId = collectorContentId,
                 onProgress = { onStartReviewProgress(it) },
                 onSaveProgress = { onSaveProgress(it) })
             startReview.execute()
@@ -1367,8 +1366,6 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
             return
         }
 
-        val finalArc: AssetReviewContent?
-
         try {
             val sc = ScannedCode(this).getFromCode(
                 code = scannedCode,
@@ -1456,7 +1453,6 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
             }
 
             val allowUnknownCodes = binding.allowUnknownCodesSwitch.isChecked
-            val addUnknownAssets = binding.addUnknownAssetsSwitch.isChecked
 
             if (sc.asset == null && !allowUnknownCodes) {
                 val res = "$scannedCode: ${getString(R.string.unknown_code)}"
@@ -1465,104 +1461,122 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
                 return
             }
 
+            val tempReview = assetReview ?: return
+
             // Agregar códigos desconocidos si está activado el CheckBox
-            // Y
+            // AND
             //    El código no se encuentra en la base de datos
-            //    O
+            //    OR
             //    El activo existe pero está desactivado
             if (allowUnknownCodes && (!sc.codeFound || sc.asset != null && sc.asset?.active != 1)) {
-                val tempReview = assetReview ?: return
-
                 /////////////////////////////////////////////////////////
                 // STATUS 3 = Add an asset does not exist in the database
-                unknownAssetId--
-
-                if (tempCode.length >= 45) {
-                    tempCode = tempCode.substring(0, 45)
-                }
-
-                collectorContentId--
-
-                finalArc = AssetReviewContent(
-                    assetReviewId = tempReview.id,
-                    id = collectorContentId,
-                    assetId = unknownAssetId,
-                    code = tempCode.uppercase(Locale.ROOT),
-                    description = getString(R.string.NO_DATA),
-                    qty = 1.0,
-                    contentStatusId = AssetReviewContentStatus.unknown.id,
-                    originWarehouseAreaId = 0L
+                addUnknownAsset(
+                    reviewId = tempReview.id,
+                    tempCode = tempCode
                 )
-
-                runOnUiThread {
-                    if (adapter == null) {
-                        completeList = arrayListOf(finalArc)
-                        fillAdapter(completeList)
-                    } else {
-                        adapter?.add(finalArc)
-                    }
-                }
-
-                try {
-                    if (!Statics.DEMO_MODE && addUnknownAssets) {
-                        // Dar de alta el activo
-                        assetCrud(finalArc)
-                        return
-                    }
-
-                    // Pedir una descripción y agregar como desconocido
-                    if (Statics.DEMO_MODE) {
-                        finalArc.description = getString(R.string.test_asset)
-                    } else {
-                        runOnUiThread { itemDescriptionDialog(finalArc) }
-                    }
-                } catch (ex: Exception) {
-                    ex.printStackTrace()
-                    ErrorLog.writeLog(this, this::class.java.simpleName, ex)
-                }
                 return
             }
 
             val tempAsset = sc.asset
             if (tempAsset != null) {
-                val tempReview = assetReview ?: return
+                val reviewAreaId = tempReview.warehouseAreaId
 
                 /////////////////////////////////////////////////////////
                 // STATUS 2 = Add an asset belonging to another warehouse
-                var contentStatusId: Int = AssetReviewContentStatus.external.id
-                if (tempAsset.warehouseAreaId == (assetReview
-                        ?: return).warehouseAreaId
-                ) {
-                    ////////////////////////////////////////////////////////////////
-                    // STATUS 4 = Add lost assets belonging to the current warehouse
-                    contentStatusId = AssetReviewContentStatus.appeared.id
-                }
-
-                collectorContentId--
-
-                finalArc = AssetReviewContent(
-                    assetReviewId = tempReview.id,
-                    id = collectorContentId,
-                    asset = tempAsset,
-                    qty = 1.0,
-                    contentStatusId = contentStatusId,
-                    originWarehouseAreaId = tempAsset.warehouseAreaId
+                addExternalAsset(
+                    reviewId = tempReview.id,
+                    warehouseAreaId = reviewAreaId,
+                    tempAsset = tempAsset
                 )
-
-                runOnUiThread {
-                    if (adapter == null) {
-                        completeList = arrayListOf(finalArc)
-                        fillAdapter(completeList)
-                    } else {
-                        adapter?.add(finalArc)
-                    }
-                }
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
             makeText(binding.root, ex.message.toString(), ERROR)
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
             return
+        }
+    }
+
+    private fun addExternalAsset(reviewId: Long, warehouseAreaId: Long, tempAsset: Asset) {
+        var contentStatusId: Int = AssetReviewContentStatus.external.id
+        if (tempAsset.warehouseAreaId == warehouseAreaId) {
+
+            ////////////////////////////////////////////////////////////////
+            // STATUS 4 = Add lost assets belonging to the current warehouse
+            contentStatusId = AssetReviewContentStatus.appeared.id
+        }
+
+        val nextId = AssetReviewContentRepository().nextId
+
+        val content = AssetReviewContent(
+            assetReviewId = reviewId,
+            id = nextId,
+            asset = tempAsset,
+            qty = 1.0,
+            contentStatusId = contentStatusId,
+            originWarehouseAreaId = tempAsset.warehouseAreaId
+        )
+
+        runOnUiThread {
+            if (adapter == null) {
+                completeList = arrayListOf(content)
+                fillAdapter(completeList)
+            } else {
+                adapter?.add(content)
+            }
+        }
+    }
+
+    private fun addUnknownAsset(reviewId: Long, tempCode: String) {
+        var code = tempCode
+
+        unknownAssetId--
+
+        if (code.length >= 45) {
+            code = code.substring(0, 45)
+        }
+
+        val nextId = AssetReviewContentRepository().nextId
+
+        val content = AssetReviewContent(
+            assetReviewId = reviewId,
+            id = nextId,
+            assetId = unknownAssetId,
+            code = code.uppercase(Locale.ROOT),
+            description = getString(R.string.NO_DATA),
+            qty = 1.0,
+            contentStatusId = AssetReviewContentStatus.unknown.id,
+            originWarehouseAreaId = 0L
+        )
+
+        runOnUiThread {
+            if (adapter == null) {
+                completeList = arrayListOf(content)
+                fillAdapter(completeList)
+            } else {
+                adapter?.add(content)
+            }
+        }
+
+        try {
+            val addUnknownAssets = binding.addUnknownAssetsSwitch.isChecked
+
+            if (!Statics.DEMO_MODE && addUnknownAssets) {
+                // Dar de alta el activo
+                assetCrud(content)
+                return
+            }
+
+            // Pedir una descripción y agregar como desconocido
+            if (Statics.DEMO_MODE) {
+                content.description = getString(R.string.test_asset)
+            } else {
+                runOnUiThread { itemDescriptionDialog(content) }
+            }
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+            ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         }
     }
 

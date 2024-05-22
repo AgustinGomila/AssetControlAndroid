@@ -18,8 +18,21 @@ class RouteProcess(
     @ColumnInfo(name = Entry.COMPLETED) var mCompleted: Int = 0,
     @ColumnInfo(name = Entry.TRANSFERRED) var transferred: Int? = null,
     @ColumnInfo(name = Entry.TRANSFERRED_DATE) var transferredDate: Date? = null,
-    @ColumnInfo(name = Entry.ROUTE_STR) var routeStr: String = "",
+    @ColumnInfo(name = Entry.ROUTE_STR) var routeStr: String? = null,
 ) : Parcelable {
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as RouteProcess
+
+        return id == other.id
+    }
+
+    override fun hashCode(): Int {
+        return id.hashCode()
+    }
 
     fun saveChanges() = RouteProcessRepository().update(this)
 

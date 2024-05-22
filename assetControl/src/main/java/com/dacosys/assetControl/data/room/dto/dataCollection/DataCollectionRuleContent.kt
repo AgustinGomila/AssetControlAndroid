@@ -16,12 +16,25 @@ class DataCollectionRuleContent(
     @ColumnInfo(name = Entry.DESCRIPTION) var description: String = "",
     @ColumnInfo(name = Entry.ACTIVE) var mActive: Int = 0,
     @ColumnInfo(name = Entry.MANDATORY) var mMandatory: Int = 0,
-    @ColumnInfo(name = Entry.ATTRIBUTE_STR) var attributeStr: String = "",
+    @ColumnInfo(name = Entry.ATTRIBUTE_STR) var attributeStr: String? = null,
     @ColumnInfo(name = Entry.ATTRIBUTE_COMPOSITION_STR) var attributeCompositionStr: String? = null
 ) {
 
     override fun toString(): String {
         return description
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as DataCollectionRuleContent
+
+        return id == other.id
+    }
+
+    override fun hashCode(): Int {
+        return id.hashCode()
     }
 
     @Ignore

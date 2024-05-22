@@ -21,7 +21,6 @@ import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.room.dto.route.Route
-import com.dacosys.assetControl.data.room.dto.route.Route.CREATOR.getAvailableRoutes
 import com.dacosys.assetControl.data.room.dto.route.RouteProcess
 import com.dacosys.assetControl.data.room.repository.route.RouteProcessContentRepository
 import com.dacosys.assetControl.data.room.repository.route.RouteProcessRepository
@@ -164,10 +163,13 @@ class RouteSelectActivity : AppCompatActivity(),
         binding.okButton.setOnClickListener { routeSelect() }
         binding.cancelRouteProcessButton.setOnClickListener { cancelRouteProcess() }
 
-        // Llenar la grilla
+        // Configuración de los paneles colapsables
         setPanels()
 
         setupUI(binding.root, this)
+
+        // Llenar la grilla
+        fillListView()
     }
 
     private fun setPanels() {
@@ -270,18 +272,18 @@ class RouteSelectActivity : AppCompatActivity(),
     }
 
     private fun routeSelect() {
-        if (adapter != null) {
-            val currentRoute = adapter?.currentRoute() ?: return
+        if (adapter == null) return
 
-            if (!rejectNewInstances) {
-                rejectNewInstances = true
+        val currentRoute = adapter?.currentRoute() ?: return
 
-                val intent =
-                    Intent(baseContext, RouteProcessContentActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-                intent.putExtra("route", Parcels.wrap(currentRoute))
-                resultForRpSuccess.launch(intent)
-            }
+        if (!rejectNewInstances) {
+            rejectNewInstances = true
+
+            val intent =
+                Intent(baseContext, RouteProcessContentActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+            intent.putExtra("route", Parcels.wrap(currentRoute))
+            resultForRpSuccess.launch(intent)
         }
     }
 
@@ -294,46 +296,45 @@ class RouteSelectActivity : AppCompatActivity(),
                     makeText(binding.root, msg, SnackBarType.ERROR)
                 }
             }
-            fillListView()
         }
 
     private fun cancelRouteProcess() {
-        if (adapter != null) {
-            val currentRoute = adapter?.currentRoute() ?: return
+        if (adapter == null) return
 
-            val rpArray = processRepository.selectByRouteIdNoCompleted(currentRoute.id)
+        val currentRoute = adapter?.currentRoute() ?: return
 
-            if (rpArray.isEmpty()) {
-                makeText(
-                    binding.root,
-                    getString(R.string.no_processes_started),
-                    SnackBarType.INFO
-                )
-                return
-            }
+        val rpArray = processRepository.selectByRouteIdNoCompleted(currentRoute.id)
 
-            if (Statics.DEMO_MODE) {
-                removeRouteProcess(rpArray[0])
-                fillListView()
-            } else {
-                val tempRouteProcess = rpArray[0]
-                runOnUiThread {
-                    val alert = AlertDialog.Builder(this)
-                    alert.setTitle(getString(R.string.remove_started_processes))
-                    alert.setMessage(getString(R.string.are_you_sure_to_cancel_the_process_started_on_this_route_question))
-                    alert.setNegativeButton(
-                        R.string.no
-                    ) { _, _ ->
-                        return@setNegativeButton
-                    }
-                    alert.setPositiveButton(
-                        R.string.yes
-                    ) { _, _ ->
-                        removeRouteProcess(tempRouteProcess)
-                        fillListView()
-                    }
-                    alert.show()
+        if (rpArray.isEmpty()) {
+            makeText(
+                binding.root,
+                getString(R.string.no_processes_started),
+                SnackBarType.INFO
+            )
+            return
+        }
+
+        if (Statics.DEMO_MODE) {
+            removeRouteProcess(rpArray[0])
+            fillListView()
+        } else {
+            val tempRouteProcess = rpArray[0]
+            runOnUiThread {
+                val alert = AlertDialog.Builder(this)
+                alert.setTitle(getString(R.string.remove_started_processes))
+                alert.setMessage(getString(R.string.are_you_sure_to_cancel_the_process_started_on_this_route_question))
+                alert.setNegativeButton(
+                    R.string.no
+                ) { _, _ ->
+                    return@setNegativeButton
                 }
+                alert.setPositiveButton(
+                    R.string.yes
+                ) { _, _ ->
+                    removeRouteProcess(tempRouteProcess)
+                    fillListView()
+                }
+                alert.show()
             }
         }
     }
@@ -390,11 +391,8 @@ class RouteSelectActivity : AppCompatActivity(),
             val r = routeSelectFilterFragment?.routeDescription ?: ""
             val onlyActive = routeSelectFilterFragment?.onlyActive ?: true
 
-            result.addAll(
-                getAvailableRoutes(
-                    RouteRepository().selectByDescription(r, onlyActive)
-                )
-            )
+            result.addAll(RouteRepository().selectByDescription(r, onlyActive))
+
             return result
         }
 

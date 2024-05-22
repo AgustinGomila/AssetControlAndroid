@@ -20,11 +20,20 @@ class DataCollection(
     @ColumnInfo(name = Entry.TRANSFERRED_DATE) var transferredDate: Date? = null,
     @ColumnInfo(name = Entry.ID) var id: Long = 0L,
     @ColumnInfo(name = Entry.COLLECTOR_ROUTE_PROCESS_ID) var collectorRouteProcessId: Long = 0L,
-    @ColumnInfo(name = Entry.ASSET_STR) var assetStr: String = "",
+    @ColumnInfo(name = Entry.ASSET_STR) var assetDescription: String? = null,
     @ColumnInfo(name = Entry.ASSET_CODE) var assetCode: String = "",
-    @ColumnInfo(name = Entry.WAREHOUSE_STR) var warehouseStr: String = "",
-    @ColumnInfo(name = Entry.WAREHOUSE_AREA_STR) var warehouseAreaStr: String = "",
+    @ColumnInfo(name = Entry.WAREHOUSE_STR) var warehouseDescription: String? = null,
+    @ColumnInfo(name = Entry.WAREHOUSE_AREA_STR) var warehouseAreaDescription: String? = null,
 ) : Parcelable {
+
+    @Ignore
+    val assetStr = assetDescription.orEmpty()
+
+    @Ignore
+    val warehouseStr = warehouseDescription.orEmpty()
+
+    @Ignore
+    val warehouseAreaStr = warehouseAreaDescription.orEmpty()
 
     @Ignore
     private var contentsRead: Boolean = false
@@ -53,10 +62,10 @@ class DataCollection(
         transferredDate = parcel.readString().orEmpty().toDate(),
         id = parcel.readLong(),
         collectorRouteProcessId = parcel.readLong(),
-        assetStr = parcel.readString().orEmpty(),
+        assetDescription = parcel.readString().orEmpty(),
         assetCode = parcel.readString().orEmpty(),
-        warehouseStr = parcel.readString().orEmpty(),
-        warehouseAreaStr = parcel.readString().orEmpty()
+        warehouseDescription = parcel.readString().orEmpty(),
+        warehouseAreaDescription = parcel.readString().orEmpty()
     )
 
     object Entry {
@@ -91,14 +100,27 @@ class DataCollection(
         parcel.writeString(transferredDate?.toString())
         parcel.writeLong(id)
         parcel.writeLong(collectorRouteProcessId)
-        parcel.writeString(assetStr)
+        parcel.writeString(assetDescription)
         parcel.writeString(assetCode)
-        parcel.writeString(warehouseStr)
-        parcel.writeString(warehouseAreaStr)
+        parcel.writeString(warehouseDescription)
+        parcel.writeString(warehouseAreaDescription)
     }
 
     override fun describeContents(): Int {
         return 0
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as DataCollection
+
+        return id == other.id
+    }
+
+    override fun hashCode(): Int {
+        return id.hashCode()
     }
 
     companion object CREATOR : Parcelable.Creator<DataCollection> {

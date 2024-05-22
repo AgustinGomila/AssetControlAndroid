@@ -16,32 +16,45 @@ data class RouteProcessContent(
     @ColumnInfo(name = Entry.ROUTE_PROCESS_STATUS_ID) var routeProcessStatusId: Int = 0,
     @ColumnInfo(name = Entry.DATA_COLLECTION_ID) var dataCollectionId: Long? = null,
     @ColumnInfo(name = Entry.ASSET_ID) var assetId: Long? = null,
-    @ColumnInfo(name = Entry.ASSET_STR) var assetStr: String? = null,
-    @ColumnInfo(name = Entry.ASSET_CODE) var assetCode: String? = null,
+    @ColumnInfo(name = Entry.ASSET_STR) var assetDescription: String? = null,
+    @ColumnInfo(name = Entry.ASSET_CODE) var code: String? = null,
     @ColumnInfo(name = Entry.ROUTE_ID) var routeId: Long? = null,
-    @ColumnInfo(name = Entry.ROUTE_STR) var routeStr: String? = null,
+    @ColumnInfo(name = Entry.ROUTE_STR) var routeDescription: String? = null,
     @ColumnInfo(name = Entry.WAREHOUSE_ID) var warehouseId: Long? = null,
-    @ColumnInfo(name = Entry.WAREHOUSE_STR) var warehouseStr: String? = null,
+    @ColumnInfo(name = Entry.WAREHOUSE_STR) var warehouseDescription: String? = null,
     @ColumnInfo(name = Entry.WAREHOUSE_AREA_ID) var warehouseAreaId: Long? = null,
-    @ColumnInfo(name = Entry.WAREHOUSE_AREA_STR) var warehouseAreaStr: String? = null
+    @ColumnInfo(name = Entry.WAREHOUSE_AREA_STR) var warehouseAreaDescription: String? = null
 ) : Parcelable {
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as RouteProcessContent
+
+        return id == other.id
+    }
+
+    override fun hashCode(): Int {
+        return id.hashCode()
+    }
 
     fun saveChanges() = RouteProcessContentRepository().update(this)
 
     @Ignore
-    val assetDescription: String = assetStr.orEmpty()
+    val assetStr: String = assetDescription.orEmpty()
 
     @Ignore
-    val code: String = assetCode.orEmpty()
+    val assetCode: String = code.orEmpty()
 
     @Ignore
-    val routeDescription: String = routeStr.orEmpty()
+    val routeStr: String = routeDescription.orEmpty()
 
     @Ignore
-    val warehouseDescription: String = warehouseStr.orEmpty()
+    val warehouseStr: String = warehouseDescription.orEmpty()
 
     @Ignore
-    val warehouseAreaDescription: String = warehouseAreaStr.orEmpty()
+    val warehouseAreaStr: String = warehouseAreaDescription.orEmpty()
 
     @Ignore
     val routeProcessStatusStr: String = RouteProcessStatus.getById(routeProcessStatusId).description
@@ -55,14 +68,14 @@ data class RouteProcessContent(
         routeProcessStatusId = parcel.readInt(),
         dataCollectionId = parcel.readValue(Long::class.java.classLoader) as? Long,
         assetId = parcel.readValue(Long::class.java.classLoader) as? Long,
-        assetStr = parcel.readString().orEmpty(),
-        assetCode = parcel.readString().orEmpty(),
+        assetDescription = parcel.readString().orEmpty(),
+        code = parcel.readString().orEmpty(),
         routeId = parcel.readValue(Long::class.java.classLoader) as? Long,
-        routeStr = parcel.readString().orEmpty(),
+        routeDescription = parcel.readString().orEmpty(),
         warehouseId = parcel.readValue(Long::class.java.classLoader) as? Long,
-        warehouseStr = parcel.readString().orEmpty(),
+        warehouseDescription = parcel.readString().orEmpty(),
         warehouseAreaId = parcel.readValue(Long::class.java.classLoader) as? Long,
-        warehouseAreaStr = parcel.readString().orEmpty()
+        warehouseAreaDescription = parcel.readString().orEmpty()
     )
 
     object Entry {
@@ -95,14 +108,14 @@ data class RouteProcessContent(
         parcel.writeInt(routeProcessStatusId)
         parcel.writeValue(dataCollectionId)
         parcel.writeValue(assetId)
-        parcel.writeString(assetStr)
-        parcel.writeString(assetCode)
+        parcel.writeString(assetDescription)
+        parcel.writeString(code)
         parcel.writeValue(routeId)
-        parcel.writeString(routeStr)
+        parcel.writeString(routeDescription)
         parcel.writeValue(warehouseId)
-        parcel.writeString(warehouseStr)
+        parcel.writeString(warehouseDescription)
         parcel.writeValue(warehouseAreaId)
-        parcel.writeString(warehouseAreaStr)
+        parcel.writeString(warehouseAreaDescription)
     }
 
     override fun describeContents(): Int {

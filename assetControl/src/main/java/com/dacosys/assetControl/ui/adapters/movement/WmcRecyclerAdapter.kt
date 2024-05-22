@@ -736,10 +736,10 @@ class WmcRecyclerAdapter(
         t.labelNumber = asset.labelNumber ?: 0
         t.parentId = asset.parentId ?: 0
         t.qty = 1.0
-        t.warehouseAreaStr = asset.warehouseAreaStr
-        t.warehouseStr = asset.warehouseStr
+        t.warehouseAreaDescription = asset.warehouseAreaStr
+        t.warehouseDescription = asset.warehouseStr
         t.itemCategoryId = asset.itemCategoryId
-        t.itemCategoryStr = asset.itemCategoryStr
+        t.itemCategoryDescription = asset.itemCategoryStr
         t.ownershipStatusId = asset.ownershipStatus
         t.manufacturer = asset.manufacturer ?: ""
         t.model = asset.model ?: ""

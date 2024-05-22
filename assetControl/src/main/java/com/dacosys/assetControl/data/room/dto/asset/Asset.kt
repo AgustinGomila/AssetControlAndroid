@@ -34,16 +34,31 @@ class Asset(
     @ColumnInfo(name = Entry.PARENT_ID) var parentId: Long? = null,
     @ColumnInfo(name = Entry.EAN) var ean: String? = null,
     @ColumnInfo(name = Entry.LAST_ASSET_REVIEW_DATE) var lastAssetReviewDate: String? = null,
-    @ColumnInfo(name = Entry.ITEM_CATEGORY_STR) var itemCategoryStr: String = "",
-    @ColumnInfo(name = Entry.WAREHOUSE_STR) var warehouseStr: String = "",
-    @ColumnInfo(name = Entry.WAREHOUSE_AREA_STR) var warehouseAreaStr: String = "",
-    @ColumnInfo(name = Entry.ORIGINAL_WAREHOUSE_STR) var originalWarehouseStr: String = "",
-    @ColumnInfo(name = Entry.ORIGINAL_WAREHOUSE_AREA_STR) var originalWarehouseAreaStr: String = "",
+    @ColumnInfo(name = Entry.ITEM_CATEGORY_STR) var itemCategoryDescription: String? = null,
+    @ColumnInfo(name = Entry.WAREHOUSE_STR) var warehouseDescription: String? = null,
+    @ColumnInfo(name = Entry.WAREHOUSE_AREA_STR) var warehouseAreaDescription: String? = null,
+    @ColumnInfo(name = Entry.ORIGINAL_WAREHOUSE_STR) var originalWarehouseDescription: String? = null,
+    @ColumnInfo(name = Entry.ORIGINAL_WAREHOUSE_AREA_STR) var originalWarehouseAreaDescription: String? = null,
 ) : Parcelable {
 
     override fun toString(): String {
         return code
     }
+
+    @Ignore
+    val itemCategoryStr = itemCategoryDescription.orEmpty()
+
+    @Ignore
+    val warehouseStr = warehouseDescription.orEmpty()
+
+    @Ignore
+    val warehouseAreaStr = warehouseAreaDescription.orEmpty()
+
+    @Ignore
+    val originalWarehouseStr = originalWarehouseDescription.orEmpty()
+
+    @Ignore
+    val originalWarehouseAreaStr = originalWarehouseAreaDescription.orEmpty()
 
     fun saveChanges() = AssetRepository().update(this)
 
@@ -85,11 +100,11 @@ class Asset(
         parentId = null,
         ean = null,
         lastAssetReviewDate = null,
-        itemCategoryStr = "",
-        warehouseStr = "",
-        warehouseAreaStr = "",
-        originalWarehouseStr = "",
-        originalWarehouseAreaStr = "",
+        itemCategoryDescription = "",
+        warehouseDescription = "",
+        warehouseAreaDescription = "",
+        originalWarehouseDescription = "",
+        originalWarehouseAreaDescription = "",
     )
 
     constructor(a: AssetObject) : this(
@@ -115,11 +130,11 @@ class Asset(
         parentId = a.parent_id,
         ean = a.ean,
         lastAssetReviewDate = a.last_asset_review_date,
-        itemCategoryStr = "",
-        warehouseStr = "",
-        warehouseAreaStr = "",
-        originalWarehouseStr = "",
-        originalWarehouseAreaStr = "",
+        itemCategoryDescription = "",
+        warehouseDescription = "",
+        warehouseAreaDescription = "",
+        originalWarehouseDescription = "",
+        originalWarehouseAreaDescription = "",
     )
 
     constructor(aco: AssetCollectorObject) : this(
@@ -145,11 +160,11 @@ class Asset(
         parentId = aco.parent_id,
         ean = aco.ean,
         lastAssetReviewDate = aco.last_asset_review_date,
-        itemCategoryStr = "",
-        warehouseStr = "",
-        warehouseAreaStr = "",
-        originalWarehouseStr = "",
-        originalWarehouseAreaStr = "",
+        itemCategoryDescription = "",
+        warehouseDescription = "",
+        warehouseAreaDescription = "",
+        originalWarehouseDescription = "",
+        originalWarehouseAreaDescription = "",
     )
 
     constructor(parcel: Parcel) : this(
@@ -175,11 +190,11 @@ class Asset(
         parentId = parcel.readValue(Long::class.java.classLoader) as? Long,
         ean = parcel.readString(),
         lastAssetReviewDate = parcel.readString(),
-        itemCategoryStr = parcel.readString().orEmpty(),
-        warehouseStr = parcel.readString().orEmpty(),
-        warehouseAreaStr = parcel.readString().orEmpty(),
-        originalWarehouseStr = parcel.readString().orEmpty(),
-        originalWarehouseAreaStr = parcel.readString().orEmpty()
+        itemCategoryDescription = parcel.readString().orEmpty(),
+        warehouseDescription = parcel.readString().orEmpty(),
+        warehouseAreaDescription = parcel.readString().orEmpty(),
+        originalWarehouseDescription = parcel.readString().orEmpty(),
+        originalWarehouseAreaDescription = parcel.readString().orEmpty()
     )
 
     object Entry {
@@ -237,11 +252,11 @@ class Asset(
         parcel.writeValue(parentId)
         parcel.writeString(ean)
         parcel.writeString(lastAssetReviewDate)
-        parcel.writeString(itemCategoryStr)
-        parcel.writeString(warehouseStr)
-        parcel.writeString(warehouseAreaStr)
-        parcel.writeString(originalWarehouseStr)
-        parcel.writeString(originalWarehouseAreaStr)
+        parcel.writeString(itemCategoryDescription)
+        parcel.writeString(warehouseDescription)
+        parcel.writeString(warehouseAreaDescription)
+        parcel.writeString(originalWarehouseDescription)
+        parcel.writeString(originalWarehouseAreaDescription)
     }
 
     override fun describeContents(): Int {

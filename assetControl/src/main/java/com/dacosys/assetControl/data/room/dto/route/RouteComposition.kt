@@ -15,6 +15,26 @@ class RouteComposition(
     @ColumnInfo(name = Entry.FALSE_RESULT) val falseResult: Int = 0
 ) {
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as RouteComposition
+
+        if (routeId != other.routeId) return false
+        if (level != other.level) return false
+        if (position != other.position) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = routeId.hashCode()
+        result = 31 * result + level
+        result = 31 * result + position
+        return result
+    }
+
     object Entry {
         const val TABLE_NAME = "route_composition"
         const val ROUTE_ID = "route_id"

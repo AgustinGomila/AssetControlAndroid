@@ -17,6 +17,19 @@ class AttributeComposition(
         return description.orEmpty()
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as AttributeComposition
+
+        return id == other.id
+    }
+
+    override fun hashCode(): Int {
+        return id.hashCode()
+    }
+
     object Entry {
         const val TABLE_NAME = "attribute_composition"
         const val ID = "_id"

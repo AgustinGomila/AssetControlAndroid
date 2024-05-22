@@ -21,9 +21,6 @@ interface DataCollectionRuleContentDao {
     )
     suspend fun selectActive(): List<DataCollectionRuleContent>
 
-    @Query("SELECT MIN(${Entry.ID}) $BASIC_FROM")
-    suspend fun selectMinId(): Long?
-
     @Query(
         "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
                 "WHERE ${Entry.TABLE_NAME}.${Entry.ID} = :id"

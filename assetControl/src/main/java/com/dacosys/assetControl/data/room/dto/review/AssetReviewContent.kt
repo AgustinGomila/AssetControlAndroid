@@ -3,6 +3,7 @@ package com.dacosys.assetControl.data.room.dto.review
 import android.os.Parcel
 import android.os.Parcelable
 import androidx.room.ColumnInfo
+import androidx.room.Ignore
 import com.dacosys.assetControl.data.room.dto.asset.Asset
 import com.dacosys.assetControl.data.room.entity.review.TempReviewContentEntity
 
@@ -20,16 +21,26 @@ class AssetReviewContent(
     @ColumnInfo(name = Entry.LABEL_NUMBER) var labelNumber: Int = 0,
     @ColumnInfo(name = Entry.PARENT_ID) var parentId: Long? = null,
     @ColumnInfo(name = Entry.WAREHOUSE_AREA_ID) var warehouseAreaId: Long = 0L,
-    @ColumnInfo(name = Entry.WAREHOUSE_AREA_STR) var warehouseAreaStr: String = "",
-    @ColumnInfo(name = Entry.WAREHOUSE_STR) var warehouseStr: String = "",
+    @ColumnInfo(name = Entry.WAREHOUSE_AREA_STR) var warehouseAreaDescription: String? = null,
+    @ColumnInfo(name = Entry.WAREHOUSE_STR) var warehouseDescription: String? = null,
     @ColumnInfo(name = Entry.ITEM_CATEGORY_ID) var itemCategoryId: Long = 0L,
-    @ColumnInfo(name = Entry.ITEM_CATEGORY_STR) var itemCategoryStr: String = "",
+    @ColumnInfo(name = Entry.ITEM_CATEGORY_STR) var itemCategoryDescription: String? = null,
     @ColumnInfo(name = Entry.OWNERSHIP_STATUS_ID) var ownershipStatusId: Int = 0,
     @ColumnInfo(name = Entry.MANUFACTURER) var manufacturer: String? = null,
     @ColumnInfo(name = Entry.MODEL) var model: String? = null,
     @ColumnInfo(name = Entry.SERIAL_NUMBER) var serialNumber: String? = null,
     @ColumnInfo(name = Entry.EAN) var ean: String? = null,
 ) : Parcelable {
+
+    @Ignore
+    val itemCategoryStr = itemCategoryDescription.orEmpty()
+
+    @Ignore
+    val warehouseStr = warehouseDescription.orEmpty()
+
+    @Ignore
+    val warehouseAreaStr = warehouseAreaDescription.orEmpty()
+
     constructor(parcel: Parcel) : this(
         id = parcel.readLong(),
         assetReviewId = parcel.readLong(),
@@ -43,10 +54,10 @@ class AssetReviewContent(
         labelNumber = parcel.readInt(),
         parentId = parcel.readValue(Long::class.java.classLoader) as? Long,
         warehouseAreaId = parcel.readLong(),
-        warehouseAreaStr = parcel.readString().orEmpty(),
-        warehouseStr = parcel.readString().orEmpty(),
+        warehouseAreaDescription = parcel.readString().orEmpty(),
+        warehouseDescription = parcel.readString().orEmpty(),
         itemCategoryId = parcel.readLong(),
-        itemCategoryStr = parcel.readString().orEmpty(),
+        itemCategoryDescription = parcel.readString().orEmpty(),
         ownershipStatusId = parcel.readInt(),
         manufacturer = parcel.readString().orEmpty(),
         model = parcel.readString().orEmpty(),
@@ -66,10 +77,10 @@ class AssetReviewContent(
         warehouseAreaId = tContent.warehouseAreaId,
         labelNumber = tContent.labelNumber ?: 0,
         parentId = tContent.parentId,
-        warehouseStr = tContent.warehouseStr,
-        warehouseAreaStr = tContent.warehouseAreaStr,
+        warehouseDescription = tContent.warehouseStr,
+        warehouseAreaDescription = tContent.warehouseAreaStr,
         itemCategoryId = tContent.itemCategoryId,
-        itemCategoryStr = tContent.itemCategoryStr,
+        itemCategoryDescription = tContent.itemCategoryStr,
         ownershipStatusId = tContent.ownershipStatus,
         manufacturer = tContent.manufacturer.orEmpty(),
         model = tContent.model.orEmpty(),
@@ -78,12 +89,7 @@ class AssetReviewContent(
     )
 
     constructor(
-        assetReviewId: Long,
-        id: Long,
-        asset: Asset,
-        qty: Double?,
-        contentStatusId: Int,
-        originWarehouseAreaId: Long
+        assetReviewId: Long, id: Long, asset: Asset, qty: Double?, contentStatusId: Int, originWarehouseAreaId: Long
     ) : this(
         assetReviewId = assetReviewId,
         id = id,
@@ -94,10 +100,10 @@ class AssetReviewContent(
         labelNumber = asset.labelNumber ?: 0,
         parentId = asset.parentId,
         warehouseAreaId = asset.warehouseAreaId,
-        warehouseAreaStr = asset.warehouseAreaStr,
-        warehouseStr = asset.warehouseStr,
+        warehouseAreaDescription = asset.warehouseAreaStr,
+        warehouseDescription = asset.warehouseStr,
         itemCategoryId = asset.itemCategoryId,
-        itemCategoryStr = asset.itemCategoryStr,
+        itemCategoryDescription = asset.itemCategoryStr,
         ownershipStatusId = asset.status,
         manufacturer = asset.manufacturer.orEmpty(),
         model = asset.model.orEmpty(),
@@ -147,10 +153,10 @@ class AssetReviewContent(
         parcel.writeInt(labelNumber)
         parcel.writeValue(parentId)
         parcel.writeLong(warehouseAreaId)
-        parcel.writeString(warehouseAreaStr)
-        parcel.writeString(warehouseStr)
+        parcel.writeString(warehouseAreaDescription)
+        parcel.writeString(warehouseDescription)
         parcel.writeLong(itemCategoryId)
-        parcel.writeString(itemCategoryStr)
+        parcel.writeString(itemCategoryDescription)
         parcel.writeInt(ownershipStatusId)
         parcel.writeString(manufacturer)
         parcel.writeString(model)
@@ -160,6 +166,19 @@ class AssetReviewContent(
 
     override fun describeContents(): Int {
         return 0
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as AssetReviewContent
+
+        return id == other.id
+    }
+
+    override fun hashCode(): Int {
+        return id.hashCode()
     }
 
     companion object CREATOR : Parcelable.Creator<AssetReviewContent> {

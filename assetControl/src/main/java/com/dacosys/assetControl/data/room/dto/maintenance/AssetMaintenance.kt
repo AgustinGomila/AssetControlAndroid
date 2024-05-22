@@ -16,9 +16,9 @@ class AssetMaintenance(
     @ColumnInfo(name = Entry.MAINTENANCE_STATUS_ID) var maintenanceStatusId: Int = 0,
     @ColumnInfo(name = Entry.ASSET_MAINTENANCE_ID) var assetMaintenanceId: Long = 0L,
     @ColumnInfo(name = Entry.MAINTENANCE_TYPE_ID) var maintenanceTypeId: Long = 0L,
-    @ColumnInfo(name = Entry.ASSET_STR) var assetStr: String = "",
+    @ColumnInfo(name = Entry.ASSET_STR) var assetStr: String? = null,
     @ColumnInfo(name = Entry.ASSET_CODE) var assetCode: String = "",
-    @ColumnInfo(name = Entry.MAINTENANCE_TYPE_STR) var maintenanceTypeStr: String = "",
+    @ColumnInfo(name = Entry.MAINTENANCE_TYPE_STR) var maintenanceTypeStr: String? = null,
 ) : Parcelable {
 
     @Ignore
@@ -88,6 +88,19 @@ class AssetMaintenance(
 
     override fun describeContents(): Int {
         return 0
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as AssetMaintenance
+
+        return id == other.id
+    }
+
+    override fun hashCode(): Int {
+        return id.hashCode()
     }
 
     companion object CREATOR : Parcelable.Creator<AssetMaintenance> {

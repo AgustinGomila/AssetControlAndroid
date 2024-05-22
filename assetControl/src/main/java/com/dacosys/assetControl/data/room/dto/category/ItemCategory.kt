@@ -59,6 +59,19 @@ class ItemCategory(
         return 0
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ItemCategory
+
+        return id == other.id
+    }
+
+    override fun hashCode(): Int {
+        return id.hashCode()
+    }
+
     companion object CREATOR : Parcelable.Creator<ItemCategory> {
         override fun createFromParcel(parcel: Parcel): ItemCategory {
             return ItemCategory(parcel)

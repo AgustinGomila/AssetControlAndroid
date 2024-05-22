@@ -19,11 +19,24 @@ class WarehouseMovement(
     @ColumnInfo(name = Entry.DESTINATION_WAREHOUSE_AREA_ID) var destinationWarehouseAreaId: Long = 0L,
     @ColumnInfo(name = Entry.DESTINATION_WAREHOUSE_ID) var destinationWarehouseId: Long = 0L,
     @ColumnInfo(name = Entry.COMPLETED) var completed: Int? = null,
-    @ColumnInfo(name = Entry.ORIGIN_WAREHOUSE_STR) var origWarehouseStr: String = "",
-    @ColumnInfo(name = Entry.ORIGIN_WAREHOUSE_AREA_STR) var origWarehouseAreaStr: String = "",
-    @ColumnInfo(name = Entry.DESTINATION_WAREHOUSE_STR) var destWarehouseStr: String = "",
-    @ColumnInfo(name = Entry.DESTINATION_WAREHOUSE_AREA_STR) var destWarehouseAreaStr: String = "",
+    @ColumnInfo(name = Entry.ORIGIN_WAREHOUSE_STR) var origWarehouseStr: String? = null,
+    @ColumnInfo(name = Entry.ORIGIN_WAREHOUSE_AREA_STR) var origWarehouseAreaStr: String? = null,
+    @ColumnInfo(name = Entry.DESTINATION_WAREHOUSE_STR) var destWarehouseStr: String? = null,
+    @ColumnInfo(name = Entry.DESTINATION_WAREHOUSE_AREA_STR) var destWarehouseAreaStr: String? = null,
 ) : Parcelable {
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as WarehouseMovement
+
+        return id == other.id
+    }
+
+    override fun hashCode(): Int {
+        return id.hashCode()
+    }
 
     fun saveChanges() = WarehouseMovementRepository().update(this)
 

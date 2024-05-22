@@ -16,9 +16,6 @@ interface RouteProcessContentDao {
     @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN $BASIC_ORDER")
     suspend fun select(): List<RouteProcessContent>
 
-    @Query("SELECT MIN(${Entry.ID}) $BASIC_FROM")
-    suspend fun selectMinId(): Long?
-
     @Query(
         "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
                 "WHERE ${Entry.TABLE_NAME}.${Entry.ID} = :id"
@@ -109,7 +106,7 @@ interface RouteProcessContentDao {
 
 
         const val BASIC_LEFT_JOIN =
-            "LEFT JOIN ${rpEntry.TABLE_NAME} ON ${rpEntry.TABLE_NAME}.${rpEntry.ROUTE_PROCESS_ID} = ${Entry.TABLE_NAME}.${Entry.ROUTE_PROCESS_ID} " +
+            "LEFT JOIN ${rpEntry.TABLE_NAME} ON ${rpEntry.TABLE_NAME}.${rpEntry.ID} = ${Entry.TABLE_NAME}.${Entry.ROUTE_PROCESS_ID} " +
                     "LEFT JOIN ${rcEntry.TABLE_NAME} ON ${rcEntry.TABLE_NAME}.${rcEntry.ROUTE_ID} = ${rpEntry.TABLE_NAME}.${rpEntry.ROUTE_ID} AND " +
                     "${Entry.TABLE_NAME}.${Entry.DATA_COLLECTION_RULE_ID} = ${rcEntry.TABLE_NAME}.${rcEntry.DATA_COLLECTION_RULE_ID} AND " +
                     "${Entry.TABLE_NAME}.${Entry.LEVEL} = ${rcEntry.TABLE_NAME}.${rcEntry.LEVEL} AND " +

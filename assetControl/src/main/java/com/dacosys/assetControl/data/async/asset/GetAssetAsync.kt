@@ -94,10 +94,10 @@ class GetAssetAsync {
             completeList
         )
 
-        if (code.isEmpty() &&
-            (itemCategory == null || (itemCategory?.id ?: -1) <= 0) &&
-            (warehouseArea == null || (warehouseArea?.id ?: -1) <= 0)
-        ) {
+        val itemCategoryId = itemCategory?.id ?: -1
+        val warehouseAreaId = warehouseArea?.id ?: -1
+
+        if (code.isEmpty() && itemCategoryId <= 0 && warehouseAreaId <= 0) {
             mCallback?.onGetAssetProgress(
                 getContext()
                     .getString(R.string.you_must_enter_at_least_one_letter_in_the_description_category_or_warehouse_area),

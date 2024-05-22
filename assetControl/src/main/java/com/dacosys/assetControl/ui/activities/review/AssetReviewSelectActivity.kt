@@ -329,98 +329,98 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     private fun assetReviewSelect() {
-        if (adapter != null) {
-            val ar = adapter?.currentAssetReview() ?: return
+        if (adapter == null) return
 
-            if (ar.statusId == AssetReviewStatus.onProcess.id) {
-                if (!rejectNewInstances) {
-                    rejectNewInstances = true
+        val ar = adapter?.currentAssetReview() ?: return
 
-                    val intent = Intent(baseContext, ArcActivity::class.java)
-                    intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-                    intent.putExtra("isNew", false)
-                    intent.putExtra("assetReview", Parcels.wrap(ar))
-                    resultForReviewSuccess.launch(intent)
-                }
-            } else {
-                makeText(
-                    binding.root, getString(R.string.selected_review_is_not_in_process), ERROR
-                )
+        if (ar.statusId == AssetReviewStatus.onProcess.id) {
+            if (!rejectNewInstances) {
+                rejectNewInstances = true
+
+                val intent = Intent(baseContext, ArcActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+                intent.putExtra("isNew", false)
+                intent.putExtra("assetReview", Parcels.wrap(ar))
+                resultForReviewSuccess.launch(intent)
             }
+        } else {
+            makeText(
+                binding.root, getString(R.string.selected_review_is_not_in_process), ERROR
+            )
         }
     }
 
     private fun assetReviewRemove() {
-        if (adapter != null) {
-            val ar = adapter?.currentAssetReview() ?: return
+        if (adapter == null) return
 
-            if (ar.statusId == AssetReviewStatus.completed.id) {
-                makeText(
-                    binding.root,
-                    getString(R.string.the_selected_revision_has_already_been_completed_and_can_not_be_deleted),
-                    SnackBarType.INFO
-                )
-                return
+        val ar = adapter?.currentAssetReview() ?: return
+
+        if (ar.statusId == AssetReviewStatus.completed.id) {
+            makeText(
+                binding.root,
+                getString(R.string.the_selected_revision_has_already_been_completed_and_can_not_be_deleted),
+                SnackBarType.INFO
+            )
+            return
+        }
+
+        JotterListener.lockScanner(this, true)
+
+        try {
+            val alert = AlertDialog.Builder(this)
+            alert.setTitle(getString(R.string.remove_review))
+            alert.setMessage(getString(R.string.do_you_want_to_delete_the_selected_revision_question))
+            alert.setNegativeButton(R.string.cancel, null)
+            alert.setPositiveButton(R.string.accept) { _, _ ->
+                AssetReviewRepository().deleteById(ar.id)
+                AssetReviewContentRepository().deleteByAssetReviewId(ar.id)
+                removeAssetReviewImages()
+
+                adapter?.remove(ar)
+                fillListView()
             }
 
-            JotterListener.lockScanner(this, true)
-
-            try {
-                val alert = AlertDialog.Builder(this)
-                alert.setTitle(getString(R.string.remove_review))
-                alert.setMessage(getString(R.string.do_you_want_to_delete_the_selected_revision_question))
-                alert.setNegativeButton(R.string.cancel, null)
-                alert.setPositiveButton(R.string.accept) { _, _ ->
-                    AssetReviewRepository().deleteById(ar.id)
-                    AssetReviewContentRepository().deleteByAssetReviewId(ar.id)
-                    removeAssetReviewImages()
-
-                    adapter?.remove(ar)
-                    fillListView()
-                }
-
-                alert.show()
-            } catch (ex: java.lang.Exception) {
-                ex.printStackTrace()
-                ErrorLog.writeLog(this, this::class.java.simpleName, ex)
-            } finally {
-                JotterListener.lockScanner(this, false)
-            }
+            alert.show()
+        } catch (ex: java.lang.Exception) {
+            ex.printStackTrace()
+            ErrorLog.writeLog(this, this::class.java.simpleName, ex)
+        } finally {
+            JotterListener.lockScanner(this, false)
         }
     }
 
     private fun removeAssetReviewImages() {
-        if (adapter != null) {
-            val ar = adapter?.currentAssetReview() ?: return
+        if (adapter == null) return
 
-            try {
-                val programData = ProgramData(
-                    programObjectId = Table.assetReview.id.toLong(),
-                    objId1 = ar.id.toString()
-                )
+        val ar = adapter?.currentAssetReview() ?: return
 
-                ImageCoroutines().get(context = getContext(), programData = programData) {
-                    if (it.isNotEmpty()) {
-                        for (t in it) {
-                            val file = File(t.filenameOriginal ?: "")
-                            if (file.exists()) {
-                                file.delete()
-                            }
+        try {
+            val programData = ProgramData(
+                programObjectId = Table.assetReview.id.toLong(),
+                objId1 = ar.id.toString()
+            )
+
+            ImageCoroutines().get(context = getContext(), programData = programData) {
+                if (it.isNotEmpty()) {
+                    for (t in it) {
+                        val file = File(t.filenameOriginal ?: "")
+                        if (file.exists()) {
+                            file.delete()
                         }
                     }
-
-                    // Eliminar las referencias a las imágenes en
-                    // la base de datos local de ImageControl
-                    ImageCoroutines().delete(
-                        context = getContext(),
-                        programObjectId = Table.assetReview.id.toLong(),
-                        objectId1 = ar.id.toString()
-                    )
                 }
-            } catch (ex: java.lang.Exception) {
-                ex.printStackTrace()
-                ErrorLog.writeLog(this, this::class.java.simpleName, ex)
+
+                // Eliminar las referencias a las imágenes en
+                // la base de datos local de ImageControl
+                ImageCoroutines().delete(
+                    context = getContext(),
+                    programObjectId = Table.assetReview.id.toLong(),
+                    objectId1 = ar.id.toString()
+                )
             }
+        } catch (ex: java.lang.Exception) {
+            ex.printStackTrace()
+            ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         }
     }
 

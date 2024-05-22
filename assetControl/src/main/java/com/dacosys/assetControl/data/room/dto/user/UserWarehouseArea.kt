@@ -11,6 +11,25 @@ class UserWarehouseArea(
     @ColumnInfo(name = Entry.COUNT) val count: Int = 0,
     @ColumnInfo(name = Entry.CHECK) val check: Int = 0
 ) {
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as UserWarehouseArea
+
+        if (userId != other.userId) return false
+        if (warehouseAreaId != other.warehouseAreaId) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = userId.hashCode()
+        result = 31 * result + warehouseAreaId.hashCode()
+        return result
+    }
+
     object Entry {
         const val TABLE_NAME = "user_warehouse_area"
         const val USER_ID = "user_id"

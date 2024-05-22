@@ -8,6 +8,24 @@ class UserPermission(
     @ColumnInfo(name = Entry.PERMISSION_ID) var permissionId: Long = 0L,
 ) {
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as UserPermission
+
+        if (userId != other.userId) return false
+        if (permissionId != other.permissionId) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = userId.hashCode()
+        result = 31 * result + permissionId.hashCode()
+        return result
+    }
+
     object Entry {
         const val TABLE_NAME = "user_permission"
         const val USER_ID = "user_id"

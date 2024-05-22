@@ -17,8 +17,8 @@ class AssetReview(
     @ColumnInfo(name = Entry.WAREHOUSE_ID) var warehouseId: Long = 0L,
     @ColumnInfo(name = Entry.MODIFICATION_DATE) var modificationDate: Date = Date(),
     @ColumnInfo(name = Entry.STATUS_ID) var statusId: Int = 0,
-    @ColumnInfo(name = Entry.WAREHOUSE_AREA_STR) var warehouseAreaStr: String = "",
-    @ColumnInfo(name = Entry.WAREHOUSE_STR) var warehouseStr: String = "",
+    @ColumnInfo(name = Entry.WAREHOUSE_AREA_STR) var warehouseAreaStr: String? = null,
+    @ColumnInfo(name = Entry.WAREHOUSE_STR) var warehouseStr: String? = null,
     @ColumnInfo(name = Entry.USER_STR) var userStr: String = ""
 ) : Parcelable {
     object Entry {
@@ -35,6 +35,19 @@ class AssetReview(
         const val WAREHOUSE_AREA_STR = "warehouse_area_str"
         const val WAREHOUSE_STR = "warehouse_str"
         const val USER_STR = "user_str"
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as AssetReview
+
+        return id == other.id
+    }
+
+    override fun hashCode(): Int {
+        return id.hashCode()
     }
 
     @Ignore

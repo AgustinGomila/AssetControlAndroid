@@ -58,13 +58,13 @@ class AssetCollectorObject() : Parcelable {
         status = asset.status
         ownership_status = asset.ownershipStatus
         active = asset.active
-        missing_date = asset.missingDate ?: ""
+        missing_date = asset.missingDate.orEmpty()
         label_number = asset.labelNumber ?: 0
         condition = asset.condition ?: 0
         parent_id = asset.parentId ?: 0
-        ean = asset.ean ?: ""
-        serial_number = asset.serialNumber ?: ""
-        last_asset_review_date = asset.lastAssetReviewDate ?: ""
+        ean = asset.ean.orEmpty()
+        serial_number = asset.serialNumber.orEmpty()
+        last_asset_review_date = asset.lastAssetReviewDate.orEmpty()
     }
 
     fun getBySoapObject(so: SoapObject): AssetCollectorObject {

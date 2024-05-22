@@ -493,7 +493,9 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
     private fun itemSelect() {
         closeKeyboard(this)
 
-        if (adapter != null) {
+        if (adapter == null) {
+            setResult(RESULT_CANCELED)
+        } else {
             val data = Intent()
 
             val asset = adapter?.currentAsset()
@@ -519,8 +521,6 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
             } else {
                 setResult(RESULT_CANCELED)
             }
-        } else {
-            setResult(RESULT_CANCELED)
         }
 
         isFinishingByUser = true

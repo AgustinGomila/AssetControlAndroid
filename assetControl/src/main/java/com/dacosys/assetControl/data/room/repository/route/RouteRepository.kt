@@ -5,6 +5,7 @@ import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.room.dao.route.RouteDao
 import com.dacosys.assetControl.data.room.database.AcDatabase.Companion.database
 import com.dacosys.assetControl.data.room.dto.route.Route
+import com.dacosys.assetControl.data.room.dto.route.Route.CREATOR.getAvailableRoutes
 import com.dacosys.assetControl.data.webservice.route.RouteObject
 import com.dacosys.assetControl.network.sync.SyncProgress
 import com.dacosys.assetControl.network.sync.SyncRegistryType
@@ -18,13 +19,17 @@ class RouteRepository {
         get() = database.routeDao()
 
     fun select(onlyActive: Boolean) = runBlocking {
-        if (onlyActive) dao.select()
-        else dao.selectActive()
+        getAvailableRoutes(
+            if (onlyActive) dao.select()
+            else dao.selectActive()
+        )
     }
 
     fun selectByDescription(desc: String, onlyActive: Boolean) = runBlocking {
-        if (onlyActive) dao.selectByDescription(desc)
-        else dao.selectByDescriptionOnlyActive(desc)
+        getAvailableRoutes(
+            if (onlyActive) dao.selectByDescription(desc)
+            else dao.selectByDescriptionOnlyActive(desc)
+        )
     }
 
 

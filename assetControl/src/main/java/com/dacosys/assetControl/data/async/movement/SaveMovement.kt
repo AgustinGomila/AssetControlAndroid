@@ -75,9 +75,9 @@ class SaveMovement {
     }
 
     private suspend fun suspendFunction(): Boolean = withContext(Dispatchers.IO) {
-        if (destWarehouseAreaId == null || !allMovementContent.any()) {
-            return@withContext false
-        }
+        if (destWarehouseAreaId == null) return@withContext false
+
+        if (!allMovementContent.any()) return@withContext false
 
         ///////////////////////////////////
         // Para controlar la transacción //

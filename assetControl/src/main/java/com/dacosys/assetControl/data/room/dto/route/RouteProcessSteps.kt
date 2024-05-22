@@ -10,6 +10,27 @@ class RouteProcessSteps(
     @ColumnInfo(name = Entry.DATA_COLLECTION_ID) val dataCollectionId: Long? = null,
     @ColumnInfo(name = Entry.STEP) val step: Int = 0,
 ) {
+
+    override fun hashCode(): Int {
+        var result = routeProcessId.hashCode()
+        result = 31 * result + level
+        result = 31 * result + position
+        return result
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as RouteProcessSteps
+
+        if (routeProcessId != other.routeProcessId) return false
+        if (level != other.level) return false
+        if (position != other.position) return false
+
+        return true
+    }
+
     object Entry {
         const val TABLE_NAME = "route_process_steps"
         const val ROUTE_PROCESS_ID = "route_process_id"
