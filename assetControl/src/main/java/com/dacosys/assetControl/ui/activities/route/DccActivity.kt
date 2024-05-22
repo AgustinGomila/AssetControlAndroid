@@ -247,17 +247,21 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         // Para expandir y colapsar el panel inferior
         setBottomPanelAnimation()
 
+        val targetWarehouseArea = targetWarehouseArea
+        val targetItemCategory = targetItemCategory
+        val targetAsset = targetAsset
+
         when {
             targetWarehouseArea != null -> makeText(
-                binding.root, (targetWarehouseArea ?: return).description, SnackBarType.INFO
+                binding.root, targetWarehouseArea.description, SnackBarType.INFO
             )
 
             targetItemCategory != null -> makeText(
-                binding.root, (targetItemCategory ?: return).description, SnackBarType.INFO
+                binding.root, targetItemCategory.description, SnackBarType.INFO
             )
 
             targetAsset != null -> makeText(
-                binding.root, (targetAsset ?: return).description, SnackBarType.INFO
+                binding.root, targetAsset.description, SnackBarType.INFO
             )
         }
 

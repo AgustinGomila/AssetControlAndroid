@@ -165,12 +165,13 @@ class WarehouseAreaCRUDFragment : Fragment() {
     private fun setWarehouseText() {
         if (_binding == null) return
 
+        val warehouse = warehouse
         if (warehouse == null) {
             binding.warehouseTextView.typeface = Typeface.DEFAULT
             binding.warehouseTextView.text = getString(R.string.search_warehouse)
         } else {
             binding.warehouseTextView.typeface = Typeface.DEFAULT_BOLD
-            binding.warehouseTextView.text = (warehouse ?: return).description
+            binding.warehouseTextView.text = warehouse.description
         }
     }
 

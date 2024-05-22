@@ -136,22 +136,26 @@ class DataCollectionRuleSelectActivity : AppCompatActivity() {
         binding.onlyActiveSwitch.isChecked =
             prefsGetBoolean(Preference.selectDataCollectionRuleOnlyActive)
 
+        val warehouseArea = warehouseArea
+        val itemCategory = itemCategory
+        val asset = asset
+
         when {
             warehouseArea != null -> makeText(
                 binding.root,
-                (warehouseArea ?: return).description,
+                warehouseArea.description,
                 SnackBarType.INFO
             )
 
             itemCategory != null -> makeText(
                 binding.root,
-                (itemCategory ?: return).description,
+                itemCategory.description,
                 SnackBarType.INFO
             )
 
             asset != null -> makeText(
                 binding.root,
-                (asset ?: return).description,
+                asset.description,
                 SnackBarType.INFO
             )
         }

@@ -163,16 +163,16 @@ class SyncInitialUser(
     }
 
     private fun onConnectionResult(it: MySqlDateResult) {
+        val confEntry = registryType.confEntry ?: return
+
         when (it.status) {
             ProgressStatus.finished -> {
                 Log.d(
                     this::class.java.simpleName, "${
                         getContext().getString(R.string.saving_synchronization_time)
-                    }: ${(registryType.confEntry ?: return).description} ($it.msg)"
+                    }: ${confEntry.description} ($it.msg)"
                 )
-                prefsPutString(
-                    (registryType.confEntry ?: return).description, it.msg
-                )
+                prefsPutString(confEntry.description, it.msg)
                 scope.launch {
                     onUiEvent(
                         SyncProgress(

@@ -207,9 +207,10 @@ class WarehouseAreaCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
     private fun setImageControlFragment() {
         var warehouseAreaId = 0L
         var description = ""
-        if (warehouseArea != null) {
-            warehouseAreaId = (warehouseArea ?: return).id
-            description = (warehouseArea ?: return).description
+        val wa = warehouseArea
+        if (wa != null) {
+            warehouseAreaId = wa.id
+            description = wa.description
         }
 
         val tableName = Table.warehouseArea.tableName

@@ -189,19 +189,21 @@ class LocationHeaderFragment : Fragment() {
         clearDestinationControls()
 
         if (_binding != null) {
+            val warehouse = warehouse
             if (warehouse != null) {
-                binding.warehouseTextView.text = (warehouse ?: return).description
+                binding.warehouseTextView.text = warehouse.description
                 TooltipCompat.setTooltipText(
                     binding.warehouseTextView,
-                    (warehouse ?: return).description
+                    warehouse.description
                 )
             }
 
+            val warehouseArea = warehouseArea
             if (warehouseArea != null) {
-                binding.warehouseAreaTextView.text = (warehouseArea ?: return).description
+                binding.warehouseAreaTextView.text = warehouseArea.description
                 TooltipCompat.setTooltipText(
                     binding.warehouseAreaTextView,
-                    (warehouseArea ?: return).description
+                    warehouseArea.description
                 )
             }
         }

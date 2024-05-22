@@ -446,9 +446,8 @@ class LocationSelectActivity : AppCompatActivity(),
             warehouse = null
             wChangedListener?.onWarehouseChanged(null)
         } else {
-            if (oldSelectedWarehouse != null &&
-                (oldSelectedWarehouse ?: return) == w
-            ) {
+            val oldWarehouse = oldSelectedWarehouse
+            if (oldWarehouse == w) {
                 return
             }
 
@@ -492,9 +491,8 @@ class LocationSelectActivity : AppCompatActivity(),
             warehouseArea = null
             waChangedListener?.onWarehouseAreaChanged(null)
         } else {
-            if (oldSelectedWarehouseArea != null &&
-                (oldSelectedWarehouseArea ?: return) == wa
-            ) {
+            val oldWarehouseArea = oldSelectedWarehouseArea
+            if (oldWarehouseArea == wa) {
                 return
             }
 
@@ -604,9 +602,12 @@ class LocationSelectActivity : AppCompatActivity(),
 
         // Si el área anterior no pertenece al depósito actual
         // limpiar el área.
-        if (warehouseArea != null &&
+        val wa = warehouseArea
+        val warehouse = warehouse
+
+        if (wa != null &&
             warehouse != null &&
-            (warehouse ?: return).id != (warehouseArea ?: return).warehouseId
+            warehouse.id != wa.warehouseId
         ) {
             warehouseArea = null
         }
@@ -625,9 +626,10 @@ class LocationSelectActivity : AppCompatActivity(),
         waIsFilling = true
 
         val t: ArrayList<WarehouseArea> = ArrayList()
+        val warehouse = warehouse
         for (wa in warehouseAreaArray) {
             if (warehouse != null) {
-                if (wa.warehouseId == (warehouse ?: return).id) {
+                if (wa.warehouseId == warehouse.id) {
                     t.add(wa)
                 }
             } else {

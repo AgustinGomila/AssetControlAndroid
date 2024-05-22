@@ -85,19 +85,20 @@ class AssetDetailActivity : AppCompatActivity() {
             }
         }
 
+        val asset = asset
         if (asset != null) {
-            binding.descriptionTextView.text = (asset ?: return).description
-            binding.codeTextView.text = (asset ?: return).code
-            binding.eanTextView.text = (asset ?: return).ean
-            binding.itemCategoryTextView.text = (asset ?: return).itemCategoryStr
-            binding.warehouseTextView.text = (asset ?: return).warehouseStr
-            binding.warehouseAreaTextView.text = (asset ?: return).warehouseAreaStr
-            binding.origWarehouseTextView.text = (asset ?: return).originalWarehouseStr
-            binding.origWarehouseAreaTextView.text = (asset ?: return).originalWarehouseAreaStr
-            binding.assetStatusTextView.text = (asset ?: return).assetStatus.description
-            binding.manufacturerTextView.text = (asset ?: return).manufacturer
-            binding.modelTextView.text = (asset ?: return).model
-            binding.serialNumberTextView.text = (asset ?: return).serialNumber
+            binding.descriptionTextView.text = asset.description
+            binding.codeTextView.text = asset.code
+            binding.eanTextView.text = asset.ean
+            binding.itemCategoryTextView.text = asset.itemCategoryStr
+            binding.warehouseTextView.text = asset.warehouseStr
+            binding.warehouseAreaTextView.text = asset.warehouseAreaStr
+            binding.origWarehouseTextView.text = asset.originalWarehouseStr
+            binding.origWarehouseAreaTextView.text = asset.originalWarehouseAreaStr
+            binding.assetStatusTextView.text = asset.assetStatus.description
+            binding.manufacturerTextView.text = asset.manufacturer
+            binding.modelTextView.text = asset.model
+            binding.serialNumberTextView.text = asset.serialNumber
         }
 
         binding.assetDetail.setOnClickListener { isBackPressed() }

@@ -71,18 +71,22 @@ class WarehouseAreaDetailActivity : AppCompatActivity() {
     }
 
     private fun showImages() {
+        val warehouseArea = warehouseArea
+
         if (warehouseArea != null) {
             if (!rejectNewInstances) {
                 rejectNewInstances = true
                 WsFunction().documentContentGetBy12(
                     programObjectId = Table.warehouseArea.id,
-                    objectId1 = (warehouseArea ?: return).warehouseId.toString()
+                    objectId1 = warehouseArea.warehouseId.toString()
                 ) { it2 -> if (it2 != null) fillResults(it2) }
             }
         }
     }
 
     private fun fillResults(docContReqResObj: DocumentContentRequestResult) {
+        val warehouseArea = warehouseArea ?: return
+
         if (docContReqResObj.documentContentArray.isEmpty()) {
             MakeText.makeText(binding.root, getString(R.string.no_images), SnackBarType.INFO)
             rejectNewInstances = false
@@ -108,7 +112,7 @@ class WarehouseAreaDetailActivity : AppCompatActivity() {
         val intent = Intent(baseContext, ImageControlGridActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
         intent.putExtra(ImageControlGridActivity.ARG_PROGRAM_OBJECT_ID, Table.warehouseArea.id.toLong())
-        intent.putExtra(ImageControlGridActivity.ARG_OBJECT_ID_1, (warehouseArea ?: return).id.toString())
+        intent.putExtra(ImageControlGridActivity.ARG_OBJECT_ID_1, warehouseArea.id.toString())
         intent.putExtra(ImageControlGridActivity.ARG_DOC_CONT_OBJ_ARRAY_LIST, ArrayList<DocumentContent>())
         startActivity(intent)
     }

@@ -284,10 +284,11 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
     private fun setImageControlFragment() {
         var assetId = 0L
         var description = ""
+        val a = asset
 
-        if (asset != null) {
-            assetId = (asset ?: return).id
-            description = (asset ?: return).description
+        if (a != null) {
+            assetId = a.id
+            description = a.description
         }
 
         val tableName = Table.asset.tableName
@@ -576,15 +577,13 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     private fun printLabel() {
-        if (asset == null) {
-            return
-        }
+        val asset = asset ?: return
 
         if (!rejectNewInstances) {
             rejectNewInstances = true
 
             val assetArray: ArrayList<Asset> = ArrayList()
-            assetArray.add(asset ?: return)
+            assetArray.add(asset)
 
             val intent = Intent(baseContext, AssetPrintLabelActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP

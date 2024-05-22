@@ -470,8 +470,10 @@ class AssetCRUDFragment : Fragment() {
             }
 
             updateAsset()
+
+            val asset = asset
             if (asset != null) {
-                val tempAsset = AssetCollectorObject(asset ?: return)
+                val tempAsset = AssetCollectorObject(asset)
                 val updateAsset = AssetCRUD.AssetUpdate()
                 updateAsset.addParams(callback, tempAsset)
                 updateAsset.execute()

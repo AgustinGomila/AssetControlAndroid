@@ -404,7 +404,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             }
         })
 
-        binding.routeStrTextView.text = (route ?: return).description
+        binding.routeStrTextView.text = route?.description
 
         binding.reentryButton.setOnClickListener { reentry() }
         binding.skipButton.setOnClickListener { skip() }
@@ -646,16 +646,18 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             var y1 = 0
             val y2 = allSteps.size
 
-            for (step in allSteps) {
-                y1++
-                Log.d(
-                    this::class.java.simpleName, "${getString(R.string.analyzing_steps)} ($y1/$y2)…"
-                )
+            val routeComposition = routeComposition
+            if (routeComposition != null) {
+                for (step in allSteps) {
+                    y1++
+                    Log.d(
+                        this::class.java.simpleName, "${getString(R.string.analyzing_steps)} ($y1/$y2)…"
+                    )
 
-                val rc = (routeComposition
-                    ?: return).first { it.level == step.level && it.position == step.position }
+                    val rc = routeComposition.first { it.level == step.level && it.position == step.position }
 
-                analiceStep(step, rc)
+                    analiceStep(step, rc)
+                }
             }
 
             Log.d(this::class.java.simpleName, getString(R.string.finished_analysis))

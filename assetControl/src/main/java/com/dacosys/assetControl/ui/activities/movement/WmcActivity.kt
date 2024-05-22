@@ -746,7 +746,9 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
         }
 
     private fun processWarehouseMovement() {
-        val destWaId = (headerFragment?.warehouseArea ?: return).id
+        val warehouseArea = headerFragment?.warehouseArea ?: return
+
+        val destWaId = warehouseArea.id
         val allWmc: ArrayList<WarehouseMovementContent> = ArrayList()
 
         // Procesar la lista, cambiar los estados si son incorrectos.
