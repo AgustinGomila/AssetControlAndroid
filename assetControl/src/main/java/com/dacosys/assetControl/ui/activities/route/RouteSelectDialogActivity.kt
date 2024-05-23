@@ -193,6 +193,7 @@ class RouteSelectDialogActivity : AppCompatActivity(),
 
         KeyboardVisibilityEvent.registerEventListener(this, this)
         refreshRouteText(cleanText = false, focus = true)
+
         thread { fillAdapter() }
     }
 

@@ -10,6 +10,7 @@ import com.dacosys.assetControl.data.room.repository.route.RouteProcessRepositor
 import kotlinx.coroutines.*
 
 class GetRouteProcess(
+    private var userId: Long,
     private var route: Route,
     private var onProgress: (RouteProcessResult) -> Unit = {},
 ) {
@@ -36,120 +37,99 @@ class GetRouteProcess(
         val compositionRepository = AttributeCompositionRepository()
         val processRepository = RouteProcessRepository()
 
-        ///////////////////////////////////
-        // Para controlar la transacción //
-        // TODO: Eliminar val db = DataBaseHelper.getWritableDb()
+        // Comprobamos la integridad de las composiciones de todos los atributos de la ruta.
+        val allAttrCompIdRoute = contentRepository.selectAttributeCompositionIdByRouteId(route.id)
+        val allAComp = compositionRepository.select()
 
-        try {
-            // TODO: Eliminar db.beginTransaction()
+        val allAttrCompIdAvailable = allAComp.map { it.id }
 
-            // Comprobamos la integridad de las composiciones de todos los atributos de la ruta.
-            val allAttrCompIdRoute = contentRepository.selectAttributeCompositionIdByRouteId(route.id)
-            val allAComp = compositionRepository.select()
+        if (!allAttrCompIdAvailable.containsAll(allAttrCompIdRoute)) {
+            // LA RUTA ESTA INCOMPLETA
+            return@withContext RouteProcessResult(
+                routeProcess = null,
+                newProcess = false,
+                error = ErrorResult(
+                    AssetControlApp.getContext()
+                        .getString(R.string.some_of_the_attributes_required_for_the_route_are_not_found_in_the_collector_database_and_require_synchronization)
+                )
+            )
+        }
 
-            val allAttrCompIdAvailable = ArrayList<Long>()
-            for (aC in allAComp) {
-                allAttrCompIdAvailable.add(aC.id)
-            }
+        val uncompletedProcess = processRepository.selectByRouteIdNoCompleted(route.id)
 
-            if (!allAttrCompIdAvailable.containsAll(allAttrCompIdRoute)) {
+        // Si no hay procesos abiertos para esa ruta, creamos uno nuevo.
+        // Si no, continuamos el proceso existente.
 
-                // TODO: Eliminar db.setTransactionSuccessful()
+        if (uncompletedProcess.isEmpty()) {
 
-                // LA RUTA ESTA INCOMPLETA
+            // Iniciar NUEVO PROCESO DE RUTA
+
+            routeProcess = processRepository.insert(userId, route)
+
+            return@withContext RouteProcessResult(
+                routeProcess = routeProcess,
+                newProcess = true
+            )
+        } else {
+
+            // Comprobar que la composición de la ruta del proceso abierto
+            // coincida con la composición de la ruta en la base de datos,
+            // ya que si se actualizó la ruta, el proceso es inválido
+
+            routeProcess = uncompletedProcess[0]
+            val processContents = routeProcess.contents()
+            val routeComposition = route.composition()
+
+            if (routeComposition.size <= 0) {
+
+                // RUTA está vacía
                 return@withContext RouteProcessResult(
                     routeProcess = null,
                     newProcess = false,
                     error = ErrorResult(
                         AssetControlApp.getContext()
-                            .getString(R.string.some_of_the_attributes_required_for_the_route_are_not_found_in_the_collector_database_and_require_synchronization)
+                            .getString(R.string.empty_route)
                     )
                 )
             }
 
-            val uncompletedProcess = processRepository.selectByRouteIdNoCompleted(route.id)
-
-            // Si no hay procesos abiertos para esa ruta, creamos uno nuevo.
-            // Si no, continuamos el proceso existente.
-
-            if (uncompletedProcess.isEmpty()) {
-
-                // Iniciar NUEVO PROCESO DE RUTA
-
-                val routeProcessId = processRepository.insert(route)
-                routeProcess = processRepository.selectById(routeProcessId)
-
-                // TODO: Eliminar db.setTransactionSuccessful()
-
-                return@withContext RouteProcessResult(
-                    routeProcess = routeProcess,
-                    newProcess = true
-                )
-            } else {
-
-                // Comprobar que la composición de la ruta del proceso abierto
-                // coincida con la composición de la ruta en la base de datos,
-                // ya que si se actualizó la ruta, el proceso es inválido
-
-                routeProcess = uncompletedProcess[0]
-                val processContents = routeProcess.contents()
-                val routeComposition = route.composition()
-
-                // TODO: Eliminar db.setTransactionSuccessful()
-
-                if (routeComposition.size <= 0) {
-
-                    // RUTA está vacía
-                    return@withContext RouteProcessResult(
-                        routeProcess = null,
-                        newProcess = false,
-                        error = ErrorResult(
-                            AssetControlApp.getContext()
-                                .getString(R.string.empty_route)
-                        )
-                    )
+            var error = false
+            for (rpc in processContents) {
+                if (!routeComposition.any {
+                        it.level == rpc.level && it.position == rpc.position
+                    }) {
+                    error = true
+                    break
                 }
+            }
 
-                var error = false
-                for (rpc in processContents) {
-                    if (!routeComposition.any {
-                            it.level == rpc.level && it.position == rpc.position
+            if (!error) {
+                for (rc in routeComposition) {
+                    if (!processContents.any {
+                            it.level == rc.level && it.position == rc.position
                         }) {
                         error = true
                         break
                     }
                 }
+            }
 
-                if (!error) {
-                    for (rc in routeComposition) {
-                        if (!processContents.any {
-                                it.level == rc.level && it.position == rc.position
-                            }) {
-                            error = true
-                            break
-                        }
-                    }
-                }
-
-                if (error) {
-                    return@withContext RouteProcessResult(
-                        routeProcess = null,
-                        newProcess = false,
-                        error = ErrorResult(
-                            AssetControlApp.getContext()
-                                .getString(R.string.the_composition_of_the_route_process_that_you_want_to_continue_is_different_from_the_current_composition_of_the_route_this_process_can_not_be_continued_and_must_be_canceled)
-                        )
-                    )
-                }
-
-                // CONTINUAR PROCESO DE RUTA
+            if (error) {
                 return@withContext RouteProcessResult(
-                    routeProcess = routeProcess,
-                    newProcess = false
+                    routeProcess = null,
+                    newProcess = false,
+                    error = ErrorResult(
+                        AssetControlApp.getContext()
+                            .getString(R.string.the_composition_of_the_route_process_that_you_want_to_continue_is_different_from_the_current_composition_of_the_route_this_process_can_not_be_continued_and_must_be_canceled)
+                    )
                 )
             }
-        } finally {
-            // TODO: Eliminar db.endTransaction()
+
+            // CONTINUAR PROCESO DE RUTA
+            return@withContext RouteProcessResult(
+                routeProcess = routeProcess,
+                newProcess = false
+            )
         }
     }
 

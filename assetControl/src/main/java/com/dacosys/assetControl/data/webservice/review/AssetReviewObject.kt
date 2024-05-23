@@ -2,6 +2,9 @@ package com.dacosys.assetControl.data.webservice.review
 
 import android.os.Parcel
 import android.os.Parcelable
+import com.dacosys.assetControl.data.enums.review.AssetReviewStatus
+import com.dacosys.assetControl.data.room.dto.review.AssetReview
+import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.dateToNotNullStringDate
 import org.ksoap2.serialization.SoapObject
 
 class AssetReviewObject() : Parcelable {
@@ -25,6 +28,18 @@ class AssetReviewObject() : Parcelable {
         modificationDate = parcel.readString().orEmpty()
         collectorAssetReviewId = parcel.readLong()
         statusId = parcel.readInt()
+    }
+
+    constructor(ar: AssetReview) : this() {
+        assetReviewId = ar.id
+        assetReviewDate = dateToNotNullStringDate(ar.assetReviewDate)
+        obs = ar.obs
+        userId = ar.userId
+        warehouseAreaId = ar.warehouseAreaId
+        warehouseId = ar.warehouseId
+        modificationDate = dateToNotNullStringDate(ar.modificationDate)
+        collectorAssetReviewId = ar.id
+        statusId = AssetReviewStatus.transferred.id
     }
 
     fun getBySoapObject(so: SoapObject): AssetReviewObject {

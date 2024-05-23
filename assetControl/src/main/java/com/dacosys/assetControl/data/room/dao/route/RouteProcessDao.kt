@@ -43,19 +43,23 @@ interface RouteProcessDao {
     )
     suspend fun selectById(rpId: Long): RouteProcess?
 
-    @Query("SELECT MAX(${Entry.ID}) $BASIC_FROM")
-    suspend fun selectMaxId(): Long?
+    @Query("SELECT MIN(${Entry.ID}) $BASIC_FROM")
+    suspend fun selectMinId(): Long?
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(routeProcess: RouteProcessEntity): Long
+    suspend fun insert(routeProcess: RouteProcessEntity)
 
 
     @Update
     suspend fun update(content: RouteProcessEntity)
 
-    @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.ID} = :newValue, ${Entry.TRANSFERRED_DATE} = :date WHERE ${Entry.ID} = :oldValue")
-    suspend fun updateId(oldValue: Long, newValue: Long, date: Date = Date())
+    @Query(
+        "UPDATE ${Entry.TABLE_NAME} SET ${Entry.ID} = :newValue, " +
+                "${Entry.TRANSFERRED_DATE} = :date " +
+                "WHERE ${Entry.ID} = :oldValue"
+    )
+    suspend fun updateId(newValue: Long, oldValue: Long, date: Date)
 
 
     @Delete

@@ -12,8 +12,8 @@ class AssetReviewContent(
     @ColumnInfo(name = Entry.ID) var id: Long = 0L,
     @ColumnInfo(name = Entry.ASSET_REVIEW_ID) var assetReviewId: Long = 0L,
     @ColumnInfo(name = Entry.ASSET_ID) var assetId: Long = 0L,
-    @ColumnInfo(name = Entry.CODE) var code: String = "",
-    @ColumnInfo(name = Entry.DESCRIPTION) var description: String = "",
+    @ColumnInfo(name = Entry.CODE) var assetCode: String? = null,
+    @ColumnInfo(name = Entry.DESCRIPTION) var assetDescription: String? = null,
     @ColumnInfo(name = Entry.QTY) var qty: Double? = null,
     @ColumnInfo(name = Entry.CONTENT_STATUS_ID) var contentStatusId: Int = 0,
     @ColumnInfo(name = Entry.ORIGIN_WAREHOUSE_AREA_ID) var originWarehouseAreaId: Long = 0L,
@@ -33,20 +33,51 @@ class AssetReviewContent(
 ) : Parcelable {
 
     @Ignore
-    val itemCategoryStr = itemCategoryDescription.orEmpty()
+    var code = assetCode.orEmpty()
+        get() = assetCode.orEmpty()
+        set(value) {
+            assetCode = value.ifEmpty { null }
+            field = value
+        }
 
     @Ignore
-    val warehouseStr = warehouseDescription.orEmpty()
+    var description = assetDescription.orEmpty()
+        get() = assetDescription.orEmpty()
+        set(value) {
+            assetDescription = value.ifEmpty { null }
+            field = value
+        }
 
     @Ignore
-    val warehouseAreaStr = warehouseAreaDescription.orEmpty()
+    var itemCategoryStr = itemCategoryDescription.orEmpty()
+        get() = itemCategoryDescription.orEmpty()
+        set(value) {
+            itemCategoryDescription = value.ifEmpty { null }
+            field = value
+        }
+
+    @Ignore
+    var warehouseStr = warehouseDescription.orEmpty()
+        get() = warehouseDescription.orEmpty()
+        set(value) {
+            warehouseDescription = value.ifEmpty { null }
+            field = value
+        }
+
+    @Ignore
+    var warehouseAreaStr = warehouseAreaDescription.orEmpty()
+        get() = warehouseAreaDescription.orEmpty()
+        set(value) {
+            warehouseAreaDescription = value.ifEmpty { null }
+            field = value
+        }
 
     constructor(parcel: Parcel) : this(
         id = parcel.readLong(),
         assetReviewId = parcel.readLong(),
         assetId = parcel.readLong(),
-        code = parcel.readString().orEmpty(),
-        description = parcel.readString().orEmpty(),
+        assetCode = parcel.readString().orEmpty(),
+        assetDescription = parcel.readString().orEmpty(),
         qty = parcel.readValue(Double::class.java.classLoader) as? Double,
         contentStatusId = parcel.readInt(),
         originWarehouseAreaId = parcel.readLong(),
@@ -69,11 +100,11 @@ class AssetReviewContent(
         id = tContent.id,
         assetReviewId = tContent.assetReviewId,
         assetId = tContent.assetId,
-        code = tContent.code,
+        assetCode = tContent.code,
         qty = tContent.qty,
         contentStatusId = tContent.contentStatus,
         assetStatusId = tContent.status,
-        description = tContent.description,
+        assetDescription = tContent.description,
         warehouseAreaId = tContent.warehouseAreaId,
         labelNumber = tContent.labelNumber ?: 0,
         parentId = tContent.parentId,
@@ -94,8 +125,8 @@ class AssetReviewContent(
         assetReviewId = assetReviewId,
         id = id,
         assetId = asset.id,
-        code = asset.code,
-        description = asset.description,
+        assetCode = asset.code,
+        assetDescription = asset.description,
         assetStatusId = asset.status,
         labelNumber = asset.labelNumber ?: 0,
         parentId = asset.parentId,
@@ -144,8 +175,8 @@ class AssetReviewContent(
         parcel.writeLong(id)
         parcel.writeLong(assetReviewId)
         parcel.writeLong(assetId)
-        parcel.writeString(code)
-        parcel.writeString(description)
+        parcel.writeString(assetCode)
+        parcel.writeString(assetDescription)
         parcel.writeFloat(qty?.toFloat() ?: 0F)
         parcel.writeInt(contentStatusId)
         parcel.writeLong(originWarehouseAreaId)

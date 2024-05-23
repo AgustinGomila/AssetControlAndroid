@@ -58,15 +58,8 @@ class WarehouseCRUD {
         }
 
         private fun addWarehouse(wObj: WarehouseObject): CrudResult<Warehouse?> {
-            var description = wObj.description
-            if (wObj.description.length > 255) {
-                description = wObj.description.substring(0, 255)
-            }
-
-            val newId = WarehouseRepository().minId
             val w = Warehouse(
-                id = newId,
-                description = description,
+                description = wObj.description.take(255),
                 mActive = wObj.active,
                 transferred = 0
             )

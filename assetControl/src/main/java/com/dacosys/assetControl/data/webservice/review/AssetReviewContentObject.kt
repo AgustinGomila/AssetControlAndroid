@@ -2,6 +2,7 @@ package com.dacosys.assetControl.data.webservice.review
 
 import android.os.Parcel
 import android.os.Parcelable
+import com.dacosys.assetControl.data.room.dto.review.AssetReviewContent
 import org.ksoap2.serialization.SoapObject
 
 class AssetReviewContentObject() : Parcelable {
@@ -15,14 +16,25 @@ class AssetReviewContentObject() : Parcelable {
     var originWarehouseAreaId: Long = 0
 
     constructor(parcel: Parcel) : this() {
-        this.assetReviewId = parcel.readLong()
-        this.assetReviewContentId = parcel.readLong()
-        this.assetId = parcel.readLong()
-        this.code = parcel.readString().orEmpty()
-        this.description = parcel.readString().orEmpty()
-        this.qty = parcel.readFloat()
-        this.contentStatusId = parcel.readInt()
-        this.originWarehouseAreaId = parcel.readLong()
+        assetReviewId = parcel.readLong()
+        assetReviewContentId = parcel.readLong()
+        assetId = parcel.readLong()
+        code = parcel.readString().orEmpty()
+        description = parcel.readString().orEmpty()
+        qty = parcel.readFloat()
+        contentStatusId = parcel.readInt()
+        originWarehouseAreaId = parcel.readLong()
+    }
+
+    constructor(arc: AssetReviewContent) : this() {
+        assetReviewId = arc.assetReviewId
+        assetReviewContentId = arc.id
+        assetId = arc.assetId
+        code = arc.code
+        if (arc.description.isNotEmpty()) description = arc.description
+        qty = 1F
+        contentStatusId = arc.contentStatusId
+        originWarehouseAreaId = arc.originWarehouseAreaId
     }
 
     fun getBySoapObject(so: SoapObject): AssetReviewContentObject {

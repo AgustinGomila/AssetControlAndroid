@@ -8,6 +8,7 @@ import android.widget.BaseAdapter
 import android.widget.TextView
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.room.dto.dataCollection.DataCollectionContent
+import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.dateToNotNullStringDate
 
 class DccAdapter(
     context: Context,
@@ -28,7 +29,7 @@ class DccAdapter(
         val item = getItem(position) as DataCollectionContent
 
         view.findViewById<TextView>(R.id.ruleTextView).text = item.dataCollectionRuleContentStr
-        view.findViewById<TextView>(R.id.dateTextView).text = item.dataCollectionDate.toString()
+        view.findViewById<TextView>(R.id.dateTextView).text = dateToNotNullStringDate(item.dataCollectionDate)
         view.findViewById<TextView>(R.id.compositionAutoSize).text = item.attributeCompositionStr
         view.findViewById<TextView>(R.id.valueAutoSize).text = item.valueStr
 

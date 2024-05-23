@@ -220,6 +220,7 @@ class ItemCategorySelectActivity :
 
         KeyboardVisibilityEvent.registerEventListener(this, this)
         refreshItemCategoryText(cleanText = false, focus = true)
+
         thread { fillAdapter() }
 
         setupUI(binding.root, this)

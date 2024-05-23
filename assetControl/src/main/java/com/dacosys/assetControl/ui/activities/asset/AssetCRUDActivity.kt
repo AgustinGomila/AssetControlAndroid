@@ -217,7 +217,6 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
         binding.rfidButton.setOnClickListener { rfidLink() }
         binding.saveButton.setOnClickListener { assetCRUDFragment?.saveAsset(this) }
 
-        // Llenar la grilla
         setPanels()
 
         setupUI(binding.root, this)
@@ -291,11 +290,8 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
             description = a.description
         }
 
-        val tableName = Table.asset.tableName
-        description = "$tableName: $description"
-        if (description.length > 255) {
-            description.substring(0, 255)
-        }
+        val tableDescription = Table.asset.description
+        description = "$tableDescription: $description".take(255)
 
         val obs = "${getString(R.string.user)}: ${currentUser()?.name}"
 

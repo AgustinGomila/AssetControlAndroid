@@ -55,8 +55,8 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
         listView: ListView?,
         multiSelect: Boolean,
         checkedIdArray: ArrayList<Long>,
-        checkedChangedListener: CheckedChangedListener?,
-        dataSetChangedListener: DataSetChangedListener?,
+        checkedChangedListener: CheckedChangedListener? = null,
+        dataSetChangedListener: DataSetChangedListener? = null,
     ) : super(AssetControlApp.getContext(), resource, routes) {
         this.activity = activity
         this.resource = resource

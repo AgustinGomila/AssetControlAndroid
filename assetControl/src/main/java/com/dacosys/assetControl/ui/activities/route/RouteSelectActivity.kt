@@ -39,6 +39,7 @@ import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 import org.parceler.Parcels
 import java.util.*
+import kotlin.concurrent.thread
 
 class RouteSelectActivity : AppCompatActivity(),
     SwipeRefreshLayout.OnRefreshListener,
@@ -169,7 +170,7 @@ class RouteSelectActivity : AppCompatActivity(),
         setupUI(binding.root, this)
 
         // Llenar la grilla
-        fillListView()
+        thread { fillListView() }
     }
 
     private fun setPanels() {
@@ -427,30 +428,18 @@ class RouteSelectActivity : AppCompatActivity(),
                         routeIdToSend = routeIdToSend,
                         listView = binding.routeListView,
                         checkedIdArray = ArrayList(),
-                        multiSelect = false,
-                        checkedChangedListener = null,
-                        dataSetChangedListener = this
+                        multiSelect = false
                     )
-                } else {
-                    // IMPORTANTE:
-                    // Se deben actualizar los listeners, si no
-                    // las variables de esta actividad pueden
-                    // tener valores antiguos en del adaptador.
-
-                    adapter?.refreshListeners(dataSetChangedListener = this)
-                    adapter?.refresh()
                 }
+
+                adapter?.refreshListeners(dataSetChangedListener = this)
 
                 while (binding.routeListView.adapter == null) {
                     // Horrible wait for full load
                 }
 
-                if (adapter != null) {
-                    adapter?.setSelectItemAndScrollPos(
-                        lastSelected,
-                        firstVisiblePos
-                    )
-                }
+                adapter?.setSelectItemAndScrollPos(lastSelected, firstVisiblePos)
+                adapter?.refresh()
 
                 if (Statics.DEMO_MODE) Handler(Looper.getMainLooper()).postDelayed({ demo() }, 300)
             }

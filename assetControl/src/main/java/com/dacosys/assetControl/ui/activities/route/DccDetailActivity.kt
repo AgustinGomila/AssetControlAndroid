@@ -141,16 +141,13 @@ class DccDetailActivity : AppCompatActivity() {
 
         val tempDc = dc ?: return
         val table = Table.routeProcess
-        val id = tempDc.collectorRouteProcessId
+        val id = tempDc.routeProcessId
 
         var description = getDescription(tempDc)
         val reference = getReference(tempDc)
 
-        val tableName = table.tableName
-        description = "$tableName: $description"
-        if (description.length > 255) {
-            description.substring(0, 255)
-        }
+        val tableDescription = table.description
+        description = "$tableDescription: $description".take(255)
 
         val obs = "${getString(R.string.user)}: ${currentUser()?.name}"
 

@@ -228,11 +228,8 @@ class ItemCategoryCRUDActivity : AppCompatActivity(), CrudCompleted,
             description = itemCategory!!.description
         }
 
-        val tableName = Table.itemCategory.tableName
-        description = "$tableName: $description"
-        if (description.length > 255) {
-            description.substring(0, 255)
-        }
+        val tableDescription = Table.itemCategory.description
+        description = "$tableDescription: $description".take(255)
 
         val obs = "${getString(R.string.user)}: ${currentUser()?.name}"
 

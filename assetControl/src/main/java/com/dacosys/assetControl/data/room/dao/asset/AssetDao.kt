@@ -132,25 +132,25 @@ interface AssetDao {
         "UPDATE ${Entry.TABLE_NAME} SET ${Entry.ID} = :newValue " +
                 "WHERE ${Entry.ID} = :oldValue"
     )
-    suspend fun updateId(oldValue: Long, newValue: Long)
+    suspend fun updateId(newValue: Long, oldValue: Long)
 
     @Query(
         "UPDATE ${Entry.TABLE_NAME} SET ${Entry.WAREHOUSE_ID} = :newValue " +
                 "WHERE ${Entry.WAREHOUSE_ID} = :oldValue"
     )
-    suspend fun updateWarehouseId(oldValue: Long, newValue: Long)
+    suspend fun updateWarehouseId(newValue: Long, oldValue: Long)
 
     @Query(
         "UPDATE ${Entry.TABLE_NAME} SET ${Entry.WAREHOUSE_AREA_ID} = :newValue " +
                 "WHERE ${Entry.WAREHOUSE_AREA_ID} = :oldValue"
     )
-    suspend fun updateWarehouseAreaId(oldValue: Long, newValue: Long)
+    suspend fun updateWarehouseAreaId(newValue: Long, oldValue: Long)
 
     @Query(
         "UPDATE ${Entry.TABLE_NAME} SET ${Entry.ITEM_CATEGORY_ID} = :newValue " +
                 "WHERE ${Entry.ITEM_CATEGORY_ID} = :oldValue"
     )
-    suspend fun updateItemCategoryId(oldValue: Long, newValue: Long)
+    suspend fun updateItemCategoryId(newValue: Long, oldValue: Long)
 
     @Query(
         "UPDATE ${Entry.TABLE_NAME} SET ${Entry.WAREHOUSE_ID} = :warehouseId, " +

@@ -33,13 +33,28 @@ data class WarehouseMovementContent(
 ) : Parcelable {
 
     @Ignore
-    val itemCategoryStr = itemCategoryDescription.orEmpty()
+    var itemCategoryStr = itemCategoryDescription.orEmpty()
+        get() = itemCategoryDescription.orEmpty()
+        set(value) {
+            itemCategoryDescription = value.ifEmpty { null }
+            field = value
+        }
 
     @Ignore
-    val warehouseStr = warehouseDescription.orEmpty()
+    var warehouseStr = warehouseDescription.orEmpty()
+        get() = warehouseDescription.orEmpty()
+        set(value) {
+            warehouseDescription = value.ifEmpty { null }
+            field = value
+        }
 
     @Ignore
-    val warehouseAreaStr = warehouseAreaDescription.orEmpty()
+    var warehouseAreaStr = warehouseAreaDescription.orEmpty()
+        get() = warehouseAreaDescription.orEmpty()
+        set(value) {
+            warehouseAreaDescription = value.ifEmpty { null }
+            field = value
+        }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -113,10 +128,12 @@ data class WarehouseMovementContent(
         ean = parcel.readString().orEmpty()
     )
 
-    constructor(arc: AssetReviewContent) : this(
-        assetId = arc.assetId,
-        code = arc.code,
-        qty = arc.qty
+    constructor(id: Long, movementId: Long, reviewContent: AssetReviewContent) : this(
+        id = id,
+        warehouseMovementId = movementId,
+        assetId = reviewContent.assetId,
+        code = reviewContent.code,
+        qty = reviewContent.qty
     )
 
     constructor(tContent: TempMovementContentEntity) : this(

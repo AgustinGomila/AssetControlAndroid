@@ -28,10 +28,15 @@ class WarehouseRepository {
 
     fun selectNoTransferred() = runBlocking { ArrayList(dao.selectNoTransferred()) }
 
-    val minId get() = runBlocking { dao.selectMinId() ?: -1 }
+    private val nextLastId: Long
+        get() = runBlocking {
+            val minId = dao.selectMinId() ?: 0
+            if (minId > 0) -1 else minId - 1
+        }
 
 
     fun insert(warehouse: Warehouse) = runBlocking {
+        warehouse.id = nextLastId
         dao.insert(WarehouseEntity(warehouse))
     }
 

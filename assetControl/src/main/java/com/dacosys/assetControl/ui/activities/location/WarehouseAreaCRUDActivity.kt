@@ -213,11 +213,8 @@ class WarehouseAreaCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
             description = wa.description
         }
 
-        val tableName = Table.warehouseArea.tableName
-        description = "$tableName: $description"
-        if (description.length > 255) {
-            description.substring(0, 255)
-        }
+        val tableDescription = Table.warehouseArea.description
+        description = "$tableDescription: $description".take(255)
 
         val obs = "${getString(R.string.user)}: ${currentUser()?.name}"
 

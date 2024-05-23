@@ -19,18 +19,18 @@ class DataCollectionRuleContentObject() : Parcelable {
     var mandatory: Int = 0
 
     constructor(parcel: Parcel) : this() {
-        this.dataCollectionRuleContentId = parcel.readLong()
-        this.description = parcel.readString().orEmpty()
-        this.dataCollectionRuleId = parcel.readLong()
-        this.level = parcel.readInt()
-        this.position = parcel.readInt()
-        this.attributeId = parcel.readLong()
-        this.attributeCompositionId = parcel.readLong()
-        this.expression = parcel.readString().orEmpty()
-        this.trueResult = parcel.readInt()
-        this.falseResult = parcel.readInt()
-        this.active = parcel.readInt()
-        this.mandatory = parcel.readInt()
+        dataCollectionRuleContentId = parcel.readLong()
+        description = parcel.readString().orEmpty()
+        dataCollectionRuleId = parcel.readLong()
+        level = parcel.readInt()
+        position = parcel.readInt()
+        attributeId = parcel.readLong()
+        attributeCompositionId = parcel.readLong()
+        expression = parcel.readString().orEmpty()
+        trueResult = parcel.readInt()
+        falseResult = parcel.readInt()
+        active = parcel.readInt()
+        mandatory = parcel.readInt()
     }
 
     fun getBySoapObject(so: SoapObject): DataCollectionRuleContentObject {

@@ -58,15 +58,8 @@ class ItemCategoryCRUD {
         }
 
         private fun addItemCategory(icObj: ItemCategoryObject): CrudResult<ItemCategory?> {
-            var description = icObj.description
-            if (icObj.description.length > 255) {
-                description = icObj.description.substring(0, 255)
-            }
-
-            val newId = ItemCategoryRepository().minId
             val ic = ItemCategory(
-                id = newId,
-                description = description,
+                description = icObj.description.take(255),
                 active = icObj.active,
                 parentId = icObj.parent_id,
                 transferred = 0

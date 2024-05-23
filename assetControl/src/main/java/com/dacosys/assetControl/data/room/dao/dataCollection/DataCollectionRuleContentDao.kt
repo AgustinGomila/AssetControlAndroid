@@ -36,7 +36,7 @@ interface DataCollectionRuleContentDao {
     suspend fun selectAttributeCompositionIdByRouteId(routeId: Long): List<Long>
 
     @Query(
-        "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN $ATTR_COMP_BASIC_JOIN_FIELDS " +
+        "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
                 "WHERE ${Entry.TABLE_NAME}.${Entry.DATA_COLLECTION_RULE_ID} = :ruleId " +
                 "AND ${Entry.TABLE_NAME}.${Entry.ACTIVE} = 1"
     )

@@ -76,10 +76,10 @@ interface WarehouseAreaDao {
     suspend fun update(area: WarehouseAreaEntity)
 
     @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.WAREHOUSE_ID} = :newValue WHERE ${Entry.WAREHOUSE_ID} = :oldValue")
-    suspend fun updateWarehouseId(oldValue: Long, newValue: Long)
+    suspend fun updateWarehouseId(newValue: Long, oldValue: Long)
 
     @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.ID} = :newValue WHERE ${Entry.ID} = :oldValue")
-    suspend fun updateWarehouseAreaId(oldValue: Long, newValue: Long)
+    suspend fun updateWarehouseAreaId(newValue: Long, oldValue: Long)
 
     @Query(
         "UPDATE ${Entry.TABLE_NAME} " +

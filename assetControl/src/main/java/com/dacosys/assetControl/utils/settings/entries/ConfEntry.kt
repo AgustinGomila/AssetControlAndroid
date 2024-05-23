@@ -789,7 +789,7 @@ class ConfEntry(
 
         var acSyncQtyRegistry = ConfEntry(
             957, "SyncQtyRegistry", ConfSection.assetControlData,
-            Int::class.javaObjectType, 20
+            Int::class.javaObjectType, 75
         )
 
         private var acMaintenanceDays = ConfEntry(

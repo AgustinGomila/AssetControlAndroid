@@ -21,7 +21,6 @@ class BarcodeLabelCustomObject() : Parcelable {
     }
 
     constructor(barcodeLabelCustom: BarcodeLabelCustom) : this() {
-        // Main Information
         description = barcodeLabelCustom.description
         barcode_label_custom_id = barcodeLabelCustom.id
         barcode_label_target_id = barcodeLabelCustom.barcodeLabelTargetId

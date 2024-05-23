@@ -6,7 +6,8 @@ import androidx.room.ColumnInfo
 import androidx.room.Ignore
 import com.dacosys.assetControl.data.room.repository.route.RouteProcessContentRepository
 import com.dacosys.assetControl.data.room.repository.route.RouteProcessRepository
-import com.dacosys.assetControl.utils.Statics.Companion.toDate
+import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.dateToStringDate
+import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.stringDateToNotNullDate
 import java.util.*
 
 class RouteProcess(
@@ -38,6 +39,7 @@ class RouteProcess(
 
     @Ignore
     var completed: Boolean = mCompleted == 1
+        get() = mCompleted == 1
         set(value) {
             mCompleted = if (value) 1 else 0
             field = value
@@ -63,10 +65,10 @@ class RouteProcess(
         userId = parcel.readLong(),
         routeId = parcel.readLong(),
         routeProcessId = parcel.readLong(),
-        routeProcessDate = parcel.readString().orEmpty().toDate(),
+        routeProcessDate = stringDateToNotNullDate(parcel.readString().orEmpty()),
         mCompleted = parcel.readInt(),
         transferred = parcel.readValue(Int::class.java.classLoader) as? Int,
-        transferredDate = parcel.readString().orEmpty().toDate(),
+        transferredDate = stringDateToNotNullDate(parcel.readString().orEmpty()),
         routeStr = parcel.readString().orEmpty()
     )
 
@@ -89,10 +91,10 @@ class RouteProcess(
         parcel.writeLong(userId)
         parcel.writeLong(routeId)
         parcel.writeLong(routeProcessId)
-        parcel.writeString(routeProcessDate.toString())
+        parcel.writeString(dateToStringDate(routeProcessDate))
         parcel.writeInt(mCompleted)
         parcel.writeValue(transferred)
-        parcel.writeString(transferredDate?.toString())
+        parcel.writeString(dateToStringDate(transferredDate))
         parcel.writeString(routeStr)
     }
 

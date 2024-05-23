@@ -28,19 +28,11 @@ class DataCollectionContentRepository {
         dao.selectByDataCollectionRuleContentIdWarehouseAreaId(dcrContId, waId)
     }
 
+
     fun insert(id: Long, dcc: DataCollectionContent): Boolean {
         val r = runBlocking {
             dcc.dataCollectionId = id
             dao.insert(DataCollectionContentEntity(dcc))
-            true
-        }
-        return r
-    }
-
-    fun insert(id: Long, dccList: List<DataCollectionContent>): Boolean {
-        val r = runBlocking {
-            dccList.forEach { it.dataCollectionId = id }
-            dao.insert(dccList.map { DataCollectionContentEntity(it) })
             true
         }
         return r

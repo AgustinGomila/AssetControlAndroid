@@ -28,6 +28,7 @@ import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion
 import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutBoolean
 import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 import org.parceler.Parcels
+import kotlin.concurrent.thread
 
 
 class DataCollectionRuleSelectActivity : AppCompatActivity() {
@@ -194,7 +195,7 @@ class DataCollectionRuleSelectActivity : AppCompatActivity() {
 
         binding.onlyActiveSwitch.setOnCheckedChangeListener { _, _ -> fillListView() }
 
-        fillListView()
+        thread { fillListView() }
 
         setupUI(binding.root, this)
     }

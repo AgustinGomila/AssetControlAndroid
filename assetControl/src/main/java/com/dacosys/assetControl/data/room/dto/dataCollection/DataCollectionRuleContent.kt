@@ -38,10 +38,20 @@ class DataCollectionRuleContent(
     }
 
     @Ignore
-    val active: Boolean = mActive == 1
+    var active: Boolean = mActive == 1
+        get() = mActive == 1
+        set(value) {
+            mActive = if (value) 1 else 0
+            field = value
+        }
 
     @Ignore
-    val mandatory: Boolean = mMandatory == 1
+    var mandatory: Boolean = mMandatory == 1
+        get() = mMandatory == 1
+        set(value) {
+            mMandatory = if (value) 1 else 0
+            field = value
+        }
 
     object Entry {
         const val TABLE_NAME = "data_collection_rule_content"

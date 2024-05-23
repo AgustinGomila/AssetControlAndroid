@@ -357,11 +357,8 @@ class ArcConfirmActivity : AppCompatActivity(),
         val ar = assetReview ?: return
 
         var description = ar.warehouseAreaStr
-        val tableName = Table.assetReview.tableName
-        description = "$tableName: $description"
-        if (description.length > 255) {
-            description.substring(0, 255)
-        }
+        val tableDescription = Table.assetReview.description
+        description = "$tableDescription: $description".take(255)
 
         val obs = "${getString(R.string.user)}: ${currentUser()?.name}"
 

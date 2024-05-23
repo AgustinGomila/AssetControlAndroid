@@ -21,11 +21,11 @@ class WarehouseAreaObject() : Parcelable {
     }
 
     constructor(warehouseArea: WarehouseArea) : this() {
-        // Main Information
-        description = warehouseArea.description
         warehouse_area_id = warehouseArea.id
         warehouse_id = warehouseArea.warehouseId
         active = warehouseArea.mActive
+        description = warehouseArea.description
+        // warehouse_area_ext_id = ""
     }
 
     fun getBySoapObject(so: SoapObject): WarehouseAreaObject {

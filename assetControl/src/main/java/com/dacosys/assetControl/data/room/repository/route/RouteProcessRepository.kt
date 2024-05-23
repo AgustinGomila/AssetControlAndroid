@@ -1,12 +1,12 @@
 package com.dacosys.assetControl.data.room.repository.route
 
-import com.dacosys.assetControl.AssetControlApp.Companion.getUserId
 import com.dacosys.assetControl.data.room.dao.route.RouteProcessDao
 import com.dacosys.assetControl.data.room.database.AcDatabase.Companion.database
 import com.dacosys.assetControl.data.room.dto.route.Route
 import com.dacosys.assetControl.data.room.dto.route.RouteProcess
 import com.dacosys.assetControl.data.room.entity.route.RouteProcessEntity
-import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.getUTCDateTimeAsDate
+import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.dateToNotNullStringDate
+import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.getUTCDateTimeAsNotNullDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -27,30 +27,28 @@ class RouteProcessRepository {
 
     fun selectByNoCompleted() = runBlocking { dao.selectByNoCompleted() }
 
-    private val nextId: Long
-        get() = runBlocking { (dao.selectMaxId() ?: 0) + 1 }
+    private val nextLastId: Long
+        get() = runBlocking {
+            val minId = dao.selectMinId() ?: 0
+            if (minId > 0) -1 else minId - 1
+        }
 
 
-    fun insert(route: Route): Long = runBlocking {
-        val nextId = nextId
-        val userId = getUserId() ?: 0
-        var newId: Long
+    fun insert(userId: Long, route: Route): RouteProcess? {
+        val nextId = nextLastId
 
-        runBlocking {
+        val r = runBlocking {
             val rp = RouteProcess(
                 id = nextId,
                 userId = userId,
                 routeId = route.id,
-                routeProcessDate = getUTCDateTimeAsDate() ?: Date(),
-                mCompleted = 0,
-                transferred = 0,
-                transferredDate = null,
+                routeProcessDate = getUTCDateTimeAsNotNullDate(),
                 routeStr = route.description
             )
-            newId = dao.insert(RouteProcessEntity(rp))
+            dao.insert(RouteProcessEntity(rp))
+            dao.selectById(nextId)
         }
-
-        newId
+        return r
     }
 
 
@@ -68,9 +66,10 @@ class RouteProcessRepository {
         return true
     }
 
-    fun updateTransferredNew(newValue: Long, oldValue: Long) {
+    fun updateTransferred(newValue: Long, oldValue: Long) {
         runBlocking {
-            dao.updateId(newValue, oldValue)
+            val date = getUTCDateTimeAsNotNullDate()
+            dao.updateId(newValue, oldValue, date)
         }
     }
 
@@ -115,7 +114,7 @@ class RouteProcessRepository {
                             continue
                         }
 
-                        minDate = r.routeProcessDate.toString()
+                        minDate = dateToNotNullStringDate(r.routeProcessDate)
                         break
                     }
                 }

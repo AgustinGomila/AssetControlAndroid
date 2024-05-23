@@ -21,12 +21,11 @@ class ItemCategoryObject() : Parcelable {
     }
 
     constructor(itemCategory: ItemCategory) : this() {
-        // Main Information
         description = itemCategory.description
         item_category_id = itemCategory.id
         parent_id = itemCategory.parentId
         active = itemCategory.active
-        item_category_ext_id = ""
+        // item_category_ext_id = ""
     }
 
     fun getBySoapObject(so: SoapObject): ItemCategoryObject {

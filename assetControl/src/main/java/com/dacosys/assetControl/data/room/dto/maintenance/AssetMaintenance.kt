@@ -23,14 +23,20 @@ class AssetMaintenance(
 
     @Ignore
     var transferred: Boolean = mTransferred == 1
+        get() = mTransferred == 1
         set(value) {
             mTransferred = if (value) 1 else 0
             field = value
         }
 
     @Ignore
-    val maintenanceStatus: MaintenanceStatus =
+    var maintenanceStatus: MaintenanceStatus =
         MaintenanceStatus.getById(maintenanceStatusId) ?: MaintenanceStatus.unknown
+        get() = MaintenanceStatus.getById(maintenanceStatusId) ?: MaintenanceStatus.unknown
+        set(value) {
+            maintenanceStatusId = value.id
+            field = value
+        }
 
     constructor(parcel: Parcel) : this(
         id = parcel.readLong(),

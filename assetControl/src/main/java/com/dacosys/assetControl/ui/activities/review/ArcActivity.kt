@@ -319,6 +319,8 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         b.putBoolean("saving", saving)
 
+        b.putLong("unknownAssetId", unknownAssetId)
+
         b.putStringArrayList("currentInventory", currentInventory)
 
         b.putBoolean("allowUnknownCodes", binding.allowUnknownCodesSwitch.isChecked)
@@ -365,6 +367,8 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
         if (b.containsKey("addUnknownAssets")) binding.addUnknownAssetsSwitch.isChecked =
             b.getBoolean("addUnknownAssets")
         else binding.addUnknownAssetsSwitch.isChecked = prefsGetBoolean(Preference.assetReviewAddUnknownAssets)
+
+        unknownAssetId = b.getLong("unknownAssetId")
 
         currentInventory = b.getStringArrayList("currentInventory")
 
@@ -1125,7 +1129,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
                     tempDesc = getString(R.string.NO_DATA)
                 }
                 runOnUiThread {
-                    arCont.description = tempDesc
+                    arCont.assetDescription = tempDesc
                 }
                 dialog.dismiss()
             }
@@ -1473,7 +1477,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
                 // STATUS 3 = Add an asset does not exist in the database
                 addUnknownAsset(
                     reviewId = tempReview.id,
-                    tempCode = tempCode
+                    code = tempCode
                 )
                 return
             }
@@ -1528,14 +1532,8 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
         }
     }
 
-    private fun addUnknownAsset(reviewId: Long, tempCode: String) {
-        var code = tempCode
-
+    private fun addUnknownAsset(reviewId: Long, code: String) {
         unknownAssetId--
-
-        if (code.length >= 45) {
-            code = code.substring(0, 45)
-        }
 
         val nextId = AssetReviewContentRepository().nextId
 
@@ -1543,8 +1541,8 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
             assetReviewId = reviewId,
             id = nextId,
             assetId = unknownAssetId,
-            code = code.uppercase(Locale.ROOT),
-            description = getString(R.string.NO_DATA),
+            assetCode = code.take(45).uppercase(Locale.ROOT),
+            assetDescription = getString(R.string.NO_DATA),
             qty = 1.0,
             contentStatusId = AssetReviewContentStatus.unknown.id,
             originWarehouseAreaId = 0L
@@ -1570,7 +1568,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
             // Pedir una descripción y agregar como desconocido
             if (Statics.DEMO_MODE) {
-                content.description = getString(R.string.test_asset)
+                content.assetDescription = getString(R.string.test_asset)
             } else {
                 runOnUiThread { itemDescriptionDialog(content) }
             }
@@ -1621,9 +1619,9 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
                     if (arc != null) {
                         try {
                             runOnUiThread {
-                                arc.description = asset.description
+                                arc.assetDescription = asset.description
                                 arc.assetId = asset.id
-                                arc.code = asset.code
+                                arc.assetCode = asset.code
                                 arc.contentStatusId = AssetReviewContentStatus.newAsset.id
                             }
                         } catch (ex: Exception) {

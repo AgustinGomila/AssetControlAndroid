@@ -231,7 +231,6 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
         binding.removeButton.setOnClickListener { assetReviewRemove() }
         binding.newButton.setOnClickListener { assetReviewNew() }
 
-        // Llenar la grilla
         setPanels()
 
         setupUI(binding.root, this)
@@ -502,6 +501,7 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
                 )
 
                 adapter?.refreshListeners(dataSetChangedListener = this)
+                adapter?.refresh()
 
                 while (binding.assetReviewListView.adapter == null) {
                     // Horrible wait for full load
@@ -522,9 +522,12 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
     private fun beginAssetReview(warehouseArea: WarehouseArea) {
         makeText(binding.assetReviewSelect, warehouseArea.description, SnackBarType.INFO)
 
+        val reviewRepository = AssetReviewRepository()
+
         // Agregar un AssetReview del área
-        val arId = AssetReviewRepository().insert(warehouseArea)
-        val ar = AssetReviewRepository().selectById(arId)
+        val arId = reviewRepository.insert(warehouseArea)
+        val ar = reviewRepository.selectById(arId)
+
         if (ar != null) {
             if (!rejectNewInstances) {
                 rejectNewInstances = true

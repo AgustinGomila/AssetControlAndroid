@@ -833,13 +833,11 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
 
         makeText(binding.root, warehouseArea.description, SnackBarType.INFO)
 
+        val reviewRepository = AssetReviewRepository()
+
         // Agregar un AssetReview del área
-        val arId = AssetReviewRepository().insert(warehouseArea)
-        if (arId <= 0) {
-            rejectNewInstances = false
-            return
-        }
-        val ar = AssetReviewRepository().selectById(arId)
+        val arId = reviewRepository.insert(warehouseArea)
+        val ar = reviewRepository.selectById(arId)
 
         val intent = Intent(baseContext, ArcActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP

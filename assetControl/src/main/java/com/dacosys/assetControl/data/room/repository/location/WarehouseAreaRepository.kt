@@ -40,11 +40,18 @@ class WarehouseAreaRepository {
         dao.selectByTempIds(ids)
     }
 
-    val minId get() = runBlocking { dao.selectMinId() ?: -1 }
+    private val nextLastId: Long
+        get() = runBlocking {
+            val minId = dao.selectMinId() ?: 0
+            if (minId > 0) -1 else minId - 1
+        }
+
 
     fun insert(warehouseArea: WarehouseArea) = runBlocking {
+        warehouseArea.id = nextLastId
         dao.insert(WarehouseAreaEntity(warehouseArea))
     }
+
 
     fun update(warehouseArea: WarehouseAreaObject) {
         val wa = WarehouseArea(warehouseArea)

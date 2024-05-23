@@ -24,7 +24,7 @@ interface UserWarehouseAreaDao {
 
 
     @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.WAREHOUSE_AREA_ID} = :newValue WHERE ${Entry.WAREHOUSE_AREA_ID} = :oldValue")
-    suspend fun updateWarehouseAreaId(oldValue: Long, newValue: Long)
+    suspend fun updateWarehouseAreaId(newValue: Long, oldValue: Long)
 
 
     @Query("DELETE $BASIC_FROM")

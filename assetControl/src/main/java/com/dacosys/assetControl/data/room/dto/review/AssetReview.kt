@@ -5,7 +5,9 @@ import android.os.Parcelable
 import androidx.room.ColumnInfo
 import androidx.room.Ignore
 import com.dacosys.assetControl.data.room.repository.review.AssetReviewContentRepository
-import com.dacosys.assetControl.utils.Statics.Companion.toDate
+import com.dacosys.assetControl.data.room.repository.review.AssetReviewRepository
+import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.dateToStringDate
+import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.stringDateToNotNullDate
 import java.util.*
 
 class AssetReview(
@@ -21,6 +23,32 @@ class AssetReview(
     @ColumnInfo(name = Entry.WAREHOUSE_STR) var warehouseStr: String? = null,
     @ColumnInfo(name = Entry.USER_STR) var userStr: String = ""
 ) : Parcelable {
+
+    fun saveChanges() = AssetReviewRepository().update(this)
+
+    @Ignore
+    var obs: String = observations.orEmpty()
+        get() = observations.orEmpty()
+        set(value) {
+            observations = value.ifEmpty { null }
+            field = value
+        }
+
+    @Ignore
+    private var contentsRead: Boolean = false
+
+    @Ignore
+    private var mContents: ArrayList<AssetReviewContent> = arrayListOf()
+
+    fun contents(): ArrayList<AssetReviewContent> {
+        if (contentsRead) return mContents
+        else {
+            mContents = ArrayList(AssetReviewContentRepository().selectByAssetReviewId(id))
+            contentsRead = true
+            return mContents
+        }
+    }
+
     object Entry {
         const val TABLE_NAME = "asset_review"
         const val ID = "_id"
@@ -50,32 +78,14 @@ class AssetReview(
         return id.hashCode()
     }
 
-    @Ignore
-    var obs: String = observations.orEmpty()
-
-    @Ignore
-    private var contentsRead: Boolean = false
-
-    @Ignore
-    private var mContents: ArrayList<AssetReviewContent> = arrayListOf()
-
-    fun contents(): ArrayList<AssetReviewContent> {
-        if (contentsRead) return mContents
-        else {
-            mContents = ArrayList(AssetReviewContentRepository().selectByAssetReviewId(id))
-            contentsRead = true
-            return mContents
-        }
-    }
-
     constructor(parcel: Parcel) : this(
         id = parcel.readLong(),
-        assetReviewDate = parcel.readString().orEmpty().toDate(),
+        assetReviewDate = stringDateToNotNullDate(parcel.readString().orEmpty()),
         observations = parcel.readString(),
         userId = parcel.readLong(),
         warehouseAreaId = parcel.readLong(),
         warehouseId = parcel.readLong(),
-        modificationDate = parcel.readString().orEmpty().toDate(),
+        modificationDate = stringDateToNotNullDate(parcel.readString().orEmpty()),
         statusId = parcel.readInt(),
         warehouseAreaStr = parcel.readString().orEmpty(),
         warehouseStr = parcel.readString().orEmpty(),
@@ -84,12 +94,12 @@ class AssetReview(
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeLong(id)
-        parcel.writeString(assetReviewDate.toString())
+        parcel.writeString(dateToStringDate(assetReviewDate))
         parcel.writeString(observations)
         parcel.writeLong(userId)
         parcel.writeLong(warehouseAreaId)
         parcel.writeLong(warehouseId)
-        parcel.writeString(modificationDate.toString())
+        parcel.writeString(dateToStringDate(modificationDate))
         parcel.writeInt(statusId)
         parcel.writeString(warehouseAreaStr)
         parcel.writeString(warehouseStr)

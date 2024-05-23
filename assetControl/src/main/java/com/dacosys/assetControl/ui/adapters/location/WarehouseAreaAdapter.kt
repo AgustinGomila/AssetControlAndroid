@@ -50,8 +50,8 @@ class WarehouseAreaAdapter : ArrayAdapter<WarehouseArea>, Filterable {
         listView: ListView?,
         checkedIdArray: ArrayList<Long>,
         multiSelect: Boolean,
-        checkedChangedListener: CheckedChangedListener?,
-        dataSetChangedListener: DataSetChangedListener?,
+        checkedChangedListener: CheckedChangedListener? = null,
+        dataSetChangedListener: DataSetChangedListener? = null,
     ) : super(AssetControlApp.getContext(), resource, warehouseAreas) {
         this.activity = activity
         this.resource = resource

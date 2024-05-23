@@ -19,11 +19,10 @@ class WarehouseObject() : Parcelable {
     }
 
     constructor(warehouse: Warehouse) : this() {
-        // Main Information
         description = warehouse.description
         warehouse_id = warehouse.id
         active = if (warehouse.active) 1 else 0
-        warehouse_ext_id = ""
+        // warehouse_ext_id = warehouse.externalId
     }
 
     fun getBySoapObject(so: SoapObject): WarehouseObject {

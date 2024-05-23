@@ -33,10 +33,6 @@ class BarcodeLabelField {
         t = t.replace("É", "E")
         t = t.replace("Á", "A")
 
-        value = t
-
-        if (value.length > length) {
-            value = value.substring(0, length)
-        }
+        value = t.take(length)
     }
 }

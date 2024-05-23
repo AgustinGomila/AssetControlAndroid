@@ -30,76 +30,61 @@ class GetRouteProcessContent(
         onProgress.invoke(result)
     }
 
-    private suspend fun suspendFunction(): GetRouteProcessContentResult =
-        withContext(Dispatchers.IO) {
+    private suspend fun suspendFunction(): GetRouteProcessContentResult = withContext(Dispatchers.IO) {
+        // Me quedo con el contenido del nivel que estamos registrando
+        var thisLevelRpCont: ArrayList<RouteProcessContent> = ArrayList()
 
-            // Me quedo con el contenido del nivel que estamos registrando
-            var thisLevelRpCont: ArrayList<RouteProcessContent> = ArrayList()
+        if (rpContArray.size < 1) {
+            Log.d(
+                this::class.java.simpleName,
+                getContext().getString(R.string.getting_processed_content)
+            )
 
-            ///////////////////////////////////
-            // Para controlar la transacción //
-            // TODO Eliminar DB, val db = DataBaseHelper.getWritableDb()
+            // Necesita llamarse al GetByRouteProcessComplete para que se inserten
+            // los registros aún no recolectados de la ruta
+            val tempRpCont =
+                RouteProcessContentRepository().selectByRouteProcessComplete(
+                    routeId = routeId,
+                    routeProcessId = routeProcessId,
+                    dataCollection = null
+                )
 
-            try {
-                // TODO Eliminar DB, db.beginTransaction()
+            for (rpCont in tempRpCont) {
+                rpContArray.add(rpCont)
 
-                if (rpContArray.size < 1) {
-                    Log.d(
-                        this::class.java.simpleName,
-                        getContext().getString(R.string.getting_processed_content)
-                    )
-
-                    // Necesita llamarse al GetByRouteProcessComplete para que se inserten
-                    // los registros aún no recolectados de la ruta
-                    val tempRpCont =
-                        RouteProcessContentRepository().selectByRouteProcessComplete(
-                            routeId = routeId,
-                            routeProcessId = routeProcessId,
-                            dataCollection = null
-                        )
-
-                    for (rpCont in tempRpCont) {
-                        rpContArray.add(rpCont)
-
-                        if (rpCont.routeProcessId == routeProcessId && rpCont.level == level) {
-                            thisLevelRpCont.add(rpCont)
-                        }
-                    }
-
-                    thisLevelRpCont =
-                        ArrayList(
-                            thisLevelRpCont.sortedWith(
-                                compareBy({ it.level },
-                                    { it.position })
-                            )
-                        )
-                } else {
-                    for (rpCont in rpContArray) {
-                        if (rpCont.routeProcessId == routeProcessId && rpCont.level == level) {
-                            thisLevelRpCont.add(rpCont)
-                        }
-                    }
-
-                    thisLevelRpCont =
-                        ArrayList(
-                            thisLevelRpCont.sortedWith(
-                                compareBy({ it.level },
-                                    { it.position })
-                            )
-                        )
+                if (rpCont.routeProcessId == routeProcessId && rpCont.level == level) {
+                    thisLevelRpCont.add(rpCont)
                 }
-
-                // TODO Eliminar DB, db.setTransactionSuccessful()
-
-            } finally {
-                // TODO Eliminar DB, db.endTransaction()
             }
 
-            return@withContext GetRouteProcessContentResult(
-                currentRouteProcessContent = thisLevelRpCont,
-                level = level
-            )
+            thisLevelRpCont =
+                ArrayList(
+                    thisLevelRpCont.sortedWith(
+                        compareBy({ it.level },
+                            { it.position })
+                    )
+                )
+        } else {
+            for (rpCont in rpContArray) {
+                if (rpCont.routeProcessId == routeProcessId && rpCont.level == level) {
+                    thisLevelRpCont.add(rpCont)
+                }
+            }
+
+            thisLevelRpCont =
+                ArrayList(
+                    thisLevelRpCont.sortedWith(
+                        compareBy({ it.level },
+                            { it.position })
+                    )
+                )
         }
+
+        return@withContext GetRouteProcessContentResult(
+            currentRouteProcessContent = thisLevelRpCont,
+            level = level
+        )
+    }
 
     init {
         scope.launch { doInBackground() }

@@ -169,7 +169,9 @@ class SyncDownload(
 
             if (prefsGetBoolean(Preference.useAssetControlManteinance)) {
                 t.union(
-                    listOf(async { maintenanceType() }, async { maintenanceTypeGroup() })
+                    listOf(
+                        async { maintenanceType() },
+                        async { maintenanceTypeGroup() })
                 )
             }
 

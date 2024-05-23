@@ -7,7 +7,7 @@ import androidx.room.Ignore
 import com.dacosys.assetControl.data.webservice.location.WarehouseObject
 
 class Warehouse(
-    @ColumnInfo(name = Entry.ID) val id: Long = 0L,
+    @ColumnInfo(name = Entry.ID) var id: Long = 0L,
     @ColumnInfo(name = Entry.DESCRIPTION) var description: String = "",
     @ColumnInfo(name = Entry.ACTIVE) var mActive: Int = 0,
     @ColumnInfo(name = Entry.TRANSFERRED) val transferred: Int? = null
@@ -19,6 +19,7 @@ class Warehouse(
 
     @Ignore
     var active: Boolean = mActive == 1
+        get() = mActive == 1
         set(value) {
             mActive = if (value) 1 else 0
             field = value

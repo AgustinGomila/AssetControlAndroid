@@ -207,6 +207,7 @@ class CodeSelectDialogActivity : AppCompatActivity(),
 
         KeyboardVisibilityEvent.registerEventListener(this, this)
         refreshCodeText(cleanText = false, focus = true)
+
         thread { fillAdapter() }
     }
 

@@ -42,7 +42,7 @@ interface WarehouseDao {
     suspend fun update(warehouse: WarehouseEntity)
 
     @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.ID} = :newValue WHERE ${Entry.ID} = :oldValue")
-    suspend fun updateId(oldValue: Long, newValue: Long)
+    suspend fun updateId(newValue: Long, oldValue: Long)
 
     @Query(
         "UPDATE ${Entry.TABLE_NAME} " +

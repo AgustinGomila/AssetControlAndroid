@@ -5,7 +5,8 @@ import android.os.Parcelable
 import androidx.room.ColumnInfo
 import androidx.room.Ignore
 import com.dacosys.assetControl.data.room.repository.dataCollection.DataCollectionContentRepository
-import com.dacosys.assetControl.utils.Statics.Companion.toDate
+import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.dateToStringDate
+import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.stringDateToDate
 import java.util.*
 
 class DataCollection(
@@ -19,7 +20,7 @@ class DataCollection(
     @ColumnInfo(name = Entry.COMPLETED) var completed: Int = 0,
     @ColumnInfo(name = Entry.TRANSFERRED_DATE) var transferredDate: Date? = null,
     @ColumnInfo(name = Entry.ID) var id: Long = 0L,
-    @ColumnInfo(name = Entry.COLLECTOR_ROUTE_PROCESS_ID) var collectorRouteProcessId: Long = 0L,
+    @ColumnInfo(name = Entry.ROUTE_PROCESS_ID) var routeProcessId: Long = 0L,
     @ColumnInfo(name = Entry.ASSET_STR) var assetDescription: String? = null,
     @ColumnInfo(name = Entry.ASSET_CODE) var assetCode: String = "",
     @ColumnInfo(name = Entry.WAREHOUSE_STR) var warehouseDescription: String? = null,
@@ -27,13 +28,28 @@ class DataCollection(
 ) : Parcelable {
 
     @Ignore
-    val assetStr = assetDescription.orEmpty()
+    var assetStr: String = assetDescription.orEmpty()
+        get() = assetDescription.orEmpty()
+        set(value) {
+            assetDescription = value.ifEmpty { null }
+            field = value
+        }
 
     @Ignore
-    val warehouseStr = warehouseDescription.orEmpty()
+    var warehouseStr = warehouseDescription.orEmpty()
+        get() = warehouseDescription.orEmpty()
+        set(value) {
+            warehouseDescription = value.ifEmpty { null }
+            field = value
+        }
 
     @Ignore
-    val warehouseAreaStr = warehouseAreaDescription.orEmpty()
+    var warehouseAreaStr = warehouseAreaDescription.orEmpty()
+        get() = warehouseAreaDescription.orEmpty()
+        set(value) {
+            warehouseAreaDescription = value.ifEmpty { null }
+            field = value
+        }
 
     @Ignore
     private var contentsRead: Boolean = false
@@ -56,12 +72,12 @@ class DataCollection(
         warehouseId = parcel.readValue(Long::class.java.classLoader) as? Long,
         warehouseAreaId = parcel.readValue(Long::class.java.classLoader) as? Long,
         userId = parcel.readLong(),
-        dateStart = parcel.readString().orEmpty().toDate(),
-        dateEnd = parcel.readString().orEmpty().toDate(),
+        dateStart = stringDateToDate(parcel.readString().orEmpty()),
+        dateEnd = stringDateToDate(parcel.readString().orEmpty()),
         completed = parcel.readInt(),
-        transferredDate = parcel.readString().orEmpty().toDate(),
+        transferredDate = stringDateToDate(parcel.readString().orEmpty()),
         id = parcel.readLong(),
-        collectorRouteProcessId = parcel.readLong(),
+        routeProcessId = parcel.readLong(),
         assetDescription = parcel.readString().orEmpty(),
         assetCode = parcel.readString().orEmpty(),
         warehouseDescription = parcel.readString().orEmpty(),
@@ -80,7 +96,7 @@ class DataCollection(
         const val COMPLETED = "completed"
         const val TRANSFERRED_DATE = "transferred_date"
         const val ID = "_id"
-        const val COLLECTOR_ROUTE_PROCESS_ID = "collector_route_process_id"
+        const val ROUTE_PROCESS_ID = "route_process_id"
 
         const val ASSET_STR = "asset_str"
         const val ASSET_CODE = "asset_code"
@@ -94,12 +110,12 @@ class DataCollection(
         parcel.writeValue(warehouseId)
         parcel.writeValue(warehouseAreaId)
         parcel.writeLong(userId)
-        parcel.writeString(dateStart?.toString())
-        parcel.writeString(dateEnd?.toString())
+        parcel.writeString(dateToStringDate(dateStart))
+        parcel.writeString(dateToStringDate(dateEnd))
         parcel.writeInt(completed)
-        parcel.writeString(transferredDate?.toString())
+        parcel.writeString(dateToStringDate(transferredDate))
         parcel.writeLong(id)
-        parcel.writeLong(collectorRouteProcessId)
+        parcel.writeLong(routeProcessId)
         parcel.writeString(assetDescription)
         parcel.writeString(assetCode)
         parcel.writeString(warehouseDescription)

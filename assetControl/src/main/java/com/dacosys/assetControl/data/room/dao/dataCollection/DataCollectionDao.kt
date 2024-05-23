@@ -19,21 +19,25 @@ interface DataCollectionDao {
         "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
                 "WHERE ${Entry.TABLE_NAME}.${Entry.ID} = :id"
     )
-    suspend fun selectByCollectorId(id: Long): DataCollection?
+    suspend fun selectById(id: Long): DataCollection?
 
     @Query("$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN $NO_TRANSFERRED_LEFT_JOIN $NO_TRANSFERRED_WHERE")
     suspend fun selectByNoTransferred(): List<DataCollection>
 
-    @Query("SELECT MAX(${Entry.ID}) $BASIC_FROM")
-    suspend fun selectMaxId(): Long?
+    @Query("SELECT MIN(${Entry.ID}) $BASIC_FROM")
+    suspend fun selectMinId(): Long?
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(content: DataCollectionEntity)
 
 
-    @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.ID} = :newValue, ${Entry.TRANSFERRED_DATE} = :date WHERE ${Entry.ID} = :oldValue")
-    suspend fun updateId(oldValue: Long, newValue: Long, date: Date = Date())
+    @Query(
+        "UPDATE ${Entry.TABLE_NAME} SET ${Entry.ID} = :newValue, " +
+                "${Entry.TRANSFERRED_DATE} = :date " +
+                "WHERE ${Entry.ID} = :oldValue"
+    )
+    suspend fun updateId(newValue: Long, oldValue: Long, date: Date)
 
 
     @Query("DELETE $BASIC_FROM WHERE ${Entry.ID} = :id")
@@ -41,7 +45,7 @@ interface DataCollectionDao {
 
     @Query(
         "DELETE $BASIC_FROM " +
-                "WHERE ${Entry.TABLE_NAME}.${Entry.COLLECTOR_ROUTE_PROCESS_ID} NOT IN ( " +
+                "WHERE ${Entry.TABLE_NAME}.${Entry.ROUTE_PROCESS_ID} NOT IN ( " +
                 "SELECT ${rpEntry.TABLE_NAME}.${rpEntry.ROUTE_PROCESS_ID} FROM ${rpEntry.TABLE_NAME}) "
     )
     suspend fun deleteOrphans()
@@ -57,16 +61,16 @@ interface DataCollectionDao {
         private val waEntry = WarehouseArea.Entry
 
         const val NO_TRANSFERRED_WHERE =
-            "WHERE (${Entry.TABLE_NAME}.${Entry.TRANSFERRED_DATE} IS NULL) AND " +
-                    "(${Entry.TABLE_NAME}.${Entry.COMPLETED} = 1) AND " +
-                    "(((${Entry.TABLE_NAME}.${Entry.COLLECTOR_ROUTE_PROCESS_ID} IS NOT NULL) " +
-                    "AND(${rpEntry.TABLE_NAME}.${rpEntry.COMPLETED} = 1) " +
+            " WHERE (${Entry.TABLE_NAME}.${Entry.TRANSFERRED_DATE} IS NULL) " +
+                    "AND (${Entry.TABLE_NAME}.${Entry.COMPLETED} = 1) " +
+                    "AND (((${Entry.TABLE_NAME}.${Entry.ROUTE_PROCESS_ID} IS NOT NULL) " +
+                    "AND (${rpEntry.TABLE_NAME}.${rpEntry.COMPLETED} = 1) " +
                     "AND (${rpEntry.TABLE_NAME}.${rpEntry.TRANSFERRED_DATE} IS NULL)) " +
-                    "OR (${Entry.TABLE_NAME}.${Entry.COLLECTOR_ROUTE_PROCESS_ID} IS NULL))"
+                    "OR (${Entry.TABLE_NAME}.${Entry.ROUTE_PROCESS_ID} IS NULL))"
 
         const val NO_TRANSFERRED_LEFT_JOIN =
-            " LEFT OUTER JOIN ${rpEntry.TABLE_NAME} ON ${rpEntry.TABLE_NAME}.${rpEntry.ROUTE_PROCESS_ID} = ${Entry.TABLE_NAME}.${Entry.COLLECTOR_ROUTE_PROCESS_ID} " +
-                    "OR (${Entry.TABLE_NAME}.${Entry.COLLECTOR_ROUTE_PROCESS_ID} IS NULL)"
+            " LEFT OUTER JOIN ${rpEntry.TABLE_NAME} ON ${rpEntry.TABLE_NAME}.${rpEntry.ID} = ${Entry.TABLE_NAME}.${Entry.ROUTE_PROCESS_ID} " +
+                    "OR (${Entry.TABLE_NAME}.${Entry.ROUTE_PROCESS_ID} IS NULL)"
 
         const val BASIC_LEFT_JOIN =
             "LEFT JOIN ${aEntry.TABLE_NAME} ON ${aEntry.TABLE_NAME}.${aEntry.ID} = ${Entry.TABLE_NAME}.${Entry.ASSET_ID} " +

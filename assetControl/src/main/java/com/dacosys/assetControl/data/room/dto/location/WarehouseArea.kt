@@ -21,6 +21,7 @@ class WarehouseArea(
 
     @Ignore
     var active: Boolean = mActive == 1
+        get() = mActive == 1
         set(value) {
             mActive = if (value) 1 else 0
             field = value

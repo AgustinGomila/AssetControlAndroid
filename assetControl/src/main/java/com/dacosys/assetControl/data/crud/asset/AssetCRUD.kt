@@ -59,36 +59,9 @@ class AssetCRUD {
         }
 
         private fun addAsset(aObj: AssetObject): CrudResult<Asset?> {
-            var description = aObj.description
-            if (aObj.description.length > 255) {
-                description = aObj.description.substring(0, 255)
-            }
-
-            var code = aObj.code
-            if (aObj.code.length > 45) {
-                code = aObj.code.substring(0, 45)
-            }
-
-            var ean = aObj.ean
-            if (aObj.ean.length > 100) {
-                ean = aObj.ean.substring(0, 100)
-            }
-
-            var serialNumber = aObj.serial_number
-            if (aObj.serial_number.length > 100) {
-                serialNumber = aObj.serial_number.substring(0, 100)
-            }
-
-            var tempLastAssetReviewDate: String? = null
-            if (aObj.last_asset_review_date.isNotEmpty()) {
-                tempLastAssetReviewDate = aObj.last_asset_review_date
-            }
-
-            val newId = AssetRepository().minId
             val asset = Asset(
-                id = newId,
-                code = code,
-                description = description,
+                code = aObj.code.take(45),
+                description = aObj.description.take(255),
                 warehouseId = aObj.warehouse_id,
                 warehouseAreaId = aObj.warehouse_area_id,
                 active = aObj.active,
@@ -102,11 +75,11 @@ class AssetCRUD {
                 labelNumber = null,
                 manufacturer = aObj.manufacturer,
                 model = aObj.model,
-                serialNumber = serialNumber,
+                serialNumber = aObj.serial_number.take(100),
                 condition = aObj.condition,
                 parentId = aObj.parent_id,
-                ean = ean,
-                lastAssetReviewDate = tempLastAssetReviewDate
+                ean = aObj.ean.take(100),
+                lastAssetReviewDate = aObj.last_asset_review_date.takeIf { it.isNotEmpty() }
             )
             AssetRepository().insert(asset)
 

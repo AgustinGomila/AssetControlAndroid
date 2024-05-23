@@ -233,18 +233,11 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
             }
         }
 
-        // MODO SELECCIÓN A PARTIR DE UNA LISTA FIJA DE ÁREAS
-        if (fixedItemList) {
-            fillAdapter(completeList)
-        } else {
-            showListOrEmptyListMessage()
-        }
-
         setPanels()
 
-        setupUI(binding.root, this)
+        thread { fillAdapter(completeList) }
 
-        showProgressBar(false)
+        setupUI(binding.root, this)
     }
 
     private fun itemSelect() {
@@ -520,28 +513,17 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
                         listView = binding.warehouseAreaListView,
                         checkedIdArray = checkedIdArray,
                         multiSelect = multiSelect,
-                        checkedChangedListener = null,
-                        dataSetChangedListener = this
                     )
-                } else {
-                    // IMPORTANTE:
-                    // Se deben actualizar los listeners, si no
-                    // las variables de esta actividad pueden
-                    // tener valores antiguos en del adaptador.
-
-                    adapter?.refreshListeners(dataSetChangedListener = this)
-                    adapter?.refresh()
                 }
+
+                adapter?.refreshListeners(dataSetChangedListener = this)
+                adapter?.refresh()
 
                 while (binding.warehouseAreaListView.adapter == null) {
                     // Horrible wait for full load
                 }
 
-                if (adapter != null) {
-                    adapter?.setSelectItemAndScrollPos(
-                        lastSelected, firstVisiblePos
-                    )
-                }
+                adapter?.setSelectItemAndScrollPos(lastSelected, firstVisiblePos)
             }
         } catch (ex: Exception) {
             ex.printStackTrace()

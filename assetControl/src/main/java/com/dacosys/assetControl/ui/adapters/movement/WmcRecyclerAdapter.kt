@@ -168,10 +168,10 @@ class WmcRecyclerAdapter(
             if (oldItem.labelNumber != newItem.labelNumber) return false
             if (oldItem.parentId != newItem.parentId) return false
             if (oldItem.qty != newItem.qty) return false
-            if (oldItem.warehouseAreaStr != newItem.warehouseAreaStr) return false
-            if (oldItem.warehouseStr != newItem.warehouseStr) return false
+            if (oldItem.warehouseAreaDescription != newItem.warehouseAreaDescription) return false
+            if (oldItem.warehouseDescription != newItem.warehouseDescription) return false
             if (oldItem.itemCategoryId != newItem.itemCategoryId) return false
-            if (oldItem.itemCategoryStr != newItem.itemCategoryStr) return false
+            if (oldItem.itemCategoryDescription != newItem.itemCategoryDescription) return false
             if (oldItem.ownershipStatusId != newItem.ownershipStatusId) return false
             if (oldItem.manufacturer != newItem.manufacturer) return false
             if (oldItem.model != newItem.model) return false

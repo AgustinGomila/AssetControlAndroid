@@ -2,6 +2,7 @@ package com.dacosys.assetControl.data.webservice.movement
 
 import android.os.Parcel
 import android.os.Parcelable
+import com.dacosys.assetControl.data.room.dto.movement.WarehouseMovementContent
 import org.ksoap2.serialization.SoapObject
 
 class WarehouseMovementContentObject() : Parcelable {
@@ -12,11 +13,19 @@ class WarehouseMovementContentObject() : Parcelable {
     var qty: Float = 0F
 
     constructor(parcel: Parcel) : this() {
-        this.warehouseMovementId = parcel.readLong()
-        this.warehouseMovementContentId = parcel.readLong()
-        this.assetId = parcel.readLong()
-        this.code = parcel.readString().orEmpty()
-        this.qty = parcel.readFloat()
+        warehouseMovementId = parcel.readLong()
+        warehouseMovementContentId = parcel.readLong()
+        assetId = parcel.readLong()
+        code = parcel.readString().orEmpty()
+        qty = parcel.readFloat()
+    }
+
+    constructor(wmc: WarehouseMovementContent) : this() {
+        warehouseMovementId = wmc.warehouseMovementId
+        warehouseMovementContentId = wmc.id
+        assetId = wmc.assetId
+        qty = wmc.qty?.toFloat() ?: 0F
+        code = wmc.code
     }
 
     fun getBySoapObject(so: SoapObject): WarehouseMovementContentObject {

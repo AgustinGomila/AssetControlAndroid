@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.dacosys.assetControl.data.room.dto.attribute.Attribute
 import com.dacosys.assetControl.data.room.dto.attribute.AttributeComposition
 import com.dacosys.assetControl.data.room.dto.dataCollection.DataCollection
 import com.dacosys.assetControl.data.room.dto.dataCollection.DataCollectionContent
@@ -14,21 +15,21 @@ import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionCo
 @Dao
 interface DataCollectionContentDao {
     @Query(
-        "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN $SPECIAL_LEFT_JOIN " +
-                "WHERE ${dcEntry.TABLE_NAME}.${dcEntry.COLLECTOR_ROUTE_PROCESS_ID} = :routeProcessId " +
+        "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN" +
+                "WHERE ${dcEntry.TABLE_NAME}.${dcEntry.ROUTE_PROCESS_ID} = :routeProcessId " +
                 BASIC_ORDER
     )
     suspend fun selectByCollectorRouteProcessId(routeProcessId: Long): List<DataCollectionContent>
 
     @Query(
-        "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN $SPECIAL_LEFT_JOIN" +
+        "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN" +
                 "WHERE ${dcEntry.TABLE_NAME}.${Entry.DATA_COLLECTION_ID} = :id " +
                 BASIC_ORDER
     )
     suspend fun selectByDataCollectionId(id: Long): List<DataCollectionContent>
 
     @Query(
-        "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN $SPECIAL_LEFT_JOIN" +
+        "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN" +
                 "WHERE ${Entry.TABLE_NAME}.${Entry.DATA_COLLECTION_RULE_CONTENT_ID} = :ruleContentId " +
                 "AND ${dcEntry.TABLE_NAME}.${dcEntry.ASSET_ID} = :assetId " +
                 BASIC_ORDER
@@ -39,7 +40,7 @@ interface DataCollectionContentDao {
     ): List<DataCollectionContent>
 
     @Query(
-        "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN $SPECIAL_LEFT_JOIN" +
+        "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN" +
                 "WHERE ${Entry.TABLE_NAME}.${Entry.DATA_COLLECTION_RULE_CONTENT_ID} = :ruleContentId " +
                 "AND ${dcEntry.TABLE_NAME}.${dcEntry.WAREHOUSE_ID} = :wId " +
                 BASIC_ORDER
@@ -50,7 +51,7 @@ interface DataCollectionContentDao {
     ): List<DataCollectionContent>
 
     @Query(
-        "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN $SPECIAL_LEFT_JOIN" +
+        "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN" +
                 "WHERE ${Entry.TABLE_NAME}.${Entry.DATA_COLLECTION_RULE_CONTENT_ID} = :ruleContentId " +
                 "AND ${dcEntry.TABLE_NAME}.${dcEntry.WAREHOUSE_AREA_ID} = :waId " +
                 BASIC_ORDER
@@ -63,9 +64,6 @@ interface DataCollectionContentDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(content: DataCollectionContentEntity)
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(contents: List<DataCollectionContentEntity>)
 
 
     @Query("DELETE FROM ${Entry.TABLE_NAME} WHERE ${Entry.DATA_COLLECTION_ID} = :id")
@@ -88,17 +86,19 @@ interface DataCollectionContentDao {
 
         private val rcEntry = DataCollectionRuleContent.Entry
         private val acEntry = AttributeComposition.Entry
+        private val aEntry = Attribute.Entry
         private val dcEntry = DataCollection.Entry
 
-        const val BASIC_JOIN_FIELDS =
-            "${rcEntry.TABLE_NAME}.${rcEntry.DESCRIPTION} AS ${Entry.DATA_COLLECTION_RULE_CONTENT_STR}, " +
-                    "${acEntry.TABLE_NAME}.${acEntry.DESCRIPTION} AS ${Entry.ATTRIBUTE_COMPOSITION_STR}"
+        private const val BASIC_JOIN_FIELDS =
+            "${acEntry.TABLE_NAME}.${acEntry.DESCRIPTION} AS ${Entry.ATTRIBUTE_COMPOSITION_STR}," +
+                    "${aEntry.TABLE_NAME}.${aEntry.DESCRIPTION} AS ${Entry.ATTRIBUTE_STR}," +
+                    "${rcEntry.TABLE_NAME}.${rcEntry.DESCRIPTION} AS ${Entry.DATA_COLLECTION_RULE_CONTENT_STR}, " +
+                    "${acEntry.TABLE_NAME}.${acEntry.ATTRIBUTE_COMPOSITION_TYPE_ID} AS ${Entry.ATTRIBUTE_COMPOSITION_TYPE_ID} "
 
-        const val BASIC_LEFT_JOIN =
-            "LEFT JOIN ${rcEntry.TABLE_NAME} ON ${Entry.TABLE_NAME}.${Entry.DATA_COLLECTION_RULE_CONTENT_ID} = ${rcEntry.TABLE_NAME}.${rcEntry.ID} " +
-                    "LEFT JOIN ${acEntry.TABLE_NAME} ON ${Entry.TABLE_NAME}.${Entry.ATTRIBUTE_COMPOSITION_ID} = ${acEntry.TABLE_NAME}.${acEntry.ID}"
-
-        const val SPECIAL_LEFT_JOIN =
-            "LEFT JOIN ${dcEntry.TABLE_NAME} ON ${Entry.TABLE_NAME}.${Entry.DATA_COLLECTION_ID} = ${dcEntry.TABLE_NAME}.${dcEntry.DATA_COLLECTION_ID} "
+        private const val BASIC_LEFT_JOIN =
+            "LEFT JOIN ${dcEntry.TABLE_NAME} ON ${dcEntry.TABLE_NAME}.${dcEntry.DATA_COLLECTION_ID} = ${Entry.TABLE_NAME}.${Entry.DATA_COLLECTION_ID} " +
+                    "LEFT JOIN ${aEntry.TABLE_NAME} ON ${aEntry.TABLE_NAME}.${aEntry.ID} = ${Entry.TABLE_NAME}.${Entry.ATTRIBUTE_ID} " +
+                    "LEFT JOIN ${acEntry.TABLE_NAME} ON ${acEntry.TABLE_NAME}.${acEntry.ID} = ${Entry.TABLE_NAME}.${Entry.ATTRIBUTE_COMPOSITION_ID} " +
+                    "LEFT JOIN ${rcEntry.TABLE_NAME} ON ${rcEntry.TABLE_NAME}.${rcEntry.ID} = ${Entry.TABLE_NAME}.${Entry.DATA_COLLECTION_RULE_CONTENT_ID} "
     }
 }

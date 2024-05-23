@@ -10,6 +10,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.data.room.dto.dataCollection.DataCollectionContent
 import com.dacosys.assetControl.databinding.DccHistoricDataFragmentBinding
+import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.dateToNotNullStringDate
 import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelableArrayList
 
 class HistoricDataFragment : Fragment() {
@@ -106,22 +107,22 @@ class HistoricDataFragment : Fragment() {
                 for (x in dccArrayList) {
                     when (z) {
                         0 -> {
-                            oldDate1 = x.dataCollectionDate.toString()
+                            oldDate1 = dateToNotNullStringDate(x.dataCollectionDate)
                             oldValue1 = x.valueStr
                         }
 
                         1 -> {
-                            oldDate2 = x.dataCollectionDate.toString()
+                            oldDate2 = dateToNotNullStringDate(x.dataCollectionDate)
                             oldValue2 = x.valueStr
                         }
 
                         2 -> {
-                            oldDate3 = x.dataCollectionDate.toString()
+                            oldDate3 = dateToNotNullStringDate(x.dataCollectionDate)
                             oldValue3 = x.valueStr
                         }
 
                         3 -> {
-                            oldDate4 = x.dataCollectionDate.toString()
+                            oldDate4 = dateToNotNullStringDate(x.dataCollectionDate)
                             oldValue4 = x.valueStr
                         }
                     }

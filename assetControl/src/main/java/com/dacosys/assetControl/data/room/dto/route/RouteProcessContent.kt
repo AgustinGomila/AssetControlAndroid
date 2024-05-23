@@ -42,22 +42,52 @@ data class RouteProcessContent(
     fun saveChanges() = RouteProcessContentRepository().update(this)
 
     @Ignore
-    val assetStr: String = assetDescription.orEmpty()
+    var assetStr: String = assetDescription.orEmpty()
+        get() = assetDescription.orEmpty()
+        set(value) {
+            assetDescription = value.ifEmpty { null }
+            field = value
+        }
 
     @Ignore
-    val assetCode: String = code.orEmpty()
+    var assetCode: String = code.orEmpty()
+        get() = code.orEmpty()
+        set(value) {
+            code = value.ifEmpty { null }
+            field = value
+        }
 
     @Ignore
-    val routeStr: String = routeDescription.orEmpty()
+    var routeStr: String = routeDescription.orEmpty()
+        get() = routeDescription.orEmpty()
+        set(value) {
+            routeDescription = value.ifEmpty { null }
+            field = value
+        }
 
     @Ignore
-    val warehouseStr: String = warehouseDescription.orEmpty()
+    var warehouseStr = warehouseDescription.orEmpty()
+        get() = warehouseDescription.orEmpty()
+        set(value) {
+            warehouseDescription = value.ifEmpty { null }
+            field = value
+        }
 
     @Ignore
-    val warehouseAreaStr: String = warehouseAreaDescription.orEmpty()
+    var warehouseAreaStr = warehouseAreaDescription.orEmpty()
+        get() = warehouseAreaDescription.orEmpty()
+        set(value) {
+            warehouseAreaDescription = value.ifEmpty { null }
+            field = value
+        }
 
     @Ignore
-    val routeProcessStatusStr: String = RouteProcessStatus.getById(routeProcessStatusId).description
+    var status: RouteProcessStatus = RouteProcessStatus.getById(routeProcessStatusId)
+        get() = RouteProcessStatus.getById(routeProcessStatusId)
+        set(value) {
+            routeProcessStatusId = value.id
+            field = value
+        }
 
     constructor(parcel: Parcel) : this(
         id = parcel.readLong(),

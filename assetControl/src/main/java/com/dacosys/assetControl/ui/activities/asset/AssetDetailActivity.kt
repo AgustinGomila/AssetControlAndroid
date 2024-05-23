@@ -121,10 +121,8 @@ class AssetDetailActivity : AppCompatActivity() {
         val table = Table.routeProcess
         val id = tempAsset.id
 
-        description = "${table.tableName}: $description"
-        if (description.length > 255) {
-            description.substring(0, 255)
-        }
+        val tableDescription = table.description
+        description = "$tableDescription: $description".take(255)
 
         val obs = "${getString(R.string.user)}: ${currentUser()?.name}"
 

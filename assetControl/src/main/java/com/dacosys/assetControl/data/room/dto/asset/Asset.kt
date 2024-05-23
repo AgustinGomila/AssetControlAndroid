@@ -45,31 +45,71 @@ class Asset(
         return code
     }
 
-    @Ignore
-    val itemCategoryStr = itemCategoryDescription.orEmpty()
-
-    @Ignore
-    val warehouseStr = warehouseDescription.orEmpty()
-
-    @Ignore
-    val warehouseAreaStr = warehouseAreaDescription.orEmpty()
-
-    @Ignore
-    val originalWarehouseStr = originalWarehouseDescription.orEmpty()
-
-    @Ignore
-    val originalWarehouseAreaStr = originalWarehouseAreaDescription.orEmpty()
-
     fun saveChanges() = AssetRepository().update(this)
 
     @Ignore
-    val assetStatus = AssetStatus.getById(status)
+    var itemCategoryStr = itemCategoryDescription.orEmpty()
+        get() = itemCategoryDescription.orEmpty()
+        set(value) {
+            itemCategoryDescription = value.ifEmpty { null }
+            field = value
+        }
 
     @Ignore
-    val ownership = OwnershipStatus.getById(ownershipStatus)
+    var warehouseStr = warehouseDescription.orEmpty()
+        get() = warehouseDescription.orEmpty()
+        set(value) {
+            warehouseDescription = value.ifEmpty { null }
+            field = value
+        }
 
     @Ignore
-    val assetCondition: AssetCondition = getCondition()
+    var warehouseAreaStr = warehouseAreaDescription.orEmpty()
+        get() = warehouseAreaDescription.orEmpty()
+        set(value) {
+            warehouseAreaDescription = value.ifEmpty { null }
+            field = value
+        }
+
+    @Ignore
+    var originalWarehouseStr = originalWarehouseDescription.orEmpty()
+        get() = originalWarehouseDescription.orEmpty()
+        set(value) {
+            originalWarehouseDescription = value.ifEmpty { null }
+            field = value
+        }
+
+    @Ignore
+    var originalWarehouseAreaStr = originalWarehouseAreaDescription.orEmpty()
+        get() = originalWarehouseAreaDescription.orEmpty()
+        set(value) {
+            originalWarehouseAreaDescription = value.ifEmpty { null }
+            field = value
+        }
+
+    @Ignore
+    var assetStatus: AssetStatus = AssetStatus.getById(status)
+        get() = AssetStatus.getById(status)
+        set(value) {
+            status = value.id
+            field = value
+        }
+
+    @Ignore
+    var ownership = OwnershipStatus.getById(ownershipStatus)
+        get() = OwnershipStatus.getById(ownershipStatus)
+        set(value) {
+            ownershipStatus = value.id
+            field = value
+        }
+
+    @Ignore
+    var assetCondition: AssetCondition = getCondition()
+        get() = getCondition()
+        set(value) {
+            condition = value.id
+            field = value
+        }
 
     private fun getCondition(): AssetCondition {
         val c = condition

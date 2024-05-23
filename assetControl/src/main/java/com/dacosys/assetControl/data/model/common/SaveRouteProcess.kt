@@ -82,10 +82,6 @@ class SaveRouteProcess {
     }
 
     private suspend fun suspendFunction(): Boolean = withContext(Dispatchers.IO) {
-        ///////////////////////////////////
-        // Para controlar la transacción //
-        // TODO: Eliminar val db = DataBaseHelper.getWritableDb()
-
         try {
             val total = allRouteProcessContent.size
 
@@ -100,9 +96,6 @@ class SaveRouteProcess {
 
             val contentRepository = RouteProcessContentRepository()
             val stepsRepository = RouteProcessStepsRepository()
-
-            ///// Comienzo de una transacción /////
-            // TODO: Eliminar db.beginTransaction()
 
             for ((index, rpc) in allRouteProcessContent.withIndex()) {
                 onSaveProgress.invoke(
@@ -152,8 +145,6 @@ class SaveRouteProcess {
                 }
             }
 
-            // TODO: Eliminar db.setTransactionSuccessful()
-
             onSaveProgress.invoke(
                 SaveProgress(taskStatus = ProgressStatus.finished.id)
             )
@@ -168,8 +159,6 @@ class SaveRouteProcess {
             )
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             return@withContext false
-        } finally {
-            // TODO: Eliminar db.endTransaction()
         }
     }
 }

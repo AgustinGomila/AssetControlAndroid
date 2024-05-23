@@ -8,6 +8,7 @@ import com.dacosys.assetControl.data.room.dto.dataCollection.DataCollection
 import com.dacosys.assetControl.data.room.dto.location.WarehouseArea
 import com.dacosys.assetControl.data.room.dto.route.RouteProcessContent
 import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionEntity
+import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.getUTCDateTimeAsNotNullDate
 import kotlinx.coroutines.runBlocking
 import java.util.*
 
@@ -15,12 +16,15 @@ class DataCollectionRepository {
     private val dao: DataCollectionDao
         get() = database.dataCollectionDao()
 
-    fun selectById(id: Long) = runBlocking { dao.selectByCollectorId(id) }
+    fun selectById(id: Long) = runBlocking { dao.selectById(id) }
 
     fun selectByNoTransferred() = runBlocking { dao.selectByNoTransferred() }
 
-    private val nextId: Long
-        get() = runBlocking { (dao.selectMaxId() ?: 0) + 1 }
+    private val nextLastId: Long
+        get() = runBlocking {
+            val minId = dao.selectMinId() ?: 0
+            if (minId > 0) -1 else minId - 1
+        }
 
 
     fun insert(rpc: RouteProcessContent, dateStart: Date, routeProcessId: Long): DataCollection? {
@@ -30,7 +34,7 @@ class DataCollectionRepository {
             val assetId = rpc.assetId ?: 0L
             val warehouseAreaId = rpc.warehouseAreaId ?: 0L
             val warehouseId = rpc.warehouseId ?: 0L
-            val nextId = nextId
+            val nextId = nextLastId
 
             val d = DataCollection(
                 id = nextId,
@@ -39,66 +43,65 @@ class DataCollectionRepository {
                 warehouseAreaId = warehouseAreaId,
                 userId = userId,
                 dateStart = dateStart,
-                dateEnd = Date(),
+                dateEnd = getUTCDateTimeAsNotNullDate(),
                 completed = 1,
-                collectorRouteProcessId = routeProcessId
+                routeProcessId = routeProcessId
             )
             dao.insert(DataCollectionEntity(d))
-            return@runBlocking d
+            dao.selectById(nextId)
         }
         return r
     }
 
-    fun insert(asset: Asset, dateStart: Date, routeProcessId: Long): DataCollection? {
+    fun insert(asset: Asset, dateStart: Date): DataCollection? {
         val userId = getUserId() ?: return null
 
         val r = runBlocking {
             val assetId = asset.id
-            val newId = nextId
+            val nextId = nextLastId
 
             val d = DataCollection(
-                id = newId,
+                id = nextId,
                 assetId = assetId,
                 userId = userId,
                 dateStart = dateStart,
-                dateEnd = Date(),
-                completed = 1,
-                collectorRouteProcessId = routeProcessId
+                dateEnd = getUTCDateTimeAsNotNullDate(),
+                completed = 1
             )
             dao.insert(DataCollectionEntity(d))
-            return@runBlocking d
+            dao.selectById(nextId)
         }
         return r
     }
 
-    fun insert(warehouseArea: WarehouseArea, dateStart: Date, routeProcessId: Long): DataCollection? {
+    fun insert(warehouseArea: WarehouseArea, dateStart: Date): DataCollection? {
         val userId = getUserId() ?: return null
 
         val r = runBlocking {
             val warehouseAreaId = warehouseArea.id
             val warehouseId = warehouseArea.warehouseId
-            val newId = nextId
+            val nextId = nextLastId
 
             val d = DataCollection(
-                id = newId,
+                id = nextId,
                 warehouseId = warehouseId,
                 warehouseAreaId = warehouseAreaId,
                 userId = userId,
                 dateStart = dateStart,
-                dateEnd = Date(),
-                completed = 1,
-                collectorRouteProcessId = routeProcessId
+                dateEnd = getUTCDateTimeAsNotNullDate(),
+                completed = 1
             )
             dao.insert(DataCollectionEntity(d))
-            return@runBlocking d
+            dao.selectById(nextId)
         }
         return r
     }
 
 
-    fun updateTransferredNew(newValue: Long, oldValue: Long) {
+    fun updateTransferred(newValue: Long, oldValue: Long) {
         runBlocking {
-            dao.updateId(newValue, oldValue)
+            val date = getUTCDateTimeAsNotNullDate()
+            dao.updateId(newValue, oldValue, date)
         }
     }
 

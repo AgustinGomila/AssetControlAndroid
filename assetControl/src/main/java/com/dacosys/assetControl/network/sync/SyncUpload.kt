@@ -8,7 +8,6 @@ import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.enums.common.Table
 import com.dacosys.assetControl.data.enums.review.AssetReviewContentStatus
-import com.dacosys.assetControl.data.enums.review.AssetReviewStatus
 import com.dacosys.assetControl.data.room.repository.asset.AssetRepository
 import com.dacosys.assetControl.data.room.repository.category.ItemCategoryRepository
 import com.dacosys.assetControl.data.room.repository.dataCollection.DataCollectionContentRepository
@@ -73,6 +72,8 @@ class SyncUpload(
 
     private var registryOnProcess: ArrayList<SyncRegistryType> = ArrayList()
 
+    private var userId: Long = 0
+
     private fun checkConnection() {
         fun onConnectionResult(it: MySqlDateResult) {
             if (it.status == ProgressStatus.finished) {
@@ -128,15 +129,16 @@ class SyncUpload(
 
     private var deferred: Deferred<Boolean>? = null
     private suspend fun doInBackground(userId: Long, onResult: (Boolean) -> Unit) {
+        this.userId = userId
         var result = false
         coroutineScope {
-            deferred = async { suspendFunction(userId) }
+            deferred = async { suspendFunction() }
             result = deferred?.await() ?: false
         }
         onResult.invoke(result)
     }
 
-    private suspend fun suspendFunction(userId: Long): Boolean = withContext(Dispatchers.IO) {
+    private suspend fun suspendFunction(): Boolean = withContext(Dispatchers.IO) {
         onSyncTaskProgress.invoke(
             SyncProgress(
                 msg = getContext().getString(R.string.synchronization_starting),
@@ -151,7 +153,7 @@ class SyncUpload(
             warehouse()
             warehouseArea()
             asset()
-            assetReview(userId)
+            assetReview()
             warehouseMovement()
             dataCollection()
             routeProcess()
@@ -180,7 +182,7 @@ class SyncUpload(
                     warehouse()
                     warehouseArea()
                     asset()
-                    assetReview(userId)
+                    assetReview()
                     warehouseMovement()
                 }
 
@@ -278,7 +280,7 @@ class SyncUpload(
         WarehouseMovementRepository().deleteTransferred()
     }
 
-    private fun assetReview(userId: Long) {
+    private fun assetReview() {
         val registryType = SyncRegistryType.AssetReview
         registryOnProcess.add(registryType)
 
@@ -356,34 +358,20 @@ class SyncUpload(
                         continue
                     }
 
-                    val x = AssetReviewContentObject()
-                    x.assetId = arc.assetId
-                    x.qty = 1F
-                    x.code = arc.code
-                    if (arc.description.isNotEmpty()) {
-                        x.description = arc.description
-                    }
+                    val x = AssetReviewContentObject(arc)
 
                     arcObjArray.add(x)
                 }
 
-                val arObj = AssetReviewObject()
-
-                arObj.warehouseId = ar.warehouseId
-                arObj.warehouseAreaId = ar.warehouseAreaId
-                arObj.assetReviewId = ar.id
-                arObj.userId = ar.userId
-                arObj.assetReviewDate = ar.assetReviewDate.toString()
-                arObj.obs = ar.obs.orEmpty()
-                arObj.modificationDate = ar.modificationDate.toString()
-                arObj.statusId = AssetReviewStatus.transferred.id
+                val arObj = AssetReviewObject(ar)
 
                 val arId = arWs.assetReviewAdd(
-                    arObj, arcObjArray
+                    assetReview = arObj,
+                    assetReviewContent = arcObjArray
                 )
 
                 if (arId > 0) {
-                    reviewRepository.updateTransferredNew(arId, ar.id)
+                    reviewRepository.updateTransferred(arId, ar.id)
 
                     // Actualizar los Ids del colector con los Ids reales
                     UpdateIdImages(
@@ -509,31 +497,20 @@ class SyncUpload(
                         break
                     }
 
-                    val x = WarehouseMovementContentObject()
-                    x.assetId = wmc.assetId
-                    x.qty = wmc.qty?.toFloat() ?: 0F
-                    x.code = wmc.code
+                    val x = WarehouseMovementContentObject(wmc)
 
                     wmcObjArray.add(x)
                 }
 
-                val wmObj = WarehouseMovementObject()
-
-                wmObj.destWarehouseAreaId = wm.destinationWarehouseAreaId
-                wmObj.destWarehouseId = wm.destinationWarehouseId
-                wmObj.origWarehouseAreaId = wm.originWarehouseAreaId
-                wmObj.origWarehouseId = wm.originWarehouseId
-                wmObj.warehouseMovementId = wm.id
-                wmObj.userId = wm.userId
-                wmObj.warehouseMovementDate = wm.warehouseMovementDate.toString()
-                wmObj.obs = wm.obs.orEmpty()
+                val wmObj = WarehouseMovementObject(wm)
 
                 val wmId = wmWs.warehouseMovementAdd(
-                    wmObj, wmcObjArray
+                    warehouseMovement = wmObj,
+                    warehouseMovementContent = wmcObjArray
                 )
 
                 if (wmId > 0) {
-                    movementRepository.updateTransferredNew(wmId, wm.id)
+                    movementRepository.updateTransferred(wmId, wm.id)
 
                     // Actualizar los Ids del colector con los Ids reales
                     UpdateIdImages(
@@ -651,11 +628,11 @@ class SyncUpload(
                 var realAssetId: Long
                 if (a.id > 0) {
                     realAssetId = assetWs.assetCollectorModify(
-                        getUserId() ?: return,
+                        userId,
                         com.dacosys.assetControl.data.webservice.asset.AssetCollectorObject(a)
                     )
                 } else {
-                    realAssetId = assetWs.assetAdd(getUserId() ?: return, AssetObject(a))
+                    realAssetId = assetWs.assetAdd(userId, AssetObject(a))
                     if (realAssetId > 0) {
 
                         // Actualizar el propio activo
@@ -697,7 +674,9 @@ class SyncUpload(
             }
 
             // Actualizamos todos los activos en una sola consulta.
-            if (!error) error = !assetRepository.updateTransferred(allRealId)
+            if (!error) {
+                error = !assetRepository.updateTransferred(allRealId)
+            }
         } catch (ex: Exception) {
             ex.printStackTrace()
             // Error remoto
@@ -795,11 +774,11 @@ class SyncUpload(
                 var realWarehouseAreaId: Long
                 if (wa.id > 0) {
                     realWarehouseAreaId = warehouseAreaWs.warehouseAreaModify(
-                        getUserId() ?: return, WarehouseAreaObject(wa)
+                        userId, WarehouseAreaObject(wa)
                     )
                 } else {
                     realWarehouseAreaId = warehouseAreaWs.warehouseAreaAdd(
-                        getUserId() ?: return, WarehouseAreaObject(wa)
+                        userId, WarehouseAreaObject(wa)
                     )
 
                     if (realWarehouseAreaId > 0) {
@@ -820,20 +799,19 @@ class SyncUpload(
                         movementRepository.updateDestinationWarehouseAreaId(realWarehouseAreaId, wa.id)
 
                         // Enviar las áreas del usuario
-                        val userId = getUserId() ?: return
                         val user = UserRepository().selectById(userId) ?: return
                         val uObj = UserObject().getByUser(user)
 
                         val uwaObj = UserWarehouseAreaObject()
                         uwaObj.warehouse_area_id = realWarehouseAreaId
-                        uwaObj.user_id = (getUserId() ?: return)
+                        uwaObj.user_id = userId
                         uwaObj.check = 1
                         uwaObj.count = 1
                         uwaObj.move = 1
                         uwaObj.see = 1
 
                         UserWarehouseAreaWs().userWarehouseAreaAdd(
-                            getUserId() ?: return, uObj, arrayListOf(uwaObj)
+                            userId, uObj, arrayListOf(uwaObj)
                         )
                     }
                 }
@@ -864,7 +842,9 @@ class SyncUpload(
             }
 
             // Actualizamos todos las áreas en una sola consulta.
-            if (!error) error = !areaRepository.updateTransferred(allRealId)
+            if (!error) {
+                error = !areaRepository.updateTransferred(allRealId)
+            }
         } catch (ex: Exception) {
             ex.printStackTrace()
             // Error remoto
@@ -962,11 +942,11 @@ class SyncUpload(
                 var realWarehouseId: Long
                 if (w.id > 0) {
                     realWarehouseId = warehouseWs.warehouseModify(
-                        getUserId() ?: return, WarehouseObject(w)
+                        userId, WarehouseObject(w)
                     )
                 } else {
                     realWarehouseId = warehouseWs.warehouseAdd(
-                        getUserId() ?: return, WarehouseObject(w)
+                        userId, WarehouseObject(w)
                     )
 
                     if (realWarehouseId > 0) {
@@ -1014,7 +994,9 @@ class SyncUpload(
             }
 
             // Actualizamos todos las áreas en una sola consulta.
-            if (!error) error = !wRepository.updateTransferred(allRealId)
+            if (!error) {
+                error = !wRepository.updateTransferred(allRealId)
+            }
         } catch (ex: Exception) {
             ex.printStackTrace()
             // Error remoto
@@ -1109,18 +1091,16 @@ class SyncUpload(
                 var realItemCategoryId: Long
                 if (ic.id > 0) {
                     realItemCategoryId = itemCategoryWs.itemCategoryModify(
-                        getUserId() ?: return, ItemCategoryObject(ic)
+                        userId, ItemCategoryObject(ic)
                     )
                 } else {
                     realItemCategoryId = itemCategoryWs.itemCategoryAdd(
-                        getUserId() ?: return, ItemCategoryObject(ic)
+                        userId, ItemCategoryObject(ic)
                     )
 
                     if (realItemCategoryId > 0) {
                         // Actualizar la propia categoría
-                        categoryRepository.updateId(
-                            realItemCategoryId, ic.id
-                        )
+                        categoryRepository.updateId(realItemCategoryId, ic.id)
 
                         // Actualizar los activos fijos asociados
                         assetRepository.updateItemCategoryId(realItemCategoryId, ic.id)
@@ -1153,7 +1133,9 @@ class SyncUpload(
             }
 
             // Actualizamos todos las áreas en una sola consulta.
-            if (!error) error = !categoryRepository.updateTransferred(allRealId)
+            if (!error) {
+                error = !categoryRepository.updateTransferred(allRealId)
+            }
         } catch (ex: Exception) {
             ex.printStackTrace()
             // Error remoto
@@ -1255,37 +1237,20 @@ class SyncUpload(
                         break
                     }
 
-                    val x = DataCollectionContentObject()
-                    x.attributeId = dcc.attributeId ?: 0
-                    x.attributeCompositionId = dcc.attributeCompositionId ?: 0
-                    x.dataCollectionDate = dcc.dataCollectionDate.toString()
-                    x.dataCollectionId = 0L
-                    x.dataCollectionContentId = 0L
-                    x.dataCollectionRuleContentId = dcc.dataCollectionRuleContentId
-                    x.level = dcc.level ?: 0
-                    x.position = dcc.position ?: 0
-                    x.result = dcc.result ?: 0
-                    x.valueStr = dcc.valueStr
+                    val x = DataCollectionContentObject(dcc)
 
                     dccObjArray.add(x)
                 }
 
-                val dcObj = DataCollectionObject()
-
-                dcObj.assetId = dc.assetId ?: 0
-                dcObj.dataCollectionId = dc.dataCollectionId
-                dcObj.dateEnd = dc.dateEnd?.toString().orEmpty()
-                dcObj.dateStart = dc.dateStart?.toString().orEmpty()
-                dcObj.userId = dc.userId
-                dcObj.warehouseAreaId = dc.warehouseAreaId ?: 0
-                dcObj.warehouseId = dc.warehouseId ?: 0
+                val dcObj = DataCollectionObject(dc)
 
                 val dcId = dcWs.dataCollectionAdd(
-                    dcObj, dccObjArray
+                    dataCollection = dcObj,
+                    dataCollectionContent = dccObjArray
                 )
 
                 if (dcId > 0) {
-                    collectionRepository.updateTransferredNew(dcId, dc.dataCollectionId)
+                    collectionRepository.updateTransferred(dcId, dc.id)
 
                     // Actualizar los Ids del colector con los Ids reales
                     UpdateIdImages(
@@ -1414,6 +1379,7 @@ class SyncUpload(
                         val dc = DataCollectionRepository().selectById(
                             rpc.dataCollectionId ?: return
                         )
+
                         if (dc != null && dc.dataCollectionId > 0) {
                             // Actualizamos todos los ID temporales
                             dataCollectionId = dc.dataCollectionId
@@ -1424,35 +1390,20 @@ class SyncUpload(
                         }
                     }
 
-                    val x = RouteProcessContentObject()
-
-                    x.dataCollectionRuleId = rpc.dataCollectionRuleId
-                    x.level = rpc.level
-                    x.position = rpc.position
-                    x.routeProcessStatusId = rpc.routeProcessStatusId
-                    x.dataCollectionId = dataCollectionId
+                    val x = RouteProcessContentObject(rpc, dataCollectionId)
 
                     rpcObjArray.add(x)
                 }
 
-                val rpObj = RouteProcessObject()
-
-                rpObj.routeId = rp.routeId
-                rpObj.routeProcessDate = rp.routeProcessDate.toString()
-                rpObj.completed = if (rp.completed) {
-                    1
-                } else {
-                    0
-                }
-                rpObj.routeProcessId = rp.id
-                rpObj.userId = rp.userId
+                val rpObj = RouteProcessObject(rp)
 
                 val rpId = rpWs.routeProcessAdd(
-                    rpObj, rpcObjArray
+                    routeProcess = rpObj,
+                    routeProcessContent = rpcObjArray
                 )
 
                 if (rpId > 0) {
-                    processRepository.updateTransferredNew(rpId, rp.id)
+                    processRepository.updateTransferred(rpId, rp.id)
 
                     // Actualizar los Ids del colector con los Ids reales
                     UpdateIdImages(
@@ -1569,26 +1520,26 @@ class SyncUpload(
                 amObj.asset_manteinance_id = am.id
                 amObj.manteinance_type_id = am.maintenanceTypeId
                 amObj.manteinance_status_id = am.maintenanceStatusId
-                amObj.repairman_id = (getUserId() ?: return)
+                amObj.repairman_id = userId
 
                 val amLogObj = AssetMaintenanceLogObject()
                 amLogObj.description = am.observations.orEmpty()
                 amLogObj.asset_manteinance_id = am.id
                 amLogObj.manteinance_status_id = am.maintenanceStatusId
-                amLogObj.repairman_id = (getUserId() ?: return)
+                amLogObj.repairman_id = userId
 
                 val assetMaintenanceId = if (am.id == 0L) {
                     amWs.assetMaintenanceAdd(
-                        getUserId() ?: return, amObj, amLogObj
+                        userId, amObj, amLogObj
                     )
                 } else {
                     amWs.assetMaintenanceModify(
-                        getUserId() ?: return, amObj, amLogObj
+                        userId, amObj, amLogObj
                     )
                 }
 
                 if (assetMaintenanceId > 0) {
-                    maintenanceRepository.updateTransferredNew(assetMaintenanceId)
+                    maintenanceRepository.updateTransferred(assetMaintenanceId)
 
                     // Actualizar los Ids del colector con los Ids reales
                     UpdateIdImages(

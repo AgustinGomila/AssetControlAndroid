@@ -2,6 +2,7 @@ package com.dacosys.assetControl.data.webservice.route
 
 import android.os.Parcel
 import android.os.Parcelable
+import com.dacosys.assetControl.data.room.dto.route.RouteProcessContent
 import org.ksoap2.serialization.SoapObject
 
 class RouteProcessContentObject() : Parcelable {
@@ -14,13 +15,23 @@ class RouteProcessContentObject() : Parcelable {
     var routeProcessContentId: Long = 0
 
     constructor(parcel: Parcel) : this() {
-        this.routeProcessId = parcel.readLong()
-        this.dataCollectionRuleId = parcel.readLong()
-        this.level = parcel.readInt()
-        this.position = parcel.readInt()
-        this.routeProcessStatusId = parcel.readInt()
-        this.dataCollectionId = parcel.readLong()
-        this.routeProcessContentId = parcel.readLong()
+        routeProcessId = parcel.readLong()
+        dataCollectionRuleId = parcel.readLong()
+        level = parcel.readInt()
+        position = parcel.readInt()
+        routeProcessStatusId = parcel.readInt()
+        dataCollectionId = parcel.readLong()
+        routeProcessContentId = parcel.readLong()
+    }
+
+    constructor(rpc: RouteProcessContent, dcId: Long) : this() {
+        routeProcessId = rpc.routeProcessId
+        dataCollectionRuleId = rpc.dataCollectionRuleId
+        level = rpc.level
+        position = rpc.position
+        routeProcessStatusId = rpc.routeProcessStatusId
+        dataCollectionId = dcId
+        routeProcessContentId = rpc.id
     }
 
     fun getBySoapObject(so: SoapObject): RouteProcessContentObject {

@@ -345,11 +345,8 @@ class WmcConfirmActivity : AppCompatActivity(),
         val wa = headerFragment?.warehouseArea ?: return
 
         var description = wa.description
-        val tableName = Table.warehouseMovement.tableName
-        description = "$tableName: $description"
-        if (description.length > 255) {
-            description.substring(0, 255)
-        }
+        val tableDescription = Table.warehouseMovement.description
+        description = "$tableDescription: $description".take(255)
 
         val obs = "${getString(R.string.user)}: ${currentUser()?.name}"
 

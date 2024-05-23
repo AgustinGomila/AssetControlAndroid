@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "a0c122df466d0d0177a24fffdbd44b9c",
+    "identityHash": "3362b43f956a3ab25f2ce3d7e98c1828",
     "entities": [
       {
         "tableName": "asset",
@@ -853,7 +853,7 @@
       },
       {
         "tableName": "data_collection",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`data_collection_id` INTEGER NOT NULL, `asset_id` INTEGER, `warehouse_id` INTEGER, `warehouse_area_id` INTEGER, `user_id` INTEGER NOT NULL, `date_start` INTEGER, `date_end` INTEGER, `completed` INTEGER NOT NULL, `transferred_date` INTEGER, `_id` INTEGER NOT NULL, `collector_route_process_id` INTEGER NOT NULL, PRIMARY KEY(`data_collection_id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`data_collection_id` INTEGER NOT NULL, `asset_id` INTEGER, `warehouse_id` INTEGER, `warehouse_area_id` INTEGER, `user_id` INTEGER NOT NULL, `date_start` INTEGER, `date_end` INTEGER, `completed` INTEGER NOT NULL, `transferred_date` INTEGER, `_id` INTEGER NOT NULL, `route_process_id` INTEGER NOT NULL, PRIMARY KEY(`data_collection_id`))",
         "fields": [
           {
             "fieldPath": "dataCollectionId",
@@ -916,8 +916,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "collectorRouteProcessId",
-            "columnName": "collector_route_process_id",
+            "fieldPath": "routeProcessId",
+            "columnName": "route_process_id",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -984,13 +984,13 @@
             "createSql": "CREATE INDEX IF NOT EXISTS `IDX_data_collection__id` ON `${TABLE_NAME}` (`_id`)"
           },
           {
-            "name": "IDX_data_collection_collector_route_process_id",
+            "name": "IDX_data_collection_route_process_id",
             "unique": false,
             "columnNames": [
-              "collector_route_process_id"
+              "route_process_id"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_data_collection_collector_route_process_id` ON `${TABLE_NAME}` (`collector_route_process_id`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_data_collection_route_process_id` ON `${TABLE_NAME}` (`route_process_id`)"
           }
         ],
         "foreignKeys": []
@@ -2721,7 +2721,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a0c122df466d0d0177a24fffdbd44b9c')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3362b43f956a3ab25f2ce3d7e98c1828')"
     ]
   }
 }

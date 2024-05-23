@@ -168,17 +168,17 @@ class ArcRecyclerAdapter(
         override fun areContentsTheSame(oldItem: AssetReviewContent, newItem: AssetReviewContent): Boolean {
             if (oldItem.contentStatusId != newItem.contentStatusId) return false
             if (oldItem.assetId != newItem.assetId) return false
-            if (oldItem.code != newItem.code) return false
-            if (oldItem.description != newItem.description) return false
+            if (oldItem.assetCode != newItem.assetCode) return false
+            if (oldItem.assetDescription != newItem.assetDescription) return false
             if (oldItem.assetStatusId != newItem.assetStatusId) return false
             if (oldItem.originWarehouseAreaId != newItem.originWarehouseAreaId) return false
             if (oldItem.labelNumber != newItem.labelNumber) return false
             if (oldItem.parentId != newItem.parentId) return false
             if (oldItem.warehouseAreaId != newItem.warehouseAreaId) return false
-            if (oldItem.warehouseAreaStr != newItem.warehouseAreaStr) return false
-            if (oldItem.warehouseStr != newItem.warehouseStr) return false
+            if (oldItem.warehouseAreaDescription != newItem.warehouseAreaDescription) return false
+            if (oldItem.warehouseDescription != newItem.warehouseDescription) return false
             if (oldItem.itemCategoryId != newItem.itemCategoryId) return false
-            if (oldItem.itemCategoryStr != newItem.itemCategoryStr) return false
+            if (oldItem.itemCategoryDescription != newItem.itemCategoryDescription) return false
             if (oldItem.ownershipStatusId != newItem.ownershipStatusId) return false
             if (oldItem.manufacturer != newItem.manufacturer) return false
             if (oldItem.model != newItem.model) return false
@@ -803,8 +803,8 @@ class ArcRecyclerAdapter(
         val t = fullList.firstOrNull { it.assetId == asset.id } ?: return
 
         t.assetId = asset.id
-        t.code = asset.code
-        t.description = asset.description
+        t.assetCode = asset.code
+        t.assetDescription = asset.description
         t.warehouseAreaId = asset.warehouseAreaId
         t.ownershipStatusId = asset.ownershipStatus
         t.assetStatusId = asset.status

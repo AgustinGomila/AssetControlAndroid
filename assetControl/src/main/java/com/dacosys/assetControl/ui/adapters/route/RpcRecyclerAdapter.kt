@@ -103,14 +103,14 @@ class RpcRecyclerAdapter(
             if (oldItem.dataCollectionId != newItem.dataCollectionId) return false
             if (oldItem.id != newItem.id) return false
             if (oldItem.assetId != newItem.assetId) return false
-            if (oldItem.assetStr != newItem.assetStr) return false
-            if (oldItem.assetCode != newItem.assetCode) return false
+            if (oldItem.assetDescription != newItem.assetDescription) return false
+            if (oldItem.code != newItem.code) return false
             if (oldItem.warehouseId != newItem.warehouseId) return false
-            if (oldItem.warehouseStr != newItem.warehouseStr) return false
+            if (oldItem.warehouseDescription != newItem.warehouseDescription) return false
             if (oldItem.warehouseAreaId != newItem.warehouseAreaId) return false
-            if (oldItem.warehouseAreaStr != newItem.warehouseAreaStr) return false
+            if (oldItem.warehouseAreaDescription != newItem.warehouseAreaDescription) return false
             if (oldItem.routeId != newItem.routeId) return false
-            if (oldItem.routeStr != newItem.routeStr) return false
+            if (oldItem.routeDescription != newItem.routeDescription) return false
             return true
         }
     }
@@ -842,14 +842,14 @@ class RpcRecyclerAdapter(
         }
 
         fun bindStatusChange(content: RouteProcessContent) {
-            binding.routeProcessStatusStr.text = content.routeProcessStatusStr
+            binding.routeProcessStatusStr.text = content.status.description
         }
 
         fun bind(content: RouteProcessContent, checkBoxVisibility: Int = GONE) {
             bindCheckBoxVisibility(checkBoxVisibility)
             bindStatusChange(content = content)
 
-            binding.routeProcessStatusStr.text = content.routeProcessStatusStr
+            binding.routeProcessStatusStr.text = content.status.description
             binding.assetStr.text = content.assetStr
             binding.assetCode.text = content.assetCode
             binding.warehouseAreaStr.text = content.warehouseAreaStr
@@ -924,14 +924,14 @@ class RpcRecyclerAdapter(
         }
 
         fun bindStatusChange(content: RouteProcessContent) {
-            binding.routeProcessStatusStr.text = content.routeProcessStatusStr
+            binding.routeProcessStatusStr.text = content.status.description
         }
 
         fun bind(content: RouteProcessContent, checkBoxVisibility: Int = GONE) {
             bindCheckBoxVisibility(checkBoxVisibility)
             bindStatusChange(content = content)
 
-            binding.routeProcessStatusStr.text = content.routeProcessStatusStr
+            binding.routeProcessStatusStr.text = content.status.description
             binding.assetStr.text = content.assetStr
             binding.assetCode.text = content.assetCode
             binding.warehouseAreaStr.text = content.warehouseAreaStr

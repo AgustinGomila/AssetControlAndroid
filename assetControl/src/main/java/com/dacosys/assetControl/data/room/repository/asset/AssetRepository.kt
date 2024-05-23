@@ -70,12 +70,18 @@ class AssetRepository {
         } == 1
     }
 
+    private val nextLastId: Long
+        get() = runBlocking {
+            val minId = dao.selectMinId() ?: 0
+            if (minId > 0) -1 else minId - 1
+        }
 
-    val minId get() = runBlocking { dao.selectMinId() ?: -1 }
 
     fun insert(asset: Asset) = runBlocking {
+        asset.id = nextLastId
         dao.insert(AssetEntity(asset))
     }
+
 
     suspend fun sync(
         assetsObj: Array<AssetObject>,
@@ -103,6 +109,7 @@ class AssetRepository {
             }
         }
     }
+
 
     fun update(asset: Asset): Boolean {
         val r = runBlocking {

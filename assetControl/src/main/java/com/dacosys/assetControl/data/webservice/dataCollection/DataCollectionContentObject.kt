@@ -2,6 +2,9 @@ package com.dacosys.assetControl.data.webservice.dataCollection
 
 import android.os.Parcel
 import android.os.Parcelable
+import com.dacosys.assetControl.data.room.dto.dataCollection.DataCollectionContent
+import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.dateToNotNullStringDate
+import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.dateToStringDate
 import org.ksoap2.serialization.SoapObject
 
 class DataCollectionContentObject() : Parcelable {
@@ -18,17 +21,31 @@ class DataCollectionContentObject() : Parcelable {
     var dataCollectionRuleContentId: Long = 0
 
     constructor(parcel: Parcel) : this() {
-        this.dataCollectionId = parcel.readLong()
-        this.level = parcel.readInt()
-        this.position = parcel.readInt()
-        this.attributeId = parcel.readLong()
-        this.attributeCompositionId = parcel.readLong()
-        this.result = parcel.readInt()
-        this.valueStr = parcel.readString().orEmpty()
-        this.dataCollectionDate = parcel.readString().orEmpty()
-        this.dataCollectionContentId = parcel.readLong()
-        this.collectorDataCollectionContentId = parcel.readLong()
-        this.dataCollectionRuleContentId = parcel.readLong()
+        dataCollectionId = parcel.readLong()
+        level = parcel.readInt()
+        position = parcel.readInt()
+        attributeId = parcel.readLong()
+        attributeCompositionId = parcel.readLong()
+        result = parcel.readInt()
+        valueStr = parcel.readString().orEmpty()
+        dataCollectionDate = parcel.readString().orEmpty()
+        dataCollectionContentId = parcel.readLong()
+        collectorDataCollectionContentId = parcel.readLong()
+        dataCollectionRuleContentId = parcel.readLong()
+    }
+
+    constructor(dcc: DataCollectionContent) : this() {
+        dataCollectionId = dcc.dataCollectionId ?: 0
+        level = dcc.level ?: 0
+        position = dcc.position ?: 0
+        attributeId = dcc.attributeId ?: 0
+        attributeCompositionId = dcc.attributeCompositionId ?: 0
+        result = dcc.result ?: 0
+        valueStr = dcc.valueStr
+        dataCollectionDate = dateToNotNullStringDate(dcc.dataCollectionDate)
+        dataCollectionContentId = dcc.id
+        collectorDataCollectionContentId = dcc.id
+        dataCollectionRuleContentId = dcc.dataCollectionRuleContentId
     }
 
     fun getBySoapObject(so: SoapObject): DataCollectionContentObject {

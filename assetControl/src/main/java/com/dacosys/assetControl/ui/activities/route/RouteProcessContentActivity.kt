@@ -30,6 +30,7 @@ import androidx.transition.ChangeBounds
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
+import com.dacosys.assetControl.AssetControlApp.Companion.getUserId
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.enums.attribute.AttributeCompositionType
 import com.dacosys.assetControl.data.enums.common.SaveProgress
@@ -546,8 +547,10 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
     private fun initRoute() {
         val r = route ?: return
+        val userId = getUserId() ?: return
 
         GetRouteProcess(
+            userId = userId,
             route = r,
             onProgress = {
                 onGetRouteProcess(it)
@@ -562,12 +565,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
         Log.d(this::class.java.simpleName, getString(R.string.getting_processed_content))
 
-        ///////////////////////////////////
-        // Para controlar la transacción //
-        // TODO: Eliminar val db = DataBaseHelper.getWritableDb()
         try {
-            // TODO: Eliminar db.beginTransaction()
-
             // Traemos la ruta para continuarla si aún no lo hemos hecho.
             if (!rpcArray.any()) {
                 rpcArray = ArrayList(
@@ -589,8 +587,6 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
                 RouteProcessStepsRepository().selectByRouteProcessId(rp.id)
                     .sortedWith(compareBy { it.step })
             )
-
-            // TODO: Eliminar db.setTransactionSuccessful()
 
             // Recorrer la ruta en busca del lugar donde quedó el operador.
             // Ir agregando los pasos a una colección de pasos.
@@ -663,8 +659,6 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             Log.d(this::class.java.simpleName, getString(R.string.finished_analysis))
         } catch (ex: Exception) {
             ex.printStackTrace()
-        } finally {
-            // TODO: Eliminar db.endTransaction()
         }
 
         fill(backLevelSteps.last())
@@ -702,13 +696,8 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         var expression = exp
         val parameters: ArrayList<Parameter> = ArrayList()
 
-        ///////////////////////////////////
-        // Para controlar la transacción //
-        // TODO: Eliminar val db = DataBaseHelper.getReadableDb()
-
         val compositionRepository = AttributeCompositionRepository()
 
-        // TODO: Eliminar db.beginTransaction()
         try {
             for (p in par) {
                 var nextLetter = charValue.toChar().toString()
@@ -751,12 +740,8 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
                 }
                 expression = expression.replace("[" + p.paramName + "]", nextLetter)
             }
-
-            // TODO: Eliminar db.setTransactionSuccessful()
         } catch (ex: Exception) {
             ex.printStackTrace()
-        } finally {
-            // TODO: Eliminar db.endTransaction()
         }
 
         // Reemplazar los resultados de tipo secuencia de niveles (ej.: '3,4')
@@ -1209,7 +1194,8 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
     private fun currentData() {
         val rpc = adapter?.currentRpc() ?: return
         val dcId = rpc.dataCollectionId
-        if (dcId == 0L) {
+
+        if (dcId == null || rpc.status == RouteProcessStatus.notProcessed || rpc.status == RouteProcessStatus.skipped) {
             makeText(binding.root, getContext().getString(R.string.not_processed), SnackBarType.INFO)
             return
         }

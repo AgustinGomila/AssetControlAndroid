@@ -2,6 +2,7 @@ package com.dacosys.assetControl.data.async.movement
 
 import android.util.Log
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
+import com.dacosys.assetControl.AssetControlApp.Companion.getUserId
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.enums.asset.AssetStatus
 import com.dacosys.assetControl.data.enums.common.SaveProgress
@@ -10,6 +11,7 @@ import com.dacosys.assetControl.data.enums.movement.WarehouseMovementContentStat
 import com.dacosys.assetControl.data.room.dto.movement.WarehouseMovement
 import com.dacosys.assetControl.data.room.dto.movement.WarehouseMovementContent
 import com.dacosys.assetControl.data.room.repository.asset.AssetRepository
+import com.dacosys.assetControl.data.room.repository.location.WarehouseAreaRepository
 import com.dacosys.assetControl.data.room.repository.movement.WarehouseMovementContentRepository
 import com.dacosys.assetControl.data.room.repository.movement.WarehouseMovementRepository
 import com.dacosys.assetControl.network.sync.SyncProgress
@@ -18,6 +20,7 @@ import com.dacosys.assetControl.network.sync.SyncUpload
 import com.dacosys.assetControl.network.utils.Connection.Companion.autoSend
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
+import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.getUTCDateTimeAsNotNullDate
 import com.dacosys.imageControl.network.upload.UploadImagesProgress
 import com.dacosys.imageControl.room.database.IcDatabase
 import kotlinx.coroutines.*
@@ -75,13 +78,12 @@ class SaveMovement {
     }
 
     private suspend fun suspendFunction(): Boolean = withContext(Dispatchers.IO) {
-        if (destWarehouseAreaId == null) return@withContext false
+        val destWaId = destWarehouseAreaId ?: return@withContext false
+        val destWa = WarehouseAreaRepository().selectById(destWaId) ?: return@withContext false
 
         if (!allMovementContent.any()) return@withContext false
 
-        ///////////////////////////////////
-        // Para controlar la transacción //
-        // TODO: Eliminar val db = DataBaseHelper.getWritableDb()
+        val userId = getUserId() ?: return@withContext false
 
         try {
             onProgress.invoke(
@@ -112,7 +114,8 @@ class SaveMovement {
                         } ${wmCont.code}"
                     }
 
-                    wmCont.contentStatusId == WarehouseMovementContentStatus.noNeedToMove.id && wmCont.assetStatusId == AssetStatus.missing.id -> {
+                    wmCont.contentStatusId == WarehouseMovementContentStatus.noNeedToMove.id &&
+                            wmCont.assetStatusId == AssetStatus.missing.id -> {
                         assetFoundedList.add(wmCont)
                         msg = "${
                             getContext().getString(R.string.processing_asset_to_register)
@@ -132,13 +135,10 @@ class SaveMovement {
                 Log.d(this::class.java.simpleName, msg)
             }
 
-            ///// Comienzo de una transacción /////
-            // TODO: Eliminar db.beginTransaction()
-
             // Dar de alta los activos que se encontraron y que ya
             // pertenecían al área de destino.
             AssetRepository().setOnInventoryFromArea(
-                warehouseAreaId = destWarehouseAreaId!!, assets = assetFoundedList
+                warehouseAreaId = destWaId, assets = assetFoundedList
             )
 
             // Hacer los movimientos y los cambios de estados de los activos solo
@@ -176,6 +176,9 @@ class SaveMovement {
                         )
                     }
 
+                    // Valor inicial de ID para contenidos reemplazando los negativos
+                    var lastId = WarehouseMovementContentRepository().maxId
+
                     // Create Warehouse Movements Content by each Origin Warehouse Area
                     partialCount = 0
                     for (origWaId in waIdList) {
@@ -190,30 +193,41 @@ class SaveMovement {
                             )
                         )
 
+                        val origWa = WarehouseAreaRepository().selectById(origWaId) ?: return@withContext false
+                        val origWId = origWa.warehouseId
+                        val destWId = destWa.warehouseId
+
                         val wm = WarehouseMovement(
+                            originWarehouseId = origWId,
                             originWarehouseAreaId = origWaId,
-                            destinationWarehouseAreaId = destWarehouseAreaId!!,
-                            obs = obs
+                            destinationWarehouseId = destWId,
+                            destinationWarehouseAreaId = destWaId,
+                            warehouseMovementDate = getUTCDateTimeAsNotNullDate(),
+                            obs = obs,
+                            userId = userId
                         )
 
-                        movementRepository.insert(wm)
+                        val newId = movementRepository.insert(wm)
+                        wm.id = newId
 
-                        val l: ArrayList<WarehouseMovementContent> = ArrayList()
-                        for (x in assetInMovementList) {
-                            if (x.warehouseAreaId == origWaId) {
-                                l.add(x)
+                        val assetsInArea: ArrayList<WarehouseMovementContent> = ArrayList()
+                        assetInMovementList
+                            .filterTo(assetsInArea) { it.warehouseAreaId == origWaId }
+                            .map {
+                                lastId++
+                                it.warehouseMovementId = newId
+                                it.id = lastId
                             }
-                        }
 
                         contentRepository.insert(
                             movement = wm,
-                            contents = l,
+                            contents = assetsInArea,
                             progress = onProgress
                         )
 
                         try {
                             // Activos que están en el movimiento cambian de estado a En Inventario.
-                            AssetRepository().setOnInventoryFromWmCont(wm, l)
+                            AssetRepository().setOnInventoryFromWmCont(wm, assetsInArea)
                         } catch (ex: Exception) {
                             msg = "${
                                 getContext().getString(R.string.error_updating_asset_status)
@@ -274,8 +288,6 @@ class SaveMovement {
                 return@withContext true
             }
 
-            // TODO: Eliminar db.setTransactionSuccessful()
-
             if (collectorMovementId != null) {
                 msg = getContext().getString(R.string.movement_performed_correctly)
                 onProgress.invoke(
@@ -302,8 +314,6 @@ class SaveMovement {
             )
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             return@withContext false
-        } finally {
-            // TODO: Eliminar db.endTransaction()
         }
     }
 }

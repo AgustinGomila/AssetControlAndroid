@@ -27,11 +27,16 @@ class ItemCategoryRepository {
 
     fun selectNoTransferred() = runBlocking { dao.selectNoTransferred() }
 
-    val minId get() = runBlocking { dao.selectMinId() ?: -1 }
+    private val nextLastId: Long
+        get() = runBlocking {
+            val minId = dao.selectMinId() ?: 0
+            if (minId > 0) -1 else minId - 1
+        }
 
 
     fun insert(category: ItemCategory) {
         runBlocking {
+            category.id = nextLastId
             dao.insert(ItemCategoryEntity(category))
         }
     }

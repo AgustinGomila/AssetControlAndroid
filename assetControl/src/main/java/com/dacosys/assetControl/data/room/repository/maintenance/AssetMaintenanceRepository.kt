@@ -33,7 +33,7 @@ class AssetMaintenanceRepository {
         dao.update(AssetMaintenanceEntity(maintenance))
     }
 
-    fun updateTransferredNew(id: Long) = runBlocking {
+    fun updateTransferred(id: Long) = runBlocking {
         dao.updateTransferred(id)
     }
 

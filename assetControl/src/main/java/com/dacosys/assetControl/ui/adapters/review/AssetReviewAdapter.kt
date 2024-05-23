@@ -21,6 +21,7 @@ import com.dacosys.assetControl.data.room.dto.review.AssetReview
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.getColorWithAlpha
+import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.dateToNotNullStringDate
 import java.lang.ref.WeakReference
 import java.util.*
 
@@ -586,8 +587,8 @@ class AssetReviewAdapter :
             if (assetReview != null) {
                 holder.wStrTextView?.text = assetReview.warehouseStr
                 holder.waStrTextView?.text = assetReview.warehouseAreaStr
-                holder.assetReviewDateTextView?.text = assetReview.assetReviewDate.toString()
-                holder.modificationDateTextView?.text = assetReview.modificationDate.toString()
+                holder.assetReviewDateTextView?.text = dateToNotNullStringDate(assetReview.assetReviewDate)
+                holder.modificationDateTextView?.text = dateToNotNullStringDate(assetReview.modificationDate)
                 holder.userNameTextView?.text = assetReview.userStr
                 holder.statusTextView?.text = AssetReviewStatus.getById(assetReview.statusId).description
                 holder.obsTextView?.text = assetReview.obs

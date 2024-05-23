@@ -29,31 +29,32 @@ interface WarehouseMovementDao {
         "UPDATE ${Entry.TABLE_NAME} SET ${Entry.ORIGIN_WAREHOUSE_AREA_ID} = :newValue " +
                 "WHERE ${Entry.ORIGIN_WAREHOUSE_AREA_ID} = :oldValue"
     )
-    suspend fun updateOriginWarehouseAreaId(oldValue: Long, newValue: Long)
+    suspend fun updateOriginWarehouseAreaId(newValue: Long, oldValue: Long)
 
     @Query(
         "UPDATE ${Entry.TABLE_NAME} SET ${Entry.DESTINATION_WAREHOUSE_AREA_ID} = :newValue " +
                 "WHERE ${Entry.DESTINATION_WAREHOUSE_AREA_ID} = :oldValue"
     )
-    suspend fun updateDestinationWarehouseAreaId(oldValue: Long, newValue: Long)
+    suspend fun updateDestinationWarehouseAreaId(newValue: Long, oldValue: Long)
 
     @Query(
         "UPDATE ${Entry.TABLE_NAME} SET ${Entry.ORIGIN_WAREHOUSE_ID} = :newValue " +
                 "WHERE ${Entry.ORIGIN_WAREHOUSE_ID} = :oldValue"
     )
-    suspend fun updateOriginWarehouseId(oldValue: Long, newValue: Long)
+    suspend fun updateOriginWarehouseId(newValue: Long, oldValue: Long)
 
     @Query(
         "UPDATE ${Entry.TABLE_NAME} SET ${Entry.DESTINATION_WAREHOUSE_ID} = :newValue " +
                 "WHERE ${Entry.DESTINATION_WAREHOUSE_ID} = :oldValue"
     )
-    suspend fun updateDestinationWarehouseId(oldValue: Long, newValue: Long)
+    suspend fun updateDestinationWarehouseId(newValue: Long, oldValue: Long)
 
     @Query(
-        "UPDATE ${Entry.TABLE_NAME} SET ${Entry.ID} = :newValue, ${Entry.TRANSFERRED_DATE} = :date " +
+        "UPDATE ${Entry.TABLE_NAME} SET ${Entry.ID} = :newValue, " +
+                "${Entry.TRANSFERRED_DATE} = :date " +
                 "WHERE ${Entry.ID} = :oldValue"
     )
-    suspend fun updateId(oldValue: Long, newValue: Long, date: Date = Date())
+    suspend fun updateId(newValue: Long, oldValue: Long, date: Date)
 
 
     @Query("DELETE $BASIC_FROM WHERE ${Entry.ID} = :id")

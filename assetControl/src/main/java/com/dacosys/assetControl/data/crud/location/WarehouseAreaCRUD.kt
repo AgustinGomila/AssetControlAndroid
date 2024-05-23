@@ -58,15 +58,8 @@ class WarehouseAreaCRUD {
         }
 
         private fun addWarehouseArea(waObj: WarehouseAreaObject): CrudResult<WarehouseArea?> {
-            var description = waObj.description
-            if (waObj.description.length > 255) {
-                description = waObj.description.substring(0, 255)
-            }
-
-            val newId = WarehouseAreaRepository().minId
             val wa = WarehouseArea(
-                id = newId,
-                description = description,
+                description = waObj.description.take(255),
                 mActive = waObj.active,
                 warehouseId = waObj.warehouse_id,
                 transferred = 0

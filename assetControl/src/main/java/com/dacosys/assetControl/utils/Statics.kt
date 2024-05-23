@@ -8,7 +8,6 @@ import androidx.core.app.ActivityCompat
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.webservice.common.SessionObject
-import java.text.DateFormat.getDateTimeInstance
 import java.util.*
 import kotlin.reflect.KClass
 
@@ -81,14 +80,6 @@ class Statics {
             return Build.VERSION.SDK_INT < Build.VERSION_CODES.S || ActivityCompat.checkSelfPermission(
                 getContext(), Manifest.permission.BLUETOOTH_CONNECT
             ) == PackageManager.PERMISSION_GRANTED
-        }
-
-        fun String.toDate(): Date {
-            return try {
-                getDateTimeInstance().parse(this) ?: Date()
-            } catch (e: java.text.ParseException) {
-                Date()
-            }
         }
     }
 }

@@ -2,6 +2,7 @@ package com.dacosys.assetControl.data.async.review
 
 import android.util.Log
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
+import com.dacosys.assetControl.AssetControlApp.Companion.getUserId
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.enums.common.SaveProgress
 import com.dacosys.assetControl.data.enums.review.AssetReviewContentStatus
@@ -11,6 +12,7 @@ import com.dacosys.assetControl.data.room.dto.movement.WarehouseMovementContent
 import com.dacosys.assetControl.data.room.dto.review.AssetReview
 import com.dacosys.assetControl.data.room.dto.review.AssetReviewContent
 import com.dacosys.assetControl.data.room.repository.asset.AssetRepository
+import com.dacosys.assetControl.data.room.repository.location.WarehouseAreaRepository
 import com.dacosys.assetControl.data.room.repository.movement.WarehouseMovementContentRepository
 import com.dacosys.assetControl.data.room.repository.movement.WarehouseMovementRepository
 import com.dacosys.assetControl.data.room.repository.review.AssetReviewContentRepository
@@ -20,6 +22,7 @@ import com.dacosys.assetControl.network.sync.SyncUpload
 import com.dacosys.assetControl.network.utils.Connection.Companion.autoSend
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.utils.misc.UTCDataTime
+import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.getUTCDateTimeAsNotNullDate
 import com.dacosys.imageControl.network.upload.UploadImagesProgress
 import kotlinx.coroutines.*
 
@@ -76,6 +79,8 @@ class SaveReview {
     }
 
     private suspend fun suspendFunction(): Boolean = withContext(Dispatchers.IO) {
+        val userId = getUserId() ?: return@withContext false
+
         /////////////////////////////////////
         ///// Construir las colecciones /////
 
@@ -136,14 +141,15 @@ class SaveReview {
             Log.d(this::class.java.simpleName, msg)
         }
 
-        ///////////////////////////////////
-        // Para controlar la transacción //
-        // TODO: Eliminar val db = DataBaseHelper.getWritableDb()
-
         // Hacer los movimientos y los cambios de estados de los activos solo
         // cuando la revisión está completada
         if (tempReview.statusId == AssetReviewStatus.completed.id) {
             //////////// MOVEMENTS ////////////
+            val areaRepository = WarehouseAreaRepository()
+
+            val destWaId = tempReview.warehouseAreaId
+            val destWa = areaRepository.selectById(destWaId) ?: return@withContext false
+
             // Create an Array List with the different
             // Origin Warehouse Areas to select the number of movements to do
             val waIdList = ArrayList<Long>()
@@ -171,19 +177,30 @@ class SaveReview {
             val movementRepository = WarehouseMovementRepository()
             val contentRepository = WarehouseMovementContentRepository()
 
-            ///// Comienzo de una transacción /////
-            // TODO: Eliminar db.beginTransaction()
-
             try {
+                // Valor inicial de ID para contenidos reemplazando los negativos
+                var lastId = WarehouseMovementContentRepository().maxId
+
                 // Create Warehouse Movements Content by each Origin Warehouse Area
                 total = waIdList.size
                 for ((p, origWaId) in waIdList.withIndex()) {
+
+                    val origWa = areaRepository.selectById(origWaId) ?: return@withContext false
+                    val origWId = origWa.warehouseId
+                    val destWId = destWa.warehouseId
+
                     val newWm = WarehouseMovement(
+                        originWarehouseId = origWId,
                         originWarehouseAreaId = origWaId,
-                        destinationWarehouseAreaId = tempReview.warehouseAreaId,
-                        obs = tempReview.obs
+                        destinationWarehouseId = destWId,
+                        destinationWarehouseAreaId = destWaId,
+                        obs = tempReview.obs,
+                        warehouseMovementDate = getUTCDateTimeAsNotNullDate(),
+                        userId = userId
                     )
-                    movementRepository.insert(newWm)
+
+                    val newId = movementRepository.insert(newWm)
+                    newWm.id = newId
 
                     onSaveProgress.invoke(
                         SaveProgress(
@@ -195,11 +212,16 @@ class SaveReview {
                     )
 
                     val l: ArrayList<WarehouseMovementContent> = ArrayList()
-                    for (x in assetExternalList) {
-                        if (x.warehouseAreaId == origWaId) {
-                            l.add(WarehouseMovementContent(x))
+                    assetExternalList
+                        .filter { it.warehouseAreaId == origWaId }
+                        .mapTo(l) {
+                            lastId++
+                            WarehouseMovementContent(
+                                id = lastId,
+                                movementId = newId,
+                                reviewContent = it
+                            )
                         }
-                    }
 
                     contentRepository.insert(
                         movement = newWm,
@@ -214,8 +236,6 @@ class SaveReview {
                     newWm.saveChanges()
                 }
 
-                // TODO: Eliminar db.setTransactionSuccessful()
-
             } catch (ex: Exception) {
                 ex.printStackTrace()
                 onSaveProgress.invoke(
@@ -225,15 +245,10 @@ class SaveReview {
                     )
                 )
                 return@withContext false
-            } finally {
-                // TODO: Eliminar db.endTransaction()
             }
 
             //////////// ASSET STATUS ////////////
             val assetRepository = AssetRepository()
-
-            ///// Comienzo de una transacción /////
-            // TODO: Eliminar db.beginTransaction()
 
             try {
                 // Activos que no están en la revisión cambian de estado a Extraviados
@@ -241,8 +256,6 @@ class SaveReview {
 
                 assetRepository.setMissing(assetNotInReviewList)
                 assetRepository.setOnInventoryFromArCont(tempReview, assetOnInventory)
-
-                // TODO: Eliminar db.setTransactionSuccessful()
             } catch (ex: Exception) {
                 ex.printStackTrace()
                 onSaveProgress.invoke(
@@ -252,42 +265,25 @@ class SaveReview {
                     )
                 )
                 return@withContext false
-            } finally {
-                // TODO: Eliminar db.endTransaction()
             }
         }
 
-        ///// Comienzo de una transacción /////
-        // TODO: Eliminar db.beginTransaction()
-
         val contentRepository = AssetReviewContentRepository()
-        try {
-            // Limpiar el contenido de la revisión ANTIGUA
-            contentRepository.deleteByAssetReviewId(tempReview.id)
 
-            // Agregar el contenido de la revisión
-            // Se agregan todos los activos, el sincronizador se encarga después
-            // de NO enviar aquellos que no fueron revisados
-            contentRepository.insert(
-                id = tempReview.id,
-                contents = allAssets,
-                progress = onSaveProgress
-            )
+        // Limpiar el contenido de la revisión ANTIGUA
+        contentRepository.deleteByAssetReviewId(tempReview.id)
 
-            // TODO: Eliminar db.setTransactionSuccessful()
+        // Agregar el contenido de la revisión
+        // Se agregan todos los activos, el sincronizador se encarga después
+        // de NO enviar aquellos que no fueron revisados
+        contentRepository.insert(
+            id = tempReview.id,
+            contents = allAssets,
+            progress = onSaveProgress
+        )
 
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-            onSaveProgress.invoke(
-                SaveProgress(
-                    msg = "${getContext().getString(R.string.failed_to_do_the_review)}: ${ex.message}",
-                    taskStatus = ProgressStatus.crashed.id,
-                )
-            )
-            return@withContext false
-        } finally {
-            // TODO: Eliminar db.endTransaction()
-        }
+        tempReview.saveChanges()
+
         return@withContext true
     }
 }

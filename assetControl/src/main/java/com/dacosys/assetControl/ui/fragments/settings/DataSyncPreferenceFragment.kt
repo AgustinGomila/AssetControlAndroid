@@ -483,42 +483,36 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
     private var tempDbFile: String = ""
 
     private fun copyDbToDocuments() {
-        /**
-        // TODO: Ver esto DB
-        try {
-        DataBaseHelper.copyDbToDocuments()
-        if (view != null) showSnackBar(
-        SnackBarEventData(
-        String.format(
-        "%s: %s", getString(R.string.database_changed), AcDatabase.DATABASE_NAME
-        ), SnackBarType.INFO
-        )
-        )
-        } catch (ex: java.lang.Exception) {
-        ex.printStackTrace()
-        }
-         **/
+        // TODO: Ver eso, copiar DB a carpeta Documents
+        // try {
+        //     DataBaseHelper.copyDbToDocuments()
+        //     if (view != null) showSnackBar(
+        //         SnackBarEventData(
+        //             String.format(
+        //                 "%s: %s", getString(R.string.database_changed), AcDatabase.DATABASE_NAME
+        //             ), SnackBarType.INFO
+        //         )
+        //     )
+        // } catch (ex: java.lang.Exception) {
+        //     ex.printStackTrace()
+        // }
     }
 
     private fun copyDb() {
-        /**
-        // TODO: Ver esto DB
-        if (tempDbFile == "") return
-        try {
-        DataBaseHelper.copyDataBase(tempDbFile)
-        if (view != null) MakeText.makeText(
-        requireView(), String.format(
-        "%s: %s", getString(R.string.database_changed), AcDatabase.DATABASE_NAME
-        ), SnackBarType.INFO
-        )
-
-        // Reiniciamos la instancia
-        DataBaseHelper.cleanInstance()
-
-        } catch (ex: java.lang.Exception) {
-        ex.printStackTrace()
-        }
-         **/
+        // TODO: Ver eso, copiar DB
+        // if (tempDbFile == "") return
+        // try {
+        //     DataBaseHelper.copyDataBase(tempDbFile)
+        //     if (view != null) MakeText.makeText(
+        //         requireView(), String.format(
+        //             "%s: %s", getString(R.string.database_changed), AcDatabase.DATABASE_NAME
+        //         ), SnackBarType.INFO
+        //     )
+        //     // Reiniciamos la instancia
+        //     DataBaseHelper.cleanInstance()
+        // } catch (ex: java.lang.Exception) {
+        //     ex.printStackTrace()
+        // }
     }
 
     private fun askForDownload(): AlertDialog {

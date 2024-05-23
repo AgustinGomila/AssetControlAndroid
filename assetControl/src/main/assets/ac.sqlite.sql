@@ -152,17 +152,17 @@ CREATE INDEX IF NOT EXISTS `IDX_barcode_label_target_description` ON `barcode_la
 
 CREATE TABLE IF NOT EXISTS `data_collection`
 (
-    `data_collection_id`         INTEGER NOT NULL,
-    `asset_id`                   INTEGER,
-    `warehouse_id`               INTEGER,
-    `warehouse_area_id`          INTEGER,
-    `user_id`                    INTEGER NOT NULL,
-    `date_start`                 INTEGER,
-    `date_end`                   INTEGER,
-    `completed`                  INTEGER NOT NULL,
-    `transferred_date`           INTEGER,
-    `_id`                        INTEGER NOT NULL,
-    `collector_route_process_id` INTEGER NOT NULL,
+    `data_collection_id` INTEGER NOT NULL,
+    `asset_id`           INTEGER,
+    `warehouse_id`       INTEGER,
+    `warehouse_area_id`  INTEGER,
+    `user_id`            INTEGER NOT NULL,
+    `date_start`         INTEGER,
+    `date_end`           INTEGER,
+    `completed`          INTEGER NOT NULL,
+    `transferred_date`   INTEGER,
+    `_id`                INTEGER NOT NULL,
+    `route_process_id`   INTEGER NOT NULL,
     PRIMARY KEY (`data_collection_id`)
 );
 CREATE INDEX IF NOT EXISTS `IDX_data_collection_data_collection_id` ON `data_collection` (`data_collection_id`);
@@ -171,7 +171,7 @@ CREATE INDEX IF NOT EXISTS `IDX_data_collection_warehouse_id` ON `data_collectio
 CREATE INDEX IF NOT EXISTS `IDX_data_collection_warehouse_area_id` ON `data_collection` (`warehouse_area_id`);
 CREATE INDEX IF NOT EXISTS `IDX_data_collection_user_id` ON `data_collection` (`user_id`);
 CREATE INDEX IF NOT EXISTS `IDX_data_collection__id` ON `data_collection` (`_id`);
-CREATE INDEX IF NOT EXISTS `IDX_data_collection_collector_route_process_id` ON `data_collection` (`collector_route_process_id`);
+CREATE INDEX IF NOT EXISTS `IDX_data_collection_route_process_id` ON `data_collection` (`route_process_id`);
 
 CREATE TABLE IF NOT EXISTS `data_collection_content`
 (

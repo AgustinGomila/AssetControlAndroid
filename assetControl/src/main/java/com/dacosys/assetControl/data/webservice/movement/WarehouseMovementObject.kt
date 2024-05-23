@@ -2,6 +2,8 @@ package com.dacosys.assetControl.data.webservice.movement
 
 import android.os.Parcel
 import android.os.Parcelable
+import com.dacosys.assetControl.data.room.dto.movement.WarehouseMovement
+import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.dateToNotNullStringDate
 import org.ksoap2.serialization.SoapObject
 
 class WarehouseMovementObject() : Parcelable {
@@ -29,6 +31,20 @@ class WarehouseMovementObject() : Parcelable {
         destWarehouseId = parcel.readLong()
         completed = parcel.readInt()
         collectorWarehouseMovementId = parcel.readLong()
+    }
+
+    constructor(wm: WarehouseMovement) : this() {
+        warehouseMovementId = wm.id
+        warehouseMovementDate = dateToNotNullStringDate(wm.warehouseMovementDate)
+        obs = wm.obs.orEmpty()
+        userId = wm.userId
+        origWarehouseAreaId = wm.originWarehouseAreaId
+        origWarehouseId = wm.originWarehouseId
+        transferedDate = dateToNotNullStringDate(wm.transferredDate)
+        destWarehouseAreaId = wm.destinationWarehouseAreaId
+        destWarehouseId = wm.destinationWarehouseId
+        completed = wm.completed ?: 0
+        collectorWarehouseMovementId = wm.id
     }
 
     fun getBySoapObject(so: SoapObject): WarehouseMovementObject {

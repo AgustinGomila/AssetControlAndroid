@@ -209,6 +209,7 @@ class TemplateSelectDialogActivity : AppCompatActivity(),
 
         KeyboardVisibilityEvent.registerEventListener(this, this)
         refreshBarcodeLabelCustomText(cleanText = false, focus = true)
+
         thread { fillAdapter() }
     }
 

@@ -1,9 +1,6 @@
 package com.dacosys.assetControl.data.room.dao.review
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room.*
 import com.dacosys.assetControl.data.enums.review.AssetReviewStatus
 import com.dacosys.assetControl.data.room.dto.location.Warehouse
 import com.dacosys.assetControl.data.room.dto.location.WarehouseArea
@@ -12,6 +9,7 @@ import com.dacosys.assetControl.data.room.dto.review.AssetReview.Entry
 import com.dacosys.assetControl.data.room.dto.user.User
 import com.dacosys.assetControl.data.room.dto.user.UserWarehouseArea
 import com.dacosys.assetControl.data.room.entity.review.AssetReviewEntity
+import com.dacosys.assetControl.data.room.repository.review.AssetReviewRepository
 import java.util.*
 
 @Dao
@@ -55,19 +53,22 @@ interface AssetReviewDao {
     suspend fun insert(assetReview: AssetReviewEntity): Long
 
 
+    @Update
+    suspend fun update(review: AssetReviewEntity)
+
     @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.WAREHOUSE_AREA_ID} = :newValue WHERE ${Entry.WAREHOUSE_AREA_ID} = :oldValue")
-    suspend fun updateWarehouseAreaId(oldValue: Long, newValue: Long)
+    suspend fun updateWarehouseAreaId(newValue: Long, oldValue: Long)
 
     @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.WAREHOUSE_ID} = :newValue WHERE ${Entry.WAREHOUSE_ID} = :oldValue")
-    suspend fun updateWarehouseId(oldValue: Long, newValue: Long)
+    suspend fun updateWarehouseId(newValue: Long, oldValue: Long)
 
-    @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.ID} = :newValue, ${Entry.MODIFICATION_DATE} = :date, ${Entry.STATUS_ID} = :status WHERE ${Entry.ID} = :oldValue")
-    suspend fun updateId(
-        oldValue: Long,
-        newValue: Long,
-        date: Date = Date(),
-        status: Int = AssetReviewStatus.transferred.id
+    @Query(
+        "UPDATE ${Entry.TABLE_NAME} SET ${Entry.ID} = :newValue, " +
+                "${Entry.MODIFICATION_DATE} = :date, " +
+                "${Entry.STATUS_ID} = :status " +
+                "WHERE ${Entry.ID} = :oldValue"
     )
+    suspend fun updateId(newValue: Long, oldValue: Long, date: Date, status: Int = AssetReviewStatus.transferred.id)
 
 
     @Query("DELETE $BASIC_FROM WHERE ${Entry.ID} = :id")

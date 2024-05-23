@@ -150,7 +150,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
     private var completeList: ArrayList<WarehouseMovementContent> = ArrayList()
     private var currentInventory: ArrayList<String>? = null
 
-    private var collectorContentId: Long = 0
+    private var tempId: Long = 0L
     private var obs = ""
 
     private var allowClicks = true
@@ -189,6 +189,8 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
         b.putBoolean("panelTopIsExpanded", panelTopIsExpanded)
         b.putBoolean("panelBottomIsExpanded", panelBottomIsExpanded)
 
+        b.putLong("tempId", tempId)
+
         b.putStringArrayList("currentInventory", currentInventory)
 
         b.putParcelable("lastSelected", adapter?.currentItem())
@@ -209,6 +211,8 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
         val t1 = b.getString("title") ?: ""
         tempTitle = t1.ifEmpty { getString(R.string.assets_movement) }
         // endregion
+
+        tempId = b.getLong("tempId")
 
         tempWarehouseArea = Parcels.unwrap<WarehouseArea>(b.parcelable("warehouseArea"))
         currentInventory = b.getStringArrayList("currentInventory")
@@ -332,7 +336,6 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         setHeaderTextBox()
 
-        // Llenar la grilla
         setPanels()
 
         setupUI(binding.root, this)
@@ -933,11 +936,11 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
                         }
                     }
 
-                    collectorContentId--
+                    tempId--
 
                     val finalWmc = WarehouseMovementContent(
                         movementId = 0,
-                        id = collectorContentId,
+                        id = tempId,
                         asset = tempAsset,
                         contentStatusId = contStatus.id
                     )

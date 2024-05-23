@@ -59,9 +59,8 @@ import com.dacosys.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.dacosys.assetControl.ui.fragments.route.*
 import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.Statics.Companion.toDate
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.misc.UTCDataTime
+import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.getUTCDateTimeAsNotNullDate
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.utils.scanners.nfc.Nfc
@@ -107,10 +106,8 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
     override fun onItemSelected(unitType: UnitType?) {
     }
 
-    private var dataStart: String = ""
-
     private var rpc: RouteProcessContent? = null
-    private var collectorRouteProcessId: Long? = null
+    private var routeProcessId: Long? = null
     private var dcr: DataCollectionRule? = null
     private var dcrContArray: ArrayList<DataCollectionRuleContent> = ArrayList()
     private var dcContArray: ArrayList<DataCollectionContent> = ArrayList()
@@ -231,7 +228,6 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         historicDataFragment =
             supportFragmentManager.findFragmentById(binding.historicDataFragment.id) as HistoricDataFragment?
-        dataStart = UTCDataTime.getUTCDateTimeAsString()
 
         if (savedInstanceState != null) {
             // Ya estamos dentro de una recolección
@@ -322,13 +318,12 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         val dcr = dcr ?: return
 
         val rp = RouteProcessRepository().selectById(id = rpc.routeProcessId) ?: return
-        collectorRouteProcessId = rp.id
+        routeProcessId = rp.id
 
-        dcrContArray =
-            ArrayList(
-                DataCollectionRuleContentRepository().selectByDataCollectionRuleIdActive(dcr.id)
-                    .sortedWith(compareBy({ it.level }, { it.position }))
-            )
+        val ruleContents = DataCollectionRuleContentRepository().selectByDataCollectionRuleIdActive(dcr.id)
+            .sortedWith(compareBy({ it.level }, { it.position }))
+
+        dcrContArray = ArrayList(ruleContents)
     }
 
     private fun setPanels() {
@@ -433,11 +428,8 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         val reference = "${getString(R.string.asset)}: ${rpc.assetCode}"
         val obs = "${getString(R.string.user)}: ${currentUser()?.name}"
 
-        val tableName = Table.routeProcess.tableName
-        description = "$tableName: $description"
-        if (description.length > 255) {
-            description.substring(0, 255)
-        }
+        val tableDescription = Table.routeProcess.description
+        description = "$tableDescription: $description".take(255)
 
         if (imageControlFragment == null) {
             imageControlFragment = ImageControlButtonsFragment.newInstance(
@@ -1126,9 +1118,12 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         // Agrego el nuevo registro si el control está activo
         if (f.isEnabled) {
             val ruleContent = f.dataCollectionRuleContent ?: return
+            val attrCompType = f.attributeCompositionType
+
             // Agregando datos a la colección, ID virtual: completePath
             val dcc = DataCollectionContent(
                 ruleContent = ruleContent,
+                attributeCompositionType = attrCompType,
                 virtualId = virtualId,
                 anyResult = result,
                 valueStr = valueStr
@@ -1325,26 +1320,35 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         ///////////// DATA COLLECTION /////////////
         val collectionRepository = DataCollectionRepository()
 
-        val r = ThreadLocalRandom.current()
-        val fakeRouteProcessId = r.nextLong(-888888 - -999999)
-        val routeProcessId = collectorRouteProcessId
-
+        val routeProcessId = routeProcessId
         var dc: DataCollection? = null
         val rpc = rpc
         val targetAsset = targetAsset
         val targetWarehouseArea = targetWarehouseArea
 
+        val dateStart = getUTCDateTimeAsNotNullDate()
+
         when {
             rpc != null && routeProcessId != null -> {
-                dc = collectionRepository.insert(rpc, dataStart.toDate(), routeProcessId)
+                dc = collectionRepository.insert(
+                    rpc = rpc,
+                    dateStart = dateStart,
+                    routeProcessId = routeProcessId
+                )
             }
 
             targetAsset != null -> {
-                dc = collectionRepository.insert(targetAsset, dataStart.toDate(), fakeRouteProcessId)
+                dc = collectionRepository.insert(
+                    asset = targetAsset,
+                    dateStart = dateStart
+                )
             }
 
             targetWarehouseArea != null -> {
-                dc = collectionRepository.insert(targetWarehouseArea, dataStart.toDate(), fakeRouteProcessId)
+                dc = collectionRepository.insert(
+                    warehouseArea = targetWarehouseArea,
+                    dateStart = dateStart
+                )
             }
         }
 
@@ -1840,11 +1844,8 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
             }
         }"
 
-        val tableName = Table.routeProcess.tableName
-        description = "$tableName: $description"
-        if (description.length > 255) {
-            description.substring(0, 255)
-        }
+        val tableDescription = Table.routeProcess.description
+        description = "$tableDescription: $description".take(255)
 
         ImageCoroutines().savePhotoInDb(
             context = applicationContext,

@@ -19,6 +19,9 @@ interface WarehouseMovementContentDao {
     )
     suspend fun selectByWarehouseMovementId(id: Long): List<WarehouseMovementContent>
 
+    @Query("SELECT MAX(${Entry.ID}) $BASIC_FROM")
+    suspend fun selectMaxId(): Long?
+
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(content: WarehouseMovementContentEntity): Long
@@ -36,7 +39,7 @@ interface WarehouseMovementContentDao {
     suspend fun update(content: WarehouseMovementContentEntity)
 
     @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.ASSET_ID} = :newValue WHERE ${Entry.ASSET_ID} = :oldValue")
-    suspend fun updateAssetId(oldValue: Long, newValue: Long)
+    suspend fun updateAssetId(newValue: Long, oldValue: Long)
 
 
     @Delete

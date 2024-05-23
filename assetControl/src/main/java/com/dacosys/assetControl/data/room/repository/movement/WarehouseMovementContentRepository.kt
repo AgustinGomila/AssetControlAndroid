@@ -16,6 +16,8 @@ class WarehouseMovementContentRepository {
 
     fun selectByWarehouseMovementId(wmId: Long) = runBlocking { dao.selectByWarehouseMovementId(wmId) }
 
+    val maxId get() = runBlocking { dao.selectMaxId() ?: 0 }
+
 
     fun insert(
         movement: WarehouseMovement,
