@@ -21,13 +21,12 @@ class AssetMaintenanceObject() : Parcelable {
         repairman_id = parcel.readLong()
     }
 
-    constructor(assetMaintenance: AssetMaintenance) : this() {
-        // Main Information
+    constructor(assetMaintenance: AssetMaintenance, userId: Long) : this() {
         asset_manteinance_id = assetMaintenance.id
         manteinance_type_id = assetMaintenance.maintenanceTypeId
         manteinance_status_id = assetMaintenance.maintenanceStatusId
         asset_id = assetMaintenance.assetId
-        repairman_id = getUserId() ?: 0
+        repairman_id = userId
     }
 
     fun getBySoapObject(so: SoapObject): AssetMaintenanceObject {

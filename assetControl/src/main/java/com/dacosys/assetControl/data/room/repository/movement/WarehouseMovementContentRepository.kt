@@ -57,6 +57,12 @@ class WarehouseMovementContentRepository {
         }
     }
 
+    fun updateMovementId(newValue: Long, oldValue: Long) {
+        runBlocking {
+            dao.updateMovementId(newValue, oldValue)
+        }
+    }
+
 
     fun deleteTransferred() = runBlocking {
         dao.deleteTransferred()

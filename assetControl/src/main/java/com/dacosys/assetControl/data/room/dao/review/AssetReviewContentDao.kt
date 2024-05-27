@@ -50,6 +50,12 @@ interface AssetReviewContentDao {
     @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.ASSET_ID} = :newValue WHERE ${Entry.ASSET_ID} = :oldValue")
     suspend fun updateAssetId(newValue: Long, oldValue: Long)
 
+    @Query(
+        "UPDATE ${Entry.TABLE_NAME} SET ${Entry.ASSET_REVIEW_ID} = :newValue " +
+                "WHERE ${Entry.ASSET_REVIEW_ID} = :oldValue"
+    )
+    suspend fun updateAssetReviewId(newValue: Long, oldValue: Long)
+
 
     @Delete
     suspend fun delete(content: AssetReviewContentEntity)

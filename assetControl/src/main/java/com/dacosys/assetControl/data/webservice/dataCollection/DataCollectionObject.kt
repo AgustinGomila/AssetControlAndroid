@@ -3,7 +3,7 @@ package com.dacosys.assetControl.data.webservice.dataCollection
 import android.os.Parcel
 import android.os.Parcelable
 import com.dacosys.assetControl.data.room.dto.dataCollection.DataCollection
-import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.dateToNotNullStringDate
+import com.dacosys.assetControl.utils.misc.DateUtils.formatDateToString
 import org.ksoap2.serialization.SoapObject
 
 class DataCollectionObject() : Parcelable {
@@ -34,16 +34,16 @@ class DataCollectionObject() : Parcelable {
     }
 
     constructor(dc: DataCollection) : this() {
-        dataCollectionId = dc.id
+        dataCollectionId = dc.dataCollectionId
         assetId = dc.assetId ?: 0
         warehouseId = dc.warehouseId ?: 0
         warehouseAreaId = dc.warehouseAreaId ?: 0
         userId = dc.userId
-        dateStart = dateToNotNullStringDate(dc.dateStart)
-        dateEnd = dateToNotNullStringDate(dc.dateEnd)
+        dateStart = formatDateToString(dc.dateStart)
+        dateEnd = formatDateToString(dc.dateEnd)
         completed = dc.completed
-        transferedDate = dateToNotNullStringDate(dc.transferredDate)
-        collectorDataCollectionId = dc.dataCollectionId
+        transferedDate = formatDateToString(dc.transferredDate)
+        collectorDataCollectionId = dc.id
         collectorRouteProcessId = dc.routeProcessId
     }
 

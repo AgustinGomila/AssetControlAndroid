@@ -1,4 +1,4 @@
-package com.dacosys.assetControl.ui.activities.route
+package com.dacosys.assetControl.ui.activities.dataCollection
 
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -16,7 +16,7 @@ import com.dacosys.assetControl.data.room.dto.dataCollection.DataCollectionRule
 import com.dacosys.assetControl.data.room.dto.location.WarehouseArea
 import com.dacosys.assetControl.data.room.repository.dataCollection.DataCollectionRuleRepository
 import com.dacosys.assetControl.databinding.DataCollectionRuleSelectActivityBinding
-import com.dacosys.assetControl.ui.adapters.datacollection.DataCollectionRuleAdapter
+import com.dacosys.assetControl.ui.adapters.dataCollection.DataCollectionRuleAdapter
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.closeKeyboard

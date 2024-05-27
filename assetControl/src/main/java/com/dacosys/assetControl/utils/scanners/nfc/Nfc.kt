@@ -18,12 +18,12 @@ import com.dacosys.assetControl.ui.activities.asset.AssetCRUDActivity
 import com.dacosys.assetControl.ui.activities.asset.AssetPrintLabelActivity
 import com.dacosys.assetControl.ui.activities.code.CodeCheckActivity
 import com.dacosys.assetControl.ui.activities.common.ObservationsActivity
+import com.dacosys.assetControl.ui.activities.dataCollection.DccActivity
 import com.dacosys.assetControl.ui.activities.location.LocationSelectActivity
 import com.dacosys.assetControl.ui.activities.location.WarehouseAreaCRUDActivity
 import com.dacosys.assetControl.ui.activities.location.WarehouseAreaPrintLabelActivity
 import com.dacosys.assetControl.ui.activities.movement.WmcActivity
 import com.dacosys.assetControl.ui.activities.review.ArcActivity
-import com.dacosys.assetControl.ui.activities.route.DccActivity
 import com.dacosys.assetControl.ui.activities.route.RouteProcessContentActivity
 import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 import kotlin.experimental.or

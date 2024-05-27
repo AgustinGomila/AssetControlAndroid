@@ -47,11 +47,6 @@ class RouteProcessContentRepository {
                 }
 
                 if (!isIn) {
-                    var dataCollectionId: Long? = null
-                    if (dataCollection != null) {
-                        dataCollectionId = dataCollection.id
-                    }
-
                     rpcList.add(
                         RouteProcessContent(
                             routeProcessId = routeProcessId,
@@ -59,7 +54,7 @@ class RouteProcessContentRepository {
                             level = rComp.level,
                             position = rComp.position,
                             routeProcessStatusId = RouteProcessStatus.notProcessed.id,
-                            dataCollectionId = dataCollectionId
+                            dataCollectionId = dataCollection?.id
                         )
                     )
                 }
@@ -74,31 +69,39 @@ class RouteProcessContentRepository {
             return rpContArray
     }
 
+    private val nextLastId: Long
+        get() = runBlocking {
+            val minId = dao.selectMinId() ?: 0
+            if (minId > 0) -1 else minId - 1
+        }
+
 
     fun insert(content: List<RouteProcessContent>): List<Long> {
-        val r = runBlocking {
+        val r: MutableList<Long> = mutableListOf()
+        runBlocking {
+            var nextId = nextLastId
+
+            content.forEach { c ->
+                c.id = nextId
+                nextId--
+            }
             insertSuspend(content)
+
+            r.add(nextId)
         }
-        return r
+        return r.toList()
     }
 
-    /**
-     * Insert
-     *
-     * @param content
-     * @return New ID
-     */
     fun insert(content: RouteProcessContent): Long =
         runBlocking {
+            val nextId = nextLastId
+
+            content.id = nextId
             insertSuspend(content)
+
+            nextId
         }
 
-    /**
-     * Insert suspend
-     *
-     * @param content
-     * @return List of new IDs
-     */
     private suspend fun insertSuspend(content: List<RouteProcessContent>): List<Long> {
         val r: MutableList<Long> = mutableListOf()
         withContext(Dispatchers.IO) {
@@ -107,12 +110,6 @@ class RouteProcessContentRepository {
         return r
     }
 
-    /**
-     * Insert suspend
-     *
-     * @param content
-     * @return New ID
-     */
     private suspend fun insertSuspend(content: RouteProcessContent): Long =
         withContext(Dispatchers.IO) {
             dao.insert(RouteProcessContentEntity(content))
@@ -127,6 +124,19 @@ class RouteProcessContentRepository {
         return r
     }
 
+    fun updateRouteProcessId(newValue: Long, oldValue: Long) {
+        runBlocking {
+            dao.updateRouteProcessId(newValue, oldValue)
+        }
+    }
+
+    fun updateDataCollectionId(newValue: Long, oldValue: Long) {
+        runBlocking {
+            dao.updateDataCollectionId(newValue, oldValue)
+        }
+    }
+
+
     fun deleteByRouteProcessId(id: Long) = runBlocking {
         dao.deleteByRouteProcessId(id)
     }
@@ -135,11 +145,11 @@ class RouteProcessContentRepository {
         dao.deleteByRouteIdRouteProcessDate(minDate, rId)
     }
 
-    fun updateStatusNew(rpc: RouteProcessContent) = runBlocking {
-        dao.updateStatusNew(
+    fun updateStatus(rpc: RouteProcessContent) = runBlocking {
+        dao.updateStatus(
             id = rpc.id,
             processStatusId = rpc.routeProcessStatusId,
-            dataCollectionId = rpc.dataCollectionId ?: 0,
+            dataCollectionId = rpc.dataCollectionId,
             routeProcessId = rpc.routeProcessId,
             dataCollectionRuleId = rpc.dataCollectionRuleId,
             level = rpc.level,

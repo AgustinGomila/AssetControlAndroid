@@ -3,7 +3,7 @@ package com.dacosys.assetControl.data.webservice.route
 import android.os.Parcel
 import android.os.Parcelable
 import com.dacosys.assetControl.data.room.dto.route.RouteProcess
-import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.dateToNotNullStringDate
+import com.dacosys.assetControl.utils.misc.DateUtils.formatDateToString
 import org.ksoap2.serialization.SoapObject
 
 class RouteProcessObject() : Parcelable {
@@ -30,12 +30,12 @@ class RouteProcessObject() : Parcelable {
     constructor(rp: RouteProcess) : this() {
         userId = rp.userId
         routeId = rp.routeId
-        routeProcessDate = dateToNotNullStringDate(rp.routeProcessDate)
+        routeProcessDate = formatDateToString(rp.routeProcessDate)
         completed = if (rp.completed) 1 else 0
         transfered = rp.transferred ?: 0
-        transferedDate = dateToNotNullStringDate(rp.transferredDate)
-        routeProcessId = rp.id
-        collectorRouteProcessId = rp.routeProcessId
+        transferedDate = formatDateToString(rp.transferredDate)
+        routeProcessId = rp.routeProcessId
+        collectorRouteProcessId = rp.id
     }
 
     fun getBySoapObject(so: SoapObject): RouteProcessObject {

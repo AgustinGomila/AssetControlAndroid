@@ -5,12 +5,10 @@ import android.os.Parcelable
 import androidx.room.ColumnInfo
 import androidx.room.Ignore
 import com.dacosys.assetControl.data.enums.attribute.AttributeCompositionType
-import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.dateToStringDate
-import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.getUTCDateTimeAsNotNullDate
-import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.stringDateToNotNullDate
 import java.util.*
 
 class DataCollectionContent(
+    @ColumnInfo(name = Entry.ID) var id: Long = 0L,
     @ColumnInfo(name = Entry.DATA_COLLECTION_CONTENT_ID) var dataCollectionContentId: Long = 0L,
     @ColumnInfo(name = Entry.DATA_COLLECTION_ID) var dataCollectionId: Long? = null,
     @ColumnInfo(name = Entry.LEVEL) var level: Int? = null,
@@ -20,7 +18,6 @@ class DataCollectionContent(
     @ColumnInfo(name = Entry.RESULT) var result: Int? = null,
     @ColumnInfo(name = Entry.VALUE_STR) var valueString: String? = null,
     @ColumnInfo(name = Entry.DATA_COLLECTION_DATE) var dataCollectionDate: Date = Date(),
-    @ColumnInfo(name = Entry.ID) var id: Long = 0L,
     @ColumnInfo(name = Entry.DATA_COLLECTION_RULE_CONTENT_ID) var dataCollectionRuleContentId: Long = 0L,
     @ColumnInfo(name = Entry.DATA_COLLECTION_RULE_CONTENT_STR) var dataCollectionRuleContentStr: String? = null,
     @ColumnInfo(name = Entry.ATTRIBUTE_COMPOSITION_STR) var attributeCompositionStr: String? = null,
@@ -37,6 +34,7 @@ class DataCollectionContent(
         }
 
     constructor(parcel: Parcel) : this(
+        id = parcel.readLong(),
         dataCollectionContentId = parcel.readLong(),
         dataCollectionId = parcel.readValue(Long::class.java.classLoader) as? Long,
         level = parcel.readValue(Int::class.java.classLoader) as? Int,
@@ -45,8 +43,7 @@ class DataCollectionContent(
         attributeCompositionId = parcel.readValue(Long::class.java.classLoader) as? Long,
         result = parcel.readValue(Int::class.java.classLoader) as? Int,
         valueString = parcel.readString().orEmpty(),
-        dataCollectionDate = stringDateToNotNullDate(parcel.readString().orEmpty()),
-        id = parcel.readLong(),
+        dataCollectionDate = Date(parcel.readLong()),
         dataCollectionRuleContentId = parcel.readLong(),
         dataCollectionRuleContentStr = parcel.readString().orEmpty(),
         attributeCompositionStr = parcel.readString().orEmpty(),
@@ -55,12 +52,14 @@ class DataCollectionContent(
     )
 
     constructor(
+        virtualId: Long,
         ruleContent: DataCollectionRuleContent,
         attributeCompositionType: AttributeCompositionType?,
-        virtualId: Long,
         anyResult: Any?,
         valueStr: String,
     ) : this() {
+        id = virtualId
+
         if (ruleContent.attributeCompositionId > 0) {
             attributeCompositionId = ruleContent.attributeCompositionId
             attributeCompositionStr = ruleContent.attributeCompositionStr
@@ -76,8 +75,7 @@ class DataCollectionContent(
             attributeCompositionTypeId = attrTypeId.toInt()
         }
 
-        dataCollectionContentId = virtualId
-        dataCollectionDate = getUTCDateTimeAsNotNullDate()
+        dataCollectionDate = Date()
         dataCollectionRuleContentId = ruleContent.id
         level = ruleContent.level
         position = ruleContent.position
@@ -113,6 +111,7 @@ class DataCollectionContent(
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeLong(id)
         parcel.writeLong(dataCollectionContentId)
         parcel.writeValue(dataCollectionId)
         parcel.writeValue(level)
@@ -121,8 +120,7 @@ class DataCollectionContent(
         parcel.writeValue(attributeCompositionId)
         parcel.writeValue(result)
         parcel.writeString(valueString)
-        parcel.writeString(dateToStringDate(dataCollectionDate))
-        parcel.writeLong(id)
+        parcel.writeLong(dataCollectionDate.time)
         parcel.writeLong(dataCollectionRuleContentId)
         parcel.writeString(dataCollectionRuleContentStr)
         parcel.writeString(attributeCompositionStr)

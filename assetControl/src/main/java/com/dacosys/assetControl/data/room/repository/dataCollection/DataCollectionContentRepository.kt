@@ -28,14 +28,31 @@ class DataCollectionContentRepository {
         dao.selectByDataCollectionRuleContentIdWarehouseAreaId(dcrContId, waId)
     }
 
+    private val nextLastId: Long
+        get() = runBlocking {
+            val minId = dao.selectMinId() ?: 0
+            if (minId > 0) -1 else minId - 1
+        }
+
 
     fun insert(id: Long, dcc: DataCollectionContent): Boolean {
         val r = runBlocking {
+            val nextId = nextLastId
+
             dcc.dataCollectionId = id
+            dcc.id = nextId
+
             dao.insert(DataCollectionContentEntity(dcc))
             true
         }
         return r
+    }
+
+
+    fun updateDataCollectionId(newValue: Long, oldValue: Long) {
+        runBlocking {
+            dao.updateDataCollectionId(newValue, oldValue)
+        }
     }
 
 

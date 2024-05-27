@@ -1,27 +1,25 @@
-package com.dacosys.assetControl.ui.fragments.route
+package com.dacosys.assetControl.ui.fragments.dataCollection
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.dacosys.assetControl.databinding.FragmentTimeBinding
-import java.text.SimpleDateFormat
-import java.util.*
+import com.dacosys.assetControl.databinding.FragmentBooleanBinding
 
 /**
  * A simple [Fragment] subclass.
- * Use the [TimeFragment.newInstance] factory method to
+ * Use the [BooleanFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class TimeFragment : Fragment() {
+class BooleanFragment : Fragment() {
     private var dccFragmentListener: DccFragmentListener? = null
 
     fun setListener(dccList: DccFragmentListener) {
         dccFragmentListener = dccList
     }
 
-    private var _binding: FragmentTimeBinding? = null
+    private var _binding: FragmentBooleanBinding? = null
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -41,28 +39,12 @@ class TimeFragment : Fragment() {
 
     private var _tempIsEnabled: Boolean = true
     private var _tempDescription: String = ""
-    private var _tempValue: String = ""
+    private var _tempValue: Boolean = true
 
     private fun loadBundleValues(b: Bundle) {
-        _tempIsEnabled = b.getBoolean("isEnabled")
+        _tempIsEnabled = if (b.containsKey("isEnabled")) b.getBoolean("isEnabled") else true
+        _tempValue = b.getBoolean("currentValue")
         _tempDescription = b.getString("description") ?: ""
-        _tempValue = b.getString("currentValue") ?: defaultValue
-    }
-
-    private fun setValue(v: String) {
-        try {
-            val sdf = SimpleDateFormat(timeFormat, Locale.getDefault())
-            val date = sdf.parse(v) ?: return
-            val cal = Calendar.getInstance()
-            cal.time = date
-            value = cal
-        } catch (ex: Exception) {
-            val sdf = SimpleDateFormat(timeFormat, Locale.getDefault())
-            val date = sdf.parse("12:00") ?: return
-            val cal = Calendar.getInstance()
-            cal.time = date
-            value = cal
-        }
     }
 
     override fun onCreateView(
@@ -70,7 +52,7 @@ class TimeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        _binding = FragmentTimeBinding.inflate(inflater, container, false)
+        _binding = FragmentBooleanBinding.inflate(inflater, container, false)
         val view = binding.root
 
         if (arguments != null)
@@ -89,48 +71,32 @@ class TimeFragment : Fragment() {
     }
 
     private fun setValues() {
-        setValue(_tempValue)
+        value = _tempValue
         isEnabled = _tempIsEnabled
     }
 
     override fun onStart() {
         super.onStart()
         if (isEnabled) {
-            binding.autoResizeTextView.requestFocus()
+            binding.booleanCheckBox.requestFocus()
         }
         dccFragmentListener?.onFragmentStarted()
     }
 
     var isEnabled: Boolean = true
 
-    var value: Calendar
+    var value: Boolean
         get() {
-            if (_binding == null) return Calendar.getInstance()
-            val hour: Int = binding.timePicker.hour
-            val minute: Int = binding.timePicker.minute
-
-            val calendar = Calendar.getInstance()
-            calendar.set(Calendar.HOUR, hour)
-            calendar.set(Calendar.MINUTE, minute)
-
-            return calendar
+            if (_binding == null) return defaultValue
+            return binding.booleanCheckBox.isChecked
         }
         set(value) {
             if (_binding == null) return
-            binding.timePicker.hour = value.get(Calendar.HOUR)
-            binding.timePicker.minute = value.get(Calendar.MINUTE)
+            binding.booleanCheckBox.isChecked = value
             return
         }
 
-    var defaultValue: String = ""
-        get() {
-            val sdf = SimpleDateFormat(timeFormat, Locale.getDefault())
-            return sdf.format(value.time)
-        }
-        set(value) {
-            field = value
-            return
-        }
+    var defaultValue: Boolean = true
 
     companion object {
         /**
@@ -140,21 +106,15 @@ class TimeFragment : Fragment() {
          */
         fun newInstance(
             description: String,
-            value: Calendar? = null,
+            value: Boolean? = null,
             isEnabled: Boolean = true,
-        ): TimeFragment {
-            val fragment = TimeFragment()
-
-            var valueStr = ""
-            if (value != null) {
-                val sdf = SimpleDateFormat(timeFormat, Locale.getDefault())
-                valueStr = sdf.format(value.time)
-            }
+        ): BooleanFragment {
+            val fragment = BooleanFragment()
 
             val args = Bundle()
             args.putString("description", description)
             args.putBoolean("isEnabled", isEnabled)
-            if (value != null) args.putString("currentValue", valueStr)
+            if (value != null) args.putBoolean("currentValue", value)
 
             fragment.arguments = args
             return fragment
@@ -163,7 +123,5 @@ class TimeFragment : Fragment() {
         fun equals(a: Any?, b: Any?): Boolean {
             return a != null && a == b
         }
-
-        private const val timeFormat = "HH:mm"
     }
 }

@@ -4,8 +4,6 @@ import android.os.Parcel
 import android.os.Parcelable
 import androidx.room.ColumnInfo
 import com.dacosys.assetControl.data.room.repository.movement.WarehouseMovementRepository
-import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.dateToStringDate
-import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.stringDateToNotNullDate
 import java.util.*
 
 class WarehouseMovement(
@@ -44,12 +42,12 @@ class WarehouseMovement(
     constructor(parcel: Parcel) : this(
         id = parcel.readLong(),
         warehouseMovementId = parcel.readLong(),
-        warehouseMovementDate = stringDateToNotNullDate(parcel.readString().orEmpty()),
+        warehouseMovementDate = Date(parcel.readLong()),
         obs = parcel.readString(),
         userId = parcel.readLong(),
         originWarehouseAreaId = parcel.readLong(),
         originWarehouseId = parcel.readLong(),
-        transferredDate = stringDateToNotNullDate(parcel.readString().orEmpty()),
+        transferredDate = parcel.readLong().let { if (it == -1L) null else Date(it) },
         destinationWarehouseAreaId = parcel.readLong(),
         destinationWarehouseId = parcel.readLong(),
         completed = parcel.readValue(Int::class.java.classLoader) as? Int,
@@ -82,12 +80,12 @@ class WarehouseMovement(
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeLong(id)
         parcel.writeLong(warehouseMovementId)
-        parcel.writeString(dateToStringDate(warehouseMovementDate))
+        parcel.writeLong(warehouseMovementDate.time)
         parcel.writeString(obs)
         parcel.writeLong(userId)
         parcel.writeLong(originWarehouseAreaId)
         parcel.writeLong(originWarehouseId)
-        parcel.writeString(dateToStringDate(transferredDate))
+        parcel.writeLong(transferredDate?.time ?: -1L)
         parcel.writeLong(destinationWarehouseAreaId)
         parcel.writeLong(destinationWarehouseId)
         parcel.writeValue(completed)

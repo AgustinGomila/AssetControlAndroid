@@ -3,8 +3,7 @@ package com.dacosys.assetControl.data.webservice.dataCollection
 import android.os.Parcel
 import android.os.Parcelable
 import com.dacosys.assetControl.data.room.dto.dataCollection.DataCollectionContent
-import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.dateToNotNullStringDate
-import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.dateToStringDate
+import com.dacosys.assetControl.utils.misc.DateUtils.formatDateToString
 import org.ksoap2.serialization.SoapObject
 
 class DataCollectionContentObject() : Parcelable {
@@ -42,7 +41,7 @@ class DataCollectionContentObject() : Parcelable {
         attributeCompositionId = dcc.attributeCompositionId ?: 0
         result = dcc.result ?: 0
         valueStr = dcc.valueStr
-        dataCollectionDate = dateToNotNullStringDate(dcc.dataCollectionDate)
+        dataCollectionDate = formatDateToString(dcc.dataCollectionDate)
         dataCollectionContentId = dcc.id
         collectorDataCollectionContentId = dcc.id
         dataCollectionRuleContentId = dcc.dataCollectionRuleContentId

@@ -6,8 +6,6 @@ import androidx.room.ColumnInfo
 import androidx.room.Ignore
 import com.dacosys.assetControl.data.room.repository.review.AssetReviewContentRepository
 import com.dacosys.assetControl.data.room.repository.review.AssetReviewRepository
-import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.dateToStringDate
-import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.stringDateToNotNullDate
 import java.util.*
 
 class AssetReview(
@@ -80,12 +78,12 @@ class AssetReview(
 
     constructor(parcel: Parcel) : this(
         id = parcel.readLong(),
-        assetReviewDate = stringDateToNotNullDate(parcel.readString().orEmpty()),
+        assetReviewDate = Date(parcel.readLong()),
         observations = parcel.readString(),
         userId = parcel.readLong(),
         warehouseAreaId = parcel.readLong(),
         warehouseId = parcel.readLong(),
-        modificationDate = stringDateToNotNullDate(parcel.readString().orEmpty()),
+        modificationDate = Date(parcel.readLong()),
         statusId = parcel.readInt(),
         warehouseAreaStr = parcel.readString().orEmpty(),
         warehouseStr = parcel.readString().orEmpty(),
@@ -94,12 +92,12 @@ class AssetReview(
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeLong(id)
-        parcel.writeString(dateToStringDate(assetReviewDate))
+        parcel.writeLong(assetReviewDate.time)
         parcel.writeString(observations)
         parcel.writeLong(userId)
         parcel.writeLong(warehouseAreaId)
         parcel.writeLong(warehouseId)
-        parcel.writeString(dateToStringDate(modificationDate))
+        parcel.writeLong(modificationDate.time)
         parcel.writeInt(statusId)
         parcel.writeString(warehouseAreaStr)
         parcel.writeString(warehouseStr)

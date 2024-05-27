@@ -3,6 +3,7 @@ package com.dacosys.assetControl.utils.settings.io
 import android.content.Context
 import android.os.Environment
 import android.util.Log
+import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.room.database.AcDatabase.Companion.DATABASE_NAME
 import com.dacosys.assetControl.data.room.database.AcTempDatabase.Companion.TEMP_DATABASE_NAME
@@ -46,7 +47,9 @@ class FileHelper {
 
         class CopyDbResult(var result: Boolean, var outFile: String)
 
-        fun copyDbToDocuments(context: Context): CopyDbResult {
+        fun copyDbToDocuments(): CopyDbResult {
+            val context = AssetControlApp.getContext()
+
             try {
                 val dbFile = File(context.getDatabasePath(DATABASE_NAME).toString())
 

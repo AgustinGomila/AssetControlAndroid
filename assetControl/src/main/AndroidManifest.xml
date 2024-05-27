@@ -8,6 +8,20 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
 
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+                     android:maxSdkVersion="32"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+                     android:maxSdkVersion="32"/>
+
+    <!-- Nuevos permisos para Android 13+ -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO"/>
+
+    <!-- Permiso para administrar todos los archivos (evitar si es posible) -->
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+                     tools:ignore="ScopedStorage"/>
+
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN"/>
     <uses-permission android:name="android.permission.BROADCAST_STICKY"/>
     <uses-permission android:name="android.permission.CAMERA"/>
@@ -15,11 +29,9 @@
     <uses-permission android:name="android.permission.FORCE_ENABLE_SCOPED_STORAGE"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.NFC"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
     <uses-permission android:name="android.permission.VIBRATE"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" tools:ignore="ScopedStorage"/>
 
     <!-- Honeywell Broadcast Permission -->
     <uses-permission android:name="com.honeywell.decode.permission.DECODE"/>
@@ -173,11 +185,11 @@
                 android:exported="false"
                 android:windowSoftInputMode="stateAlwaysHidden"/>
         <activity
-                android:name=".ui.activities.route.DccActivity"
+                android:name=".ui.activities.dataCollection.DccActivity"
                 android:exported="false"
                 android:windowSoftInputMode="adjustResize"/>
-        <activity android:name=".ui.activities.route.DataCollectionRuleSelectActivity"/>
-        <activity android:name=".ui.activities.route.DataCollectionRuleTargetActivity"/>
+        <activity android:name=".ui.activities.dataCollection.DataCollectionRuleSelectActivity"/>
+        <activity android:name=".ui.activities.dataCollection.DataCollectionRuleTargetActivity"/>
         <activity
                 android:name="com.dacosys.assetControl.ui.activities.location.WarehouseAreaCRUDActivity"
                 android:exported="false"
@@ -231,7 +243,7 @@
                 android:theme="@style/Theme.AppCompat.Translucent"
                 android:windowSoftInputMode="adjustResize"/>
         <activity
-                android:name=".ui.activities.route.DccDetailActivity"
+                android:name=".ui.activities.dataCollection.DccDetailActivity"
                 android:configChanges="keyboardHidden|orientation|screenSize"
                 android:excludeFromRecents="true"
                 android:theme="@style/Theme.AppCompat.Translucent"

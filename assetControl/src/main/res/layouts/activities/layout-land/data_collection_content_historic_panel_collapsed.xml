@@ -177,7 +177,7 @@
 
         <androidx.fragment.app.FragmentContainerView
                 android:id="@+id/historicDataFragment"
-                android:name="com.dacosys.assetControl.ui.fragments.route.HistoricDataFragment"
+                android:name="com.dacosys.assetControl.ui.fragments.dataCollection.HistoricDataFragment"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 app:layout_constraintBottom_toBottomOf="parent"

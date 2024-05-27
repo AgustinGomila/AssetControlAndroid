@@ -5,12 +5,11 @@ import com.dacosys.assetControl.data.room.database.AcDatabase.Companion.database
 import com.dacosys.assetControl.data.room.dto.route.Route
 import com.dacosys.assetControl.data.room.dto.route.RouteProcess
 import com.dacosys.assetControl.data.room.entity.route.RouteProcessEntity
-import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.dateToNotNullStringDate
-import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.getUTCDateTimeAsNotNullDate
+import com.dacosys.assetControl.utils.misc.DateUtils.formatDateToString
+import com.dacosys.assetControl.utils.misc.DateUtils.getDateMinusDays
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import java.text.SimpleDateFormat
 import java.util.*
 
 class RouteProcessRepository {
@@ -35,14 +34,14 @@ class RouteProcessRepository {
 
 
     fun insert(userId: Long, route: Route): RouteProcess? {
-        val nextId = nextLastId
-
         val r = runBlocking {
+            val nextId = nextLastId
+
             val rp = RouteProcess(
                 id = nextId,
                 userId = userId,
                 routeId = route.id,
-                routeProcessDate = getUTCDateTimeAsNotNullDate(),
+                routeProcessDate = Date(),
                 routeStr = route.description
             )
             dao.insert(RouteProcessEntity(rp))
@@ -66,10 +65,10 @@ class RouteProcessRepository {
         return true
     }
 
-    fun updateTransferred(newValue: Long, oldValue: Long) {
+    fun updateRouteProcessId(routeProcessId: Long, oldId: Long) {
         runBlocking {
-            val date = getUTCDateTimeAsNotNullDate()
-            dao.updateId(newValue, oldValue, date)
+            val date = Date()
+            dao.updateRouteProcessId(routeProcessId, oldId, date)
         }
     }
 
@@ -93,13 +92,7 @@ class RouteProcessRepository {
             routeIdList.add(r.routeId)
         }
 
-        // Esta es una forma de obtener la fecha actual y restarle 7 días
-        val c = Calendar.getInstance()
-        c.add(Calendar.DATE, -7)
-
-        val sdf = SimpleDateFormat("dd'/'MM'/'yyyy HH:mm:ss a", Locale.getDefault())
-        sdf.calendar = c
-        var minDate = sdf.format(c.time).toString()
+        var minDate = getDateMinusDays(7)
 
         val contentRepository = RouteProcessContentRepository()
         val stepsRepository = RouteProcessStepsRepository()
@@ -114,15 +107,17 @@ class RouteProcessRepository {
                             continue
                         }
 
-                        minDate = dateToNotNullStringDate(r.routeProcessDate)
+                        minDate = r.routeProcessDate
                         break
                     }
                 }
 
                 if (a > 4) {
-                    contentRepository.deleteByRouteIdRouteProcessDate(minDate, rId)
-                    stepsRepository.deleteByRouteIdRouteProcessDate(minDate, rId)
-                    deleteByRouteIdRouteProcessDate(minDate, rId)
+                    val date = formatDateToString(minDate)
+
+                    contentRepository.deleteByRouteIdRouteProcessDate(date, rId)
+                    stepsRepository.deleteByRouteIdRouteProcessDate(date, rId)
+                    deleteByRouteIdRouteProcessDate(date, rId)
                 }
             }
             true

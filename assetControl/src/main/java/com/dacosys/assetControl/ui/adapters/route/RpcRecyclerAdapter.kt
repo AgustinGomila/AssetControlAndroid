@@ -511,6 +511,20 @@ class RpcRecyclerAdapter(
         }
     }
 
+    fun update(content: RouteProcessContent) {
+        val t = fullList.firstOrNull { it == content } ?: return
+
+        val index = fullList.indexOf(t)
+        if (index != -1) fullList[index] = content
+
+        submitList(fullList) {
+            run {
+                // Notificamos al Listener superior
+                dataSetChangedListener?.onDataSetChanged()
+            }
+        }
+    }
+
     fun remove(position: Int) {
         if (position < 0) return
 

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "3362b43f956a3ab25f2ce3d7e98c1828",
+    "identityHash": "8c339dcaa4d8d98d9e036eacdc162860",
     "entities": [
       {
         "tableName": "asset",
@@ -853,8 +853,14 @@
       },
       {
         "tableName": "data_collection",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`data_collection_id` INTEGER NOT NULL, `asset_id` INTEGER, `warehouse_id` INTEGER, `warehouse_area_id` INTEGER, `user_id` INTEGER NOT NULL, `date_start` INTEGER, `date_end` INTEGER, `completed` INTEGER NOT NULL, `transferred_date` INTEGER, `_id` INTEGER NOT NULL, `route_process_id` INTEGER NOT NULL, PRIMARY KEY(`data_collection_id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `data_collection_id` INTEGER NOT NULL, `asset_id` INTEGER, `warehouse_id` INTEGER, `warehouse_area_id` INTEGER, `user_id` INTEGER NOT NULL, `date_start` INTEGER, `date_end` INTEGER, `completed` INTEGER NOT NULL, `transferred_date` INTEGER, `route_process_id` INTEGER NOT NULL)",
         "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
           {
             "fieldPath": "dataCollectionId",
             "columnName": "data_collection_id",
@@ -910,12 +916,6 @@
             "notNull": false
           },
           {
-            "fieldPath": "id",
-            "columnName": "_id",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
             "fieldPath": "routeProcessId",
             "columnName": "route_process_id",
             "affinity": "INTEGER",
@@ -923,9 +923,9 @@
           }
         ],
         "primaryKey": {
-          "autoGenerate": false,
+          "autoGenerate": true,
           "columnNames": [
-            "data_collection_id"
+            "_id"
           ]
         },
         "indices": [
@@ -975,15 +975,6 @@
             "createSql": "CREATE INDEX IF NOT EXISTS `IDX_data_collection_user_id` ON `${TABLE_NAME}` (`user_id`)"
           },
           {
-            "name": "IDX_data_collection__id",
-            "unique": false,
-            "columnNames": [
-              "_id"
-            ],
-            "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_data_collection__id` ON `${TABLE_NAME}` (`_id`)"
-          },
-          {
             "name": "IDX_data_collection_route_process_id",
             "unique": false,
             "columnNames": [
@@ -997,8 +988,14 @@
       },
       {
         "tableName": "data_collection_content",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`data_collection_content_id` INTEGER NOT NULL, `data_collection_id` INTEGER, `level` INTEGER, `position` INTEGER, `attribute_id` INTEGER, `attribute_composition_id` INTEGER, `result` INTEGER, `value_str` TEXT NOT NULL, `data_collection_date` INTEGER NOT NULL, `_id` INTEGER NOT NULL, `data_collection_rule_content_id` INTEGER NOT NULL, PRIMARY KEY(`data_collection_content_id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `data_collection_content_id` INTEGER NOT NULL, `data_collection_id` INTEGER, `level` INTEGER, `position` INTEGER, `attribute_id` INTEGER, `attribute_composition_id` INTEGER, `result` INTEGER, `value_str` TEXT NOT NULL, `data_collection_date` INTEGER NOT NULL, `data_collection_rule_content_id` INTEGER NOT NULL)",
         "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
           {
             "fieldPath": "dataCollectionContentId",
             "columnName": "data_collection_content_id",
@@ -1054,12 +1051,6 @@
             "notNull": true
           },
           {
-            "fieldPath": "id",
-            "columnName": "_id",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
             "fieldPath": "dataCollectionRuleContentId",
             "columnName": "data_collection_rule_content_id",
             "affinity": "INTEGER",
@@ -1067,9 +1058,9 @@
           }
         ],
         "primaryKey": {
-          "autoGenerate": false,
+          "autoGenerate": true,
           "columnNames": [
-            "data_collection_content_id"
+            "_id"
           ]
         },
         "indices": [
@@ -1119,13 +1110,13 @@
             "createSql": "CREATE INDEX IF NOT EXISTS `IDX_data_collection_content_attribute_composition_id` ON `${TABLE_NAME}` (`attribute_composition_id`)"
           },
           {
-            "name": "IDX_data_collection_content__id",
+            "name": "IDX_data_collection_content_data_collection_content_id",
             "unique": false,
             "columnNames": [
-              "_id"
+              "data_collection_content_id"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_data_collection_content__id` ON `${TABLE_NAME}` (`_id`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_data_collection_content_data_collection_content_id` ON `${TABLE_NAME}` (`data_collection_content_id`)"
           },
           {
             "name": "IDX_data_collection_content_data_collection_rule_content_id",
@@ -2721,7 +2712,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3362b43f956a3ab25f2ce3d7e98c1828')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8c339dcaa4d8d98d9e036eacdc162860')"
     ]
   }
 }

@@ -21,10 +21,10 @@ import com.dacosys.assetControl.network.sync.SyncRegistryType
 import com.dacosys.assetControl.network.sync.SyncUpload
 import com.dacosys.assetControl.network.utils.Connection.Companion.autoSend
 import com.dacosys.assetControl.network.utils.ProgressStatus
-import com.dacosys.assetControl.utils.misc.UTCDataTime
-import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.getUTCDateTimeAsNotNullDate
+import com.dacosys.assetControl.utils.misc.DateUtils.formatDateToString
 import com.dacosys.imageControl.network.upload.UploadImagesProgress
 import kotlinx.coroutines.*
+import java.util.*
 
 class SaveReview {
     private lateinit var tempReview: AssetReview
@@ -195,7 +195,7 @@ class SaveReview {
                         destinationWarehouseId = destWId,
                         destinationWarehouseAreaId = destWaId,
                         obs = tempReview.obs,
-                        warehouseMovementDate = getUTCDateTimeAsNotNullDate(),
+                        warehouseMovementDate = Date(),
                         userId = userId
                     )
 
@@ -228,7 +228,7 @@ class SaveReview {
                         contents = l.toList(),
                         progress = onSaveProgress
                     )
-                    val date = UTCDataTime.getUTCDateTimeAsString()
+                    val date = formatDateToString(Date())
 
                     newWm.completed = 1
                     newWm.obs =

@@ -24,13 +24,13 @@ class RouteProcessContentObject() : Parcelable {
         routeProcessContentId = parcel.readLong()
     }
 
-    constructor(rpc: RouteProcessContent, dcId: Long) : this() {
+    constructor(rpc: RouteProcessContent) : this() {
         routeProcessId = rpc.routeProcessId
         dataCollectionRuleId = rpc.dataCollectionRuleId
         level = rpc.level
         position = rpc.position
         routeProcessStatusId = rpc.routeProcessStatusId
-        dataCollectionId = dcId
+        dataCollectionId = rpc.dataCollectionId ?: 0
         routeProcessContentId = rpc.id
     }
 

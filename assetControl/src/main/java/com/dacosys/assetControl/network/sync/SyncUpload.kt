@@ -57,7 +57,7 @@ import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.settings.config.Preference
 import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.utils.settings.preferences.Repository.Companion.connectionTimeout
-import com.dacosys.imageControl.network.common.ProgressStatus.CREATOR.getFinish
+import com.dacosys.imageControl.network.common.ProgressStatus.CREATOR.finishStates
 import com.dacosys.imageControl.network.upload.SendPending
 import com.dacosys.imageControl.network.upload.UpdateIdImages
 import com.dacosys.imageControl.network.upload.UploadImagesProgress
@@ -256,12 +256,12 @@ class SyncUpload(
                 Log.i(tag, "Progreso de subida: ${res.description}")
             }
 
-            if (res !in getFinish()) {
+            if (res !in finishStates()) {
                 // Reportamos solo los progresos
                 onUploadImageProgress.invoke(it)
             }
 
-            setProcessState(res in getFinish())
+            setProcessState(res in finishStates())
         }
 
         while (!getProcessState()) {
@@ -372,6 +372,7 @@ class SyncUpload(
 
                 if (arId > 0) {
                     reviewRepository.updateTransferred(arId, ar.id)
+                    contentRepository.updateAssetReviewId(arId, ar.id)
 
                     // Actualizar los Ids del colector con los Ids reales
                     UpdateIdImages(
@@ -380,7 +381,7 @@ class SyncUpload(
                         newObjectId1 = arId,
                         localObjectId1 = ar.id,
                         onUploadProgress = {
-                            if (it.result !in getFinish()) {
+                            if (it.result !in finishStates()) {
                                 // Reportamos solo los progresos
                                 onUploadImageProgress.invoke(it)
                             }
@@ -511,6 +512,7 @@ class SyncUpload(
 
                 if (wmId > 0) {
                     movementRepository.updateTransferred(wmId, wm.id)
+                    contentRepository.updateMovementId(wmId, wm.id)
 
                     // Actualizar los Ids del colector con los Ids reales
                     UpdateIdImages(
@@ -519,7 +521,7 @@ class SyncUpload(
                         newObjectId1 = wmId,
                         localObjectId1 = wm.id,
                         onUploadProgress = {
-                            if (it.result !in getFinish()) {
+                            if (it.result !in finishStates()) {
                                 // Reportamos solo los progresos
                                 onUploadImageProgress.invoke(it)
                             }
@@ -658,7 +660,7 @@ class SyncUpload(
                         newObjectId1 = realAssetId,
                         localObjectId1 = a.id,
                         onUploadProgress = {
-                            if (it.result !in getFinish()) {
+                            if (it.result !in finishStates()) {
                                 // Reportamos solo los progresos
                                 onUploadImageProgress.invoke(it)
                             }
@@ -826,7 +828,7 @@ class SyncUpload(
                         newObjectId1 = realWarehouseAreaId,
                         localObjectId1 = wa.id,
                         onUploadProgress = {
-                            if (it.result !in getFinish()) {
+                            if (it.result !in finishStates()) {
                                 // Reportamos solo los progresos
                                 onUploadImageProgress.invoke(it)
                             }
@@ -978,7 +980,7 @@ class SyncUpload(
                         newObjectId1 = realWarehouseId,
                         localObjectId1 = w.id,
                         onUploadProgress = {
-                            if (it.result !in getFinish()) {
+                            if (it.result !in finishStates()) {
                                 // Reportamos solo los progresos
                                 onUploadImageProgress.invoke(it)
                             }
@@ -1117,7 +1119,7 @@ class SyncUpload(
                         newObjectId1 = realItemCategoryId,
                         localObjectId1 = ic.id,
                         onUploadProgress = {
-                            if (it.result !in getFinish()) {
+                            if (it.result !in finishStates()) {
                                 // Reportamos solo los progresos
                                 onUploadImageProgress.invoke(it)
                             }
@@ -1174,6 +1176,7 @@ class SyncUpload(
 
         val collectionRepository = DataCollectionRepository()
         val contentRepository = DataCollectionContentRepository()
+        val processContentRepository = RouteProcessContentRepository()
 
         var error = false
 
@@ -1208,7 +1211,7 @@ class SyncUpload(
                     SyncProgress(
                         totalTask = totalTask,
                         completedTask = currentTask,
-                        uniqueId = dc.dataCollectionId.toString(),
+                        uniqueId = dc.id.toString(),
                         msg = getContext().getString(R.string.synchronizing_data_collections),
                         registryType = registryType,
                         progressStatus = ProgressStatus.running
@@ -1226,7 +1229,7 @@ class SyncUpload(
                     break
                 }
 
-                val dccAl = contentRepository.selectByDataCollectionId(dc.dataCollectionId)
+                val dccAl = contentRepository.selectByDataCollectionId(dc.id)
                 if (dccAl.isEmpty()) {
                     continue
                 }
@@ -1250,16 +1253,18 @@ class SyncUpload(
                 )
 
                 if (dcId > 0) {
-                    collectionRepository.updateTransferred(dcId, dc.id)
+                    collectionRepository.updateDataCollectionId(dcId, dc.id)
+                    contentRepository.updateDataCollectionId(dcId, dc.id)
+                    processContentRepository.updateDataCollectionId(dcId, dc.id)
 
                     // Actualizar los Ids del colector con los Ids reales
                     UpdateIdImages(
                         context = getContext(),
                         programObjectId = Table.dataCollection.id.toLong(),
                         newObjectId1 = dcId,
-                        localObjectId1 = dc.dataCollectionId,
+                        localObjectId1 = dc.id,
                         onUploadProgress = {
-                            if (it.result !in getFinish()) {
+                            if (it.result !in finishStates()) {
                                 // Reportamos solo los progresos
                                 onUploadImageProgress.invoke(it)
                             }
@@ -1364,6 +1369,7 @@ class SyncUpload(
                 }
 
                 val rpcAl = contentRepository.selectByRouteProcessId(rp.id)
+
                 if (rpcAl.isEmpty()) {
                     continue
                 }
@@ -1374,25 +1380,12 @@ class SyncUpload(
                         break
                     }
 
-                    var dataCollectionId = 0L
-                    if (rpc.dataCollectionId != null && (rpc.dataCollectionId ?: return) > 0) {
-                        val dc = DataCollectionRepository().selectById(
-                            rpc.dataCollectionId ?: return
-                        )
+                    val tempDcId = rpc.dataCollectionId
 
-                        if (dc != null && dc.dataCollectionId > 0) {
-                            // Actualizamos todos los ID temporales
-                            dataCollectionId = dc.dataCollectionId
-                            rpc.dataCollectionId = dc.dataCollectionId
-                        } else {
-                            // No enviar contenidos sin datos recolectados.
-                            continue
-                        }
-                    }
+                    // Tiene un ID negativo, por lo tanto todavía no se envió su recolección de datos.
+                    if (tempDcId != null && tempDcId < 0) continue
 
-                    val x = RouteProcessContentObject(rpc, dataCollectionId)
-
-                    rpcObjArray.add(x)
+                    rpcObjArray.add(RouteProcessContentObject(rpc))
                 }
 
                 val rpObj = RouteProcessObject(rp)
@@ -1403,7 +1396,8 @@ class SyncUpload(
                 )
 
                 if (rpId > 0) {
-                    processRepository.updateTransferred(rpId, rp.id)
+                    processRepository.updateRouteProcessId(rpId, rp.id)
+                    contentRepository.updateRouteProcessId(rpId, rp.id)
 
                     // Actualizar los Ids del colector con los Ids reales
                     UpdateIdImages(
@@ -1412,7 +1406,7 @@ class SyncUpload(
                         newObjectId1 = rpId,
                         localObjectId1 = rp.id,
                         onUploadProgress = {
-                            if (it.result !in getFinish()) {
+                            if (it.result !in finishStates()) {
                                 // Reportamos solo los progresos
                                 onUploadImageProgress.invoke(it)
                             }
@@ -1515,40 +1509,36 @@ class SyncUpload(
                     break
                 }
 
-                val amObj = AssetMaintenanceObject()
-                amObj.asset_id = am.assetId
-                amObj.asset_manteinance_id = am.id
-                amObj.manteinance_type_id = am.maintenanceTypeId
-                amObj.manteinance_status_id = am.maintenanceStatusId
-                amObj.repairman_id = userId
+                val amObj = AssetMaintenanceObject(am, userId)
 
-                val amLogObj = AssetMaintenanceLogObject()
-                amLogObj.description = am.observations.orEmpty()
-                amLogObj.asset_manteinance_id = am.id
-                amLogObj.manteinance_status_id = am.maintenanceStatusId
-                amLogObj.repairman_id = userId
+                val amLogObj = AssetMaintenanceLogObject(am, userId)
 
-                val assetMaintenanceId = if (am.id == 0L) {
-                    amWs.assetMaintenanceAdd(
-                        userId, amObj, amLogObj
-                    )
-                } else {
-                    amWs.assetMaintenanceModify(
-                        userId, amObj, amLogObj
-                    )
-                }
+                val amId =
+                    if (am.id <= 0L) {
+                        amWs.assetMaintenanceAdd(
+                            userId = userId,
+                            assetMaintenance = amObj,
+                            assetMaintenanceLog = amLogObj
+                        )
+                    } else {
+                        amWs.assetMaintenanceModify(
+                            userId = userId,
+                            assetMaintenance = amObj,
+                            assetMaintenanceLog = amLogObj
+                        )
+                    }
 
-                if (assetMaintenanceId > 0) {
-                    maintenanceRepository.updateTransferred(assetMaintenanceId)
+                if (amId > 0) {
+                    maintenanceRepository.updateTransferred(amId)
 
                     // Actualizar los Ids del colector con los Ids reales
                     UpdateIdImages(
                         context = getContext(),
                         programObjectId = Table.assetMaintenance.id.toLong(),
-                        newObjectId1 = assetMaintenanceId,
+                        newObjectId1 = amId,
                         localObjectId1 = am.id,
                         onUploadProgress = {
-                            if (it.result !in getFinish()) {
+                            if (it.result !in finishStates()) {
                                 // Reportamos solo los progresos
                                 onUploadImageProgress.invoke(it)
                             }

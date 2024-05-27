@@ -5,8 +5,6 @@ import android.os.Parcelable
 import androidx.room.ColumnInfo
 import androidx.room.Ignore
 import com.dacosys.assetControl.data.room.repository.dataCollection.DataCollectionContentRepository
-import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.dateToStringDate
-import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.stringDateToDate
 import java.util.*
 
 class DataCollection(
@@ -72,10 +70,10 @@ class DataCollection(
         warehouseId = parcel.readValue(Long::class.java.classLoader) as? Long,
         warehouseAreaId = parcel.readValue(Long::class.java.classLoader) as? Long,
         userId = parcel.readLong(),
-        dateStart = stringDateToDate(parcel.readString().orEmpty()),
-        dateEnd = stringDateToDate(parcel.readString().orEmpty()),
+        dateStart = parcel.readLong().let { if (it == -1L) null else Date(it) },
+        dateEnd = parcel.readLong().let { if (it == -1L) null else Date(it) },
         completed = parcel.readInt(),
-        transferredDate = stringDateToDate(parcel.readString().orEmpty()),
+        transferredDate = parcel.readLong().let { if (it == -1L) null else Date(it) },
         id = parcel.readLong(),
         routeProcessId = parcel.readLong(),
         assetDescription = parcel.readString().orEmpty(),
@@ -110,10 +108,10 @@ class DataCollection(
         parcel.writeValue(warehouseId)
         parcel.writeValue(warehouseAreaId)
         parcel.writeLong(userId)
-        parcel.writeString(dateToStringDate(dateStart))
-        parcel.writeString(dateToStringDate(dateEnd))
+        parcel.writeLong(dateStart?.time ?: -1L)
+        parcel.writeLong(dateEnd?.time ?: -1L)
         parcel.writeInt(completed)
-        parcel.writeString(dateToStringDate(transferredDate))
+        parcel.writeLong(transferredDate?.time ?: -1L)
         parcel.writeLong(id)
         parcel.writeLong(routeProcessId)
         parcel.writeString(assetDescription)

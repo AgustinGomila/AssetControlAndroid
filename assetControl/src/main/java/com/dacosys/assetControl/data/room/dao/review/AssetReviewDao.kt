@@ -9,7 +9,6 @@ import com.dacosys.assetControl.data.room.dto.review.AssetReview.Entry
 import com.dacosys.assetControl.data.room.dto.user.User
 import com.dacosys.assetControl.data.room.dto.user.UserWarehouseArea
 import com.dacosys.assetControl.data.room.entity.review.AssetReviewEntity
-import com.dacosys.assetControl.data.room.repository.review.AssetReviewRepository
 import java.util.*
 
 @Dao

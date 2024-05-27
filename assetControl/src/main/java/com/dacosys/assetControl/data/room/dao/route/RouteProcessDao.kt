@@ -21,7 +21,8 @@ interface RouteProcessDao {
 
     @Query(
         "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
-                "WHERE ${Entry.TABLE_NAME}.${Entry.TRANSFERRED} = 0"
+                "WHERE ${Entry.TABLE_NAME}.${Entry.TRANSFERRED_DATE} IS NULL " +
+                "AND ${Entry.TABLE_NAME}.${Entry.COMPLETED} = 1"
     )
     suspend fun selectByNoTransferred(): List<RouteProcess>
 
@@ -55,11 +56,11 @@ interface RouteProcessDao {
     suspend fun update(content: RouteProcessEntity)
 
     @Query(
-        "UPDATE ${Entry.TABLE_NAME} SET ${Entry.ID} = :newValue, " +
+        "UPDATE ${Entry.TABLE_NAME} SET ${Entry.ROUTE_PROCESS_ID} = :routeProcessId, " +
                 "${Entry.TRANSFERRED_DATE} = :date " +
                 "WHERE ${Entry.ID} = :oldValue"
     )
-    suspend fun updateId(newValue: Long, oldValue: Long, date: Date)
+    suspend fun updateRouteProcessId(routeProcessId: Long, oldValue: Long, date: Date)
 
 
     @Delete

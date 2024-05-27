@@ -1,4 +1,4 @@
-package com.dacosys.assetControl.ui.adapters.datacollection
+package com.dacosys.assetControl.ui.adapters.dataCollection
 
 import android.util.Log
 import android.view.LayoutInflater

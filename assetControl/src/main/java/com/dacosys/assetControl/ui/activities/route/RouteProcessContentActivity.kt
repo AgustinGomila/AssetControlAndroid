@@ -58,6 +58,8 @@ import com.dacosys.assetControl.network.sync.SyncProgress
 import com.dacosys.assetControl.network.sync.SyncRegistryType
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.ui.activities.asset.AssetDetailActivity
+import com.dacosys.assetControl.ui.activities.dataCollection.DccActivity
+import com.dacosys.assetControl.ui.activities.dataCollection.DccDetailActivity
 import com.dacosys.assetControl.ui.activities.location.WarehouseAreaDetailActivity
 import com.dacosys.assetControl.ui.adapters.interfaces.Interfaces.*
 import com.dacosys.assetControl.ui.adapters.route.RpcRecyclerAdapter
@@ -153,6 +155,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
                         PAYLOADS.STATUS_CHANGE
                     )
                 }
+                fillSummaryRow()
             }
 
             // El nivel al que volví está completo
@@ -488,11 +491,11 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         }
     }
 
-    private fun onGetContentProcess(it: GetRouteProcessContentResult) {
+    private fun onGetContentProcess(it: RouteProcessContentResult) {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
 
         // Contenidos del nivel solicitado
-        val contents = it.currentRouteProcessContent
+        val contents = it.contents
         val level = it.level
 
         fillAdapter(contents)
@@ -545,6 +548,18 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         adapter?.refreshUiEventListener(uiEventListener = this)
     }
 
+    private fun fillSummaryRow() {
+        val processed = adapter?.processed ?: 0
+        val skipped = adapter?.skipped ?: 0
+        val notProcessed = adapter?.notProcessed ?: 0
+
+        runOnUiThread {
+            binding.processedTextView.text = processed.toString()
+            binding.skippedTextView.text = skipped.toString()
+            binding.notProcessedTextView.text = notProcessed.toString()
+        }
+    }
+
     private fun initRoute() {
         val r = route ?: return
         val userId = getUserId() ?: return
@@ -558,10 +573,16 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
     }
 
     private fun continueRouteProcess(rp: RouteProcess) {
-        routeComposition = ArrayList(
-            RouteCompositionRepository().selectByRouteId(rp.routeId)
-                .sortedWith(compareBy({ it.level }, { it.position }))
-        )
+        val compRepository = RouteCompositionRepository()
+        val contentRepository = RouteProcessContentRepository()
+        val dataContentRepository = DataCollectionContentRepository()
+        val stepsRepository = RouteProcessStepsRepository()
+
+        routeComposition =
+            ArrayList(
+                compRepository.selectByRouteId(rp.routeId)
+                    .sortedWith(compareBy({ it.level }, { it.position }))
+            )
 
         Log.d(this::class.java.simpleName, getString(R.string.getting_processed_content))
 
@@ -569,7 +590,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             // Traemos la ruta para continuarla si aún no lo hemos hecho.
             if (!rpcArray.any()) {
                 rpcArray = ArrayList(
-                    RouteProcessContentRepository().selectByRouteProcessId(rp.id)
+                    contentRepository.selectByRouteProcessId(rp.id)
                         .sortedWith(compareBy({ it.level }, { it.position }))
                 )
             }
@@ -577,14 +598,14 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             Log.d(this::class.java.simpleName, getString(R.string.obtaining_collected_data))
 
             val tempDccArray = ArrayList(
-                DataCollectionContentRepository().selectByCollectorRouteProcessId(rp.id)
+                dataContentRepository.selectByCollectorRouteProcessId(rp.id)
                     .sortedWith(compareBy({ it.level }, { it.position }))
             )
 
             Log.d(this::class.java.simpleName, getString(R.string.getting_previous_steps))
 
             val allSteps = ArrayList(
-                RouteProcessStepsRepository().selectByRouteProcessId(rp.id)
+                stepsRepository.selectByRouteProcessId(rp.id)
                     .sortedWith(compareBy { it.step })
             )
 
@@ -1071,7 +1092,6 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         rpc: RouteProcessContent,
         s: RouteProcessStatus,
         dc: DataCollection?,
-        refreshLater: Boolean = false,
     ) {
         rpc.routeProcessStatusId = s.id
 
@@ -1090,10 +1110,8 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             )
         }
 
-        if (!refreshLater) {
-            val index = adapter?.getIndexById(rpc.id)
-            if (index != null) adapter?.notifyItemChanged(index, PAYLOADS.STATUS_CHANGE)
-        }
+        // Actualizamos el Proceso registrado
+        adapter?.update(rpc)
 
         if (s == RouteProcessStatus.processed || s == RouteProcessStatus.skipped) {
             runOnUiThread {
@@ -1292,6 +1310,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
     private fun saveRouteProcess() {
         val rp = routeProcess ?: return
+        val rpc = RouteProcessContentRepository().selectByRouteProcessId(rp.id)
 
         saving = true
 
@@ -1301,7 +1320,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             val saveRouteProcess = SaveRouteProcess()
             saveRouteProcess.addParams(
                 routeProcess = rp,
-                allRouteProcessContent = rpcArray,
+                allRouteProcessContent = ArrayList(rpc),
                 onSaveProgress = { saveViewModel.setSaveProgress(it) },
                 onSyncProgress = { syncViewModel.setSyncUploadProgress(it) },
                 onUploadImageProgress = { syncViewModel.setUploadImagesProgress(it) },
@@ -1466,7 +1485,9 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         val rpc = adapter?.currentRpc() ?: return
 
         updateStatus(
-            rpc = rpc, s = RouteProcessStatus.processed, dc = dataCollection, refreshLater = false
+            rpc = rpc,
+            s = RouteProcessStatus.processed,
+            dc = dataCollection
         )
 
         // PROCESO TERMINADO, SALIR
@@ -1638,8 +1659,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
                         updateStatus(
                             rpc = rpc,
                             s = RouteProcessStatus.processed,
-                            dc = dc,
-                            refreshLater = false
+                            dc = dc
                         )
 
                         fill(levelsToNavigate[0])
@@ -1647,37 +1667,38 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
                         return
                     }
-                } else if (result is Int) // Niveles en formato numérico
-                {
-                    if (result > 0) // IR AL NIVEL DETERMINADO
-                    {
+                } else if (result is Int) {
+
+                    // Niveles en formato numérico
+                    if (result > 0) {
+
+                        // IR AL NIVEL DETERMINADO
                         updateStatus(
                             rpc = rpc,
                             s = RouteProcessStatus.processed,
-                            dc = dc,
-                            refreshLater = false
+                            dc = dc
                         )
                         fill(result)
                         return
                     }
-                    if (result == DcrResult.cont.id) // CONTINUAR
-                    {
+                    if (result == DcrResult.cont.id) {
+
+                        // CONTINUAR
                         updateStatus(
                             rpc = rpc,
                             s = RouteProcessStatus.processed,
-                            dc = dc,
-                            refreshLater = false
+                            dc = dc
                         )
                         next()
                         return
                     }
-                    if (result == DcrResult.back.id) // VOLVER
-                    {
+                    if (result == DcrResult.back.id) {
+
+                        // VOLVER
                         updateStatus(
                             rpc = rpc,
                             s = RouteProcessStatus.processed,
-                            dc = dc,
-                            refreshLater = false
+                            dc = dc
                         )
 
                         runOnUiThread {
@@ -1685,14 +1706,15 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
                         }
                         return
                     }
-                    if (result == DcrResult.end.id) // FIN
-                    {
+                    if (result == DcrResult.end.id) {
+
+                        // FIN
                         endProcess(dc)
                         return
                     }
-                    if (result == DcrResult.noContinue.id)
-                    // NO CONTINUAR
-                    {
+                    if (result == DcrResult.noContinue.id) {
+
+                        // NO CONTINUAR
                         // No puede seguir
                         makeText(
                             binding.root,
@@ -2024,6 +2046,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
     override fun onDataSetChanged() {
         showListOrEmptyListMessage()
+        fillSummaryRow()
     }
 
     private fun showListOrEmptyListMessage() {
@@ -2035,5 +2058,6 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
     }
 
     override fun onCheckedChanged(isChecked: Boolean, pos: Int) {
+        fillSummaryRow()
     }
 }

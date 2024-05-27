@@ -33,11 +33,11 @@ interface DataCollectionDao {
 
 
     @Query(
-        "UPDATE ${Entry.TABLE_NAME} SET ${Entry.ID} = :newValue, " +
+        "UPDATE ${Entry.TABLE_NAME} SET ${Entry.DATA_COLLECTION_ID} = :dataCollectionId, " +
                 "${Entry.TRANSFERRED_DATE} = :date " +
                 "WHERE ${Entry.ID} = :oldValue"
     )
-    suspend fun updateId(newValue: Long, oldValue: Long, date: Date)
+    suspend fun updateDataCollectionId(dataCollectionId: Long, oldValue: Long, date: Date)
 
 
     @Query("DELETE $BASIC_FROM WHERE ${Entry.ID} = :id")
@@ -46,7 +46,7 @@ interface DataCollectionDao {
     @Query(
         "DELETE $BASIC_FROM " +
                 "WHERE ${Entry.TABLE_NAME}.${Entry.ROUTE_PROCESS_ID} NOT IN ( " +
-                "SELECT ${rpEntry.TABLE_NAME}.${rpEntry.ROUTE_PROCESS_ID} FROM ${rpEntry.TABLE_NAME}) "
+                "SELECT ${rpEntry.TABLE_NAME}.${rpEntry.ID} FROM ${rpEntry.TABLE_NAME}) "
     )
     suspend fun deleteOrphans()
 

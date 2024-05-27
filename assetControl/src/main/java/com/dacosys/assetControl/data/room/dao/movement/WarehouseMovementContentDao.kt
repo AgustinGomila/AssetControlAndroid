@@ -41,6 +41,12 @@ interface WarehouseMovementContentDao {
     @Query("UPDATE ${Entry.TABLE_NAME} SET ${Entry.ASSET_ID} = :newValue WHERE ${Entry.ASSET_ID} = :oldValue")
     suspend fun updateAssetId(newValue: Long, oldValue: Long)
 
+    @Query(
+        "UPDATE ${Entry.TABLE_NAME} SET ${Entry.WAREHOUSE_MOVEMENT_ID} = :newValue " +
+                "WHERE ${Entry.WAREHOUSE_MOVEMENT_ID} = :oldValue"
+    )
+    suspend fun updateMovementId(newValue: Long, oldValue: Long)
+
 
     @Delete
     suspend fun delete(content: WarehouseMovementContentEntity)

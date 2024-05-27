@@ -34,15 +34,14 @@ class AssetMaintenanceLogObject() : Parcelable {
         repairman_id = parcel.readLong()
     }
 
-    constructor(assetMaintenance: AssetMaintenance) : this() {
-        // Main Information
+    constructor(assetMaintenance: AssetMaintenance, userId: Long) : this() {
         asset_manteinance_id = assetMaintenance.id
         manteinance_status_id = assetMaintenance.maintenanceStatusId
         description = assetMaintenance.observations.orEmpty()
         log_date = "" // TODO: Ver valor correcto para este campo
         asset_id = assetMaintenance.assetId
         repairshop_id = 0 // TODO: Ver valor correcto para este campo
-        repairman_id = getUserId() ?: 0
+        repairman_id = userId
     }
 
     fun getBySoapObject(so: SoapObject): AssetMaintenanceLogObject {

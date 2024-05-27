@@ -1,4 +1,4 @@
-package com.dacosys.assetControl.ui.fragments.route
+package com.dacosys.assetControl.ui.fragments.dataCollection
 
 import android.os.Bundle
 import android.text.InputFilter

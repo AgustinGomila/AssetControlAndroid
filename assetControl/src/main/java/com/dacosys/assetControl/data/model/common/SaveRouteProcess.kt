@@ -113,18 +113,21 @@ class SaveRouteProcess {
                 }
 
                 val routeProcessId = routeProcess.id
-                val level = rpc.level
-                val position = rpc.position
-                val dataCollectionId = rpc.dataCollectionId
 
                 if (rpc.routeProcessId == routeProcessId) {
                     rpc.routeProcessStatusId = statusId
-                    contentRepository.updateStatusNew(rpc)
+                    contentRepository.updateStatus(rpc)
                 } else {
+
+                    val level = rpc.level
+                    val position = rpc.position
+                    val dataCollectionId = rpc.dataCollectionId
+                    val ruleId = rpc.dataCollectionRuleId
+
                     val newId = contentRepository.insert(
                         RouteProcessContent(
                             routeProcessId = routeProcessId,
-                            dataCollectionRuleId = rpc.dataCollectionRuleId,
+                            dataCollectionRuleId = ruleId,
                             level = level,
                             position = position,
                             routeProcessStatusId = statusId,

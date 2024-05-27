@@ -52,15 +52,131 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"/>
 
+            <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/summaryConstraintLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="2dp"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginEnd="2dp"
+                    android:background="@drawable/layout_thin_border_yellow"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/routeStrTextView">
+
+                <View
+                        android:id="@+id/summaryDividerVert2"
+                        android:layout_width="1dp"
+                        android:layout_height="0dp"
+                        android:background="?android:attr/listDivider"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/summaryGuideline66"
+                        app:layout_constraintStart_toStartOf="@+id/summaryGuideline66"
+                        app:layout_constraintTop_toTopOf="parent"/>
+
+                <View
+                        android:id="@+id/summaryDividerVert"
+                        android:layout_width="1dp"
+                        android:layout_height="0dp"
+                        android:background="?android:attr/listDivider"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/summaryGuideline33"
+                        app:layout_constraintStart_toStartOf="@+id/summaryGuideline33"
+                        app:layout_constraintTop_toTopOf="parent"/>
+
+                <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="2dp"
+                        android:text="@string/not_processed"
+                        android:textSize="12sp"
+                        app:layout_constraintEnd_toStartOf="@+id/notProcessedTextView"
+                        app:layout_constraintStart_toStartOf="@+id/summaryGuideline66"
+                        app:layout_constraintTop_toTopOf="parent"/>
+
+                <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="2dp"
+                        android:text="@string/skipped"
+                        android:textSize="12sp"
+                        app:layout_constraintEnd_toStartOf="@+id/skippedTextView"
+                        app:layout_constraintStart_toStartOf="@+id/summaryGuideline33"
+                        app:layout_constraintTop_toTopOf="parent"/>
+
+                <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="2dp"
+                        android:text="@string/processed"
+                        android:textSize="12sp"
+                        app:layout_constraintEnd_toStartOf="@+id/processedTextView"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"/>
+
+                <TextView
+                        android:id="@+id/processedTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="0dp"
+                        android:layout_marginEnd="8dp"
+                        android:text="@string/_0"
+                        android:textColor="@color/seagreen"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toStartOf="@+id/summaryGuideline33"
+                        app:layout_constraintTop_toTopOf="parent"/>
+
+                <TextView
+                        android:id="@+id/notProcessedTextView"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:text="@string/_0"
+                        android:textColor="@color/royalblue"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"/>
+
+                <TextView
+                        android:id="@+id/skippedTextView"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:text="@string/_0"
+                        android:textColor="@color/dimgray"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toStartOf="@+id/summaryGuideline66"
+                        app:layout_constraintTop_toTopOf="parent"/>
+
+                <androidx.constraintlayout.widget.Guideline
+                        android:id="@+id/summaryGuideline66"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        app:layout_constraintGuide_percent="0.66"/>
+
+                <androidx.constraintlayout.widget.Guideline
+                        android:id="@+id/summaryGuideline33"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        app:layout_constraintGuide_percent="0.33"/>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
             <TextView
                     android:id="@+id/emptyTextView"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
                     android:gravity="center"
                     android:textSize="20sp"
                     android:text="@string/no_items_to_display" app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" android:visibility="gone"/>
+                    app:layout_constraintTop_toBottomOf="@+id/summaryConstraintLayout" android:visibility="gone"/>
 
             <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
                     android:id="@+id/swipeRefresh"
@@ -68,13 +184,12 @@
                     android:layout_height="0dp"
                     android:layout_below="@+id/routeStrTextView"
                     android:layout_marginStart="2dp"
-                    android:layout_marginTop="2dp"
                     android:layout_marginEnd="2dp"
                     android:layout_marginBottom="2dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/routeStrTextView"
+                    app:layout_constraintTop_toBottomOf="@+id/summaryConstraintLayout"
                     app:srl_direction="bottom">
 
                 <androidx.recyclerview.widget.RecyclerView

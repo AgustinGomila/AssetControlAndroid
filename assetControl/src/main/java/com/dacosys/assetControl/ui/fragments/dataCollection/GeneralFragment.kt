@@ -1,4 +1,4 @@
-package com.dacosys.assetControl.ui.fragments.route
+package com.dacosys.assetControl.ui.fragments.dataCollection
 
 import android.util.Log
 import com.dacosys.assetControl.data.enums.attribute.AttributeCompositionType

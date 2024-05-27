@@ -8,9 +8,12 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.preference.EditTextPreference
 import androidx.preference.Preference
@@ -20,11 +23,15 @@ import com.dacosys.assetControl.AssetControlApp
 import com.dacosys.assetControl.AssetControlApp.Companion.isLogged
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.room.database.AcDatabase
+import com.dacosys.assetControl.data.room.database.AcDatabase.Companion.DATABASE_NAME
+import com.dacosys.assetControl.data.room.database.AcDatabase.Companion.cleanInstance
 import com.dacosys.assetControl.network.download.DownloadDb
 import com.dacosys.assetControl.network.sync.SyncDownload
 import com.dacosys.assetControl.ui.common.snackbar.MakeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarEventData
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
+import com.dacosys.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
+import com.dacosys.assetControl.ui.common.snackbar.SnackBarType.CREATOR.SUCCESS
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.settings.entries.ConfEntry
@@ -33,6 +40,10 @@ import com.dacosys.assetControl.utils.settings.io.PathHelper
 import com.dacosys.assetControl.utils.settings.preferences.Repository
 import com.google.android.gms.common.api.CommonStatusCodes
 import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.IOException
+import java.nio.channels.FileChannel
 import java.util.*
 
 class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.OnRequestPermissionsResultCallback {
@@ -49,6 +60,8 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val context = AssetControlApp.getContext()
+
         val syncQtyPref: EditTextPreference? = findPreference(ConfEntry.acSyncQtyRegistry.description)
         syncQtyPref?.summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
 
@@ -61,11 +74,8 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
                 askForDownload().show()
             } catch (ex: Exception) {
                 ex.printStackTrace()
-                if (view != null) MakeText.makeText(
-                    requireView(), "${
-                        AssetControlApp.getContext().getString(R.string.error)
-                    }: ${ex.message}", SnackBarType.ERROR
-                )
+                if (view != null)
+                    showSnackBar("${context.getString(R.string.error)}: ${ex.message}", ERROR)
                 ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             }
             true
@@ -75,25 +85,16 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
         resetSyncDatePref?.onPreferenceClickListener = OnPreferenceClickListener {
             try {
                 if (SyncDownload.resetSyncDates()) {
-                    if (view != null) MakeText.makeText(
-                        requireView(),
-                        AssetControlApp.getContext().getString(R.string.synchronization_dates_restarted_successfully),
-                        SnackBarType.SUCCESS
-                    )
+                    if (view != null)
+                        showSnackBar(context.getString(R.string.synchronization_dates_restarted_successfully), SUCCESS)
                 } else {
-                    if (view != null) MakeText.makeText(
-                        requireView(),
-                        AssetControlApp.getContext().getString(R.string.error_restarting_sync_dates),
-                        SnackBarType.ERROR
-                    )
+                    if (view != null)
+                        showSnackBar(context.getString(R.string.error_restarting_sync_dates), ERROR)
                 }
             } catch (ex: Exception) {
                 ex.printStackTrace()
-                if (view != null) MakeText.makeText(
-                    requireView(), "${
-                        AssetControlApp.getContext().getString(R.string.error)
-                    }: ${ex.message}", SnackBarType.ERROR
-                )
+                if (view != null)
+                    showSnackBar("${context.getString(R.string.error)}: ${ex.message}", ERROR)
                 ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             }
             true
@@ -102,26 +103,12 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
         val loadCustomDbPref: Preference? = findPreference("load_custom_db")
         loadCustomDbPref?.onPreferenceClickListener = OnPreferenceClickListener {
             try {
-                val permissions = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                activity?.let {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R || hasPermissions(
-                            activity as Context,
-                            permissions
-                        )
-                    ) {
-                        selectFileDb()
-                    } else {
-                        NEXT_STEP = REQUEST_EXTERNAL_STORAGE_FOR_CUSTOM_DB
-                        permReqLauncher.launch(permissions)
-                    }
-                }
+                NEXT_STEP = LOAD_CUSTOM_DB
+                requestPermissions()
             } catch (ex: Exception) {
                 ex.printStackTrace()
-                if (view != null) MakeText.makeText(
-                    requireView(), "${
-                        AssetControlApp.getContext().getString(R.string.error)
-                    }: ${ex.message}", SnackBarType.ERROR
-                )
+                if (view != null)
+                    showSnackBar("${context.getString(R.string.error)}: ${ex.message}", ERROR)
                 ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             }
             true
@@ -133,11 +120,8 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
                 deleteTempDbFiles()
             } catch (ex: Exception) {
                 ex.printStackTrace()
-                if (view != null) MakeText.makeText(
-                    requireView(), "${
-                        AssetControlApp.getContext().getString(R.string.error)
-                    }: ${ex.message}", SnackBarType.ERROR
-                )
+                if (view != null)
+                    showSnackBar("${context.getString(R.string.error)}: ${ex.message}", ERROR)
                 ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             }
             true
@@ -146,22 +130,12 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
         val sendDbPref: Preference? = findPreference("send_db_by_mail")
         sendDbPref?.onPreferenceClickListener = OnPreferenceClickListener {
             try {
-                val permissions = arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
-                activity?.let {
-                    if (hasPermissions(activity as Context, permissions)) {
-                        sendDbByMail()
-                    } else {
-                        NEXT_STEP = REQUEST_EXTERNAL_STORAGE_FOR_SEND_MAIL
-                        permReqLauncher.launch(permissions)
-                    }
-                }
+                NEXT_STEP = SEND_BY_MAIL
+                requestPermissions()
             } catch (ex: Exception) {
                 ex.printStackTrace()
-                if (view != null) MakeText.makeText(
-                    requireView(), "${
-                        AssetControlApp.getContext().getString(R.string.error)
-                    }: ${ex.message}", SnackBarType.ERROR
-                )
+                if (view != null)
+                    showSnackBar("${context.getString(R.string.error)}: ${ex.message}", ERROR)
                 ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             }
             true
@@ -170,26 +144,12 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
         val copyDbPref: Preference? = findPreference("copy_db")
         copyDbPref?.onPreferenceClickListener = OnPreferenceClickListener {
             try {
-                val permissions = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                activity?.let {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R || hasPermissions(
-                            activity as Context,
-                            permissions
-                        )
-                    ) {
-                        copyDbToDocuments()
-                    } else {
-                        NEXT_STEP = REQUEST_EXTERNAL_STORAGE_FOR_COPY_DB_TO_DOC
-                        permReqLauncher.launch(permissions)
-                    }
-                }
+                NEXT_STEP = COPY_DB_TO_DOC
+                requestPermissions()
             } catch (ex: Exception) {
                 ex.printStackTrace()
-                if (view != null) MakeText.makeText(
-                    requireView(), "${
-                        AssetControlApp.getContext().getString(R.string.error)
-                    }: ${ex.message}", SnackBarType.ERROR
-                )
+                if (view != null)
+                    showSnackBar("${context.getString(R.string.error)}: ${ex.message}", ERROR)
                 ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             }
             true
@@ -220,28 +180,64 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
         } catch (ex: Exception) {
             ex.printStackTrace()
             if (view != null) showSnackBar(
-                SnackBarEventData(
-                    getString(R.string.error_sending_email), SnackBarType.ERROR
-                )
+                getString(R.string.error_sending_email), ERROR
             )
         }
     }
 
-    private val permReqLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            val granted = permissions.entries.all {
-                it.value
-            }
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private val readMediaPermissions = arrayOf(
+        Manifest.permission.READ_MEDIA_IMAGES,
+        Manifest.permission.READ_MEDIA_VIDEO,
+        Manifest.permission.READ_MEDIA_AUDIO
+    )
 
-            if (granted) {
-                when (NEXT_STEP) {
-                    REQUEST_EXTERNAL_STORAGE_FOR_CUSTOM_DB -> selectFileDb()
-                    REQUEST_EXTERNAL_STORAGE_FOR_COPY_DB -> copyDb()
-                    REQUEST_EXTERNAL_STORAGE_FOR_COPY_DB_TO_DOC -> copyDbToDocuments()
-                    REQUEST_EXTERNAL_STORAGE_FOR_SEND_MAIL -> sendDbByMail()
-                }
+    private val requestCodePermission = 101
+
+    private fun requestPermissions() {
+        val context = AssetControlApp.getContext()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (readMediaPermissions.all {
+                    ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
+                }) {
+                // Permisos concedidos, continuar
+                runNextStep()
+            } else {
+                ActivityCompat.requestPermissions(requireActivity(), readMediaPermissions, requestCodePermission)
+            }
+        } else {
+            // Manejar permisos para versiones anteriores a Android 13
+            if (ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                ) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                ActivityCompat.requestPermissions(
+                    requireActivity(), arrayOf(
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    ), requestCodePermission
+                )
+            } else {
+                // Permisos concedidos, continuar
+                runNextStep()
             }
         }
+    }
+
+    private fun runNextStep() {
+        when (NEXT_STEP) {
+            LOAD_CUSTOM_DB -> selectFileDb()
+            COPY_DB -> copyDb()
+            COPY_DB_TO_DOC -> copyDbToDocuments()
+            SEND_BY_MAIL -> sendDbByMail()
+        }
+    }
 
     private fun hasPermissions(context: Context, permissions: Array<String>): Boolean = permissions.all {
         ActivityCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
@@ -257,8 +253,8 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
 
                 tempDbFile = PathHelper.getPath(dataFile) ?: ""
                 if (tempDbFile == "") {
-                    if (view != null) MakeText.makeText(
-                        requireView(), getString(R.string.unable_to_open_file), SnackBarType.ERROR
+                    if (view != null) showSnackBar(
+                        getString(R.string.unable_to_open_file), ERROR
                     )
                     return@registerForActivityResult
                 }
@@ -277,8 +273,8 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
                     ) {
                         copyDb()
                     } else {
-                        NEXT_STEP = REQUEST_EXTERNAL_STORAGE_FOR_COPY_DB
-                        permReqLauncher.launch(permissions)
+                        NEXT_STEP = COPY_DB
+                        requestPermissions()
                     }
                 }
             } catch (ex: Exception) {
@@ -291,69 +287,47 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
         requestCode: Int,
         permissions: Array<String>, grantResults: IntArray,
     ) {
-        when (requestCode) {
-            REQUEST_EXTERNAL_STORAGE_FOR_SEND_MAIL -> {
-                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    sendDbByMail()
-                }
-                return
-            }
-
-            REQUEST_EXTERNAL_STORAGE_FOR_CUSTOM_DB -> {
-                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    selectFileDb()
-                }
-                return
-            }
-
-            REQUEST_EXTERNAL_STORAGE_FOR_COPY_DB -> {
-                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    copyDb()
-                }
-                return
-            }
-
-            REQUEST_EXTERNAL_STORAGE_FOR_COPY_DB_TO_DOC -> {
-                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    copyDbToDocuments()
-                }
-                return
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == requestCodePermission) {
+            if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
+                // Permisos concedidos, continuar
+                runNextStep()
+            } else {
+                // Permisos no concedidos, mostrar mensaje al usuario
+                showSnackBar(getString(R.string.app_dont_have_necessary_permissions), ERROR)
             }
         }
     }
 
     private fun sendDbByMail() {
+        val context = AssetControlApp.getContext()
+
         try {
             // Base de datos
-            val dbFile = File(
-                AssetControlApp.getContext().getDatabasePath(AcDatabase.DATABASE_NAME).toString()
-            )
+            val dbFile = File(context.getDatabasePath(DATABASE_NAME).toString())
             if (!dbFile.exists()) {
-                if (view != null) MakeText.makeText(
-                    requireView(), getString(R.string.database_file_does_not_exist), SnackBarType.ERROR
-                )
+                if (view != null)
+                    showSnackBar(getString(R.string.database_file_does_not_exist), ERROR)
                 return
             }
 
             // Copiar la base a Documentos
-            val result = FileHelper.copyDbToDocuments(AssetControlApp.getContext())
+            val result = FileHelper.copyDbToDocuments()
             val outFile = File(result.outFile)
             if (!outFile.exists()) {
-                if (view != null) MakeText.makeText(
-                    requireView(), getString(R.string.database_file_does_not_exist), SnackBarType.ERROR
-                )
+                if (view != null)
+                    showSnackBar(getString(R.string.database_file_does_not_exist), ERROR)
                 return
             }
 
             val dbFilePath = FileProvider.getUriForFile(
-                AssetControlApp.getContext(),
-                AssetControlApp.getContext().applicationContext.packageName + ".provider",
+                context,
+                context.applicationContext.packageName + ".provider",
                 outFile
             )
             if (dbFilePath == null) {
-                if (view != null) MakeText.makeText(
-                    requireView(), getString(R.string.database_file_does_not_exist), SnackBarType.ERROR
-                )
+                if (view != null)
+                    showSnackBar(getString(R.string.database_file_does_not_exist), ERROR)
                 return
             }
 
@@ -362,8 +336,8 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
             var lastErrorLogPath: Uri? = null
             if (lastErrorLog != null) {
                 lastErrorLogPath = FileProvider.getUriForFile(
-                    AssetControlApp.getContext(),
-                    AssetControlApp.getContext().applicationContext.packageName + ".provider",
+                    context,
+                    context.applicationContext.packageName + ".provider",
                     lastErrorLog
                 )
             }
@@ -393,8 +367,8 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
             grantUrisPermissions(requireActivity(), emailIntent, uris)
 
             // Mensaje
-            val pInfo = AssetControlApp.getContext().applicationContext.packageManager.getPackageInfo(
-                AssetControlApp.getContext().packageName, 0
+            val pInfo = context.applicationContext.packageManager.getPackageInfo(
+                context.packageName, 0
             )
 
             // The mail subject
@@ -427,11 +401,8 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
             )
         } catch (ex: Exception) {
             ex.printStackTrace()
-            if (view != null) showSnackBar(
-                SnackBarEventData(
-                    getString(R.string.error_sending_email), SnackBarType.ERROR
-                )
-            )
+            if (view != null)
+                showSnackBar(getString(R.string.error_sending_email), ERROR)
         }
     }
 
@@ -450,8 +421,10 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
     }
 
     private fun deleteTempDbFiles() {
+        val context = AssetControlApp.getContext()
+
         var anyDeleted = false
-        val path = AssetControlApp.getContext().getDatabasePath(AcDatabase.DATABASE_NAME).parent ?: return
+        val path = context.getDatabasePath(DATABASE_NAME).parent ?: return
 
         val dir = File(path)
         val files = dir.listFiles()
@@ -466,53 +439,87 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
         }
 
         if (anyDeleted) {
-            if (view != null) showSnackBar(
-                SnackBarEventData(
-                    getString(R.string.temporary_databases_deleted), SnackBarType.SUCCESS
-                )
-            )
+            if (view != null)
+                showSnackBar(getString(R.string.temporary_databases_deleted), SUCCESS)
         } else {
-            if (view != null) showSnackBar(
-                SnackBarEventData(
-                    getString(R.string.no_temporary_bases_found), SnackBarType.INFO
+            if (view != null)
+                showSnackBar(getString(R.string.no_temporary_bases_found), SnackBarType.INFO)
+        }
+    }
+
+    private fun copyDbToDocuments() {
+        val context = AssetControlApp.getContext()
+        val dbFile = context.getDatabasePath(DATABASE_NAME)
+
+        val documentsDir = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
+        if (documentsDir != null && !documentsDir.exists()) {
+            documentsDir.mkdirs()
+        }
+
+        val outputFile = File(documentsDir, DATABASE_NAME)
+
+        try {
+            FileInputStream(dbFile).use { inputStream ->
+                FileOutputStream(outputFile).use { outputStream ->
+                    val src: FileChannel = inputStream.channel
+                    val dst: FileChannel = outputStream.channel
+                    dst.transferFrom(src, 0, src.size())
+                }
+            }
+            if (view != null) {
+                showSnackBar(
+                    String.format(
+                        "%s: %s", getString(R.string.database_changed), DATABASE_NAME
+                    ), SnackBarType.INFO
                 )
-            )
+            }
+        } catch (e: IOException) {
+            println("${String.format(getString(R.string.failed_to_copy_database))}: ${Statics.newLine}")
+            e.printStackTrace()
+
+            showSnackBar(String.format(getString(R.string.failed_to_copy_database)), ERROR)
         }
     }
 
     private var tempDbFile: String = ""
 
-    private fun copyDbToDocuments() {
-        // TODO: Ver eso, copiar DB a carpeta Documents
-        // try {
-        //     DataBaseHelper.copyDbToDocuments()
-        //     if (view != null) showSnackBar(
-        //         SnackBarEventData(
-        //             String.format(
-        //                 "%s: %s", getString(R.string.database_changed), AcDatabase.DATABASE_NAME
-        //             ), SnackBarType.INFO
-        //         )
-        //     )
-        // } catch (ex: java.lang.Exception) {
-        //     ex.printStackTrace()
-        // }
-    }
-
     private fun copyDb() {
-        // TODO: Ver eso, copiar DB
-        // if (tempDbFile == "") return
-        // try {
-        //     DataBaseHelper.copyDataBase(tempDbFile)
-        //     if (view != null) MakeText.makeText(
-        //         requireView(), String.format(
-        //             "%s: %s", getString(R.string.database_changed), AcDatabase.DATABASE_NAME
-        //         ), SnackBarType.INFO
-        //     )
-        //     // Reiniciamos la instancia
-        //     DataBaseHelper.cleanInstance()
-        // } catch (ex: java.lang.Exception) {
-        //     ex.printStackTrace()
-        // }
+        if (tempDbFile == "") return
+
+        val context = AssetControlApp.getContext()
+        val dbFile = context.getDatabasePath(DATABASE_NAME)
+        if (!dbFile.exists()) {
+            throw IllegalArgumentException("The current database does not exist.")
+        }
+
+        val newDbFile = File(tempDbFile)
+        if (!newDbFile.exists()) {
+            throw IllegalArgumentException("The database file at the specified path does not exist.")
+        }
+
+        try {
+            FileInputStream(newDbFile).use { inputStream ->
+                FileOutputStream(dbFile).use { outputStream ->
+                    val src: FileChannel = inputStream.channel
+                    val dst: FileChannel = outputStream.channel
+                    dst.transferFrom(src, 0, src.size())
+                }
+            }
+            showSnackBar(
+                String.format(
+                    "%s: %s", getString(R.string.database_changed), DATABASE_NAME
+                ), SnackBarType.INFO
+            )
+        } catch (e: IOException) {
+            println("${String.format(getString(R.string.failed_to_replace_database))}: ${Statics.newLine}")
+            e.printStackTrace()
+
+            showSnackBar(String.format(getString(R.string.failed_to_replace_database)), ERROR)
+            println(": ${e.message}")
+        } finally {
+            // Reiniciamos la instancia
+            cleanInstance()
+        }
     }
 
     private fun askForDownload(): AlertDialog {
@@ -525,8 +532,7 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
             ) { dialog, _ ->
                 // Forzar descarga de la base de datos
                 DownloadDb.downloadDbRequired = true
-                if (view != null) MakeText.makeText(
-                    requireView(),
+                if (view != null) showSnackBar(
                     getString(R.string.the_database_will_be_downloaded_when_you_return_to_the_login_screen),
                     SnackBarType.INFO
                 )
@@ -534,6 +540,10 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
             }.setNegativeButton(
                 R.string.no
             ) { dialog, _ -> dialog.dismiss() }.create()
+    }
+
+    private fun showSnackBar(text: String, type: SnackBarType) {
+        showSnackBar(SnackBarEventData(text, type))
     }
 
     private fun showSnackBar(it: SnackBarEventData) {
@@ -548,9 +558,9 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
         }
 
         private var NEXT_STEP = 0
-        private const val REQUEST_EXTERNAL_STORAGE_FOR_COPY_DB_TO_DOC = 4001
-        private const val REQUEST_EXTERNAL_STORAGE_FOR_COPY_DB = 3001
-        private const val REQUEST_EXTERNAL_STORAGE_FOR_CUSTOM_DB = 2001
-        private const val REQUEST_EXTERNAL_STORAGE_FOR_SEND_MAIL = 1001
+        private const val COPY_DB_TO_DOC = 4001
+        private const val COPY_DB = 3001
+        private const val LOAD_CUSTOM_DB = 2001
+        private const val SEND_BY_MAIL = 1001
     }
 }

@@ -1,25 +1,28 @@
-package com.dacosys.assetControl.ui.fragments.route
+package com.dacosys.assetControl.ui.fragments.dataCollection
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.dacosys.assetControl.databinding.FragmentBooleanBinding
+import com.dacosys.assetControl.databinding.FragmentDateBinding
+import java.text.SimpleDateFormat
+import java.util.*
+
 
 /**
  * A simple [Fragment] subclass.
- * Use the [BooleanFragment.newInstance] factory method to
+ * Use the [DateFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class BooleanFragment : Fragment() {
+class DateFragment : Fragment() {
     private var dccFragmentListener: DccFragmentListener? = null
 
     fun setListener(dccList: DccFragmentListener) {
         dccFragmentListener = dccList
     }
 
-    private var _binding: FragmentBooleanBinding? = null
+    private var _binding: FragmentDateBinding? = null
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -33,18 +36,33 @@ class BooleanFragment : Fragment() {
     private fun destroyLocals() {
         dccFragmentListener?.onFragmentDestroy()
         dccFragmentListener = null
-
         _binding = null
     }
 
     private var _tempIsEnabled: Boolean = true
     private var _tempDescription: String = ""
-    private var _tempValue: Boolean = true
+    private var _tempValue: String = ""
 
     private fun loadBundleValues(b: Bundle) {
-        _tempIsEnabled = if (b.containsKey("isEnabled")) b.getBoolean("isEnabled") else true
-        _tempValue = b.getBoolean("currentValue")
+        _tempIsEnabled = b.getBoolean("isEnabled")
         _tempDescription = b.getString("description") ?: ""
+        _tempValue = b.getString("currentValue") ?: defaultValue
+    }
+
+    private fun setValue(v: String) {
+        try {
+            val sdf = SimpleDateFormat(dateFormat, Locale.getDefault())
+            val date = sdf.parse(v) ?: return
+            val cal = Calendar.getInstance()
+            cal.time = date
+            value = cal
+        } catch (ex: Exception) {
+            val sdf = SimpleDateFormat(dateFormat, Locale.getDefault())
+            val date = sdf.parse(sdf.format(Date())) ?: return
+            val cal = Calendar.getInstance()
+            cal.time = date
+            value = cal
+        }
     }
 
     override fun onCreateView(
@@ -52,7 +70,7 @@ class BooleanFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        _binding = FragmentBooleanBinding.inflate(inflater, container, false)
+        _binding = FragmentDateBinding.inflate(inflater, container, false)
         val view = binding.root
 
         if (arguments != null)
@@ -71,32 +89,51 @@ class BooleanFragment : Fragment() {
     }
 
     private fun setValues() {
-        value = _tempValue
+        setValue(_tempValue)
         isEnabled = _tempIsEnabled
     }
 
     override fun onStart() {
         super.onStart()
         if (isEnabled) {
-            binding.booleanCheckBox.requestFocus()
+            binding.datePicker.requestFocus()
         }
         dccFragmentListener?.onFragmentStarted()
     }
 
     var isEnabled: Boolean = true
 
-    var value: Boolean
+    var value: Calendar
         get() {
-            if (_binding == null) return defaultValue
-            return binding.booleanCheckBox.isChecked
+            if (_binding == null) return Calendar.getInstance()
+            val day = binding.datePicker.dayOfMonth
+            val month = binding.datePicker.month
+            val year = binding.datePicker.year
+
+            val calendar = Calendar.getInstance()
+            calendar.set(year, month, day)
+
+            return calendar
         }
         set(value) {
             if (_binding == null) return
-            binding.booleanCheckBox.isChecked = value
+            binding.datePicker.updateDate(
+                value.get(Calendar.YEAR),
+                value.get(Calendar.MONTH),
+                value.get(Calendar.DAY_OF_MONTH)
+            )
             return
         }
 
-    var defaultValue: Boolean = true
+    var defaultValue: String = ""
+        get() {
+            val sdf = SimpleDateFormat(dateFormat, Locale.getDefault())
+            return sdf.format(value.time)
+        }
+        set(value) {
+            field = value
+            return
+        }
 
     companion object {
         /**
@@ -106,15 +143,21 @@ class BooleanFragment : Fragment() {
          */
         fun newInstance(
             description: String,
-            value: Boolean? = null,
+            value: Calendar? = null,
             isEnabled: Boolean = true,
-        ): BooleanFragment {
-            val fragment = BooleanFragment()
+        ): DateFragment {
+            val fragment = DateFragment()
+
+            var valueStr = ""
+            if (value != null) {
+                val sdf = SimpleDateFormat(dateFormat, Locale.getDefault())
+                valueStr = sdf.format(value.time)
+            }
 
             val args = Bundle()
             args.putString("description", description)
             args.putBoolean("isEnabled", isEnabled)
-            if (value != null) args.putBoolean("currentValue", value)
+            if (value != null) args.putString("currentValue", valueStr)
 
             fragment.arguments = args
             return fragment
@@ -123,5 +166,7 @@ class BooleanFragment : Fragment() {
         fun equals(a: Any?, b: Any?): Boolean {
             return a != null && a == b
         }
+
+        private const val dateFormat = "dd/MM/yyyy hh:mm:ss"
     }
 }

@@ -11,7 +11,7 @@ import androidx.core.app.ActivityCompat
 import androidx.fragment.app.FragmentActivity
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.utils.Statics
-import com.dacosys.assetControl.utils.misc.UTCDataTime
+import com.dacosys.assetControl.utils.misc.DateUtils.formatDateToString
 import com.dacosys.assetControl.utils.settings.config.Preference
 import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
 import java.io.*
@@ -132,7 +132,7 @@ class ErrorLog {
         private fun writeLog(activity: Activity? = null) {
             if (activity == null) return
 
-            // Ver si la aplicación tiene permiso de escritura, sino pedir permiso.
+            // Ver si la aplicación tiene permiso de escritura, si no pedir permiso.
             verifyPermissions(activity)
         }
 
@@ -141,7 +141,7 @@ class ErrorLog {
             val logPath = errorLogPath
 
             val logFile = File("$logPath/$logFileName")
-            val currentDate = UTCDataTime.getUTCDateTimeAsString()
+            val currentDate = formatDateToString(Date())
 
             val parent = logFile.parentFile
             parent?.mkdirs()

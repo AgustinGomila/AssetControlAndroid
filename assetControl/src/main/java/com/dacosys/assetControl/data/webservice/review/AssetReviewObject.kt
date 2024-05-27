@@ -4,7 +4,7 @@ import android.os.Parcel
 import android.os.Parcelable
 import com.dacosys.assetControl.data.enums.review.AssetReviewStatus
 import com.dacosys.assetControl.data.room.dto.review.AssetReview
-import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.dateToNotNullStringDate
+import com.dacosys.assetControl.utils.misc.DateUtils.formatDateToString
 import org.ksoap2.serialization.SoapObject
 
 class AssetReviewObject() : Parcelable {
@@ -32,12 +32,12 @@ class AssetReviewObject() : Parcelable {
 
     constructor(ar: AssetReview) : this() {
         assetReviewId = ar.id
-        assetReviewDate = dateToNotNullStringDate(ar.assetReviewDate)
+        assetReviewDate = formatDateToString(ar.assetReviewDate)
         obs = ar.obs
         userId = ar.userId
         warehouseAreaId = ar.warehouseAreaId
         warehouseId = ar.warehouseId
-        modificationDate = dateToNotNullStringDate(ar.modificationDate)
+        modificationDate = formatDateToString(ar.modificationDate)
         collectorAssetReviewId = ar.id
         statusId = AssetReviewStatus.transferred.id
     }

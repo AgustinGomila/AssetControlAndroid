@@ -32,17 +32,13 @@ import java.util.*
             name = "IDX_${Entry.TABLE_NAME}_${Entry.USER_ID}"
         ),
         Index(
-            value = [Entry.ID],
-            name = "IDX_${Entry.TABLE_NAME}_${Entry.ID}"
-        ),
-        Index(
             value = [Entry.ROUTE_PROCESS_ID],
             name = "IDX_${Entry.TABLE_NAME}_${Entry.ROUTE_PROCESS_ID}"
         )
     ]
 )
 data class DataCollectionEntity(
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true) @ColumnInfo(name = Entry.ID) var id: Long = 0L,
     @ColumnInfo(name = Entry.DATA_COLLECTION_ID) var dataCollectionId: Long = 0L,
     @ColumnInfo(name = Entry.ASSET_ID) var assetId: Long? = null,
     @ColumnInfo(name = Entry.WAREHOUSE_ID) var warehouseId: Long? = null,
@@ -52,10 +48,10 @@ data class DataCollectionEntity(
     @ColumnInfo(name = Entry.DATE_END) var dateEnd: Date? = null,
     @ColumnInfo(name = Entry.COMPLETED) var completed: Int = 0,
     @ColumnInfo(name = Entry.TRANSFERRED_DATE) var transferredDate: Date? = null,
-    @ColumnInfo(name = Entry.ID) var id: Long = 0L,
     @ColumnInfo(name = Entry.ROUTE_PROCESS_ID) var routeProcessId: Long = 0L,
 ) {
     constructor(d: DataCollection) : this(
+        id = d.id,
         dataCollectionId = d.dataCollectionId,
         assetId = d.assetId,
         warehouseId = d.warehouseId,
@@ -65,7 +61,6 @@ data class DataCollectionEntity(
         dateEnd = d.dateEnd,
         completed = d.completed,
         transferredDate = d.transferredDate,
-        id = d.id,
         routeProcessId = d.routeProcessId,
     )
 
@@ -83,18 +78,17 @@ data class DataCollectionEntity(
                 """
             CREATE TABLE IF NOT EXISTS `data_collection`
             (
-                `data_collection_id` INTEGER NOT NULL,
+                `data_collection_id` INTEGER                           NOT NULL,
                 `asset_id`           INTEGER,
                 `warehouse_id`       INTEGER,
                 `warehouse_area_id`  INTEGER,
-                `user_id`            INTEGER NOT NULL,
+                `user_id`            INTEGER                           NOT NULL,
                 `date_start`         INTEGER,
                 `date_end`           INTEGER,
-                `completed`          INTEGER NOT NULL,
+                `completed`          INTEGER                           NOT NULL,
                 `transferred_date`   INTEGER,
-                `_id`                INTEGER NOT NULL,
-                `route_process_id`   INTEGER NOT NULL,
-                PRIMARY KEY (`data_collection_id`)
+                `_id`                INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                `route_process_id`   INTEGER                           NOT NULL
             );
         """.trimIndent()
             )
@@ -127,7 +121,6 @@ data class DataCollectionEntity(
             r.add("CREATE INDEX IF NOT EXISTS `IDX_data_collection_warehouse_id` ON `data_collection` (`warehouse_id`);")
             r.add("CREATE INDEX IF NOT EXISTS `IDX_data_collection_warehouse_area_id` ON `data_collection` (`warehouse_area_id`);")
             r.add("CREATE INDEX IF NOT EXISTS `IDX_data_collection_user_id` ON `data_collection` (`user_id`);")
-            r.add("CREATE INDEX IF NOT EXISTS `IDX_data_collection__id` ON `data_collection` (`_id`);")
             r.add("CREATE INDEX IF NOT EXISTS `IDX_data_collection_route_process_id` ON `data_collection` (`route_process_id`);")
             return r
         }

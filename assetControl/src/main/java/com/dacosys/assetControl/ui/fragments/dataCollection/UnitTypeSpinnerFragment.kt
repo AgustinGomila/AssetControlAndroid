@@ -1,4 +1,4 @@
-package com.dacosys.assetControl.ui.fragments.route
+package com.dacosys.assetControl.ui.fragments.dataCollection
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -8,16 +8,19 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
 import com.dacosys.assetControl.AssetControlApp
-import com.dacosys.assetControl.R.layout.custom_spinner_comma_separated_item
+import com.dacosys.assetControl.R.layout.custom_spinner_dropdown_item
+import com.dacosys.assetControl.data.enums.unit.UnitType
+import com.dacosys.assetControl.data.enums.unit.UnitTypeCategory
 import com.dacosys.assetControl.databinding.FragmentSpinnerBinding
+import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
+import org.parceler.Parcels
 
 /**
  * A simple [Fragment] subclass.
- * Use the [CommaSeparatedSpinnerFragment.newInstance] factory method to
+ * Use the [UnitTypeSpinnerFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class CommaSeparatedSpinnerFragment : Fragment() {
-    private val optionSeparator = ';'
+class UnitTypeSpinnerFragment : Fragment() {
     private var itemSelectedListener: OnItemSelectedListener? = null
     private var dccFragmentListener: DccFragmentListener? = null
 
@@ -45,23 +48,26 @@ class CommaSeparatedSpinnerFragment : Fragment() {
 
     private fun destroyLocals() {
         dccFragmentListener?.onFragmentDestroy()
+
         itemSelectedListener = null
         dccFragmentListener = null
+
+        _tempValue = null
+        _tempCat = null
 
         _binding = null
     }
 
     private var _tempIsEnabled: Boolean = true
     private var _tempDescription: String = ""
-    private var _tempValue: String = ""
-    private var _tempCommaSeparatedOptions: String = ""
+    private var _tempValue: UnitType? = null
+    private var _tempCat: UnitTypeCategory? = null
 
     private fun loadBundleValues(b: Bundle) {
         _tempIsEnabled = if (b.containsKey("isEnabled")) b.getBoolean("isEnabled") else true
-        _tempValue = b.getString("currentValue") ?: defaultValue
+        _tempValue = b.parcelable("currentValue")
+        _tempCat = b.parcelable(ARG_UNIT_TYPE_CATEGORY)
         _tempDescription = b.getString("description") ?: ""
-        val c = b.getString(argCommaSeparatedOptions)
-        if (c != null) _tempCommaSeparatedOptions = c
     }
 
     override fun onCreateView(
@@ -84,7 +90,7 @@ class CommaSeparatedSpinnerFragment : Fragment() {
                     id: Long,
                 ) {
                     if (selectedPosition != position) {
-                        itemSelectedListener?.onItemSelected(parent.getItemAtPosition(position) as String)
+                        itemSelectedListener?.onItemSelected(parent.getItemAtPosition(position) as UnitType)
                     }
                 }
 
@@ -106,7 +112,6 @@ class CommaSeparatedSpinnerFragment : Fragment() {
     }
 
     private fun setValues() {
-        commaSeparatedOptions = _tempCommaSeparatedOptions
         isEnabled = _tempIsEnabled
 
         // Llenar el binding.fragmentSpinner
@@ -130,50 +135,52 @@ class CommaSeparatedSpinnerFragment : Fragment() {
     }
 
     private fun fillAdapter() {
-        val composition = commaSeparatedOptions.trim().trimEnd(optionSeparator)
-        val allOptions = ArrayList(composition.split(optionSeparator)).sorted()
+        val cat = _tempCat ?: return
+
+        val allUnitType = UnitType.getByCategory(cat)
+        allUnitType.sortedWith(compareBy { it.description })
 
         val spinnerArrayAdapter = ArrayAdapter(
             AssetControlApp.getContext(),
-            custom_spinner_comma_separated_item,
-            allOptions
+            custom_spinner_dropdown_item,
+            allUnitType
         )
 
-        // Step 3: Tell the strOptionSpinner about our adapter
+        // Step 3: Tell the binding.fragmentSpinner about our adapter
         binding.fragmentSpinner.adapter = spinnerArrayAdapter
 
-        if (_tempValue.isNotEmpty()) {
-            selectedStrOption = _tempValue
+        if (_tempValue != null) {
+            selectedUnitType = _tempValue
         }
     }
 
     var isEnabled: Boolean = true
 
-    private var commaSeparatedOptions: String = ""
-
-    var selectedStrOption: String
+    var selectedUnitType: UnitType?
         get() {
             if (_binding == null) return defaultValue
-            val temp = binding.fragmentSpinner.selectedItem ?: defaultValue
-            return temp as String
+            val temp = binding.fragmentSpinner.selectedItem
+            return if (temp != null) {
+                temp as UnitType
+            } else null
         }
-        set(strOption) {
+        set(unitType) {
             if (_binding == null) return
-            if (strOption.isEmpty()) {
+            if (unitType == null) {
                 binding.fragmentSpinner.setSelection(0)
                 return
             }
 
             val adapter = binding.fragmentSpinner.adapter as ArrayAdapter<*>
             for (i in 0 until adapter.count) {
-                if (equals(strOption, adapter.getItem(i))) {
+                if (equals(unitType, adapter.getItem(i))) {
                     binding.fragmentSpinner.setSelection(i)
                     break
                 }
             }
         }
 
-    var defaultValue: String = ""
+    var defaultValue: UnitType? = null
 
     var selectedPosition: Int
         get() {
@@ -190,33 +197,33 @@ class CommaSeparatedSpinnerFragment : Fragment() {
 
     // Container Activity must implement this interface
     interface OnItemSelectedListener {
-        fun onItemSelected(strOption: String?)
+        fun onItemSelected(unitType: UnitType?)
     }
     // endregion
 
     companion object {
-        private const val argCommaSeparatedOptions = "commaSeparatedOptions"
+        private const val ARG_UNIT_TYPE_CATEGORY = "unitTypeCat"
 
         /**
          * Use this factory method to create a new instance of
          * this fragment using the provided parameters.
          *
-         * @param commaSeparatedOptions Parameter 1.
-         * @return A new instance of fragment strOption_spinner.
+         * @param unitTypeCat Parameter 1.
+         * @return A new instance of fragment unitType_spinner.
          */
         fun newInstance(
-            commaSeparatedOptions: String,
+            unitTypeCat: UnitTypeCategory,
             description: String,
-            value: String? = null, isEnabled: Boolean = true,
-        ): CommaSeparatedSpinnerFragment {
-            val fragment = CommaSeparatedSpinnerFragment()
+            value: UnitType? = null, isEnabled: Boolean = true,
+        ): UnitTypeSpinnerFragment {
+            val fragment = UnitTypeSpinnerFragment()
 
             val args = Bundle()
-            args.putString(argCommaSeparatedOptions, commaSeparatedOptions)
+            args.putParcelable(ARG_UNIT_TYPE_CATEGORY, Parcels.wrap(unitTypeCat))
             args.putString("description", description)
             args.putBoolean("isEnabled", isEnabled)
-            if (value != null) args.putString("currentValue", value)
-
+            if (value != null) args.putParcelable("currentValue", value)
+//
             fragment.arguments = args
             return fragment
         }

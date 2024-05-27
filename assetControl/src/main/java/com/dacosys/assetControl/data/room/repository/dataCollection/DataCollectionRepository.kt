@@ -8,7 +8,6 @@ import com.dacosys.assetControl.data.room.dto.dataCollection.DataCollection
 import com.dacosys.assetControl.data.room.dto.location.WarehouseArea
 import com.dacosys.assetControl.data.room.dto.route.RouteProcessContent
 import com.dacosys.assetControl.data.room.entity.dataCollection.DataCollectionEntity
-import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.getUTCDateTimeAsNotNullDate
 import kotlinx.coroutines.runBlocking
 import java.util.*
 
@@ -31,9 +30,9 @@ class DataCollectionRepository {
         val userId = getUserId() ?: return null
 
         val r = runBlocking {
-            val assetId = rpc.assetId ?: 0L
-            val warehouseAreaId = rpc.warehouseAreaId ?: 0L
-            val warehouseId = rpc.warehouseId ?: 0L
+            val assetId = rpc.assetId
+            val warehouseAreaId = rpc.warehouseAreaId
+            val warehouseId = rpc.warehouseId
             val nextId = nextLastId
 
             val d = DataCollection(
@@ -43,7 +42,7 @@ class DataCollectionRepository {
                 warehouseAreaId = warehouseAreaId,
                 userId = userId,
                 dateStart = dateStart,
-                dateEnd = getUTCDateTimeAsNotNullDate(),
+                dateEnd = Date(),
                 completed = 1,
                 routeProcessId = routeProcessId
             )
@@ -65,7 +64,7 @@ class DataCollectionRepository {
                 assetId = assetId,
                 userId = userId,
                 dateStart = dateStart,
-                dateEnd = getUTCDateTimeAsNotNullDate(),
+                dateEnd = Date(),
                 completed = 1
             )
             dao.insert(DataCollectionEntity(d))
@@ -88,7 +87,7 @@ class DataCollectionRepository {
                 warehouseAreaId = warehouseAreaId,
                 userId = userId,
                 dateStart = dateStart,
-                dateEnd = getUTCDateTimeAsNotNullDate(),
+                dateEnd = Date(),
                 completed = 1
             )
             dao.insert(DataCollectionEntity(d))
@@ -98,10 +97,10 @@ class DataCollectionRepository {
     }
 
 
-    fun updateTransferred(newValue: Long, oldValue: Long) {
+    fun updateDataCollectionId(dataCollectionId: Long, oldId: Long) {
         runBlocking {
-            val date = getUTCDateTimeAsNotNullDate()
-            dao.updateId(newValue, oldValue, date)
+            val date = Date()
+            dao.updateDataCollectionId(dataCollectionId, oldId, date)
         }
     }
 

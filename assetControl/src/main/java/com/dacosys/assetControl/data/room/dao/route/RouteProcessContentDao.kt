@@ -28,6 +28,9 @@ interface RouteProcessContentDao {
     )
     suspend fun selectByRouteProcessId(id: Long): List<RouteProcessContent>
 
+    @Query("SELECT MIN(${Entry.ID}) $BASIC_FROM")
+    suspend fun selectMinId(): Long?
+
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(content: RouteProcessContentEntity): Long
@@ -44,20 +47,32 @@ interface RouteProcessContentDao {
                 "SET ${Entry.ROUTE_PROCESS_STATUS_ID} = :processStatusId, ${Entry.DATA_COLLECTION_ID} = :dataCollectionId " +
                 "WHERE ${Entry.ROUTE_PROCESS_ID} = :routeProcessId " +
                 "AND ${Entry.ID} = :id " +
-                "AND ${Entry.DATA_COLLECTION_ID} = :dataCollectionRuleId " +
                 "AND ${Entry.DATA_COLLECTION_RULE_ID} = :dataCollectionRuleId " +
                 "AND ${Entry.LEVEL} = :level " +
                 "AND ${Entry.POSITION} = :position "
     )
-    suspend fun updateStatusNew(
+    suspend fun updateStatus(
         id: Long,
         processStatusId: Int,
-        dataCollectionId: Long,
+        dataCollectionId: Long?,
         routeProcessId: Long,
         dataCollectionRuleId: Long,
         level: Int,
         position: Int,
     )
+
+    @Query(
+        "UPDATE ${Entry.TABLE_NAME} SET ${Entry.ROUTE_PROCESS_ID} = :newValue " +
+                "WHERE ${Entry.ROUTE_PROCESS_ID} = :oldValue"
+    )
+    suspend fun updateRouteProcessId(newValue: Long, oldValue: Long)
+
+    @Query(
+        "UPDATE ${Entry.TABLE_NAME} SET ${Entry.DATA_COLLECTION_ID} = :newValue " +
+                "WHERE ${Entry.DATA_COLLECTION_ID} = :oldValue"
+    )
+    suspend fun updateDataCollectionId(newValue: Long, oldValue: Long)
+
 
     @Delete
     suspend fun delete(content: RouteProcessContentEntity)

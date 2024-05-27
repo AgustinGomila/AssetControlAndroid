@@ -1,4 +1,4 @@
-package com.dacosys.assetControl.ui.activities.route
+package com.dacosys.assetControl.ui.activities.dataCollection
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -57,10 +57,9 @@ import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.dacosys.assetControl.ui.common.snackbar.SnackBarType
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
-import com.dacosys.assetControl.ui.fragments.route.*
+import com.dacosys.assetControl.ui.fragments.dataCollection.*
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.getUTCDateTimeAsNotNullDate
 import com.dacosys.assetControl.utils.scanners.JotterListener
 import com.dacosys.assetControl.utils.scanners.Scanner
 import com.dacosys.assetControl.utils.scanners.nfc.Nfc
@@ -1122,9 +1121,9 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
 
             // Agregando datos a la colección, ID virtual: completePath
             val dcc = DataCollectionContent(
+                virtualId = virtualId,
                 ruleContent = ruleContent,
                 attributeCompositionType = attrCompType,
-                virtualId = virtualId,
                 anyResult = result,
                 valueStr = valueStr
             )
@@ -1326,13 +1325,11 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         val targetAsset = targetAsset
         val targetWarehouseArea = targetWarehouseArea
 
-        val dateStart = getUTCDateTimeAsNotNullDate()
-
         when {
             rpc != null && routeProcessId != null -> {
                 dc = collectionRepository.insert(
                     rpc = rpc,
-                    dateStart = dateStart,
+                    dateStart = Date(),
                     routeProcessId = routeProcessId
                 )
             }
@@ -1340,14 +1337,14 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
             targetAsset != null -> {
                 dc = collectionRepository.insert(
                     asset = targetAsset,
-                    dateStart = dateStart
+                    dateStart = Date()
                 )
             }
 
             targetWarehouseArea != null -> {
                 dc = collectionRepository.insert(
                     warehouseArea = targetWarehouseArea,
-                    dateStart = dateStart
+                    dateStart = Date()
                 )
             }
         }

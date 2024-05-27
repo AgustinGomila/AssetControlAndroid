@@ -32,8 +32,8 @@ import java.util.*
             name = "IDX_${Entry.TABLE_NAME}_${Entry.ATTRIBUTE_COMPOSITION_ID}"
         ),
         Index(
-            value = [Entry.ID],
-            name = "IDX_${Entry.TABLE_NAME}_${Entry.ID}"
+            value = [Entry.DATA_COLLECTION_CONTENT_ID],
+            name = "IDX_${Entry.TABLE_NAME}_${Entry.DATA_COLLECTION_CONTENT_ID}"
         ),
         Index(
             value = [Entry.DATA_COLLECTION_RULE_CONTENT_ID],
@@ -42,7 +42,7 @@ import java.util.*
     ]
 )
 data class DataCollectionContentEntity(
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true) @ColumnInfo(name = Entry.ID) var id: Long = 0L,
     @ColumnInfo(name = Entry.DATA_COLLECTION_CONTENT_ID) var dataCollectionContentId: Long = 0L,
     @ColumnInfo(name = Entry.DATA_COLLECTION_ID) var dataCollectionId: Long? = null,
     @ColumnInfo(name = Entry.LEVEL) var level: Int? = null,
@@ -52,10 +52,10 @@ data class DataCollectionContentEntity(
     @ColumnInfo(name = Entry.RESULT) var result: Int? = null,
     @ColumnInfo(name = Entry.VALUE_STR) var valueStr: String = "",
     @ColumnInfo(name = Entry.DATA_COLLECTION_DATE) var dataCollectionDate: Date = Date(),
-    @ColumnInfo(name = Entry.ID) var id: Long = 0L,
     @ColumnInfo(name = Entry.DATA_COLLECTION_RULE_CONTENT_ID) var dataCollectionRuleContentId: Long = 0L,
 ) {
     constructor(d: DataCollectionContent) : this(
+        id = d.id,
         dataCollectionContentId = d.dataCollectionContentId,
         dataCollectionId = d.dataCollectionId,
         level = d.level,
@@ -65,7 +65,6 @@ data class DataCollectionContentEntity(
         result = d.result,
         valueStr = d.valueStr,
         dataCollectionDate = d.dataCollectionDate,
-        id = d.id,
         dataCollectionRuleContentId = d.dataCollectionRuleContentId
     )
 
@@ -83,18 +82,17 @@ data class DataCollectionContentEntity(
                 """
             CREATE TABLE IF NOT EXISTS `data_collection_content`
             (
-                `data_collection_content_id`      INTEGER NOT NULL,
+                `data_collection_content_id`      INTEGER                           NOT NULL,
                 `data_collection_id`              INTEGER,
                 `level`                           INTEGER,
                 `position`                        INTEGER,
                 `attribute_id`                    INTEGER,
                 `attribute_composition_id`        INTEGER,
                 `result`                          INTEGER,
-                `value_str`                       TEXT    NOT NULL,
-                `data_collection_date`            INTEGER NOT NULL,
-                `_id`                             INTEGER NOT NULL,
-                `data_collection_rule_content_id` INTEGER NOT NULL,
-                PRIMARY KEY (`data_collection_content_id`)
+                `value_str`                       TEXT                              NOT NULL,
+                `data_collection_date`            INTEGER                           NOT NULL,
+                `_id`                             INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                `data_collection_rule_content_id` INTEGER                           NOT NULL
             );
         """.trimIndent()
             )
@@ -127,7 +125,7 @@ data class DataCollectionContentEntity(
             r.add("CREATE INDEX IF NOT EXISTS `IDX_data_collection_content_position` ON `data_collection_content` (`position`);")
             r.add("CREATE INDEX IF NOT EXISTS `IDX_data_collection_content_attribute_id` ON `data_collection_content` (`attribute_id`);")
             r.add("CREATE INDEX IF NOT EXISTS `IDX_data_collection_content_attribute_composition_id` ON `data_collection_content` (`attribute_composition_id`);")
-            r.add("CREATE INDEX IF NOT EXISTS `IDX_data_collection_content__id` ON `data_collection_content` (`_id`);")
+            r.add("CREATE INDEX IF NOT EXISTS `IDX_data_collection_content_data_collection_content_id` ON `data_collection_content` (`data_collection_content_id`);")
             r.add("CREATE INDEX IF NOT EXISTS `IDX_data_collection_content_data_collection_rule_content_id` ON `data_collection_content` (`data_collection_rule_content_id`);")
             return r
         }

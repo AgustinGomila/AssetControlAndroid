@@ -57,12 +57,12 @@ import com.dacosys.assetControl.network.utils.Connection.Companion.isOnline
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.ui.activities.code.CodeCheckActivity
 import com.dacosys.assetControl.ui.activities.common.CRUDActivity
+import com.dacosys.assetControl.ui.activities.dataCollection.DataCollectionRuleTargetActivity
 import com.dacosys.assetControl.ui.activities.maintenance.AssetMaintenanceSelectActivity
 import com.dacosys.assetControl.ui.activities.movement.WmcActivity
 import com.dacosys.assetControl.ui.activities.print.PrintLabelActivity
 import com.dacosys.assetControl.ui.activities.review.ArcActivity
 import com.dacosys.assetControl.ui.activities.review.AssetReviewSelectActivity
-import com.dacosys.assetControl.ui.activities.route.DataCollectionRuleTargetActivity
 import com.dacosys.assetControl.ui.activities.route.RouteSelectActivity
 import com.dacosys.assetControl.ui.activities.sync.SyncActivity
 import com.dacosys.assetControl.ui.common.snackbar.MakeText.Companion.makeText

@@ -12,7 +12,7 @@ class GetRouteProcessContent(
     private val routeProcessId: Long,
     private val level: Int,
     private var rpContArray: ArrayList<RouteProcessContent> = ArrayList(),
-    private var onProgress: (GetRouteProcessContentResult) -> Unit = {},
+    private var onProgress: (RouteProcessContentResult) -> Unit = {},
 ) {
     private val scope = CoroutineScope(Job() + Dispatchers.IO)
 
@@ -20,17 +20,17 @@ class GetRouteProcessContent(
         scope.cancel()
     }
 
-    private var deferred: Deferred<GetRouteProcessContentResult>? = null
+    private var deferred: Deferred<RouteProcessContentResult>? = null
     private suspend fun doInBackground() {
-        var result = GetRouteProcessContentResult()
+        var result = RouteProcessContentResult()
         coroutineScope {
             deferred = async { suspendFunction() }
-            result = deferred?.await() ?: GetRouteProcessContentResult()
+            result = deferred?.await() ?: RouteProcessContentResult()
         }
         onProgress.invoke(result)
     }
 
-    private suspend fun suspendFunction(): GetRouteProcessContentResult = withContext(Dispatchers.IO) {
+    private suspend fun suspendFunction(): RouteProcessContentResult = withContext(Dispatchers.IO) {
         // Me quedo con el contenido del nivel que estamos registrando
         var thisLevelRpCont: ArrayList<RouteProcessContent> = ArrayList()
 
@@ -40,7 +40,7 @@ class GetRouteProcessContent(
                 getContext().getString(R.string.getting_processed_content)
             )
 
-            // Necesita llamarse al GetByRouteProcessComplete para que se inserten
+            // Necesita llamarse al [selectByRouteProcessComplete] para que se inserten
             // los registros aún no recolectados de la ruta
             val tempRpCont =
                 RouteProcessContentRepository().selectByRouteProcessComplete(
@@ -80,8 +80,8 @@ class GetRouteProcessContent(
                 )
         }
 
-        return@withContext GetRouteProcessContentResult(
-            currentRouteProcessContent = thisLevelRpCont,
+        return@withContext RouteProcessContentResult(
+            contents = thisLevelRpCont,
             level = level
         )
     }

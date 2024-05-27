@@ -4,10 +4,10 @@ import com.dacosys.assetControl.data.room.dao.movement.WarehouseMovementDao
 import com.dacosys.assetControl.data.room.database.AcDatabase.Companion.database
 import com.dacosys.assetControl.data.room.dto.movement.WarehouseMovement
 import com.dacosys.assetControl.data.room.entity.movement.WarehouseMovementEntity
-import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.getUTCDateTimeAsNotNullDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import java.util.*
 
 class WarehouseMovementRepository {
     private val dao: WarehouseMovementDao
@@ -54,8 +54,7 @@ class WarehouseMovementRepository {
 
     fun updateTransferred(newValue: Long, oldValue: Long) {
         runBlocking {
-            val date = getUTCDateTimeAsNotNullDate()
-            dao.updateId(newValue, oldValue, date)
+            dao.updateId(newValue, oldValue, Date())
         }
     }
 

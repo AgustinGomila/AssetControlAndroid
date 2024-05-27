@@ -8,7 +8,7 @@
                                                    android:clickable="true"
                                                    android:focusable="true"
                                                    android:orientation="vertical"
-                                                   tools:context="com.dacosys.assetControl.ui.activities.route.DccDetailActivity"
+                                                   tools:context="com.dacosys.assetControl.ui.activities.dataCollection.DccDetailActivity"
                                                    tools:layout_editor_absoluteX="0dp"
                                                    tools:layout_editor_absoluteY="81dp">
 

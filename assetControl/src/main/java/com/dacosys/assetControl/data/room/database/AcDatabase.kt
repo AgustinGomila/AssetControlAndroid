@@ -258,7 +258,7 @@ abstract class AcDatabase : RoomDatabase() {
             )
         }
 
-        private const val IDENTITY_HASH_V1 = "3362b43f956a3ab25f2ce3d7e98c1828"
+        private const val IDENTITY_HASH_V1 = "8c339dcaa4d8d98d9e036eacdc162860"
 
         private val migrationZero: List<String>
             get() {

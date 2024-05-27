@@ -23,7 +23,7 @@ interface DataCollectionContentDao {
 
     @Query(
         "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN" +
-                "WHERE ${dcEntry.TABLE_NAME}.${Entry.DATA_COLLECTION_ID} = :id " +
+                "WHERE ${Entry.TABLE_NAME}.${Entry.DATA_COLLECTION_ID} = :id " +
                 BASIC_ORDER
     )
     suspend fun selectByDataCollectionId(id: Long): List<DataCollectionContent>
@@ -61,9 +61,19 @@ interface DataCollectionContentDao {
         waId: Long
     ): List<DataCollectionContent>
 
+    @Query("SELECT MIN(${Entry.ID}) $BASIC_FROM")
+    suspend fun selectMinId(): Long?
+
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(content: DataCollectionContentEntity)
+
+
+    @Query(
+        "UPDATE ${Entry.TABLE_NAME} SET ${Entry.DATA_COLLECTION_ID} = :newValue " +
+                "WHERE ${Entry.DATA_COLLECTION_ID} = :oldValue"
+    )
+    suspend fun updateDataCollectionId(newValue: Long, oldValue: Long)
 
 
     @Query("DELETE FROM ${Entry.TABLE_NAME} WHERE ${Entry.DATA_COLLECTION_ID} = :id")
@@ -72,7 +82,7 @@ interface DataCollectionContentDao {
     @Query(
         "DELETE $BASIC_FROM " +
                 "WHERE ${Entry.TABLE_NAME}.${Entry.DATA_COLLECTION_ID} NOT IN ( " +
-                "SELECT ${dcEntry.TABLE_NAME}.${dcEntry.DATA_COLLECTION_ID} FROM ${dcEntry.TABLE_NAME})"
+                "SELECT ${dcEntry.TABLE_NAME}.${dcEntry.ID} FROM ${dcEntry.TABLE_NAME})"
     )
     suspend fun deleteOrphans()
 

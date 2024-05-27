@@ -7,9 +7,9 @@ import com.dacosys.assetControl.data.room.database.AcDatabase.Companion.database
 import com.dacosys.assetControl.data.room.dto.location.WarehouseArea
 import com.dacosys.assetControl.data.room.dto.review.AssetReview
 import com.dacosys.assetControl.data.room.entity.review.AssetReviewEntity
-import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.getUTCDateTimeAsNotNullDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import java.util.*
 
 class AssetReviewRepository {
     private val dao: AssetReviewDao
@@ -38,12 +38,12 @@ class AssetReviewRepository {
         runBlocking {
             val assetReview = AssetReview(
                 id = nextId,
-                assetReviewDate = getUTCDateTimeAsNotNullDate(),
+                assetReviewDate = Date(),
                 observations = "",
                 userId = userId,
                 warehouseAreaId = warehouseArea.id,
                 warehouseId = warehouseArea.warehouseId,
-                modificationDate = getUTCDateTimeAsNotNullDate(),
+                modificationDate = Date(),
                 statusId = AssetReviewStatus.onProcess.id,
                 warehouseAreaStr = warehouseArea.description,
                 warehouseStr = warehouseArea.warehouseStr,
@@ -75,7 +75,7 @@ class AssetReviewRepository {
 
     fun updateTransferred(newValue: Long, oldValue: Long) {
         runBlocking {
-            val date = getUTCDateTimeAsNotNullDate()
+            val date = Date()
             dao.updateId(newValue, oldValue, date)
         }
     }

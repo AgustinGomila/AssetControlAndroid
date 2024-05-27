@@ -1,29 +1,27 @@
-package com.dacosys.assetControl.ui.fragments.route
+package com.dacosys.assetControl.ui.fragments.dataCollection
 
 import android.os.Bundle
-import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.EditorInfo
-import android.widget.TextView
 import androidx.fragment.app.Fragment
-import com.dacosys.assetControl.databinding.FragmentStringBinding
-
+import com.dacosys.assetControl.databinding.FragmentTimeBinding
+import java.text.SimpleDateFormat
+import java.util.*
 
 /**
  * A simple [Fragment] subclass.
- * Use the [StringFragment.newInstance] factory method to
+ * Use the [TimeFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class StringFragment : Fragment() {
+class TimeFragment : Fragment() {
     private var dccFragmentListener: DccFragmentListener? = null
 
     fun setListener(dccList: DccFragmentListener) {
         dccFragmentListener = dccList
     }
 
-    private var _binding: FragmentStringBinding? = null
+    private var _binding: FragmentTimeBinding? = null
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -38,7 +36,6 @@ class StringFragment : Fragment() {
         dccFragmentListener?.onFragmentDestroy()
         dccFragmentListener = null
 
-        binding.stringEditText.clearFocus()
         _binding = null
     }
 
@@ -47,9 +44,25 @@ class StringFragment : Fragment() {
     private var _tempValue: String = ""
 
     private fun loadBundleValues(b: Bundle) {
-        _tempIsEnabled = if (b.containsKey("isEnabled")) b.getBoolean("isEnabled") else true
-        _tempValue = b.getString("currentValue") ?: defaultValue
+        _tempIsEnabled = b.getBoolean("isEnabled")
         _tempDescription = b.getString("description") ?: ""
+        _tempValue = b.getString("currentValue") ?: defaultValue
+    }
+
+    private fun setValue(v: String) {
+        try {
+            val sdf = SimpleDateFormat(timeFormat, Locale.getDefault())
+            val date = sdf.parse(v) ?: return
+            val cal = Calendar.getInstance()
+            cal.time = date
+            value = cal
+        } catch (ex: Exception) {
+            val sdf = SimpleDateFormat(timeFormat, Locale.getDefault())
+            val date = sdf.parse("12:00") ?: return
+            val cal = Calendar.getInstance()
+            cal.time = date
+            value = cal
+        }
     }
 
     override fun onCreateView(
@@ -57,19 +70,11 @@ class StringFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        _binding = FragmentStringBinding.inflate(inflater, container, false)
+        _binding = FragmentTimeBinding.inflate(inflater, container, false)
         val view = binding.root
 
-        if (arguments != null) loadBundleValues(requireArguments())
-
-        binding.stringEditText.setOnEditorActionListener { _, keyCode, keyEvent ->
-            if (keyCode == EditorInfo.IME_ACTION_DONE || (keyEvent.action == KeyEvent.ACTION_DOWN && (keyCode == KeyEvent.KEYCODE_UNKNOWN || keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_DPAD_CENTER))) {
-                dccFragmentListener?.onFragmentOk()
-                true
-            } else {
-                false
-            }
-        }
+        if (arguments != null)
+            loadBundleValues(requireArguments())
 
         binding.autoResizeTextView.text = _tempDescription
         binding.autoResizeTextView.visibility = if (_tempDescription.isEmpty()) {
@@ -84,33 +89,48 @@ class StringFragment : Fragment() {
     }
 
     private fun setValues() {
-        value = _tempValue
+        setValue(_tempValue)
         isEnabled = _tempIsEnabled
     }
 
     override fun onStart() {
         super.onStart()
         if (isEnabled) {
-            binding.stringEditText.requestFocus()
+            binding.autoResizeTextView.requestFocus()
         }
         dccFragmentListener?.onFragmentStarted()
     }
 
     var isEnabled: Boolean = true
 
-    var value: String
+    var value: Calendar
         get() {
-            if (_binding == null) return defaultValue
-            return binding.stringEditText.text.toString()
+            if (_binding == null) return Calendar.getInstance()
+            val hour: Int = binding.timePicker.hour
+            val minute: Int = binding.timePicker.minute
+
+            val calendar = Calendar.getInstance()
+            calendar.set(Calendar.HOUR, hour)
+            calendar.set(Calendar.MINUTE, minute)
+
+            return calendar
         }
         set(value) {
             if (_binding == null) return
-            binding.stringEditText.setText(value, TextView.BufferType.EDITABLE)
-            binding.stringEditText.clearFocus()
+            binding.timePicker.hour = value.get(Calendar.HOUR)
+            binding.timePicker.minute = value.get(Calendar.MINUTE)
             return
         }
 
     var defaultValue: String = ""
+        get() {
+            val sdf = SimpleDateFormat(timeFormat, Locale.getDefault())
+            return sdf.format(value.time)
+        }
+        set(value) {
+            field = value
+            return
+        }
 
     companion object {
         /**
@@ -120,15 +140,21 @@ class StringFragment : Fragment() {
          */
         fun newInstance(
             description: String,
-            value: String? = null,
+            value: Calendar? = null,
             isEnabled: Boolean = true,
-        ): StringFragment {
-            val fragment = StringFragment()
+        ): TimeFragment {
+            val fragment = TimeFragment()
+
+            var valueStr = ""
+            if (value != null) {
+                val sdf = SimpleDateFormat(timeFormat, Locale.getDefault())
+                valueStr = sdf.format(value.time)
+            }
 
             val args = Bundle()
             args.putString("description", description)
             args.putBoolean("isEnabled", isEnabled)
-            if (value != null) args.putString("currentValue", value)
+            if (value != null) args.putString("currentValue", valueStr)
 
             fragment.arguments = args
             return fragment
@@ -137,5 +163,7 @@ class StringFragment : Fragment() {
         fun equals(a: Any?, b: Any?): Boolean {
             return a != null && a == b
         }
+
+        private const val timeFormat = "HH:mm"
     }
 }

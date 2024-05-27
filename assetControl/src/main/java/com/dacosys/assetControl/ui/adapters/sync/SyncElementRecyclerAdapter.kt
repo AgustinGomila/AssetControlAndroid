@@ -44,9 +44,9 @@ import com.dacosys.assetControl.ui.adapters.interfaces.Interfaces.*
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.getBestContrastColor
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.getColorWithAlpha
 import com.dacosys.assetControl.ui.common.utils.Screen.Companion.manipulateColor
+import com.dacosys.assetControl.utils.misc.DateUtils.formatDateToString
 import com.dacosys.assetControl.utils.misc.Md5.Companion.getMd5
 import com.dacosys.assetControl.utils.misc.Md5.Companion.md5HashToInt
-import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.dateToNotNullStringDate
 import com.dacosys.assetControl.utils.settings.preferences.Repository.Companion.useImageControl
 import com.dacosys.imageControl.network.common.ProgramData
 import com.dacosys.imageControl.room.entity.Image
@@ -1106,7 +1106,7 @@ class SyncElementRecyclerAdapter private constructor(builder: Builder) :
                 syncElement.warehouseAreaStr.isNotEmpty() -> syncElement.warehouseAreaStr
                 else -> ""
             }
-            binding.dataCollectionDate.text = dateToNotNullStringDate(syncElement.dateEnd)
+            binding.dataCollectionDate.text = formatDateToString(syncElement.dateEnd)
 
             setStyle(isSelected)
         }
@@ -1145,7 +1145,7 @@ class SyncElementRecyclerAdapter private constructor(builder: Builder) :
             bindCheckBoxVisibility(checkBoxVisibility)
 
             binding.routeStr.text = syncElement.routeStr
-            binding.routeProcessDate.text = dateToNotNullStringDate(syncElement.routeProcessDate)
+            binding.routeProcessDate.text = formatDateToString(syncElement.routeProcessDate)
 
             setStyle(isSelected)
         }
@@ -1193,7 +1193,7 @@ class SyncElementRecyclerAdapter private constructor(builder: Builder) :
                 binding.obs.visibility = VISIBLE
                 binding.dividerObs.visibility = VISIBLE
             }
-            binding.warehouseMovementDate.text = dateToNotNullStringDate(syncElement.warehouseMovementDate)
+            binding.warehouseMovementDate.text = formatDateToString(syncElement.warehouseMovementDate)
 
             setStyle(isSelected)
         }
@@ -1242,7 +1242,7 @@ class SyncElementRecyclerAdapter private constructor(builder: Builder) :
                 binding.obs.visibility = VISIBLE
                 binding.dividerObs.visibility = VISIBLE
             }
-            binding.assetReviewDate.text = dateToNotNullStringDate(syncElement.assetReviewDate)
+            binding.assetReviewDate.text = formatDateToString(syncElement.assetReviewDate)
 
             setStyle(isSelected)
         }

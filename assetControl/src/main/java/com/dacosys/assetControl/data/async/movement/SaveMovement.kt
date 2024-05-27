@@ -20,10 +20,10 @@ import com.dacosys.assetControl.network.sync.SyncUpload
 import com.dacosys.assetControl.network.utils.Connection.Companion.autoSend
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.utils.errorLog.ErrorLog
-import com.dacosys.assetControl.utils.misc.UTCDataTime.Companion.getUTCDateTimeAsNotNullDate
 import com.dacosys.imageControl.network.upload.UploadImagesProgress
 import com.dacosys.imageControl.room.database.IcDatabase
 import kotlinx.coroutines.*
+import java.util.*
 
 class SaveMovement {
     private var allMovementContent: ArrayList<WarehouseMovementContent> = ArrayList()
@@ -202,7 +202,7 @@ class SaveMovement {
                             originWarehouseAreaId = origWaId,
                             destinationWarehouseId = destWId,
                             destinationWarehouseAreaId = destWaId,
-                            warehouseMovementDate = getUTCDateTimeAsNotNullDate(),
+                            warehouseMovementDate = Date(),
                             obs = obs,
                             userId = userId
                         )

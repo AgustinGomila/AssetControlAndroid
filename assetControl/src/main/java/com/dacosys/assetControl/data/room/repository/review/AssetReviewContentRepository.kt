@@ -55,6 +55,12 @@ class AssetReviewContentRepository {
         dao.updateAssetId(newValue, oldValue)
     }
 
+    fun updateAssetReviewId(newValue: Long, oldValue: Long) {
+        runBlocking {
+            dao.updateAssetReviewId(newValue, oldValue)
+        }
+    }
+
 
     fun deleteByAssetReviewId(id: Long) = runBlocking {
         dao.deleteByAssetReviewId(id)

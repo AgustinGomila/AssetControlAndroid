@@ -1,4 +1,4 @@
-package com.dacosys.assetControl.ui.activities.route
+package com.dacosys.assetControl.ui.activities.dataCollection
 
 import android.annotation.SuppressLint
 import android.os.Bundle
