@@ -160,9 +160,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
             // El nivel al que volví está completo
             if (isCurrentLevelCompleted && currentLevel == 1) {
-                runOnUiThread {
-                    binding.confirmButton.isEnabled = true
-                }
+                enableConfirmButton(true)
                 return
             }
 
@@ -533,7 +531,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
             Handler(Looper.getMainLooper()).postDelayed({
                 // Activo o no el botón de confirmar si el nivel está completado
-                binding.confirmButton.isEnabled = isCurrentLevelCompleted
+                enableConfirmButton(isCurrentLevelCompleted)
 
                 next()
             }, 200)
@@ -1048,9 +1046,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
         // El nivel al que volví está completo
         if (isCurrentLevelCompleted) {
-            runOnUiThread {
-                binding.confirmButton.isEnabled = true
-            }
+            enableConfirmButton(true)
             return
         }
 
@@ -1114,9 +1110,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         adapter?.update(rpc)
 
         if (s == RouteProcessStatus.processed || s == RouteProcessStatus.skipped) {
-            runOnUiThread {
-                binding.confirmButton.isEnabled = isCurrentLevelCompleted
-            }
+            enableConfirmButton(isCurrentLevelCompleted)
         }
     }
 
@@ -1172,9 +1166,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
         updateStatus(rpc = rpc, s = RouteProcessStatus.notProcessed, dc = null)
 
-        runOnUiThread {
-            binding.confirmButton.isEnabled = false
-        }
+        enableConfirmButton(false)
     }
 
     private fun detail() {
@@ -1360,9 +1352,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
     }
 
     private fun backLevel() {
-        runOnUiThread {
-            binding.confirmButton.isEnabled = false
-        }
+        enableConfirmButton(false)
 
         if (levelsToNavigate.size > 0) {
             Log.d(this::class.java.simpleName, getString(R.string.continuing_sequence_of_levels))
@@ -1389,9 +1379,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         // El nivel al que volví está completo
         if (isCurrentLevelCompleted) {
             // Seguir bajando
-            runOnUiThread {
-                binding.confirmButton.isEnabled = true
-            }
+            enableConfirmButton(true)
         }
 
         runDemo()
@@ -1491,9 +1479,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         )
 
         // PROCESO TERMINADO, SALIR
-        runOnUiThread {
-            binding.confirmButton.isEnabled = true
-        }
+        enableConfirmButton(true)
     }
 
     private fun processFinish(dc: DataCollection) {
@@ -1528,12 +1514,13 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
         val parameters: ArrayList<Parameter> = ArrayList()
         for (c in dcCont) {
-            if ((c.attributeCompositionId ?: 0) <= 0) {
+            val attrCompId = c.attributeCompositionId ?: 0
+            if (attrCompId <= 0) {
                 continue
             }
 
             val paramName =
-                rc.level.toString() + separator + rc.position + separator + c.level + separator + c.position + separator + c.attributeCompositionId
+                "${rc.level}$separator${rc.position}$separator${c.level}$separator${c.position}$separator$attrCompId"
 
             parameters.add(Parameter(paramName, c.valueStr))
         }
@@ -1701,9 +1688,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
                             dc = dc
                         )
 
-                        runOnUiThread {
-                            binding.confirmButton.isEnabled = true
-                        }
+                        enableConfirmButton(true)
                         return
                     }
                     if (result == DcrResult.end.id) {
@@ -1733,11 +1718,15 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         if (result != null && (rc.trueResult == DcrResult.back.id && result == true || rc.falseResult == DcrResult.back.id && result == false)) {
             updateStatus(rpc = rpc, s = RouteProcessStatus.processed, dc = dc)
 
-            runOnUiThread {
-                binding.confirmButton.isEnabled = true
-            }
+            enableConfirmButton(true)
         }
         // endregion
+    }
+
+    private fun enableConfirmButton(enable: Boolean) {
+        runOnUiThread {
+            binding.confirmButton.isEnabled = enable
+        }
     }
 
     private fun scannerHandleScanCompleted(scannedCode: String) {

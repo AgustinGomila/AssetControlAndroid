@@ -521,6 +521,9 @@ class RpcRecyclerAdapter(
             run {
                 // Notificamos al Listener superior
                 dataSetChangedListener?.onDataSetChanged()
+
+                // Notificamos el cambio de ítem para redibujarlo
+                notifyItemChanged(index)
             }
         }
     }

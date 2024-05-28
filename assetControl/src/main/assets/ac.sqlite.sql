@@ -152,6 +152,7 @@ CREATE INDEX IF NOT EXISTS `IDX_barcode_label_target_description` ON `barcode_la
 
 CREATE TABLE IF NOT EXISTS `data_collection`
 (
+    `_id`                INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     `data_collection_id` INTEGER                           NOT NULL,
     `asset_id`           INTEGER,
     `warehouse_id`       INTEGER,
@@ -161,7 +162,6 @@ CREATE TABLE IF NOT EXISTS `data_collection`
     `date_end`           INTEGER,
     `completed`          INTEGER                           NOT NULL,
     `transferred_date`   INTEGER,
-    `_id`                INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     `route_process_id`   INTEGER                           NOT NULL
 );
 CREATE INDEX IF NOT EXISTS `IDX_data_collection_data_collection_id` ON `data_collection` (`data_collection_id`);
@@ -173,6 +173,7 @@ CREATE INDEX IF NOT EXISTS `IDX_data_collection_route_process_id` ON `data_colle
 
 CREATE TABLE IF NOT EXISTS `data_collection_content`
 (
+    `_id`                             INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     `data_collection_content_id`      INTEGER                           NOT NULL,
     `data_collection_id`              INTEGER,
     `level`                           INTEGER,
@@ -182,7 +183,6 @@ CREATE TABLE IF NOT EXISTS `data_collection_content`
     `result`                          INTEGER,
     `value_str`                       TEXT                              NOT NULL,
     `data_collection_date`            INTEGER                           NOT NULL,
-    `_id`                             INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     `data_collection_rule_content_id` INTEGER                           NOT NULL
 );
 CREATE INDEX IF NOT EXISTS `IDX_data_collection_content_data_collection_id` ON `data_collection_content` (`data_collection_id`);
@@ -314,14 +314,14 @@ CREATE INDEX IF NOT EXISTS `IDX_route_composition_warehouse_area_id` ON `route_c
 
 CREATE TABLE IF NOT EXISTS `route_process`
 (
+    `_id`                INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     `user_id`            INTEGER                           NOT NULL,
     `route_id`           INTEGER                           NOT NULL,
     `route_process_id`   INTEGER                           NOT NULL,
     `route_process_date` INTEGER                           NOT NULL,
     `completed`          INTEGER                           NOT NULL,
     `transferred`        INTEGER,
-    `transferred_date`   INTEGER,
-    `_id`                INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
+    `transferred_date`   INTEGER
 );
 CREATE INDEX IF NOT EXISTS `IDX_route_process_user_id` ON `route_process` (`user_id`);
 CREATE INDEX IF NOT EXISTS `IDX_route_process_route_id` ON `route_process` (`route_id`);

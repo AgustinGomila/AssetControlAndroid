@@ -15,7 +15,8 @@ interface RouteProcessDao {
     @Query(
         "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
                 "WHERE ${Entry.TABLE_NAME}.${Entry.ROUTE_ID} = :routeId " +
-                "AND ${Entry.TABLE_NAME}.${Entry.COMPLETED} = 0"
+                "AND ${Entry.TABLE_NAME}.${Entry.COMPLETED} = 0 " +
+                "AND ${Entry.TABLE_NAME}.${Entry.TRANSFERRED_DATE} IS NULL"
     )
     suspend fun selectByRouteIdNoCompleted(routeId: Long): List<RouteProcess>
 
@@ -34,7 +35,8 @@ interface RouteProcessDao {
 
     @Query(
         "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
-                "WHERE ${Entry.TABLE_NAME}.${Entry.COMPLETED} = 0"
+                "WHERE ${Entry.TABLE_NAME}.${Entry.TRANSFERRED_DATE} IS NULL " +
+                "AND ${Entry.TABLE_NAME}.${Entry.COMPLETED} = 0"
     )
     suspend fun selectByNoCompleted(): List<RouteProcess>
 

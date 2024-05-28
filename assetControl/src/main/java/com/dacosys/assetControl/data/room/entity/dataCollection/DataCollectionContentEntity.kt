@@ -82,6 +82,7 @@ data class DataCollectionContentEntity(
                 """
             CREATE TABLE IF NOT EXISTS `data_collection_content`
             (
+                `_id`                             INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                 `data_collection_content_id`      INTEGER                           NOT NULL,
                 `data_collection_id`              INTEGER,
                 `level`                           INTEGER,
@@ -90,8 +91,7 @@ data class DataCollectionContentEntity(
                 `attribute_composition_id`        INTEGER,
                 `result`                          INTEGER,
                 `value_str`                       TEXT                              NOT NULL,
-                `data_collection_date`            INTEGER                           NOT NULL,
-                `_id`                             INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                `data_collection_date`            INTEGER                           NOT NULL,                
                 `data_collection_rule_content_id` INTEGER                           NOT NULL
             );
         """.trimIndent()

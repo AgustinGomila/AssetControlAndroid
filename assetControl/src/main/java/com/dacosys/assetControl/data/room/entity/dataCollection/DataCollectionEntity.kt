@@ -78,6 +78,7 @@ data class DataCollectionEntity(
                 """
             CREATE TABLE IF NOT EXISTS `data_collection`
             (
+                `_id`                INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                 `data_collection_id` INTEGER                           NOT NULL,
                 `asset_id`           INTEGER,
                 `warehouse_id`       INTEGER,
@@ -86,8 +87,7 @@ data class DataCollectionEntity(
                 `date_start`         INTEGER,
                 `date_end`           INTEGER,
                 `completed`          INTEGER                           NOT NULL,
-                `transferred_date`   INTEGER,
-                `_id`                INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                `transferred_date`   INTEGER,                
                 `route_process_id`   INTEGER                           NOT NULL
             );
         """.trimIndent()

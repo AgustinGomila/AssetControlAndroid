@@ -2,7 +2,6 @@ package com.dacosys.assetControl.data.webservice.maintenance
 
 import android.os.Parcel
 import android.os.Parcelable
-import com.dacosys.assetControl.AssetControlApp.Companion.getUserId
 import com.dacosys.assetControl.data.room.dto.maintenance.AssetMaintenance
 import org.ksoap2.serialization.SoapObject
 
