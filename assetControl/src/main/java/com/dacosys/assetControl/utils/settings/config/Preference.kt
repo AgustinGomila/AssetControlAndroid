@@ -354,25 +354,25 @@ class Preference(key: String, defaultValue: Any, debugValue: Any) {
         var acUser = Preference(
             "ac_user",
             "",
-            "test"
+            ""
         )
 
         var acPass = Preference(
             "ac_pass",
             "",
-            "pass"
+            ""
         )
 
         var acWsServer = Preference(
             "ac_ws_server",
             "",
-            "https://dev.dacosys.com/Milestone13/ac/s1/service.php"
+            ""
         )
 
         var acWsNamespace = Preference(
             "ac_ws_namespace",
             "",
-            "https://dev.dacosys.com/Milestone13/ac"
+            ""
         )
 
         var acWsProxy = Preference(
@@ -464,25 +464,25 @@ class Preference(key: String, defaultValue: Any, debugValue: Any) {
         var acMantUser = Preference(
             "ac_mant_user",
             "",
-            "test"
+            ""
         )
 
         var acMantPass = Preference(
             "ac_mant_pass",
             "",
-            "pass"
+            ""
         )
 
         var acMantWsServer = Preference(
             "ac_mant_ws_server",
             "",
-            "https://dev.dacosys.com/Milestone13/ac/smant/service.php"
+            ""
         )
 
         var acMantWsNamespace = Preference(
             "ac_mant_ws_namespace",
             "",
-            "https://dev.dacosys.com/Milestone13/ac"
+            ""
         )
 
         var acMantWsProxy = Preference(
@@ -518,13 +518,13 @@ class Preference(key: String, defaultValue: Any, debugValue: Any) {
         var acMantWsUser = Preference(
             "ac_mant_ws_user",
             "",
-            "dacosys"
+            ""
         )
 
         var acMantWsPass = Preference(
             "ac_mant_ws_pass",
             "",
-            "dacosys"
+            ""
         )
         /* endregion AssetControl Maintenance WebService */
 
@@ -538,25 +538,25 @@ class Preference(key: String, defaultValue: Any, debugValue: Any) {
         var icUser = Preference(
             "ic_user",
             "",
-            "test"
+            ""
         )
 
         var icPass = Preference(
             "ic_pass",
             "",
-            "pass"
+            ""
         )
 
         var icWsServer = Preference(
             "ic_ws_server",
             "",
-            "https://dev.dacosys.com/Milestone13/ic/s1/service.php"
+            ""
         )
 
         var icWsNamespace = Preference(
             "ic_ws_namespace",
             "",
-            "https://dev.dacosys.com/ic"
+            ""
         )
 
         var icWsProxy = Preference(
