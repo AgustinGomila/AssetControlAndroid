@@ -24,7 +24,7 @@ class ItemCategoryObject() : Parcelable {
         description = itemCategory.description
         item_category_id = itemCategory.id
         parent_id = itemCategory.parentId
-        active = itemCategory.active
+        active = itemCategory.mActive
         // item_category_ext_id = ""
     }
 

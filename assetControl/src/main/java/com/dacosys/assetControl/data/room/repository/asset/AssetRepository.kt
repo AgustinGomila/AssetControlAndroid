@@ -78,6 +78,7 @@ class AssetRepository {
 
 
     fun insert(asset: Asset) = runBlocking {
+        asset.transferred = 0
         asset.id = nextLastId
         dao.insert(AssetEntity(asset))
     }
@@ -111,12 +112,9 @@ class AssetRepository {
     }
 
 
-    fun update(asset: Asset): Boolean {
-        val r = runBlocking {
-            dao.update(AssetEntity(asset))
-            true
-        }
-        return r
+    fun update(asset: Asset) = runBlocking {
+        asset.transferred = 0
+        dao.update(AssetEntity(asset))
     }
 
     fun updateTransferred(ids: List<Long>): Boolean {

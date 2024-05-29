@@ -3,34 +3,52 @@ package com.dacosys.assetControl.data.room.dto.category
 import android.os.Parcel
 import android.os.Parcelable
 import androidx.room.ColumnInfo
+import androidx.room.Ignore
 import com.dacosys.assetControl.data.webservice.category.ItemCategoryObject
 
 class ItemCategory(
     @ColumnInfo(name = Entry.ID) var id: Long = 0L,
     @ColumnInfo(name = Entry.DESCRIPTION) var description: String = "",
-    @ColumnInfo(name = Entry.ACTIVE) var active: Int = 0,
+    @ColumnInfo(name = Entry.ACTIVE) var mActive: Int = 0,
     @ColumnInfo(name = Entry.PARENT_ID) var parentId: Long = 0L,
     @ColumnInfo(name = Entry.TRANSFERRED) var transferred: Int? = null,
-    @ColumnInfo(name = Entry.PARENT_STR) var parentStr: String = ""
+    @ColumnInfo(name = Entry.PARENT_STR) var parentDescription: String? = null
 ) : Parcelable {
 
     override fun toString(): String {
         return description
     }
 
+    @Ignore
+    var active: Boolean = mActive == 1
+        get() = mActive == 1
+        set(value) {
+            mActive = if (value) 1 else 0
+            field = value
+        }
+
+    @Ignore
+    var parentStr = parentDescription.orEmpty()
+        get() = parentDescription.orEmpty()
+        set(value) {
+            parentDescription = value.ifEmpty { null }
+            field = value
+        }
+
+
     constructor(parcel: Parcel) : this(
         id = parcel.readLong(),
         description = parcel.readString().orEmpty(),
-        active = parcel.readInt(),
+        mActive = parcel.readInt(),
         parentId = parcel.readLong(),
         transferred = parcel.readValue(Int::class.java.classLoader) as? Int,
-        parentStr = parcel.readString().orEmpty()
+        parentDescription = parcel.readString().orEmpty()
     )
 
     constructor(ic: ItemCategoryObject) : this(
         id = ic.item_category_id,
         description = ic.description,
-        active = ic.active,
+        mActive = ic.active,
         parentId = ic.parent_id,
         transferred = 1
     )
@@ -49,10 +67,10 @@ class ItemCategory(
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeLong(id)
         parcel.writeString(description)
-        parcel.writeInt(active)
+        parcel.writeInt(mActive)
         parcel.writeLong(parentId)
         parcel.writeValue(transferred)
-        parcel.writeString(parentStr)
+        parcel.writeString(parentDescription)
     }
 
     override fun describeContents(): Int {

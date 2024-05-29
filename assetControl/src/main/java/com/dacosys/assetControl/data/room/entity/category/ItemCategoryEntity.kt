@@ -31,7 +31,7 @@ data class ItemCategoryEntity(
     constructor(i: ItemCategory) : this(
         id = i.id,
         description = i.description,
-        active = i.active,
+        active = i.mActive,
         parentId = i.parentId,
         transferred = i.transferred
     )

@@ -12,7 +12,7 @@ class WarehouseArea(
     @ColumnInfo(name = Entry.ACTIVE) var mActive: Int = 0,
     @ColumnInfo(name = Entry.WAREHOUSE_ID) var warehouseId: Long = 0L,
     @ColumnInfo(name = Entry.TRANSFERRED) var transferred: Int? = null,
-    @ColumnInfo(name = Entry.WAREHOUSE_STR) var warehouseStr: String = ""
+    @ColumnInfo(name = Entry.WAREHOUSE_STR) var warehouseDescription: String? = null
 ) : Parcelable {
 
     override fun toString(): String {
@@ -27,13 +27,21 @@ class WarehouseArea(
             field = value
         }
 
+    @Ignore
+    var warehouseStr = warehouseDescription.orEmpty()
+        get() = warehouseDescription.orEmpty()
+        set(value) {
+            warehouseDescription = value.ifEmpty { null }
+            field = value
+        }
+
     constructor(parcel: Parcel) : this(
         id = parcel.readLong(),
         description = parcel.readString().orEmpty(),
         mActive = parcel.readInt(),
         warehouseId = parcel.readLong(),
         transferred = parcel.readValue(Int::class.java.classLoader) as? Int,
-        warehouseStr = parcel.readString().orEmpty()
+        warehouseDescription = parcel.readString().orEmpty()
     )
 
     constructor(waObj: WarehouseAreaObject) : this(
@@ -61,7 +69,7 @@ class WarehouseArea(
         parcel.writeInt(mActive)
         parcel.writeLong(warehouseId)
         parcel.writeValue(transferred)
-        parcel.writeString(warehouseStr)
+        parcel.writeString(warehouseDescription)
     }
 
     override fun describeContents(): Int {

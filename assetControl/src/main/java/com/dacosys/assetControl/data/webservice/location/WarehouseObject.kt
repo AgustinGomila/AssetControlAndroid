@@ -21,7 +21,7 @@ class WarehouseObject() : Parcelable {
     constructor(warehouse: Warehouse) : this() {
         description = warehouse.description
         warehouse_id = warehouse.id
-        active = if (warehouse.active) 1 else 0
+        active = warehouse.mActive
         // warehouse_ext_id = warehouse.externalId
     }
 

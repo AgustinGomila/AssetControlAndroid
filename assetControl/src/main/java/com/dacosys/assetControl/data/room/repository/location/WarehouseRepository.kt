@@ -37,22 +37,18 @@ class WarehouseRepository {
 
     fun insert(warehouse: Warehouse) = runBlocking {
         warehouse.id = nextLastId
+        warehouse.transferred = 0
         dao.insert(WarehouseEntity(warehouse))
     }
 
 
-    fun update(warehouse: Warehouse): Boolean {
-        val r = runBlocking {
-            dao.update(WarehouseEntity(warehouse))
-            true
-        }
-        return r
+    fun update(warehouse: Warehouse) = runBlocking {
+        warehouse.transferred = 0
+        dao.update(WarehouseEntity(warehouse))
     }
 
-    fun updateWarehouseId(newValue: Long, oldValue: Long) {
-        runBlocking {
-            dao.updateId(newValue, oldValue)
-        }
+    fun updateWarehouseId(newValue: Long, oldValue: Long) = runBlocking {
+        dao.updateId(newValue, oldValue)
     }
 
     fun updateTransferred(ids: List<Long>): Boolean {

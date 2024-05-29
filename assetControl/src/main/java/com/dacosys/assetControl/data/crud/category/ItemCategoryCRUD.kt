@@ -60,7 +60,7 @@ class ItemCategoryCRUD {
         private fun addItemCategory(icObj: ItemCategoryObject): CrudResult<ItemCategory?> {
             val ic = ItemCategory(
                 description = icObj.description.take(255),
-                active = icObj.active,
+                mActive = icObj.active,
                 parentId = icObj.parent_id,
                 transferred = 0
             )
@@ -116,9 +116,12 @@ class ItemCategoryCRUD {
         }
 
         private fun updateItemCategory(icObj: ItemCategoryObject): CrudResult<ItemCategory?> {
-            ItemCategoryRepository().update(ItemCategory(icObj))
+            val tempIc = ItemCategory(icObj)
+            ItemCategoryRepository().update(tempIc)
+
+            val ic = ItemCategoryRepository().selectById(tempIc.id)
             crudResult.status = UPDATE_OK
-            crudResult.itemResult = ItemCategory(icObj)
+            crudResult.itemResult = ic
 
             return crudResult
         }

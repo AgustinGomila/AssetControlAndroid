@@ -116,15 +116,12 @@ class WarehouseAreaCRUD {
         }
 
         private fun updateWarehouseArea(waObj: WarehouseAreaObject): CrudResult<WarehouseArea?> {
-            val wa = WarehouseArea(waObj)
+            val tempWa = WarehouseArea(waObj)
+            WarehouseAreaRepository().update(tempWa)
 
-            if (WarehouseAreaRepository().update(wa)) {
-                crudResult.status = UPDATE_OK
-                crudResult.itemResult = wa
-            } else {
-                crudResult.status = ERROR_UPDATE
-                crudResult.itemResult = null
-            }
+            val wa = WarehouseAreaRepository().selectById(tempWa.id)
+            crudResult.status = UPDATE_OK
+            crudResult.itemResult = wa
 
             return crudResult
         }

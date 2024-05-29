@@ -49,6 +49,7 @@ class WarehouseAreaRepository {
 
     fun insert(warehouseArea: WarehouseArea) = runBlocking {
         warehouseArea.id = nextLastId
+        warehouseArea.transferred = 0
         dao.insert(WarehouseAreaEntity(warehouseArea))
     }
 
@@ -58,12 +59,9 @@ class WarehouseAreaRepository {
         update(wa)
     }
 
-    fun update(warehouseArea: WarehouseArea): Boolean {
-        val r = runBlocking {
-            dao.update(WarehouseAreaEntity(warehouseArea))
-            true
-        }
-        return r
+    fun update(warehouseArea: WarehouseArea) = runBlocking {
+        warehouseArea.transferred = 0
+        dao.update(WarehouseAreaEntity(warehouseArea))
     }
 
     fun updateTransferred(ids: List<Long>): Boolean {

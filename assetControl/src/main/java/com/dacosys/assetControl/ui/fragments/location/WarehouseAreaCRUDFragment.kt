@@ -253,7 +253,7 @@ class WarehouseAreaCRUDFragment : Fragment() {
 
         wa.description = binding.descriptionEditText.text.trim().toString()
         wa.warehouseId = wId
-        wa.active = binding.activeCheckBox.isChecked
+        wa.mActive = if (binding.activeCheckBox.isChecked) 1 else 0
     }
 
     private fun createWsWarehouseArea(): WarehouseAreaObject? {

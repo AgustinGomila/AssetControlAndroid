@@ -79,10 +79,12 @@ class WarehouseCRUDFragment : Fragment() {
     }
 
     private fun fillControls(restoreState: Boolean) {
-        if (warehouse == null && !restoreState) {
+        val w = warehouse
+        if (w == null && !restoreState) {
             clearControl()
             return
         }
+        if (w == null) return
 
         if (restoreState) {
             if (_binding != null) {
@@ -91,11 +93,8 @@ class WarehouseCRUDFragment : Fragment() {
             }
         } else {
             if (_binding != null) {
-                binding.descriptionEditText.setText(
-                    warehouse?.description ?: "",
-                    TextView.BufferType.EDITABLE
-                )
-                binding.activeCheckBox.isChecked = warehouse?.active ?: false
+                binding.descriptionEditText.setText(w.description, TextView.BufferType.EDITABLE)
+                binding.activeCheckBox.isChecked = w.active
             }
         }
     }

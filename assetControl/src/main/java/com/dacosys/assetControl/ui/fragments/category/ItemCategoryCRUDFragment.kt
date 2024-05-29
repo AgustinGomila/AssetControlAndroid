@@ -126,10 +126,12 @@ class ItemCategoryCRUDFragment : Fragment() {
         }
 
     private fun fillControls(restoreState: Boolean) {
-        if (itemCategory == null && !restoreState) {
+        val ic = itemCategory
+        if (ic == null && !restoreState) {
             clearControl()
             return
         }
+        if (ic == null) return
 
         if (restoreState) {
             if (_binding != null) {
@@ -138,18 +140,14 @@ class ItemCategoryCRUDFragment : Fragment() {
             }
         } else {
             if (_binding != null) {
-                binding.descriptionEditText.setText(
-                    itemCategory?.description ?: "",
-                    TextView.BufferType.EDITABLE
-                )
-                binding.activeCheckBox.isChecked = itemCategory?.active == 1
+                binding.descriptionEditText.setText(ic.description, TextView.BufferType.EDITABLE)
+                binding.activeCheckBox.isChecked = ic.active
             }
-            parentCategory =
-                if (itemCategory?.parentId != null && (itemCategory?.parentId ?: -1) > 0) {
-                    ItemCategoryRepository().selectById(itemCategory!!.parentId)
-                } else {
-                    null
-                }
+            parentCategory = if (ic.parentId > 0) {
+                ItemCategoryRepository().selectById(ic.parentId)
+            } else {
+                null
+            }
         }
 
         setParentCategoryText()
@@ -243,14 +241,14 @@ class ItemCategoryCRUDFragment : Fragment() {
         // Main Information
         itemCategory?.description = binding.descriptionEditText.text.trim().toString()
         itemCategory?.parentId = parentCategory?.id ?: 0
-        itemCategory?.active = if (binding.activeCheckBox.isChecked) 1 else 0
+        itemCategory?.mActive = if (binding.activeCheckBox.isChecked) 1 else 0
     }
 
     private fun createWsItemCategory(): ItemCategoryObject {
         val tempItemCategory = ItemCategory(
             description = binding.descriptionEditText.text.trim().toString(),
             parentId = parentCategory?.id ?: 0,
-            active = if (binding.activeCheckBox.isChecked) 1 else 0
+            mActive = if (binding.activeCheckBox.isChecked) 1 else 0
         )
         return ItemCategoryObject(tempItemCategory)
     }

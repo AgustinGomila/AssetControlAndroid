@@ -159,7 +159,7 @@ class ItemCategoryAdapter(
 
                 if (resource == R.layout.item_category_row && v != null) {
                     when {
-                        itemCategory.active != 1 -> {
+                        !itemCategory.active -> {
                             v.setBackgroundColor(lightgray)
                             holder.descriptionTextView?.setTextColor(dimgray)
                             holder.parentCategoryTextView?.setTextColor(dimgray)
@@ -172,7 +172,7 @@ class ItemCategoryAdapter(
                         }
                     }
                 } else if (resource == R.layout.custom_spinner_dropdown_item && v != null) {
-                    if (itemCategory.active == 1 && itemCategory.id > 0) {
+                    if (itemCategory.active && itemCategory.id > 0) {
                         holder.descriptionTextView?.setTextColor(black)
                     } else {
                         holder.descriptionTextView?.setTextColor(dimgray)

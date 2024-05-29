@@ -34,20 +34,16 @@ class ItemCategoryRepository {
         }
 
 
-    fun insert(category: ItemCategory) {
-        runBlocking {
-            category.id = nextLastId
-            dao.insert(ItemCategoryEntity(category))
-        }
+    fun insert(category: ItemCategory) = runBlocking {
+        category.id = nextLastId
+        category.transferred = 0
+        dao.insert(ItemCategoryEntity(category))
     }
 
 
-    fun update(category: ItemCategory): Boolean {
-        val r = runBlocking {
-            dao.update(ItemCategoryEntity(category))
-            true
-        }
-        return r
+    fun update(category: ItemCategory) = runBlocking {
+        category.transferred = 0
+        dao.update(ItemCategoryEntity(category))
     }
 
     fun updateTransferred(ids: List<Long>): Boolean {

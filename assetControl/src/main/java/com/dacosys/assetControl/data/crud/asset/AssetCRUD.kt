@@ -136,9 +136,10 @@ class AssetCRUD {
         }
 
         private fun updateAsset(aObj: AssetCollectorObject): CrudResult<Asset?> {
-            val asset = Asset(aObj)
-            AssetRepository().update(asset)
+            val tempAsset = Asset(aObj)
+            AssetRepository().update(tempAsset)
 
+            val asset = AssetRepository().selectById(tempAsset.id)
             crudResult.status = UPDATE_OK
             crudResult.itemResult = asset
 

@@ -25,11 +25,13 @@ class AssetMaintenanceRepository {
 
     fun insert(maintenance: AssetMaintenance) = runBlocking {
         maintenance.id = nextId
+        maintenance.mTransferred = 0
         dao.insert(AssetMaintenanceEntity(maintenance))
     }
 
 
     fun update(maintenance: AssetMaintenance) = runBlocking {
+        maintenance.mTransferred = 0
         dao.update(AssetMaintenanceEntity(maintenance))
     }
 

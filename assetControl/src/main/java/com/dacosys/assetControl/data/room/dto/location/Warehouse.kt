@@ -10,7 +10,7 @@ class Warehouse(
     @ColumnInfo(name = Entry.ID) var id: Long = 0L,
     @ColumnInfo(name = Entry.DESCRIPTION) var description: String = "",
     @ColumnInfo(name = Entry.ACTIVE) var mActive: Int = 0,
-    @ColumnInfo(name = Entry.TRANSFERRED) val transferred: Int? = null
+    @ColumnInfo(name = Entry.TRANSFERRED) var transferred: Int? = null
 ) : Parcelable {
 
     override fun toString(): String {
