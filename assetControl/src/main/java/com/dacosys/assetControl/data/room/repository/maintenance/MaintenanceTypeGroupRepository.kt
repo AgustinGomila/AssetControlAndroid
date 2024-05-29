@@ -10,15 +10,7 @@ class MaintenanceTypeGroupRepository {
     private val dao: MaintenanceTypeGroupDao
         get() = database.maintenanceTypeGroupDao()
 
-    fun insert(typeGroup: MaintenanceTypeGroup) = runBlocking {
+    fun sync(typeGroup: MaintenanceTypeGroup) = runBlocking {
         dao.insert(MaintenanceTypeGroupEntity(typeGroup))
-    }
-
-    fun update(typeGroup: MaintenanceTypeGroup): Boolean {
-        val r = runBlocking {
-            dao.update(MaintenanceTypeGroupEntity(typeGroup))
-            true
-        }
-        return r
     }
 }

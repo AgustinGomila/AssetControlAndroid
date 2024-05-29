@@ -897,25 +897,20 @@ class SyncDownload(
 
                 val attributeId = a.attributeId
                 val objArray = ws.attributeCompositionGet(attributeId)
-                if (!objArray.isNullOrEmpty()) {
-                    for (obj in objArray) {
-                        val attributeComposition = AttributeComposition(
-                            id = obj.attributeCompositionId,
-                            attributeId = obj.attributeId,
-                            attributeCompositionTypeId = obj.attributeCompositionTypeId,
-                            description = obj.description,
-                            composition = obj.composition,
-                            used = obj.used,
-                            name = obj.name,
-                            readOnly = obj.readOnly,
-                            defaultValue = obj.defaultValue
-                        )
 
-                        Log.d(
-                            this::class.java.simpleName,
-                            "SQLITE-QUERY-INSERT-->" + attributeId + "," + obj.attributeCompositionId
+                if (!objArray.isNullOrEmpty()) {
+                    objArray.mapTo(allAttrComp) {
+                        AttributeComposition(
+                            id = it.attributeCompositionId,
+                            attributeId = it.attributeId,
+                            attributeCompositionTypeId = it.attributeCompositionTypeId,
+                            description = it.description,
+                            composition = it.composition,
+                            used = it.used,
+                            name = it.name,
+                            readOnly = it.readOnly,
+                            defaultValue = it.defaultValue
                         )
-                        allAttrComp.add(attributeComposition)
                     }
                 }
             }
@@ -1495,25 +1490,7 @@ class SyncDownload(
                                 active = obj.active,
                                 maintenanceTypeGroupId = obj.manteinance_type_group_id
                             )
-
-                            if (typeRepository.update(maintenanceType)) {
-                                Log.d(
-                                    this::class.java.simpleName,
-                                    "SQLITE-QUERY-UPDATE-->" + obj.manteinance_type_id
-                                )
-                            } else {
-                                try {
-                                    Log.d(
-                                        this::class.java.simpleName,
-                                        "SQLITE-QUERY-INSERT-->" + obj.manteinance_type_id
-                                    )
-
-                                    typeRepository.insert(maintenanceType)
-                                } catch (ex: Exception) {
-                                    // Posible inserción sobre Id existente
-                                    ErrorLog.writeLog(null, this::class.java.simpleName, ex)
-                                }
-                            }
+                            typeRepository.sync(maintenanceType)
                         }
                     } catch (ex: Exception) {
                         ex.printStackTrace()
@@ -1639,27 +1616,7 @@ class SyncDownload(
                                 description = obj.description,
                                 active = obj.active
                             )
-
-                            if (groupRepository.update(typeGroup)) {
-                                Log.d(
-                                    this::class.java.simpleName,
-                                    "SQLITE-QUERY-UPDATE-->" + obj.maintenanceTypeGroupId
-                                )
-                            } else {
-                                try {
-                                    Log.d(
-                                        this::class.java.simpleName,
-                                        "SQLITE-QUERY-INSERT-->" + obj.maintenanceTypeGroupId
-                                    )
-
-                                    groupRepository.insert(typeGroup)
-                                } catch (ex: Exception) {
-                                    // Posible inserción sobre Id existente
-                                    ErrorLog.writeLog(
-                                        null, this::class.java.simpleName, ex
-                                    )
-                                }
-                            }
+                            groupRepository.sync(typeGroup)
                         }
                     } catch (ex: Exception) {
                         ex.printStackTrace()

@@ -1138,4 +1138,6 @@
     <string name="skipped">Omitido</string>
     <string name="failed_to_copy_database">Error al copiar la base de datos</string>
     <string name="failed_to_replace_database">Error al reemplazar la base de datos</string>
+    <string name="permissions_required">Permisos necesarios</string>
+    <string name="this_app_needs_access_to_your_external_storage_to_read_and_write_files">Esta aplicación necesita acceso a su almacenamiento externo para leer y escribir archivos. Otorgue los permisos para continuar usando esta función.</string>
 </resources>

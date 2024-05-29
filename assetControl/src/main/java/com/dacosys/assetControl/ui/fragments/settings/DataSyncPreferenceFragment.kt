@@ -185,6 +185,53 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
         }
     }
 
+
+    private fun showRationaleDialog(onPositiveClick: () -> Unit) {
+        AlertDialog.Builder(AssetControlApp.getContext())
+            .setTitle(getString(R.string.permissions_required))
+            .setMessage(getString(R.string.this_app_needs_access_to_your_external_storage_to_read_and_write_files))
+            .setPositiveButton(getString(R.string.ok)) { dialog, _ ->
+                dialog.dismiss()
+                onPositiveClick()
+            }
+            .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
+                dialog.dismiss()
+                showSnackBar(getString(R.string.app_dont_have_necessary_permissions), ERROR)
+            }
+            .show()
+    }
+
+    private fun requestPermissions(permissionsToRequest: Array<String>) {
+        val shouldShowRationale = permissionsToRequest.any {
+            shouldShowRequestPermissionRationale(it)
+        }
+
+        if (shouldShowRationale) {
+            showRationaleDialog {
+                requestMultiplePermissionsLauncher.launch(permissionsToRequest)
+            }
+        } else {
+            requestMultiplePermissionsLauncher.launch(permissionsToRequest)
+        }
+    }
+
+    private val requestMultiplePermissionsLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions: Map<String, Boolean> ->
+        permissions.entries.forEach {
+            // val permissionName = it.key
+            val isGranted = it.value
+            if (isGranted) {
+                runNextStep()
+            } else {
+                showSnackBar(
+                    AssetControlApp.getContext().getString(R.string.app_dont_have_necessary_permissions),
+                    ERROR
+                )
+            }
+        }
+    }
+
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private val readMediaPermissions = arrayOf(
         Manifest.permission.READ_MEDIA_IMAGES,
@@ -192,7 +239,10 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
         Manifest.permission.READ_MEDIA_AUDIO
     )
 
-    private val requestCodePermission = 101
+    private val readWritePermissions = arrayOf(
+        Manifest.permission.READ_EXTERNAL_STORAGE,
+        Manifest.permission.WRITE_EXTERNAL_STORAGE
+    )
 
     private fun requestPermissions() {
         val context = AssetControlApp.getContext()
@@ -201,31 +251,18 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
             if (readMediaPermissions.all {
                     ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
                 }) {
-                // Permisos concedidos, continuar
                 runNextStep()
             } else {
-                ActivityCompat.requestPermissions(requireActivity(), readMediaPermissions, requestCodePermission)
+                requestPermissions(readMediaPermissions)
             }
         } else {
-            // Manejar permisos para versiones anteriores a Android 13
-            if (ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.READ_EXTERNAL_STORAGE
-                ) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                ActivityCompat.requestPermissions(
-                    requireActivity(), arrayOf(
-                        Manifest.permission.READ_EXTERNAL_STORAGE,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE
-                    ), requestCodePermission
-                )
-            } else {
-                // Permisos concedidos, continuar
+            if (readWritePermissions.all {
+                    ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
+                }) {
                 runNextStep()
+            } else {
+                // Manejar permisos para versiones anteriores a Android 13
+                requestPermissions(readWritePermissions)
             }
         }
     }
@@ -266,10 +303,9 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
                 )
                 Statics.OFFLINE_MODE = true
 
-                val permissions = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 activity?.let {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R ||
-                        hasPermissions(activity as Context, permissions)
+                        hasPermissions(activity as Context, readWritePermissions)
                     ) {
                         copyDb()
                     } else {
@@ -283,21 +319,6 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
             }
         }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>, grantResults: IntArray,
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == requestCodePermission) {
-            if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
-                // Permisos concedidos, continuar
-                runNextStep()
-            } else {
-                // Permisos no concedidos, mostrar mensaje al usuario
-                showSnackBar(getString(R.string.app_dont_have_necessary_permissions), ERROR)
-            }
-        }
-    }
 
     private fun sendDbByMail() {
         val context = AssetControlApp.getContext()

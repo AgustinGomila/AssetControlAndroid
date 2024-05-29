@@ -13,16 +13,7 @@ class MaintenanceTypeRepository {
     fun getAll(): List<MaintenanceType> = runBlocking { dao.select() }
 
 
-    fun insert(type: MaintenanceType) = runBlocking {
+    fun sync(type: MaintenanceType) = runBlocking {
         dao.insert(MaintenanceTypeEntity(type))
-    }
-
-
-    fun update(type: MaintenanceType): Boolean {
-        val r = runBlocking {
-            dao.update(MaintenanceTypeEntity(type))
-            true
-        }
-        return r
     }
 }
