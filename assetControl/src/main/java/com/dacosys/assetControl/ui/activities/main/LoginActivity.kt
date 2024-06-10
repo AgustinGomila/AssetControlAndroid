@@ -976,7 +976,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
             }
 
             R.id.action_settings -> {
-                if (currentStyle != ButtonStyle.BUSY) {
+                if (currentStyle != ButtonStyle.BUSY || BuildConfig.DEBUG) {
                     configApp()
                 } else {
                     showSnackBar(SnackBarEventData(getString(R.string.please_wait), SnackBarType.RUNNING))

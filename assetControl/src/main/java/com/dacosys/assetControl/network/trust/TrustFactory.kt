@@ -1,4 +1,4 @@
-package com.dacosys.assetControl.network.clientPackages
+package com.dacosys.assetControl.network.trust
 
 import android.content.Context
 import com.dacosys.assetControl.R
@@ -12,9 +12,28 @@ import javax.net.ssl.X509TrustManager
 
 class TrustFactory {
     companion object {
+
+        private const val DACOSYS_CONFIG = "config.dacosys.com"
+        private const val DACOSYS_CLIENT = "client.dacosys.com"
+
+        private var trustedList: MutableList<String> = mutableListOf(
+            DACOSYS_CONFIG,
+            DACOSYS_CLIENT,
+        )
+
+        val trustedDomains: List<String>
+            get() = trustedList
+
+        fun addTrustedDomains(domains: List<String>) {
+            domains
+                .filterNot { trustedList.contains(it) }
+                .forEach { trustedList.add(it) }
+        }
+
         fun getTrustFactoryManager(context: Context): Pair<SSLSocketFactory, X509TrustManager> {
             val cf = CertificateFactory.getInstance("X.509")
 
+            // Cargar los certificados desde los recursos raw
             val isrgRoot1Input = context.resources.openRawResource(R.raw.isrgrootx1)
             val isrgRoot1Certificate: Certificate = isrgRoot1Input.use {
                 cf.generateCertificate(it)

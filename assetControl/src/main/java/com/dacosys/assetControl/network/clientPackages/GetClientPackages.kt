@@ -1,9 +1,9 @@
 package com.dacosys.assetControl.network.clientPackages
 
-import android.os.Build
 import android.util.Log
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
+import com.dacosys.assetControl.network.trust.CustomSSLContext
 import com.dacosys.assetControl.network.utils.Connection.Companion.isOnline
 import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.utils.Statics
@@ -95,10 +95,9 @@ class GetClientPackages(
             connection.setRequestProperty("Content-Type", "application/json; charset=utf-8")
             connection.connectTimeout = Repository.connectionTimeout * 1000
 
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-                val t = TrustFactory.getTrustFactoryManager(getContext())
-                HttpsURLConnection.setDefaultSSLSocketFactory(t.first)
-                connection.sslSocketFactory = t.first
+            val sslContext = CustomSSLContext.createCustomSSLContext()
+            if (sslContext != null) {
+                connection.sslSocketFactory = sslContext.socketFactory
             }
 
             //connection.useCaches = false
