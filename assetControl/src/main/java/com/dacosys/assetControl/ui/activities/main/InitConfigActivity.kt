@@ -250,6 +250,19 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
         binding.emailEditText.requestFocus()
     }
 
+    override fun onStart() {
+        super.onStart()
+        if (Statics.SUPER_DEMO_MODE) {
+            val env = DotenvBuilder()
+                .directory("/assets")
+                .filename("env")
+                .load()
+
+            // val uade = env["CLIENT_UADE_QR"]
+            // scannerCompleted(uade)
+        }
+    }
+
     private fun clearOldPrefs() {
         cleanPrefs()
     }
@@ -506,9 +519,17 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
                         .filename("env")
                         .load()
 
+                    // val uade = env["CLIENT_UADE_QR"]
+                    // scannerCompleted(uade)
+
+                    // val qrHttp = env["CLIENT_HTTP_QR"]
+                    // scannerCompleted(qrHttp)
+
+                    // val username = env["CLIENT_EMAIL_CP"]
+                    // val password = env["CLIENT_PASSWORD_CP"]
+
                     val username = env["CLIENT_EMAIL"]
                     val password = env["CLIENT_PASSWORD"]
-
                     scannerCompleted("""{"config":{"client_email":"$username","client_password":"$password"}}""".trimIndent())
                     return super.onOptionsItemSelected(item)
                 }

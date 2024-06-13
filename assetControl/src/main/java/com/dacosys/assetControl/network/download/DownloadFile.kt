@@ -1,12 +1,10 @@
 package com.dacosys.assetControl.network.download
 
 import android.content.Context
-import android.os.Build
 import android.os.PowerManager
 import android.util.Log
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.R
-import com.dacosys.assetControl.network.clientPackages.TrustFactory
 import com.dacosys.assetControl.network.download.DownloadStatus.*
 import com.dacosys.assetControl.utils.Statics
 import kotlinx.coroutines.*
@@ -16,7 +14,6 @@ import java.io.InputStream
 import java.io.OutputStream
 import java.net.HttpURLConnection
 import java.net.URL
-import javax.net.ssl.HttpsURLConnection
 
 class DownloadFile(
     private var urlDestination: UrlDestParam,
@@ -109,7 +106,7 @@ class DownloadFile(
         var input: InputStream? = null
         var output: OutputStream? = null
 
-        var connection: HttpsURLConnection? = null
+        var connection: HttpURLConnection? = null
 
         try {
             val url = URL(urlStr)
@@ -120,14 +117,7 @@ class DownloadFile(
                 }: $urlStr"
             )
 
-            connection = url.openConnection() as HttpsURLConnection
-
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-                val t = TrustFactory.getTrustFactoryManager(getContext())
-                HttpsURLConnection.setDefaultSSLSocketFactory(t.first)
-                connection.sslSocketFactory = t.first
-            }
-
+            connection = url.openConnection() as HttpURLConnection
             connection.connect()
 
             // expect HTTP 200 OK, so we don't mistakenly save error report

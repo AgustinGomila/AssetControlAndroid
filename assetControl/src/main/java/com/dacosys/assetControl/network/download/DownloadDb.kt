@@ -179,7 +179,12 @@ class DownloadDb(
             }
         }
 
-        GetMySqlDate(getWebservice()) { onConnectionResult(it) }.execute()
+        if (Statics.SUPER_DEMO_MODE) launchDownload()
+        else {
+            GetMySqlDate(getWebservice()) {
+                onConnectionResult(it)
+            }.execute()
+        }
     }
 
     private fun launchDownload() {
