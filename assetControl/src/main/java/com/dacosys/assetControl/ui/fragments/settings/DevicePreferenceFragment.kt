@@ -24,6 +24,7 @@ import com.dacosys.assetControl.utils.scanners.Collector
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.utils.scanners.rfid.RfidType
 import com.dacosys.assetControl.utils.scanners.vh75.Vh75Bt
+import com.dacosys.assetControl.utils.settings.collectorType.CollectorType
 import com.dacosys.assetControl.utils.settings.collectorType.CollectorTypePreference
 import com.dacosys.assetControl.utils.settings.devices.DevicePreference
 import com.dacosys.assetControl.utils.settings.preferences.Preferences
@@ -64,7 +65,7 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
         }
         setPreferencesFromResource(R.xml.pref_devices, key)
 
-        // Llenar sólo el fragmento que se ve para evitar NullExceptions
+        // Llenar solo el fragmento que se ve para evitar NullExceptions
         when (key) {
             "printer" -> {
                 setPrinterPref()
@@ -128,7 +129,8 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
                 text
             }
         }
-        collectorListPref?.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, _ ->
+        collectorListPref?.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { preference, newValue ->
+            preference.summary = CollectorType.getById(newValue.toString().toInt()).description
             Collector.collectorTypeChanged = true
             true
         }
@@ -305,7 +307,7 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
 
         swPrefBtPrinter?.setOnPreferenceChangeListener { _, newValue ->
             if (newValue == true) swPrefNetPrinter?.isChecked = false
-            else deviceListPref?.entry?.toString() ?: ""
+            else deviceListPref?.entry?.toString().orEmpty()
             true
         }
         swPrefNetPrinter?.setOnPreferenceChangeListener { _, newValue ->
