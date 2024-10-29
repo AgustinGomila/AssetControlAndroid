@@ -181,7 +181,7 @@ class Webservice @Throws(Exception::class) constructor(private var webServiceTyp
         val sessionSoapObject: SoapObject = when (webServiceType) {
             WebServiceType.AssetControl,
             WebServiceType.AssetControlManteinance,
-            -> getSessionObject(useConfSession)
+                -> getSessionObject(useConfSession)
 
             else -> return null
         } ?: return null

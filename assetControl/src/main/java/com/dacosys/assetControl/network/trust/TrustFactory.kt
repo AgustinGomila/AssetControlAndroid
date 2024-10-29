@@ -1,7 +1,6 @@
 package com.dacosys.assetControl.network.trust
 
 import android.content.Context
-import com.dacosys.assetControl.R
 import java.security.KeyStore
 import java.security.cert.Certificate
 import java.security.cert.CertificateFactory
@@ -30,25 +29,19 @@ class TrustFactory {
                 .forEach { trustedList.add(it) }
         }
 
-        fun getTrustFactoryManager(context: Context): Pair<SSLSocketFactory, X509TrustManager> {
+        fun getTrustFactoryManager(
+            context: Context,
+            certResourceIds: List<Int>
+        ): Pair<SSLSocketFactory, X509TrustManager> {
             val cf = CertificateFactory.getInstance("X.509")
+            val keyStore = KeyStore.getInstance(KeyStore.getDefaultType()).apply { load(null, null) }
 
-            // Cargar los certificados desde los recursos raw
-            val isrgRoot1Input = context.resources.openRawResource(R.raw.isrgrootx1)
-            val isrgRoot1Certificate: Certificate = isrgRoot1Input.use {
-                cf.generateCertificate(it)
-            }
-
-            val isrgRoot2Input = context.resources.openRawResource(R.raw.isrgrootx2)
-            val isrgRoot2Certificate: Certificate = isrgRoot2Input.use {
-                cf.generateCertificate(it)
-            }
-
-            val keyStoreType = KeyStore.getDefaultType()
-            val keyStore = KeyStore.getInstance(keyStoreType).apply {
-                load(null, null)
-                setCertificateEntry("isrgrootx1", isrgRoot1Certificate)
-                setCertificateEntry("isrgrootx2", isrgRoot2Certificate)
+            // Cargar los certificados desde los recursos `raw`
+            certResourceIds.forEachIndexed { index, resId ->
+                context.resources.openRawResource(resId).use { inputStream ->
+                    val certificate: Certificate = cf.generateCertificate(inputStream)
+                    keyStore.setCertificateEntry("cert_$index", certificate)
+                }
             }
 
             val tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm()

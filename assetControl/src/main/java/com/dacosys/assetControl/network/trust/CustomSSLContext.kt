@@ -1,7 +1,9 @@
 package com.dacosys.assetControl.network.trust
 
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
+import com.dacosys.assetControl.R
 import com.dacosys.assetControl.network.trust.TrustFactory.Companion.addTrustedDomains
+import com.dacosys.assetControl.network.trust.TrustFactory.Companion.getTrustFactoryManager
 import com.dacosys.assetControl.network.trust.TrustFactory.Companion.trustedDomains
 import com.dacosys.assetControl.utils.settings.preferences.Repository
 import java.net.MalformedURLException
@@ -21,8 +23,15 @@ object CustomSSLContext {
         }
 
         return try {
-            val (socketFactory, defaultTrustManager) = TrustFactory.getTrustFactoryManager(getContext())
-            val customTrustManager = CustomTrustManager(defaultTrustManager)
+            val sslFactoryManager = getTrustFactoryManager(
+                getContext(),
+                listOf(R.raw.isrgrootx1, R.raw.isrgrootx2, R.raw.r1, R.raw.r2, R.raw.r3, R.raw.r4, R.raw.gsr4)
+            )
+
+            // val socketFactory = sslFactoryManager.first
+            val trustManager = sslFactoryManager.second
+
+            val customTrustManager = CustomTrustManager(trustManager)
 
             for (domain in trustedDomains) {
                 customTrustManager.addTrustedDomain(domain)

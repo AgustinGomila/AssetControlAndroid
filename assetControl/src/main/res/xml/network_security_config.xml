@@ -1,11 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
-    <base-config cleartextTrafficPermitted="true">
+    <base-config cleartextTrafficPermitted="false">
         <trust-anchors>
-            <certificates src="@raw/isrgrootx2"/>
+            <certificates src="@raw/gsr4"/>
             <certificates src="@raw/isrgrootx1"/>
-            <certificates src="user"/>
+            <certificates src="@raw/isrgrootx2"/>
+            <certificates src="@raw/r1"/>
+            <certificates src="@raw/r2"/>
+            <certificates src="@raw/r3"/>
+            <certificates src="@raw/r4"/>
             <certificates src="system"/>
+            <debug-overrides>
+                <certificates src="user"/>
+            </debug-overrides>
         </trust-anchors>
     </base-config>
     <domain-config cleartextTrafficPermitted="true">
