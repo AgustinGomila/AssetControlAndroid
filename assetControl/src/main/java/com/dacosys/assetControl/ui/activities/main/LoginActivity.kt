@@ -32,7 +32,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.ViewCompat
 import com.dacosys.assetControl.AssetControlApp.Companion.appName
-import com.dacosys.assetControl.AssetControlApp.Companion.getContext
 import com.dacosys.assetControl.AssetControlApp.Companion.setCurrentUserId
 import com.dacosys.assetControl.BuildConfig
 import com.dacosys.assetControl.R
@@ -81,7 +80,6 @@ import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion
 import com.dacosys.assetControl.utils.settings.preferences.Repository
 import com.dacosys.assetControl.viewModel.sync.DownloadDbViewModel
 import com.dacosys.assetControl.viewModel.sync.SyncViewModel
-import com.dacosys.imageControl.network.upload.SendPending
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import io.github.cdimascio.dotenv.DotenvBuilder
@@ -288,10 +286,6 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                 // Cerramos la base...
                 DataBaseHelper().close()
                 SQLiteDatabase.releaseMemory()
-
-                // Enviar las imágenes pendientes...
-                if (Repository.useImageControl && Statics.AUTO_SEND_ON_STARTUP)
-                    SendPending(context = getContext())
 
                 thread {
                     Sync.goSync(onSyncProgress = { syncViewModel.setSyncDownloadProgress(it) },
