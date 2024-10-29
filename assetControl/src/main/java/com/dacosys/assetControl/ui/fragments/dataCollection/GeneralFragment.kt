@@ -190,7 +190,7 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
             }
 
             AttributeCompositionType.getAllUnitType().contains(attrCompType)
-            -> {
+                -> {
                 when (attrCompType) {
                     AttributeCompositionType.TypeUnitVolume -> {
                         currentFragment = UnitTypeSpinnerFragment.newInstance(
@@ -630,4 +630,3 @@ class GeneralFragment(val listener: DccFragmentListener) : DccFragmentListener {
         }
     }
 }
-

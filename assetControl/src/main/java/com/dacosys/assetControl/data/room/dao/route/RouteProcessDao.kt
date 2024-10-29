@@ -42,9 +42,9 @@ interface RouteProcessDao {
 
     @Query(
         "$BASIC_SELECT, $BASIC_JOIN_FIELDS $BASIC_FROM $BASIC_LEFT_JOIN " +
-                "WHERE ${Entry.TABLE_NAME}.${Entry.ID} = :rpId"
+                "WHERE ${Entry.TABLE_NAME}.${Entry.ID} = :id"
     )
-    suspend fun selectById(rpId: Long): RouteProcess?
+    suspend fun selectById(id: Long): RouteProcess?
 
     @Query("SELECT MIN(${Entry.ID}) $BASIC_FROM")
     suspend fun selectMinId(): Long?

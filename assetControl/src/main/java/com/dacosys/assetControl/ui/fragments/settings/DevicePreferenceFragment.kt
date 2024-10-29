@@ -24,6 +24,7 @@ import com.dacosys.assetControl.utils.scanners.Collector
 import com.dacosys.assetControl.utils.scanners.rfid.Rfid
 import com.dacosys.assetControl.utils.scanners.rfid.RfidType
 import com.dacosys.assetControl.utils.scanners.vh75.Vh75Bt
+import com.dacosys.assetControl.utils.settings.collectorType.CollectorType
 import com.dacosys.assetControl.utils.settings.collectorType.CollectorTypePreference
 import com.dacosys.assetControl.utils.settings.devices.DevicePreference
 import com.dacosys.assetControl.utils.settings.preferences.Preferences
@@ -128,7 +129,8 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
                 text
             }
         }
-        collectorListPref?.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, _ ->
+        collectorListPref?.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { preference, newValue ->
+            preference.summary = CollectorType.getById(newValue.toString().toInt()).description
             Collector.collectorTypeChanged = true
             true
         }
@@ -179,22 +181,6 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
             }
         }
         return r
-    }
-
-    private fun resultForPrinterBtPermissions() {
-        if (!appHasBluetoothPermission()) {
-            requestPermissionsPrinter.launch(arrayOf(Manifest.permission.BLUETOOTH_CONNECT))
-        } else {
-            setPrinter()
-        }
-    }
-
-    private val requestPermissionsPrinter = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        if (permissions.values.all { it }) {
-            setPrinter()
-        }
     }
 
     private fun setSymbology() {
@@ -248,6 +234,22 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
 
     private fun setPrinterPref() {
         resultForPrinterBtPermissions()
+    }
+
+    private fun resultForPrinterBtPermissions() {
+        if (!appHasBluetoothPermission()) {
+            requestPermissionsPrinter.launch(arrayOf(Manifest.permission.BLUETOOTH_CONNECT))
+        } else {
+            setPrinter()
+        }
+    }
+
+    private val requestPermissionsPrinter = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        if (permissions.values.all { it }) {
+            setPrinter()
+        }
     }
 
     private fun setPrinter() {
@@ -442,6 +444,13 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
         }
     }
 
+    private fun setRfidPref() {
+        resultForRfidBtPermissions()
+    }
+
+    private val vh75: Vh75Bt?
+        get() = Rfid.vh75.takeIf { it?.state == Vh75Bt.STATE_CONNECTED }
+
     private fun resultForRfidBtPermissions() {
         if (!appHasBluetoothPermission()) {
             requestPermissionsRfid.launch(arrayOf(Manifest.permission.BLUETOOTH_CONNECT))
@@ -457,13 +466,6 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
             setRfid()
         }
     }
-
-    private fun setRfidPref() {
-        resultForRfidBtPermissions()
-    }
-
-    private val vh75: Vh75Bt?
-        get() = Rfid.vh75.takeIf { it?.state == Vh75Bt.STATE_CONNECTED }
 
     private fun setRfid() {
         //region //// USE RFID

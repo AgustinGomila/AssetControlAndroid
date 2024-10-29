@@ -41,20 +41,19 @@ class Zebra(private val activity: AppCompatActivity) : Scanner() {
 
     private var ls = AtomicBoolean(false)
     var lockScannerEvent: Boolean
-        get() {
-            return ls.get()
-        }
-        set(value) {
-            ls.set(value)
-        }
+        get() = ls.get()
+        set(value) = ls.set(value)
 
     private var broadcastReceiver: ZebraBroadcastReceiver? = null
 
     var activityName: String = ""
 
     init {
+        createProfile()
+
         activityName = activity.javaClass.simpleName
         broadcastReceiver = ZebraBroadcastReceiver(this)
+
         initializeScanner()
     }
 
@@ -83,71 +82,19 @@ class Zebra(private val activity: AppCompatActivity) : Scanner() {
         barcodeProps.putString("scanner_input_enabled", "true")
 
         // Set Symbologies
-        barcodeProps.putString(
-            "decoder_pdf417",
-            prefsGetBoolean(Preference.symbologyPDF417)
-                .toString()
-        )
-        barcodeProps.putString(
-            "decoder_aztec",
-            prefsGetBoolean(Preference.symbologyAztec)
-                .toString()
-        )
-        barcodeProps.putString(
-            "decoder_qrcode",
-            prefsGetBoolean(Preference.symbologyQRCode)
-                .toString()
-        )
-        barcodeProps.putString(
-            "decoder_codabar",
-            prefsGetBoolean(Preference.symbologyCODABAR)
-                .toString()
-        )
-        barcodeProps.putString(
-            "decoder_code128",
-            prefsGetBoolean(Preference.symbologyCode128)
-                .toString()
-        )
-        barcodeProps.putString(
-            "decoder_code39",
-            prefsGetBoolean(Preference.symbologyCode39)
-                .toString()
-        )
-        barcodeProps.putString(
-            "decoder_code93",
-            prefsGetBoolean(Preference.symbologyCode93)
-                .toString()
-        )
-        barcodeProps.putString(
-            "decoder_datamatrix",
-            prefsGetBoolean(Preference.symbologyDataMatrix)
-                .toString()
-        )
-        barcodeProps.putString(
-            "decoder_ean13",
-            prefsGetBoolean(Preference.symbologyEAN13)
-                .toString()
-        )
-        barcodeProps.putString(
-            "decoder_ean8",
-            prefsGetBoolean(Preference.symbologyEAN8)
-                .toString()
-        )
-        barcodeProps.putString(
-            "decoder_maxicode",
-            prefsGetBoolean(Preference.symbologyMaxiCode)
-                .toString()
-        )
-        barcodeProps.putString(
-            "decoder_upca",
-            prefsGetBoolean(Preference.symbologyUPCA)
-                .toString()
-        )
-        barcodeProps.putString(
-            "decoder_upce0",
-            prefsGetBoolean(Preference.symbologyUPCE)
-                .toString()
-        )
+        barcodeProps.putString("decoder_pdf417", prefsGetBoolean(Preference.symbologyPDF417).toString())
+        barcodeProps.putString("decoder_aztec", prefsGetBoolean(Preference.symbologyAztec).toString())
+        barcodeProps.putString("decoder_qrcode", prefsGetBoolean(Preference.symbologyQRCode).toString())
+        barcodeProps.putString("decoder_codabar", prefsGetBoolean(Preference.symbologyCODABAR).toString())
+        barcodeProps.putString("decoder_code128", prefsGetBoolean(Preference.symbologyCode128).toString())
+        barcodeProps.putString("decoder_code39", prefsGetBoolean(Preference.symbologyCode39).toString())
+        barcodeProps.putString("decoder_code93", prefsGetBoolean(Preference.symbologyCode93).toString())
+        barcodeProps.putString("decoder_datamatrix", prefsGetBoolean(Preference.symbologyDataMatrix).toString())
+        barcodeProps.putString("decoder_ean13", prefsGetBoolean(Preference.symbologyEAN13).toString())
+        barcodeProps.putString("decoder_ean8", prefsGetBoolean(Preference.symbologyEAN8).toString())
+        barcodeProps.putString("decoder_maxicode", prefsGetBoolean(Preference.symbologyMaxiCode).toString())
+        barcodeProps.putString("decoder_upca", prefsGetBoolean(Preference.symbologyUPCA).toString())
+        barcodeProps.putString("decoder_upce0", prefsGetBoolean(Preference.symbologyUPCE).toString())
 
         // Bundle "barcodeProps" within bundle "barcodeConfig"
         barcodeConfig.putBundle("PARAM_LIST", barcodeProps)
@@ -181,7 +128,7 @@ class Zebra(private val activity: AppCompatActivity) : Scanner() {
     }
 
     // Create profile from UI onClick() event
-    fun createProfile(view: View?) {
+    private fun createProfile() {
         val profileName = EXTRA_PROFILENAME
 
         // Send DataWedge intent with extra to create profile
@@ -220,12 +167,14 @@ class Zebra(private val activity: AppCompatActivity) : Scanner() {
         val intentConfig = Bundle()
         intentConfig.putString("PLUGIN_NAME", "INTENT")
         intentConfig.putString("RESET_CONFIG", "true")
+
         val intentProps = Bundle()
         intentProps.putString("intent_output_enabled", "true")
-        intentProps.putString("intent_action", "com.zebra.datacapture1.ACTION")
+        intentProps.putString("intent_action", activityIntentFilterAction)
         intentProps.putString("intent_delivery", "2")
         intentConfig.putBundle("PARAM_LIST", intentProps)
         profileConfig.putBundle("PLUGIN_CONFIG", intentConfig)
+
         sendDataWedgeIntentWithExtra(EXTRA_SET_CONFIG, profileConfig)
         Log.v(javaClass.simpleName, "Created profile.  Check DataWedge app UI.")
     }

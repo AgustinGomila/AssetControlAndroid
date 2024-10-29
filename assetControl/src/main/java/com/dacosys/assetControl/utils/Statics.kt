@@ -28,7 +28,6 @@ class Statics {
         const val DEMO_MODE = false
         const val DEMO_AUTO_SEND = false
         const val SUPER_DEMO_MODE = false
-        const val AUTO_SEND_ON_STARTUP = !DEMO_MODE
         var OFFLINE_MODE = false
 
         // endregion Variables para DEBUG/DEMO
