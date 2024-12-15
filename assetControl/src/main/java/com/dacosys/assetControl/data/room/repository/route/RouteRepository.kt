@@ -20,15 +20,15 @@ class RouteRepository {
 
     fun select(onlyActive: Boolean) = runBlocking {
         getAvailableRoutes(
-            if (onlyActive) dao.select()
-            else dao.selectActive()
+            if (onlyActive) dao.selectActive()
+            else dao.select()
         )
     }
 
     fun selectByDescription(desc: String, onlyActive: Boolean) = runBlocking {
         getAvailableRoutes(
-            if (onlyActive) dao.selectByDescription(desc)
-            else dao.selectByDescriptionOnlyActive(desc)
+            if (onlyActive) dao.selectByDescriptionOnlyActive(desc)
+            else dao.selectByDescription(desc)
         )
     }
 

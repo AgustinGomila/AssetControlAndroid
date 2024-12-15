@@ -390,7 +390,7 @@ class RouteSelectActivity : AppCompatActivity(),
             if (routeSelectFilterFragment == null) return ArrayList()
             val result: ArrayList<Route> = ArrayList()
             val r = routeSelectFilterFragment?.routeDescription ?: ""
-            val onlyActive = routeSelectFilterFragment?.onlyActive ?: true
+            val onlyActive = routeSelectFilterFragment?.onlyActive != false
 
             result.addAll(RouteRepository().selectByDescription(r, onlyActive))
 
