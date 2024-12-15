@@ -234,7 +234,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             ProgressStatus.bigStarting,
             ProgressStatus.starting,
             ProgressStatus.running,
-            -> {
+                -> {
                 showProgressDialog(
                     title = getString(R.string.synchronizing_),
                     msg = msg,
@@ -252,7 +252,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
             ProgressStatus.bigCrashed,
             ProgressStatus.canceled,
-            -> {
+                -> {
                 closeKeyboard(this)
                 makeText(binding.root, msg, ERROR)
                 ErrorLog.writeLog(
@@ -612,7 +612,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             allParameters.clear()
 
             // RECORRER COMPOSICIÓN DE LA RUTA PARA CREAR LOS PARÁMETROS
-            if (rpcArray.size > 0 && tempDccArray.size > 0) {
+            if (rpcArray.isNotEmpty() && tempDccArray.isNotEmpty()) {
                 var x1 = 0
                 val x2 = rpcArray.size
 
@@ -822,7 +822,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         // En caso de que falseResult sea 0 y la evaluación sea negativa
         if (rc.trueResult == DcrResult.cont.id && rc.falseResult == DcrResult.cont.id || rc.trueResult == DcrResult.cont.id && result != null && result == true || rc.falseResult == DcrResult.cont.id && result != null && result == false) {
             // ¿Está ejecutando una secuencia de niveles?
-            if (levelsToNavigate.size > 0) {
+            if (levelsToNavigate.isNotEmpty()) {
                 // Elimino el último paso ejecutado así el último paso es el previo
                 backLevelSteps.remove(backLevelSteps.last())
                 backLevelSteps.add(levelsToNavigate[0])
@@ -858,7 +858,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
                     val z = result.toString().split(',')
 
                     try {
-                        if (levelsToNavigate.size < 1) {
+                        if (levelsToNavigate.isEmpty()) {
                             levelsToNavigate.clear()
                         }
 
@@ -871,7 +871,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
                         return
                     }
 
-                    if (levelsToNavigate.size > 0) {
+                    if (levelsToNavigate.isNotEmpty()) {
                         backLevelSteps.add(levelsToNavigate[0])
                         levelsToNavigate.remove(levelsToNavigate[0])
 
@@ -891,7 +891,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
                     // VOLVER
                     if (result == DcrResult.back.id) {
-                        if (levelsToNavigate.size > 0) {
+                        if (levelsToNavigate.isNotEmpty()) {
                             // Elimino el último paso ejecutado así el último paso es el previo
                             backLevelSteps.remove(backLevelSteps.last())
                             backLevelSteps.add(levelsToNavigate[0])
@@ -923,7 +923,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
                     val z = result.toString().split(',')
 
                     try {
-                        if (levelsToNavigate.size < 1) {
+                        if (levelsToNavigate.isEmpty()) {
                             levelsToNavigate.clear()
                         }
 
@@ -936,7 +936,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
                         return
                     }
 
-                    if (levelsToNavigate.size > 0) {
+                    if (levelsToNavigate.isNotEmpty()) {
                         backLevelSteps.add(levelsToNavigate[0])
                         levelsToNavigate.remove(levelsToNavigate[0])
 
@@ -955,7 +955,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
                     // VOLVER
                     if (result == DcrResult.back.id) {
-                        if (levelsToNavigate.size > 0) {
+                        if (levelsToNavigate.isNotEmpty()) {
                             // Elimino el último paso ejecutado así el último paso es el previo
                             backLevelSteps.remove(backLevelSteps.last())
                             backLevelSteps.add(levelsToNavigate[0])
@@ -983,7 +983,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         // -1 - VOLVER
         ///////////////////
         if (result != null && (rc.trueResult == DcrResult.back.id && result == true || rc.falseResult == DcrResult.back.id && result == false)) {
-            if (levelsToNavigate.size > 0) {
+            if (levelsToNavigate.isNotEmpty()) {
                 // Elimino el último paso ejecutado así el último paso es el previo
                 backLevelSteps.remove(backLevelSteps.last())
                 backLevelSteps.add(levelsToNavigate[0])
@@ -1354,7 +1354,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
     private fun backLevel() {
         enableConfirmButton(false)
 
-        if (levelsToNavigate.size > 0) {
+        if (levelsToNavigate.isNotEmpty()) {
             Log.d(this::class.java.simpleName, getString(R.string.continuing_sequence_of_levels))
 
             // Elimino el último paso ejecutado así el último paso es el previo
@@ -1362,13 +1362,13 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
             fill(levelsToNavigate[0])
             levelsToNavigate.remove(levelsToNavigate[0])
-        } else if (backLevelSteps.size > 0) {
+        } else if (backLevelSteps.isNotEmpty()) {
             Log.d(this::class.java.simpleName, getString(R.string.returning_to_the_previous_level))
 
             // Elimino el último paso ejecutado así el último paso es el previo
             backLevelSteps.remove(backLevelSteps.last())
 
-            if (backLevelSteps.size > 0) {
+            if (backLevelSteps.isNotEmpty()) {
                 fill(backLevelSteps.last())
 
                 // Elimino el paso que se agrega en el FILL porque si no quedan dos repetidos seguidos
@@ -1469,7 +1469,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         }
     }
 
-    private fun endProcess(dataCollection: DataCollection) {
+    private fun endProcess(dataCollection: DataCollection, skipAll: Boolean) {
         val rpc = adapter?.currentRpc() ?: return
 
         updateStatus(
@@ -1477,6 +1477,9 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             s = RouteProcessStatus.processed,
             dc = dataCollection
         )
+
+        // Si venimos de una orden de Fin, saltamos los restantes del nivel.
+        if (skipAll) positiveSkipAll()
 
         // PROCESO TERMINADO, SALIR
         enableConfirmButton(true)
@@ -1589,7 +1592,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             updateStatus(rpc = rpc, s = RouteProcessStatus.processed, dc = dc)
 
             if (isRouteFinished()) {
-                endProcess(dc)
+                endProcess(dc, false)
                 return
             } else {
                 next()
@@ -1600,8 +1603,11 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
         // region -2 - FIN
         ////////////////
-        if (result != null && (rc.trueResult == DcrResult.end.id && result == true || rc.falseResult == DcrResult.end.id && result == false)) {
-            endProcess(dc)
+        if (result != null &&
+            (rc.trueResult == DcrResult.end.id && result == true ||
+                    rc.falseResult == DcrResult.end.id && result == false)
+        ) {
+            endProcess(dc, true)
             return
         }
         // endregion
@@ -1629,7 +1635,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
                 if (result is String) {
                     val z = result.toString().split(',')
                     try {
-                        if (levelsToNavigate.size < 1) {
+                        if (levelsToNavigate.isEmpty()) {
                             levelsToNavigate.clear()
                         }
 
@@ -1642,7 +1648,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
                         return
                     }
 
-                    if (levelsToNavigate.size > 0) {
+                    if (levelsToNavigate.isNotEmpty()) {
                         updateStatus(
                             rpc = rpc,
                             s = RouteProcessStatus.processed,
@@ -1694,7 +1700,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
                     if (result == DcrResult.end.id) {
 
                         // FIN
-                        endProcess(dc)
+                        endProcess(dc, true)
                         return
                     }
                     if (result == DcrResult.noContinue.id) {
@@ -1808,7 +1814,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
             if (rpc != null) {
                 // SELECT THE ITEM ROW
-                adapter?.selectItem(rpc ?: return)
+                adapter?.selectItem(rpc)
             }
 
             return
@@ -1844,7 +1850,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
                 RouteProcessStatus.skipped.id,
                 RouteProcessStatus.unknown.id,
-                -> {
+                    -> {
                 }
             }
         }
