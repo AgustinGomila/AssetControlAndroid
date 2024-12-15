@@ -2,6 +2,7 @@ package com.dacosys.assetControl.network.sync
 
 import android.util.Log
 import com.dacosys.assetControl.AssetControlApp.Companion.getContext
+import com.dacosys.assetControl.AssetControlApp.Companion.getUserId
 import com.dacosys.assetControl.R
 import com.dacosys.assetControl.data.room.dto.attribute.AttributeComposition
 import com.dacosys.assetControl.data.room.dto.dataCollection.DataCollectionRuleContent
@@ -46,7 +47,6 @@ import com.dacosys.assetControl.data.webservice.route.RouteCompositionWs
 import com.dacosys.assetControl.data.webservice.route.RouteWs
 import com.dacosys.assetControl.data.webservice.user.UserPermissionWs
 import com.dacosys.assetControl.data.webservice.user.UserWarehouseAreaWs
-import com.dacosys.assetControl.data.webservice.user.UserWs
 import com.dacosys.assetControl.network.serverDate.GetMySqlDate
 import com.dacosys.assetControl.network.serverDate.MySqlDateResult
 import com.dacosys.assetControl.network.utils.ProgressStatus
@@ -157,6 +157,7 @@ class SyncDownload(
 
         try {
             val t = listOf(
+                async { user() },
                 async { asset() },
                 async { itemCategory() },
                 async { warehouse() },
@@ -434,92 +435,40 @@ class SyncDownload(
         )
 
         registryOnProcess.add(registryType)
-        val ws = UserWs()
         val upWs = UserPermissionWs()
         val uwaWs = UserWarehouseAreaWs()
-
-        val userRepository = UserRepository()
+        
         val permissionRepository = UserPermissionRepository()
         val userAreaRepository = UserWarehouseAreaRepository()
 
         // Eliminar datos antiguos de los usuarios
-        userRepository.deleteAll()
         permissionRepository.deleteAll()
         userAreaRepository.deleteAll()
 
-        val date = prefsGetString(
-            registryType.confEntry ?: return
-        )
-
-        val countTotal: Int?
-        var errorOccurred = false
-        var currentCount = 0
-        var groupCount = 0
-        var pos = 0
         try {
-            countTotal = ws.userCount(date)
-            if (countTotal == null) {
-                errorOccurred = true
-            } else {
-                while (groupCount < countTotal) {
-                    if (!scope.isActive) break
+            if (!scope.isActive) return
+            var currentUserId = getUserId() ?: return
 
-                    val objArray = ws.userGetAllLimit(pos, qty, date)
-                    if (!objArray.any()) break
+            try {
+                // Sincronizar los permisos del usuario
+                var perm = upWs.userPermissionGet(currentUserId) ?: arrayOf()
+                permissionRepository.insert(perm.toList()) { scope.launch { onUiEvent(it) } }
 
-                    groupCount += objArray.size
-                    pos++
-
-                    try {
-                        if (objArray.isNotEmpty()) {
-                            userRepository.sync(
-                                assetsObj = objArray,
-                                onSyncProgress = { scope.launch { onUiEvent(it) } },
-                                count = currentCount,
-                                total = countTotal
-                            )
-
-                            currentCount += objArray.size
-
-                            val total = objArray.count()
-                            for ((index, obj) in objArray.withIndex()) {
-                                // user permission
-                                SyncInitialUser { scope.launch { onUiEvent(it) } }.userPermission(
-                                    objArray = upWs.userPermissionGet(obj.user_id)
-                                )
-
-                                // user warehouse area
-                                SyncInitialUser { scope.launch { onUiEvent(it) } }.userWarehouseArea(
-                                    objArray = uwaWs.userWarehouseAreaGet(obj.user_id)
-                                )
-
-                                scope.launch {
-                                    onUiEvent(
-                                        SyncProgress(
-                                            totalTask = total,
-                                            completedTask = index + 1,
-                                            msg = getContext().getString(R.string.synchronizing_users),
-                                            registryType = SyncRegistryType.User,
-                                            progressStatus = ProgressStatus.running
-                                        )
-                                    )
-                                }
-                            }
-                        }
-                    } catch (ex: Exception) {
-                        ex.printStackTrace()
-                        // Error local
-                        onUiEvent(
-                            SyncProgress(
-                                msg = getContext().getString(R.string.local_error_in_user_synchronization),
-                                registryType = registryType,
-                                progressStatus = ProgressStatus.crashed
-                            )
-                        )
-                        ErrorLog.writeLog(null, this::class.java.simpleName, ex)
-                        return
-                    }
-                }
+                // Sincronizar las áreas del usuario
+                var areas = uwaWs.userWarehouseAreaGet(currentUserId) ?: arrayOf()
+                userAreaRepository.insert(areas.toList()) { scope.launch { onUiEvent(it) } }
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+                // Error local
+                onUiEvent(
+                    SyncProgress(
+                        msg = getContext().getString(R.string.local_error_in_user_synchronization),
+                        registryType = registryType,
+                        progressStatus = ProgressStatus.crashed
+                    )
+                )
+                ErrorLog.writeLog(null, this::class.java.simpleName, ex)
+                return
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
@@ -555,9 +504,7 @@ class SyncDownload(
                         progressStatus = ProgressStatus.success
                     )
                 )
-                if (!errorOccurred) {
-                    registryTypeUpdated.add(registryType)
-                }
+                registryTypeUpdated.add(registryType)
             }
         }
     }

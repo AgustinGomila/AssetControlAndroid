@@ -23,8 +23,6 @@ class SyncInitialUser(
     private val registryType = SyncRegistryType.User
 
     private val ws get() = UserWs()
-    private val upWs get() = UserPermissionWs()
-    private val uwaWs get() = UserWarehouseAreaWs()
     private val userRepository get() = UserRepository()
     private val userPermissionRepository get() = UserPermissionRepository()
     private val userWarehouseAreaRepository get() = UserWarehouseAreaRepository()
@@ -100,25 +98,6 @@ class SyncInitialUser(
 
                             val total = objArray.size
                             currentCount += total
-                            for ((index, obj) in objArray.withIndex()) {
-                                // user permission
-                                userPermission(upWs.initialUserPermissionGet(obj.user_id))
-
-                                // user warehouse area
-                                userWarehouseArea(uwaWs.initialUserWarehouseAreaGet(obj.user_id))
-
-                                scope.launch {
-                                    onUiEvent(
-                                        SyncProgress(
-                                            totalTask = total,
-                                            completedTask = index + 1,
-                                            msg = getContext().getString(R.string.synchronizing_users),
-                                            registryType = SyncRegistryType.User,
-                                            progressStatus = ProgressStatus.running
-                                        )
-                                    )
-                                }
-                            }
                         }
                     } catch (ex: Exception) {
                         ex.printStackTrace()
@@ -198,41 +177,11 @@ class SyncInitialUser(
         }
     }
 
-    fun userPermission(
-        objArray: Array<UserPermissionObject>?
-    ) {
-        try {
-            if (!objArray.isNullOrEmpty()) {
-                UserPermissionRepository().insert(objArray.toList()) { scope.launch { onUiEvent(it) } }
-            }
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
-            return
-        }
-    }
-
-    fun userWarehouseArea(
-        objArray: Array<UserWarehouseAreaObject>?
-    ) {
-        try {
-            if (!objArray.isNullOrEmpty()) {
-                UserWarehouseAreaRepository().insert(objArray.toList()) { scope.launch { onUiEvent(it) } }
-            }
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-            ErrorLog.writeLog(null, this::class.java.simpleName, ex)
-            return
-        }
-    }
-
     private suspend fun onUiEvent(it: SyncProgress) {
         withContext(Dispatchers.Main) {
             onSyncTaskProgress.invoke(it)
         }
     }
-
-    // endregion InitialUserSync
 
     init {
         scope.launch {

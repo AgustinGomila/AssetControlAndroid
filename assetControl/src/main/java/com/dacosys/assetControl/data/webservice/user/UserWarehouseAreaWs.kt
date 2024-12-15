@@ -118,31 +118,4 @@ constructor() {
             else -> null
         }
     }
-
-    @Throws(Exception::class)
-    fun initialUserWarehouseAreaGet(
-        userId: Long,
-    ): Array<UserWarehouseAreaObject>? {
-        val any = getWebservice().s(
-            "UserWarehouseArea_Get",
-            arrayOf(
-                WsParam("user_id", userId)
-            ),
-            null,
-            null,
-            true
-        )
-        if (any != null) {
-            val soVector = any as Vector<*>
-            val dObjAl: ArrayList<UserWarehouseAreaObject> = ArrayList()
-            for (soDc in soVector) {
-                if (soDc !is SoapObject)
-                    continue
-
-                dObjAl.add(UserWarehouseAreaObject().getBySoapObject(soDc))
-            }
-            return dObjAl.toTypedArray()
-        }
-        return null
-    }
 }

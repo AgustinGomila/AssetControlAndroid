@@ -180,7 +180,7 @@ class UserSpinnerFragment : Fragment() {
         oldPos = defaultValue.toInt()
         var result = true
 
-        allUser = ArrayList(UserRepository().selectByActiveAndPermission())
+        allUser = ArrayList(UserRepository().select())
 
         allUser!!.sortWith { v1, v2 -> v1.name.compareTo(v2.name) }
 

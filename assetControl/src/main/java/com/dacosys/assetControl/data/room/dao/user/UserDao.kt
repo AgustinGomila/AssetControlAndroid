@@ -1,7 +1,6 @@
 package com.dacosys.assetControl.data.room.dao.user
 
 import androidx.room.*
-import com.dacosys.assetControl.data.enums.permission.PermissionEntry
 import com.dacosys.assetControl.data.room.dto.user.User
 import com.dacosys.assetControl.data.room.dto.user.User.Entry
 import com.dacosys.assetControl.data.room.entity.user.UserEntity
@@ -9,6 +8,9 @@ import com.dacosys.assetControl.data.room.dto.user.UserPermission.Entry as upEnt
 
 @Dao
 interface UserDao {
+    @Query("$BASIC_SELECT $BASIC_FROM $BASIC_LEFT_JOIN")
+    suspend fun select(): List<User>
+
     @Query(
         "$BASIC_SELECT $BASIC_FROM " +
                 "WHERE ${Entry.TABLE_NAME}.${Entry.ID} = :id"
@@ -21,13 +23,6 @@ interface UserDao {
                 "OR ${Entry.TABLE_NAME}.${Entry.NAME} = :mailOrName"
     )
     suspend fun selectByNameOrEmail(mailOrName: String): User?
-
-    @Query(
-        "$BASIC_SELECT $BASIC_FROM $BASIC_LEFT_JOIN " +
-                "WHERE ${Entry.TABLE_NAME}.${Entry.ACTIVE} = 1 " +
-                "AND ${upEntry.TABLE_NAME}.${upEntry.PERMISSION_ID} = :permission"
-    )
-    suspend fun selectByActiveAndPermission(permission: Long = PermissionEntry.UseCollectorProgram.id): List<User>
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

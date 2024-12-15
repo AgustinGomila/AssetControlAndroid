@@ -90,31 +90,4 @@ constructor() {
         ) ?: return false
         return result as Boolean
     }
-
-    @Throws(Exception::class)
-    fun initialUserPermissionGet(
-        userId: Long,
-    ): Array<UserPermissionObject>? {
-        val any = getWebservice().s(
-            "UserPermission_Get",
-            arrayOf(
-                WsParam("user_id", userId)
-            ),
-            null,
-            null,
-            true
-        )
-        if (any != null) {
-            val soVector = any as Vector<*>
-            val dObjAl: ArrayList<UserPermissionObject> = ArrayList()
-            for (soDc in soVector) {
-                if (soDc !is SoapObject)
-                    continue
-
-                dObjAl.add(UserPermissionObject().getBySoapObject(soDc))
-            }
-            return dObjAl.toTypedArray()
-        }
-        return null
-    }
 }
