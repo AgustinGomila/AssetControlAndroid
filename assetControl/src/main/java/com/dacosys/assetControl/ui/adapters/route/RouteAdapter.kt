@@ -127,7 +127,7 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
                 }
             }
 
-            if (routesToAdd.size > 0) {
+            if (routesToAdd.isNotEmpty()) {
                 reportRouteAdded(routesToAdd)
             }
         }
@@ -160,7 +160,7 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
                 }
             }
 
-            if (routesRemoved.size > 0) {
+            if (routesRemoved.isNotEmpty()) {
                 reportRouteRemoved(routesRemoved)
             }
         }
@@ -303,7 +303,7 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
         if (suspendReport) {
             return
         }
-        if (routes.size <= 0) {
+        if (routes.isEmpty()) {
             return
         }
 
@@ -334,7 +334,7 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
         if (suspendReport) {
             return
         }
-        if (routes.size <= 0) {
+        if (routes.isEmpty()) {
             return
         }
 

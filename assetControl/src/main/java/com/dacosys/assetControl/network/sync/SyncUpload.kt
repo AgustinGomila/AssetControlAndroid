@@ -206,7 +206,7 @@ class SyncUpload(
 
                 SyncRegistryType.DataCollection,
                 SyncRegistryType.RouteProcess,
-                -> {
+                    -> {
                     itemCategory()
                     warehouse()
                     warehouseArea()
@@ -450,7 +450,7 @@ class SyncUpload(
             }
 
             val wmAl = movementRepository.selectByNoTransferred()
-            if (wmAl.size < 1) {
+            if (wmAl.isEmpty()) {
                 return
             }
 
@@ -736,7 +736,7 @@ class SyncUpload(
             }
 
             val waAl = areaRepository.selectNoTransferred()
-            if (waAl.size < 1) {
+            if (waAl.isEmpty()) {
                 return
             }
 
@@ -904,7 +904,7 @@ class SyncUpload(
             }
 
             val wAl = wRepository.selectNoTransferred()
-            if (wAl.size < 1) {
+            if (wAl.isEmpty()) {
                 return
             }
 
@@ -1586,7 +1586,7 @@ class SyncUpload(
         if (!isLogged()) {
             onSyncFinish(true)
         } else {
-            if (registryOnProcess.size > 0) {
+            if (registryOnProcess.isNotEmpty()) {
                 onSyncTaskProgress.invoke(
                     SyncProgress(progressStatus = ProgressStatus.canceled)
                 )

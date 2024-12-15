@@ -419,7 +419,7 @@ class RouteSelectActivity : AppCompatActivity(),
                     firstVisiblePos = adapter?.firstVisiblePos()
                 }
 
-                if (adapter == null || routeArray.size > 0) {
+                if (adapter == null || routeArray.isNotEmpty()) {
                     adapter = RouteAdapter(
                         activity = this,
                         resource = R.layout.route_row,

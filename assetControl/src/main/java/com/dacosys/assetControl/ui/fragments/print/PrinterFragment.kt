@@ -615,7 +615,7 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
     }
 
     fun printWaById(waIdArray: ArrayList<Long>) {
-        if (waIdArray.size == 0) {
+        if (waIdArray.isEmpty()) {
             showSnackBar(
                 getString(R.string.you_must_select_at_least_one_area),
                 SnackBarType.ERROR
@@ -636,7 +636,7 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
     }
 
     fun printWa(was: ArrayList<WarehouseArea>) {
-        if (was.size == 0) {
+        if (was.isEmpty()) {
             showSnackBar(
                 getString(R.string.you_must_select_at_least_one_area),
                 SnackBarType.ERROR
@@ -680,7 +680,7 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
     }
 
     fun printAssetById(assetIdArray: ArrayList<Long>) {
-        if (assetIdArray.size == 0) {
+        if (assetIdArray.isEmpty()) {
             showSnackBar(
                 getString(R.string.you_must_select_at_least_one_asset),
                 SnackBarType.ERROR
@@ -701,7 +701,7 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
     }
 
     fun printAsset(assets: ArrayList<Asset>) {
-        if (assets.size == 0) {
+        if (assets.isEmpty()) {
             showSnackBar(
                 getString(R.string.you_must_select_at_least_one_asset),
                 SnackBarType.ERROR

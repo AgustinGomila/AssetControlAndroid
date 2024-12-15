@@ -114,7 +114,7 @@ class AssetReviewAdapter :
                 }
             }
 
-            if (assetReviewsAdded.size > 0) {
+            if (assetReviewsAdded.isNotEmpty()) {
                 reportAssetReviewAdded(assetReviewsAdded)
             }
         }
@@ -150,7 +150,7 @@ class AssetReviewAdapter :
                 }
             }
 
-            if (assetReviewsRemoved.size > 0) {
+            if (assetReviewsRemoved.isNotEmpty()) {
                 reportAssetReviewRemoved(assetReviewsRemoved)
             }
         }
@@ -165,7 +165,7 @@ class AssetReviewAdapter :
         if (suspendReport) {
             return
         }
-        if (assetReviewArray.size <= 0) {
+        if (assetReviewArray.isEmpty()) {
             return
         }
 
@@ -194,7 +194,7 @@ class AssetReviewAdapter :
         if (suspendReport) {
             return
         }
-        if (assetReviewArray.size <= 0) {
+        if (assetReviewArray.isEmpty()) {
             return
         }
 
@@ -441,7 +441,7 @@ class AssetReviewAdapter :
         var newPos = -1
 
         val allItems = getAll()
-        if (allItems.size > 0) {
+        if (allItems.isNotEmpty()) {
             // Buscar el siguiente visible
             for (i in currentPos until allItems.size) {
                 if (isStatusVisible(i)) {

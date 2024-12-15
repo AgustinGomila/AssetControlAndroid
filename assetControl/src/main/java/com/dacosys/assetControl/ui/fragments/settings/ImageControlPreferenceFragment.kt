@@ -153,7 +153,6 @@ class ImageControlPreferenceFragment : PreferenceFragmentCompat(), ClientPackage
             .setMessage(getString(R.string.do_you_want_to_delete_the_image_cache_question)).setPositiveButton(
                 getString(R.string.delete)
             ) { dialog, _ ->
-                //your deleting code
                 val albumFolder = File(
                     AssetControlApp.getContext().getExternalFilesDir(
                         Environment.DIRECTORY_PICTURES

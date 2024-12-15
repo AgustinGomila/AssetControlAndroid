@@ -189,7 +189,7 @@ open class BtPrinter(private val activity: FragmentActivity, private val onEvent
 
             this.bluetoothAdapter = bluetoothAdapter
 
-            if (mPairedDevices.size > 0) {
+            if (mPairedDevices.isNotEmpty()) {
                 for (mDevice in mPairedDevices) {
                     if (mDevice.address == printerBtAddress) {
                         bluetoothDevice = mDevice

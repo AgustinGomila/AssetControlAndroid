@@ -117,7 +117,7 @@ class WarehouseAreaAdapter : ArrayAdapter<WarehouseArea>, Filterable {
                 }
             }
 
-            if (assetsAdded.size > 0) {
+            if (assetsAdded.isNotEmpty()) {
                 reportWarehouseAreaAdded(assetsAdded)
             }
         }
@@ -150,7 +150,7 @@ class WarehouseAreaAdapter : ArrayAdapter<WarehouseArea>, Filterable {
                 }
             }
 
-            if (warehouseAreasRemoved.size > 0) {
+            if (warehouseAreasRemoved.isNotEmpty()) {
                 reportWarehouseAreaRemoved(warehouseAreasRemoved)
             }
         }
@@ -229,7 +229,7 @@ class WarehouseAreaAdapter : ArrayAdapter<WarehouseArea>, Filterable {
         if (suspendReport) {
             return
         }
-        if (areas.size <= 0) {
+        if (areas.isEmpty()) {
             return
         }
 
@@ -260,7 +260,7 @@ class WarehouseAreaAdapter : ArrayAdapter<WarehouseArea>, Filterable {
         if (suspendReport) {
             return
         }
-        if (areas.size <= 0) {
+        if (areas.isEmpty()) {
             return
         }
 

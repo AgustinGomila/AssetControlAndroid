@@ -548,7 +548,7 @@ class LocationSelectActivity : AppCompatActivity(),
     }
 
     private fun getWarehouse() {
-        if (warehouseArray.size > 0) {
+        if (warehouseArray.isNotEmpty()) {
             return
         }
 
@@ -596,7 +596,7 @@ class LocationSelectActivity : AppCompatActivity(),
     }
 
     private fun getWarehouseArea() {
-        if (warehouseAreaArray.size > 0) {
+        if (warehouseAreaArray.isNotEmpty()) {
             return
         }
 

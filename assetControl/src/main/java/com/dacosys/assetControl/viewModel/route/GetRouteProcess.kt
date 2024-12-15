@@ -80,7 +80,7 @@ class GetRouteProcess(
             val processContents = routeProcess.contents()
             val routeComposition = route.composition()
 
-            if (routeComposition.size <= 0) {
+            if (routeComposition.isEmpty()) {
 
                 // RUTA está vacía
                 return@withContext RouteProcessResult(

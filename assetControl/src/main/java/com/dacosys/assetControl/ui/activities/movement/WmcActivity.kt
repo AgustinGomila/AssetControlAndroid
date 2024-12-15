@@ -955,7 +955,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
             return
         }
 
-        if (allMovements.size > 0) {
+        if (allMovements.isNotEmpty()) {
             runOnUiThread {
                 if (adapter == null) {
                     completeList = allMovements
@@ -1199,7 +1199,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
             ProgressStatus.bigStarting,
             ProgressStatus.starting,
             ProgressStatus.running,
-            -> {
+                -> {
                 showProgressDialog(
                     title = getString(R.string.synchronizing_),
                     msg = msg,
@@ -1219,7 +1219,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
             ProgressStatus.bigCrashed,
             ProgressStatus.canceled,
-            -> {
+                -> {
                 closeKeyboard(this)
                 makeText(binding.root, msg, ERROR)
                 ErrorLog.writeLog(

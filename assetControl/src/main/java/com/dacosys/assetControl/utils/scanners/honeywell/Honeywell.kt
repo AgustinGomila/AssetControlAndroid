@@ -343,7 +343,7 @@ class Honeywell(private val activity: AppCompatActivity) : Scanner() {
         val appContext = getContext()
         val pm: PackageManager = appContext.packageManager
         val matches = pm.queryBroadcastReceivers(i, 0)
-        if (matches.size > 0) {
+        if (matches.isNotEmpty()) {
             for (resolveInfo in matches) {
                 val explicit = Intent(i)
                 val cn = ComponentName(

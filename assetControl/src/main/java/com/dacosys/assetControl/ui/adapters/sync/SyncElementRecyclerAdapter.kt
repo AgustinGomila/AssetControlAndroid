@@ -751,7 +751,7 @@ class SyncElementRecyclerAdapter private constructor(builder: Builder) :
     fun selectNearVisible() {
         var newPos = -1
         val allItems = fullList
-        if (allItems.size > 0) {
+        if (allItems.isNotEmpty()) {
             // Buscar el siguiente visible
             for (i in currentIndex until allItems.size) {
                 if (isStatusVisible(i)) {

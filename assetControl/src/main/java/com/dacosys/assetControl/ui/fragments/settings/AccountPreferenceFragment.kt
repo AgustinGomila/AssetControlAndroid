@@ -187,7 +187,6 @@ class AccountPreferenceFragment : PreferenceFragmentCompat(), ClientPackage.Comp
             .setMessage(getString(R.string.download_database_required_question)).setPositiveButton(
                 getString(R.string.yes)
             ) { dialog, _ ->
-                //your deleting code
                 DownloadDb.downloadDbRequired = true
                 alreadyAnsweredYes = true
 
@@ -212,9 +211,8 @@ class AccountPreferenceFragment : PreferenceFragmentCompat(), ClientPackage.Comp
             .setMessage(getString(R.string.download_database_required_question)).setPositiveButton(
                 getString(R.string.yes)
             ) { dialog, _ ->
-                //your deleting code
                 DownloadDb.downloadDbRequired = true
-                preference.summary = newValue.toString()
+                if (!BuildConfig.DEBUG) preference.summary = newValue.toString()
                 alreadyAnsweredYes = true
                 if (newValue is String) {
                     Preferences.prefsPutString(
@@ -243,7 +241,7 @@ class AccountPreferenceFragment : PreferenceFragmentCompat(), ClientPackage.Comp
         val msg: String = it.msg
 
         if (status == ProgressStatus.finished) {
-            if (result.size > 0) {
+            if (result.isNotEmpty()) {
                 requireActivity().runOnUiThread {
                     ClientPackage.selectClientPackage(
                         parentView = requireView(),

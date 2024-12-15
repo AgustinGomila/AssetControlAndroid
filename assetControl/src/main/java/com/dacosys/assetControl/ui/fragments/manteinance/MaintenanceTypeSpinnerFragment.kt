@@ -187,7 +187,7 @@ class MaintenanceTypeSpinnerFragment : Fragment() {
         (types
             ?: return).sortWith { v1, v2 -> v1.description.compareTo(v2.description) }
 
-        if (types == null || (types ?: return).size < 1) {
+        if (types == null || (types ?: return).isEmpty()) {
             types = ArrayList()
             (types ?: return).add(
                 MaintenanceType(

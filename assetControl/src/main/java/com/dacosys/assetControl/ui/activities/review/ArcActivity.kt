@@ -215,7 +215,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
             ProgressStatus.bigStarting,
             ProgressStatus.starting,
             ProgressStatus.running,
-            -> {
+                -> {
                 showProgressDialog(
                     title = getString(R.string.synchronizing_),
                     msg = msg,
@@ -235,7 +235,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
             ProgressStatus.bigCrashed,
             ProgressStatus.canceled,
-            -> {
+                -> {
                 closeKeyboard(this)
                 makeText(binding.root, msg, ERROR)
                 ErrorLog.writeLog(
@@ -2075,11 +2075,11 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
             }
         }
 
-        if (allCodes.size <= 0) {
+        if (allCodes.isEmpty()) {
             allCodes = ArrayList(AssetRepository().selectAllCodes())
         }
 
-        if (allCodesInLocation.size <= 0) {
+        if (allCodesInLocation.isEmpty()) {
             allCodesInLocation = ArrayList(
                 AssetRepository().selectAllCodesByWarehouseAreaId(
                     headerFragment?.warehouseArea?.id ?: 0L

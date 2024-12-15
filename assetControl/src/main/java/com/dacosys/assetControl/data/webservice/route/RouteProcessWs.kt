@@ -92,7 +92,7 @@ constructor() {
         arSoapObject.addProperty("collector_route_process_id", routeProcess.collectorRouteProcessId)
 
         var arcArrayObject: ArrayList<SoapObject> = addNullContent()
-        if (routeProcessContent.size > 0) {
+        if (routeProcessContent.isNotEmpty()) {
             routeProcessContent.forEach { t ->
                 val arcSoapObject = SoapObject(getWebservice().namespace, "content")
 
@@ -135,7 +135,7 @@ constructor() {
         arSoapObject.addProperty("collector_route_process_id", routeProcess.collectorRouteProcessId)
 
         var arcArrayObject: ArrayList<SoapObject> = addNullContent()
-        if (routeProcessContent.size > 0) {
+        if (routeProcessContent.isNotEmpty()) {
             routeProcessContent.forEach { t ->
                 val arcSoapObject = SoapObject(getWebservice().namespace, "content")
 

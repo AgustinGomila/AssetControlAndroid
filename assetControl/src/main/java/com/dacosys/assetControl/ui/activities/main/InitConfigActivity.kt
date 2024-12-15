@@ -89,7 +89,7 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
             }
 
             ProgressStatus.finished -> {
-                if (result.size > 0) {
+                if (result.isNotEmpty()) {
                     runOnUiThread {
                         selectClientPackage(
                             parentView = binding.root,
@@ -252,15 +252,14 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     override fun onStart() {
         super.onStart()
-        if (Statics.SUPER_DEMO_MODE) {
-            val env = DotenvBuilder()
-                .directory("/assets")
-                .filename("env")
-                .load()
-
-            // val uade = env["CLIENT_UADE_QR"]
-            // scannerCompleted(uade)
-        }
+//        if (Statics.SUPER_DEMO_MODE) {
+//            val env = DotenvBuilder()
+//                .directory("/assets")
+//                .filename("env")
+//                .load()
+//            val environment = env["CLIENT_UADE_QR"]
+//            scannerCompleted(environment)
+//        }
     }
 
     private fun clearOldPrefs() {

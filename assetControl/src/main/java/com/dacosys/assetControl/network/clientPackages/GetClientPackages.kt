@@ -192,7 +192,7 @@ class GetClientPackages(
                 result = result,
                 clientEmail = email,
                 clientPassword = password,
-                msg = if (result.size > 0) {
+                msg = if (result.isNotEmpty()) {
                     getContext().getString(R.string.success_response)
                 } else {
                     getContext()

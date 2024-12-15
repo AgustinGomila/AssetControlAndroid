@@ -696,7 +696,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         attrFrags.clear()
         val r: ArrayList<GeneralFragment> = ArrayList()
 
-        if (allFrags.size == 0) {
+        if (allFrags.isEmpty()) {
             return
         }
 
@@ -1012,7 +1012,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     private fun prevAttribute() {
-        if (attrFrags.size <= 0) {
+        if (attrFrags.isEmpty()) {
             return
         }
 
@@ -1041,7 +1041,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         // Guardo el estado de todos los controles
         saveControlStatus()
 
-        if (attrFrags.size <= 0) {
+        if (attrFrags.isEmpty()) {
             return
         }
 
@@ -1463,7 +1463,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         if (eval is String) {
             val f = eval.toString().split(',')
             try {
-                if (levelsToNavigate.size < 1) {
+                if (levelsToNavigate.isEmpty()) {
                     levelsToNavigate.clear()
                 }
 
@@ -1476,7 +1476,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
                 return
             }
 
-            if (levelsToNavigate.size > 0) {
+            if (levelsToNavigate.isNotEmpty()) {
                 // Agrego el paso a la colección de pasos
                 stepsHistory.add(
                     KeyLevelPos(
@@ -1528,7 +1528,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     private fun goBack() {
-        if (levelsToNavigate.size > 0) {
+        if (levelsToNavigate.isNotEmpty()) {
             // Agrego el paso a la colección de pasos
             var attrCompId = 0L
             for (drcCont in dcrContArray) {
@@ -1545,7 +1545,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         } else {
             // Tomo el último paso
             var tempStep: KeyLevelPos? = null
-            if (stepsHistory.size > 0) {
+            if (stepsHistory.isNotEmpty()) {
                 tempStep = stepsHistory.last()
             }
 
@@ -1753,14 +1753,14 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
             AttributeCompositionType.TypeIntNumber,
             AttributeCompositionType.TypeDecimalNumber,
             AttributeCompositionType.TypeCurrency,
-            -> {
+                -> {
                 val random: Int = ThreadLocalRandom.current().nextInt(0, 100)
                 fragment.valueStr = random.toString()
             }
 
             AttributeCompositionType.TypeTextLong,
             AttributeCompositionType.TypeTextShort,
-            -> {
+                -> {
                 fragment.valueStr = "Texto de prueba"
             }
 

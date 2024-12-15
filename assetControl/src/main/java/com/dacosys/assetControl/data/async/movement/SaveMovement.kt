@@ -143,7 +143,7 @@ class SaveMovement {
 
             // Hacer los movimientos y los cambios de estados de los activos solo
             // cuando el movimiento está completada
-            if (assetInMovementList.size > 0) {
+            if (assetInMovementList.isNotEmpty()) {
 
                 //////////// MOVEMENTS ////////////
                 val movementRepository = WarehouseMovementRepository()
@@ -276,7 +276,7 @@ class SaveMovement {
                     )
                     return@withContext false
                 }
-            } else if (assetFoundedList.size > 0) {
+            } else if (assetFoundedList.isNotEmpty()) {
                 // Si no había contenidos en el movimiento, pero sí cambios de
                 // estado de algunos activos el proceso termina correctamente.
                 msg = getContext().getString(R.string.movement_performed_correctly)

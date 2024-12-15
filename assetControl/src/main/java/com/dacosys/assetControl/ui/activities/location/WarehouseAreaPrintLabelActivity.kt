@@ -253,7 +253,7 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
                     "ids", arrayListOf(ParcelLong(warehouseArea.id))
                 )
                 setResult(RESULT_OK, data)
-            } else if (multiSelect && warehouseAreaIdArray != null && warehouseAreaIdArray.size > 0) {
+            } else if (multiSelect && warehouseAreaIdArray != null && warehouseAreaIdArray.isNotEmpty()) {
                 val parcelIdArray: ArrayList<ParcelLong> = ArrayList()
                 for (it in warehouseAreaIdArray) parcelIdArray.add(ParcelLong(it))
                 data.putParcelableArrayListExtra("ids", parcelIdArray)

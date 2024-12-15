@@ -184,7 +184,7 @@ class UserSpinnerFragment : Fragment() {
 
         allUser!!.sortWith { v1, v2 -> v1.name.compareTo(v2.name) }
 
-        if (allUser == null || allUser!!.size < 1) {
+        if (allUser == null || allUser!!.isEmpty()) {
             result = false
             allUser = ArrayList()
             allUser!!.add(

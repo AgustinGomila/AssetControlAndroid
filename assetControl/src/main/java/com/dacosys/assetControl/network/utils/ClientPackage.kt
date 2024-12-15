@@ -156,7 +156,7 @@ class ClientPackage {
                     }
                 }
 
-                if (selectedPacks.size > 0) {
+                if (selectedPacks.isNotEmpty()) {
                     setConfigPanel(
                         parentView = parentView,
                         callback = callback,

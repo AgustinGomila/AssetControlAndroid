@@ -596,7 +596,6 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
             .setPositiveButton(
                 getString(R.string.reset)
             ) { dialog, _ ->
-                //your deleting code
                 vh75?.resetToFactory()
                 dialog.dismiss()
             }.setNegativeButton(

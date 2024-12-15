@@ -111,7 +111,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         val msg: String = it.msg
 
         if (status == ProgressStatus.finished) {
-            if (result.size > 0) {
+            if (result.isNotEmpty()) {
                 runOnUiThread {
                     selectClientPackage(
                         parentView = binding.login,
@@ -168,7 +168,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
             ProgressStatus.starting,
             ProgressStatus.bigStarting,
             ProgressStatus.running,
-            -> {
+                -> {
                 if (registryType == null) {
                     // Si es un registro ya lo estamos actualizando arriba...
                     setButton(ButtonStyle.BUSY)
@@ -186,7 +186,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
             ProgressStatus.bigCrashed,
             ProgressStatus.crashed,
             ProgressStatus.canceled,
-            -> {
+                -> {
                 showSnackBar(SnackBarEventData(msg, SnackBarType.ERROR))
                 refresh()
 

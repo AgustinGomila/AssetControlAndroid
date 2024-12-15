@@ -95,7 +95,7 @@ constructor() {
         )
 
         var arcArrayObject: ArrayList<SoapObject> = addNullContent()
-        if (warehouseMovementContent.size > 0) {
+        if (warehouseMovementContent.isNotEmpty()) {
             warehouseMovementContent.forEach { t ->
                 val arcSoapObject = SoapObject(getWebservice().namespace, "content")
 
@@ -148,7 +148,7 @@ constructor() {
         )
 
         var arcArrayObject: ArrayList<SoapObject> = addNullContent()
-        if (warehouseMovementContent.size > 0) {
+        if (warehouseMovementContent.isNotEmpty()) {
             warehouseMovementContent.forEach { t ->
                 val arcSoapObject = SoapObject(getWebservice().namespace, "content")
 

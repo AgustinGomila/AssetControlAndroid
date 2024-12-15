@@ -34,7 +34,7 @@ class GetRouteProcessContent(
         // Me quedo con el contenido del nivel que estamos registrando
         var thisLevelRpCont: ArrayList<RouteProcessContent> = ArrayList()
 
-        if (rpContArray.size < 1) {
+        if (rpContArray.isEmpty()) {
             Log.d(
                 this::class.java.simpleName,
                 getContext().getString(R.string.getting_processed_content)

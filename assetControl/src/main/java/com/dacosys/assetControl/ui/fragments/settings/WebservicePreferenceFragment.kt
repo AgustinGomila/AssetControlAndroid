@@ -213,9 +213,8 @@ class WebservicePreferenceFragment : PreferenceFragmentCompat() {
             ) { dialog, _ ->
                 cleanPanelWebData()
 
-                //your deleting code
                 DownloadDb.downloadDbRequired = true
-                preference.summary = newValue.toString()
+                if (!BuildConfig.DEBUG) preference.summary = newValue.toString()
                 alreadyAnsweredYes = true
                 if (newValue is String) {
                     Preferences.prefsPutString(

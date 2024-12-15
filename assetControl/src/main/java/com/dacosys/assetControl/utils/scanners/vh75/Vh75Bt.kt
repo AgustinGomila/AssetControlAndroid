@@ -75,7 +75,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
 
         val pairedDevices = mAdapter.bondedDevices
         Log.v(this::class.java.simpleName, "pairDevice: Total devices: ${pairedDevices.size}")
-        if (pairedDevices.size > 0) {
+        if (pairedDevices.isNotEmpty()) {
             var device: BluetoothDevice? = null
             for (d in pairedDevices.toTypedArray()) {
                 if (d.address == btAddress) {

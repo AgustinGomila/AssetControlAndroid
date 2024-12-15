@@ -144,7 +144,7 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
         val msg: String = it.msg
 
         if (status == ProgressStatus.finished) {
-            if (result.size > 0) {
+            if (result.isNotEmpty()) {
                 runOnUiThread {
                     selectClientPackage(
                         parentView = binding.settings,

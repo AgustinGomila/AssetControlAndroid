@@ -86,7 +86,7 @@ constructor() {
         arSoapObject.addProperty("modification_date", assetReview.modificationDate)
 
         var arcArrayObject: ArrayList<SoapObject> = addNullContent()
-        if (assetReviewContent.size > 0) {
+        if (assetReviewContent.isNotEmpty()) {
             assetReviewContent.forEach { t ->
                 val arcSoapObject = SoapObject(getWebservice().namespace, "content")
 
@@ -128,7 +128,7 @@ constructor() {
         arSoapObject.addProperty("modification_date", assetReview.modificationDate)
 
         var arcArrayObject: ArrayList<SoapObject> = addNullContent()
-        if (assetReviewContent.size > 0) {
+        if (assetReviewContent.isNotEmpty()) {
             assetReviewContent.forEach { t ->
                 val arcSoapObject = SoapObject(getWebservice().namespace, "content")
 

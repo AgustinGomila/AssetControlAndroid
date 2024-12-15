@@ -75,7 +75,7 @@ class DevicePreference
 
             if (appHasBluetoothPermission()) {
                 val pairedDevices = mBluetoothAdapter?.bondedDevices
-                if (pairedDevices != null && pairedDevices.size > 0) {
+                if (pairedDevices != null && pairedDevices.isNotEmpty()) {
                     for (device in pairedDevices) {
                         devices.add(device)
                     }
