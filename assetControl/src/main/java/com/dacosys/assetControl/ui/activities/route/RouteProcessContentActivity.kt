@@ -1382,15 +1382,15 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             enableConfirmButton(true)
         }
 
-        runDemo()
+        if (Statics.DEMO_MODE) runDemo()
     }
 
     private fun runDemo() {
-        if (!saving && Statics.DEMO_MODE) {
-            Handler(Looper.getMainLooper()).postDelayed(
-                { demo() }, 500
-            )
-        }
+        if (saving) return
+
+        Handler(Looper.getMainLooper()).postDelayed(
+            { demo() }, 500
+        )
     }
 
     private fun isRouteFinished(): Boolean {
@@ -1859,7 +1859,8 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
     public override fun onResume() {
         super.onResume()
         rejectNewInstances = false
-        runDemo()
+
+        if (Statics.DEMO_MODE) runDemo()
     }
 
     private val showScannedCode: Boolean
