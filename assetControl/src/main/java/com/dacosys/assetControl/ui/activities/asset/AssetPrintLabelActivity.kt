@@ -726,7 +726,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
                 code = assetSelectFilterFragment?.itemCode ?: "",
                 itemCategory = assetSelectFilterFragment?.itemCategory,
                 warehouseArea = assetSelectFilterFragment?.warehouseArea,
-                onlyActive = assetSelectFilterFragment?.onlyActive ?: true
+                onlyActive = assetSelectFilterFragment?.onlyActive != false
             )
             sync.execute()
         }

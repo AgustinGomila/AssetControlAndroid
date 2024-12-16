@@ -304,7 +304,7 @@ class WarehouseAreaAdapter : ArrayAdapter<WarehouseArea>, Filterable {
     }
 
     private fun isSelected(position: Int): Boolean {
-        return position >= 0 && listView?.isItemChecked(position) ?: false
+        return position >= 0 && listView?.isItemChecked(position) == true
     }
 
     private fun getIndex(`object`: WarehouseArea): Int {

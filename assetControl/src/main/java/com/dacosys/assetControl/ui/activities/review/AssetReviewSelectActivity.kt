@@ -465,7 +465,7 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         val w = waSelectFilterFragment?.wDescription ?: ""
         val wa = waSelectFilterFragment?.waDescription ?: ""
-        val onlyActive = waSelectFilterFragment?.onlyActive ?: true
+        val onlyActive = waSelectFilterFragment?.onlyActive != false
 
         val assetReviewList =
             ArrayList(

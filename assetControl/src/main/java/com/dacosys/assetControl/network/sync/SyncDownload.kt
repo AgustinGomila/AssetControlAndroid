@@ -26,7 +26,6 @@ import com.dacosys.assetControl.data.room.repository.maintenance.MaintenanceType
 import com.dacosys.assetControl.data.room.repository.route.RouteCompositionRepository
 import com.dacosys.assetControl.data.room.repository.route.RouteRepository
 import com.dacosys.assetControl.data.room.repository.user.UserPermissionRepository
-import com.dacosys.assetControl.data.room.repository.user.UserRepository
 import com.dacosys.assetControl.data.room.repository.user.UserWarehouseAreaRepository
 import com.dacosys.assetControl.data.webservice.asset.AssetWs
 import com.dacosys.assetControl.data.webservice.attribute.AttributeCategoryWs
@@ -136,7 +135,7 @@ class SyncDownload(
         var result = false
         coroutineScope {
             deferred = async { suspendFunction() }
-            result = deferred?.await() ?: false
+            result = deferred?.await() == true
         }
         onFinish.invoke(result)
     }
@@ -437,7 +436,7 @@ class SyncDownload(
         registryOnProcess.add(registryType)
         val upWs = UserPermissionWs()
         val uwaWs = UserWarehouseAreaWs()
-        
+
         val permissionRepository = UserPermissionRepository()
         val userAreaRepository = UserWarehouseAreaRepository()
 

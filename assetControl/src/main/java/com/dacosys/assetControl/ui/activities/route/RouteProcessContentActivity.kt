@@ -1328,7 +1328,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
     private val isCurrentLevelCompleted: Boolean
         get() {
-            return adapter?.isLevelCompleted ?: false
+            return adapter?.isLevelCompleted == true
         }
 
     private val allItems: ArrayList<RouteProcessContent>

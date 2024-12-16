@@ -159,7 +159,7 @@ class AssetMaintenanceSelectActivity : AppCompatActivity(),
                     }
                 }
             }
-            v?.onTouchEvent(event) ?: true
+            v?.onTouchEvent(event) != false
         }
 
         binding.assetMaintenanceListView.setOnItemClickListener { _, _, pos, _ -> selectRow(pos) }

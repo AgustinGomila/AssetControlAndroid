@@ -489,7 +489,7 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
             sync.addExtraParams(
                 waDescription = warehouseAreaSelectFilterFragment?.waDescription ?: "",
                 wDescription = warehouseAreaSelectFilterFragment?.wDescription ?: "",
-                onlyActive = warehouseAreaSelectFilterFragment?.onlyActive ?: true
+                onlyActive = warehouseAreaSelectFilterFragment?.onlyActive != false
             )
             sync.execute()
         }

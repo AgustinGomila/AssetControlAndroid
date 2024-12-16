@@ -197,7 +197,7 @@ class DataCollectionRuleAdapter : ArrayAdapter<DataCollectionRule> {
     }
 
     private fun isSelected(position: Int): Boolean {
-        return position >= 0 && listView?.isItemChecked(position) ?: false
+        return position >= 0 && listView?.isItemChecked(position) == true
     }
 
     fun getItems(): ArrayList<DataCollectionRule> {

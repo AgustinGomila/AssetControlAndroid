@@ -133,7 +133,7 @@ class SyncUpload(
         var result = false
         coroutineScope {
             deferred = async { suspendFunction() }
-            result = deferred?.await() ?: false
+            result = deferred?.await() == true
         }
         onResult.invoke(result)
     }

@@ -186,7 +186,7 @@ class DataCollectionRuleSelectActivity : AppCompatActivity() {
                     }
                 }
             }
-            v?.onTouchEvent(event) ?: true
+            v?.onTouchEvent(event) != false
         }
 
         binding.dcRuleListView.setOnItemClickListener { _, _, pos, _ -> selectRow(pos) }

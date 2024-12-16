@@ -67,7 +67,7 @@ class GetAssetAsync {
         var result = false
         coroutineScope {
             deferred = async { suspendFunction() }
-            result = deferred?.await() ?: false
+            result = deferred?.await() == true
         }
         return result
     }
