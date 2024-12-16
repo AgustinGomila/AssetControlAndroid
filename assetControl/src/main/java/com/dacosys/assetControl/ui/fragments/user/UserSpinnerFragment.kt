@@ -11,6 +11,9 @@ import com.dacosys.assetControl.R.layout.custom_spinner_dropdown_item
 import com.dacosys.assetControl.data.room.dto.user.User
 import com.dacosys.assetControl.data.room.repository.user.UserRepository
 import com.dacosys.assetControl.databinding.FragmentSpinnerBinding
+import com.dacosys.assetControl.network.sync.SyncInitialUser
+import com.dacosys.assetControl.network.sync.SyncProgress
+import com.dacosys.assetControl.network.utils.ProgressStatus
 import com.dacosys.assetControl.ui.adapters.user.UserAdapter
 import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelableArrayList
 import org.parceler.Parcels
@@ -174,20 +177,40 @@ class UserSpinnerFragment : Fragment() {
         mCallback = null
     }
 
-    fun fillAdapter(): Boolean {
-        if (_binding == null) return false
+    private fun syncProgress(it: SyncProgress, onResult: (Boolean) -> Unit = {}) {
+        when (it.progressStatus) {
+            ProgressStatus.starting, ProgressStatus.running -> {}
+            ProgressStatus.crashed, ProgressStatus.canceled -> {
+                onResult.invoke(false)
+            }
 
+            ProgressStatus.finished -> {
+                var userList = ArrayList(UserRepository().select())
+                fillAdapter(userList, onResult)
+            }
+        }
+    }
+
+    fun syncAndFillAdapter(onResult: (Boolean) -> Unit = {}) {
+        if (_binding == null) {
+            onResult.invoke(false)
+            return
+        }
+
+        allUser?.clear()
         oldPos = defaultValue.toInt()
+
+        SyncInitialUser { syncProgress(it, onResult) }
+    }
+
+    private fun fillAdapter(userList: ArrayList<User>, onResult: (Boolean) -> Unit = {}) {
         var result = true
 
-        allUser = ArrayList(UserRepository().select())
+        userList.sortWith { v1, v2 -> v1.name.compareTo(v2.name) }
 
-        allUser!!.sortWith { v1, v2 -> v1.name.compareTo(v2.name) }
-
-        if (allUser == null || allUser!!.isEmpty()) {
+        if (userList.isEmpty()) {
             result = false
-            allUser = ArrayList()
-            allUser!!.add(
+            userList.add(
                 0,
                 User(
                     id = 0,
@@ -199,7 +222,7 @@ class UserSpinnerFragment : Fragment() {
                 )
             )
         } else if (showGeneralLevel) {
-            allUser!!.add(
+            userList.add(
                 0,
                 User(
                     id = 0,
@@ -212,16 +235,18 @@ class UserSpinnerFragment : Fragment() {
             )
         }
 
-        allUser!!.sortWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.name })
+        userList.sortWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.name })
+        allUser = userList
+
         val spinnerArrayAdapter = UserAdapter(
             custom_spinner_dropdown_item,
-            allUser!!,
+            userList,
             binding.fragmentSpinner
         )
 
         // Step 3: Tell the binding.fragmentSpinner about our adapter
         binding.fragmentSpinner.adapter = spinnerArrayAdapter
-        return result
+        onResult.invoke(result)
     }
 
     // Container Activity must implement this interface

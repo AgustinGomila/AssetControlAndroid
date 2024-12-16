@@ -325,16 +325,18 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
 
         try {
             runOnUiThread {
-                if (userSpinnerFragment?.fillAdapter() == true) {
-                    setButton(ButtonStyle.READY)
-                } else {
-                    showSnackBar(
-                        SnackBarEventData(
-                            getString(R.string.there_are_no_users_you_must_synchronize_the_database),
-                            SnackBarType.ERROR
+                userSpinnerFragment?.syncAndFillAdapter { result ->
+                    if (result) {
+                        setButton(ButtonStyle.READY)
+                    } else {
+                        showSnackBar(
+                            SnackBarEventData(
+                                getString(R.string.there_are_no_users_you_must_synchronize_the_database),
+                                SnackBarType.ERROR
+                            )
                         )
-                    )
-                    setButton(ButtonStyle.REFRESH)
+                        setButton(ButtonStyle.REFRESH)
+                    }
                 }
             }
         } catch (ex: Exception) {

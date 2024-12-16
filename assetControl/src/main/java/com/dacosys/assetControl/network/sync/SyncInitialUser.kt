@@ -35,7 +35,14 @@ class SyncInitialUser(
 
     private suspend fun doInBackground() {
         coroutineScope {
-            launch { initialUser() }
+            launch {
+                // Eliminar datos antiguos de los usuarios
+                userRepository.deleteAll()
+                userPermissionRepository.deleteAll()
+                userWarehouseAreaRepository.deleteAll()
+
+                initialUser()
+            }
         }
     }
 
@@ -55,11 +62,6 @@ class SyncInitialUser(
                 )
             )
         }
-
-        // Eliminar datos antiguos de los usuarios
-        userRepository.deleteAll()
-        userPermissionRepository.deleteAll()
-        userWarehouseAreaRepository.deleteAll()
 
         val confEntry = registryType.confEntry ?: return@withContext
         val date = confEntry.defaultValue.toString()
