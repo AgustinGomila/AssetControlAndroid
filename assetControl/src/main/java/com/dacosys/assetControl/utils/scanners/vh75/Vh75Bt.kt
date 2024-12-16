@@ -3,7 +3,9 @@ package com.dacosys.assetControl.utils.scanners.vh75
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothSocket
+import android.content.Context
 import android.media.AudioManager
 import android.media.ToneGenerator
 import android.util.Log
@@ -25,13 +27,17 @@ import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.experimental.inv
 
 @SuppressLint("MissingPermission")
-class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
+class Vh75Bt(private var listener: RfidDeviceListener?, context: Context) : Rfid() {
     /**
      * Constructor. Prepares a new Vh75Bt session.
      * BuilderVH75 Contains both the Listener and the Context
      */
     // Member fields
-    private val mAdapter: BluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+    // BluetoothManager y BluetoothAdapter
+    private val bluetoothManager: BluetoothManager =
+        context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+    private val mAdapter: BluetoothAdapter
+        get() = bluetoothManager.adapter
     private var mConnectedThread: ConnectedThread? = null
 
     /**
@@ -73,11 +79,11 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
             return
         }
 
-        val pairedDevices = mAdapter.bondedDevices
+        val pairedDevices = mAdapter.bondedDevices ?: emptySet()
         Log.v(this::class.java.simpleName, "pairDevice: Total devices: ${pairedDevices.size}")
         if (pairedDevices.isNotEmpty()) {
             var device: BluetoothDevice? = null
-            for (d in pairedDevices.toTypedArray()) {
+            for (d in pairedDevices) {
                 if (d.address == btAddress) {
                     device = d
                     break
@@ -735,11 +741,11 @@ class Vh75Bt(private var listener: RfidDeviceListener?) : Rfid() {
                     listener.onReadCompleted(epcId)
                 }
             } else {
-                var bootCode = ret2[0]
-                val len = ret2[1] // Length of last 3 parts
+                // Unused: var bootCode = ret2[0]
+                // Unused: val len = ret2[1] // Length of last 3 parts
                 val commandCode = ret2[2]
-                val dataSegment = getDataSegment(ret2)
-                var checkSum = ret2.last()
+                // Unused: val dataSegment = getDataSegment(ret2)
+                // Unused: var checkSum = ret2.last()
 
                 val cSuc = checkSuccess(ret2)
                 if (cSuc) {

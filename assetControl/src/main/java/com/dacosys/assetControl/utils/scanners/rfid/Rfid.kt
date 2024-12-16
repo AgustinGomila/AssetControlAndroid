@@ -1,5 +1,6 @@
 package com.dacosys.assetControl.utils.scanners.rfid
 
+import android.content.Context
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.dacosys.assetControl.utils.Statics.Companion.classImplementsInterface
@@ -123,9 +124,9 @@ open class Rfid {
             return -1
         }
 
-        fun setListener(listener: RfidDeviceListener, rfidType: RfidType) {
+        fun setListener(listener: RfidDeviceListener, rfidType: RfidType, context: Context) {
             if (initRfidRequired()) {
-                build(listener, rfidType)
+                build(listener, rfidType, context)
             } else {
                 if (vh75 != null) {
                     vh75?.setListener(listener)
@@ -133,9 +134,9 @@ open class Rfid {
             }
         }
 
-        fun build(listener: RfidDeviceListener?, rfidType: RfidType): Rfid? {
+        fun build(listener: RfidDeviceListener?, rfidType: RfidType, context: Context): Rfid? {
             if (rfidType == RfidType.vh75) {
-                rfidDevice = Vh75Bt(listener)
+                rfidDevice = Vh75Bt(listener, context)
             }
             return rfidDevice
         }

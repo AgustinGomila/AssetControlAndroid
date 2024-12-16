@@ -75,43 +75,40 @@ class HandsetParam {
         }
 
     fun toBytes(): ByteArray {
-        val data = ByteArray(32)
-        var index = 0
-
-        data[index++] = TagType
-        data[index++] = Alarm
-        data[index++] = OutputMode
-        data[index++] = USBBaudRate
-        data[index++] = Reserve5
-        data[index++] = Min_Frequence
-        data[index++] = Max_Frequence
-        data[index++] = Power
-        data[index++] = RFhrdVer1
-        data[index++] = RFhrdVer2
-        data[index++] = RFSoftVer1
-        data[index++] = RFSoftVer2
-        data[index++] = ISTID
-        data[index++] = TIDAddr
-        data[index++] = TIDLen
-        data[index++] = ISUSER
-        data[index++] = USERAddr
-        data[index++] = USERLen
-        data[index++] = Reserve19
-        data[index++] = Reserve20
-        data[index++] = Reserve21
-        data[index++] = Reserve22
-        data[index++] = Reserve23
-        data[index++] = Reserve24
-        data[index++] = Reserve25
-        data[index++] = Reserve26
-        data[index++] = Reserve27
-        data[index++] = Reserve28
-        data[index++] = Reserve29
-        data[index++] = Reserve30
-        data[index++] = Reserve31
-        data[index++] = Reserve32
-
-        return data
+        return byteArrayOf(
+            TagType,
+            Alarm,
+            OutputMode,
+            USBBaudRate,
+            Reserve5,
+            Min_Frequence,
+            Max_Frequence,
+            Power,
+            RFhrdVer1,
+            RFhrdVer2,
+            RFSoftVer1,
+            RFSoftVer2,
+            ISTID,
+            TIDAddr,
+            TIDLen,
+            ISUSER,
+            USERAddr,
+            USERLen,
+            Reserve19,
+            Reserve20,
+            Reserve21,
+            Reserve22,
+            Reserve23,
+            Reserve24,
+            Reserve25,
+            Reserve26,
+            Reserve27,
+            Reserve28,
+            Reserve29,
+            Reserve30,
+            Reserve31,
+            Reserve32
+        )
     }
 
     fun setAlarm(isAlarm: Boolean, isLabel: Boolean) {

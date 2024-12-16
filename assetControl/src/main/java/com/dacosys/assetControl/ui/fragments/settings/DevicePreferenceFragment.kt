@@ -139,7 +139,7 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
     private fun setupRfidReader() {
         try {
             if (Rfid.isRfidRequired(this::class)) {
-                Rfid.setListener(this, RfidType.vh75)
+                Rfid.setListener(this, RfidType.vh75, context)
             }
         } catch (ex: Exception) {
             ex.printStackTrace()

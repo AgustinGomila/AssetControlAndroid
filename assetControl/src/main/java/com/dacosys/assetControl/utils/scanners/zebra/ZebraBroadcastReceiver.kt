@@ -32,7 +32,7 @@ class ZebraBroadcastReceiver : BroadcastReceiver {
 
     override fun onReceive(context: Context, intent: Intent) {
         val action = intent.action
-        val b = intent.extras
+        // Not used: val b = intent.extras
         Log.d(javaClass.simpleName, "DataWedge Action:$action")
 
         // Get DataWedge version info
@@ -57,14 +57,24 @@ class ZebraBroadcastReceiver : BroadcastReceiver {
                 var info = ""
                 if (intent.hasExtra(EXTRA_RESULT_INFO)) {
                     val resultInfo = intent.getBundleExtra(EXTRA_RESULT_INFO)
-                    val keys = resultInfo!!.keySet()
-                    for (key in keys) {
-                        val `object` = resultInfo[key]
-                        if (`object` is String) {
-                            info += "$key: $`object`\n"
-                        } else if (`object` is Array<*>) {
-                            for (code in `object`) {
-                                info += "$key: $code\n"
+                    if (resultInfo != null) {
+                        val keys = resultInfo.keySet()
+                        for (key in keys) {
+                            // First try to get as String
+                            val value = resultInfo.getString(key)
+                            if (value != null) {
+                                info += "$key: $value\n"
+                            } else {
+                                // Try to get as Array<String>
+                                val arrayValue = resultInfo.getStringArray(key)
+                                if (arrayValue != null) {
+                                    arrayValue.forEach { code ->
+                                        info += "$key: $code\n"
+                                    }
+                                } else {
+                                    // Not valid
+                                    info += "$key: Not valid\n"
+                                }
                             }
                         }
                     }

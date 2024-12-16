@@ -191,12 +191,12 @@ object JotterListener : Jotter.Listener {
                 manufacturer.contains("Honeywell", true)
                         || manufacturer.startsWith("Universal Global Scientific Industrial")
                         || manufacturer.startsWith("Foxconn International Holdings Limited")
-                -> collectorType = CollectorType.honeywellNative
+                    -> collectorType = CollectorType.honeywellNative
 
                 manufacturer.contains("Motorola", true)
                         || manufacturer.contains("Zebra", true)
                         || manufacturer.contains("Symbol", true)
-                -> collectorType = CollectorType.zebra
+                    -> collectorType = CollectorType.zebra
             }
 
             Log.v(javaClass.simpleName, "Manufacturer: $manufacturer, Model: $model")
@@ -265,7 +265,7 @@ object JotterListener : Jotter.Listener {
         Rfid.destroy()
         if (!isRfidRequired(activity)) return
 
-        Rfid.build(activity as Rfid.RfidDeviceListener, RfidType.vh75)
+        Rfid.build(activity as Rfid.RfidDeviceListener, RfidType.vh75, activity)
 
         rfidSetup(activity)
     }
@@ -322,7 +322,7 @@ object JotterListener : Jotter.Listener {
 
     private fun rfidSetListener(activity: AppCompatActivity) {
         try {
-            Rfid.setListener(activity as Rfid.RfidDeviceListener, RfidType.vh75)
+            Rfid.setListener(activity as Rfid.RfidDeviceListener, RfidType.vh75, activity)
         } catch (ex: Exception) {
             ex.printStackTrace()
             makeText(
