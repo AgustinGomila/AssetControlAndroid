@@ -1,0 +1,97 @@
+[versions]
+activity = "1.10.1"
+agp = "8.10.1"
+androidMinSdk = "35"
+androidTargetSdk = "35"
+annotation = "1.9.1"
+appcompat = "1.7.1"
+asyncHttp = "1.4.11"
+buildToolsVer = "35.0.0"
+constraintlayout = "2.1.4"
+coreKtx = "1.16.0"
+coreSplashscreen = "1.0.1"
+desugar = "2.1.5"
+testext-junit = "1.2.1"
+dotenv = "3.2.0"
+easyfloat = "1.0.5"
+evalex = "2.7"
+fragment = "1.8.8"
+freereflection = "3.1.0"
+honeywellLibrary = "1.0.1"
+imageControl = "1.0.6"
+junit = "4.13.2"
+jvmCompatibility = "1.8"
+keyboardvisibility = "2.3.0"
+kotlinVersion = "2.2.0"
+ksoap2 = "3.6.2"
+koinTest = "3.2.2"
+koinVersion = "4.0.4"
+kspVersion = "2.2.0-2.0.2"
+leakcanary = "2.14"
+lifecycle = "2.9.1"
+material = "1.12.0"
+mockito = "5.18.0"
+parcelerVersion = "1.1.13"
+percentlayout = "1.0.0"
+playServicesVision = "20.1.3"
+preferenceKtx = "1.2.1"
+recyclerview = "1.4.0"
+roomVersion = "2.7.2"
+swiperefreshlayout = "1.1.0"
+vectordrawable = "1.2.0"
+zxingAndroid = "1.0.7"
+
+[libraries]
+# AndroidX
+androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "annotation" }
+androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
+androidx-activity = { module = "androidx.activity:activity-ktx", version.ref = "activity" }
+androidx-fragment = { module = "androidx.fragment:fragment-ktx", version.ref = "fragment" }
+androidx-lifecycle-livedata = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "lifecycle" }
+androidx-lifecycle-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
+androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
+androidx-swiperefreshlayout = { module = "androidx.swiperefreshlayout:swiperefreshlayout", version.ref = "swiperefreshlayout" }
+androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
+androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
+androidx-preference = { module = "androidx.preference:preference-ktx", version.ref = "preferenceKtx" }
+androidx-vectordrawable = { module = "androidx.vectordrawable:vectordrawable", version.ref = "vectordrawable" }
+androidx-percentlayout = { module = "androidx.percentlayout:percentlayout", version.ref = "percentlayout" }
+androidx-recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "recyclerview" }
+androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomVersion" }
+androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomVersion" }
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomVersion" }
+
+# Google
+google-material = { module = "com.google.android.material:material", version.ref = "material" }
+google-play-services-vision = { module = "com.google.android.gms:play-services-vision", version.ref = "playServicesVision" }
+google-ksoap2 = { module = "com.google.code.ksoap2-android:ksoap2-android", version.ref = "ksoap2" }
+
+# Koin
+koin-android = { module = "io.insert-koin:koin-android", version.ref = "koinVersion" }
+koin-test = { module = "io.insert-koin:koin-test", version.ref = "koinTest" }
+
+# Third-party
+freereflection = { module = "com.github.tiann:FreeReflection", version.ref = "freereflection" }
+desugar = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar" }
+junit = { module = "junit:junit", version.ref = "junit" }
+androidx-testext-junit = { module = "androidx.test.ext:junit-ktx", version.ref = "testext-junit" }
+mockito = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+keyboardvisibility = { module = "net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent", version.ref = "keyboardvisibility" }
+evalex = { module = "com.udojava:EvalEx", version.ref = "evalex" }
+async-http = { module = "com.loopj.android:android-async-http", version.ref = "asyncHttp" }
+leakcanary = { module = "com.squareup.leakcanary:leakcanary-android", version.ref = "leakcanary" }
+dotenv = { module = "io.github.cdimascio:dotenv-java", version.ref = "dotenv" }
+parceler-api = { module = "org.parceler:parceler-api", version.ref = "parcelerVersion" }
+commons-net = { module = "commons-net:commons-net", version = "3.9.0" }
+
+# Dacosys
+dacosys-imagecontrol = { module = "com.dacosys:imageControl", version.ref = "imageControl" }
+dacosys-easyfloat = { module = "com.dacosys.libs:easyfloat", version.ref = "easyfloat" }
+dacosys-zxing = { module = "com.dacosys.libs:zxingAndroid", version.ref = "zxingAndroid" }
+dacosys-honeywell = { module = "com.dacosys.libs:honeywellLibraryAndroid", version.ref = "honeywellLibrary" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlinVersion" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "kspVersion" }
+android-library = { id = "com.android.library", version.ref = "agp" }

@@ -1,0 +1,12 @@
+CLIENT_EMAIL=miguel@dacosys.com
+CLIENT_PASSWORD=sarasa123!!
+
+CLIENT_EMAIL_ALT=administracion@casapalm.com.ar
+CLIENT_PASSWORD_ALT=9827a
+
+CLIENT_EMAIL_CP=centralpuerto.com
+CLIENT_PASSWORD_CP=293f0w4n
+
+CLIENT_UADE_QR={"AssetControlM13":{"ac_ws_namespace":"http:\/\/activos.uade.edu.ar\/K65STVDC","ac_ws_pass":"password","ac_ws_server":"http:\/\/activos.uade.edu.ar:80\/K65STVDC\/s1\/service.php","ac_ws_user":"user"}}
+
+CLIENT_HTTP_QR={"AssetControlM13":{"ac_ws_namespace":"http:\/\/35.247.232.122\/ws","ac_ws_pass":"U2ccPN{zI1","ac_ws_server":"http:\/\/35.247.232.122\/ws\/s1\/service.php","ac_ws_user":"F7TE9NI2"}}

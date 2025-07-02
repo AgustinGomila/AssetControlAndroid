@@ -1,8 +1,3 @@
-pass.txt
-private_key.pepk
-ac.jks
-assetControl/src/main/assets/env
-
 # Built application files
 *.apk
 *.aar
@@ -87,3 +82,9 @@ imageControl/
 
 #Dacosys Android Libs
 androidLibs/
+assetControl/src/main/assets/env
+
+#Private files
+ac.jks
+private_key.pepk
+pass.txt
