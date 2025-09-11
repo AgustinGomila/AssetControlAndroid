@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                                                   xmlns:app="http://schemas.android.com/apk/res-auto"
+                                                   xmlns:tools="http://schemas.android.com/tools"
+                                                   android:id="@+id/asset_manteinance_condition"
+                                                   android:layout_width="match_parent"
+                                                   android:layout_height="match_parent"
+                                                   tools:context="com.example.assetControl.ui.activities.maintenance.AssetMaintenanceConditionActivity">
+
+    <androidx.appcompat.widget.Toolbar
+            android:id="@+id/top_appbar"
+            style="@style/MyActionBar"
+            android:layout_width="match_parent"
+            android:layout_height="?android:attr/actionBarSize"
+            android:elevation="4dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:title="@string/new_maintenance_task"/>
+
+    <TextView
+            android:id="@+id/descriptionTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@color/lightgoldenrodyellow"
+            android:text="@string/description"
+            android:textAlignment="viewStart"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/top_appbar"/>
+
+    <TextView
+            android:id="@+id/codeTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@color/lightgoldenrodyellow"
+            android:text="@string/code"
+            android:textAlignment="viewStart"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/descriptionTextView"/>
+
+    <TextView
+            android:id="@+id/textView53"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/condition"
+            app:layout_constraintBottom_toBottomOf="@+id/conditionFragment"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/conditionFragment"/>
+
+    <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/conditionFragment"
+            android:name="com.example.assetControl.ui.fragments.asset.AssetConditionSpinnerFragment"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="2dp"
+            android:layout_marginEnd="2dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/textView53"
+            app:layout_constraintTop_toBottomOf="@+id/codeTextView"
+            tools:layout="@layout/fragment_spinner"/>
+
+    <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/task"
+            app:layout_constraintBottom_toBottomOf="@+id/manteinanceTypeFragment"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/manteinanceTypeFragment"/>
+
+    <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/manteinanceTypeFragment"
+            android:name="com.example.assetControl.ui.fragments.manteinance.MaintenanceTypeSpinnerFragment"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="2dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/conditionFragment"
+            app:layout_constraintTop_toBottomOf="@+id/conditionFragment"
+            tools:layout="@layout/fragment_spinner"/>
+
+    <EditText
+            android:id="@+id/obsEditText"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:ems="10"
+            android:gravity="start"
+            android:hint="@string/observations"
+            android:importantForAutofill="no"
+            android:inputType="textMultiLine"
+            app:layout_constraintBottom_toTopOf="@+id/okButton"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/manteinanceTypeFragment"/>
+
+    <Button
+            android:id="@+id/okButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="2dp"
+            android:layout_marginEnd="2dp"
+            android:layout_marginBottom="2dp"
+            android:background="@drawable/rounded_corner_button_seagreen"
+            android:clickable="true"
+            android:elevation="1dp"
+            android:focusable="true"
+            android:stateListAnimator="@null"
+            android:text="@string/confirm"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

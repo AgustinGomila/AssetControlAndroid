@@ -1,0 +1,38 @@
+package com.example.assetControl.data.room.repository.route
+
+import com.example.assetControl.data.room.dao.route.RouteProcessStepsDao
+import com.example.assetControl.data.room.database.AcDatabase.Companion.database
+import com.example.assetControl.data.room.dto.route.RouteProcessSteps
+import com.example.assetControl.data.room.entity.route.RouteProcessStepsEntity
+import kotlinx.coroutines.runBlocking
+
+class RouteProcessStepsRepository {
+    private val dao: RouteProcessStepsDao
+        get() = database.routeProcessStepsDao()
+
+
+    fun selectByRouteProcessId(routeProcessId: Long) = runBlocking {
+        dao.selectByRouteProcessId(routeProcessId)
+    }
+
+
+    fun insert(content: RouteProcessSteps) {
+        runBlocking {
+            dao.insert(RouteProcessStepsEntity(content))
+        }
+    }
+
+
+    fun deleteByRouteIdRouteProcessDate(minDate: String, rId: Long) = runBlocking {
+        dao.deleteByRouteIdRouteProcessDate(minDate, rId)
+    }
+
+
+    fun deleteByRouteProcessId(id: Long) = runBlocking {
+        dao.deleteByRouteProcessId(id)
+    }
+
+    fun deleteByCollectorDataCollectionId(id: Long) = runBlocking {
+        dao.deleteByCollectorDataCollectionId(id)
+    }
+}

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                                                   xmlns:app="http://schemas.android.com/apk/res-auto"
+                                                   xmlns:tools="http://schemas.android.com/tools"
+                                                   android:layout_width="match_parent"
+                                                   android:layout_height="wrap_content"
+                                                   android:background="@drawable/layout_thin_border"
+                                                   android:minHeight="0dp"
+                                                   android:theme="@style/Theme.AppCompat.Light"
+                                                   tools:layout_editor_absoluteX="0dp"
+                                                   tools:layout_editor_absoluteY="81dp">
+
+    <TextView
+            android:id="@+id/titleTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/area"
+            android:textColor="@color/text_dark"
+            android:textSize="12sp"
+            app:layout_constraintStart_toEndOf="@+id/checkBoxConstraintLayout"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/generalDataConstraintLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/checkBoxConstraintLayout"
+            app:layout_constraintTop_toBottomOf="@+id/titleTextView">
+
+        <View
+                android:id="@+id/dividerVert"
+                android:layout_width="1dp"
+                android:layout_height="0dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp"
+                android:background="?android:attr/listDivider"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/guideline500"
+                app:layout_constraintStart_toStartOf="@+id/guideline500"
+                app:layout_constraintTop_toTopOf="parent"/>
+
+        <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline500"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.5"/>
+
+        <com.example.assetControl.ui.common.views.custom.AutoResizeTextView
+                android:id="@+id/warehouseStr"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="1dp"
+                android:layout_marginEnd="1dp"
+                android:layout_weight="1"
+                android:gravity="start"
+                android:maxLines="2"
+                android:minLines="1"
+                android:text="@string/warehouse"
+                android:textSize="14sp"
+                app:autoSizeMaxTextSize="18sp"
+                app:autoSizeMinTextSize="12dp"
+                app:autoSizeStepGranularity="1sp"
+                app:autoSizeTextType="uniform"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/dividerVert"
+                app:layout_constraintTop_toTopOf="@+id/warehouseAreaStr"/>
+
+        <com.example.assetControl.ui.common.views.custom.AutoResizeTextView
+                android:id="@+id/warehouseAreaStr"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="1dp"
+                android:layout_marginEnd="1dp"
+                android:layout_weight="1"
+                android:gravity="start"
+                android:maxLines="1"
+                android:minLines="1"
+                android:text="@string/area"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:autoSizeMaxTextSize="18sp"
+                app:autoSizeMinTextSize="12dp"
+                app:autoSizeStepGranularity="1sp"
+                app:autoSizeTextType="uniform"
+                app:layout_constraintEnd_toStartOf="@+id/dividerVert"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/checkBoxConstraintLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+        <CheckBox
+                android:id="@+id/checkBox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="false"
+                android:focusable="false"
+                android:gravity="center_vertical"
+                android:longClickable="true"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
