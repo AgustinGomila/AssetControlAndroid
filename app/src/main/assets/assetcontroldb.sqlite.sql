@@ -1,0 +1,1047 @@
+BEGIN
+TRANSACTION;
+CREATE TABLE IF NOT EXISTS [asset]
+(
+    [
+    _id]
+    BIGINT
+    NOT
+    NULL, [
+    code]
+    NVARCHAR
+(
+    45
+) NOT NULL,
+    [description] NVARCHAR
+(
+    255
+) NOT NULL,
+    [warehouse_id] BIGINT NOT NULL,
+    [warehouse_area_id] BIGINT NOT NULL,
+    [active] INT NOT NULL DEFAULT 1,
+    [ownership_status] INT NOT NULL DEFAULT 1,
+    [status] INT NOT NULL DEFAULT 1,
+    [missing_date] DATETIME,
+    [item_category_id] BIGINT NOT NULL DEFAULT 0,
+    [transfered] INT,
+    [original_warehouse_id] BIGINT NOT NULL,
+    [original_warehouse_area_id] BIGINT NOT NULL,
+    [label_number] INT,
+    [manufacturer] NVARCHAR
+(
+    255
+),
+    [model] NVARCHAR
+(
+    255
+),
+    [serial_number] NVARCHAR
+(
+    255
+),
+    [condition] INT,
+    [cost_centre_id] BIGINT,
+    [parent_id] BIGINT,
+    [ean] NVARCHAR
+(
+    100
+),
+    [last_asset_review_date] DATETIME,
+    CONSTRAINT [PK__id] PRIMARY KEY
+(
+[
+    _id]
+)
+    );
+CREATE TABLE IF NOT EXISTS [asset_manteinance_collector]
+(
+    [
+    asset_id]
+    BIGINT
+    NOT
+    NULL, [
+    observations]
+    NVARCHAR
+(
+    255
+),
+    [transfered] INT,
+    [manteinance_status_id] BIGINT NOT NULL,
+    [asset_manteinance_id] BIGINT NOT NULL,
+    [manteinance_type_id] BIGINT NOT NULL,
+    [_id] BIGINT NOT NULL
+    );
+CREATE TABLE IF NOT EXISTS [asset_review]
+(
+    [
+    asset_review_id]
+    BIGINT, [
+    asset_review_date]
+    DATETIME
+    NOT
+    NULL, [
+    obs]
+    NVARCHAR
+(
+    255
+),
+    [user_id] BIGINT NOT NULL,
+    [warehouse_area_id] BIGINT NOT NULL,
+    [warehouse_id] BIGINT NOT NULL,
+    [modification_date] DATETIME NOT NULL,
+    [_id] BIGINT NOT NULL,
+    [status_id] INT NOT NULL,
+    CONSTRAINT [PK__id] PRIMARY KEY
+(
+[
+    _id]
+)
+    );
+CREATE TABLE IF NOT EXISTS [asset_review_content]
+(
+    [
+    asset_review_id]
+    BIGINT
+    NOT
+    NULL, [
+    asset_review_content_id]
+    BIGINT
+    NOT
+    NULL
+    UNIQUE, [
+    asset_id]
+    BIGINT, [
+    code]
+    NVARCHAR
+(
+    45
+) NOT NULL,
+    [description] NVARCHAR
+(
+    255
+) NOT NULL,
+    [qty] DECIMAL
+(
+    12,
+    4
+),
+    [content_status_id] INT
+(
+    1
+) NOT NULL,
+    [origin_warehouse_area_id] BIGINT NOT NULL,
+    PRIMARY KEY
+(
+[
+    asset_review_content_id]
+)
+    );
+CREATE TABLE IF NOT EXISTS [status]
+(
+    [
+    _id]
+    INT
+(
+    11
+) NOT NULL UNIQUE,
+    [description] NVARCHAR
+(
+    255
+) NOT NULL
+    );
+CREATE TABLE IF NOT EXISTS [attribute_category]
+(
+    [
+    _id]
+    BIGINT
+    NOT
+    NULL, [
+    description]
+    NVARCHAR
+(
+    255
+) NOT NULL,
+    [active] INT NOT NULL,
+    [parent_id] BIGINT NOT NULL,
+    CONSTRAINT [PK__id] PRIMARY KEY
+(
+[
+    _id]
+)
+    );
+CREATE TABLE IF NOT EXISTS [attribute_composition]
+(
+    [
+    _id]
+    BIGINT
+    NOT
+    NULL, [
+    attribute_id]
+    BIGINT
+    NOT
+    NULL, [
+    attribute_composition_type_id]
+    BIGINT
+    NOT
+    NULL, [
+    description]
+    NVARCHAR
+(
+    255
+),
+    [composition] NVARCHAR
+(
+    4000
+),
+    [used] INT NOT NULL,
+    [name] NVARCHAR
+(
+    100
+) NOT NULL,
+    [read_only] INT NOT NULL,
+    [default_value] TEXT NOT NULL,
+    CONSTRAINT [PK__id] PRIMARY KEY
+(
+[
+    _id]
+)
+    );
+CREATE TABLE IF NOT EXISTS [attribute]
+(
+    [
+    _id]
+    BIGINT
+    NOT
+    NULL, [
+    description]
+    NVARCHAR
+(
+    100
+) NOT NULL,
+    [active] INT NOT NULL,
+    [attribute_type_id] BIGINT NOT NULL,
+    [attribute_category_id] BIGINT NOT NULL,
+    CONSTRAINT [PK__id] PRIMARY KEY
+(
+[
+    _id]
+)
+    );
+CREATE TABLE IF NOT EXISTS [barcode_label_custom]
+(
+    [
+    _id]
+    INTEGER
+(
+    11
+) NOT NULL,
+    [description] VARCHAR
+(
+    255
+) NOT NULL,
+    [active] INTEGER
+(
+    1
+) NOT NULL,
+    [barcode_label_target_id] INTEGER
+(
+    11
+) NOT NULL,
+    [template] TEXT NOT NULL,
+    CONSTRAINT [PK__id] PRIMARY KEY
+(
+[
+    _id]
+)
+    );
+CREATE TABLE IF NOT EXISTS [barcode_label_target]
+(
+    [
+    _id]
+    INT
+(
+    11
+) NOT NULL UNIQUE,
+    [description] NVARCHAR
+(
+    255
+) NOT NULL
+    );
+CREATE TABLE IF NOT EXISTS [data_collection_content]
+(
+    [
+    data_collection_id]
+    BIGINT, [
+    level]
+    INT, [
+    position]
+    INT, [
+    attribute_id]
+    BIGINT, [
+    attribute_composition_id]
+    BIGINT, [
+    result]
+    INT, [
+    value_str]
+    TEXT
+    NOT
+    NULL, [
+    data_collection_date]
+    DATETIME
+    NOT
+    NULL, [
+    data_collection_content_id]
+    BIGINT, [
+    _id]
+    BIGINT
+    NOT
+    NULL, [
+    data_collection_rule_content_id]
+    BIGINT
+    NOT
+    NULL,
+    PRIMARY
+    KEY (
+[
+    data_collection_content_id]
+)
+    );
+CREATE TABLE IF NOT EXISTS [data_collection]
+(
+    [
+    data_collection_id]
+    BIGINT, [
+    asset_id]
+    BIGINT, [
+    warehouse_id]
+    BIGINT, [
+    warehouse_area_id]
+    BIGINT, [
+    user_id]
+    BIGINT
+    NOT
+    NULL, [
+    date_start]
+    DATETIME, [
+    date_end]
+    DATETIME, [
+    completed]
+    INT, [
+    transfered_date]
+    DATETIME, [
+    _id]
+    BIGINT
+    NOT
+    NULL, [
+    collector_route_process_id]
+    BIGINT
+    NOT
+    NULL,
+    CONSTRAINT [
+    PK__id]
+    PRIMARY
+    KEY (
+[
+    _id]
+)
+    );
+CREATE TABLE IF NOT EXISTS [data_collection_rule_content]
+(
+    [
+    _id]
+    BIGINT
+    NOT
+    NULL, [
+    data_collection_rule_id]
+    BIGINT
+    NOT
+    NULL, [
+    level]
+    INT
+    NOT
+    NULL, [
+    position]
+    INT
+    NOT
+    NULL, [
+    attribute_id]
+    BIGINT, [
+    attribute_composition_id]
+    BIGINT, [
+    expression]
+    NVARCHAR
+(
+    4000
+),
+    [true_result] INT,
+    [false_result] INT,
+    [description] NVARCHAR
+(
+    255
+) NOT NULL,
+    [active] INT NOT NULL,
+    [mandatory] INT NOT NULL,
+    CONSTRAINT [PK__id] PRIMARY KEY
+(
+[
+    _id]
+)
+    );
+CREATE TABLE IF NOT EXISTS [data_collection_rule]
+(
+    [
+    _id]
+    BIGINT
+    NOT
+    NULL, [
+    description]
+    NVARCHAR
+(
+    100
+) NOT NULL,
+    [active] INT NOT NULL,
+    CONSTRAINT [PK__id] PRIMARY KEY
+(
+[
+    _id]
+)
+    );
+CREATE TABLE IF NOT EXISTS [data_collection_rule_target]
+(
+    [
+    data_collection_rule_id]
+    BIGINT
+    NOT
+    NULL, [
+    asset_id]
+    BIGINT
+    NULL, [
+    warehouse_id]
+    BIGINT
+    NULL, [
+    warehouse_area_id]
+    BIGINT
+    NULL,
+[
+    item_category_id]
+    BIGINT
+    NULL
+);
+CREATE TABLE IF NOT EXISTS [item_category]
+(
+    [
+    _id]
+    BIGINT
+    NOT
+    NULL, [
+    description]
+    NVARCHAR
+(
+    255
+) NOT NULL,
+    [active] INT NOT NULL,
+    [parent_id] BIGINT NOT NULL,
+    [transferred] INT,
+    CONSTRAINT [PK__id] PRIMARY KEY
+(
+[
+    _id]
+)
+    );
+CREATE TABLE IF NOT EXISTS [manteinance_status]
+(
+    [
+    _id]
+    INT
+(
+    11
+) NOT NULL UNIQUE,
+    [description] NVARCHAR
+(
+    255
+) NOT NULL
+    );
+CREATE TABLE IF NOT EXISTS [manteinance_type]
+(
+    [
+    _id]
+    BIGINT
+    NOT
+    NULL, [
+    description]
+    NVARCHAR
+(
+    255
+) NOT NULL,
+    [active] INT NOT NULL,
+    [manteinance_type_group_id] BIGINT NOT NULL,
+    CONSTRAINT [PK__id] PRIMARY KEY
+(
+[
+    _id]
+)
+    );
+CREATE TABLE IF NOT EXISTS [manteinance_type_group]
+(
+    [
+    _id]
+    BIGINT
+    NOT
+    NULL, [
+    description]
+    NVARCHAR
+(
+    255
+) NOT NULL,
+    [active] INT NOT NULL,
+    CONSTRAINT [PK__id] PRIMARY KEY
+(
+[
+    _id]
+)
+    );
+CREATE TABLE IF NOT EXISTS [route_composition]
+(
+    [
+    route_id]
+    BIGINT
+    NOT
+    NULL, [
+    data_collection_rule_id]
+    BIGINT
+    NOT
+    NULL, [
+    level]
+    INT
+    NOT
+    NULL, [
+    position]
+    INT
+    NOT
+    NULL, [
+    asset_id]
+    BIGINT
+    NULL, [
+    warehouse_id]
+    BIGINT
+    NULL, [
+    warehouse_area_id]
+    BIGINT
+    NULL, [
+    expression]
+    NVARCHAR
+(
+    4000
+) NULL,
+    [true_result] INT NULL,
+    [false_result] INT NULL
+    );
+CREATE TABLE IF NOT EXISTS [route]
+(
+    [
+    _id]
+    BIGINT
+    NOT
+    NULL, [
+    description]
+    NVARCHAR
+(
+    255
+) NOT NULL,
+    [active] INT NOT NULL,
+    CONSTRAINT [PK__id] PRIMARY KEY
+(
+[
+    _id]
+)
+    );
+CREATE TABLE IF NOT EXISTS [route_process_content]
+(
+    [
+    route_process_id]
+    BIGINT
+    NULL, [
+    data_collection_rule_id]
+    BIGINT
+    NULL, [
+    level]
+    INT
+    NULL, [
+    position]
+    INT
+    NULL, [
+    route_process_status_id]
+    BIGINT
+    NULL, [
+    data_collection_id]
+    BIGINT
+    NULL,
+[
+    route_process_content_id]
+    BIGINT
+    NULL
+);
+CREATE TABLE IF NOT EXISTS [route_process]
+(
+    [
+    user_id]
+    BIGINT
+    NOT
+    NULL, [
+    route_id]
+    BIGINT
+    NOT
+    NULL, [
+    route_process_date]
+    DATETIME
+    NOT
+    NULL, [
+    completed]
+    INT
+    NOT
+    NULL, [
+    transfered]
+    INT, [
+    transfered_date]
+    DATETIME, [
+    route_process_id]
+    BIGINT, [
+    _id]
+    BIGINT
+    NOT
+    NULL,
+    CONSTRAINT [
+    PK__id]
+    PRIMARY
+    KEY (
+[
+    _id]
+)
+    );
+CREATE TABLE IF NOT EXISTS [route_process_status]
+(
+    [
+    _id]
+    INT
+(
+    11
+) NOT NULL UNIQUE,
+    [description] NVARCHAR
+(
+    255
+) NOT NULL
+    );
+CREATE TABLE IF NOT EXISTS [route_process_steps]
+(
+    [
+    route_process_id]
+    BIGINT
+    NULL, [
+    route_process_content_id]
+    BIGINT
+    NULL, [
+    level]
+    INT
+    NULL, [
+    position]
+    INT
+    NULL, [
+    data_collection_id]
+    BIGINT
+    NULL,
+[
+    step]
+    INT
+    NULL
+);
+CREATE TABLE IF NOT EXISTS [warehouse_area]
+(
+    [
+    _id]
+    BIGINT
+    NOT
+    NULL, [
+    description]
+    NVARCHAR
+(
+    255
+) NOT NULL,
+    [active] INT NOT NULL,
+    [warehouse_id] BIGINT NOT NULL,
+    [transferred] INT,
+    CONSTRAINT [PK__id] PRIMARY KEY
+(
+[
+    _id]
+)
+    );
+CREATE TABLE IF NOT EXISTS [warehouse]
+(
+    [
+    _id]
+    BIGINT
+    NOT
+    NULL, [
+    description]
+    NVARCHAR
+(
+    255
+) NOT NULL,
+    [active] INT NOT NULL,
+    [transferred] INT,
+    CONSTRAINT [PK__id] PRIMARY KEY
+(
+[
+    _id]
+)
+    );
+CREATE TABLE IF NOT EXISTS [warehouse_movement_content]
+(
+    [
+    warehouse_movement_id]
+    BIGINT
+    NOT
+    NULL, [
+    _id]
+    BIGINT
+    NOT
+    NULL
+    UNIQUE, [
+    asset_id]
+    BIGINT, [
+    code]
+    NVARCHAR
+(
+    45
+) NOT NULL,
+    [qty] DECIMAL
+(
+    12,
+    4
+),
+    PRIMARY KEY
+(
+[
+    _id]
+)
+    );
+CREATE TABLE IF NOT EXISTS [warehouse_movement]
+(
+    [
+    warehouse_movement_id]
+    BIGINT, [
+    warehouse_movement_date]
+    DATETIME
+    NOT
+    NULL, [
+    obs]
+    NVARCHAR
+(
+    255
+),
+    [user_id] BIGINT NOT NULL,
+    [origin_warehouse_area_id] BIGINT NOT NULL,
+    [origin_warehouse_id] BIGINT NOT NULL,
+    [transfered_date] DATETIME,
+    [destination_warehouse_area_id] BIGINT NOT NULL,
+    [destination_warehouse_id] BIGINT NOT NULL,
+    [completed] INT,
+    [_id] BIGINT NOT NULL,
+    CONSTRAINT [PK__id] PRIMARY KEY
+(
+[
+    _id]
+)
+    );
+CREATE TABLE IF NOT EXISTS [user]
+(
+    [
+    _id]
+    BIGINT
+    NOT
+    NULL, [
+    name]
+    nvarchar
+(
+    255
+) NOT NULL,
+    [external_id] nvarchar
+(
+    45
+),
+    [email] nvarchar
+(
+    255
+) NOT NULL UNIQUE,
+    [active] int NOT NULL,
+    [password] nvarchar
+(
+    100
+) NULL,
+    CONSTRAINT [PK_user] PRIMARY KEY
+(
+[
+    _id]
+)
+    );
+CREATE TABLE IF NOT EXISTS [user_warehouse_area]
+(
+    [
+    user_id]
+    BIGINT
+    NOT
+    NULL, [
+    warehouse_area_id]
+    BIGINT
+    NOT
+    NULL, [
+    see]
+    INT
+    NULL, [
+    move]
+    INT
+    NULL, [
+    `count`]
+    INT
+    NULL,
+[
+    `check`]
+    INT
+    NULL
+);
+CREATE TABLE IF NOT EXISTS [user_permission]
+(
+    [
+    user_id]
+    BIGINT
+    NOT
+    NULL,
+[
+    permission_id]
+    BIGINT
+    NOT
+    NULL
+);
+DROP INDEX IF EXISTS [IDX_asset_code];
+DROP INDEX IF EXISTS [IDX_asset_description];
+DROP INDEX IF EXISTS [IDX_asset_item_category_id];
+DROP INDEX IF EXISTS [IDX_asset_warehouse_id];
+DROP INDEX IF EXISTS [IDX_asset_warehouse_area_id];
+DROP INDEX IF EXISTS [IDX_asset_serial_number];
+DROP INDEX IF EXISTS [IDX_asset_ean];
+CREATE INDEX [IDX_asset_code] ON [asset] ([code]);
+CREATE INDEX [IDX_asset_description] ON [asset] ([description]);
+CREATE INDEX [IDX_asset_item_category_id] ON [asset] ([item_category_id]);
+CREATE INDEX [IDX_asset_warehouse_id] ON [asset] ([warehouse_id]);
+CREATE INDEX [IDX_asset_warehouse_area_id] ON [asset] ([warehouse_area_id]);
+CREATE INDEX [IDX_asset_serial_number] ON [asset] ([serial_number]);
+CREATE INDEX [IDX_asset_ean] ON [asset] ([ean]);
+DROP INDEX IF EXISTS [IDX_asset_manteinance_collector_manteinance_status_id];
+DROP INDEX IF EXISTS [IDX_asset_manteinance_collector_asset_manteinance_id];
+DROP INDEX IF EXISTS [IDX_asset_manteinance_collector_manteinance_type_id];
+DROP INDEX IF EXISTS [IDX_asset_manteinance_collector__id];
+CREATE INDEX [IDX_asset_manteinance_collector_manteinance_status_id] ON [asset_manteinance_collector] ([manteinance_status_id]);
+CREATE INDEX [IDX_asset_manteinance_collector_asset_manteinance_id] ON [asset_manteinance_collector] ([asset_manteinance_id]);
+CREATE INDEX [IDX_asset_manteinance_collector_manteinance_type_id] ON [asset_manteinance_collector] ([manteinance_type_id]);
+CREATE INDEX [IDX_asset_manteinance_collector__id] ON [asset_manteinance_collector] ([_id]);
+DROP INDEX IF EXISTS [IDX_asset_review_user_id];
+DROP INDEX IF EXISTS [IDX_asset_review_warehouse_area_id];
+DROP INDEX IF EXISTS [IDX_asset_review_warehouse_id];
+DROP INDEX IF EXISTS [IDX_asset_review__id];
+CREATE INDEX [IDX_asset_review_user_id] ON [asset_review] ([user_id]);
+CREATE INDEX [IDX_asset_review_warehouse_area_id] ON [asset_review] ([warehouse_area_id]);
+CREATE INDEX [IDX_asset_review_warehouse_id] ON [asset_review] ([warehouse_id]);
+CREATE INDEX [IDX_asset_review__id] ON [asset_review] ([_id]);
+DROP INDEX IF EXISTS [IDX_asset_review_content_asset_review_id];
+DROP INDEX IF EXISTS [IDX_asset_review_content_asset_id];
+DROP INDEX IF EXISTS [IDX_asset_review_content_code];
+DROP INDEX IF EXISTS [IDX_asset_review_content_description];
+DROP INDEX IF EXISTS [IDX_asset_review_content_origin_warehouse_area_id];
+CREATE INDEX [IDX_asset_review_content_asset_review_id] ON [asset_review_content] ([asset_review_id]);
+CREATE INDEX [IDX_asset_review_content_asset_id] ON [asset_review_content] ([asset_id]);
+CREATE INDEX [IDX_asset_review_content_code] ON [asset_review_content] ([code]);
+CREATE INDEX [IDX_asset_review_content_description] ON [asset_review_content] ([description]);
+CREATE INDEX [IDX_asset_review_content_origin_warehouse_area_id] ON [asset_review_content] ([origin_warehouse_area_id]);
+DROP INDEX IF EXISTS [IDX_status__id];
+DROP INDEX IF EXISTS [IDX_status_description];
+CREATE INDEX [IDX_status__id] ON [status] ([_id]);
+CREATE INDEX [IDX_status_description] ON [status] ([description]);
+DROP INDEX IF EXISTS [IDX_attribute_category_parent_id];
+DROP INDEX IF EXISTS [IDX_attribute_category_description];
+CREATE INDEX [IDX_attribute_category_parent_id] ON [attribute_category] ([parent_id]);
+CREATE INDEX [IDX_attribute_category_description] ON [attribute_category] ([description]);
+DROP INDEX IF EXISTS [IDX_attribute_composition_attribute_id];
+DROP INDEX IF EXISTS [IDX_attribute_composition_attribute_composition_type_id];
+DROP INDEX IF EXISTS [IDX_attribute_composition_description];
+CREATE INDEX [IDX_attribute_composition_attribute_id] ON [attribute_composition] ([attribute_id]);
+CREATE INDEX [IDX_attribute_composition_attribute_composition_type_id] ON [attribute_composition] ([attribute_composition_type_id]);
+CREATE INDEX [IDX_attribute_composition_description] ON [attribute_composition] ([description]);
+DROP INDEX IF EXISTS [IDX_attribute_attribute_type_id];
+DROP INDEX IF EXISTS [IDX_attribute_attribute_category_id];
+DROP INDEX IF EXISTS [IDX_attribute_description];
+CREATE INDEX [IDX_attribute_attribute_type_id] ON [attribute] ([attribute_type_id]);
+CREATE INDEX [IDX_attribute_attribute_category_id] ON [attribute] ([attribute_category_id]);
+CREATE INDEX [IDX_attribute_description] ON [attribute] ([description]);
+DROP INDEX IF EXISTS [IDX_barcode_label_custom_barcode_label_target_id];
+DROP INDEX IF EXISTS [IDX_barcode_label_custom_description];
+CREATE INDEX [IDX_barcode_label_custom_barcode_label_target_id] ON [barcode_label_custom] ([barcode_label_target_id]);
+CREATE INDEX [IDX_barcode_label_custom_description] ON [barcode_label_custom] ([description]);
+DROP INDEX IF EXISTS [IDX_barcode_label_target__id];
+DROP INDEX IF EXISTS [IDX_barcode_label_target_description];
+CREATE INDEX [IDX_barcode_label_target__id] ON [barcode_label_target] ([_id]);
+CREATE INDEX [IDX_barcode_label_target_description] ON [barcode_label_target] ([description]);
+DROP INDEX IF EXISTS [IDX_data_collection_content_data_collection_id];
+DROP INDEX IF EXISTS [IDX_data_collection_content_level];
+DROP INDEX IF EXISTS [IDX_data_collection_content_position];
+DROP INDEX IF EXISTS [IDX_data_collection_content_attribute_id];
+DROP INDEX IF EXISTS [IDX_data_collection_content_attribute_composition_id];
+DROP INDEX IF EXISTS [IDX_data_collection_content__id];
+DROP INDEX IF EXISTS [IDX_data_collection_content_data_collection_rule_content_id];
+CREATE INDEX [IDX_data_collection_content_data_collection_id] ON [data_collection_content] ([data_collection_id]);
+CREATE INDEX [IDX_data_collection_content_level] ON [data_collection_content] ([level]);
+CREATE INDEX [IDX_data_collection_content_position] ON [data_collection_content] ([position]);
+CREATE INDEX [IDX_data_collection_content_attribute_id] ON [data_collection_content] ([attribute_id]);
+CREATE INDEX [IDX_data_collection_content_attribute_composition_id] ON [data_collection_content] ([attribute_composition_id]);
+CREATE INDEX [IDX_data_collection_content__id] ON [data_collection_content] ([_id]);
+CREATE INDEX [IDX_data_collection_content_data_collection_rule_content_id] ON [data_collection_content] ([data_collection_rule_content_id]);
+DROP INDEX IF EXISTS [IDX_data_collection_data_collection_id];
+DROP INDEX IF EXISTS [IDX_data_collection_asset_id];
+DROP INDEX IF EXISTS [IDX_data_collection_warehouse_id];
+DROP INDEX IF EXISTS [IDX_data_collection_warehouse_area_id];
+DROP INDEX IF EXISTS [IDX_data_collection_user_id];
+DROP INDEX IF EXISTS [IDX_data_collection__id];
+DROP INDEX IF EXISTS [IDX_data_collection_collector_route_process_id];
+CREATE INDEX [IDX_data_collection_data_collection_id] ON [data_collection] ([data_collection_id]);
+CREATE INDEX [IDX_data_collection_asset_id] ON [data_collection] ([asset_id]);
+CREATE INDEX [IDX_data_collection_warehouse_id] ON [data_collection] ([warehouse_id]);
+CREATE INDEX [IDX_data_collection_warehouse_area_id] ON [data_collection] ([warehouse_area_id]);
+CREATE INDEX [IDX_data_collection_user_id] ON [data_collection] ([user_id]);
+CREATE INDEX [IDX_data_collection__id] ON [data_collection] ([_id]);
+CREATE INDEX [IDX_data_collection_collector_route_process_id] ON [data_collection] ([collector_route_process_id]);
+DROP INDEX IF EXISTS [IDX_data_collection_rule_content_data_collection_rule_id];
+DROP INDEX IF EXISTS [IDX_data_collection_rule_content_level];
+DROP INDEX IF EXISTS [IDX_data_collection_rule_content_position];
+DROP INDEX IF EXISTS [IDX_data_collection_rule_content_attribute_id];
+DROP INDEX IF EXISTS [IDX_data_collection_rule_content_attribute_composition_id];
+DROP INDEX IF EXISTS [IDX_data_collection_rule_content_description];
+CREATE INDEX [IDX_data_collection_rule_content_data_collection_rule_id] ON [data_collection_rule_content] ([data_collection_rule_id]);
+CREATE INDEX [IDX_data_collection_rule_content_level] ON [data_collection_rule_content] ([level]);
+CREATE INDEX [IDX_data_collection_rule_content_position] ON [data_collection_rule_content] ([position]);
+CREATE INDEX [IDX_data_collection_rule_content_attribute_id] ON [data_collection_rule_content] ([attribute_id]);
+CREATE INDEX [IDX_data_collection_rule_content_attribute_composition_id] ON [data_collection_rule_content] ([attribute_composition_id]);
+CREATE INDEX [IDX_data_collection_rule_content_description] ON [data_collection_rule_content] ([description]);
+DROP INDEX IF EXISTS [IDX_data_collection_rule_description];
+CREATE INDEX [IDX_data_collection_rule_description] ON [data_collection_rule] ([description]);
+DROP INDEX IF EXISTS [IDX_data_collection_rule_target_data_collection_rule_id];
+DROP INDEX IF EXISTS [IDX_data_collection_rule_target_asset_id];
+DROP INDEX IF EXISTS [IDX_data_collection_rule_target_warehouse_id];
+DROP INDEX IF EXISTS [IDX_data_collection_rule_target_warehouse_area_id];
+DROP INDEX IF EXISTS [IDX_data_collection_rule_target_item_category_id];
+CREATE INDEX [IDX_data_collection_rule_target_data_collection_rule_id] ON [data_collection_rule_target] ([data_collection_rule_id]);
+CREATE INDEX [IDX_data_collection_rule_target_asset_id] ON [data_collection_rule_target] ([asset_id]);
+CREATE INDEX [IDX_data_collection_rule_target_warehouse_id] ON [data_collection_rule_target] ([warehouse_id]);
+CREATE INDEX [IDX_data_collection_rule_target_warehouse_area_id] ON [data_collection_rule_target] ([warehouse_area_id]);
+CREATE INDEX [IDX_data_collection_rule_target_item_category_id] ON [data_collection_rule_target] ([item_category_id]);
+DROP INDEX IF EXISTS [IDX_item_category_description];
+DROP INDEX IF EXISTS [IDX_item_category_parent_id];
+CREATE INDEX [IDX_item_category_description] ON [item_category] ([description]);
+CREATE INDEX [IDX_item_category_parent_id] ON [item_category] ([parent_id]);
+DROP INDEX IF EXISTS [IDX_manteinance_status__id];
+DROP INDEX IF EXISTS [IDX_manteinance_status_description];
+CREATE INDEX [IDX_manteinance_status__id] ON [manteinance_status] ([_id]);
+CREATE INDEX [IDX_manteinance_status_description] ON [manteinance_status] ([description]);
+DROP INDEX IF EXISTS [IDX_manteinance_type_manteinance_type_group_id];
+DROP INDEX IF EXISTS [IDX_manteinance_type_description];
+CREATE INDEX [IDX_manteinance_type_manteinance_type_group_id] ON [manteinance_type] ([manteinance_type_group_id]);
+CREATE INDEX [IDX_manteinance_type_description] ON [manteinance_type] ([description]);
+DROP INDEX IF EXISTS [IDX_manteinance_type_group_description];
+CREATE INDEX [IDX_manteinance_type_group_description] ON [manteinance_type_group] ([description]);
+DROP INDEX IF EXISTS [IDX_route_composition_route_id];
+DROP INDEX IF EXISTS [IDX_route_composition_data_collection_rule_id];
+DROP INDEX IF EXISTS [IDX_route_composition_level];
+DROP INDEX IF EXISTS [IDX_route_composition_position];
+DROP INDEX IF EXISTS [IDX_route_composition_asset_id];
+DROP INDEX IF EXISTS [IDX_route_composition_warehouse_id];
+DROP INDEX IF EXISTS [IDX_route_composition_warehouse_area_id];
+CREATE INDEX [IDX_route_composition_route_id] ON [route_composition] ([route_id]);
+CREATE INDEX [IDX_route_composition_data_collection_rule_id] ON [route_composition] ([data_collection_rule_id]);
+CREATE INDEX [IDX_route_composition_level] ON [route_composition] ([level]);
+CREATE INDEX [IDX_route_composition_position] ON [route_composition] ([position]);
+CREATE INDEX [IDX_route_composition_asset_id] ON [route_composition] ([asset_id]);
+CREATE INDEX [IDX_route_composition_warehouse_id] ON [route_composition] ([warehouse_id]);
+CREATE INDEX [IDX_route_composition_warehouse_area_id] ON [route_composition] ([warehouse_area_id]);
+DROP INDEX IF EXISTS [IDX_route_description];
+CREATE INDEX [IDX_route_description] ON [route] ([description]);
+DROP INDEX IF EXISTS [IDX_route_process_content_route_process_id];
+DROP INDEX IF EXISTS [IDX_route_process_content_data_collection_rule_id];
+DROP INDEX IF EXISTS [IDX_route_process_content_level];
+DROP INDEX IF EXISTS [IDX_route_process_content_position];
+DROP INDEX IF EXISTS [IDX_route_process_content_route_process_status_id];
+DROP INDEX IF EXISTS [IDX_route_process_content_data_collection_id];
+DROP INDEX IF EXISTS [IDX_route_process_content_route_process_content_id];
+CREATE INDEX [IDX_route_process_content_route_process_id] ON [route_process_content] ([route_process_id]);
+CREATE INDEX [IDX_route_process_content_data_collection_rule_id] ON [route_process_content] ([data_collection_rule_id]);
+CREATE INDEX [IDX_route_process_content_level] ON [route_process_content] ([level]);
+CREATE INDEX [IDX_route_process_content_position] ON [route_process_content] ([position]);
+CREATE INDEX [IDX_route_process_content_route_process_status_id] ON [route_process_content] ([route_process_status_id]);
+CREATE INDEX [IDX_route_process_content_data_collection_id] ON [route_process_content] ([data_collection_id]);
+CREATE INDEX [IDX_route_process_content_route_process_content_id] ON [route_process_content] ([route_process_content_id]);
+DROP INDEX IF EXISTS [IDX_route_process_user_id];
+DROP INDEX IF EXISTS [IDX_route_process_route_id];
+DROP INDEX IF EXISTS [IDX_route_process_route_process_id];
+CREATE INDEX [IDX_route_process_user_id] ON [route_process] ([user_id]);
+CREATE INDEX [IDX_route_process_route_id] ON [route_process] ([route_id]);
+CREATE INDEX [IDX_route_process_route_process_id] ON [route_process] ([route_process_id]);
+DROP INDEX IF EXISTS [IDX_route_process_status__id];
+DROP INDEX IF EXISTS [IDX_route_process_status_description];
+CREATE INDEX [IDX_route_process_status__id] ON [route_process_status] ([_id]);
+CREATE INDEX [IDX_route_process_status_description] ON [route_process_status] ([description]);
+DROP INDEX IF EXISTS [IDX_route_process_steps_route_process_id];
+DROP INDEX IF EXISTS [IDX_route_process_steps_route_process_content_id];
+DROP INDEX IF EXISTS [IDX_route_process_steps_level];
+DROP INDEX IF EXISTS [IDX_route_process_steps_position];
+DROP INDEX IF EXISTS [IDX_route_process_steps_data_collection_id];
+DROP INDEX IF EXISTS [IDX_route_process_steps_step];
+CREATE INDEX [IDX_route_process_steps_route_process_id] ON [route_process_steps] ([route_process_id]);
+CREATE INDEX [IDX_route_process_steps_route_process_content_id] ON [route_process_steps] ([route_process_content_id]);
+CREATE INDEX [IDX_route_process_steps_level] ON [route_process_steps] ([level]);
+CREATE INDEX [IDX_route_process_steps_position] ON [route_process_steps] ([position]);
+CREATE INDEX [IDX_route_process_steps_data_collection_id] ON [route_process_steps] ([data_collection_id]);
+CREATE INDEX [IDX_route_process_steps_step] ON [route_process_steps] ([step]);
+DROP INDEX IF EXISTS [IDX_warehouse_area_description];
+DROP INDEX IF EXISTS [IDX_warehouse_area_warehouse_id];
+CREATE INDEX [IDX_warehouse_area_description] ON [warehouse_area] ([description]);
+CREATE INDEX [IDX_warehouse_area_warehouse_id] ON [warehouse_area] ([warehouse_id]);
+DROP INDEX IF EXISTS [IDX_warehouse_description];
+CREATE INDEX [IDX_warehouse_description] ON [warehouse] ([description]);
+DROP INDEX IF EXISTS [IDX_warehouse_movement_content_warehouse_movement_id];
+DROP INDEX IF EXISTS [IDX_warehouse_movement_content_asset_id];
+DROP INDEX IF EXISTS [IDX_warehouse_movement_content_code];
+CREATE INDEX [IDX_warehouse_movement_content_warehouse_movement_id] ON [warehouse_movement_content] ([warehouse_movement_id]);
+CREATE INDEX [IDX_warehouse_movement_content_asset_id] ON [warehouse_movement_content] ([asset_id]);
+CREATE INDEX [IDX_warehouse_movement_content_code] ON [warehouse_movement_content] ([code]);
+DROP INDEX IF EXISTS [IDX_warehouse_movement_warehouse_movement_id];
+DROP INDEX IF EXISTS [IDX_warehouse_movement_user_id];
+DROP INDEX IF EXISTS [IDX_warehouse_movement_origin_warehouse_area_id];
+DROP INDEX IF EXISTS [IDX_warehouse_movement_origin_warehouse_id];
+DROP INDEX IF EXISTS [IDX_warehouse_movement_destination_warehouse_area_id];
+DROP INDEX IF EXISTS [IDX_warehouse_movement_destination_warehouse_id];
+CREATE INDEX [IDX_warehouse_movement_warehouse_movement_id] ON [warehouse_movement] ([warehouse_movement_id]);
+CREATE INDEX [IDX_warehouse_movement_user_id] ON [warehouse_movement] ([user_id]);
+CREATE INDEX [IDX_warehouse_movement_origin_warehouse_area_id] ON [warehouse_movement] ([origin_warehouse_area_id]);
+CREATE INDEX [IDX_warehouse_movement_origin_warehouse_id] ON [warehouse_movement] ([origin_warehouse_id]);
+CREATE INDEX [IDX_warehouse_movement_destination_warehouse_area_id] ON [warehouse_movement] ([destination_warehouse_area_id]);
+CREATE INDEX [IDX_warehouse_movement_destination_warehouse_id] ON [warehouse_movement] ([destination_warehouse_id]);
+DROP INDEX IF EXISTS [IDX_user_name];
+DROP INDEX IF EXISTS [IDX_user_external_id];
+CREATE INDEX [IDX_user_name] ON [user] ([name]);
+CREATE INDEX [IDX_user_external_id] ON [user] ([external_id]);
+DROP INDEX IF EXISTS [IDX_user_warehouse_area_user_id];
+DROP INDEX IF EXISTS [IDX_user_warehouse_area_warehouse_area_id];
+CREATE INDEX [IDX_user_warehouse_area_user_id] ON [user_warehouse_area] ([user_id]);
+CREATE INDEX [IDX_user_warehouse_area_warehouse_area_id] ON [user_warehouse_area] ([warehouse_area_id]);
+DROP INDEX IF EXISTS [IDX_user_permission_user_id];
+DROP INDEX IF EXISTS [IDX_user_permission_permission_id];
+CREATE INDEX [IDX_user_permission_user_id] ON [user_permission] ([user_id]);
+CREATE INDEX [IDX_user_permission_permission_id] ON [user_permission] ([permission_id]);
+COMMIT;

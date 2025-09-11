@@ -1,0 +1,22 @@
+package com.example.assetControl.data.room.dao.barcode
+
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import com.example.assetControl.data.room.dto.barcode.BarcodeLabelTargetEntry
+import com.example.assetControl.data.room.entity.barcode.BarcodeLabelTargetEntity
+
+@Dao
+interface BarcodeLabelTargetDao {
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(statuses: List<BarcodeLabelTargetEntity>)
+
+
+    @Query("DELETE $BASIC_FROM")
+    suspend fun deleteAll()
+
+    companion object {
+        const val BASIC_FROM = "FROM ${BarcodeLabelTargetEntry.TABLE_NAME}"
+    }
+}

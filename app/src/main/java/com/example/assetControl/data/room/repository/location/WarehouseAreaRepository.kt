@@ -1,0 +1,113 @@
+package com.example.assetControl.data.room.repository.location
+
+import com.example.assetControl.AssetControlApp.Companion.context
+import com.example.assetControl.R
+import com.example.assetControl.data.room.dao.location.WarehouseAreaDao
+import com.example.assetControl.data.room.database.AcDatabase.Companion.database
+import com.example.assetControl.data.room.dto.location.WarehouseArea
+import com.example.assetControl.data.room.entity.location.WarehouseAreaEntity
+import com.example.assetControl.data.webservice.location.WarehouseAreaObject
+import com.example.assetControl.network.sync.SyncProgress
+import com.example.assetControl.network.sync.SyncRegistryType
+import com.example.assetControl.network.utils.ProgressStatus
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
+
+class WarehouseAreaRepository {
+    private val dao: WarehouseAreaDao
+        get() = database.warehouseAreaDao()
+
+    val getAll: List<WarehouseArea> = runBlocking { dao.select() }
+
+    fun selectById(id: Long) = runBlocking { dao.selectById(id) }
+
+    fun selectNoTransferred() = runBlocking { ArrayList(dao.selectNoTransferred()) }
+
+    fun select(onlyActive: Boolean): List<WarehouseArea> = runBlocking {
+        if (onlyActive) dao.selectActive()
+        else dao.select()
+    }
+
+    fun selectByDescription(wDescription: String, waDescription: String, onlyActive: Boolean) = runBlocking {
+        if (onlyActive) dao.selectByDescriptionActive(wDescription, waDescription)
+        else dao.selectByDescription(wDescription, waDescription)
+    }
+
+    fun selectByTempIds(): List<WarehouseArea> = runBlocking {
+        val tempAreas = TempWarehouseAreaRepository().select()
+        val ids = tempAreas.map { it.tempId }.toList()
+        dao.selectByTempIds(ids)
+    }
+
+    private val nextLastId: Long
+        get() = runBlocking {
+            val minId = dao.selectMinId() ?: 0
+            if (minId > 0) -1 else minId - 1
+        }
+
+
+    fun insert(warehouseArea: WarehouseArea) = runBlocking {
+        warehouseArea.id = nextLastId
+        warehouseArea.transferred = 0
+        dao.insert(WarehouseAreaEntity(warehouseArea))
+    }
+
+
+    fun update(warehouseArea: WarehouseAreaObject) {
+        val wa = WarehouseArea(warehouseArea)
+        update(wa)
+    }
+
+    fun update(warehouseArea: WarehouseArea) = runBlocking {
+        warehouseArea.transferred = 0
+        dao.update(WarehouseAreaEntity(warehouseArea))
+    }
+
+    fun updateTransferred(ids: List<Long>): Boolean {
+        val r = runBlocking {
+            dao.updateTransferred(ids.toTypedArray())
+            true
+        }
+        return r
+    }
+
+    fun updateWarehouseId(newValue: Long, oldValue: Long) {
+        runBlocking {
+            dao.updateWarehouseId(newValue, oldValue)
+        }
+    }
+
+    suspend fun sync(
+        areaObjects: Array<WarehouseAreaObject>,
+        onSyncProgress: (SyncProgress) -> Unit = {},
+        count: Int = 0,
+        total: Int = 0,
+    ) {
+        val registryType = SyncRegistryType.WarehouseArea
+
+        val areas: ArrayList<WarehouseArea> = arrayListOf()
+        areaObjects.mapTo(areas) { WarehouseArea(it) }
+        val partial = areas.count()
+
+        withContext(Dispatchers.IO) {
+            dao.insert(areas) {
+                onSyncProgress.invoke(
+                    SyncProgress(
+                        totalTask = partial + total,
+                        completedTask = it + count,
+                        msg = context.getString(R.string.synchronizing_warehouse_areas),
+                        registryType = registryType,
+                        progressStatus = ProgressStatus.running
+                    )
+                )
+            }
+        }
+    }
+
+    fun updateWarehouseAreaId(newValue: Long, oldValue: Long) {
+        runBlocking {
+            dao.updateWarehouseAreaId(newValue, oldValue)
+        }
+    }
+}

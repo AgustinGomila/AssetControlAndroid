@@ -1,0 +1,549 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "cd48ceade7ae2f1747deb25996349e07",
+    "entities": [
+      {
+        "tableName": "fragment_data",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`data_collection_rule_content_id` INTEGER NOT NULL, `attribute_composition_type_id` INTEGER NOT NULL, `value_str` TEXT NOT NULL, `is_enabled` INTEGER NOT NULL, PRIMARY KEY(`data_collection_rule_content_id`))",
+        "fields": [
+          {
+            "fieldPath": "dataCollectionRuleContentId",
+            "columnName": "data_collection_rule_content_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "attributeCompositionTypeId",
+            "columnName": "attribute_composition_type_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "valueStr",
+            "columnName": "value_str",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mEnabled",
+            "columnName": "is_enabled",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "data_collection_rule_content_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "IDX_fragment_data_data_collection_rule_content_id",
+            "unique": false,
+            "columnNames": [
+              "data_collection_rule_content_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_fragment_data_data_collection_rule_content_id` ON `${TABLE_NAME}` (`data_collection_rule_content_id`)"
+          },
+          {
+            "name": "IDX_fragment_data_attribute_composition_type_id",
+            "unique": false,
+            "columnNames": [
+              "attribute_composition_type_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_fragment_data_attribute_composition_type_id` ON `${TABLE_NAME}` (`attribute_composition_type_id`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "temp_asset",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`temp_id` INTEGER NOT NULL, PRIMARY KEY(`temp_id`))",
+        "fields": [
+          {
+            "fieldPath": "tempId",
+            "columnName": "temp_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "temp_id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "temp_warehouse_area",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`temp_id` INTEGER NOT NULL, PRIMARY KEY(`temp_id`))",
+        "fields": [
+          {
+            "fieldPath": "tempId",
+            "columnName": "temp_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "temp_id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "temp_warehouse_movement_content",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`warehouse_movement_id` INTEGER NOT NULL, `_id` INTEGER NOT NULL, `content_status` INTEGER NOT NULL, `asset_id` INTEGER NOT NULL, `code` TEXT NOT NULL, `description` TEXT NOT NULL, `status` INTEGER NOT NULL DEFAULT 1, `warehouse_area_id` INTEGER NOT NULL, `label_number` INTEGER, `parent_id` INTEGER, `qty` REAL, `warehouse_area_str` TEXT NOT NULL, `warehouse_str` TEXT NOT NULL, `item_category_id` INTEGER NOT NULL DEFAULT 0, `item_category_str` TEXT NOT NULL, `ownership_status` INTEGER NOT NULL DEFAULT 1, `manufacturer` TEXT, `model` TEXT, `serial_number` TEXT, `ean` TEXT, PRIMARY KEY(`_id`))",
+        "fields": [
+          {
+            "fieldPath": "warehouseMovementId",
+            "columnName": "warehouse_movement_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "id",
+            "columnName": "_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contentStatus",
+            "columnName": "content_status",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "assetId",
+            "columnName": "asset_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "code",
+            "columnName": "code",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "1"
+          },
+          {
+            "fieldPath": "warehouseAreaId",
+            "columnName": "warehouse_area_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "labelNumber",
+            "columnName": "label_number",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "parentId",
+            "columnName": "parent_id",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "qty",
+            "columnName": "qty",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "warehouseAreaStr",
+            "columnName": "warehouse_area_str",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "warehouseStr",
+            "columnName": "warehouse_str",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "itemCategoryId",
+            "columnName": "item_category_id",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "itemCategoryStr",
+            "columnName": "item_category_str",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ownershipStatus",
+            "columnName": "ownership_status",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "1"
+          },
+          {
+            "fieldPath": "manufacturer",
+            "columnName": "manufacturer",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "model",
+            "columnName": "model",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "serialNumber",
+            "columnName": "serial_number",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "ean",
+            "columnName": "ean",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "IDX_temp_warehouse_movement_content_warehouse_movement_id",
+            "unique": false,
+            "columnNames": [
+              "warehouse_movement_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_temp_warehouse_movement_content_warehouse_movement_id` ON `${TABLE_NAME}` (`warehouse_movement_id`)"
+          },
+          {
+            "name": "IDX_temp_warehouse_movement_content__id",
+            "unique": false,
+            "columnNames": [
+              "_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_temp_warehouse_movement_content__id` ON `${TABLE_NAME}` (`_id`)"
+          },
+          {
+            "name": "IDX_temp_warehouse_movement_content_asset_id",
+            "unique": false,
+            "columnNames": [
+              "asset_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_temp_warehouse_movement_content_asset_id` ON `${TABLE_NAME}` (`asset_id`)"
+          },
+          {
+            "name": "IDX_temp_warehouse_movement_content_code",
+            "unique": false,
+            "columnNames": [
+              "code"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_temp_warehouse_movement_content_code` ON `${TABLE_NAME}` (`code`)"
+          },
+          {
+            "name": "IDX_temp_warehouse_movement_content_description",
+            "unique": false,
+            "columnNames": [
+              "description"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_temp_warehouse_movement_content_description` ON `${TABLE_NAME}` (`description`)"
+          },
+          {
+            "name": "IDX_temp_warehouse_movement_content_item_category_id",
+            "unique": false,
+            "columnNames": [
+              "item_category_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_temp_warehouse_movement_content_item_category_id` ON `${TABLE_NAME}` (`item_category_id`)"
+          },
+          {
+            "name": "IDX_temp_warehouse_movement_content_warehouse_area_id",
+            "unique": false,
+            "columnNames": [
+              "warehouse_area_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_temp_warehouse_movement_content_warehouse_area_id` ON `${TABLE_NAME}` (`warehouse_area_id`)"
+          },
+          {
+            "name": "IDX_temp_warehouse_movement_content_serial_number",
+            "unique": false,
+            "columnNames": [
+              "serial_number"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_temp_warehouse_movement_content_serial_number` ON `${TABLE_NAME}` (`serial_number`)"
+          },
+          {
+            "name": "IDX_temp_warehouse_movement_content_ean",
+            "unique": false,
+            "columnNames": [
+              "ean"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_temp_warehouse_movement_content_ean` ON `${TABLE_NAME}` (`ean`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "temp_asset_review_content",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`asset_review_id` INTEGER NOT NULL, `_id` INTEGER NOT NULL, `content_status` INTEGER NOT NULL, `asset_id` INTEGER NOT NULL, `code` TEXT NOT NULL, `description` TEXT NOT NULL, `status` INTEGER NOT NULL DEFAULT 1, `warehouse_area_id` INTEGER NOT NULL, `label_number` INTEGER, `parent_id` INTEGER, `qty` REAL, `warehouse_area_str` TEXT NOT NULL, `warehouse_str` TEXT NOT NULL, `item_category_id` INTEGER NOT NULL DEFAULT 0, `item_category_str` TEXT NOT NULL, `ownership_status` INTEGER NOT NULL DEFAULT 1, `manufacturer` TEXT, `model` TEXT, `serial_number` TEXT, `ean` TEXT, PRIMARY KEY(`_id`))",
+        "fields": [
+          {
+            "fieldPath": "assetReviewId",
+            "columnName": "asset_review_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "id",
+            "columnName": "_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contentStatus",
+            "columnName": "content_status",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "assetId",
+            "columnName": "asset_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "code",
+            "columnName": "code",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "1"
+          },
+          {
+            "fieldPath": "warehouseAreaId",
+            "columnName": "warehouse_area_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "labelNumber",
+            "columnName": "label_number",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "parentId",
+            "columnName": "parent_id",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "qty",
+            "columnName": "qty",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "warehouseAreaStr",
+            "columnName": "warehouse_area_str",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "warehouseStr",
+            "columnName": "warehouse_str",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "itemCategoryId",
+            "columnName": "item_category_id",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "itemCategoryStr",
+            "columnName": "item_category_str",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ownershipStatus",
+            "columnName": "ownership_status",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "1"
+          },
+          {
+            "fieldPath": "manufacturer",
+            "columnName": "manufacturer",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "model",
+            "columnName": "model",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "serialNumber",
+            "columnName": "serial_number",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "ean",
+            "columnName": "ean",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "IDX_temp_asset_review_content_asset_review_id",
+            "unique": false,
+            "columnNames": [
+              "asset_review_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_temp_asset_review_content_asset_review_id` ON `${TABLE_NAME}` (`asset_review_id`)"
+          },
+          {
+            "name": "IDX_temp_asset_review_content__id",
+            "unique": false,
+            "columnNames": [
+              "_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_temp_asset_review_content__id` ON `${TABLE_NAME}` (`_id`)"
+          },
+          {
+            "name": "IDX_temp_asset_review_content_asset_id",
+            "unique": false,
+            "columnNames": [
+              "asset_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_temp_asset_review_content_asset_id` ON `${TABLE_NAME}` (`asset_id`)"
+          },
+          {
+            "name": "IDX_temp_asset_review_content_code",
+            "unique": false,
+            "columnNames": [
+              "code"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_temp_asset_review_content_code` ON `${TABLE_NAME}` (`code`)"
+          },
+          {
+            "name": "IDX_temp_asset_review_content_description",
+            "unique": false,
+            "columnNames": [
+              "description"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_temp_asset_review_content_description` ON `${TABLE_NAME}` (`description`)"
+          },
+          {
+            "name": "IDX_temp_asset_review_content_item_category_id",
+            "unique": false,
+            "columnNames": [
+              "item_category_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_temp_asset_review_content_item_category_id` ON `${TABLE_NAME}` (`item_category_id`)"
+          },
+          {
+            "name": "IDX_temp_asset_review_content_warehouse_area_id",
+            "unique": false,
+            "columnNames": [
+              "warehouse_area_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_temp_asset_review_content_warehouse_area_id` ON `${TABLE_NAME}` (`warehouse_area_id`)"
+          },
+          {
+            "name": "IDX_temp_asset_review_content_serial_number",
+            "unique": false,
+            "columnNames": [
+              "serial_number"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_temp_asset_review_content_serial_number` ON `${TABLE_NAME}` (`serial_number`)"
+          },
+          {
+            "name": "IDX_temp_asset_review_content_ean",
+            "unique": false,
+            "columnNames": [
+              "ean"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_temp_asset_review_content_ean` ON `${TABLE_NAME}` (`ean`)"
+          }
+        ],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'cd48ceade7ae2f1747deb25996349e07')"
+    ]
+  }
+}

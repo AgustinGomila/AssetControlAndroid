@@ -1,0 +1,25 @@
+package com.example.assetControl.data.enums.movement
+
+import com.example.assetControl.AssetControlApp.Companion.context
+import com.example.assetControl.R
+
+data class WarehouseMovementContentStatus(val id: Int, val description: String) {
+    companion object {
+        var toMove = WarehouseMovementContentStatus(
+            id = 0,
+            description = context.getString(R.string.to_move)
+        )
+        var noNeedToMove = WarehouseMovementContentStatus(
+            id = 3,
+            description = context.getString(R.string.no_need_to_move)
+        )
+
+        fun getAll(): List<WarehouseMovementContentStatus> {
+            return listOf(toMove, noNeedToMove)
+        }
+
+        fun getById(id: Int): WarehouseMovementContentStatus? {
+            return getAll().firstOrNull { it.id == id }
+        }
+    }
+}

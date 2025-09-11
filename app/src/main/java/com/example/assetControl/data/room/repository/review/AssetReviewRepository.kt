@@ -1,0 +1,92 @@
+package com.example.assetControl.data.room.repository.review
+
+import com.example.assetControl.AssetControlApp.Companion.getUserId
+import com.example.assetControl.data.enums.review.AssetReviewStatus
+import com.example.assetControl.data.room.dao.review.AssetReviewDao
+import com.example.assetControl.data.room.database.AcDatabase.Companion.database
+import com.example.assetControl.data.room.dto.location.WarehouseArea
+import com.example.assetControl.data.room.dto.review.AssetReview
+import com.example.assetControl.data.room.entity.review.AssetReviewEntity
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import java.util.*
+
+class AssetReviewRepository {
+    private val dao: AssetReviewDao
+        get() = database.assetReviewDao()
+
+    fun selectById(id: Long) = runBlocking { dao.selectById(id) }
+
+    fun selectByDescription(wDescription: String, waDescription: String, userId: Long, onlyActive: Boolean) =
+        runBlocking {
+            if (onlyActive) dao.selectByDescriptionActive(wDescription, waDescription, userId)
+            else dao.selectByDescription(wDescription, waDescription, userId)
+        }
+
+    fun selectByCompleted(userId: Long) = runBlocking { dao.selectByCompleted(userId = userId) }
+
+
+    private val nextId: Long
+        get() = runBlocking { (dao.selectMaxId() ?: 0) + 1 }
+
+
+    fun insert(warehouseArea: WarehouseArea): Long {
+        val nextId = nextId
+        val userId = getUserId() ?: return 0
+        val newId: Long
+
+        runBlocking {
+            val assetReview = AssetReview(
+                id = nextId,
+                assetReviewDate = Date(),
+                observations = "",
+                userId = userId,
+                warehouseAreaId = warehouseArea.id,
+                warehouseId = warehouseArea.warehouseId,
+                modificationDate = Date(),
+                statusId = AssetReviewStatus.onProcess.id,
+                warehouseAreaStr = warehouseArea.description,
+                warehouseStr = warehouseArea.warehouseStr,
+            )
+            newId = dao.insert(AssetReviewEntity(assetReview))
+        }
+
+        return newId
+    }
+
+
+    fun update(review: AssetReview) {
+        runBlocking(Dispatchers.IO) {
+            dao.update(AssetReviewEntity(review))
+        }
+    }
+
+    fun updateWarehouseAreaId(newValue: Long, oldValue: Long) {
+        runBlocking {
+            dao.updateWarehouseAreaId(newValue, oldValue)
+        }
+    }
+
+    fun updateWarehouseId(newValue: Long, oldValue: Long) {
+        runBlocking {
+            dao.updateWarehouseId(newValue, oldValue)
+        }
+    }
+
+    fun updateTransferred(newValue: Long, oldValue: Long) {
+        runBlocking {
+            val date = Date()
+            dao.updateId(newValue, oldValue, date)
+        }
+    }
+
+
+    fun deleteById(id: Long) = runBlocking {
+        dao.deleteById(id)
+    }
+
+    fun deleteTransferred() = runBlocking {
+        AssetReviewContentRepository().deleteTransferred()
+        dao.deleteTransferred()
+    }
+}

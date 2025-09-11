@@ -1,0 +1,2718 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "8c339dcaa4d8d98d9e036eacdc162860",
+    "entities": [
+      {
+        "tableName": "asset",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `code` TEXT NOT NULL, `description` TEXT NOT NULL, `warehouse_id` INTEGER NOT NULL, `warehouse_area_id` INTEGER NOT NULL, `active` INTEGER NOT NULL DEFAULT 1, `ownership_status` INTEGER NOT NULL DEFAULT 1, `status` INTEGER NOT NULL DEFAULT 1, `missing_date` TEXT, `item_category_id` INTEGER NOT NULL DEFAULT 0, `transferred` INTEGER, `original_warehouse_id` INTEGER NOT NULL, `original_warehouse_area_id` INTEGER NOT NULL, `label_number` INTEGER, `manufacturer` TEXT, `model` TEXT, `serial_number` TEXT, `condition` INTEGER, `cost_centre_id` INTEGER, `parent_id` INTEGER, `ean` TEXT, `last_asset_review_date` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "code",
+            "columnName": "code",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "warehouseId",
+            "columnName": "warehouse_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "warehouseAreaId",
+            "columnName": "warehouse_area_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "active",
+            "columnName": "active",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "1"
+          },
+          {
+            "fieldPath": "ownershipStatus",
+            "columnName": "ownership_status",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "1"
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "1"
+          },
+          {
+            "fieldPath": "missingDate",
+            "columnName": "missing_date",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "itemCategoryId",
+            "columnName": "item_category_id",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "transferred",
+            "columnName": "transferred",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "originalWarehouseId",
+            "columnName": "original_warehouse_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "originalWarehouseAreaId",
+            "columnName": "original_warehouse_area_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "labelNumber",
+            "columnName": "label_number",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "manufacturer",
+            "columnName": "manufacturer",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "model",
+            "columnName": "model",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "serialNumber",
+            "columnName": "serial_number",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "condition",
+            "columnName": "condition",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "costCentreId",
+            "columnName": "cost_centre_id",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "parentId",
+            "columnName": "parent_id",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "ean",
+            "columnName": "ean",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "lastAssetReviewDate",
+            "columnName": "last_asset_review_date",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "IDX_asset_code",
+            "unique": false,
+            "columnNames": [
+              "code"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_asset_code` ON `${TABLE_NAME}` (`code`)"
+          },
+          {
+            "name": "IDX_asset_description",
+            "unique": false,
+            "columnNames": [
+              "description"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_asset_description` ON `${TABLE_NAME}` (`description`)"
+          },
+          {
+            "name": "IDX_asset_item_category_id",
+            "unique": false,
+            "columnNames": [
+              "item_category_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_asset_item_category_id` ON `${TABLE_NAME}` (`item_category_id`)"
+          },
+          {
+            "name": "IDX_asset_warehouse_id",
+            "unique": false,
+            "columnNames": [
+              "warehouse_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_asset_warehouse_id` ON `${TABLE_NAME}` (`warehouse_id`)"
+          },
+          {
+            "name": "IDX_asset_warehouse_area_id",
+            "unique": false,
+            "columnNames": [
+              "warehouse_area_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_asset_warehouse_area_id` ON `${TABLE_NAME}` (`warehouse_area_id`)"
+          },
+          {
+            "name": "IDX_asset_serial_number",
+            "unique": false,
+            "columnNames": [
+              "serial_number"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_asset_serial_number` ON `${TABLE_NAME}` (`serial_number`)"
+          },
+          {
+            "name": "IDX_asset_ean",
+            "unique": false,
+            "columnNames": [
+              "ean"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_asset_ean` ON `${TABLE_NAME}` (`ean`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "asset_maintenance_collector",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER NOT NULL, `asset_id` INTEGER NOT NULL, `observations` TEXT, `transferred` INTEGER, `maintenance_status_id` INTEGER NOT NULL, `asset_maintenance_id` INTEGER NOT NULL, `maintenance_type_id` INTEGER NOT NULL, PRIMARY KEY(`_id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "assetId",
+            "columnName": "asset_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "observations",
+            "columnName": "observations",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "mTransferred",
+            "columnName": "transferred",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "maintenanceStatusId",
+            "columnName": "maintenance_status_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "assetMaintenanceId",
+            "columnName": "asset_maintenance_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "maintenanceTypeId",
+            "columnName": "maintenance_type_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "IDX_asset_maintenance_collector_asset_id",
+            "unique": false,
+            "columnNames": [
+              "asset_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_asset_maintenance_collector_asset_id` ON `${TABLE_NAME}` (`asset_id`)"
+          },
+          {
+            "name": "IDX_asset_maintenance_collector_maintenance_status_id",
+            "unique": false,
+            "columnNames": [
+              "maintenance_status_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_asset_maintenance_collector_maintenance_status_id` ON `${TABLE_NAME}` (`maintenance_status_id`)"
+          },
+          {
+            "name": "IDX_asset_maintenance_collector_asset_maintenance_id",
+            "unique": false,
+            "columnNames": [
+              "asset_maintenance_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_asset_maintenance_collector_asset_maintenance_id` ON `${TABLE_NAME}` (`asset_maintenance_id`)"
+          },
+          {
+            "name": "IDX_asset_maintenance_collector_maintenance_type_id",
+            "unique": false,
+            "columnNames": [
+              "maintenance_type_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_asset_maintenance_collector_maintenance_type_id` ON `${TABLE_NAME}` (`maintenance_type_id`)"
+          },
+          {
+            "name": "IDX_asset_maintenance_collector__id",
+            "unique": false,
+            "columnNames": [
+              "_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_asset_maintenance_collector__id` ON `${TABLE_NAME}` (`_id`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "asset_review",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `asset_review_date` INTEGER NOT NULL, `obs` TEXT, `user_id` INTEGER NOT NULL, `warehouse_area_id` INTEGER NOT NULL, `warehouse_id` INTEGER NOT NULL, `modification_date` INTEGER NOT NULL, `status_id` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "assetReviewDate",
+            "columnName": "asset_review_date",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "obs",
+            "columnName": "obs",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "userId",
+            "columnName": "user_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "warehouseAreaId",
+            "columnName": "warehouse_area_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "warehouseId",
+            "columnName": "warehouse_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "modificationDate",
+            "columnName": "modification_date",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "statusId",
+            "columnName": "status_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "IDX_asset_review_user_id",
+            "unique": false,
+            "columnNames": [
+              "user_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_asset_review_user_id` ON `${TABLE_NAME}` (`user_id`)"
+          },
+          {
+            "name": "IDX_asset_review_warehouse_area_id",
+            "unique": false,
+            "columnNames": [
+              "warehouse_area_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_asset_review_warehouse_area_id` ON `${TABLE_NAME}` (`warehouse_area_id`)"
+          },
+          {
+            "name": "IDX_asset_review_warehouse_id",
+            "unique": false,
+            "columnNames": [
+              "warehouse_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_asset_review_warehouse_id` ON `${TABLE_NAME}` (`warehouse_id`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "asset_review_content",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER NOT NULL, `asset_review_id` INTEGER NOT NULL, `asset_id` INTEGER NOT NULL, `code` TEXT NOT NULL, `description` TEXT NOT NULL, `qty` REAL, `content_status_id` INTEGER NOT NULL, `origin_warehouse_area_id` INTEGER NOT NULL, PRIMARY KEY(`_id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "assetReviewId",
+            "columnName": "asset_review_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "assetId",
+            "columnName": "asset_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "code",
+            "columnName": "code",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "qty",
+            "columnName": "qty",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "contentStatusId",
+            "columnName": "content_status_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "originWarehouseAreaId",
+            "columnName": "origin_warehouse_area_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "IDX_asset_review_content_asset_review_id",
+            "unique": false,
+            "columnNames": [
+              "asset_review_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_asset_review_content_asset_review_id` ON `${TABLE_NAME}` (`asset_review_id`)"
+          },
+          {
+            "name": "IDX_asset_review_content_asset_id",
+            "unique": false,
+            "columnNames": [
+              "asset_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_asset_review_content_asset_id` ON `${TABLE_NAME}` (`asset_id`)"
+          },
+          {
+            "name": "IDX_asset_review_content_code",
+            "unique": false,
+            "columnNames": [
+              "code"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_asset_review_content_code` ON `${TABLE_NAME}` (`code`)"
+          },
+          {
+            "name": "IDX_asset_review_content_description",
+            "unique": false,
+            "columnNames": [
+              "description"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_asset_review_content_description` ON `${TABLE_NAME}` (`description`)"
+          },
+          {
+            "name": "IDX_asset_review_content_origin_warehouse_area_id",
+            "unique": false,
+            "columnNames": [
+              "origin_warehouse_area_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_asset_review_content_origin_warehouse_area_id` ON `${TABLE_NAME}` (`origin_warehouse_area_id`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "attribute",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER NOT NULL, `description` TEXT NOT NULL, `active` INTEGER NOT NULL, `attribute_type_id` INTEGER NOT NULL, `attribute_category_id` INTEGER NOT NULL, PRIMARY KEY(`_id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "active",
+            "columnName": "active",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "attributeTypeId",
+            "columnName": "attribute_type_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "attributeCategoryId",
+            "columnName": "attribute_category_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "IDX_attribute_attribute_type_id",
+            "unique": false,
+            "columnNames": [
+              "attribute_type_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_attribute_attribute_type_id` ON `${TABLE_NAME}` (`attribute_type_id`)"
+          },
+          {
+            "name": "IDX_attribute_attribute_category_id",
+            "unique": false,
+            "columnNames": [
+              "attribute_category_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_attribute_attribute_category_id` ON `${TABLE_NAME}` (`attribute_category_id`)"
+          },
+          {
+            "name": "IDX_attribute_description",
+            "unique": false,
+            "columnNames": [
+              "description"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_attribute_description` ON `${TABLE_NAME}` (`description`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "attribute_category",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER NOT NULL, `description` TEXT NOT NULL, `active` INTEGER NOT NULL, `parent_id` INTEGER NOT NULL, PRIMARY KEY(`_id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "active",
+            "columnName": "active",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "parentId",
+            "columnName": "parent_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "IDX_attribute_category_parent_id",
+            "unique": false,
+            "columnNames": [
+              "parent_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_attribute_category_parent_id` ON `${TABLE_NAME}` (`parent_id`)"
+          },
+          {
+            "name": "IDX_attribute_category_description",
+            "unique": false,
+            "columnNames": [
+              "description"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_attribute_category_description` ON `${TABLE_NAME}` (`description`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "attribute_composition",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER NOT NULL, `attribute_id` INTEGER NOT NULL, `attribute_composition_type_id` INTEGER NOT NULL, `description` TEXT, `composition` TEXT, `used` INTEGER NOT NULL, `name` TEXT NOT NULL, `read_only` INTEGER NOT NULL, `default_value` TEXT NOT NULL, PRIMARY KEY(`_id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "attributeId",
+            "columnName": "attribute_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "attributeCompositionTypeId",
+            "columnName": "attribute_composition_type_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "composition",
+            "columnName": "composition",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "used",
+            "columnName": "used",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "readOnly",
+            "columnName": "read_only",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "defaultValue",
+            "columnName": "default_value",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "IDX_attribute_composition_attribute_id",
+            "unique": false,
+            "columnNames": [
+              "attribute_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_attribute_composition_attribute_id` ON `${TABLE_NAME}` (`attribute_id`)"
+          },
+          {
+            "name": "IDX_attribute_composition_attribute_composition_type_id",
+            "unique": false,
+            "columnNames": [
+              "attribute_composition_type_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_attribute_composition_attribute_composition_type_id` ON `${TABLE_NAME}` (`attribute_composition_type_id`)"
+          },
+          {
+            "name": "IDX_attribute_composition_description",
+            "unique": false,
+            "columnNames": [
+              "description"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_attribute_composition_description` ON `${TABLE_NAME}` (`description`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "barcode_label_custom",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER NOT NULL, `description` TEXT NOT NULL, `active` INTEGER NOT NULL, `barcode_label_target_id` INTEGER NOT NULL, `template` TEXT NOT NULL, PRIMARY KEY(`_id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "active",
+            "columnName": "active",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "barcodeLabelTargetId",
+            "columnName": "barcode_label_target_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "template",
+            "columnName": "template",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "IDX_barcode_label_custom_barcode_label_target_id",
+            "unique": false,
+            "columnNames": [
+              "barcode_label_target_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_barcode_label_custom_barcode_label_target_id` ON `${TABLE_NAME}` (`barcode_label_target_id`)"
+          },
+          {
+            "name": "IDX_barcode_label_custom_description",
+            "unique": false,
+            "columnNames": [
+              "description"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_barcode_label_custom_description` ON `${TABLE_NAME}` (`description`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "barcode_label_target",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER NOT NULL, `description` TEXT NOT NULL, PRIMARY KEY(`_id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "IDX_barcode_label_target__id",
+            "unique": false,
+            "columnNames": [
+              "_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_barcode_label_target__id` ON `${TABLE_NAME}` (`_id`)"
+          },
+          {
+            "name": "IDX_barcode_label_target_description",
+            "unique": false,
+            "columnNames": [
+              "description"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_barcode_label_target_description` ON `${TABLE_NAME}` (`description`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "data_collection",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `data_collection_id` INTEGER NOT NULL, `asset_id` INTEGER, `warehouse_id` INTEGER, `warehouse_area_id` INTEGER, `user_id` INTEGER NOT NULL, `date_start` INTEGER, `date_end` INTEGER, `completed` INTEGER NOT NULL, `transferred_date` INTEGER, `route_process_id` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataCollectionId",
+            "columnName": "data_collection_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "assetId",
+            "columnName": "asset_id",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "warehouseId",
+            "columnName": "warehouse_id",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "warehouseAreaId",
+            "columnName": "warehouse_area_id",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "userId",
+            "columnName": "user_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dateStart",
+            "columnName": "date_start",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "dateEnd",
+            "columnName": "date_end",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "completed",
+            "columnName": "completed",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "transferredDate",
+            "columnName": "transferred_date",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "routeProcessId",
+            "columnName": "route_process_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "IDX_data_collection_data_collection_id",
+            "unique": false,
+            "columnNames": [
+              "data_collection_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_data_collection_data_collection_id` ON `${TABLE_NAME}` (`data_collection_id`)"
+          },
+          {
+            "name": "IDX_data_collection_asset_id",
+            "unique": false,
+            "columnNames": [
+              "asset_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_data_collection_asset_id` ON `${TABLE_NAME}` (`asset_id`)"
+          },
+          {
+            "name": "IDX_data_collection_warehouse_id",
+            "unique": false,
+            "columnNames": [
+              "warehouse_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_data_collection_warehouse_id` ON `${TABLE_NAME}` (`warehouse_id`)"
+          },
+          {
+            "name": "IDX_data_collection_warehouse_area_id",
+            "unique": false,
+            "columnNames": [
+              "warehouse_area_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_data_collection_warehouse_area_id` ON `${TABLE_NAME}` (`warehouse_area_id`)"
+          },
+          {
+            "name": "IDX_data_collection_user_id",
+            "unique": false,
+            "columnNames": [
+              "user_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_data_collection_user_id` ON `${TABLE_NAME}` (`user_id`)"
+          },
+          {
+            "name": "IDX_data_collection_route_process_id",
+            "unique": false,
+            "columnNames": [
+              "route_process_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_data_collection_route_process_id` ON `${TABLE_NAME}` (`route_process_id`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "data_collection_content",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `data_collection_content_id` INTEGER NOT NULL, `data_collection_id` INTEGER, `level` INTEGER, `position` INTEGER, `attribute_id` INTEGER, `attribute_composition_id` INTEGER, `result` INTEGER, `value_str` TEXT NOT NULL, `data_collection_date` INTEGER NOT NULL, `data_collection_rule_content_id` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataCollectionContentId",
+            "columnName": "data_collection_content_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataCollectionId",
+            "columnName": "data_collection_id",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "level",
+            "columnName": "level",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "attributeId",
+            "columnName": "attribute_id",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "attributeCompositionId",
+            "columnName": "attribute_composition_id",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "result",
+            "columnName": "result",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "valueStr",
+            "columnName": "value_str",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataCollectionDate",
+            "columnName": "data_collection_date",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataCollectionRuleContentId",
+            "columnName": "data_collection_rule_content_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "IDX_data_collection_content_data_collection_id",
+            "unique": false,
+            "columnNames": [
+              "data_collection_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_data_collection_content_data_collection_id` ON `${TABLE_NAME}` (`data_collection_id`)"
+          },
+          {
+            "name": "IDX_data_collection_content_level",
+            "unique": false,
+            "columnNames": [
+              "level"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_data_collection_content_level` ON `${TABLE_NAME}` (`level`)"
+          },
+          {
+            "name": "IDX_data_collection_content_position",
+            "unique": false,
+            "columnNames": [
+              "position"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_data_collection_content_position` ON `${TABLE_NAME}` (`position`)"
+          },
+          {
+            "name": "IDX_data_collection_content_attribute_id",
+            "unique": false,
+            "columnNames": [
+              "attribute_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_data_collection_content_attribute_id` ON `${TABLE_NAME}` (`attribute_id`)"
+          },
+          {
+            "name": "IDX_data_collection_content_attribute_composition_id",
+            "unique": false,
+            "columnNames": [
+              "attribute_composition_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_data_collection_content_attribute_composition_id` ON `${TABLE_NAME}` (`attribute_composition_id`)"
+          },
+          {
+            "name": "IDX_data_collection_content_data_collection_content_id",
+            "unique": false,
+            "columnNames": [
+              "data_collection_content_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_data_collection_content_data_collection_content_id` ON `${TABLE_NAME}` (`data_collection_content_id`)"
+          },
+          {
+            "name": "IDX_data_collection_content_data_collection_rule_content_id",
+            "unique": false,
+            "columnNames": [
+              "data_collection_rule_content_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_data_collection_content_data_collection_rule_content_id` ON `${TABLE_NAME}` (`data_collection_rule_content_id`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "data_collection_rule",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER NOT NULL, `description` TEXT NOT NULL, `active` INTEGER NOT NULL, PRIMARY KEY(`_id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "active",
+            "columnName": "active",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "IDX_data_collection_rule_description",
+            "unique": false,
+            "columnNames": [
+              "description"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_data_collection_rule_description` ON `${TABLE_NAME}` (`description`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "data_collection_rule_content",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER NOT NULL, `data_collection_rule_id` INTEGER NOT NULL, `level` INTEGER NOT NULL, `position` INTEGER NOT NULL, `attribute_id` INTEGER NOT NULL, `attribute_composition_id` INTEGER NOT NULL, `expression` TEXT, `true_result` INTEGER NOT NULL, `false_result` INTEGER NOT NULL, `description` TEXT NOT NULL, `active` INTEGER NOT NULL, `mandatory` INTEGER NOT NULL, PRIMARY KEY(`_id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataCollectionRuleId",
+            "columnName": "data_collection_rule_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "level",
+            "columnName": "level",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "attributeId",
+            "columnName": "attribute_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "attributeCompositionId",
+            "columnName": "attribute_composition_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "expression",
+            "columnName": "expression",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "trueResult",
+            "columnName": "true_result",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "falseResult",
+            "columnName": "false_result",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mActive",
+            "columnName": "active",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mMandatory",
+            "columnName": "mandatory",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "IDX_data_collection_rule_content_data_collection_rule_id",
+            "unique": false,
+            "columnNames": [
+              "data_collection_rule_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_data_collection_rule_content_data_collection_rule_id` ON `${TABLE_NAME}` (`data_collection_rule_id`)"
+          },
+          {
+            "name": "IDX_data_collection_rule_content_level",
+            "unique": false,
+            "columnNames": [
+              "level"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_data_collection_rule_content_level` ON `${TABLE_NAME}` (`level`)"
+          },
+          {
+            "name": "IDX_data_collection_rule_content_position",
+            "unique": false,
+            "columnNames": [
+              "position"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_data_collection_rule_content_position` ON `${TABLE_NAME}` (`position`)"
+          },
+          {
+            "name": "IDX_data_collection_rule_content_attribute_id",
+            "unique": false,
+            "columnNames": [
+              "attribute_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_data_collection_rule_content_attribute_id` ON `${TABLE_NAME}` (`attribute_id`)"
+          },
+          {
+            "name": "IDX_data_collection_rule_content_attribute_composition_id",
+            "unique": false,
+            "columnNames": [
+              "attribute_composition_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_data_collection_rule_content_attribute_composition_id` ON `${TABLE_NAME}` (`attribute_composition_id`)"
+          },
+          {
+            "name": "IDX_data_collection_rule_content_description",
+            "unique": false,
+            "columnNames": [
+              "description"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_data_collection_rule_content_description` ON `${TABLE_NAME}` (`description`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "data_collection_rule_target",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `data_collection_rule_id` INTEGER NOT NULL, `asset_id` INTEGER, `warehouse_id` INTEGER, `warehouse_area_id` INTEGER, `item_category_id` INTEGER)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataCollectionRuleId",
+            "columnName": "data_collection_rule_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "assetId",
+            "columnName": "asset_id",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "warehouseId",
+            "columnName": "warehouse_id",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "warehouseAreaId",
+            "columnName": "warehouse_area_id",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "itemCategoryId",
+            "columnName": "item_category_id",
+            "affinity": "INTEGER",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "IDX_data_collection_rule_target_data_collection_rule_id",
+            "unique": false,
+            "columnNames": [
+              "data_collection_rule_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_data_collection_rule_target_data_collection_rule_id` ON `${TABLE_NAME}` (`data_collection_rule_id`)"
+          },
+          {
+            "name": "IDX_data_collection_rule_target_asset_id",
+            "unique": false,
+            "columnNames": [
+              "asset_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_data_collection_rule_target_asset_id` ON `${TABLE_NAME}` (`asset_id`)"
+          },
+          {
+            "name": "IDX_data_collection_rule_target_warehouse_id",
+            "unique": false,
+            "columnNames": [
+              "warehouse_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_data_collection_rule_target_warehouse_id` ON `${TABLE_NAME}` (`warehouse_id`)"
+          },
+          {
+            "name": "IDX_data_collection_rule_target_warehouse_area_id",
+            "unique": false,
+            "columnNames": [
+              "warehouse_area_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_data_collection_rule_target_warehouse_area_id` ON `${TABLE_NAME}` (`warehouse_area_id`)"
+          },
+          {
+            "name": "IDX_data_collection_rule_target_item_category_id",
+            "unique": false,
+            "columnNames": [
+              "item_category_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_data_collection_rule_target_item_category_id` ON `${TABLE_NAME}` (`item_category_id`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "item_category",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER NOT NULL, `description` TEXT NOT NULL, `active` INTEGER NOT NULL, `parent_id` INTEGER NOT NULL, `transferred` INTEGER, PRIMARY KEY(`_id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "active",
+            "columnName": "active",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "parentId",
+            "columnName": "parent_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "transferred",
+            "columnName": "transferred",
+            "affinity": "INTEGER",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "IDX_item_category_description",
+            "unique": false,
+            "columnNames": [
+              "description"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_item_category_description` ON `${TABLE_NAME}` (`description`)"
+          },
+          {
+            "name": "IDX_item_category_parent_id",
+            "unique": false,
+            "columnNames": [
+              "parent_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_item_category_parent_id` ON `${TABLE_NAME}` (`parent_id`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "maintenance_status",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER NOT NULL, `description` TEXT NOT NULL, PRIMARY KEY(`_id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "IDX_maintenance_status__id",
+            "unique": false,
+            "columnNames": [
+              "_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_maintenance_status__id` ON `${TABLE_NAME}` (`_id`)"
+          },
+          {
+            "name": "IDX_maintenance_status_description",
+            "unique": false,
+            "columnNames": [
+              "description"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_maintenance_status_description` ON `${TABLE_NAME}` (`description`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "maintenance_type",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER NOT NULL, `description` TEXT NOT NULL, `active` INTEGER NOT NULL, `maintenance_type_group_id` INTEGER NOT NULL, PRIMARY KEY(`_id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "active",
+            "columnName": "active",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "maintenanceTypeGroupId",
+            "columnName": "maintenance_type_group_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "IDX_maintenance_type_maintenance_type_group_id",
+            "unique": false,
+            "columnNames": [
+              "maintenance_type_group_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_maintenance_type_maintenance_type_group_id` ON `${TABLE_NAME}` (`maintenance_type_group_id`)"
+          },
+          {
+            "name": "IDX_maintenance_type_description",
+            "unique": false,
+            "columnNames": [
+              "description"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_maintenance_type_description` ON `${TABLE_NAME}` (`description`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "maintenance_type_group",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER NOT NULL, `description` TEXT NOT NULL, `active` INTEGER NOT NULL, PRIMARY KEY(`_id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "active",
+            "columnName": "active",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "IDX_maintenance_type_group_description",
+            "unique": false,
+            "columnNames": [
+              "description"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_maintenance_type_group_description` ON `${TABLE_NAME}` (`description`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "route",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER NOT NULL, `description` TEXT NOT NULL, `active` INTEGER NOT NULL, PRIMARY KEY(`_id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "active",
+            "columnName": "active",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "IDX_route_description",
+            "unique": false,
+            "columnNames": [
+              "description"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_route_description` ON `${TABLE_NAME}` (`description`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "route_composition",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`route_id` INTEGER NOT NULL, `data_collection_rule_id` INTEGER NOT NULL, `level` INTEGER NOT NULL, `position` INTEGER NOT NULL, `asset_id` INTEGER, `warehouse_id` INTEGER, `warehouse_area_id` INTEGER, `expression` TEXT, `true_result` INTEGER NOT NULL, `false_result` INTEGER NOT NULL, PRIMARY KEY(`route_id`, `level`, `position`))",
+        "fields": [
+          {
+            "fieldPath": "routeId",
+            "columnName": "route_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataCollectionRuleId",
+            "columnName": "data_collection_rule_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "level",
+            "columnName": "level",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "assetId",
+            "columnName": "asset_id",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "warehouseId",
+            "columnName": "warehouse_id",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "warehouseAreaId",
+            "columnName": "warehouse_area_id",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "expression",
+            "columnName": "expression",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "trueResult",
+            "columnName": "true_result",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "falseResult",
+            "columnName": "false_result",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "route_id",
+            "level",
+            "position"
+          ]
+        },
+        "indices": [
+          {
+            "name": "IDX_route_composition_route_id",
+            "unique": false,
+            "columnNames": [
+              "route_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_route_composition_route_id` ON `${TABLE_NAME}` (`route_id`)"
+          },
+          {
+            "name": "IDX_route_composition_data_collection_rule_id",
+            "unique": false,
+            "columnNames": [
+              "data_collection_rule_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_route_composition_data_collection_rule_id` ON `${TABLE_NAME}` (`data_collection_rule_id`)"
+          },
+          {
+            "name": "IDX_route_composition_level",
+            "unique": false,
+            "columnNames": [
+              "level"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_route_composition_level` ON `${TABLE_NAME}` (`level`)"
+          },
+          {
+            "name": "IDX_route_composition_position",
+            "unique": false,
+            "columnNames": [
+              "position"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_route_composition_position` ON `${TABLE_NAME}` (`position`)"
+          },
+          {
+            "name": "IDX_route_composition_asset_id",
+            "unique": false,
+            "columnNames": [
+              "asset_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_route_composition_asset_id` ON `${TABLE_NAME}` (`asset_id`)"
+          },
+          {
+            "name": "IDX_route_composition_warehouse_id",
+            "unique": false,
+            "columnNames": [
+              "warehouse_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_route_composition_warehouse_id` ON `${TABLE_NAME}` (`warehouse_id`)"
+          },
+          {
+            "name": "IDX_route_composition_warehouse_area_id",
+            "unique": false,
+            "columnNames": [
+              "warehouse_area_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_route_composition_warehouse_area_id` ON `${TABLE_NAME}` (`warehouse_area_id`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "route_process",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `user_id` INTEGER NOT NULL, `route_id` INTEGER NOT NULL, `route_process_id` INTEGER NOT NULL, `route_process_date` INTEGER NOT NULL, `completed` INTEGER NOT NULL, `transferred` INTEGER, `transferred_date` INTEGER)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "userId",
+            "columnName": "user_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "routeId",
+            "columnName": "route_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "routeProcessId",
+            "columnName": "route_process_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "routeProcessDate",
+            "columnName": "route_process_date",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mCompleted",
+            "columnName": "completed",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "transferred",
+            "columnName": "transferred",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "transferredDate",
+            "columnName": "transferred_date",
+            "affinity": "INTEGER",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "IDX_route_process_user_id",
+            "unique": false,
+            "columnNames": [
+              "user_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_route_process_user_id` ON `${TABLE_NAME}` (`user_id`)"
+          },
+          {
+            "name": "IDX_route_process_route_id",
+            "unique": false,
+            "columnNames": [
+              "route_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_route_process_route_id` ON `${TABLE_NAME}` (`route_id`)"
+          },
+          {
+            "name": "IDX_route_process_route_process_id",
+            "unique": false,
+            "columnNames": [
+              "route_process_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_route_process_route_process_id` ON `${TABLE_NAME}` (`route_process_id`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "route_process_content",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `route_process_id` INTEGER NOT NULL, `data_collection_rule_id` INTEGER NOT NULL, `level` INTEGER NOT NULL, `position` INTEGER NOT NULL, `route_process_status_id` INTEGER NOT NULL, `data_collection_id` INTEGER)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "routeProcessId",
+            "columnName": "route_process_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataCollectionRuleId",
+            "columnName": "data_collection_rule_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "level",
+            "columnName": "level",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "routeProcessStatusId",
+            "columnName": "route_process_status_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataCollectionId",
+            "columnName": "data_collection_id",
+            "affinity": "INTEGER",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "IDX_route_process_content_route_process_id",
+            "unique": false,
+            "columnNames": [
+              "route_process_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_route_process_content_route_process_id` ON `${TABLE_NAME}` (`route_process_id`)"
+          },
+          {
+            "name": "IDX_route_process_content_data_collection_rule_id",
+            "unique": false,
+            "columnNames": [
+              "data_collection_rule_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_route_process_content_data_collection_rule_id` ON `${TABLE_NAME}` (`data_collection_rule_id`)"
+          },
+          {
+            "name": "IDX_route_process_content_level",
+            "unique": false,
+            "columnNames": [
+              "level"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_route_process_content_level` ON `${TABLE_NAME}` (`level`)"
+          },
+          {
+            "name": "IDX_route_process_content_position",
+            "unique": false,
+            "columnNames": [
+              "position"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_route_process_content_position` ON `${TABLE_NAME}` (`position`)"
+          },
+          {
+            "name": "IDX_route_process_content_route_process_status_id",
+            "unique": false,
+            "columnNames": [
+              "route_process_status_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_route_process_content_route_process_status_id` ON `${TABLE_NAME}` (`route_process_status_id`)"
+          },
+          {
+            "name": "IDX_route_process_content_data_collection_id",
+            "unique": false,
+            "columnNames": [
+              "data_collection_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_route_process_content_data_collection_id` ON `${TABLE_NAME}` (`data_collection_id`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "route_process_status",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER NOT NULL, `description` TEXT NOT NULL, PRIMARY KEY(`_id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "IDX_route_process_status__id",
+            "unique": false,
+            "columnNames": [
+              "_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_route_process_status__id` ON `${TABLE_NAME}` (`_id`)"
+          },
+          {
+            "name": "IDX_route_process_status_description",
+            "unique": false,
+            "columnNames": [
+              "description"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_route_process_status_description` ON `${TABLE_NAME}` (`description`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "route_process_steps",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`route_process_id` INTEGER NOT NULL, `route_process_content_id` INTEGER NOT NULL, `level` INTEGER NOT NULL, `position` INTEGER NOT NULL, `data_collection_id` INTEGER, `step` INTEGER NOT NULL, PRIMARY KEY(`route_process_id`, `level`, `position`))",
+        "fields": [
+          {
+            "fieldPath": "routeProcessId",
+            "columnName": "route_process_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "routeProcessContentId",
+            "columnName": "route_process_content_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "level",
+            "columnName": "level",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataCollectionId",
+            "columnName": "data_collection_id",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "step",
+            "columnName": "step",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "route_process_id",
+            "level",
+            "position"
+          ]
+        },
+        "indices": [
+          {
+            "name": "IDX_route_process_steps_route_process_id",
+            "unique": false,
+            "columnNames": [
+              "route_process_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_route_process_steps_route_process_id` ON `${TABLE_NAME}` (`route_process_id`)"
+          },
+          {
+            "name": "IDX_route_process_steps_route_process_content_id",
+            "unique": false,
+            "columnNames": [
+              "route_process_content_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_route_process_steps_route_process_content_id` ON `${TABLE_NAME}` (`route_process_content_id`)"
+          },
+          {
+            "name": "IDX_route_process_steps_level",
+            "unique": false,
+            "columnNames": [
+              "level"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_route_process_steps_level` ON `${TABLE_NAME}` (`level`)"
+          },
+          {
+            "name": "IDX_route_process_steps_position",
+            "unique": false,
+            "columnNames": [
+              "position"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_route_process_steps_position` ON `${TABLE_NAME}` (`position`)"
+          },
+          {
+            "name": "IDX_route_process_steps_data_collection_id",
+            "unique": false,
+            "columnNames": [
+              "data_collection_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_route_process_steps_data_collection_id` ON `${TABLE_NAME}` (`data_collection_id`)"
+          },
+          {
+            "name": "IDX_route_process_steps_step",
+            "unique": false,
+            "columnNames": [
+              "step"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_route_process_steps_step` ON `${TABLE_NAME}` (`step`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "status",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER NOT NULL, `description` TEXT NOT NULL, PRIMARY KEY(`_id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "IDX_status__id",
+            "unique": false,
+            "columnNames": [
+              "_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_status__id` ON `${TABLE_NAME}` (`_id`)"
+          },
+          {
+            "name": "IDX_status_description",
+            "unique": false,
+            "columnNames": [
+              "description"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_status_description` ON `${TABLE_NAME}` (`description`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "user",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER NOT NULL, `name` TEXT NOT NULL, `external_id` TEXT, `email` TEXT NOT NULL, `active` INTEGER NOT NULL, `password` TEXT, PRIMARY KEY(`_id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "externalId",
+            "columnName": "external_id",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "email",
+            "columnName": "email",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "active",
+            "columnName": "active",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "password",
+            "columnName": "password",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "IDX_user_name",
+            "unique": false,
+            "columnNames": [
+              "name"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_user_name` ON `${TABLE_NAME}` (`name`)"
+          },
+          {
+            "name": "IDX_user_external_id",
+            "unique": false,
+            "columnNames": [
+              "external_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_user_external_id` ON `${TABLE_NAME}` (`external_id`)"
+          },
+          {
+            "name": "IDX_user_email",
+            "unique": false,
+            "columnNames": [
+              "email"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_user_email` ON `${TABLE_NAME}` (`email`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "user_permission",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`user_id` INTEGER NOT NULL, `permission_id` INTEGER NOT NULL, PRIMARY KEY(`user_id`, `permission_id`))",
+        "fields": [
+          {
+            "fieldPath": "userId",
+            "columnName": "user_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "permissionId",
+            "columnName": "permission_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "user_id",
+            "permission_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "IDX_user_permission_user_id",
+            "unique": false,
+            "columnNames": [
+              "user_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_user_permission_user_id` ON `${TABLE_NAME}` (`user_id`)"
+          },
+          {
+            "name": "IDX_user_permission_permission_id",
+            "unique": false,
+            "columnNames": [
+              "permission_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_user_permission_permission_id` ON `${TABLE_NAME}` (`permission_id`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "user_warehouse_area",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`user_id` INTEGER NOT NULL, `warehouse_area_id` INTEGER NOT NULL, `see` INTEGER NOT NULL, `move` INTEGER NOT NULL, `count` INTEGER NOT NULL, `check` INTEGER NOT NULL, PRIMARY KEY(`user_id`, `warehouse_area_id`))",
+        "fields": [
+          {
+            "fieldPath": "userId",
+            "columnName": "user_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "warehouseAreaId",
+            "columnName": "warehouse_area_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "see",
+            "columnName": "see",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "move",
+            "columnName": "move",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "count",
+            "columnName": "count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "check",
+            "columnName": "check",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "user_id",
+            "warehouse_area_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "IDX_user_warehouse_area_user_id",
+            "unique": false,
+            "columnNames": [
+              "user_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_user_warehouse_area_user_id` ON `${TABLE_NAME}` (`user_id`)"
+          },
+          {
+            "name": "IDX_user_warehouse_area_warehouse_area_id",
+            "unique": false,
+            "columnNames": [
+              "warehouse_area_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_user_warehouse_area_warehouse_area_id` ON `${TABLE_NAME}` (`warehouse_area_id`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "warehouse",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER NOT NULL, `description` TEXT NOT NULL, `active` INTEGER NOT NULL, `transferred` INTEGER, PRIMARY KEY(`_id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mActive",
+            "columnName": "active",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "transferred",
+            "columnName": "transferred",
+            "affinity": "INTEGER",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "IDX_warehouse_description",
+            "unique": false,
+            "columnNames": [
+              "description"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_warehouse_description` ON `${TABLE_NAME}` (`description`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "warehouse_area",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER NOT NULL, `description` TEXT NOT NULL, `active` INTEGER NOT NULL, `warehouse_id` INTEGER NOT NULL, `transferred` INTEGER, PRIMARY KEY(`_id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mActive",
+            "columnName": "active",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "warehouseId",
+            "columnName": "warehouse_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "transferred",
+            "columnName": "transferred",
+            "affinity": "INTEGER",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "IDX_warehouse_area_description",
+            "unique": false,
+            "columnNames": [
+              "description"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_warehouse_area_description` ON `${TABLE_NAME}` (`description`)"
+          },
+          {
+            "name": "IDX_warehouse_area_warehouse_id",
+            "unique": false,
+            "columnNames": [
+              "warehouse_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_warehouse_area_warehouse_id` ON `${TABLE_NAME}` (`warehouse_id`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "warehouse_movement",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `warehouse_movement_id` INTEGER NOT NULL, `warehouse_movement_date` INTEGER NOT NULL, `obs` TEXT, `user_id` INTEGER NOT NULL, `origin_warehouse_area_id` INTEGER NOT NULL, `origin_warehouse_id` INTEGER NOT NULL, `transferred_date` INTEGER, `destination_warehouse_area_id` INTEGER NOT NULL, `destination_warehouse_id` INTEGER NOT NULL, `completed` INTEGER)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "warehouseMovementId",
+            "columnName": "warehouse_movement_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "warehouseMovementDate",
+            "columnName": "warehouse_movement_date",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "obs",
+            "columnName": "obs",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "userId",
+            "columnName": "user_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "originWarehouseAreaId",
+            "columnName": "origin_warehouse_area_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "originWarehouseId",
+            "columnName": "origin_warehouse_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "transferredDate",
+            "columnName": "transferred_date",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "destinationWarehouseAreaId",
+            "columnName": "destination_warehouse_area_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "destinationWarehouseId",
+            "columnName": "destination_warehouse_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "completed",
+            "columnName": "completed",
+            "affinity": "INTEGER",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "IDX_warehouse_movement_warehouse_movement_id",
+            "unique": false,
+            "columnNames": [
+              "warehouse_movement_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_warehouse_movement_warehouse_movement_id` ON `${TABLE_NAME}` (`warehouse_movement_id`)"
+          },
+          {
+            "name": "IDX_warehouse_movement_user_id",
+            "unique": false,
+            "columnNames": [
+              "user_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_warehouse_movement_user_id` ON `${TABLE_NAME}` (`user_id`)"
+          },
+          {
+            "name": "IDX_warehouse_movement_origin_warehouse_area_id",
+            "unique": false,
+            "columnNames": [
+              "origin_warehouse_area_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_warehouse_movement_origin_warehouse_area_id` ON `${TABLE_NAME}` (`origin_warehouse_area_id`)"
+          },
+          {
+            "name": "IDX_warehouse_movement_origin_warehouse_id",
+            "unique": false,
+            "columnNames": [
+              "origin_warehouse_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_warehouse_movement_origin_warehouse_id` ON `${TABLE_NAME}` (`origin_warehouse_id`)"
+          },
+          {
+            "name": "IDX_warehouse_movement_destination_warehouse_area_id",
+            "unique": false,
+            "columnNames": [
+              "destination_warehouse_area_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_warehouse_movement_destination_warehouse_area_id` ON `${TABLE_NAME}` (`destination_warehouse_area_id`)"
+          },
+          {
+            "name": "IDX_warehouse_movement_destination_warehouse_id",
+            "unique": false,
+            "columnNames": [
+              "destination_warehouse_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_warehouse_movement_destination_warehouse_id` ON `${TABLE_NAME}` (`destination_warehouse_id`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "warehouse_movement_content",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `warehouse_movement_id` INTEGER NOT NULL, `asset_id` INTEGER NOT NULL, `code` TEXT NOT NULL, `qty` REAL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "warehouseMovementId",
+            "columnName": "warehouse_movement_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "assetId",
+            "columnName": "asset_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "code",
+            "columnName": "code",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "qty",
+            "columnName": "qty",
+            "affinity": "REAL",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "IDX_warehouse_movement_content_warehouse_movement_id",
+            "unique": false,
+            "columnNames": [
+              "warehouse_movement_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_warehouse_movement_content_warehouse_movement_id` ON `${TABLE_NAME}` (`warehouse_movement_id`)"
+          },
+          {
+            "name": "IDX_warehouse_movement_content_asset_id",
+            "unique": false,
+            "columnNames": [
+              "asset_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_warehouse_movement_content_asset_id` ON `${TABLE_NAME}` (`asset_id`)"
+          },
+          {
+            "name": "IDX_warehouse_movement_content_code",
+            "unique": false,
+            "columnNames": [
+              "code"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `IDX_warehouse_movement_content_code` ON `${TABLE_NAME}` (`code`)"
+          }
+        ],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8c339dcaa4d8d98d9e036eacdc162860')"
+    ]
+  }
+}
