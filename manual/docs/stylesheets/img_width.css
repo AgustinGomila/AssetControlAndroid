@@ -1,0 +1,5 @@
+/* Maximum width of images */
+.md-content img {
+    max-width: 500px !important;
+    max-height: 500px !important;
+}

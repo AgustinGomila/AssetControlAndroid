@@ -1,0 +1,77 @@
+# Bienvenido a la documentación de AssetControl
+
+## Índice
+
+- Instalación y configuración
+    - Instalación del software de escritorio
+    - [Proceso de instalación](install%2Finstall_index.md)
+        - Instalación de prequisitos
+        - Inicio de instalación del AssetControl
+        - Selección de directorio de destino
+        - Confirmar instalación
+        - Proceso de instalación
+            - Instalación del Sentinel Run-time Environment
+            - Fin de instalación
+        - Instalación de licencia
+            - Licencia perpetua de uso
+            - LicenseApplicator
+            - EMS-RUS
+                - Generación de archivo C2V
+                - Ingreso al EMS
+                - Ingreso de datos de registro
+                - Detalle de product key
+                - Carga de archivo C2V
+                - Descarga de archivo V2C
+                - Aplicación de archivo V2C
+        - Licencia de demostración
+            - Resultado de la instalación de la licencia de demostración
+    - Migrar licencia
+    - Configuración del Webservice- Instalación del software de colector
+- Software Colector
+- Pantalla de Ingreso
+- Configuración
+- [Descargar Datos](software%2Fdata_collector_windows%2Fconfiguration%2Fdownload_data%2Fdownload_data.md)
+- Configuración Avanzada
+- Configuración servidor de activos fijos
+- Configuración servidor de mantenimiento
+- Configuración proxy
+- Configuración de Tipo de colector
+- Licencia de software
+- Configuración Servidor de Imágenes (ImageControl)
+- Menú Principal
+- Alta / Modificación de Activos
+- Configuración
+- Enviar y recibir datos
+- Enviar datos
+- Recibir datos
+- Imprimir etiqueta de Activo
+- Imprimir etiqueta de Área
+- Lectura de códigos
+- Mantenimiento
+- Nuevo mantenimiento
+- Movimiento de activos
+- Pantalla de movimiento de activos
+- Finalización de movimiento
+- Confirmación de movimiento
+- Pantallas comunes
+- Buscar Activos Manualmente
+- Detalles de activo
+- Ingreso de observaciones
+- Ingreso de observaciones (ImageControl)
+- Selección de área
+- Tomar Foto
+- ¿Qué es?
+- Resultado de lectura de código
+- Recolección de Datos - Rutas
+- Selección de Ruta
+- Proceso de Ruta
+- Carga de datos
+- Ingreso de datos
+- Revisión de Activos
+- Pantalla de Revisión de área
+- Operaciones de mantenimiento
+- Terminar Revisión
+- Pantalla confirmación de revisión
+- Proceso de guardado
+- Fin de revisión
+- Vinculación Activo - RFID

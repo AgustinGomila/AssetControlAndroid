@@ -1,0 +1,73 @@
+site_name: AssetControl Manual
+nav:
+  - Home: index.md
+
+  - Instalación:
+      - Índice: ./install/install_index.md
+      - Escritorio: ./install/desktop/install.md
+      - Android: ./install/data_collector_android/install_M13.md
+      - Migración de licencia: ./install/license/license_migration.md
+  - Software:
+      - Escritorio:
+          - Índice: ./software/desktop/index.md
+          - Creación de usuarios: ./software/desktop/user/index.md
+          - Creación de rutas: ./software/desktop/route/index.md
+          - Módulo de imágenes: ./software/desktop/image_control/image_control.md
+      - Colector (Android):
+          - Índice: ./software/data_collector_android/index.md
+          - Configuración:
+              - RFID: ./software/data_collector_android/configuration/rfid_config/index.md
+              - Filtrado de rutas: ./software/data_collector_android/configuration/route_filter/index.md
+          - Recolección de datos: ./software/data_collector_android/route_process/index.md
+          - Módulo de imágenes: ./software/data_collector_android/image_control/image_control.md
+      - Colector (Windows CE):
+          - Pantalla ingreso: ./software/data_collector_windows/login.md
+          - Menú principal: ./software/data_collector_windows/main_menu.md
+          - Configuración:
+              - Índice: ./software/data_collector_windows/configuration/configuration.md
+              - Avanzado: ./software/data_collector_windows/configuration/configuration_advanced/advanced_configuration.md
+              - Servidor: ./software/data_collector_windows/configuration/configuration_advanced/server_configuration.md
+              - Licencia: ./software/data_collector_windows/configuration/configuration_advanced/license.md
+              - Descargar datos: ./software/data_collector_windows/configuration/download_data/download_data.md
+      - Infraestructura: ./software/infrastructure/infrastructure.md
+  - Políticas:
+      - Política de privacidad: ./policies/privacy_policy.md
+      - Eliminación de datos: ./policies/data_removal.md
+
+theme:
+  name: material
+  language: es
+  favicon: ./stylesheets/favicon.ico
+  logo: ./stylesheets/logo.png
+  extra:
+    generator: false
+dev_addr: 127.0.0.1:9999
+markdown_extensions:
+  - footnotes
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - def_list
+  - attr_list
+  - md_in_html
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.caret
+  - pymdownx.mark
+  - pymdownx.tilde
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+extra_css:
+  - stylesheets/full_width.css
+  - stylesheets/dacosys_colors.css
+  - stylesheets/img_width.css
+copyright: Copyright &copy; 2024 <a href="https://www.dacosys.com/">DACOSYS</a>.
+# Plugins should be the last
+plugins:
+  - search

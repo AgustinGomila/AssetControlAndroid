@@ -1,0 +1,1 @@
+# AssetControl para dispositivos Android
