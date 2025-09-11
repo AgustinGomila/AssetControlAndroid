@@ -505,9 +505,14 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
                         .filename("env")
                         .load()
 
-                    val username = env["CLIENT_EMAIL"]
-                    val password = env["CLIENT_PASSWORD"]
+                    // val uade = env["CLIENT_UADE_QR"]
+                    // scannerCompleted(uade)
 
+                    // val qrHttp = env["CLIENT_HTTP_QR"]
+                    // scannerCompleted(qrHttp)
+
+                    val username = env["CLIENT_EMAIL_CP"]
+                    val password = env["CLIENT_PASSWORD_CP"]
                     scannerCompleted("""{"config":{"client_email":"$username","client_password":"$password"}}""".trimIndent())
                     return super.onOptionsItemSelected(item)
                 }

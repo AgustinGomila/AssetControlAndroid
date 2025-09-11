@@ -525,7 +525,8 @@ class RouteProcessDbHelper {
             (route_process.completed = 0)
          */
 
-        val where = " WHERE ($TABLE_NAME.$ROUTE_ID = $routeId) AND ($TABLE_NAME.$COMPLETED = 0)"
+        val where =
+            " WHERE ($TABLE_NAME.$TRANSFERED_DATE IS NULL) AND ($TABLE_NAME.$ROUTE_ID = $routeId) AND ($TABLE_NAME.$COMPLETED = 0)"
         val rawQuery = basicSelect +
                 "," +
                 basicStrFields +
@@ -568,7 +569,7 @@ class RouteProcessDbHelper {
             (route_process.completed = 0)
          */
 
-        val where = " WHERE ($TABLE_NAME.$COMPLETED = 0)"
+        val where = " WHERE ($TABLE_NAME.$TRANSFERED_DATE IS NULL) AND ($TABLE_NAME.$COMPLETED = 0)"
         val rawQuery = basicSelect +
                 "," +
                 basicStrFields +

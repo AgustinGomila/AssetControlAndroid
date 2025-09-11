@@ -57,7 +57,7 @@ import com.dacosys.assetControl.utils.errorLog.ErrorLog
 import com.dacosys.assetControl.utils.settings.config.Preference
 import com.dacosys.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
 import com.dacosys.assetControl.utils.settings.preferences.Repository.Companion.connectionTimeout
-import com.dacosys.imageControl.network.common.ProgressStatus.CREATOR.getFinish
+import com.dacosys.imageControl.network.common.ProgressStatus.CREATOR.finishStates
 import com.dacosys.imageControl.network.upload.SendPending
 import com.dacosys.imageControl.network.upload.UpdateIdImages
 import com.dacosys.imageControl.network.upload.UploadImagesProgress
@@ -242,12 +242,12 @@ class SyncUpload(
                 Log.i(tag, "Progreso de subida: ${res.description}")
             }
 
-            if (res !in getFinish()) {
+            if (res !in finishStates()) {
                 // Reportamos solo los progresos
                 onUploadImageProgress.invoke(it)
             }
 
-            setProcessState(res in getFinish())
+            setProcessState(res in finishStates())
         }
 
         while (!getProcessState()) {
@@ -380,7 +380,7 @@ class SyncUpload(
                         newObjectId1 = arId,
                         localObjectId1 = ar.collectorAssetReviewId,
                         onUploadProgress = {
-                            if (it.result !in getFinish()) {
+                            if (it.result !in finishStates()) {
                                 // Reportamos solo los progresos
                                 onUploadImageProgress.invoke(it)
                             }
@@ -531,7 +531,7 @@ class SyncUpload(
                         newObjectId1 = wmId,
                         localObjectId1 = wm.collectorWarehouseMovementId,
                         onUploadProgress = {
-                            if (it.result !in getFinish()) {
+                            if (it.result !in finishStates()) {
                                 // Reportamos solo los progresos
                                 onUploadImageProgress.invoke(it)
                             }
@@ -671,7 +671,7 @@ class SyncUpload(
                         newObjectId1 = realAssetId,
                         localObjectId1 = a.assetId,
                         onUploadProgress = {
-                            if (it.result !in getFinish()) {
+                            if (it.result !in finishStates()) {
                                 // Reportamos solo los progresos
                                 onUploadImageProgress.invoke(it)
                             }
@@ -851,7 +851,7 @@ class SyncUpload(
                         newObjectId1 = realWarehouseAreaId,
                         localObjectId1 = wa.warehouseAreaId,
                         onUploadProgress = {
-                            if (it.result !in getFinish()) {
+                            if (it.result !in finishStates()) {
                                 // Reportamos solo los progresos
                                 onUploadImageProgress.invoke(it)
                             }
@@ -1002,7 +1002,7 @@ class SyncUpload(
                         newObjectId1 = realWarehouseId,
                         localObjectId1 = w.warehouseId,
                         onUploadProgress = {
-                            if (it.result !in getFinish()) {
+                            if (it.result !in finishStates()) {
                                 // Reportamos solo los progresos
                                 onUploadImageProgress.invoke(it)
                             }
@@ -1142,7 +1142,7 @@ class SyncUpload(
                         newObjectId1 = realItemCategoryId,
                         localObjectId1 = ic.itemCategoryId,
                         onUploadProgress = {
-                            if (it.result !in getFinish()) {
+                            if (it.result !in finishStates()) {
                                 // Reportamos solo los progresos
                                 onUploadImageProgress.invoke(it)
                             }
@@ -1299,7 +1299,7 @@ class SyncUpload(
                         newObjectId1 = dcId,
                         localObjectId1 = dc.collectorDataCollectionId,
                         onUploadProgress = {
-                            if (it.result !in getFinish()) {
+                            if (it.result !in finishStates()) {
                                 // Reportamos solo los progresos
                                 onUploadImageProgress.invoke(it)
                             }
@@ -1466,7 +1466,7 @@ class SyncUpload(
                         newObjectId1 = rpId,
                         localObjectId1 = rp.collectorRouteProcessId,
                         onUploadProgress = {
-                            if (it.result !in getFinish()) {
+                            if (it.result !in finishStates()) {
                                 // Reportamos solo los progresos
                                 onUploadImageProgress.invoke(it)
                             }
@@ -1603,7 +1603,7 @@ class SyncUpload(
                         newObjectId1 = assetMaintenanceId,
                         localObjectId1 = am.assetManteinanceId,
                         onUploadProgress = {
-                            if (it.result !in getFinish()) {
+                            if (it.result !in finishStates()) {
                                 // Reportamos solo los progresos
                                 onUploadImageProgress.invoke(it)
                             }

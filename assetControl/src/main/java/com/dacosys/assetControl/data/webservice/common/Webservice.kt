@@ -1,9 +1,7 @@
 package com.dacosys.assetControl.data.webservice.common
 
-import android.os.Build
 import android.util.Log
-import com.dacosys.assetControl.AssetControlApp.Companion.getContext
-import com.dacosys.assetControl.network.clientPackages.TrustFactory
+import com.dacosys.assetControl.network.trust.CustomSSLContext
 import com.dacosys.assetControl.utils.Statics
 import com.dacosys.assetControl.utils.misc.Md5
 import com.dacosys.assetControl.utils.settings.config.Preference
@@ -24,7 +22,6 @@ import java.net.PasswordAuthentication
 import java.net.Proxy
 import java.util.*
 import java.util.regex.Pattern
-import javax.net.ssl.HttpsURLConnection
 
 
 class Webservice @Throws(Exception::class) constructor(private var webServiceType: WebServiceType?) {
@@ -184,7 +181,7 @@ class Webservice @Throws(Exception::class) constructor(private var webServiceTyp
         val sessionSoapObject: SoapObject = when (webServiceType) {
             WebServiceType.AssetControl,
             WebServiceType.AssetControlManteinance,
-            -> getSessionObject(useConfSession)
+                -> getSessionObject(useConfSession)
 
             else -> return null
         } ?: return null
@@ -440,10 +437,9 @@ class Webservice @Throws(Exception::class) constructor(private var webServiceTyp
                     )
                     aht.debug = false
 
-                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-                        val t = TrustFactory.getTrustFactoryManager(getContext())
-                        HttpsURLConnection.setDefaultSSLSocketFactory(t.first)
-                        (aht.serviceConnection as HttpsServiceConnectionSE).setSSLSocketFactory(t.first)
+                    val sslContext = CustomSSLContext.createCustomSSLContext()
+                    if (sslContext != null) {
+                        (aht.serviceConnection as HttpsServiceConnectionSE).setSSLSocketFactory(sslContext.socketFactory)
                     }
 
                     callWithRetry(aht, soapAction, envelope, headers)

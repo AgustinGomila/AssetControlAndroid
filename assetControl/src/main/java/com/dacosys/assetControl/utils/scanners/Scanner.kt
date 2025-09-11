@@ -46,137 +46,82 @@ open class Scanner {
     }
 
     fun activityName(): String {
-        var r = ""
-        if (scannerDevice == null) return r
+        val scanner = scannerDevice ?: return ""
+        return try {
+            when (scanner) {
+                is Honeywell -> scanner.activityName
+                is HoneywellNative -> scanner.activityName
+                is Zebra -> scanner.activityName
+                else -> ""
+            }
+        } catch (e: NoClassDefFoundError) {
+            //handle carefully
+            ""
+        }
+    }
+
+    fun onResume() {
+        val scanner = scannerDevice ?: return
         try {
-            when (scannerDevice!!.javaClass) {
-                Honeywell::class.java -> {
-                    r = (scannerDevice as Honeywell).activityName
-                }
-
-                HoneywellNative::class.java -> {
-                    r = (scannerDevice as HoneywellNative).activityName
-                }
-
-                Zebra::class.java -> {
-                    r = (scannerDevice as Zebra).activityName
-                }
+            when (scanner) {
+                is Honeywell -> scanner.pause()
+                is HoneywellNative -> scanner.pause()
+                is Zebra -> scanner.pause()
             }
         } catch (e: NoClassDefFoundError) {
             //handle carefully
         }
-        return r
-    }
-
-    fun onResume() {
-        if (scannerDevice != null) {
-            try {
-                when (scannerDevice!!.javaClass) {
-                    Honeywell::class.java -> {
-                        (scannerDevice as Honeywell).resume()
-                    }
-
-                    HoneywellNative::class.java -> {
-                        (scannerDevice as HoneywellNative).resume()
-                    }
-
-                    Zebra::class.java -> {
-                        (scannerDevice as Zebra).resume()
-                    }
-                }
-            } catch (e: NoClassDefFoundError) {
-                //handle carefully
-            }
-        }
     }
 
     fun onPause() {
-        if (scannerDevice != null) {
-            try {
-                when (scannerDevice!!.javaClass) {
-                    Honeywell::class.java -> {
-                        (scannerDevice as Honeywell).pause()
-                    }
-
-                    HoneywellNative::class.java -> {
-                        (scannerDevice as HoneywellNative).pause()
-                    }
-
-                    Zebra::class.java -> {
-                        (scannerDevice as Zebra).pause()
-                    }
-                }
-            } catch (e: NoClassDefFoundError) {
-                //handle carefully
+        val scanner = scannerDevice ?: return
+        try {
+            when (scanner) {
+                is Honeywell -> scanner.pause()
+                is HoneywellNative -> scanner.pause()
+                is Zebra -> scanner.pause()
             }
+        } catch (e: NoClassDefFoundError) {
+            //handle carefully
         }
     }
 
     fun onDestroy() {
-        if (scannerDevice != null) {
-            try {
-                when (scannerDevice!!.javaClass) {
-                    Honeywell::class.java -> {
-                        //(scannerDevice as Honeywell).destroy()
-                    }
-
-                    HoneywellNative::class.java -> {
-                        (scannerDevice as HoneywellNative).destroy()
-                    }
-
-                    Zebra::class.java -> {
-                        //(scannerDevice as Zebra).destroy()
-                    }
-                }
-            } catch (e: NoClassDefFoundError) {
-                //handle carefully
+        val scanner = scannerDevice ?: return
+        try {
+            when (scanner) {
+                is HoneywellNative -> scanner.destroy()
             }
+        } catch (e: NoClassDefFoundError) {
+            //handle carefully
         }
         // release resources!
         scannerDevice = null
     }
 
     fun trigger() {
-        if (scannerDevice != null) {
-            try {
-                when (scannerDevice!!.javaClass) {
-                    Honeywell::class.java -> {
-                        (scannerDevice as Honeywell).triggerScanner()
-                    }
-
-                    HoneywellNative::class.java -> {
-                        (scannerDevice as HoneywellNative).triggerScanner()
-                    }
-
-                    Zebra::class.java -> {
-                        (scannerDevice as Zebra).triggerScanner()
-                    }
-                }
-            } catch (e: NoClassDefFoundError) {
-                //handle carefully
+        val scanner = scannerDevice ?: return
+        try {
+            when (scanner) {
+                is Honeywell -> scanner.triggerScanner()
+                is HoneywellNative -> scanner.triggerScanner()
+                is Zebra -> scanner.triggerScanner()
             }
+        } catch (e: NoClassDefFoundError) {
+            //handle carefully
         }
     }
 
     fun lockScanner(lock: Boolean) {
-        if (scannerDevice != null) {
-            try {
-                when (scannerDevice!!.javaClass) {
-                    Honeywell::class.java -> {
-                        (scannerDevice as Honeywell).lockScannerEvent = lock
-                    }
-
-                    HoneywellNative::class.java -> {
-                        (scannerDevice as HoneywellNative).lockScannerEvent = lock
-                    }
-
-                    Zebra::class.java -> {
-                        (scannerDevice as Zebra).lockScannerEvent = lock
-                    }
-                }
-            } catch (e: NoClassDefFoundError) {
-                //handle carefully
+        val scanner = scannerDevice ?: return
+        try {
+            when (scanner) {
+                is Honeywell -> scanner.lockScannerEvent = lock
+                is HoneywellNative -> scanner.lockScannerEvent = lock
+                is Zebra -> scanner.lockScannerEvent = lock
             }
+        } catch (e: NoClassDefFoundError) {
+            //handle carefully
         }
     }
 }
