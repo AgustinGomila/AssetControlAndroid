@@ -23,32 +23,32 @@ import java.lang.ref.WeakReference
 
 class ClientPackage {
     companion object : DialogInterface.OnMultiChoiceClickListener {
-
         // region Selección automática de paquetes del cliente
         private var allProductsArray: ArrayList<JSONObject> = ArrayList()
         private var validProductsArray: ArrayList<JSONObject> = ArrayList()
         private var selected: BooleanArray? = null
 
         override fun onClick(dialog: DialogInterface?, which: Int, isChecked: Boolean) {
-            if (isChecked) {
-                val tempProdVersionId = validProductsArray[which].getString("product_version_id")
-
-                for (i in 0 until validProductsArray.size) {
-                    if ((selected ?: return)[i]) {
-                        val prodVerId = validProductsArray[i].getString("product_version_id")
-                        if (prodVerId == tempProdVersionId) {
-                            (selected ?: return)[i] = false
-                            (dialog as AlertDialog).listView.setItemChecked(i, false)
-                        }
-                    }
-                }
-            }
-
+            if (isChecked) clickedProduct(dialog, which)
             (selected ?: return)[which] = isChecked
         }
 
         private var ValidProducts = getValidProducts()
         private var finishByUser = false
+
+        private fun clickedProduct(dialog: DialogInterface?, which: Int) {
+            val tempProdVersionId = validProductsArray[which].getString(PRODUCT_VERSION_ID_TAG)
+
+            for (i in 0 until validProductsArray.size) {
+                if ((selected ?: return)[i]) {
+                    val prodVerId = validProductsArray[i].getString(PRODUCT_VERSION_ID_TAG)
+                    if (prodVerId == tempProdVersionId) {
+                        (selected ?: return)[i] = false
+                        (dialog as AlertDialog).listView.setItemChecked(i, false)
+                    }
+                }
+            }
+        }
 
         private fun getValidProducts(): ArrayList<String> {
             val r: ArrayList<String> = ArrayList()
@@ -70,7 +70,7 @@ class ClientPackage {
 
             allProductsArray.clear()
             for (pack in allPackage) {
-                val pvId = pack.getString("product_version_id")
+                val pvId = pack.getString(PRODUCT_VERSION_ID_TAG)
                 if (ValidProducts.contains(pvId) && !allProductsArray.contains(pack)) {
                     allProductsArray.add(pack)
                 }
@@ -78,9 +78,9 @@ class ClientPackage {
 
             // Comprobamos que el usuario tenga opciones para elegir o podemos configurar el sistema de forma automática.
             val allMainApp =
-                allProductsArray.mapNotNull { if (it.getString("product_version_id") == Statics.APP_VERSION_ID.toString()) it else null }
+                allProductsArray.mapNotNull { if (it.getString(PRODUCT_VERSION_ID_TAG) == Statics.APP_VERSION_ID.toString()) it else null }
             val allSecondApp =
-                allProductsArray.mapNotNull { if (it.getString("product_version_id") == Statics.APP_VERSION_ID_IMAGE_CONTROL.toString()) it else null }
+                allProductsArray.mapNotNull { if (it.getString(PRODUCT_VERSION_ID_TAG) == Statics.APP_VERSION_ID_IMAGE_CONTROL.toString()) it else null }
 
             if (allMainApp.isEmpty() && allSecondApp.isEmpty()) {
                 MakeText.makeText(
@@ -117,12 +117,12 @@ class ClientPackage {
 
             // Unimos y ordenamos la lista para que los diferentes tipos de paquetes queden agrupados
             validProductsArray =
-                ArrayList(allMainApp.union(allSecondApp).sortedBy { it.getString("product_version_id") })
+                ArrayList(allMainApp.union(allSecondApp).sortedBy { it.getString(PRODUCT_VERSION_ID_TAG) })
             val listItems: ArrayList<String> = ArrayList()
 
             for (pack in validProductsArray) {
-                val clientPackage = pack.getString("client_package_content_description")
-                val installationCode = pack.getString("installation_code")
+                val clientPackage = pack.getString(CLIENT_PACKAGE_CONTENT_DESCRIPTION_TAG)
+                val installationCode = pack.getString(INSTALLATION_CODE_TAG)
                 val packageStr = "$clientPackage (${installationCode})"
 
                 listItems.add(packageStr)
@@ -137,7 +137,7 @@ class ClientPackage {
             val title = TextView(activity)
             title.text = String.format(
                 "%s - %s",
-                allProductsArray.first().getString("client"),
+                allProductsArray.first().getString(CLIENT_TAG),
                 AssetControlApp.context.getString(R.string.select_package)
             )
             title.textSize = 16F
@@ -197,7 +197,7 @@ class ClientPackage {
             password: String,
         ) {
             for (pack in packArray) {
-                val active = pack.getInt("active")
+                val active = pack.getInt(ACTIVE_TAG)
                 if (active == 0) {
                     MakeText.makeText(
                         parentView,
@@ -208,10 +208,10 @@ class ClientPackage {
                 }
 
                 // PANEL DE CONFIGURACIÓN
-                val productId = pack.getString("product_version_id")
-                val panelJsonObj = pack.getJSONObject("panel")
+                val productId = pack.getString(PRODUCT_VERSION_ID_TAG)
+                val panelJsonObj = pack.getJSONObject(PANEL_TAG)
                 val appUrl = when {
-                    panelJsonObj.has("url") -> panelJsonObj.getString("url") ?: ""
+                    panelJsonObj.has(WS_URL_TAG) -> panelJsonObj.getString(WS_URL_TAG).orEmpty()
                     else -> ""
                 }
 
@@ -226,14 +226,15 @@ class ClientPackage {
                 }
 
                 val clientPackage = when {
-                    pack.has("client_package_content_description") -> pack.getString("client_package_content_description")
-                        ?: ""
+                    pack.has(CLIENT_PACKAGE_CONTENT_DESCRIPTION_TAG) -> pack.getString(
+                        CLIENT_PACKAGE_CONTENT_DESCRIPTION_TAG
+                    ).orEmpty()
 
                     else -> ""
                 }
 
                 val installationCode = when {
-                    pack.has("installation_code") -> pack.getString("installation_code") ?: ""
+                    pack.has(INSTALLATION_CODE_TAG) -> pack.getString(INSTALLATION_CODE_TAG).orEmpty()
                     else -> ""
                 }
 
@@ -244,17 +245,17 @@ class ClientPackage {
                 var icUser: String
                 var icPass: String
 
-                val wsJsonObj = pack.getJSONObject("ws")
-                url = if (wsJsonObj.has("url")) wsJsonObj.getString("url") else ""
-                namespace = if (wsJsonObj.has("namespace")) wsJsonObj.getString("namespace") else ""
-                user = if (wsJsonObj.has("ws_user")) wsJsonObj.getString("ws_user") else ""
-                pass = if (wsJsonObj.has("ws_password")) wsJsonObj.getString("ws_password") else ""
+                val wsJsonObj = pack.getJSONObject(WS_TAG)
+                url = if (wsJsonObj.has(WS_URL_TAG)) wsJsonObj.getString(WS_URL_TAG) else ""
+                namespace = if (wsJsonObj.has(WS_NAMESPACE_TAG)) wsJsonObj.getString(WS_NAMESPACE_TAG) else ""
+                user = if (wsJsonObj.has(WS_USER_TAG)) wsJsonObj.getString(WS_USER_TAG) else ""
+                pass = if (wsJsonObj.has(WS_PASSWORD_TAG)) wsJsonObj.getString(WS_PASSWORD_TAG) else ""
 
-                val customOptJsonObj = pack.getJSONObject("custom_options")
+                val customOptJsonObj = pack.getJSONObject(CUSTOM_OPTIONS_TAG)
                 icUser =
-                    if (customOptJsonObj.has("ic_user")) customOptJsonObj.getString("ic_user") else ""
+                    if (customOptJsonObj.has(IC_USER_TAG)) customOptJsonObj.getString(IC_USER_TAG) else ""
                 icPass =
-                    if (customOptJsonObj.has("ic_password")) customOptJsonObj.getString("ic_password") else ""
+                    if (customOptJsonObj.has(IC_PASSWORD_TAG)) customOptJsonObj.getString(IC_PASSWORD_TAG) else ""
 
                 val x = Preferences.prefs.edit()
                 if (productId == Statics.APP_VERSION_ID.toString()) {
@@ -286,5 +287,31 @@ class ClientPackage {
             callback.onTaskConfigPanelEnded(ProgressStatus.finished)
         }
         // endregion
+
+        // region JSON values
+        const val ACTIVE_TAG = "active"
+        const val AUTHDATA_TAG = "authdata"
+        const val CLIENT_PACKAGE_CONTENT_DESCRIPTION_TAG = "client_package_content_description"
+        const val CLIENT_TAG = "client"
+        const val CODE_TAG = "code"
+        const val CUSTOM_OPTIONS_TAG = "custom_options"
+        const val DESCRIPTION_TAG = "description"
+        const val EMAIL_TAG = "email"
+        const val ERROR_TAG = "error"
+        const val IC_PASSWORD_TAG = "ic_password"
+        const val IC_USER_TAG = "ic_user"
+        const val INSTALLATION_CODE_TAG = "installation_code"
+        const val NAME_TAG = "name"
+        const val PACKAGES_TAG = "packages"
+        const val PANEL_TAG = "panel"
+        const val PASSWORD_TAG = "password"
+        const val PRODUCT_VERSION_ID_TAG = "product_version_id"
+        const val VERSION_TAG = "version"
+        const val WS_NAMESPACE_TAG = "namespace"
+        const val WS_PASSWORD_TAG = "ws_password"
+        const val WS_TAG = "ws"
+        const val WS_URL_TAG = "url"
+        const val WS_USER_TAG = "ws_user"
+        // endregion JSON values
     }
 }

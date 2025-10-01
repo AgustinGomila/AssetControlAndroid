@@ -18,10 +18,10 @@ class AssetControlApp : Application(), KoinComponent {
             androidContext(this@AssetControlApp)
             modules(appModule)
         }
-        initialize()
+        initDeviceListening()
     }
 
-    private fun initialize() {
+    private fun initDeviceListening() {
         /** Star listening activities events **/
         deviceLifecycle.startListening()
     }
@@ -29,7 +29,7 @@ class AssetControlApp : Application(), KoinComponent {
     companion object {
         val context: Context by lazy { get().get() }
         val deviceLifecycle: DeviceLifecycle by lazy { get().get() }
-        val appName: String by lazy { "${getApplicationName()}M13" }
+        val appName: String by lazy { "${getApplicationName()}${MILESTONE}" }
         val imageControl: ImageControl by lazy { get().get() }
 
         private fun getApplicationName(): String {
@@ -40,6 +40,7 @@ class AssetControlApp : Application(), KoinComponent {
             }
         }
 
+        private const val MILESTONE = "M13"
         private var currentUserId: Long? = null
 
         /**

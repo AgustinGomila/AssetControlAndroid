@@ -4,6 +4,18 @@ import android.util.Log
 import com.example.assetControl.AssetControlApp.Companion.context
 import com.example.assetControl.R
 import com.example.assetControl.network.trust.CustomSSLContext
+import com.example.assetControl.network.utils.ClientPackage.Companion.ACTIVE_TAG
+import com.example.assetControl.network.utils.ClientPackage.Companion.AUTHDATA_TAG
+import com.example.assetControl.network.utils.ClientPackage.Companion.CODE_TAG
+import com.example.assetControl.network.utils.ClientPackage.Companion.DESCRIPTION_TAG
+import com.example.assetControl.network.utils.ClientPackage.Companion.EMAIL_TAG
+import com.example.assetControl.network.utils.ClientPackage.Companion.ERROR_TAG
+import com.example.assetControl.network.utils.ClientPackage.Companion.INSTALLATION_CODE_TAG
+import com.example.assetControl.network.utils.ClientPackage.Companion.NAME_TAG
+import com.example.assetControl.network.utils.ClientPackage.Companion.PACKAGES_TAG
+import com.example.assetControl.network.utils.ClientPackage.Companion.PASSWORD_TAG
+import com.example.assetControl.network.utils.ClientPackage.Companion.PRODUCT_VERSION_ID_TAG
+import com.example.assetControl.network.utils.ClientPackage.Companion.VERSION_TAG
 import com.example.assetControl.network.utils.Connection.Companion.isOnline
 import com.example.assetControl.network.utils.ProgressStatus
 import com.example.assetControl.utils.Statics
@@ -112,12 +124,12 @@ class GetClientPackages(
 
             val authDataCont = JSONObject()
             authDataCont
-                .put("version", "1")
-                .put("email", email)
-                .put("password", password)
+                .put(VERSION_TAG, "1")
+                .put(EMAIL_TAG, email)
+                .put(PASSWORD_TAG, password)
 
             val jsonParam = JSONObject()
-            jsonParam.put("authdata", authDataCont)
+            jsonParam.put(AUTHDATA_TAG, authDataCont)
 
             // Mostrar el resultado en logcat
             val utf8JsonString = jsonParam.toString().toByteArray(charset("UTF8"))
@@ -160,12 +172,12 @@ class GetClientPackages(
         try {
             val jsonObj = JSONObject(response.toString())
 
-            if (jsonObj.has("error")) {
-                val error = jsonObj.getJSONObject("error")
+            if (jsonObj.has(ERROR_TAG)) {
+                val error = jsonObj.getJSONObject(ERROR_TAG)
 
-                val code = error.getString("code")
-                val name = error.getString("name")
-                val description = error.getString("description")
+                val code = error.getString(CODE_TAG)
+                val name = error.getString(NAME_TAG)
+                val description = error.getString(DESCRIPTION_TAG)
 
                 sendMessage(
                     status = ProgressStatus.crashed,
@@ -174,20 +186,20 @@ class GetClientPackages(
                 return
             }
 
-            if (jsonObj.has("packages")) {
-                val jsonPackages = jsonObj.getJSONObject("packages")
+            if (jsonObj.has(PACKAGES_TAG)) {
+                val jsonPackages = jsonObj.getJSONObject(PACKAGES_TAG)
 
                 for (k in jsonPackages.keys()) {
                     val jsonPack = jsonPackages.getJSONObject(k)
                     if (installationCode.trim().isNotEmpty()) {
-                        val tempInstallationCode = jsonPack.getString("installation_code")
+                        val tempInstallationCode = jsonPack.getString(INSTALLATION_CODE_TAG)
                         if (tempInstallationCode != installationCode) {
                             continue
                         }
                     }
 
-                    val productId = jsonPack.getInt("product_version_id")
-                    if (jsonPack.getInt("active") == 1 &&
+                    val productId = jsonPack.getInt(PRODUCT_VERSION_ID_TAG)
+                    if (jsonPack.getInt(ACTIVE_TAG) == 1 &&
                         (productId == Statics.APP_VERSION_ID || productId == Statics.APP_VERSION_ID_IMAGE_CONTROL)
                     ) {
                         result.add(jsonPack)
