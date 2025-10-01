@@ -131,7 +131,7 @@ class AssetSelectViewModel(
     fun applyCompleteList(
         assets: List<Asset>,
     ) {
-        updateState { state -> state.copy(completeList = assets) }
+        updateState { it.copy(completeList = assets, isLoading = false) }
     }
 
     fun applyFilters(

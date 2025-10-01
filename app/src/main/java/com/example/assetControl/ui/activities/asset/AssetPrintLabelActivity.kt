@@ -200,9 +200,6 @@ class AssetPrintLabelActivity : BasePanelActivity(), SwipeRefreshLayout.OnRefres
         fillSummaryRow()
     }
 
-
-    private var tempTitle = ""
-
     private var rejectNewInstances = false
 
     // Se usa para saber si estamos en onStart luego de onCreate
@@ -233,22 +230,6 @@ class AssetPrintLabelActivity : BasePanelActivity(), SwipeRefreshLayout.OnRefres
     private val visibleStatus
         get() = filterFragment?.visibleStatusArray ?: ArrayList(AssetStatus.getAll())
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        saveCurrentListInTemporaryDB()
-    }
-
-    private fun saveCurrentListInTemporaryDB() {
-        // Guardar en la DB temporalmente los ítems listados
-        TempAssetRepository().insert(currentList.map { TempAssetEntity(it.id) })
-    }
-
-    private fun loadLastListFromTemporaryDB() {
-        // Carga del estado del adaptador desde la tabla temporal.
-        val list = TempAssetRepository().select().map { Asset(it.tempId) }
-        viewModel.applyCompleteList(list)
-    }
-
     private lateinit var binding: AssetPrintLabelActivityTopPanelCollapsedBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -267,8 +248,16 @@ class AssetPrintLabelActivity : BasePanelActivity(), SwipeRefreshLayout.OnRefres
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
+                    // Carga del estado del adaptador desde la tabla temporal.
+                    val list = TempAssetRepository().select().map { Asset(it.tempId) }
+                    viewModel.applyCompleteList(list)
+
                     updateUI(state)
                 }
+            }
+            repeatOnLifecycle(Lifecycle.State.DESTROYED) {
+                // Guardar en la DB temporalmente los ítems listados
+                TempAssetRepository().insert(currentList.map { TempAssetEntity(it.id) })
             }
         }
     }
@@ -287,10 +276,7 @@ class AssetPrintLabelActivity : BasePanelActivity(), SwipeRefreshLayout.OnRefres
         setupPrintFragment()
         setSearchEditText()
 
-        if (savedInstanceState != null) {
-            loadLastListFromTemporaryDB()
-        } else {
-            // Borramos los Ids temporales al crear la actividad por primera vez.
+        if (savedInstanceState == null) {
             TempAssetRepository().deleteAll()
         }
 
