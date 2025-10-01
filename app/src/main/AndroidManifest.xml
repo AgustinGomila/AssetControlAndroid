@@ -60,7 +60,7 @@
             android:networkSecurityConfig="@xml/network_security_config"
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
-            android:theme="@style/AssetControlTheme"
+            android:theme="@style/AssetControlNoActionBarTheme"
             android:usesCleartextTraffic="true"
             tools:ignore="GoogleAppIndexingWarning">
 
@@ -153,7 +153,6 @@
         <activity
                 android:name=".ui.activities.asset.AssetPrintLabelActivity"
                 android:windowSoftInputMode="adjustResize"
-                android:theme="@style/AssetControlNoActionBarTheme"
                 android:exported="false"/>
         <activity android:name=".ui.activities.review.ArcConfirmActivity"/>
         <activity

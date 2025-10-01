@@ -236,8 +236,10 @@ class CodeCheckActivity : AppCompatActivity(),
 
             menuItemRandomWa -> {
                 val allWa = WarehouseAreaRepository().select(true)
-                val waId = allWa[Random().nextInt(allWa.count())].id
-                if (allWa.any()) scannerCompleted("#WA#${String.format("%05d", waId)}#")
+                if (allWa.any()) {
+                    val waId = allWa[Random().nextInt(allWa.count())].id
+                    scannerCompleted("#WA#${String.format("%05d", waId)}#")
+                }
                 return super.onOptionsItemSelected(item)
             }
 

@@ -11,6 +11,8 @@
         <item name="android:textColorSecondary">@color/assetControlDark</item>
         <item name="android:statusBarColor">@color/triad1</item>
         <item name="android:navigationBarColor">@color/assetControlDark</item>
+        <item name="iconTint">@color/cornsilk</item>
+        <item name="android:iconTint">@color/cornsilk</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
@@ -22,9 +24,11 @@
         <item name="colorSecondary">@color/triad3</item>
         <item name="colorSecondaryVariant">@color/triad2</item>
         <item name="colorOnSecondary">@color/text_dark</item>
-        <item name="android:textColorSecondary">@color/assetControlDark</item>
+        <item name="android:textColorSecondary">@color/cornsilk</item>
         <item name="android:statusBarColor">@color/triad1</item>
         <item name="android:navigationBarColor">@color/assetControlDark</item>
+        <item name="iconTint">@color/cornsilk</item>
+        <item name="android:iconTint">@color/cornsilk</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
