@@ -24,6 +24,7 @@ import androidx.transition.TransitionManager
 import com.dacosys.imageControl.ui.fragments.ImageControlButtonsFragment
 import com.example.assetControl.AssetControlApp.Companion.currentUser
 import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.data.enums.common.ConfirmStatus
 import com.example.assetControl.data.enums.common.Table
@@ -43,7 +44,6 @@ import com.example.assetControl.ui.common.utils.Screen.Companion.setupUI
 import com.example.assetControl.ui.fragments.movement.LocationHeaderFragment
 import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.parcel.Parcelables.parcelable
-import com.example.assetControl.utils.settings.config.Preference
 import org.parceler.Parcels
 
 class ArcConfirmActivity : AppCompatActivity(),
@@ -96,9 +96,9 @@ class ArcConfirmActivity : AppCompatActivity(),
     private var panelBottomIsExpanded = false
     private var panelTopIsExpanded = true
     private var showImages
-        get() = sr.prefsGetBoolean(Preference.reviewContentShowImages)
+        get() = svm.reviewContentShowImages
         set(value) {
-            sr.prefsPutBoolean(Preference.reviewContentShowImages.key, value)
+            svm.reviewContentShowImages = value
         }
 
     override fun onStart() {
@@ -208,7 +208,7 @@ class ArcConfirmActivity : AppCompatActivity(),
 
         binding.obsButton.setOnClickListener { addObservations() }
         binding.completedTextView.setOnClickListener { binding.completedSwitch.performClick() }
-        binding.completedSwitch.isChecked = sr.prefsGetBoolean(Preference.assetReviewCompletedCheckBox)
+        binding.completedSwitch.isChecked = svm.assetReviewCompletedCheckBox
         binding.confirmButton.setOnClickListener { confirmCount() }
 
         setPanels()
@@ -380,7 +380,7 @@ class ArcConfirmActivity : AppCompatActivity(),
                     .replace(binding.imageControlFragment.id, imageControlFragment ?: return@runOnUiThread)
                     .commit()
 
-                if (!sr.prefsGetBoolean(Preference.useImageControl)) {
+                if (!svm.useImageControl) {
                     fm.beginTransaction()
                         .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
                         .hide(imageControlFragment as Fragment)
@@ -515,7 +515,7 @@ class ArcConfirmActivity : AppCompatActivity(),
 
     private fun confirmCount() {
         // Si tiene firma obligatoria, no está firmado y la revisión está completada, solicitar firma.
-        if (sr.prefsGetBoolean(Preference.signReviewsAndMovements) && !(imageControlFragment
+        if (svm.signReviewsAndMovements && !(imageControlFragment
                 ?: return).isSigned && binding.completedSwitch.isChecked
         ) {
             makeText(

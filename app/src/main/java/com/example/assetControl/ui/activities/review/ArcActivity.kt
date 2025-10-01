@@ -285,7 +285,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
     private var firstVisiblePos: Int? = null
 
     private var visibleStatusArray: ArrayList<AssetReviewContentStatus> = ArrayList()
-    private val allowQuickReview: Boolean by lazy { sr.prefsGetBoolean(Preference.quickReviews) }
+    private val allowQuickReview: Boolean by lazy { svm.quickReviews }
 
     private var unknownAssetId: Long = 0
 
@@ -298,7 +298,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private val menuItemShowImages = 9999
     private var showImages
-        get() = sr.prefsGetBoolean(Preference.reviewContentShowImages)
+        get() = svm.reviewContentShowImages
         set(value) {
             sr.prefsPutBoolean(Preference.reviewContentShowImages.key, value)
         }
@@ -306,7 +306,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
     private var showCheckBoxes
         get() =
             if (!allowQuickReview) false
-            else sr.prefsGetBoolean(Preference.reviewContentShowCheckBoxes)
+            else svm.reviewContentShowCheckBoxes
         set(value) {
             sr.prefsPutBoolean(Preference.reviewContentShowCheckBoxes.key, value)
         }
@@ -369,11 +369,11 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         if (b.containsKey("allowUnknownCodes")) binding.allowUnknownCodesSwitch.isChecked =
             b.getBoolean("allowUnknownCodes")
-        else binding.allowUnknownCodesSwitch.isChecked = sr.prefsGetBoolean(Preference.assetReviewAllowUnknownCodes)
+        else binding.allowUnknownCodesSwitch.isChecked = svm.assetReviewAllowUnknownCodes
 
         if (b.containsKey("addUnknownAssets")) binding.addUnknownAssetsSwitch.isChecked =
             b.getBoolean("addUnknownAssets")
-        else binding.addUnknownAssetsSwitch.isChecked = sr.prefsGetBoolean(Preference.assetReviewAddUnknownAssets)
+        else binding.addUnknownAssetsSwitch.isChecked = svm.assetReviewAddUnknownAssets
 
         unknownAssetId = b.getLong("unknownAssetId")
 
@@ -406,8 +406,8 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private fun loadDefaultValues() {
         tempTitle = getString(R.string.asset_review)
-        binding.allowUnknownCodesSwitch.isChecked = sr.prefsGetBoolean(Preference.assetReviewAllowUnknownCodes)
-        binding.addUnknownAssetsSwitch.isChecked = sr.prefsGetBoolean(Preference.assetReviewAddUnknownAssets)
+        binding.allowUnknownCodesSwitch.isChecked = svm.assetReviewAllowUnknownCodes
+        binding.addUnknownAssetsSwitch.isChecked = svm.assetReviewAddUnknownAssets
         loadDefaultVisibleStatus()
     }
 
@@ -517,7 +517,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
                 binding.addUnknownAssetsSwitch.isChecked = false
             }
         }
-        binding.allowUnknownCodesSwitch.isChecked = sr.prefsGetBoolean(Preference.assetReviewAllowUnknownCodes)
+        binding.allowUnknownCodesSwitch.isChecked = svm.assetReviewAllowUnknownCodes
         binding.allowUnknownAssetTextView.setOnClickListener { binding.allowUnknownCodesSwitch.performClick() }
 
         binding.addUnknownAssetsSwitch.setOnCheckedChangeListener { _, isChecked ->
@@ -525,7 +525,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
                 binding.allowUnknownCodesSwitch.isChecked = true
             }
         }
-        binding.addUnknownAssetsSwitch.isChecked = sr.prefsGetBoolean(Preference.assetReviewAddUnknownAssets)
+        binding.addUnknownAssetsSwitch.isChecked = svm.assetReviewAddUnknownAssets
         binding.unknownAssetRegistrationTextView.setOnClickListener { binding.addUnknownAssetsSwitch.performClick() }
 
         binding.mantButton.setOnClickListener {
@@ -535,7 +535,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
             }
         }
 
-        if (!sr.prefsGetBoolean(Preference.useAssetControlManteinance)) {
+        if (!svm.useAssetControlManteinance) {
             binding.mantButton.isEnabled = false
         }
 
@@ -1158,7 +1158,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private val showScannedCode: Boolean
         get() {
-            return sr.prefsGetBoolean(Preference.showScannedCode)
+            return svm.showScannedCode
         }
 
     override fun scannerCompleted(scanCode: String) {
@@ -2129,7 +2129,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     override fun onStateChanged(state: Int) {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
-        if (sr.prefsGetBoolean(Preference.rfidShowConnectedMessage)) {
+        if (svm.rfidShowConnectedMessage) {
             when (Rfid.vh75State) {
                 Vh75Bt.STATE_CONNECTED -> {
                     makeText(

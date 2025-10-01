@@ -2,10 +2,9 @@ package com.example.assetControl.network.sync
 
 import android.os.Handler
 import android.os.Looper
-import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.network.utils.Connection.Companion.autoSend
 import com.example.assetControl.utils.errorLog.ErrorLog
-import com.example.assetControl.utils.settings.config.Preference
 import java.util.*
 
 @Suppress("unused")
@@ -53,7 +52,7 @@ class Sync {
                 cancelTimer()
 
                 timer = Timer()
-                val interval = sr.prefsGetInt(Preference.acSyncInterval)
+                val interval = svm.acSyncInterval
 
                 timerTask = object : TimerTask() {
                     override fun run() {

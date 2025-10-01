@@ -19,6 +19,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.assetControl.AssetControlApp.Companion.context
 import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.databinding.FloatingCameraActivityBinding
 import com.example.assetControl.devices.scanners.Scanner
@@ -375,20 +376,15 @@ class FloatingCameraBarcode(private var activity: AppCompatActivity) : BarcodeCa
         flCameraMinWidth = Preference.flCameraPortraitWidth.defaultValue as Int
         flCameraMinHeight = Preference.flCameraPortraitHeight.defaultValue as Int
 
-        flCameraPortraitLoc =
-            intArrayOf(sr.prefsGetInt(Preference.flCameraPortraitLocX), sr.prefsGetInt(Preference.flCameraPortraitLocY))
-        flCameraPortraitWidth = min(sr.prefsGetInt(Preference.flCameraPortraitWidth), screenWidth)
-        flCameraPortraitHeight = min(sr.prefsGetInt(Preference.flCameraPortraitHeight), screenHeight)
-        flCameraLandscapeLoc =
-            intArrayOf(
-                sr.prefsGetInt(Preference.flCameraLandscapeLocX),
-                sr.prefsGetInt(Preference.flCameraLandscapeLocY)
-            )
-        flCameraLandscapeWidth = min(sr.prefsGetInt(Preference.flCameraLandscapeWidth), screenWidth)
-        flCameraLandscapeHeight = min(sr.prefsGetInt(Preference.flCameraLandscapeHeight), screenHeight)
+        flCameraPortraitLoc = intArrayOf(svm.flCameraPortraitLocX, svm.flCameraPortraitLocY)
+        flCameraPortraitWidth = min(svm.flCameraPortraitWidth, screenWidth)
+        flCameraPortraitHeight = min(svm.flCameraPortraitHeight, screenHeight)
+        flCameraLandscapeLoc = intArrayOf(svm.flCameraLandscapeLocX, svm.flCameraLandscapeLocY)
+        flCameraLandscapeWidth = min(svm.flCameraLandscapeWidth, screenWidth)
+        flCameraLandscapeHeight = min(svm.flCameraLandscapeHeight, screenHeight)
 
-        continuousOn = sr.prefsGetBoolean(Preference.flCameraContinuousMode)
-        filterRepeatedReads = sr.prefsGetBoolean(Preference.flCameraFilterRepeatedReads)
+        continuousOn = svm.flCameraContinuousMode
+        filterRepeatedReads = svm.flCameraFilterRepeatedReads
     }
 
     private fun saveValues() {
@@ -485,21 +481,21 @@ class FloatingCameraBarcode(private var activity: AppCompatActivity) : BarcodeCa
 
         // Barcode camera scanner view
         val formats: ArrayList<BarcodeFormat> = ArrayList()
-        if (sr.prefsGetBoolean(Preference.symbologyPDF417)) formats.add(BarcodeFormat.PDF_417)
-        if (sr.prefsGetBoolean(Preference.symbologyAztec)) formats.add(BarcodeFormat.AZTEC)
-        if (sr.prefsGetBoolean(Preference.symbologyQRCode)) formats.add(BarcodeFormat.QR_CODE)
-        if (sr.prefsGetBoolean(Preference.symbologyCODABAR)) formats.add(BarcodeFormat.CODABAR)
-        if (sr.prefsGetBoolean(Preference.symbologyCode128)) formats.add(BarcodeFormat.CODE_128)
-        if (sr.prefsGetBoolean(Preference.symbologyCode39)) formats.add(BarcodeFormat.CODE_39)
-        if (sr.prefsGetBoolean(Preference.symbologyCode93)) formats.add(BarcodeFormat.CODE_93)
-        if (sr.prefsGetBoolean(Preference.symbologyDataMatrix)) formats.add(BarcodeFormat.DATA_MATRIX)
-        if (sr.prefsGetBoolean(Preference.symbologyEAN13)) formats.add(BarcodeFormat.EAN_13)
-        if (sr.prefsGetBoolean(Preference.symbologyEAN8)) formats.add(BarcodeFormat.EAN_8)
-        if (sr.prefsGetBoolean(Preference.symbologyMaxiCode)) formats.add(BarcodeFormat.MAXICODE)
-        if (sr.prefsGetBoolean(Preference.symbologyRSS14)) formats.add(BarcodeFormat.RSS_14)
-        if (sr.prefsGetBoolean(Preference.symbologyRSSExpanded)) formats.add(BarcodeFormat.RSS_EXPANDED)
-        if (sr.prefsGetBoolean(Preference.symbologyUPCA)) formats.add(BarcodeFormat.UPC_A)
-        if (sr.prefsGetBoolean(Preference.symbologyUPCE)) formats.add(BarcodeFormat.UPC_E)
+        if (svm.symbologyPDF417) formats.add(BarcodeFormat.PDF_417)
+        if (svm.symbologyAztec) formats.add(BarcodeFormat.AZTEC)
+        if (svm.symbologyQRCode) formats.add(BarcodeFormat.QR_CODE)
+        if (svm.symbologyCODABAR) formats.add(BarcodeFormat.CODABAR)
+        if (svm.symbologyCode128) formats.add(BarcodeFormat.CODE_128)
+        if (svm.symbologyCode39) formats.add(BarcodeFormat.CODE_39)
+        if (svm.symbologyCode93) formats.add(BarcodeFormat.CODE_93)
+        if (svm.symbologyDataMatrix) formats.add(BarcodeFormat.DATA_MATRIX)
+        if (svm.symbologyEAN13) formats.add(BarcodeFormat.EAN_13)
+        if (svm.symbologyEAN8) formats.add(BarcodeFormat.EAN_8)
+        if (svm.symbologyMaxiCode) formats.add(BarcodeFormat.MAXICODE)
+        if (svm.symbologyRSS14) formats.add(BarcodeFormat.RSS_14)
+        if (svm.symbologyRSSExpanded) formats.add(BarcodeFormat.RSS_EXPANDED)
+        if (svm.symbologyUPCA) formats.add(BarcodeFormat.UPC_A)
+        if (svm.symbologyUPCE) formats.add(BarcodeFormat.UPC_E)
 
         // Mostrar último código escaneado en la vista exceptuando códigos de configuración e ingreso.
         if (!lastScannedCode.contains("config") &&

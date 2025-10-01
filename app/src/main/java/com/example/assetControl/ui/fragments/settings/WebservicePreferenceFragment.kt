@@ -13,6 +13,7 @@ import com.example.assetControl.AssetControlApp
 import com.example.assetControl.AssetControlApp.Companion.appName
 import com.example.assetControl.AssetControlApp.Companion.isLogged
 import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.BuildConfig
 import com.example.assetControl.R
 import com.example.assetControl.devices.scanners.GenerateQR
@@ -67,13 +68,13 @@ class WebservicePreferenceFragment : PreferenceFragmentCompat() {
         val testPref: Preference? = findPreference("ac_test")
         testPref?.onPreferenceClickListener = OnPreferenceClickListener {
             if (wsServerPref != null && wsNamespacePref != null) {
-                val url = sr.prefsGetString(p.acWsServer)
-                val namespace = sr.prefsGetString(p.acWsNamespace)
-                val urlProxy = sr.prefsGetString(p.acWsProxy)
-                val proxyPort = sr.prefsGetInt(p.acWsProxyPort)
-                val useProxy = sr.prefsGetBoolean(p.acWsUseProxy)
-                val proxyUser = sr.prefsGetString(p.acWsProxyUser)
-                val proxyPass = sr.prefsGetString(p.acWsProxyPass)
+                val url = svm.acWsServer
+                val namespace = svm.acWsNamespace
+                val urlProxy = svm.acWsProxy
+                val proxyPort = svm.acWsProxyPort
+                val useProxy = svm.acWsUseProxy
+                val proxyUser = svm.acWsProxyUser
+                val proxyPass = svm.acWsProxyPass
 
                 SettingsActivity.testWsConnection(
                     parentView = requireView(),
@@ -111,10 +112,10 @@ class WebservicePreferenceFragment : PreferenceFragmentCompat() {
 
         val qrCodePref: Preference? = findPreference("ac_qr_code")
         qrCodePref?.onPreferenceClickListener = OnPreferenceClickListener {
-            val url = sr.prefsGetString(p.acWsServer)
-            val namespace = sr.prefsGetString(p.acWsNamespace)
-            val userWs = sr.prefsGetString(p.acWsUser)
-            val passwordWs = sr.prefsGetString(p.acWsPass)
+            val url = svm.acWsServer
+            val namespace = svm.acWsNamespace
+            val userWs = svm.acWsUser
+            val passwordWs = svm.acWsPass
 
             if (url.isEmpty() || namespace.isEmpty() || userWs.isEmpty() || passwordWs.isEmpty()) {
                 MakeText.makeText(

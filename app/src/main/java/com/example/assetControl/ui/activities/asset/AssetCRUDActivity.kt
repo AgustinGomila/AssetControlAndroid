@@ -17,7 +17,7 @@ import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.dacosys.imageControl.ui.fragments.ImageControlButtonsFragment
 import com.example.assetControl.AssetControlApp.Companion.currentUser
-import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.data.enums.asset.AssetStatus
 import com.example.assetControl.data.enums.common.CrudCompleted
@@ -49,7 +49,6 @@ import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.parcel.ParcelLong
 import com.example.assetControl.utils.parcel.Parcelables.parcelable
 import com.example.assetControl.utils.parcel.Parcelables.parcelableArrayList
-import com.example.assetControl.utils.settings.config.Preference
 import org.parceler.Parcels
 
 class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
@@ -319,7 +318,7 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
                         .replace(binding.imageControlFragment.id, imageControlFragment ?: return@runOnUiThread)
                         .commit()
 
-                    if (!sr.prefsGetBoolean(Preference.useImageControl)) {
+                    if (!svm.useImageControl) {
                         fm.beginTransaction()
                             .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
                             .hide(imageControlFragment as Fragment)
@@ -428,7 +427,7 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private val showScannedCode: Boolean
         get() {
-            return sr.prefsGetBoolean(Preference.showScannedCode)
+            return svm.showScannedCode
         }
 
     override fun scannerCompleted(scanCode: String) {
@@ -690,7 +689,7 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     override fun onStateChanged(state: Int) {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
-        if (sr.prefsGetBoolean(Preference.rfidShowConnectedMessage)) {
+        if (svm.rfidShowConnectedMessage) {
             when (Rfid.vh75State) {
                 Vh75Bt.STATE_CONNECTED -> {
                     makeText(

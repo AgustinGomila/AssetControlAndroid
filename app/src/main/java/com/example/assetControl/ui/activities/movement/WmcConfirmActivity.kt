@@ -23,7 +23,7 @@ import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.dacosys.imageControl.ui.fragments.ImageControlButtonsFragment
 import com.example.assetControl.AssetControlApp.Companion.currentUser
-import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.data.enums.asset.AssetStatus
 import com.example.assetControl.data.enums.common.ConfirmStatus
@@ -44,7 +44,6 @@ import com.example.assetControl.ui.common.utils.Screen.Companion.setupUI
 import com.example.assetControl.ui.fragments.movement.LocationHeaderFragment
 import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.parcel.Parcelables.parcelable
-import com.example.assetControl.utils.settings.config.Preference
 import org.parceler.Parcels
 
 class WmcConfirmActivity : AppCompatActivity(),
@@ -367,7 +366,7 @@ class WmcConfirmActivity : AppCompatActivity(),
                         .replace(binding.imageControlFragment.id, imageControlFragment ?: return@runOnUiThread)
                         .commit()
 
-                    if (!sr.prefsGetBoolean(Preference.useImageControl)) {
+                    if (!svm.useImageControl) {
                         fm.beginTransaction()
                             .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
                             .hide(imageControlFragment as Fragment)
@@ -491,9 +490,7 @@ class WmcConfirmActivity : AppCompatActivity(),
         }
 
     private fun confirmMovement() {
-        if (sr.prefsGetBoolean(Preference.signReviewsAndMovements) && !(imageControlFragment
-                ?: return).isSigned
-        ) {
+        if (svm.signReviewsAndMovements && !(imageControlFragment ?: return).isSigned) {
             makeText(
                 binding.root, getString(R.string.mandatory_sign), SnackBarType.ERROR
             )

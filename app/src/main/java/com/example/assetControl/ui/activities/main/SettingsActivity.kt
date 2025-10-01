@@ -15,7 +15,7 @@ import androidx.preference.PreferenceFragmentCompat
 import com.example.assetControl.AssetControlApp.Companion.context
 import com.example.assetControl.AssetControlApp.Companion.getUserId
 import com.example.assetControl.AssetControlApp.Companion.isLogged
-import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.databinding.SettingsActivityBinding
 import com.example.assetControl.devices.deviceLifecycle.ScannerManager
@@ -40,7 +40,6 @@ import com.example.assetControl.utils.settings.config.QRConfigType.CREATOR.QRCon
 import com.example.assetControl.utils.settings.io.FileHelper
 import org.json.JSONObject
 import java.lang.ref.WeakReference
-import com.example.assetControl.utils.settings.config.Preference.Companion as PreferenceConfig
 
 class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPreferenceStartFragmentCallback,
     Scanner.ScannerListener, ConfigHelper.TaskConfigEnded, ClientPackage.Companion.TaskConfigPanelEnded {
@@ -200,7 +199,7 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
 
     private val showScannedCode: Boolean
         get() {
-            return sr.prefsGetBoolean(PreferenceConfig.showScannedCode)
+            return svm.showScannedCode
         }
 
     override fun scannerCompleted(scanCode: String) {

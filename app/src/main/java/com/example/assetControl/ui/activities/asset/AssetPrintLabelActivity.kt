@@ -213,14 +213,14 @@ class AssetPrintLabelActivity : BasePanelActivity(), SwipeRefreshLayout.OnRefres
     // Image Control
     private val menuItemShowImages = 9999
     private var showImages
-        get() = sr.prefsGetBoolean(Preference.printLabelAssetShowImages)
+        get() = svm.printLabelAssetShowImages
         set(value) {
             sr.prefsPutBoolean(Preference.printLabelAssetShowImages.key, value)
         }
 
     private var showCheckBoxes
         get() = if (!viewModel.multiSelect) false
-        else sr.prefsGetBoolean(Preference.printLabelAssetShowCheckBoxes)
+        else svm.printLabelAssetShowCheckBoxes
         set(value) {
             sr.prefsPutBoolean(Preference.printLabelAssetShowCheckBoxes.key, value)
         }
@@ -332,7 +332,7 @@ class AssetPrintLabelActivity : BasePanelActivity(), SwipeRefreshLayout.OnRefres
         val target = BarcodeLabelTarget.Asset
         printerFragment?.barcodeLabelTarget = target
 
-        val id = sr.prefsGetLong(Preference.defaultBarcodeLabelCustomAsset)
+        val id = svm.defaultBarcodeLabelCustomAsset
         val blc = BarcodeLabelCustomRepository().selectById(id)
         if (blc != null) {
             printerFragment?.barcodeLabelCustom = blc
@@ -614,7 +614,7 @@ class AssetPrintLabelActivity : BasePanelActivity(), SwipeRefreshLayout.OnRefres
 
     private val showScannedCode: Boolean
         get() {
-            return sr.prefsGetBoolean(Preference.showScannedCode)
+            return svm.showScannedCode
         }
 
     override fun scannerCompleted(scanCode: String) {
@@ -1045,7 +1045,7 @@ class AssetPrintLabelActivity : BasePanelActivity(), SwipeRefreshLayout.OnRefres
 
     override fun onStateChanged(state: Int) {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
-        if (sr.prefsGetBoolean(Preference.rfidShowConnectedMessage)) {
+        if (svm.rfidShowConnectedMessage) {
             when (Rfid.vh75State) {
                 Vh75Bt.STATE_CONNECTED -> {
                     showMessage(

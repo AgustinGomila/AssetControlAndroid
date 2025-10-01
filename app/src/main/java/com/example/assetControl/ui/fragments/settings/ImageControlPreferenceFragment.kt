@@ -12,7 +12,7 @@ import androidx.preference.Preference.OnPreferenceClickListener
 import androidx.preference.PreferenceFragmentCompat
 import com.example.assetControl.AssetControlApp
 import com.example.assetControl.AssetControlApp.Companion.appName
-import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.BuildConfig
 import com.example.assetControl.R
 import com.example.assetControl.devices.scanners.GenerateQR
@@ -74,8 +74,8 @@ class ImageControlPreferenceFragment : PreferenceFragmentCompat(), ClientPackage
         val testPref: Preference? = findPreference("ic_test")
         testPref?.onPreferenceClickListener = OnPreferenceClickListener {
             if (wsServerPref != null && wsNamespacePref != null && userPref != null && passPref != null) {
-                val url = sr.prefsGetString(p.icWsServer)
-                val namespace = sr.prefsGetString(p.icWsNamespace)
+                val url = svm.icWsServer
+                val namespace = svm.icWsNamespace
 
                 testImageControlConnection(url = url, namespace = namespace)
             }
@@ -91,12 +91,12 @@ class ImageControlPreferenceFragment : PreferenceFragmentCompat(), ClientPackage
 
         val qrCodePref: Preference? = findPreference("ic_qr_code")
         qrCodePref?.onPreferenceClickListener = OnPreferenceClickListener {
-            val icUrl = sr.prefsGetString(p.icWsServer)
-            val icNamespace = sr.prefsGetString(p.icWsNamespace)
-            val icUserWs = sr.prefsGetString(p.icWsUser)
-            val icPasswordWs = sr.prefsGetString(p.icWsPass)
-            //val icUser = sr.prefsGetString(P.icUser)
-            //val icPassword = sr.prefsGetString(P.icPass)
+            val icUrl = svm.icWsServer
+            val icNamespace = svm.icWsNamespace
+            val icUserWs = svm.icWsUser
+            val icPasswordWs = svm.icWsPass
+            //val icUser = svm.icUser)
+            //val icPassword = svm.icPass)
 
             if (icUrl.isEmpty() || icNamespace.isEmpty() || icUserWs.isEmpty() || icPasswordWs.isEmpty()) {
                 MakeText.makeText(

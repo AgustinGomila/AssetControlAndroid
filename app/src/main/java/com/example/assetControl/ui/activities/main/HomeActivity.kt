@@ -129,7 +129,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
 
     private val showScannedCode: Boolean
         get() {
-            return sr.prefsGetBoolean(Preference.showScannedCode)
+            return svm.showScannedCode
         }
 
     override fun scannerCompleted(scanCode: String) {
@@ -356,7 +356,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
     }
 
     private fun configApp() {
-        val realPass = sr.prefsGetString(Preference.confPassword)
+        val realPass = svm.confPassword
         if (realPass.isEmpty()) {
             attemptEnterConfig(realPass)
             return
@@ -398,7 +398,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
     }
 
     private fun attemptEnterConfig(password: String) {
-        val realPass = sr.prefsGetString(Preference.confPassword)
+        val realPass = svm.confPassword
         if (password != realPass) {
             makeText(binding.root, getString(R.string.invalid_password), SnackBarType.ERROR)
             return
@@ -568,7 +568,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
 
         runOnUiThread {
-            val restSec = sr.prefsGetInt(Preference.acSyncInterval) - secs
+            val restSec = svm.acSyncInterval - secs
             val restMin = restSec / 60
             val rstSecsInMin = restSec % 60
             val msg = "$restMin:${String.format("%02d", rstSecsInMin)}"
@@ -810,7 +810,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_main, menu)
 
-        if (!sr.prefsGetBoolean(Preference.showConfButton)) {
+        if (!svm.showConfButton) {
             menu.removeItem(menu.findItem(R.id.action_settings).itemId)
         }
 

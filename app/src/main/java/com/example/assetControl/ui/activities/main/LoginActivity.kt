@@ -38,7 +38,6 @@ import androidx.core.view.ViewCompat
 import com.dacosys.imageControl.room.database.IcDatabase
 import com.example.assetControl.AssetControlApp.Companion.appName
 import com.example.assetControl.AssetControlApp.Companion.setCurrentUserId
-import com.example.assetControl.AssetControlApp.Companion.sr
 import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.BuildConfig
 import com.example.assetControl.R
@@ -702,7 +701,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
     }
 
     private fun configApp() {
-        val realPass = sr.prefsGetString(Preference.confPassword)
+        val realPass = svm.confPassword
         if (realPass.isEmpty()) {
             attemptEnterConfig(realPass)
             return
@@ -748,7 +747,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
     }
 
     private fun attemptEnterConfig(password: String) {
-        val realPass = sr.prefsGetString(Preference.confPassword)
+        val realPass = svm.confPassword
         if (password != realPass) {
             showSnackBar(SnackBarEventData(getString(R.string.invalid_password), SnackBarType.ERROR))
             return
@@ -857,7 +856,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
 
     private val showScannedCode: Boolean
         get() {
-            return sr.prefsGetBoolean(Preference.showScannedCode)
+            return svm.showScannedCode
         }
 
     override fun scannerCompleted(scanCode: String) {
@@ -948,7 +947,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_login, menu)
 
-        if (!sr.prefsGetBoolean(Preference.showConfButton)) {
+        if (!svm.showConfButton) {
             menu.removeItem(menu.findItem(R.id.action_settings).itemId)
         }
 

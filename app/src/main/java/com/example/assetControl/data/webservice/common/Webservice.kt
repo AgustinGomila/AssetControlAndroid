@@ -1,12 +1,10 @@
 package com.example.assetControl.data.webservice.common
 
 import android.util.Log
-import com.example.assetControl.AssetControlApp.Companion.sr
 import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.network.trust.CustomSSLContext
 import com.example.assetControl.utils.Statics
 import com.example.assetControl.utils.misc.Md5
-import com.example.assetControl.utils.settings.config.Preference
 import org.ksoap2.HeaderProperty
 import org.ksoap2.SoapEnvelope
 import org.ksoap2.serialization.SoapObject
@@ -426,7 +424,7 @@ class Webservice @Throws(Exception::class) constructor(private var webServiceTyp
         val response: Any
 
         try {
-            val timeout = sr.prefsGetInt(Preference.connectionTimeout) * 1000
+            val timeout = svm.connectionTimeout * 1000
             val headers: MutableList<HeaderProperty> = ArrayList()
             headers.add(HeaderProperty("Connection", "close"))
 

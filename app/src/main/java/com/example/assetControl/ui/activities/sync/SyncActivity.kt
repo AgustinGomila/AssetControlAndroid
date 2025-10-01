@@ -269,9 +269,9 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
 
     private val menuItemShowImages = 9999
     private var showImages
-        get() = sr.prefsGetBoolean(Preference.syncShowImages)
+        get() = svm.syncShowImages
         set(value) {
-            sr.prefsPutBoolean(Preference.syncShowImages.key, value)
+            svm.syncShowImages = value
         }
 
     override fun onRefresh() {

@@ -7,10 +7,9 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.example.assetControl.AssetControlApp.Companion.context
-import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.devices.scanners.vh75.Utility
 import com.example.assetControl.devices.scanners.vh75.Vh75Bt
-import com.example.assetControl.utils.settings.config.Preference
 import kotlin.reflect.KClass
 
 open class Rfid {
@@ -69,10 +68,10 @@ open class Rfid {
         }
 
         private fun isRfidEnabled(): Boolean {
-            if (!sr.prefsGetBoolean(Preference.useBtRfid))
+            if (!svm.useBtRfid)
                 return false
 
-            val btAddress = sr.prefsGetString(Preference.rfidBtAddress)
+            val btAddress = svm.rfidBtAddress
             return btAddress.isNotEmpty()
         }
 

@@ -19,6 +19,7 @@ import androidx.preference.SeekBarPreference
 import androidx.preference.SwitchPreference
 import com.example.assetControl.AssetControlApp
 import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.devices.scanners.Collector
 import com.example.assetControl.devices.scanners.collector.CollectorType
@@ -152,11 +153,11 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
     }
 
     private fun getPrinterName(): String {
-        val useBtPrinter = sr.prefsGetBoolean(PreferenceConfig.useBtPrinter)
-        val useNetPrinter = sr.prefsGetBoolean(PreferenceConfig.useNetPrinter)
-        val ipNetPrinter = sr.prefsGetString(PreferenceConfig.ipNetPrinter)
-        val printerBtAddress = sr.prefsGetString(PreferenceConfig.printerBtAddress)
-        val portNetPrinter = sr.prefsGetString(PreferenceConfig.portNetPrinter)
+        val useBtPrinter = svm.useBtPrinter
+        val useNetPrinter = svm.useNetPrinter
+        val ipNetPrinter = svm.ipNetPrinter
+        val printerBtAddress = svm.printerBtAddress
+        val portNetPrinter = svm.portNetPrinter
 
         val r = if (!useBtPrinter && !useNetPrinter) {
             getString(R.string.disabled)
@@ -284,7 +285,7 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
         }
 
         portNetPrinterPref?.setOnPreferenceChangeListener { _, newValue ->
-            if (sr.prefsGetBoolean(PreferenceConfig.useNetPrinter) && newValue != null) {
+            if (svm.useNetPrinter && newValue != null) {
                 portNetPrinterPref.summary = newValue.toString()
             }
             true
@@ -342,7 +343,7 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
         val swPrefCharLF: SwitchPreference? = findPreference("conf_printer_new_line_char_lf")
         val swPrefCharCR: SwitchPreference? = findPreference("conf_printer_new_line_char_cr")
 
-        val lineSeparator = sr.prefsGetString(PreferenceConfig.lineSeparator)
+        val lineSeparator = svm.lineSeparator
         if (lineSeparator == Char(10).toString()) swPrefCharLF?.isChecked
         else if (lineSeparator == Char(13).toString()) swPrefCharCR?.isChecked
 
@@ -379,15 +380,15 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
 
     private fun getRfidSummary(): String {
         var rfidSummary =
-            if (sr.prefsGetBoolean(PreferenceConfig.useBtRfid))
+            if (svm.useBtRfid)
                 getString(R.string.enabled)
             else
                 getString(R.string.disabled)
 
-        val btAddress = sr.prefsGetString(PreferenceConfig.rfidBtAddress)
+        val btAddress = svm.rfidBtAddress
         if (btAddress.isNotEmpty() && btAddress != 0.toString()) {
             var description = btAddress
-            val btName = sr.prefsGetString(PreferenceConfig.rfidBtName)
+            val btName = svm.rfidBtName
             if (btName.isNotEmpty() && btName != 0.toString()) description = btName
             rfidSummary = "$rfidSummary: $description"
         }
@@ -402,7 +403,7 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
     override fun onWriteCompleted(isOk: Boolean) {}
 
     override fun onStateChanged(state: Int) {
-        if (sr.prefsGetBoolean(PreferenceConfig.rfidShowConnectedMessage)) {
+        if (svm.rfidShowConnectedMessage) {
             when (Rfid.vh75State) {
                 Vh75Bt.STATE_CONNECTED -> {
                     showSnackBar(
@@ -555,7 +556,7 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
     }
 
     private fun connectToRfidDevice() {
-        if (!sr.prefsGetBoolean(PreferenceConfig.useBtRfid)) return
+        if (!svm.useBtRfid) return
 
         val bluetoothManager =
             context.getSystemService(AppCompatActivity.BLUETOOTH_SERVICE) as BluetoothManager

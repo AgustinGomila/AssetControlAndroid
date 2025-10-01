@@ -12,6 +12,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.data.room.dto.maintenance.AssetMaintenance
 import com.example.assetControl.data.room.repository.asset.AssetRepository
@@ -134,7 +135,7 @@ class AssetMaintenanceSelectActivity : AppCompatActivity(),
         title = tempTitle
 
         binding.onlyActiveSwitch.setOnCheckedChangeListener(null)
-        binding.onlyActiveSwitch.isChecked = sr.prefsGetBoolean(Preference.selectWarehouseOnlyActive)
+        binding.onlyActiveSwitch.isChecked = svm.selectWarehouseOnlyActive
 
         binding.etDescription.setOnEditorActionListener(null)
         binding.etDescription.setOnEditorActionListener { _, keyCode, keyEvent ->

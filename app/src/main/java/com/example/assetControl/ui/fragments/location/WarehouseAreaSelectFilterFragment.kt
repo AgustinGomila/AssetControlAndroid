@@ -10,6 +10,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.databinding.WarehouseAreaSelectFilterFragmentBinding
 import com.example.assetControl.ui.activities.location.LocationSelectActivity
@@ -88,7 +89,7 @@ class WarehouseAreaSelectFilterFragment : Fragment() {
     private fun loadDefaultValues() {
         wDescription = ""
         waDescription = ""
-        onlyActive = sr.prefsGetBoolean(Preference.selectWarehouseAreaOnlyActive)
+        onlyActive = svm.selectWarehouseAreaOnlyActive
     }
 
     private fun saveBundleValues(b: Bundle) {

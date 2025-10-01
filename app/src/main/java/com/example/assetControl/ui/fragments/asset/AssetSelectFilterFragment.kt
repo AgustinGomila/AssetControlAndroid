@@ -10,6 +10,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.data.enums.asset.AssetStatus
 import com.example.assetControl.data.room.dto.category.ItemCategory
@@ -125,7 +126,7 @@ class AssetSelectFilterFragment : Fragment() {
         warehouseArea = null
         itemCategory = null
         itemCode = ""
-        onlyActive = sr.prefsGetBoolean(Preference.selectAssetOnlyActive)
+        onlyActive = svm.selectAssetOnlyActive
         loadDefaultVisibleStatus()
     }
 

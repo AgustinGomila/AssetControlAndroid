@@ -269,7 +269,7 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     private fun configApp() {
-        val realPass = sr.prefsGetString(Preference.confPassword)
+        val realPass = svm.confPassword
         if (realPass.isEmpty()) {
             attemptEnterConfig(realPass)
             return
@@ -311,7 +311,7 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     private fun attemptEnterConfig(password: String) {
-        val realPass = sr.prefsGetString(Preference.confPassword)
+        val realPass = svm.confPassword
         if (password != realPass) {
             makeText(binding.root, getString(R.string.invalid_password), ERROR)
             return
@@ -426,7 +426,7 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private val showScannedCode: Boolean
         get() {
-            return sr.prefsGetBoolean(Preference.showScannedCode)
+            return svm.showScannedCode
         }
 
     override fun scannerCompleted(scanCode: String) {
@@ -470,7 +470,7 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_login, menu)
 
-        if (!sr.prefsGetBoolean(Preference.showConfButton)) {
+        if (!svm.showConfButton) {
             menu.removeItem(menu.findItem(R.id.action_settings).itemId)
         }
 

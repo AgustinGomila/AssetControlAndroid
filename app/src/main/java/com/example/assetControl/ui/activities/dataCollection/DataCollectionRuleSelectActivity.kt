@@ -10,6 +10,7 @@ import android.view.inputmethod.EditorInfo
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.data.room.dto.asset.Asset
 import com.example.assetControl.data.room.dto.category.ItemCategory
@@ -133,8 +134,7 @@ class DataCollectionRuleSelectActivity : AppCompatActivity() {
         title = tempTitle
 
         binding.onlyActiveSwitch.setOnCheckedChangeListener(null)
-        binding.onlyActiveSwitch.isChecked =
-            sr.prefsGetBoolean(Preference.selectDataCollectionRuleOnlyActive)
+        binding.onlyActiveSwitch.isChecked = svm.selectDataCollectionRuleOnlyActive
 
         val warehouseArea = warehouseArea
         val itemCategory = itemCategory

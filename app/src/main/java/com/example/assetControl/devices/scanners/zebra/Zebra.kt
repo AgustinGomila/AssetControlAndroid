@@ -9,7 +9,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.example.assetControl.AssetControlApp.Companion.context
-import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.devices.scanners.Scanner
 import com.example.assetControl.devices.scanners.zebra.Zebra.Constants.ACTION_DATAWEDGE
 import com.example.assetControl.devices.scanners.zebra.Zebra.Constants.ACTION_RESULT
@@ -28,7 +28,6 @@ import com.example.assetControl.devices.scanners.zebra.Zebra.Constants.EXTRA_SOF
 import com.example.assetControl.devices.scanners.zebra.Zebra.Constants.EXTRA_UNREGISTER_NOTIFICATION
 import com.example.assetControl.devices.scanners.zebra.Zebra.Constants.activityActionFromService
 import com.example.assetControl.devices.scanners.zebra.Zebra.Constants.activityIntentFilterAction
-import com.example.assetControl.utils.settings.config.Preference
 import java.util.concurrent.atomic.AtomicBoolean
 
 // ****************************************************************************************
@@ -83,19 +82,19 @@ class Zebra(private val activity: AppCompatActivity) : Scanner() {
         barcodeProps.putString("scanner_input_enabled", "true")
 
         // Set Symbologies
-        barcodeProps.putString("decoder_pdf417", sr.prefsGetBoolean(Preference.symbologyPDF417).toString())
-        barcodeProps.putString("decoder_aztec", sr.prefsGetBoolean(Preference.symbologyAztec).toString())
-        barcodeProps.putString("decoder_qrcode", sr.prefsGetBoolean(Preference.symbologyQRCode).toString())
-        barcodeProps.putString("decoder_codabar", sr.prefsGetBoolean(Preference.symbologyCODABAR).toString())
-        barcodeProps.putString("decoder_code128", sr.prefsGetBoolean(Preference.symbologyCode128).toString())
-        barcodeProps.putString("decoder_code39", sr.prefsGetBoolean(Preference.symbologyCode39).toString())
-        barcodeProps.putString("decoder_code93", sr.prefsGetBoolean(Preference.symbologyCode93).toString())
-        barcodeProps.putString("decoder_datamatrix", sr.prefsGetBoolean(Preference.symbologyDataMatrix).toString())
-        barcodeProps.putString("decoder_ean13", sr.prefsGetBoolean(Preference.symbologyEAN13).toString())
-        barcodeProps.putString("decoder_ean8", sr.prefsGetBoolean(Preference.symbologyEAN8).toString())
-        barcodeProps.putString("decoder_maxicode", sr.prefsGetBoolean(Preference.symbologyMaxiCode).toString())
-        barcodeProps.putString("decoder_upca", sr.prefsGetBoolean(Preference.symbologyUPCA).toString())
-        barcodeProps.putString("decoder_upce0", sr.prefsGetBoolean(Preference.symbologyUPCE).toString())
+        barcodeProps.putString("decoder_pdf417", svm.symbologyPDF417.toString())
+        barcodeProps.putString("decoder_aztec", svm.symbologyAztec.toString())
+        barcodeProps.putString("decoder_qrcode", svm.symbologyQRCode.toString())
+        barcodeProps.putString("decoder_codabar", svm.symbologyCODABAR.toString())
+        barcodeProps.putString("decoder_code128", svm.symbologyCode128.toString())
+        barcodeProps.putString("decoder_code39", svm.symbologyCode39.toString())
+        barcodeProps.putString("decoder_code93", svm.symbologyCode93.toString())
+        barcodeProps.putString("decoder_datamatrix", svm.symbologyDataMatrix.toString())
+        barcodeProps.putString("decoder_ean13", svm.symbologyEAN13.toString())
+        barcodeProps.putString("decoder_ean8", svm.symbologyEAN8.toString())
+        barcodeProps.putString("decoder_maxicode", svm.symbologyMaxiCode.toString())
+        barcodeProps.putString("decoder_upca", svm.symbologyUPCA.toString())
+        barcodeProps.putString("decoder_upce0", svm.symbologyUPCE.toString())
 
         // Bundle "barcodeProps" within bundle "barcodeConfig"
         barcodeConfig.putBundle("PARAM_LIST", barcodeProps)

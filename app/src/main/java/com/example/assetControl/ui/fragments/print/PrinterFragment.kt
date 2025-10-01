@@ -19,6 +19,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.data.enums.barcode.BarcodeLabelTarget
 import com.example.assetControl.data.model.barcodeFields.AssetLabelField
@@ -168,7 +169,7 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
         // Seleccionamos la primera plantilla del tipo deseado si existe alguna.
         barcodeLabelCustom = when (requireActivity()) {
             is WarehouseAreaPrintLabelActivity -> {
-                val blcId = sr.prefsGetLong(Preference.defaultBarcodeLabelCustomWa)
+                val blcId = svm.defaultBarcodeLabelCustomWa
                 if (blcId > 0) {
                     barcodeRepository.selectById(blcId)
                 } else {
@@ -181,7 +182,7 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
             }
 
             is AssetPrintLabelActivity -> {
-                val blcId = sr.prefsGetLong(Preference.defaultBarcodeLabelCustomAsset)
+                val blcId = svm.defaultBarcodeLabelCustomAsset
                 if (blcId > 0) {
                     barcodeRepository.selectById(blcId)
                 } else {
@@ -352,7 +353,7 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
     }
 
     private fun configApp() {
-        val realPass = sr.prefsGetString(Preference.confPassword)
+        val realPass = svm.confPassword
         if (realPass.isEmpty()) {
             attemptEnterConfig(realPass)
             return
@@ -398,7 +399,7 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
     }
 
     private fun attemptEnterConfig(password: String) {
-        val realPass = sr.prefsGetString(Preference.confPassword)
+        val realPass = svm.confPassword
         if (password != realPass) {
             showSnackBar(getString(R.string.invalid_password), SnackBarType.ERROR)
             return
@@ -469,12 +470,11 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
 
     private fun setPrinter() {
         // Impresora guardada en las preferencias
-        val useBtPrinter = sr.prefsGetBoolean(Preference.useBtPrinter)
-        val useNetPrinter = sr.prefsGetBoolean(Preference.useNetPrinter)
-
-        val pBt = sr.prefsGetString(Preference.printerBtAddress)
-        val pIp = sr.prefsGetString(Preference.ipNetPrinter)
-        val port = sr.prefsGetString(Preference.portNetPrinter)
+        val useBtPrinter = svm.useBtPrinter
+        val useNetPrinter = svm.useNetPrinter
+        val pBt = svm.printerBtAddress
+        val pIp = svm.ipNetPrinter
+        val port = svm.portNetPrinter
 
         printer = when {
             useBtPrinter -> pBt

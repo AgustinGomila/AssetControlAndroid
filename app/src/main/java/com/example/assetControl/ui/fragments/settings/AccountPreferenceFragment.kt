@@ -12,6 +12,7 @@ import androidx.preference.PreferenceFragmentCompat
 import com.example.assetControl.AssetControlApp
 import com.example.assetControl.AssetControlApp.Companion.isLogged
 import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.BuildConfig
 import com.example.assetControl.R
 import com.example.assetControl.databinding.ProgressViewBinding
@@ -83,8 +84,8 @@ class AccountPreferenceFragment : PreferenceFragmentCompat(), ClientPackage.Comp
         val selectPackagePref: Preference? = findPreference("select_package")
         selectPackagePref?.onPreferenceClickListener = OnPreferenceClickListener {
             if (emailPref != null && passPref != null) {
-                val email = sr.prefsGetString(p.clientEmail)
-                val password = sr.prefsGetString(p.clientPassword)
+                val email = svm.clientEmail
+                val password = svm.clientPassword
 
                 if (!alreadyAnsweredYes) {
                     val diaBox = askForDownloadDbRequired2(email = email, password = password)
@@ -122,11 +123,11 @@ class AccountPreferenceFragment : PreferenceFragmentCompat(), ClientPackage.Comp
 
         val qrCodePref: Preference? = findPreference("ac_qr_code")
         qrCodePref?.onPreferenceClickListener = OnPreferenceClickListener {
-            val urlPanel = sr.prefsGetString(p.urlPanel)
-            val installationCode = sr.prefsGetString(p.installationCode)
-            val clientEmail = sr.prefsGetString(p.clientEmail)
-            val clientPassword = sr.prefsGetString(p.clientPassword)
-            val clientPackage = sr.prefsGetString(p.clientPackage)
+            val urlPanel = svm.urlPanel
+            val installationCode = svm.installationCode
+            val clientEmail = svm.clientEmail
+            val clientPassword = svm.clientPassword
+            val clientPackage = svm.clientPackage
 
             if (urlPanel.isEmpty() || installationCode.isEmpty() || clientPackage.isEmpty() || clientEmail.isEmpty() || clientPassword.isEmpty()) {
                 MakeText.makeText(

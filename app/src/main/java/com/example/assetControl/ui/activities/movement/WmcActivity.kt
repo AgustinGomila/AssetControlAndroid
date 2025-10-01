@@ -167,7 +167,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private val menuItemShowImages = 9999
     private var showImages
-        get() = sr.prefsGetBoolean(Preference.reviewContentShowImages)
+        get() = svm.reviewContentShowImages
         set(value) {
             sr.prefsPutBoolean(Preference.reviewContentShowImages.key, value)
         }
@@ -175,7 +175,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
     private var showCheckBoxes
         get() =
             if (!multiSelect) false
-            else sr.prefsGetBoolean(Preference.reviewContentShowCheckBoxes)
+            else svm.reviewContentShowCheckBoxes
         set(value) {
             sr.prefsPutBoolean(Preference.reviewContentShowCheckBoxes.key, value)
         }
@@ -819,7 +819,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private val showScannedCode: Boolean
         get() {
-            return sr.prefsGetBoolean(Preference.showScannedCode)
+            return svm.showScannedCode
         }
 
     override fun scannerCompleted(scanCode: String) {
@@ -1361,7 +1361,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     override fun onStateChanged(state: Int) {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
-        if (sr.prefsGetBoolean(Preference.rfidShowConnectedMessage)) {
+        if (svm.rfidShowConnectedMessage) {
             when (Rfid.vh75State) {
                 Vh75Bt.STATE_CONNECTED -> {
                     makeText(

@@ -2,11 +2,10 @@ package com.example.assetControl.devices.printer
 
 import androidx.fragment.app.FragmentActivity
 import com.example.assetControl.AssetControlApp.Companion.context
-import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.ui.common.snackbar.SnackBarEventData
 import com.example.assetControl.ui.common.snackbar.SnackBarType
-import com.example.assetControl.utils.settings.config.Preference
 
 object Printer {
     interface PrintLabelListener {
@@ -16,8 +15,8 @@ object Printer {
     object PrinterFactory {
         fun createPrinter(activity: FragmentActivity, onEvent: (SnackBarEventData) -> Unit): PrintLabelListener? {
             // Impresora guardada en preferencias
-            val useBtPrinter = sr.prefsGetBoolean(Preference.useBtPrinter)
-            val useNetPrinter = sr.prefsGetBoolean(Preference.useNetPrinter)
+            val useBtPrinter = svm.useBtPrinter
+            val useNetPrinter = svm.useNetPrinter
 
             return when {
                 useNetPrinter -> NetPrinter(onEvent)

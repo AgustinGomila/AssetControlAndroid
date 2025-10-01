@@ -4,6 +4,7 @@ import android.util.Log
 import com.example.assetControl.AssetControlApp.Companion.context
 import com.example.assetControl.AssetControlApp.Companion.getUserId
 import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.data.room.dto.attribute.AttributeComposition
 import com.example.assetControl.data.room.dto.dataCollection.DataCollectionRuleContent
@@ -54,7 +55,6 @@ import com.example.assetControl.network.utils.SetCurrentSession
 import com.example.assetControl.utils.Statics
 import com.example.assetControl.utils.Statics.Companion.TIME_FILE_NAME
 import com.example.assetControl.utils.errorLog.ErrorLog
-import com.example.assetControl.utils.settings.config.Preference
 import com.example.assetControl.utils.settings.entries.ConfEntry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -174,7 +174,7 @@ class SyncDownload(
                 async { dataCollectionRule() },
                 async { barcodeLabelCustom() })
 
-            if (sr.prefsGetBoolean(Preference.useAssetControlManteinance)) {
+            if (svm.useAssetControlManteinance) {
                 t.union(
                     listOf(
                         async { maintenanceType() },

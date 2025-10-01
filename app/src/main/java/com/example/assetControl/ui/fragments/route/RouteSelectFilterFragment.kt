@@ -10,6 +10,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.databinding.RouteSelectFilterFragmentBinding
 import com.example.assetControl.ui.activities.route.RouteSelectDialogActivity
@@ -96,8 +97,7 @@ class RouteSelectFilterFragment : Fragment() {
 
     private fun loadDefaultValues() {
         routeDescription = ""
-        onlyActive =
-            sr.prefsGetBoolean(Preference.selectRouteOnlyActive)
+        onlyActive = svm.selectRouteOnlyActive
     }
 
     private fun saveBundleValues(b: Bundle) {

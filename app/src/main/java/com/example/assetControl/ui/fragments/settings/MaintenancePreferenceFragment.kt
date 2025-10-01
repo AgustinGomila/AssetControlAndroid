@@ -5,7 +5,7 @@ import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import androidx.preference.Preference.OnPreferenceClickListener
 import androidx.preference.PreferenceFragmentCompat
-import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.BuildConfig
 import com.example.assetControl.R
 import com.example.assetControl.ui.activities.main.SettingsActivity
@@ -51,13 +51,13 @@ class MaintenancePreferenceFragment : PreferenceFragmentCompat() {
         val testPref: Preference? = findPreference("ac_mant_test")
         testPref?.onPreferenceClickListener = OnPreferenceClickListener {
             if (wsServerPref != null && wsNamespacePref != null) {
-                val url = sr.prefsGetString(p.acMantWsServer)
-                val namespace = sr.prefsGetString(p.acMantWsNamespace)
-                val urlProxy = sr.prefsGetString(p.acMantWsProxy)
-                val proxyPort = sr.prefsGetInt(p.acMantWsProxyPort)
-                val useProxy = sr.prefsGetBoolean(p.acMantWsUseProxy)
-                val proxyUser = sr.prefsGetString(p.acMantWsProxyUser)
-                val proxyPass = sr.prefsGetString(p.acMantWsProxyPass)
+                val url = svm.acMantWsServer
+                val namespace = svm.acMantWsNamespace
+                val urlProxy = svm.acMantWsProxy
+                val proxyPort = svm.acMantWsProxyPort
+                val useProxy = svm.acMantWsUseProxy
+                val proxyUser = svm.acMantWsProxyUser
+                val proxyPass = svm.acMantWsProxyPass
 
                 SettingsActivity.testWsConnection(
                     parentView = requireView(),

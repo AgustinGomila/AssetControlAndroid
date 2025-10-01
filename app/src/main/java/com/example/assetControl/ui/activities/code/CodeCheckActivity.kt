@@ -17,7 +17,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.menu.MenuBuilder
-import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.BuildConfig
 import com.example.assetControl.R
 import com.example.assetControl.data.room.repository.asset.AssetRepository
@@ -39,7 +39,6 @@ import com.example.assetControl.ui.fragments.asset.AssetDetailFragment
 import com.example.assetControl.ui.fragments.location.WarehouseAreaDetailFragment
 import com.example.assetControl.utils.Statics
 import com.example.assetControl.utils.errorLog.ErrorLog
-import com.example.assetControl.utils.settings.config.Preference
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import java.util.*
@@ -388,7 +387,7 @@ class CodeCheckActivity : AppCompatActivity(),
 
     private val showScannedCode: Boolean
         get() {
-            return sr.prefsGetBoolean(Preference.showScannedCode)
+            return svm.showScannedCode
         }
 
     override fun scannerCompleted(scanCode: String) {
@@ -433,7 +432,7 @@ class CodeCheckActivity : AppCompatActivity(),
 
     override fun onStateChanged(state: Int) {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
-        if (sr.prefsGetBoolean(Preference.rfidShowConnectedMessage)) {
+        if (svm.rfidShowConnectedMessage) {
             when (Rfid.vh75State) {
                 Vh75Bt.STATE_CONNECTED -> {
                     makeText(

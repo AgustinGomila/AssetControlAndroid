@@ -8,7 +8,6 @@ import com.dacosys.imageControl.network.upload.UploadImagesProgress
 import com.example.assetControl.AssetControlApp.Companion.context
 import com.example.assetControl.AssetControlApp.Companion.getUserId
 import com.example.assetControl.AssetControlApp.Companion.isLogged
-import com.example.assetControl.AssetControlApp.Companion.sr
 import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.BuildConfig
 import com.example.assetControl.R
@@ -60,7 +59,6 @@ import com.example.assetControl.network.serverDate.GetMySqlDate
 import com.example.assetControl.network.serverDate.MySqlDateResult
 import com.example.assetControl.network.utils.ProgressStatus
 import com.example.assetControl.utils.errorLog.ErrorLog
-import com.example.assetControl.utils.settings.config.Preference
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -167,7 +165,7 @@ class SyncUpload(
             dataCollection()
             routeProcess()
 
-            if (sr.prefsGetBoolean(Preference.useAssetControlManteinance)) {
+            if (svm.useAssetControlManteinance) {
                 assetMaintenance()
             }
         } else {
@@ -204,7 +202,7 @@ class SyncUpload(
                 }
 
                 SyncRegistryType.AssetMaintenance -> {
-                    if (sr.prefsGetBoolean(Preference.useAssetControlManteinance)) {
+                    if (svm.useAssetControlManteinance) {
                         itemCategory()
                         warehouse()
                         warehouseArea()

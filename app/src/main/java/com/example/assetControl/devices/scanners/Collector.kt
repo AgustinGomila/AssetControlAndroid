@@ -2,6 +2,7 @@ package com.example.assetControl.devices.scanners
 
 import android.util.Log
 import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.devices.scanners.collector.CollectorType
 import com.example.assetControl.utils.settings.config.Preference
 
@@ -31,7 +32,7 @@ class Collector {
             }
 
         fun isNfcRequired(): Boolean {
-            return sr.prefsGetBoolean(Preference.useNfc)
+            return svm.useNfc
         }
     }
 }
