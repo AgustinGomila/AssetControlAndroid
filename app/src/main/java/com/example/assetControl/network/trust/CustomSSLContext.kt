@@ -1,10 +1,10 @@
 package com.example.assetControl.network.trust
 
 import com.example.assetControl.AssetControlApp.Companion.context
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.network.trust.TrustFactory.Companion.addTrustedDomains
 import com.example.assetControl.network.trust.TrustFactory.Companion.trustedDomains
-import com.example.assetControl.utils.settings.preferences.Repository
 import java.net.MalformedURLException
 import java.net.URL
 import java.security.KeyManagementException
@@ -15,7 +15,7 @@ import javax.net.ssl.TrustManager
 object CustomSSLContext {
     fun createCustomSSLContext(): SSLContext {
         try {
-            val url = Repository.wsUrl
+            val url = svm.wsUrl
             if (url.isNotEmpty()) addTrustedDomains(listOf(URL(url).host))
         } catch (e: MalformedURLException) {
             e.printStackTrace()

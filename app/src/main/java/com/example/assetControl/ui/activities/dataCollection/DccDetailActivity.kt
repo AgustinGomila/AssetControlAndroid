@@ -8,6 +8,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.dacosys.imageControl.ui.fragments.ImageControlButtonsFragment
 import com.example.assetControl.AssetControlApp.Companion.currentUser
+import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.data.enums.common.Table
 import com.example.assetControl.data.room.dto.dataCollection.DataCollection
@@ -18,8 +20,6 @@ import com.example.assetControl.ui.adapters.route.DccAdapter
 import com.example.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.example.assetControl.ui.common.utils.Screen.Companion.setupUI
 import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
-import com.example.assetControl.utils.settings.preferences.Repository.Companion.useImageControl
 
 class DccDetailActivity : AppCompatActivity() {
     private var dc: DataCollection? = null
@@ -132,7 +132,7 @@ class DccDetailActivity : AppCompatActivity() {
     }
 
     private fun setImageControlFragment() {
-        if (!useImageControl) {
+        if (!svm.useImageControl) {
             runOnUiThread {
                 binding.imageControlLayout.visibility = View.GONE
             }
@@ -168,7 +168,7 @@ class DccDetailActivity : AppCompatActivity() {
                             binding.imageControlLayout.id, imageControlFragment ?: return@runOnUiThread
                         ).commit()
 
-                    if (!prefsGetBoolean(Preference.useImageControl)) {
+                    if (!sr.prefsGetBoolean(Preference.useImageControl)) {
                         fm.beginTransaction()
                             .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
                             .hide(imageControlFragment as Fragment).commitAllowingStateLoss()

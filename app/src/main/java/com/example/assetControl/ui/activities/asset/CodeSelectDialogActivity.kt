@@ -18,6 +18,7 @@ import android.widget.AdapterView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
+import com.example.assetControl.AssetControlApp.Companion.sr
 import com.example.assetControl.R
 import com.example.assetControl.data.enums.asset.AssetStatus
 import com.example.assetControl.data.room.dto.asset.Asset
@@ -38,8 +39,6 @@ import com.example.assetControl.ui.common.views.custom.ContractsAutoCompleteText
 import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.parcel.Parcelables.parcelableArrayList
 import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetStringSet
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener
 import kotlin.concurrent.thread
@@ -136,7 +135,7 @@ class CodeSelectDialogActivity : AppCompatActivity(),
         }
 
         //Retrieve the values
-        val set = prefsGetStringSet(
+        val set = sr.prefsGetStringSet(
             Preference.assetSelectFragmentVisibleStatus.key,
             Preference.assetSelectFragmentVisibleStatus.defaultValue as ArrayList<String>
         )
@@ -313,7 +312,7 @@ class CodeSelectDialogActivity : AppCompatActivity(),
 
     private val showScannedCode: Boolean
         get() {
-            return prefsGetBoolean(Preference.showScannedCode)
+            return sr.prefsGetBoolean(Preference.showScannedCode)
         }
 
     override fun scannerCompleted(scanCode: String) {
@@ -422,7 +421,7 @@ class CodeSelectDialogActivity : AppCompatActivity(),
 
     override fun onStateChanged(state: Int) {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
-        if (prefsGetBoolean(Preference.rfidShowConnectedMessage)) {
+        if (sr.prefsGetBoolean(Preference.rfidShowConnectedMessage)) {
             when (Rfid.vh75State) {
                 Vh75Bt.STATE_CONNECTED -> {
                     makeText(

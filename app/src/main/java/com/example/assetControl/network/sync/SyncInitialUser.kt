@@ -2,6 +2,7 @@ package com.example.assetControl.network.sync
 
 import android.util.Log
 import com.example.assetControl.AssetControlApp.Companion.context
+import com.example.assetControl.AssetControlApp.Companion.sr
 import com.example.assetControl.R
 import com.example.assetControl.data.room.repository.user.UserPermissionRepository
 import com.example.assetControl.data.room.repository.user.UserRepository
@@ -13,8 +14,6 @@ import com.example.assetControl.network.serverDate.MySqlDateResult
 import com.example.assetControl.network.utils.ProgressStatus
 import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.settings.entries.ConfEntry
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetInt
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -57,8 +56,7 @@ class SyncInitialUser(
     // Descarga de usuarios, permisos, áreas del usuario
     // previo a iniciar sesión
     private suspend fun initialUser() = withContext(Dispatchers.IO) {
-        val qty =
-            prefsGetInt(ConfEntry.acSyncQtyRegistry)
+        val qty = sr.prefsGetInt(ConfEntry.acSyncQtyRegistry)
 
         scope.launch {
             onUiEvent(
@@ -160,7 +158,7 @@ class SyncInitialUser(
                         context.getString(R.string.saving_synchronization_time)
                     }: ${confEntry.description} ($it.msg)"
                 )
-                prefsPutString(confEntry.description, it.msg)
+                sr.prefsPutString(confEntry.description, it.msg)
                 scope.launch {
                     onUiEvent(
                         SyncProgress(

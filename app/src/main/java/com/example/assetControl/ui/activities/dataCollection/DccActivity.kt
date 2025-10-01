@@ -33,6 +33,8 @@ import com.dacosys.imageControl.ui.fragments.ImageControlButtonsFragment
 import com.dacosys.imageControl.ui.snackBar.MakeText
 import com.dacosys.imageControl.ui.snackBar.SnackBarEventData
 import com.example.assetControl.AssetControlApp.Companion.currentUser
+import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.data.enums.attribute.AttributeCompositionType
 import com.example.assetControl.data.enums.common.Table
@@ -77,8 +79,6 @@ import com.example.assetControl.utils.Statics
 import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.parcel.Parcelables.parcelable
 import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
-import com.example.assetControl.utils.settings.preferences.Repository.Companion.maxHeightOrWidth
 import kotlinx.coroutines.runBlocking
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener
@@ -452,7 +452,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
                         .replace(binding.imageControlFragment.id, imageControlFragment ?: return@runOnUiThread)
                         .commit()
 
-                    if (!prefsGetBoolean(Preference.useImageControl)) {
+                    if (!sr.prefsGetBoolean(Preference.useImageControl)) {
                         fm.beginTransaction()
                             .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
                             .hide(imageControlFragment as Fragment)
@@ -1670,7 +1670,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private val showScannedCode: Boolean
         get() {
-            return prefsGetBoolean(Preference.showScannedCode)
+            return sr.prefsGetBoolean(Preference.showScannedCode)
         }
 
     override fun scannerCompleted(scanCode: String) {
@@ -1830,7 +1830,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         Log.d(this::class.java.simpleName, "Guardando imagen de Demostración...")
 
-        val image: Bitmap = generateRandomBitmap(maxHeightOrWidth, maxHeightOrWidth)
+        val image: Bitmap = generateRandomBitmap(svm.maxHeightOrWidth, svm.maxHeightOrWidth)
 
         val photoFilePath = ImageCoroutines().addJpgPhotoToGallery(
             context = applicationContext,
@@ -1906,7 +1906,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     override fun onStateChanged(state: Int) {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
-        if (prefsGetBoolean(Preference.rfidShowConnectedMessage)) {
+        if (sr.prefsGetBoolean(Preference.rfidShowConnectedMessage)) {
             when (Rfid.vh75State) {
                 Vh75Bt.STATE_CONNECTED -> {
                     makeText(

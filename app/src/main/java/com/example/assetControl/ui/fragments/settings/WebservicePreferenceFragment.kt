@@ -12,6 +12,7 @@ import androidx.preference.PreferenceFragmentCompat
 import com.example.assetControl.AssetControlApp
 import com.example.assetControl.AssetControlApp.Companion.appName
 import com.example.assetControl.AssetControlApp.Companion.isLogged
+import com.example.assetControl.AssetControlApp.Companion.sr
 import com.example.assetControl.BuildConfig
 import com.example.assetControl.R
 import com.example.assetControl.devices.scanners.GenerateQR
@@ -23,7 +24,6 @@ import com.example.assetControl.ui.common.utils.Screen
 import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.settings.config.ConfigHelper
 import com.example.assetControl.utils.settings.config.QRConfigType
-import com.example.assetControl.utils.settings.preferences.Preferences
 
 class WebservicePreferenceFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
@@ -67,13 +67,13 @@ class WebservicePreferenceFragment : PreferenceFragmentCompat() {
         val testPref: Preference? = findPreference("ac_test")
         testPref?.onPreferenceClickListener = OnPreferenceClickListener {
             if (wsServerPref != null && wsNamespacePref != null) {
-                val url = Preferences.prefsGetString(p.acWsServer)
-                val namespace = Preferences.prefsGetString(p.acWsNamespace)
-                val urlProxy = Preferences.prefsGetString(p.acWsProxy)
-                val proxyPort = Preferences.prefsGetInt(p.acWsProxyPort)
-                val useProxy = Preferences.prefsGetBoolean(p.acWsUseProxy)
-                val proxyUser = Preferences.prefsGetString(p.acWsProxyUser)
-                val proxyPass = Preferences.prefsGetString(p.acWsProxyPass)
+                val url = sr.prefsGetString(p.acWsServer)
+                val namespace = sr.prefsGetString(p.acWsNamespace)
+                val urlProxy = sr.prefsGetString(p.acWsProxy)
+                val proxyPort = sr.prefsGetInt(p.acWsProxyPort)
+                val useProxy = sr.prefsGetBoolean(p.acWsUseProxy)
+                val proxyUser = sr.prefsGetString(p.acWsProxyUser)
+                val proxyPass = sr.prefsGetString(p.acWsProxyPass)
 
                 SettingsActivity.testWsConnection(
                     parentView = requireView(),
@@ -111,10 +111,10 @@ class WebservicePreferenceFragment : PreferenceFragmentCompat() {
 
         val qrCodePref: Preference? = findPreference("ac_qr_code")
         qrCodePref?.onPreferenceClickListener = OnPreferenceClickListener {
-            val url = Preferences.prefsGetString(p.acWsServer)
-            val namespace = Preferences.prefsGetString(p.acWsNamespace)
-            val userWs = Preferences.prefsGetString(p.acWsUser)
-            val passwordWs = Preferences.prefsGetString(p.acWsPass)
+            val url = sr.prefsGetString(p.acWsServer)
+            val namespace = sr.prefsGetString(p.acWsNamespace)
+            val userWs = sr.prefsGetString(p.acWsUser)
+            val passwordWs = sr.prefsGetString(p.acWsPass)
 
             if (url.isEmpty() || namespace.isEmpty() || userWs.isEmpty() || passwordWs.isEmpty()) {
                 MakeText.makeText(
@@ -218,9 +218,7 @@ class WebservicePreferenceFragment : PreferenceFragmentCompat() {
                 if (!BuildConfig.DEBUG) preference.summary = newValue.toString()
                 alreadyAnsweredYes = true
                 if (newValue is String) {
-                    Preferences.prefsPutString(
-                        preference.key, newValue
-                    )
+                    sr.prefsPutString(preference.key, newValue)
                 }
                 dialog.dismiss()
             }.setNegativeButton(
@@ -233,20 +231,10 @@ class WebservicePreferenceFragment : PreferenceFragmentCompat() {
      * porque está configurando el webservice de manera manual
      */
     private fun cleanPanelWebData() {
-        Preferences.prefsPutString(
-            p.urlPanel.key, ""
-        )
-        Preferences.prefsPutString(
-            p.installationCode.key, ""
-        )
-        Preferences.prefsPutString(
-            p.clientPackage.key, ""
-        )
-        Preferences.prefsPutString(
-            p.clientEmail.key, ""
-        )
-        Preferences.prefsPutString(
-            p.clientPassword.key, ""
-        )
+        sr.prefsPutString(p.urlPanel.key, "")
+        sr.prefsPutString(p.installationCode.key, "")
+        sr.prefsPutString(p.clientPackage.key, "")
+        sr.prefsPutString(p.clientEmail.key, "")
+        sr.prefsPutString(p.clientPassword.key, "")
     }
 }

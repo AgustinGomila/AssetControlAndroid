@@ -2,11 +2,14 @@ package com.example.assetControl
 
 import android.app.Application
 import android.content.Context
+import android.content.SharedPreferences
 import com.dacosys.imageControl.ImageControl
 import com.example.assetControl.data.room.dto.user.User
 import com.example.assetControl.data.room.repository.user.UserRepository
 import com.example.assetControl.devices.deviceLifecycle.DeviceLifecycle
 import com.example.assetControl.utils.Statics
+import com.example.assetControl.utils.settings.preferences.SettingsRepository
+import com.example.assetControl.utils.settings.preferences.SettingsViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.context.GlobalContext.get
@@ -32,6 +35,9 @@ class AssetControlApp : Application(), KoinComponent {
         val deviceLifecycle: DeviceLifecycle by lazy { get().get() }
         val appName: String by lazy { "${getApplicationName()}${MILESTONE}" }
         val imageControl: ImageControl by lazy { get().get() }
+        val sr: SettingsRepository by lazy { get().get() }
+        val prefs: SharedPreferences by lazy { get().get() }
+        val svm: SettingsViewModel by lazy { get().get() }
 
         private fun getApplicationName(): String {
             val applicationInfo = context.applicationInfo

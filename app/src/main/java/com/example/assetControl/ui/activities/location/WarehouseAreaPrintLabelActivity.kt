@@ -20,6 +20,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.transition.ChangeBounds
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
+import com.example.assetControl.AssetControlApp.Companion.sr
 import com.example.assetControl.R
 import com.example.assetControl.data.async.location.GetLocationAsync
 import com.example.assetControl.data.enums.barcode.BarcodeLabelTarget
@@ -50,8 +51,6 @@ import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.parcel.ParcelLong
 import com.example.assetControl.utils.parcel.Parcelables.parcelable
 import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetLong
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener
 import kotlin.concurrent.thread
@@ -157,7 +156,7 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
 
     private fun loadDefaultValues() {
         tempTitle = getString(R.string.select_warehouse_area)
-        val id = prefsGetLong(Preference.defaultBarcodeLabelCustomWa)
+        val id = sr.prefsGetLong(Preference.defaultBarcodeLabelCustomWa)
         val blc = BarcodeLabelCustomRepository().selectById(id)
         if (blc != null) printerFragment?.barcodeLabelCustom = blc
     }
@@ -557,7 +556,7 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
 
     private val showScannedCode: Boolean
         get() {
-            return prefsGetBoolean(Preference.showScannedCode)
+            return sr.prefsGetBoolean(Preference.showScannedCode)
         }
 
     override fun scannerCompleted(scanCode: String) {
@@ -730,7 +729,7 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
 
     override fun onStateChanged(state: Int) {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
-        if (prefsGetBoolean(Preference.rfidShowConnectedMessage)) {
+        if (sr.prefsGetBoolean(Preference.rfidShowConnectedMessage)) {
             when (Rfid.vh75State) {
                 Vh75Bt.STATE_CONNECTED -> {
                     makeText(

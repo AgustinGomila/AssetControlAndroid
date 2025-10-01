@@ -25,7 +25,8 @@ import androidx.core.graphics.scale
 import androidx.core.view.ViewCompat
 import com.example.assetControl.AssetControlApp.Companion.appName
 import com.example.assetControl.AssetControlApp.Companion.context
-import com.example.assetControl.BuildConfig
+import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.databinding.InitConfigActivityBinding
 import com.example.assetControl.devices.deviceLifecycle.ScannerManager
@@ -51,10 +52,6 @@ import com.example.assetControl.utils.settings.config.Preference
 import com.example.assetControl.utils.settings.config.QRConfigType
 import com.example.assetControl.utils.settings.config.QRConfigType.CREATOR.QRConfigClientAccount
 import com.example.assetControl.utils.settings.io.FileHelper
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.cleanPrefs
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetString
-import com.example.assetControl.utils.settings.preferences.Repository
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import io.github.cdimascio.dotenv.DotenvBuilder
@@ -268,11 +265,11 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     private fun clearOldPrefs() {
-        cleanPrefs()
+        sr.cleanPrefs()
     }
 
     private fun configApp() {
-        val realPass = prefsGetString(Preference.confPassword)
+        val realPass = sr.prefsGetString(Preference.confPassword)
         if (realPass.isEmpty()) {
             attemptEnterConfig(realPass)
             return
@@ -314,7 +311,7 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     private fun attemptEnterConfig(password: String) {
-        val realPass = prefsGetString(Preference.confPassword)
+        val realPass = sr.prefsGetString(Preference.confPassword)
         if (password != realPass) {
             makeText(binding.root, getString(R.string.invalid_password), ERROR)
             return
@@ -336,7 +333,7 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
                 // Vamos a reconstruir el scanner por si cambió la configuración
                 ScannerManager.autodetectDeviceModel(this)
 
-                if (Repository.urlPanel.isEmpty()) {
+                if (svm.urlPanel.isEmpty()) {
                     makeText(binding.root, getString(R.string.server_is_not_configured), ERROR)
                     return@registerForActivityResult
                 }
@@ -429,7 +426,7 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private val showScannedCode: Boolean
         get() {
-            return prefsGetBoolean(Preference.showScannedCode)
+            return sr.prefsGetBoolean(Preference.showScannedCode)
         }
 
     override fun scannerCompleted(scanCode: String) {
@@ -473,7 +470,7 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_login, menu)
 
-        if (!prefsGetBoolean(Preference.showConfButton)) {
+        if (!sr.prefsGetBoolean(Preference.showConfButton)) {
             menu.removeItem(menu.findItem(R.id.action_settings).itemId)
         }
 

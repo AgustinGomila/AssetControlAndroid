@@ -11,13 +11,13 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.res.ResourcesCompat
 import com.example.assetControl.AssetControlApp
+import com.example.assetControl.AssetControlApp.Companion.prefs
 import com.example.assetControl.R
 import com.example.assetControl.network.download.DownloadDb
 import com.example.assetControl.ui.common.snackbar.MakeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
 import com.example.assetControl.utils.Statics
 import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences
 import org.json.JSONObject
 import java.lang.ref.WeakReference
 
@@ -257,7 +257,7 @@ class ClientPackage {
                 icPass =
                     if (customOptJsonObj.has(IC_PASSWORD_TAG)) customOptJsonObj.getString(IC_PASSWORD_TAG) else ""
 
-                val x = Preferences.prefs.edit()
+                val x = prefs.edit()
                 if (productId == Statics.APP_VERSION_ID.toString()) {
                     x.putString(Preference.urlPanel.key, appUrl)
                     x.putString(Preference.installationCode.key, installationCode)

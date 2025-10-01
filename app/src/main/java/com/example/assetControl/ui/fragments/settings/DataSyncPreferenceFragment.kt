@@ -19,6 +19,7 @@ import androidx.preference.Preference.OnPreferenceClickListener
 import androidx.preference.PreferenceFragmentCompat
 import com.example.assetControl.AssetControlApp
 import com.example.assetControl.AssetControlApp.Companion.isLogged
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.data.room.database.AcDatabase
 import com.example.assetControl.data.room.database.AcDatabase.Companion.DATABASE_NAME
@@ -35,7 +36,6 @@ import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.settings.entries.ConfEntry
 import com.example.assetControl.utils.settings.io.FileHelper
 import com.example.assetControl.utils.settings.io.PathHelper
-import com.example.assetControl.utils.settings.preferences.Repository
 import com.google.android.gms.common.api.CommonStatusCodes
 import java.io.File
 import java.io.FileInputStream
@@ -389,9 +389,9 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
                 "Ver: %s%sInstallation Code: %s%sClient Package: %s",
                 "${getString(R.string.app_milestone)} ${pInfo.versionName}",
                 Statics.newLine,
-                Repository.installationCode,
+                svm.installationCode,
                 Statics.newLine,
-                Repository.clientPackage
+                svm.clientPackage
             )
 
             val extraText = ArrayList<String>()

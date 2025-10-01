@@ -9,13 +9,12 @@ import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.example.assetControl.AssetControlApp.Companion.sr
 import com.example.assetControl.R
 import com.example.assetControl.databinding.WarehouseAreaSelectFilterFragmentBinding
 import com.example.assetControl.ui.activities.location.LocationSelectActivity
 import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutBoolean
 
 class WarehouseAreaSelectFilterFragment : Fragment() {
     private var fragmentListener: FragmentListener? = null
@@ -60,7 +59,7 @@ class WarehouseAreaSelectFilterFragment : Fragment() {
     }
 
     private fun saveSharedPreferences() {
-        prefsPutBoolean(
+        sr.prefsPutBoolean(
             Preference.selectWarehouseAreaOnlyActive.key, onlyActive
         )
     }
@@ -89,7 +88,7 @@ class WarehouseAreaSelectFilterFragment : Fragment() {
     private fun loadDefaultValues() {
         wDescription = ""
         waDescription = ""
-        onlyActive = prefsGetBoolean(Preference.selectWarehouseAreaOnlyActive)
+        onlyActive = sr.prefsGetBoolean(Preference.selectWarehouseAreaOnlyActive)
     }
 
     private fun saveBundleValues(b: Bundle) {

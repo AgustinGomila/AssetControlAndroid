@@ -1,9 +1,9 @@
 package com.example.assetControl.data.model.barcodeFields
 
+import com.example.assetControl.AssetControlApp.Companion.sr
 import com.example.assetControl.data.room.dto.asset.Asset
 import com.example.assetControl.utils.Statics
 import com.example.assetControl.utils.settings.entries.ConfEntry
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
 import java.util.*
 
 class AssetLabelField(asset: Asset, forReport: Boolean) {
@@ -22,7 +22,7 @@ class AssetLabelField(asset: Asset, forReport: Boolean) {
         val asset = mAsset
 
         if (asset != null) {
-            val addLabelNumber = prefsGetBoolean(ConfEntry.acAddLabelNumberOnBarcode)
+            val addLabelNumber = sr.prefsGetBoolean(ConfEntry.acAddLabelNumberOnBarcode)
 
             tempCode =
                 if (addLabelNumber) {

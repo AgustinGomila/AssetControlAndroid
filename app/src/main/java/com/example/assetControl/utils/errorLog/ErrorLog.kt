@@ -7,10 +7,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.FragmentActivity
 import com.example.assetControl.AssetControlApp.Companion.context
+import com.example.assetControl.AssetControlApp.Companion.sr
 import com.example.assetControl.utils.Statics
 import com.example.assetControl.utils.misc.DateUtils.formatDateToString
 import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -62,7 +62,7 @@ class ErrorLog {
             tClassName = className
             Log.e(tClassName, tMsg)
 
-            if (!prefsGetBoolean(Preference.registryError)) return
+            if (!sr.prefsGetBoolean(Preference.registryError)) return
 
             reallyWriteLog()
         }
@@ -74,7 +74,7 @@ class ErrorLog {
             tClassName = className
             Log.e(tClassName, tMsg)
 
-            if (!prefsGetBoolean(Preference.registryError)) return
+            if (!sr.prefsGetBoolean(Preference.registryError)) return
 
             reallyWriteLog()
         }
@@ -86,7 +86,7 @@ class ErrorLog {
             tClassName = className
             Log.e(tClassName, tMsg)
 
-            if (!prefsGetBoolean(Preference.registryError)) return
+            if (!sr.prefsGetBoolean(Preference.registryError)) return
 
             reallyWriteLog()
         }
@@ -100,7 +100,7 @@ class ErrorLog {
             tClassName = className
             Log.e(tClassName, tMsg)
 
-            if (!prefsGetBoolean(Preference.registryError)) return
+            if (!sr.prefsGetBoolean(Preference.registryError)) return
 
             reallyWriteLog()
         }

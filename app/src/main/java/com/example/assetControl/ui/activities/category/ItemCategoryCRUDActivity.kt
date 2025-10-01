@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.dacosys.imageControl.ui.fragments.ImageControlButtonsFragment
 import com.example.assetControl.AssetControlApp.Companion.currentUser
+import com.example.assetControl.AssetControlApp.Companion.sr
 import com.example.assetControl.R
 import com.example.assetControl.data.enums.common.CrudCompleted
 import com.example.assetControl.data.enums.common.CrudResult
@@ -31,7 +32,6 @@ import com.example.assetControl.ui.fragments.category.ItemCategoryCRUDFragment
 import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.parcel.Parcelables.parcelable
 import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
 import org.parceler.Parcels
 
 class ItemCategoryCRUDActivity : AppCompatActivity(), CrudCompleted,
@@ -258,7 +258,7 @@ class ItemCategoryCRUDActivity : AppCompatActivity(), CrudCompleted,
                             imageControlFragment ?: return@runOnUiThread
                         ).commit()
 
-                    if (!prefsGetBoolean(Preference.useImageControl)) {
+                    if (!sr.prefsGetBoolean(Preference.useImageControl)) {
                         fm.beginTransaction()
                             .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
                             .hide(imageControlFragment as Fragment)

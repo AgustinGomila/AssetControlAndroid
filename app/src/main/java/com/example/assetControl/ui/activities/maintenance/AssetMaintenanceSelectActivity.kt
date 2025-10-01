@@ -11,6 +11,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
+import com.example.assetControl.AssetControlApp.Companion.sr
 import com.example.assetControl.R
 import com.example.assetControl.data.room.dto.maintenance.AssetMaintenance
 import com.example.assetControl.data.room.repository.asset.AssetRepository
@@ -28,8 +29,6 @@ import com.example.assetControl.utils.parcel.ParcelLong
 import com.example.assetControl.utils.parcel.Parcelables.parcelable
 import com.example.assetControl.utils.parcel.Parcelables.parcelableArrayList
 import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutBoolean
 
 class AssetMaintenanceSelectActivity : AppCompatActivity(),
     AssetMaintenanceAdapter.CustomCheckedChangeListener {
@@ -59,7 +58,7 @@ class AssetMaintenanceSelectActivity : AppCompatActivity(),
     }
 
     private fun saveSharedPreferences() {
-        prefsPutBoolean(
+        sr.prefsPutBoolean(
             Preference.selectAssetMaintenanceOnlyActive.key, binding.onlyActiveSwitch.isChecked
         )
     }
@@ -135,7 +134,7 @@ class AssetMaintenanceSelectActivity : AppCompatActivity(),
         title = tempTitle
 
         binding.onlyActiveSwitch.setOnCheckedChangeListener(null)
-        binding.onlyActiveSwitch.isChecked = prefsGetBoolean(Preference.selectWarehouseOnlyActive)
+        binding.onlyActiveSwitch.isChecked = sr.prefsGetBoolean(Preference.selectWarehouseOnlyActive)
 
         binding.etDescription.setOnEditorActionListener(null)
         binding.etDescription.setOnEditorActionListener { _, keyCode, keyEvent ->

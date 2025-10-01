@@ -43,6 +43,8 @@ import com.dacosys.imageControl.room.dao.ImageCoroutines
 import com.dacosys.imageControl.ui.activities.ImageControlCameraActivity
 import com.dacosys.imageControl.ui.activities.ImageControlGridActivity
 import com.example.assetControl.AssetControlApp.Companion.context
+import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.BuildConfig
 import com.example.assetControl.R
 import com.example.assetControl.data.async.movement.SaveMovement
@@ -91,9 +93,6 @@ import com.example.assetControl.utils.parcel.ParcelLong
 import com.example.assetControl.utils.parcel.Parcelables.parcelable
 import com.example.assetControl.utils.parcel.Parcelables.parcelableArrayList
 import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutBoolean
-import com.example.assetControl.utils.settings.preferences.Repository.Companion.useImageControl
 import com.example.assetControl.viewModel.review.SaveReviewViewModel
 import com.example.assetControl.viewModel.sync.SyncViewModel
 import com.google.android.material.textfield.TextInputEditText
@@ -168,17 +167,17 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private val menuItemShowImages = 9999
     private var showImages
-        get() = prefsGetBoolean(Preference.reviewContentShowImages)
+        get() = sr.prefsGetBoolean(Preference.reviewContentShowImages)
         set(value) {
-            prefsPutBoolean(Preference.reviewContentShowImages.key, value)
+            sr.prefsPutBoolean(Preference.reviewContentShowImages.key, value)
         }
 
     private var showCheckBoxes
         get() =
             if (!multiSelect) false
-            else prefsGetBoolean(Preference.reviewContentShowCheckBoxes)
+            else sr.prefsGetBoolean(Preference.reviewContentShowCheckBoxes)
         set(value) {
-            prefsPutBoolean(Preference.reviewContentShowCheckBoxes.key, value)
+            sr.prefsPutBoolean(Preference.reviewContentShowCheckBoxes.key, value)
         }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -536,7 +535,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
             editAssetListener = this
         )
 
-        if (useImageControl) {
+        if (svm.useImageControl) {
             adapter?.refreshImageControlListeners(
                 addPhotoListener = this,
                 albumViewListener = this
@@ -820,7 +819,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private val showScannedCode: Boolean
         get() {
-            return prefsGetBoolean(Preference.showScannedCode)
+            return sr.prefsGetBoolean(Preference.showScannedCode)
         }
 
     override fun scannerCompleted(scanCode: String) {
@@ -1362,7 +1361,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     override fun onStateChanged(state: Int) {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
-        if (prefsGetBoolean(Preference.rfidShowConnectedMessage)) {
+        if (sr.prefsGetBoolean(Preference.rfidShowConnectedMessage)) {
             when (Rfid.vh75State) {
                 Vh75Bt.STATE_CONNECTED -> {
                     makeText(
@@ -1453,7 +1452,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
     // region ImageControl
 
     override fun onAlbumViewRequired(tableId: Int, itemId: Long, filename: String) {
-        if (!useImageControl) {
+        if (!svm.useImageControl) {
             return
         }
 
@@ -1531,7 +1530,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     override fun onAddPhotoRequired(tableId: Int, itemId: Long, description: String, obs: String, reference: String) {
-        if (!useImageControl) {
+        if (!svm.useImageControl) {
             return
         }
 

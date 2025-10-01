@@ -1,6 +1,7 @@
 package com.example.assetControl.network.checkConn
 
 import com.example.assetControl.AssetControlApp.Companion.context
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.data.webservice.common.Webservice.Companion.getWebservice
 import com.example.assetControl.network.serverDate.GetMySqlDate
@@ -8,7 +9,6 @@ import com.example.assetControl.network.serverDate.MySqlDateResult
 import com.example.assetControl.network.utils.ProgressStatus
 import com.example.assetControl.ui.common.snackbar.SnackBarEventData
 import com.example.assetControl.ui.common.snackbar.SnackBarType
-import com.example.assetControl.utils.settings.preferences.Repository
 
 class CheckWsConnection(
     private var url: String,
@@ -36,15 +36,15 @@ class CheckWsConnection(
     }
 
     fun execute() {
-        Repository.wsTestUrl = url
-        Repository.wsTestNamespace = namespace
-        Repository.wsTestUseProxy = useProxy
-        Repository.wsTestProxyUrl = proxyUrl
-        Repository.wsTestProxyPort = proxyPort
-        Repository.wsTestProxyUser = proxyUser
-        Repository.wsTestProxyPass = proxyPass
+        svm.wsTestUrl = url
+        svm.wsTestNamespace = namespace
+        svm.wsTestUseProxy = useProxy
+        svm.wsTestProxyUrl = proxyUrl
+        svm.wsTestProxyPort = proxyPort
+        svm.wsTestProxyUser = proxyUser
+        svm.wsTestProxyPass = proxyPass
 
-        if (Repository.wsTestUrl.isEmpty() || Repository.wsTestNamespace.isEmpty()) {
+        if (svm.wsTestUrl.isEmpty() || svm.wsTestNamespace.isEmpty()) {
             return
         }
 

@@ -58,6 +58,8 @@ import com.dacosys.imageControl.room.dao.ImageCoroutines
 import com.dacosys.imageControl.ui.activities.ImageControlCameraActivity
 import com.dacosys.imageControl.ui.activities.ImageControlGridActivity
 import com.example.assetControl.AssetControlApp.Companion.context
+import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.BuildConfig
 import com.example.assetControl.R
 import com.example.assetControl.data.async.review.SaveReview
@@ -112,11 +114,6 @@ import com.example.assetControl.utils.parcel.ParcelLong
 import com.example.assetControl.utils.parcel.Parcelables.parcelable
 import com.example.assetControl.utils.parcel.Parcelables.parcelableArrayList
 import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetStringSet
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutBoolean
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutStringSet
-import com.example.assetControl.utils.settings.preferences.Repository.Companion.useImageControl
 import com.example.assetControl.viewModel.review.SaveReviewViewModel
 import com.example.assetControl.viewModel.sync.SyncViewModel
 import com.google.android.material.textfield.TextInputEditText
@@ -140,9 +137,9 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     private fun saveSharedPreferences() {
-        prefsPutBoolean(Preference.assetReviewAddUnknownAssets.key, binding.addUnknownAssetsSwitch.isChecked)
-        prefsPutBoolean(Preference.assetReviewAllowUnknownCodes.key, binding.allowUnknownCodesSwitch.isChecked)
-        prefsPutStringSet(
+        sr.prefsPutBoolean(Preference.assetReviewAddUnknownAssets.key, binding.addUnknownAssetsSwitch.isChecked)
+        sr.prefsPutBoolean(Preference.assetReviewAllowUnknownCodes.key, binding.allowUnknownCodesSwitch.isChecked)
+        sr.prefsPutStringSet(
             Preference.assetReviewContentVisibleStatus.key, (adapter?.visibleStatus ?: ArrayList())
                 .map { it.id.toString() }
                 .toSet())
@@ -288,7 +285,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
     private var firstVisiblePos: Int? = null
 
     private var visibleStatusArray: ArrayList<AssetReviewContentStatus> = ArrayList()
-    private val allowQuickReview: Boolean by lazy { prefsGetBoolean(Preference.quickReviews) }
+    private val allowQuickReview: Boolean by lazy { sr.prefsGetBoolean(Preference.quickReviews) }
 
     private var unknownAssetId: Long = 0
 
@@ -301,17 +298,17 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private val menuItemShowImages = 9999
     private var showImages
-        get() = prefsGetBoolean(Preference.reviewContentShowImages)
+        get() = sr.prefsGetBoolean(Preference.reviewContentShowImages)
         set(value) {
-            prefsPutBoolean(Preference.reviewContentShowImages.key, value)
+            sr.prefsPutBoolean(Preference.reviewContentShowImages.key, value)
         }
 
     private var showCheckBoxes
         get() =
             if (!allowQuickReview) false
-            else prefsGetBoolean(Preference.reviewContentShowCheckBoxes)
+            else sr.prefsGetBoolean(Preference.reviewContentShowCheckBoxes)
         set(value) {
-            prefsPutBoolean(Preference.reviewContentShowCheckBoxes.key, value)
+            sr.prefsPutBoolean(Preference.reviewContentShowCheckBoxes.key, value)
         }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -372,11 +369,11 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         if (b.containsKey("allowUnknownCodes")) binding.allowUnknownCodesSwitch.isChecked =
             b.getBoolean("allowUnknownCodes")
-        else binding.allowUnknownCodesSwitch.isChecked = prefsGetBoolean(Preference.assetReviewAllowUnknownCodes)
+        else binding.allowUnknownCodesSwitch.isChecked = sr.prefsGetBoolean(Preference.assetReviewAllowUnknownCodes)
 
         if (b.containsKey("addUnknownAssets")) binding.addUnknownAssetsSwitch.isChecked =
             b.getBoolean("addUnknownAssets")
-        else binding.addUnknownAssetsSwitch.isChecked = prefsGetBoolean(Preference.assetReviewAddUnknownAssets)
+        else binding.addUnknownAssetsSwitch.isChecked = sr.prefsGetBoolean(Preference.assetReviewAddUnknownAssets)
 
         unknownAssetId = b.getLong("unknownAssetId")
 
@@ -409,14 +406,14 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private fun loadDefaultValues() {
         tempTitle = getString(R.string.asset_review)
-        binding.allowUnknownCodesSwitch.isChecked = prefsGetBoolean(Preference.assetReviewAllowUnknownCodes)
-        binding.addUnknownAssetsSwitch.isChecked = prefsGetBoolean(Preference.assetReviewAddUnknownAssets)
+        binding.allowUnknownCodesSwitch.isChecked = sr.prefsGetBoolean(Preference.assetReviewAllowUnknownCodes)
+        binding.addUnknownAssetsSwitch.isChecked = sr.prefsGetBoolean(Preference.assetReviewAddUnknownAssets)
         loadDefaultVisibleStatus()
     }
 
     private fun loadDefaultVisibleStatus() {
         visibleStatusArray.clear()
-        var set = prefsGetStringSet(
+        var set = sr.prefsGetStringSet(
             Preference.assetReviewContentVisibleStatus.key,
             Preference.assetReviewContentVisibleStatus.defaultValue as ArrayList<String>
         )
@@ -520,7 +517,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
                 binding.addUnknownAssetsSwitch.isChecked = false
             }
         }
-        binding.allowUnknownCodesSwitch.isChecked = prefsGetBoolean(Preference.assetReviewAllowUnknownCodes)
+        binding.allowUnknownCodesSwitch.isChecked = sr.prefsGetBoolean(Preference.assetReviewAllowUnknownCodes)
         binding.allowUnknownAssetTextView.setOnClickListener { binding.allowUnknownCodesSwitch.performClick() }
 
         binding.addUnknownAssetsSwitch.setOnCheckedChangeListener { _, isChecked ->
@@ -528,7 +525,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
                 binding.allowUnknownCodesSwitch.isChecked = true
             }
         }
-        binding.addUnknownAssetsSwitch.isChecked = prefsGetBoolean(Preference.assetReviewAddUnknownAssets)
+        binding.addUnknownAssetsSwitch.isChecked = sr.prefsGetBoolean(Preference.assetReviewAddUnknownAssets)
         binding.unknownAssetRegistrationTextView.setOnClickListener { binding.addUnknownAssetsSwitch.performClick() }
 
         binding.mantButton.setOnClickListener {
@@ -538,7 +535,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
             }
         }
 
-        if (!prefsGetBoolean(Preference.useAssetControlManteinance)) {
+        if (!sr.prefsGetBoolean(Preference.useAssetControlManteinance)) {
             binding.mantButton.isEnabled = false
         }
 
@@ -1161,7 +1158,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private val showScannedCode: Boolean
         get() {
-            return prefsGetBoolean(Preference.showScannedCode)
+            return sr.prefsGetBoolean(Preference.showScannedCode)
         }
 
     override fun scannerCompleted(scanCode: String) {
@@ -1356,7 +1353,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
         )
         adapter?.refreshUiEventListener(uiEventListener = this)
 
-        if (useImageControl) {
+        if (svm.useImageControl) {
             adapter?.refreshImageControlListeners(
                 addPhotoListener = this,
                 albumViewListener = this
@@ -1681,7 +1678,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
         }
 
         // Opción de visibilidad de Imágenes
-        if (useImageControl) {
+        if (svm.useImageControl) {
             menu.add(Menu.NONE, menuItemShowImages, menu.size, context.getString(R.string.show_images))
                 .setChecked(showImages)
                 .isCheckable = true
@@ -2132,7 +2129,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     override fun onStateChanged(state: Int) {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
-        if (prefsGetBoolean(Preference.rfidShowConnectedMessage)) {
+        if (sr.prefsGetBoolean(Preference.rfidShowConnectedMessage)) {
             when (Rfid.vh75State) {
                 Vh75Bt.STATE_CONNECTED -> {
                     makeText(
@@ -2207,7 +2204,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
     // region ImageControl
 
     override fun onAlbumViewRequired(tableId: Int, itemId: Long, filename: String) {
-        if (!useImageControl) {
+        if (!svm.useImageControl) {
             return
         }
 
@@ -2294,7 +2291,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
         obs: String,
         reference: String
     ) {
-        if (!useImageControl) {
+        if (!svm.useImageControl) {
             return
         }
 

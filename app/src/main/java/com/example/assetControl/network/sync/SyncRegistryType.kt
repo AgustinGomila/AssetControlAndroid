@@ -4,9 +4,9 @@ package com.example.assetControl.network.sync
 import android.os.Parcel
 import android.os.Parcelable
 import com.example.assetControl.AssetControlApp.Companion.context
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.utils.settings.entries.ConfEntry
-import com.example.assetControl.utils.settings.preferences.Repository
 import java.util.*
 
 class SyncRegistryType : Parcelable {
@@ -181,7 +181,7 @@ class SyncRegistryType : Parcelable {
                 BarcodeLabelTarget,
             )
 
-            if (Repository.useImageControl) allSections.add(Image)
+            if (svm.useImageControl) allSections.add(Image)
 
             return ArrayList(allSections.sortedWith(compareBy { it.id }))
         }
@@ -224,7 +224,7 @@ class SyncRegistryType : Parcelable {
                 RouteProcess
             )
 
-            if (Repository.useImageControl) allSections.add(Image)
+            if (svm.useImageControl) allSections.add(Image)
 
             return ArrayList(allSections.sortedWith(compareBy { it.id }))
         }
@@ -244,7 +244,7 @@ class SyncRegistryType : Parcelable {
                 RouteProcess.id.toString()
             )
 
-            if (Repository.useImageControl) allSections.add(Image.id.toString())
+            if (svm.useImageControl) allSections.add(Image.id.toString())
 
             return ArrayList(allSections.sortedWith(compareBy { it }))
         }

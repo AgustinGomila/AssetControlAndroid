@@ -6,14 +6,14 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.util.Log
 import com.example.assetControl.AssetControlApp
+import com.example.assetControl.AssetControlApp.Companion.sr
 import com.example.assetControl.utils.Statics.Companion.AUTO_SEND
 import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences
 
 class Connection {
     companion object {
         fun autoSend(): Boolean {
-            return isOnline() && (Preferences.prefsGetBoolean(Preference.autoSend) || AUTO_SEND)
+            return isOnline() && (sr.prefsGetBoolean(Preference.autoSend) || AUTO_SEND)
         }
 
         @SuppressLint("MissingPermission")

@@ -38,6 +38,7 @@ import com.dacosys.imageControl.ui.adapter.ImageAdapter.Companion.GetImageStatus
 import com.dacosys.imageControl.ui.adapter.ImageAdapter.Companion.ImageControlHolder
 import com.example.assetControl.AssetControlApp.Companion.context
 import com.example.assetControl.AssetControlApp.Companion.currentUser
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.data.enums.asset.AssetStatus
 import com.example.assetControl.data.enums.asset.OwnershipStatus
@@ -59,7 +60,6 @@ import com.example.assetControl.ui.adapters.interfaces.Interfaces.EditAssetRequi
 import com.example.assetControl.ui.common.utils.Screen.Companion.getBestContrastColor
 import com.example.assetControl.ui.common.utils.Screen.Companion.getColorWithAlpha
 import com.example.assetControl.ui.common.utils.Screen.Companion.manipulateColor
-import com.example.assetControl.utils.settings.preferences.Repository.Companion.useImageControl
 import java.util.*
 
 class WmcRecyclerAdapter(
@@ -317,9 +317,9 @@ class WmcRecyclerAdapter(
 
                 PAYLOADS.IMAGE_CONTROL_VISIBILITY -> {
                     if (position == currentIndex) {
-                        (holder as SelectedViewHolder).bindImageControlVisibility(if (useImageControl) VISIBLE else GONE)
+                        (holder as SelectedViewHolder).bindImageControlVisibility(if (svm.useImageControl) VISIBLE else GONE)
                     }
-                    if (!useImageControl) showImages(false)
+                    if (!svm.useImageControl) showImages(false)
                 }
             }
         }
@@ -1031,7 +1031,7 @@ class WmcRecyclerAdapter(
          * @param changingState Only if we are changing the visibility state, we expand the panel
          */
         fun bindImageVisibility(imageVisibility: Int, changingState: Boolean) {
-            if (!useImageControl || imageVisibility == GONE) collapseImagePanel(icHolder)
+            if (!svm.useImageControl || imageVisibility == GONE) collapseImagePanel(icHolder)
             else if (changingState) expandImagePanel(icHolder)
         }
 
@@ -1046,7 +1046,7 @@ class WmcRecyclerAdapter(
 
         fun bind(content: WarehouseMovementContent, checkBoxVisibility: Int = GONE, imageVisibility: Int = GONE) {
             bindCheckBoxVisibility(checkBoxVisibility)
-            bindImageControlVisibility(visibility = if (useImageControl) VISIBLE else GONE)
+            bindImageControlVisibility(visibility = if (svm.useImageControl) VISIBLE else GONE)
             bindImageVisibility(imageVisibility = imageVisibility, changingState = false)
             bindStatusChange(content = content)
 
@@ -1194,7 +1194,7 @@ class WmcRecyclerAdapter(
          * @param changingState Only if we are changing the visibility state, we expand the panel
          */
         fun bindImageVisibility(imageVisibility: Int, changingState: Boolean) {
-            if (!useImageControl || imageVisibility == GONE) collapseImagePanel(icHolder)
+            if (!svm.useImageControl || imageVisibility == GONE) collapseImagePanel(icHolder)
             else if (changingState) expandImagePanel(icHolder)
         }
 
@@ -1286,7 +1286,7 @@ class WmcRecyclerAdapter(
         refreshFilter(filterOptions)
 
         // Cambiamos la visibilidad del panel de imágenes.
-        if (!useImageControl) showImages = false
+        if (!svm.useImageControl) showImages = false
         showImages(showImages)
     }
 

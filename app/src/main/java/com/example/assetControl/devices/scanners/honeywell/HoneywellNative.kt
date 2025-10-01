@@ -5,10 +5,10 @@ import android.os.Looper
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.example.assetControl.AssetControlApp.Companion.context
+import com.example.assetControl.AssetControlApp.Companion.sr
 import com.example.assetControl.R
 import com.example.assetControl.devices.scanners.Scanner
 import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
 import com.honeywell.aidc.AidcManager
 import com.honeywell.aidc.BarcodeFailureEvent
 import com.honeywell.aidc.BarcodeReadEvent
@@ -205,23 +205,23 @@ class HoneywellNative(private var weakRef: WeakReference<AppCompatActivity>) : S
     private fun loadProperties() {
         properties = HashMap()
 
-        properties[BarcodeReader.PROPERTY_PDF_417_ENABLED] = prefsGetBoolean(Preference.symbologyPDF417)
-        properties[BarcodeReader.PROPERTY_AZTEC_ENABLED] = prefsGetBoolean(Preference.symbologyAztec)
-        properties[BarcodeReader.PROPERTY_QR_CODE_ENABLED] = prefsGetBoolean(Preference.symbologyQRCode)
-        properties[BarcodeReader.PROPERTY_CODABAR_ENABLED] = prefsGetBoolean(Preference.symbologyCODABAR)
-        properties[BarcodeReader.PROPERTY_CODE_128_ENABLED] = prefsGetBoolean(Preference.symbologyCode128)
-        properties[BarcodeReader.PROPERTY_CODE_39_ENABLED] = prefsGetBoolean(Preference.symbologyCode39)
-        properties[BarcodeReader.PROPERTY_CODE_93_ENABLED] = prefsGetBoolean(Preference.symbologyCode93)
-        properties[BarcodeReader.PROPERTY_DATAMATRIX_ENABLED] = prefsGetBoolean(Preference.symbologyDataMatrix)
-        properties[BarcodeReader.PROPERTY_EAN_13_ENABLED] = prefsGetBoolean(Preference.symbologyEAN13)
-        properties[BarcodeReader.PROPERTY_EAN_8_ENABLED] = prefsGetBoolean(Preference.symbologyEAN8)
-        properties[BarcodeReader.PROPERTY_MAXICODE_ENABLED] = prefsGetBoolean(Preference.symbologyMaxiCode)
-        properties[BarcodeReader.PROPERTY_RSS_ENABLED] = prefsGetBoolean(Preference.symbologyRSS14)
-        properties[BarcodeReader.PROPERTY_RSS_EXPANDED_ENABLED] = prefsGetBoolean(Preference.symbologyRSSExpanded)
-        properties[BarcodeReader.PROPERTY_UPC_A_ENABLE] = prefsGetBoolean(Preference.symbologyUPCA)
-        properties[BarcodeReader.PROPERTY_UPC_E_ENABLED] = prefsGetBoolean(Preference.symbologyUPCE)
+        properties[BarcodeReader.PROPERTY_PDF_417_ENABLED] = sr.prefsGetBoolean(Preference.symbologyPDF417)
+        properties[BarcodeReader.PROPERTY_AZTEC_ENABLED] = sr.prefsGetBoolean(Preference.symbologyAztec)
+        properties[BarcodeReader.PROPERTY_QR_CODE_ENABLED] = sr.prefsGetBoolean(Preference.symbologyQRCode)
+        properties[BarcodeReader.PROPERTY_CODABAR_ENABLED] = sr.prefsGetBoolean(Preference.symbologyCODABAR)
+        properties[BarcodeReader.PROPERTY_CODE_128_ENABLED] = sr.prefsGetBoolean(Preference.symbologyCode128)
+        properties[BarcodeReader.PROPERTY_CODE_39_ENABLED] = sr.prefsGetBoolean(Preference.symbologyCode39)
+        properties[BarcodeReader.PROPERTY_CODE_93_ENABLED] = sr.prefsGetBoolean(Preference.symbologyCode93)
+        properties[BarcodeReader.PROPERTY_DATAMATRIX_ENABLED] = sr.prefsGetBoolean(Preference.symbologyDataMatrix)
+        properties[BarcodeReader.PROPERTY_EAN_13_ENABLED] = sr.prefsGetBoolean(Preference.symbologyEAN13)
+        properties[BarcodeReader.PROPERTY_EAN_8_ENABLED] = sr.prefsGetBoolean(Preference.symbologyEAN8)
+        properties[BarcodeReader.PROPERTY_MAXICODE_ENABLED] = sr.prefsGetBoolean(Preference.symbologyMaxiCode)
+        properties[BarcodeReader.PROPERTY_RSS_ENABLED] = sr.prefsGetBoolean(Preference.symbologyRSS14)
+        properties[BarcodeReader.PROPERTY_RSS_EXPANDED_ENABLED] = sr.prefsGetBoolean(Preference.symbologyRSSExpanded)
+        properties[BarcodeReader.PROPERTY_UPC_A_ENABLE] = sr.prefsGetBoolean(Preference.symbologyUPCA)
+        properties[BarcodeReader.PROPERTY_UPC_E_ENABLED] = sr.prefsGetBoolean(Preference.symbologyUPCE)
 
-        val sendDigit = prefsGetBoolean(Preference.sendBarcodeCheckDigit)
+        val sendDigit = sr.prefsGetBoolean(Preference.sendBarcodeCheckDigit)
         properties[BarcodeReader.PROPERTY_EAN_13_CHECK_DIGIT_TRANSMIT_ENABLED] = sendDigit
         properties[BarcodeReader.PROPERTY_EAN_8_CHECK_DIGIT_TRANSMIT_ENABLED] = sendDigit
         properties[BarcodeReader.PROPERTY_UPC_A_CHECK_DIGIT_TRANSMIT_ENABLED] = sendDigit

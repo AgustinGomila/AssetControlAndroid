@@ -9,13 +9,12 @@ import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.example.assetControl.AssetControlApp.Companion.sr
 import com.example.assetControl.R
 import com.example.assetControl.databinding.RouteSelectFilterFragmentBinding
 import com.example.assetControl.ui.activities.route.RouteSelectDialogActivity
 import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutBoolean
 
 /**
  * A simple [Fragment] subclass.
@@ -59,7 +58,7 @@ class RouteSelectFilterFragment : Fragment() {
     }
 
     private fun saveSharedPreferences() {
-        prefsPutBoolean(
+        sr.prefsPutBoolean(
             Preference.selectRouteOnlyActive.key,
             onlyActive
         )
@@ -98,7 +97,7 @@ class RouteSelectFilterFragment : Fragment() {
     private fun loadDefaultValues() {
         routeDescription = ""
         onlyActive =
-            prefsGetBoolean(Preference.selectRouteOnlyActive)
+            sr.prefsGetBoolean(Preference.selectRouteOnlyActive)
     }
 
     private fun saveBundleValues(b: Bundle) {

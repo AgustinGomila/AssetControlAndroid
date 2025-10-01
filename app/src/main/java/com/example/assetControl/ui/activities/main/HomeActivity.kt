@@ -43,6 +43,8 @@ import com.example.assetControl.AssetControlApp.Companion.context
 import com.example.assetControl.AssetControlApp.Companion.currentUser
 import com.example.assetControl.AssetControlApp.Companion.isLogged
 import com.example.assetControl.AssetControlApp.Companion.setCurrentUserId
+import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.BuildConfig
 import com.example.assetControl.R
 import com.example.assetControl.data.enums.permission.PermissionEntry
@@ -84,10 +86,6 @@ import com.example.assetControl.utils.imageControl.ImageControl.Companion.setupI
 import com.example.assetControl.utils.mainButton.MainButton
 import com.example.assetControl.utils.settings.config.ConfigHelper
 import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetString
-import com.example.assetControl.utils.settings.preferences.Repository
 import com.example.assetControl.viewModel.sync.SyncViewModel
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
@@ -131,7 +129,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
 
     private val showScannedCode: Boolean
         get() {
-            return prefsGetBoolean(Preference.showScannedCode)
+            return sr.prefsGetBoolean(Preference.showScannedCode)
         }
 
     override fun scannerCompleted(scanCode: String) {
@@ -186,7 +184,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
         // así que de esta manera puedo volver a llenar el fragmento de usuarios
         // ¿Ya está autentificado?
         // Evitar hacer un nuevo login cuando se hace la rotación de la pantalla
-        if (Repository.wsUrl.isEmpty() || Repository.wsNamespace.isEmpty()) {
+        if (svm.wsUrl.isEmpty() || svm.wsNamespace.isEmpty()) {
             setupInitConfig()
             return
         }
@@ -358,7 +356,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
     }
 
     private fun configApp() {
-        val realPass = prefsGetString(Preference.confPassword)
+        val realPass = sr.prefsGetString(Preference.confPassword)
         if (realPass.isEmpty()) {
             attemptEnterConfig(realPass)
             return
@@ -400,7 +398,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
     }
 
     private fun attemptEnterConfig(password: String) {
-        val realPass = prefsGetString(Preference.confPassword)
+        val realPass = sr.prefsGetString(Preference.confPassword)
         if (password != realPass) {
             makeText(binding.root, getString(R.string.invalid_password), SnackBarType.ERROR)
             return
@@ -481,7 +479,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
     private val resultForInitConfig =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             try {
-                if (Repository.wsUrl.isEmpty() || Repository.wsNamespace.isEmpty()) {
+                if (svm.wsUrl.isEmpty() || svm.wsNamespace.isEmpty()) {
                     makeText(
                         binding.root,
                         getString(R.string.webservice_is_not_configured),
@@ -536,10 +534,10 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
         val pInfo = packageManager.getPackageInfo(packageName, 0)
         binding.versionTextView.text =
             String.format("%s %s", getString(R.string.app_milestone), pInfo.versionName)
-        binding.installationCodeTextView.text = Repository.installationCode
-        binding.packageTextView.text = Repository.clientPackage
+        binding.installationCodeTextView.text = svm.installationCode
+        binding.packageTextView.text = svm.clientPackage
         when {
-            Repository.clientPackage.isEmpty() -> binding.packageTextView.visibility = GONE
+            svm.clientPackage.isEmpty() -> binding.packageTextView.visibility = GONE
             else -> binding.packageTextView.visibility = View.VISIBLE
         }
 
@@ -570,7 +568,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
 
         runOnUiThread {
-            val restSec = Preferences.prefsGetInt(Preference.acSyncInterval) - secs
+            val restSec = sr.prefsGetInt(Preference.acSyncInterval) - secs
             val restMin = restSec / 60
             val rstSecsInMin = restSec % 60
             val msg = "$restMin:${String.format("%02d", rstSecsInMin)}"
@@ -694,7 +692,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
 
         for (b in t) {
             // Omitir el botón de mantenimientos
-            if (b.mainButtonId == MainButton.AssetMaintenance.mainButtonId && !prefsGetBoolean(
+            if (b.mainButtonId == MainButton.AssetMaintenance.mainButtonId && !sr.prefsGetBoolean(
                     Preference.useAssetControlManteinance
                 )
             ) {
@@ -812,7 +810,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_main, menu)
 
-        if (!prefsGetBoolean(Preference.showConfButton)) {
+        if (!sr.prefsGetBoolean(Preference.showConfButton)) {
             menu.removeItem(menu.findItem(R.id.action_settings).itemId)
         }
 

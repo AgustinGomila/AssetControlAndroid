@@ -8,6 +8,8 @@ import com.dacosys.imageControl.network.upload.UploadImagesProgress
 import com.example.assetControl.AssetControlApp.Companion.context
 import com.example.assetControl.AssetControlApp.Companion.getUserId
 import com.example.assetControl.AssetControlApp.Companion.isLogged
+import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.BuildConfig
 import com.example.assetControl.R
 import com.example.assetControl.data.enums.common.Table
@@ -59,8 +61,6 @@ import com.example.assetControl.network.serverDate.MySqlDateResult
 import com.example.assetControl.network.utils.ProgressStatus
 import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
-import com.example.assetControl.utils.settings.preferences.Repository.Companion.connectionTimeout
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -167,7 +167,7 @@ class SyncUpload(
             dataCollection()
             routeProcess()
 
-            if (prefsGetBoolean(Preference.useAssetControlManteinance)) {
+            if (sr.prefsGetBoolean(Preference.useAssetControlManteinance)) {
                 assetMaintenance()
             }
         } else {
@@ -204,7 +204,7 @@ class SyncUpload(
                 }
 
                 SyncRegistryType.AssetMaintenance -> {
-                    if (prefsGetBoolean(Preference.useAssetControlManteinance)) {
+                    if (sr.prefsGetBoolean(Preference.useAssetControlManteinance)) {
                         itemCategory()
                         warehouse()
                         warehouseArea()
@@ -274,7 +274,7 @@ class SyncUpload(
         }
 
         while (!getProcessState()) {
-            if (System.currentTimeMillis() - startTime == (connectionTimeout * 1000).toLong()) {
+            if (System.currentTimeMillis() - startTime == (svm.connectionTimeout * 1000).toLong()) {
                 setProcessState(true)
             }
         }

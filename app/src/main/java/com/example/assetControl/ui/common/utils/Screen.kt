@@ -24,9 +24,8 @@ import androidx.core.graphics.toColorInt
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.assetControl.AssetControlApp.Companion.context
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
-import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -44,7 +43,7 @@ class Screen {
             height = displayMetrics.heightPixels
             width = displayMetrics.widthPixels
 
-            if (prefsGetBoolean(Preference.allowScreenRotation)) {
+            if (svm.allowScreenRotation) {
                 activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
             } else {
                 when (rotation) {

@@ -18,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.assetControl.AssetControlApp.Companion.context
+import com.example.assetControl.AssetControlApp.Companion.sr
 import com.example.assetControl.R
 import com.example.assetControl.databinding.FloatingCameraActivityBinding
 import com.example.assetControl.devices.scanners.Scanner
@@ -28,10 +29,6 @@ import com.example.assetControl.ui.common.utils.Screen.Companion.getScreenWidth
 import com.example.assetControl.ui.common.utils.Screen.Companion.getSystemBarsHeight
 import com.example.assetControl.ui.common.views.scaleImageView.ScaleImage
 import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetInt
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutBoolean
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutInt
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.client.android.BeepManager
 import com.journeyapps.barcodescanner.BarcodeCallback
@@ -379,32 +376,35 @@ class FloatingCameraBarcode(private var activity: AppCompatActivity) : BarcodeCa
         flCameraMinHeight = Preference.flCameraPortraitHeight.defaultValue as Int
 
         flCameraPortraitLoc =
-            intArrayOf(prefsGetInt(Preference.flCameraPortraitLocX), prefsGetInt(Preference.flCameraPortraitLocY))
-        flCameraPortraitWidth = min(prefsGetInt(Preference.flCameraPortraitWidth), screenWidth)
-        flCameraPortraitHeight = min(prefsGetInt(Preference.flCameraPortraitHeight), screenHeight)
+            intArrayOf(sr.prefsGetInt(Preference.flCameraPortraitLocX), sr.prefsGetInt(Preference.flCameraPortraitLocY))
+        flCameraPortraitWidth = min(sr.prefsGetInt(Preference.flCameraPortraitWidth), screenWidth)
+        flCameraPortraitHeight = min(sr.prefsGetInt(Preference.flCameraPortraitHeight), screenHeight)
         flCameraLandscapeLoc =
-            intArrayOf(prefsGetInt(Preference.flCameraLandscapeLocX), prefsGetInt(Preference.flCameraLandscapeLocY))
-        flCameraLandscapeWidth = min(prefsGetInt(Preference.flCameraLandscapeWidth), screenWidth)
-        flCameraLandscapeHeight = min(prefsGetInt(Preference.flCameraLandscapeHeight), screenHeight)
+            intArrayOf(
+                sr.prefsGetInt(Preference.flCameraLandscapeLocX),
+                sr.prefsGetInt(Preference.flCameraLandscapeLocY)
+            )
+        flCameraLandscapeWidth = min(sr.prefsGetInt(Preference.flCameraLandscapeWidth), screenWidth)
+        flCameraLandscapeHeight = min(sr.prefsGetInt(Preference.flCameraLandscapeHeight), screenHeight)
 
-        continuousOn = prefsGetBoolean(Preference.flCameraContinuousMode)
-        filterRepeatedReads = prefsGetBoolean(Preference.flCameraFilterRepeatedReads)
+        continuousOn = sr.prefsGetBoolean(Preference.flCameraContinuousMode)
+        filterRepeatedReads = sr.prefsGetBoolean(Preference.flCameraFilterRepeatedReads)
     }
 
     private fun saveValues() {
         if (!floatWindowCreated) return
 
         // Guardar datos de la ventana flotante
-        prefsPutInt(Preference.flCameraPortraitLocX.key, flCameraPortraitLoc[0])
-        prefsPutInt(Preference.flCameraPortraitLocY.key, flCameraPortraitLoc[1])
-        prefsPutInt(Preference.flCameraPortraitWidth.key, flCameraPortraitWidth)
-        prefsPutInt(Preference.flCameraPortraitHeight.key, flCameraPortraitHeight)
-        prefsPutInt(Preference.flCameraLandscapeLocX.key, flCameraLandscapeLoc[0])
-        prefsPutInt(Preference.flCameraLandscapeLocY.key, flCameraLandscapeLoc[1])
-        prefsPutInt(Preference.flCameraLandscapeWidth.key, flCameraLandscapeWidth)
-        prefsPutInt(Preference.flCameraLandscapeHeight.key, flCameraLandscapeHeight)
-        prefsPutBoolean(Preference.flCameraContinuousMode.key, continuousOn)
-        prefsPutBoolean(Preference.flCameraFilterRepeatedReads.key, filterRepeatedReads)
+        sr.prefsPutInt(Preference.flCameraPortraitLocX.key, flCameraPortraitLoc[0])
+        sr.prefsPutInt(Preference.flCameraPortraitLocY.key, flCameraPortraitLoc[1])
+        sr.prefsPutInt(Preference.flCameraPortraitWidth.key, flCameraPortraitWidth)
+        sr.prefsPutInt(Preference.flCameraPortraitHeight.key, flCameraPortraitHeight)
+        sr.prefsPutInt(Preference.flCameraLandscapeLocX.key, flCameraLandscapeLoc[0])
+        sr.prefsPutInt(Preference.flCameraLandscapeLocY.key, flCameraLandscapeLoc[1])
+        sr.prefsPutInt(Preference.flCameraLandscapeWidth.key, flCameraLandscapeWidth)
+        sr.prefsPutInt(Preference.flCameraLandscapeHeight.key, flCameraLandscapeHeight)
+        sr.prefsPutBoolean(Preference.flCameraContinuousMode.key, continuousOn)
+        sr.prefsPutBoolean(Preference.flCameraFilterRepeatedReads.key, filterRepeatedReads)
     }
 
     private fun checkCameraFloatingPermission() {
@@ -485,21 +485,21 @@ class FloatingCameraBarcode(private var activity: AppCompatActivity) : BarcodeCa
 
         // Barcode camera scanner view
         val formats: ArrayList<BarcodeFormat> = ArrayList()
-        if (prefsGetBoolean(Preference.symbologyPDF417)) formats.add(BarcodeFormat.PDF_417)
-        if (prefsGetBoolean(Preference.symbologyAztec)) formats.add(BarcodeFormat.AZTEC)
-        if (prefsGetBoolean(Preference.symbologyQRCode)) formats.add(BarcodeFormat.QR_CODE)
-        if (prefsGetBoolean(Preference.symbologyCODABAR)) formats.add(BarcodeFormat.CODABAR)
-        if (prefsGetBoolean(Preference.symbologyCode128)) formats.add(BarcodeFormat.CODE_128)
-        if (prefsGetBoolean(Preference.symbologyCode39)) formats.add(BarcodeFormat.CODE_39)
-        if (prefsGetBoolean(Preference.symbologyCode93)) formats.add(BarcodeFormat.CODE_93)
-        if (prefsGetBoolean(Preference.symbologyDataMatrix)) formats.add(BarcodeFormat.DATA_MATRIX)
-        if (prefsGetBoolean(Preference.symbologyEAN13)) formats.add(BarcodeFormat.EAN_13)
-        if (prefsGetBoolean(Preference.symbologyEAN8)) formats.add(BarcodeFormat.EAN_8)
-        if (prefsGetBoolean(Preference.symbologyMaxiCode)) formats.add(BarcodeFormat.MAXICODE)
-        if (prefsGetBoolean(Preference.symbologyRSS14)) formats.add(BarcodeFormat.RSS_14)
-        if (prefsGetBoolean(Preference.symbologyRSSExpanded)) formats.add(BarcodeFormat.RSS_EXPANDED)
-        if (prefsGetBoolean(Preference.symbologyUPCA)) formats.add(BarcodeFormat.UPC_A)
-        if (prefsGetBoolean(Preference.symbologyUPCE)) formats.add(BarcodeFormat.UPC_E)
+        if (sr.prefsGetBoolean(Preference.symbologyPDF417)) formats.add(BarcodeFormat.PDF_417)
+        if (sr.prefsGetBoolean(Preference.symbologyAztec)) formats.add(BarcodeFormat.AZTEC)
+        if (sr.prefsGetBoolean(Preference.symbologyQRCode)) formats.add(BarcodeFormat.QR_CODE)
+        if (sr.prefsGetBoolean(Preference.symbologyCODABAR)) formats.add(BarcodeFormat.CODABAR)
+        if (sr.prefsGetBoolean(Preference.symbologyCode128)) formats.add(BarcodeFormat.CODE_128)
+        if (sr.prefsGetBoolean(Preference.symbologyCode39)) formats.add(BarcodeFormat.CODE_39)
+        if (sr.prefsGetBoolean(Preference.symbologyCode93)) formats.add(BarcodeFormat.CODE_93)
+        if (sr.prefsGetBoolean(Preference.symbologyDataMatrix)) formats.add(BarcodeFormat.DATA_MATRIX)
+        if (sr.prefsGetBoolean(Preference.symbologyEAN13)) formats.add(BarcodeFormat.EAN_13)
+        if (sr.prefsGetBoolean(Preference.symbologyEAN8)) formats.add(BarcodeFormat.EAN_8)
+        if (sr.prefsGetBoolean(Preference.symbologyMaxiCode)) formats.add(BarcodeFormat.MAXICODE)
+        if (sr.prefsGetBoolean(Preference.symbologyRSS14)) formats.add(BarcodeFormat.RSS_14)
+        if (sr.prefsGetBoolean(Preference.symbologyRSSExpanded)) formats.add(BarcodeFormat.RSS_EXPANDED)
+        if (sr.prefsGetBoolean(Preference.symbologyUPCA)) formats.add(BarcodeFormat.UPC_A)
+        if (sr.prefsGetBoolean(Preference.symbologyUPCE)) formats.add(BarcodeFormat.UPC_E)
 
         // Mostrar último código escaneado en la vista exceptuando códigos de configuración e ingreso.
         if (!lastScannedCode.contains("config") &&

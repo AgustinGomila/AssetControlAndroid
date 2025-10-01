@@ -3,6 +3,9 @@ package com.example.assetControl.utils.settings.config
 import android.util.Log
 import com.example.assetControl.AssetControlApp
 import com.example.assetControl.AssetControlApp.Companion.appName
+import com.example.assetControl.AssetControlApp.Companion.prefs
+import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.BuildConfig
 import com.example.assetControl.R
 import com.example.assetControl.network.clientPackages.ClientPackagesProgress
@@ -10,9 +13,6 @@ import com.example.assetControl.network.clientPackages.GetClientPackages
 import com.example.assetControl.network.utils.ProgressStatus
 import com.example.assetControl.utils.Statics
 import com.example.assetControl.utils.errorLog.ErrorLog
-import com.example.assetControl.utils.settings.preferences.Preferences
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefs
-import com.example.assetControl.utils.settings.preferences.Repository
 import org.json.JSONObject
 
 class ConfigHelper {
@@ -129,27 +129,27 @@ class ConfigHelper {
 
             for (p in ps) {
                 if (p.defaultValue is Int) {
-                    val value = Preferences.prefsGetInt(p)
+                    val value = sr.prefsGetInt(p)
                     if (value != p.defaultValue) {
                         jsonObject.put(p.key, value)
                     }
                 } else if (p.defaultValue is Boolean) {
-                    val value = Preferences.prefsGetBoolean(p)
+                    val value = sr.prefsGetBoolean(p)
                     if (value != p.defaultValue) {
                         jsonObject.put(p.key, value)
                     }
                 } else if (p.defaultValue is String) {
-                    val value = Preferences.prefsGetString(p)
+                    val value = sr.prefsGetString(p)
                     if (value != p.defaultValue && value.isNotEmpty()) {
                         jsonObject.put(p.key, value)
                     }
                 } else if (p.defaultValue is Long) {
-                    val value = Preferences.prefsGetLong(p)
+                    val value = sr.prefsGetLong(p)
                     if (value != p.defaultValue) {
                         jsonObject.put(p.key, value)
                     }
                 } else if (p.defaultValue is Float) {
-                    val value = Preferences.prefsGetFloat(p)
+                    val value = sr.prefsGetFloat(p)
                     if (value != p.defaultValue) {
                         jsonObject.put(p.key, value)
                     }
@@ -173,7 +173,7 @@ class ConfigHelper {
                 }
 
                 with(prefs.edit()) {
-                    val tempPref = Preferences.prefs.all[prefName]
+                    val tempPref = prefs.all[prefName]
                     if (tempPref != null) {
                         try {
                             when (tempPref) {
@@ -219,145 +219,93 @@ class ConfigHelper {
         }
 
         fun setDebugConfigValues() {
-            // VALORES POR DEFECTO, SÓLO PARA DEBUG
+            // VALORES POR DEFECTO, SOLO PARA DEBUG
             if (Statics.isDebuggable() || BuildConfig.DEBUG) {
-                val x = Preferences.prefs.edit()
-
                 // region ASSET CONTROL WEBSERVICE
-                if (Repository.wsUrl.isEmpty()) {
-                    x.putString(
-                        Preference.acWsServer.key, Preference.acWsServer.debugValue as String?
-                    )
+                if (svm.wsUrl.isEmpty()) {
+                    svm.wsUrl = Preference.acWsServer.debugValue as String
                 }
 
-                if (Repository.wsNamespace.isEmpty()) {
-                    x.putString(
-                        Preference.acWsNamespace.key,
-                        Preference.acWsNamespace.debugValue as String?
-                    )
+                if (svm.wsNamespace.isEmpty()) {
+                    svm.wsNamespace = Preference.acWsNamespace.debugValue as String
                 }
 
-                if (Preferences.prefsGetString(Preference.acWsUser).isEmpty()) {
-                    x.putString(
-                        Preference.acWsUser.key, Preference.acWsUser.debugValue as String?
-                    )
+                if (svm.acWsUser.isEmpty()) {
+                    svm.acWsUser = Preference.acWsUser.debugValue as String
                 }
 
-                if (Preferences.prefsGetString(Preference.acWsPass).isEmpty()) {
-                    x.putString(
-                        Preference.acWsPass.key, Preference.acWsPass.debugValue as String?
-                    )
+                if (svm.acWsPass.isEmpty()) {
+                    svm.acWsPass = Preference.acWsPass.debugValue as String
                 }
 
-                if (Preferences.prefsGetString(Preference.acUser).isEmpty()) {
-                    x.putString(
-                        Preference.acUser.key, Preference.acUser.debugValue as String?
-                    )
+                if (svm.acUser.isEmpty()) {
+                    svm.acUser = Preference.acUser.debugValue as String
                 }
 
-                if (Preferences.prefsGetString(Preference.acPass).isEmpty()) {
-                    x.putString(
-                        Preference.acPass.key, Preference.acPass.debugValue as String?
-                    )
+                if (svm.acPass.isEmpty()) {
+                    svm.acPass = Preference.acPass.debugValue as String
                 }
                 // endregion
 
-                // region ASSET CONTROL MANTEINANCE WEBSERVICE
-                if (Repository.wsMantUrl.isEmpty()) {
-                    x.putString(
-                        Preference.acMantWsServer.key,
-                        Preference.acMantWsServer.debugValue as String?
-                    )
+                // region ASSET CONTROL MAINTENANCE WEBSERVICE
+                if (svm.acMantWsServer.isEmpty()) {
+                    svm.acMantWsServer = Preference.acMantWsServer.debugValue as String
                 }
 
-                if (Repository.wsMantNamespace.isEmpty()) {
-                    x.putString(
-                        Preference.acMantWsNamespace.key,
-                        Preference.acMantWsNamespace.debugValue as String?
-                    )
+                if (svm.wsMantNamespace.isEmpty()) {
+                    svm.wsMantNamespace = Preference.acMantWsNamespace.debugValue as String
                 }
 
-                if (Preferences.prefsGetString(Preference.acMantWsUser).isEmpty()) {
-                    x.putString(
-                        Preference.acMantWsUser.key,
-                        Preference.acMantWsUser.debugValue as String?
-                    )
+                if (svm.acMantWsUser.isEmpty()) {
+                    svm.acMantWsUser = Preference.acMantWsUser.debugValue as String
                 }
 
-                if (Preferences.prefsGetString(Preference.acMantWsPass).isEmpty()) {
-                    x.putString(
-                        Preference.acMantWsPass.key,
-                        Preference.acMantWsPass.debugValue as String?
-                    )
+                if (svm.acMantWsPass.isEmpty()) {
+                    svm.acMantWsPass = Preference.acMantWsPass.debugValue as String
                 }
 
-                if (Preferences.prefsGetString(Preference.acMantUser).isEmpty()) {
-                    x.putString(
-                        Preference.acMantUser.key, Preference.acMantUser.debugValue as String?
-                    )
+                if (svm.acMantUser.isEmpty()) {
+                    svm.acMantUser = Preference.acMantUser.debugValue as String
                 }
 
-                if (Preferences.prefsGetString(Preference.acMantPass).isEmpty()) {
-                    x.putString(
-                        Preference.acMantPass.key, Preference.acMantPass.debugValue as String?
-                    )
+                if (svm.acMantPass.isEmpty()) {
+                    svm.acMantPass = Preference.acMantPass.debugValue as String
                 }
                 // endregion
 
                 // region IMAGE CONTROL WEBSERVICE
-                if (Repository.wsIcUrl.isEmpty()) {
-                    x.putString(
-                        Preference.icWsServer.key, Preference.icWsServer.debugValue as String?
-                    )
+                if (svm.wsIcUrl.isEmpty()) {
+                    svm.wsIcUrl = Preference.icWsServer.debugValue as String
                 }
 
-                if (Repository.wsIcNamespace.isEmpty()) {
-                    x.putString(
-                        Preference.icWsNamespace.key,
-                        Preference.icWsNamespace.debugValue as String?
-                    )
+                if (svm.wsIcNamespace.isEmpty()) {
+                    svm.wsIcNamespace = Preference.icWsNamespace.debugValue as String
                 }
 
-                if (Repository.wsIcUser.isEmpty()) {
-                    x.putString(
-                        Preference.icWsUser.key, Preference.icWsUser.debugValue as String?
-                    )
+                if (svm.wsIcUser.isEmpty()) {
+                    svm.wsIcUser = Preference.icWsUser.debugValue as String
                 }
 
-                if (Repository.wsIcPass.isEmpty()) {
-                    x.putString(
-                        Preference.icWsPass.key, Preference.icWsPass.debugValue as String?
-                    )
+                if (svm.wsIcPass.isEmpty()) {
+                    svm.wsIcPass = Preference.icWsPass.debugValue as String
                 }
 
-                if (Repository.icUser.isEmpty()) {
-                    x.putString(
-                        Preference.icUser.key, Preference.icUser.debugValue as String?
-                    )
+                if (svm.icUser.isEmpty()) {
+                    svm.icUser = Preference.icUser.debugValue as String
                 }
 
-                if (Repository.icPass.isEmpty()) {
-                    x.putString(
-                        Preference.icPass.key, Preference.icPass.debugValue as String?
-                    )
+                if (svm.icPass.isEmpty()) {
+                    svm.icPass = Preference.icPass.debugValue as String
                 }
 
-                if (Preferences.prefsGetString(Preference.icUser).isEmpty()) {
-                    x.putString(
-                        Preference.icUser.key, Preference.icUser.debugValue as String?
-                    )
+                if (svm.icUser.isEmpty()) {
+                    svm.icUser = Preference.icUser.debugValue as String
                 }
 
-                if (Preferences.prefsGetString(Preference.icPass).isEmpty()) {
-                    x.putString(
-                        Preference.icPass.key, Preference.icPass.debugValue as String?
-                    )
+                if (svm.icPass.isEmpty()) {
+                    svm.icPass = Preference.icPass.debugValue as String
                 }
                 // endregion
-
-                run {
-                    x.apply()
-                }
             }
         }
     }

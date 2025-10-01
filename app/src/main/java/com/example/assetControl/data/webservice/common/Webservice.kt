@@ -1,12 +1,12 @@
 package com.example.assetControl.data.webservice.common
 
 import android.util.Log
+import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.network.trust.CustomSSLContext
 import com.example.assetControl.utils.Statics
 import com.example.assetControl.utils.misc.Md5
 import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences
-import com.example.assetControl.utils.settings.preferences.Repository
 import org.ksoap2.HeaderProperty
 import org.ksoap2.SoapEnvelope
 import org.ksoap2.serialization.SoapObject
@@ -64,43 +64,43 @@ class Webservice @Throws(Exception::class) constructor(private var webServiceTyp
     private fun confWebservice() {
         when (webServiceType) {
             WebServiceType.AssetControl -> {
-                url = Repository.wsUrl
-                namespace = Repository.wsNamespace
-                proxyUrl = Repository.wsProxy
-                useProxy = Repository.wsUseProxy
-                proxyPort = Repository.wsProxyPort
-                proxyUser = Repository.wsProxyUser
-                proxyPass = Repository.wsProxyPass
+                url = svm.wsUrl
+                namespace = svm.wsNamespace
+                proxyUrl = svm.wsProxy
+                useProxy = svm.wsUseProxy
+                proxyPort = svm.wsProxyPort
+                proxyUser = svm.wsProxyUser
+                proxyPass = svm.wsProxyPass
             }
 
             WebServiceType.AssetControlMaintenance -> {
-                url = Repository.wsMantUrl
-                namespace = Repository.wsMantNamespace
-                proxyUrl = Repository.wsMantProxy
-                useProxy = Repository.wsMantUseProxy
-                proxyPort = Repository.wsMantProxyPort
-                proxyUser = Repository.wsMantProxyUser
-                proxyPass = Repository.wsMantProxyPass
+                url = svm.acMantWsServer
+                namespace = svm.wsMantNamespace
+                proxyUrl = svm.wsMantProxy
+                useProxy = svm.wsMantUseProxy
+                proxyPort = svm.wsMantProxyPort
+                proxyUser = svm.wsMantProxyUser
+                proxyPass = svm.wsMantProxyPass
             }
 
             WebServiceType.ImageControl -> {
-                url = Repository.wsIcUrl
-                namespace = Repository.wsIcNamespace
-                proxyUrl = Repository.wsIcProxy
-                useProxy = Repository.wsIcUseProxy
-                proxyPort = Repository.wsIcProxyPort
-                proxyUser = Repository.wsIcProxyUser
-                proxyPass = Repository.wsIcProxyPass
+                url = svm.wsIcUrl
+                namespace = svm.wsIcNamespace
+                proxyUrl = svm.wsIcProxy
+                useProxy = svm.wsIcUseProxy
+                proxyPort = svm.wsIcProxyPort
+                proxyUser = svm.wsIcProxyUser
+                proxyPass = svm.wsIcProxyPass
             }
 
             WebServiceType.Test -> {
-                url = Repository.wsTestUrl
-                namespace = Repository.wsTestNamespace
-                proxyUrl = Repository.wsTestProxyUrl
-                useProxy = Repository.wsTestUseProxy
-                proxyPort = Repository.wsTestProxyPort
-                proxyUser = Repository.wsTestProxyUser
-                proxyPass = Repository.wsTestProxyPass
+                url = svm.wsTestUrl
+                namespace = svm.wsTestNamespace
+                proxyUrl = svm.wsTestProxyUrl
+                useProxy = svm.wsTestUseProxy
+                proxyPort = svm.wsTestProxyPort
+                proxyUser = svm.wsTestProxyUser
+                proxyPass = svm.wsTestProxyPass
             }
 
             else -> {}
@@ -426,7 +426,7 @@ class Webservice @Throws(Exception::class) constructor(private var webServiceTyp
         val response: Any
 
         try {
-            val timeout = Preferences.prefsGetInt(Preference.connectionTimeout) * 1000
+            val timeout = sr.prefsGetInt(Preference.connectionTimeout) * 1000
             val headers: MutableList<HeaderProperty> = ArrayList()
             headers.add(HeaderProperty("Connection", "close"))
 

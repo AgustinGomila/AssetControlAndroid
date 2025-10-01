@@ -38,6 +38,8 @@ import androidx.core.view.ViewCompat
 import com.dacosys.imageControl.room.database.IcDatabase
 import com.example.assetControl.AssetControlApp.Companion.appName
 import com.example.assetControl.AssetControlApp.Companion.setCurrentUserId
+import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.BuildConfig
 import com.example.assetControl.R
 import com.example.assetControl.data.room.database.AcDatabase
@@ -86,9 +88,6 @@ import com.example.assetControl.utils.settings.config.Preference
 import com.example.assetControl.utils.settings.config.QRConfigType.CREATOR.QRConfigApp
 import com.example.assetControl.utils.settings.config.QRConfigType.CREATOR.QRConfigClientAccount
 import com.example.assetControl.utils.settings.config.QRConfigType.CREATOR.QRConfigWebservice
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetString
-import com.example.assetControl.utils.settings.preferences.Repository
 import com.example.assetControl.viewModel.sync.DownloadDbViewModel
 import com.example.assetControl.viewModel.sync.SyncViewModel
 import com.google.android.material.textfield.TextInputEditText
@@ -571,16 +570,16 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                 binding.versionTextView.text = "${getString(R.string.app_milestone)} ${
                     packageManager.getPackageInfo(packageName, 0).versionName
                 }"
-                binding.packageTextView.text = Repository.clientPackage
+                binding.packageTextView.text = svm.clientPackage
                 when {
-                    Repository.clientPackage.isEmpty() -> binding.packageTextView.visibility =
+                    svm.clientPackage.isEmpty() -> binding.packageTextView.visibility =
                         View.GONE
 
                     else -> binding.packageTextView.visibility = View.VISIBLE
                 }
-                binding.installationCodeTextView.text = Repository.installationCode
+                binding.installationCodeTextView.text = svm.installationCode
                 when {
-                    Repository.installationCode.isEmpty() -> binding.installationCodeTextView.visibility =
+                    svm.installationCode.isEmpty() -> binding.installationCodeTextView.visibility =
                         View.GONE
 
                     else -> binding.installationCodeTextView.visibility = View.VISIBLE
@@ -640,7 +639,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                 return
             }
 
-            if (Repository.wsUrl.isEmpty() || Repository.wsNamespace.isEmpty()) {
+            if (svm.wsUrl.isEmpty() || svm.wsNamespace.isEmpty()) {
                 showSnackBar(
                     SnackBarEventData(
                         getString(R.string.webservice_is_not_configured), SnackBarType.ERROR
@@ -703,7 +702,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
     }
 
     private fun configApp() {
-        val realPass = prefsGetString(Preference.confPassword)
+        val realPass = sr.prefsGetString(Preference.confPassword)
         if (realPass.isEmpty()) {
             attemptEnterConfig(realPass)
             return
@@ -749,7 +748,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
     }
 
     private fun attemptEnterConfig(password: String) {
-        val realPass = prefsGetString(Preference.confPassword)
+        val realPass = sr.prefsGetString(Preference.confPassword)
         if (password != realPass) {
             showSnackBar(SnackBarEventData(getString(R.string.invalid_password), SnackBarType.ERROR))
             return
@@ -858,7 +857,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
 
     private val showScannedCode: Boolean
         get() {
-            return prefsGetBoolean(Preference.showScannedCode)
+            return sr.prefsGetBoolean(Preference.showScannedCode)
         }
 
     override fun scannerCompleted(scanCode: String) {
@@ -949,7 +948,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_login, menu)
 
-        if (!prefsGetBoolean(Preference.showConfButton)) {
+        if (!sr.prefsGetBoolean(Preference.showConfButton)) {
             menu.removeItem(menu.findItem(R.id.action_settings).itemId)
         }
 
@@ -1005,7 +1004,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                         var username = env["CLIENT_EMAIL"]
                         var password = env["CLIENT_PASSWORD"]
 
-                        if (Repository.clientEmail.contains(username)) {
+                        if (svm.clientEmail.contains(username)) {
                             username = env["CLIENT_EMAIL_ALT"]
                             password = env["CLIENT_PASSWORD_ALT"]
                         }

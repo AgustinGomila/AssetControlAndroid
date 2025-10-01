@@ -2,11 +2,11 @@ package com.example.assetControl.devices.printer
 
 import android.util.Log
 import com.example.assetControl.AssetControlApp.Companion.context
+import com.example.assetControl.AssetControlApp.Companion.sr
 import com.example.assetControl.R
 import com.example.assetControl.ui.common.snackbar.SnackBarEventData
 import com.example.assetControl.ui.common.snackbar.SnackBarType
 import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences
 import java.io.IOException
 import java.net.ConnectException
 import java.net.Socket
@@ -19,8 +19,8 @@ open class NetPrinter(private val onEvent: (SnackBarEventData) -> Unit) :
 
     override fun printLabel(printThis: String, qty: Int, onFinish: (Boolean) -> Unit) {
         // Impresora guardada en preferencias
-        val ipPrinter = Preferences.prefsGetString(Preference.ipNetPrinter)
-        val portPrinter = Preferences.prefsGetInt(Preference.portNetPrinter)
+        val ipPrinter = sr.prefsGetString(Preference.ipNetPrinter)
+        val portPrinter = sr.prefsGetInt(Preference.portNetPrinter)
 
         Log.v(tag, "Printer IP: $ipPrinter ($portPrinter)")
         Log.v(tag, printThis)

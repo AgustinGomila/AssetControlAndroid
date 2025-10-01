@@ -23,6 +23,7 @@ import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.dacosys.imageControl.ui.fragments.ImageControlButtonsFragment
 import com.example.assetControl.AssetControlApp.Companion.currentUser
+import com.example.assetControl.AssetControlApp.Companion.sr
 import com.example.assetControl.R
 import com.example.assetControl.data.enums.common.ConfirmStatus
 import com.example.assetControl.data.enums.common.Table
@@ -43,8 +44,6 @@ import com.example.assetControl.ui.fragments.movement.LocationHeaderFragment
 import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.parcel.Parcelables.parcelable
 import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutBoolean
 import org.parceler.Parcels
 
 class ArcConfirmActivity : AppCompatActivity(),
@@ -71,7 +70,7 @@ class ArcConfirmActivity : AppCompatActivity(),
     }
 
     private fun saveSharedPreferences() {
-        prefsPutBoolean(
+        sr.prefsPutBoolean(
             "asset_review_completed_checkbox", binding.completedSwitch.isChecked
         )
     }
@@ -97,9 +96,9 @@ class ArcConfirmActivity : AppCompatActivity(),
     private var panelBottomIsExpanded = false
     private var panelTopIsExpanded = true
     private var showImages
-        get() = prefsGetBoolean(Preference.reviewContentShowImages)
+        get() = sr.prefsGetBoolean(Preference.reviewContentShowImages)
         set(value) {
-            prefsPutBoolean(Preference.reviewContentShowImages.key, value)
+            sr.prefsPutBoolean(Preference.reviewContentShowImages.key, value)
         }
 
     override fun onStart() {
@@ -209,7 +208,7 @@ class ArcConfirmActivity : AppCompatActivity(),
 
         binding.obsButton.setOnClickListener { addObservations() }
         binding.completedTextView.setOnClickListener { binding.completedSwitch.performClick() }
-        binding.completedSwitch.isChecked = prefsGetBoolean(Preference.assetReviewCompletedCheckBox)
+        binding.completedSwitch.isChecked = sr.prefsGetBoolean(Preference.assetReviewCompletedCheckBox)
         binding.confirmButton.setOnClickListener { confirmCount() }
 
         setPanels()
@@ -381,7 +380,7 @@ class ArcConfirmActivity : AppCompatActivity(),
                     .replace(binding.imageControlFragment.id, imageControlFragment ?: return@runOnUiThread)
                     .commit()
 
-                if (!prefsGetBoolean(Preference.useImageControl)) {
+                if (!sr.prefsGetBoolean(Preference.useImageControl)) {
                     fm.beginTransaction()
                         .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
                         .hide(imageControlFragment as Fragment)
@@ -516,7 +515,7 @@ class ArcConfirmActivity : AppCompatActivity(),
 
     private fun confirmCount() {
         // Si tiene firma obligatoria, no está firmado y la revisión está completada, solicitar firma.
-        if (prefsGetBoolean(Preference.signReviewsAndMovements) && !(imageControlFragment
+        if (sr.prefsGetBoolean(Preference.signReviewsAndMovements) && !(imageControlFragment
                 ?: return).isSigned && binding.completedSwitch.isChecked
         ) {
             makeText(

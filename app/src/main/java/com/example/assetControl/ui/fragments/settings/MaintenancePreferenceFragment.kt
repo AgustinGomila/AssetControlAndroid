@@ -5,10 +5,10 @@ import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import androidx.preference.Preference.OnPreferenceClickListener
 import androidx.preference.PreferenceFragmentCompat
+import com.example.assetControl.AssetControlApp.Companion.sr
 import com.example.assetControl.BuildConfig
 import com.example.assetControl.R
 import com.example.assetControl.ui.activities.main.SettingsActivity
-import com.example.assetControl.utils.settings.preferences.Preferences
 
 class MaintenancePreferenceFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
@@ -51,13 +51,13 @@ class MaintenancePreferenceFragment : PreferenceFragmentCompat() {
         val testPref: Preference? = findPreference("ac_mant_test")
         testPref?.onPreferenceClickListener = OnPreferenceClickListener {
             if (wsServerPref != null && wsNamespacePref != null) {
-                val url = Preferences.prefsGetString(p.acMantWsServer)
-                val namespace = Preferences.prefsGetString(p.acMantWsNamespace)
-                val urlProxy = Preferences.prefsGetString(p.acMantWsProxy)
-                val proxyPort = Preferences.prefsGetInt(p.acMantWsProxyPort)
-                val useProxy = Preferences.prefsGetBoolean(p.acMantWsUseProxy)
-                val proxyUser = Preferences.prefsGetString(p.acMantWsProxyUser)
-                val proxyPass = Preferences.prefsGetString(p.acMantWsProxyPass)
+                val url = sr.prefsGetString(p.acMantWsServer)
+                val namespace = sr.prefsGetString(p.acMantWsNamespace)
+                val urlProxy = sr.prefsGetString(p.acMantWsProxy)
+                val proxyPort = sr.prefsGetInt(p.acMantWsProxyPort)
+                val useProxy = sr.prefsGetBoolean(p.acMantWsUseProxy)
+                val proxyUser = sr.prefsGetString(p.acMantWsProxyUser)
+                val proxyPass = sr.prefsGetString(p.acMantWsProxyPass)
 
                 SettingsActivity.testWsConnection(
                     parentView = requireView(),

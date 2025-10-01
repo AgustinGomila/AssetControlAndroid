@@ -18,6 +18,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.example.assetControl.AssetControlApp.Companion.sr
 import com.example.assetControl.R
 import com.example.assetControl.data.enums.barcode.BarcodeLabelTarget
 import com.example.assetControl.data.model.barcodeFields.AssetLabelField
@@ -42,10 +43,6 @@ import com.example.assetControl.utils.misc.CounterHandler
 import com.example.assetControl.utils.parcel.Parcelables.parcelable
 import com.example.assetControl.utils.settings.config.ConfigHelper
 import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetLong
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetString
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutLong
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 
@@ -115,12 +112,12 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
 
     fun saveSharedPreferences() {
         if (barcodeLabelTarget == BarcodeLabelTarget.Asset) {
-            prefsPutLong(
+            sr.prefsPutLong(
                 Preference.defaultBarcodeLabelCustomAsset.key,
                 barcodeLabelCustom?.id ?: 0L
             )
         } else if (barcodeLabelTarget == BarcodeLabelTarget.WarehouseArea) {
-            prefsPutLong(
+            sr.prefsPutLong(
                 Preference.defaultBarcodeLabelCustomWa.key,
                 barcodeLabelCustom?.id ?: 0L
             )
@@ -171,8 +168,7 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
         // Seleccionamos la primera plantilla del tipo deseado si existe alguna.
         barcodeLabelCustom = when (requireActivity()) {
             is WarehouseAreaPrintLabelActivity -> {
-                val blcId =
-                    prefsGetLong(Preference.defaultBarcodeLabelCustomWa)
+                val blcId = sr.prefsGetLong(Preference.defaultBarcodeLabelCustomWa)
                 if (blcId > 0) {
                     barcodeRepository.selectById(blcId)
                 } else {
@@ -185,8 +181,7 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
             }
 
             is AssetPrintLabelActivity -> {
-                val blcId =
-                    prefsGetLong(Preference.defaultBarcodeLabelCustomAsset)
+                val blcId = sr.prefsGetLong(Preference.defaultBarcodeLabelCustomAsset)
                 if (blcId > 0) {
                     barcodeRepository.selectById(blcId)
                 } else {
@@ -357,7 +352,7 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
     }
 
     private fun configApp() {
-        val realPass = prefsGetString(Preference.confPassword)
+        val realPass = sr.prefsGetString(Preference.confPassword)
         if (realPass.isEmpty()) {
             attemptEnterConfig(realPass)
             return
@@ -403,7 +398,7 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
     }
 
     private fun attemptEnterConfig(password: String) {
-        val realPass = prefsGetString(Preference.confPassword)
+        val realPass = sr.prefsGetString(Preference.confPassword)
         if (password != realPass) {
             showSnackBar(getString(R.string.invalid_password), SnackBarType.ERROR)
             return
@@ -474,12 +469,12 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
 
     private fun setPrinter() {
         // Impresora guardada en las preferencias
-        val useBtPrinter = prefsGetBoolean(Preference.useBtPrinter)
-        val useNetPrinter = prefsGetBoolean(Preference.useNetPrinter)
+        val useBtPrinter = sr.prefsGetBoolean(Preference.useBtPrinter)
+        val useNetPrinter = sr.prefsGetBoolean(Preference.useNetPrinter)
 
-        val pBt = prefsGetString(Preference.printerBtAddress)
-        val pIp = prefsGetString(Preference.ipNetPrinter)
-        val port = prefsGetString(Preference.portNetPrinter)
+        val pBt = sr.prefsGetString(Preference.printerBtAddress)
+        val pIp = sr.prefsGetString(Preference.ipNetPrinter)
+        val port = sr.prefsGetString(Preference.portNetPrinter)
 
         printer = when {
             useBtPrinter -> pBt

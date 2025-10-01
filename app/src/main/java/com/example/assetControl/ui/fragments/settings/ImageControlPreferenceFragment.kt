@@ -12,6 +12,7 @@ import androidx.preference.Preference.OnPreferenceClickListener
 import androidx.preference.PreferenceFragmentCompat
 import com.example.assetControl.AssetControlApp
 import com.example.assetControl.AssetControlApp.Companion.appName
+import com.example.assetControl.AssetControlApp.Companion.sr
 import com.example.assetControl.BuildConfig
 import com.example.assetControl.R
 import com.example.assetControl.devices.scanners.GenerateQR
@@ -27,7 +28,6 @@ import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.settings.config.ConfigHelper
 import com.example.assetControl.utils.settings.config.QRConfigType
 import com.example.assetControl.utils.settings.io.FileHelper
-import com.example.assetControl.utils.settings.preferences.Preferences
 import java.io.File
 
 class ImageControlPreferenceFragment : PreferenceFragmentCompat(), ClientPackage.Companion.TaskConfigPanelEnded {
@@ -74,8 +74,8 @@ class ImageControlPreferenceFragment : PreferenceFragmentCompat(), ClientPackage
         val testPref: Preference? = findPreference("ic_test")
         testPref?.onPreferenceClickListener = OnPreferenceClickListener {
             if (wsServerPref != null && wsNamespacePref != null && userPref != null && passPref != null) {
-                val url = Preferences.prefsGetString(p.icWsServer)
-                val namespace = Preferences.prefsGetString(p.icWsNamespace)
+                val url = sr.prefsGetString(p.icWsServer)
+                val namespace = sr.prefsGetString(p.icWsNamespace)
 
                 testImageControlConnection(url = url, namespace = namespace)
             }
@@ -91,12 +91,12 @@ class ImageControlPreferenceFragment : PreferenceFragmentCompat(), ClientPackage
 
         val qrCodePref: Preference? = findPreference("ic_qr_code")
         qrCodePref?.onPreferenceClickListener = OnPreferenceClickListener {
-            val icUrl = Preferences.prefsGetString(p.icWsServer)
-            val icNamespace = Preferences.prefsGetString(p.icWsNamespace)
-            val icUserWs = Preferences.prefsGetString(p.icWsUser)
-            val icPasswordWs = Preferences.prefsGetString(p.icWsPass)
-            //val icUser = prefsGetString(P.icUser)
-            //val icPassword = prefsGetString(P.icPass)
+            val icUrl = sr.prefsGetString(p.icWsServer)
+            val icNamespace = sr.prefsGetString(p.icWsNamespace)
+            val icUserWs = sr.prefsGetString(p.icWsUser)
+            val icPasswordWs = sr.prefsGetString(p.icWsPass)
+            //val icUser = sr.prefsGetString(P.icUser)
+            //val icPassword = sr.prefsGetString(P.icPass)
 
             if (icUrl.isEmpty() || icNamespace.isEmpty() || icUserWs.isEmpty() || icPasswordWs.isEmpty()) {
                 MakeText.makeText(

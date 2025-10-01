@@ -13,13 +13,13 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentActivity
 import com.example.assetControl.AssetControlApp.Companion.context
+import com.example.assetControl.AssetControlApp.Companion.sr
 import com.example.assetControl.R
 import com.example.assetControl.ui.common.snackbar.SnackBarEventData
 import com.example.assetControl.ui.common.snackbar.SnackBarType
 import com.example.assetControl.utils.Statics.Companion.appHasBluetoothPermission
 import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences
 import com.google.android.gms.common.api.CommonStatusCodes
 import java.io.IOException
 
@@ -149,7 +149,7 @@ open class BtPrinter(private val activity: FragmentActivity, private val onEvent
                         "${context.getString(R.string.exception_error)}: " + e.message
                     )
 
-                    val printerBtAddress = Preferences.prefsGetString(Preference.printerBtAddress)
+                    val printerBtAddress = sr.prefsGetString(Preference.printerBtAddress)
                     sendEvent(
                         "${context.getString(R.string.error_connecting_to)}: $printerBtAddress",
                         SnackBarType.ERROR
@@ -163,8 +163,8 @@ open class BtPrinter(private val activity: FragmentActivity, private val onEvent
 
     private fun refreshBluetoothPrinter() {
         // Impresora guardada en preferencias
-        val useBtPrinter = Preferences.prefsGetBoolean(Preference.useBtPrinter)
-        val printerBtAddress = Preferences.prefsGetString(Preference.printerBtAddress)
+        val useBtPrinter = sr.prefsGetBoolean(Preference.useBtPrinter)
+        val printerBtAddress = sr.prefsGetString(Preference.printerBtAddress)
 
         if (useBtPrinter) {
             if (printerBtAddress.isEmpty()) {

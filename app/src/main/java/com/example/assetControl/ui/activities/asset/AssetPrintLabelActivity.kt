@@ -47,6 +47,8 @@ import com.dacosys.imageControl.room.dao.ImageCoroutines
 import com.dacosys.imageControl.ui.activities.ImageControlCameraActivity
 import com.dacosys.imageControl.ui.activities.ImageControlGridActivity
 import com.example.assetControl.AssetControlApp.Companion.context
+import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.data.enums.asset.AssetStatus
 import com.example.assetControl.data.enums.barcode.BarcodeLabelTarget
@@ -86,10 +88,6 @@ import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.parcel.ParcelLong
 import com.example.assetControl.utils.parcel.Parcelables.parcelable
 import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetLong
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutBoolean
-import com.example.assetControl.utils.settings.preferences.Repository.Companion.useImageControl
 import com.example.assetControl.viewModel.assetSelect.AssetSelectUiState
 import com.example.assetControl.viewModel.assetSelect.AssetSelectViewModel
 import kotlinx.coroutines.Dispatchers
@@ -215,16 +213,16 @@ class AssetPrintLabelActivity : BasePanelActivity(), SwipeRefreshLayout.OnRefres
     // Image Control
     private val menuItemShowImages = 9999
     private var showImages
-        get() = prefsGetBoolean(Preference.printLabelAssetShowImages)
+        get() = sr.prefsGetBoolean(Preference.printLabelAssetShowImages)
         set(value) {
-            prefsPutBoolean(Preference.printLabelAssetShowImages.key, value)
+            sr.prefsPutBoolean(Preference.printLabelAssetShowImages.key, value)
         }
 
     private var showCheckBoxes
         get() = if (!viewModel.multiSelect) false
-        else prefsGetBoolean(Preference.printLabelAssetShowCheckBoxes)
+        else sr.prefsGetBoolean(Preference.printLabelAssetShowCheckBoxes)
         set(value) {
-            prefsPutBoolean(Preference.printLabelAssetShowCheckBoxes.key, value)
+            sr.prefsPutBoolean(Preference.printLabelAssetShowCheckBoxes.key, value)
         }
 
     private val visibleStatus
@@ -334,7 +332,7 @@ class AssetPrintLabelActivity : BasePanelActivity(), SwipeRefreshLayout.OnRefres
         val target = BarcodeLabelTarget.Asset
         printerFragment?.barcodeLabelTarget = target
 
-        val id = prefsGetLong(Preference.defaultBarcodeLabelCustomAsset)
+        val id = sr.prefsGetLong(Preference.defaultBarcodeLabelCustomAsset)
         val blc = BarcodeLabelCustomRepository().selectById(id)
         if (blc != null) {
             printerFragment?.barcodeLabelCustom = blc
@@ -544,7 +542,7 @@ class AssetPrintLabelActivity : BasePanelActivity(), SwipeRefreshLayout.OnRefres
             .checkedChangedListener(this)
             .editAssetRequiredListener(this)
 
-        if (useImageControl) {
+        if (svm.useImageControl) {
             builder
                 .showImages(`val` = showImages, callback = { showImages = it })
                 .addPhotoRequiredListener(this)
@@ -616,7 +614,7 @@ class AssetPrintLabelActivity : BasePanelActivity(), SwipeRefreshLayout.OnRefres
 
     private val showScannedCode: Boolean
         get() {
-            return prefsGetBoolean(Preference.showScannedCode)
+            return sr.prefsGetBoolean(Preference.showScannedCode)
         }
 
     override fun scannerCompleted(scanCode: String) {
@@ -676,7 +674,7 @@ class AssetPrintLabelActivity : BasePanelActivity(), SwipeRefreshLayout.OnRefres
         }
 
         // Opción de visibilidad de Imágenes
-        if (useImageControl) {
+        if (svm.useImageControl) {
             menu.add(Menu.NONE, menuItemShowImages, menu.size, context.getString(R.string.show_images))
                 .setChecked(showImages).isCheckable = true
             val item = menu.findItem(menuItemShowImages)
@@ -880,7 +878,7 @@ class AssetPrintLabelActivity : BasePanelActivity(), SwipeRefreshLayout.OnRefres
     }
 
     override fun onAddPhotoRequired(tableId: Int, itemId: Long, description: String, obs: String, reference: String) {
-        if (!useImageControl) return
+        if (!svm.useImageControl) return
 
         if (!rejectNewInstances) {
             rejectNewInstances = true
@@ -915,7 +913,7 @@ class AssetPrintLabelActivity : BasePanelActivity(), SwipeRefreshLayout.OnRefres
         }
 
     override fun onAlbumViewRequired(tableId: Int, itemId: Long, filename: String) {
-        if (!useImageControl) return
+        if (!svm.useImageControl) return
 
         if (rejectNewInstances) return
         rejectNewInstances = true
@@ -1047,7 +1045,7 @@ class AssetPrintLabelActivity : BasePanelActivity(), SwipeRefreshLayout.OnRefres
 
     override fun onStateChanged(state: Int) {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
-        if (prefsGetBoolean(Preference.rfidShowConnectedMessage)) {
+        if (sr.prefsGetBoolean(Preference.rfidShowConnectedMessage)) {
             when (Rfid.vh75State) {
                 Vh75Bt.STATE_CONNECTED -> {
                     showMessage(

@@ -11,6 +11,7 @@ import androidx.preference.Preference.OnPreferenceClickListener
 import androidx.preference.PreferenceFragmentCompat
 import com.example.assetControl.AssetControlApp
 import com.example.assetControl.AssetControlApp.Companion.isLogged
+import com.example.assetControl.AssetControlApp.Companion.sr
 import com.example.assetControl.BuildConfig
 import com.example.assetControl.R
 import com.example.assetControl.databinding.ProgressViewBinding
@@ -28,7 +29,6 @@ import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.settings.config.ConfigHelper
 import com.example.assetControl.utils.settings.config.QRConfigType
 import com.example.assetControl.utils.settings.io.FileHelper
-import com.example.assetControl.utils.settings.preferences.Preferences
 import org.json.JSONObject
 import java.lang.ref.WeakReference
 
@@ -83,8 +83,8 @@ class AccountPreferenceFragment : PreferenceFragmentCompat(), ClientPackage.Comp
         val selectPackagePref: Preference? = findPreference("select_package")
         selectPackagePref?.onPreferenceClickListener = OnPreferenceClickListener {
             if (emailPref != null && passPref != null) {
-                val email = Preferences.prefsGetString(p.clientEmail)
-                val password = Preferences.prefsGetString(p.clientPassword)
+                val email = sr.prefsGetString(p.clientEmail)
+                val password = sr.prefsGetString(p.clientPassword)
 
                 if (!alreadyAnsweredYes) {
                     val diaBox = askForDownloadDbRequired2(email = email, password = password)
@@ -122,11 +122,11 @@ class AccountPreferenceFragment : PreferenceFragmentCompat(), ClientPackage.Comp
 
         val qrCodePref: Preference? = findPreference("ac_qr_code")
         qrCodePref?.onPreferenceClickListener = OnPreferenceClickListener {
-            val urlPanel = Preferences.prefsGetString(p.urlPanel)
-            val installationCode = Preferences.prefsGetString(p.installationCode)
-            val clientEmail = Preferences.prefsGetString(p.clientEmail)
-            val clientPassword = Preferences.prefsGetString(p.clientPassword)
-            val clientPackage = Preferences.prefsGetString(p.clientPackage)
+            val urlPanel = sr.prefsGetString(p.urlPanel)
+            val installationCode = sr.prefsGetString(p.installationCode)
+            val clientEmail = sr.prefsGetString(p.clientEmail)
+            val clientPassword = sr.prefsGetString(p.clientPassword)
+            val clientPackage = sr.prefsGetString(p.clientPackage)
 
             if (urlPanel.isEmpty() || installationCode.isEmpty() || clientPackage.isEmpty() || clientEmail.isEmpty() || clientPassword.isEmpty()) {
                 MakeText.makeText(
@@ -216,9 +216,7 @@ class AccountPreferenceFragment : PreferenceFragmentCompat(), ClientPackage.Comp
                 if (!BuildConfig.DEBUG) preference.summary = newValue.toString()
                 alreadyAnsweredYes = true
                 if (newValue is String) {
-                    Preferences.prefsPutString(
-                        preference.key, newValue
-                    )
+                    sr.prefsPutString(preference.key, newValue)
                 }
                 dialog.dismiss()
             }.setNegativeButton(
