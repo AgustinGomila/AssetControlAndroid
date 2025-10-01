@@ -996,7 +996,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
 
             R.id.action_trigger_scan -> {
                 if (currentStyle != ButtonStyle.BUSY) {
-                    if (Statics.GOD_MODE) {
+                    if (Statics.DEMO_MODE) {
                         val env = DotenvBuilder()
                             .directory("/assets")
                             .filename("env")
