@@ -18,7 +18,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import com.example.assetControl.AssetControlApp.Companion.sr
 import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.data.enums.barcode.BarcodeLabelTarget
@@ -43,7 +42,6 @@ import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.misc.CounterHandler
 import com.example.assetControl.utils.parcel.Parcelables.parcelable
 import com.example.assetControl.utils.settings.config.ConfigHelper
-import com.example.assetControl.utils.settings.config.Preference
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 
@@ -113,15 +111,9 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
 
     fun saveSharedPreferences() {
         if (barcodeLabelTarget == BarcodeLabelTarget.Asset) {
-            sr.prefsPutLong(
-                Preference.defaultBarcodeLabelCustomAsset.key,
-                barcodeLabelCustom?.id ?: 0L
-            )
+            svm.defaultBarcodeLabelCustomAsset = barcodeLabelCustom?.id ?: 0L
         } else if (barcodeLabelTarget == BarcodeLabelTarget.WarehouseArea) {
-            sr.prefsPutLong(
-                Preference.defaultBarcodeLabelCustomWa.key,
-                barcodeLabelCustom?.id ?: 0L
-            )
+            svm.defaultBarcodeLabelCustomWa = barcodeLabelCustom?.id ?: 0L
         }
     }
 

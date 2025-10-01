@@ -349,9 +349,7 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
 
         swPrefCharLF?.setOnPreferenceChangeListener { _, newValue ->
             if (newValue == true) {
-                sr.prefsPutString(
-                    PreferenceConfig.lineSeparator.key, Char(10).toString()
-                )
+                svm.lineSeparator = Char(10).toString()
                 swPrefCharCR?.isChecked = false
             }
             true
@@ -359,9 +357,7 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
 
         swPrefCharCR?.setOnPreferenceChangeListener { _, newValue ->
             if (newValue == true) {
-                sr.prefsPutString(
-                    PreferenceConfig.lineSeparator.key, Char(13).toString()
-                )
+                svm.lineSeparator = Char(13).toString()
                 swPrefCharLF?.isChecked = false
             }
             true
@@ -517,7 +513,7 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
             Preference.OnPreferenceChangeListener { _, _ ->
                 val entry = deviceListPref.entry
                 if (!entry.isNullOrEmpty()) {
-                    sr.prefsPutString(PreferenceConfig.rfidBtName.key, entry.toString())
+                    svm.rfidBtName = entry.toString()
                 }
                 true
             }

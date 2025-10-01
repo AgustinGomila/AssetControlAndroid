@@ -23,7 +23,6 @@ import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.dacosys.imageControl.ui.fragments.ImageControlButtonsFragment
 import com.example.assetControl.AssetControlApp.Companion.currentUser
-import com.example.assetControl.AssetControlApp.Companion.sr
 import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.data.enums.common.ConfirmStatus
@@ -70,9 +69,7 @@ class ArcConfirmActivity : AppCompatActivity(),
     }
 
     private fun saveSharedPreferences() {
-        sr.prefsPutBoolean(
-            "asset_review_completed_checkbox", binding.completedSwitch.isChecked
-        )
+        svm.assetReviewCompletedCheckBox = binding.completedSwitch.isChecked
     }
 
     private fun destroyLocals() {

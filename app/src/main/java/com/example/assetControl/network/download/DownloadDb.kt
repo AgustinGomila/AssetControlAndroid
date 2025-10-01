@@ -569,9 +569,7 @@ class DownloadDb(
                 registries.add(ConfEntry.acLastUpdateAssetMaintenance.description)
                 registries.add(ConfEntry.acLastUpdateMaintenanceType.description)
                 registries.add(ConfEntry.acLastUpdateMaintenanceTypeGroup.description)
-                sr.prefsPutString(
-                    registries, Statics.DEFAULT_DATE
-                )
+                sr.prefsPutString(registries, Statics.DEFAULT_DATE)
             } else {
                 scope.launch {
                     onUiEvent(

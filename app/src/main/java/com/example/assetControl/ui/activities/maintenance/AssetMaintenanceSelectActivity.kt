@@ -11,7 +11,6 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
-import com.example.assetControl.AssetControlApp.Companion.sr
 import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.data.room.dto.maintenance.AssetMaintenance
@@ -29,7 +28,6 @@ import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.parcel.ParcelLong
 import com.example.assetControl.utils.parcel.Parcelables.parcelable
 import com.example.assetControl.utils.parcel.Parcelables.parcelableArrayList
-import com.example.assetControl.utils.settings.config.Preference
 
 class AssetMaintenanceSelectActivity : AppCompatActivity(),
     AssetMaintenanceAdapter.CustomCheckedChangeListener {
@@ -59,9 +57,7 @@ class AssetMaintenanceSelectActivity : AppCompatActivity(),
     }
 
     private fun saveSharedPreferences() {
-        sr.prefsPutBoolean(
-            Preference.selectAssetMaintenanceOnlyActive.key, binding.onlyActiveSwitch.isChecked
-        )
+        svm.selectAssetMaintenanceOnlyActive = binding.onlyActiveSwitch.isChecked
     }
 
     private fun destroyLocals() {

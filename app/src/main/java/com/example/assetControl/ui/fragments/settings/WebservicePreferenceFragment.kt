@@ -232,10 +232,10 @@ class WebservicePreferenceFragment : PreferenceFragmentCompat() {
      * porque está configurando el webservice de manera manual
      */
     private fun cleanPanelWebData() {
-        sr.prefsPutString(p.urlPanel.key, "")
-        sr.prefsPutString(p.installationCode.key, "")
-        sr.prefsPutString(p.clientPackage.key, "")
-        sr.prefsPutString(p.clientEmail.key, "")
-        sr.prefsPutString(p.clientPassword.key, "")
+        svm.urlPanel = ""
+        svm.installationCode = ""
+        svm.clientPackage = ""
+        svm.clientEmail = ""
+        svm.clientPassword = ""
     }
 }

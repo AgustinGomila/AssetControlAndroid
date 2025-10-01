@@ -1,6 +1,7 @@
 package com.example.assetControl.devices.scanners.floatingCamera
 
 import android.Manifest
+import android.app.AlertDialog
 import android.content.Context
 import android.content.pm.PackageManager
 import android.content.res.Configuration
@@ -18,7 +19,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.assetControl.AssetControlApp.Companion.context
-import com.example.assetControl.AssetControlApp.Companion.sr
 import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.databinding.FloatingCameraActivityBinding
@@ -391,16 +391,16 @@ class FloatingCameraBarcode(private var activity: AppCompatActivity) : BarcodeCa
         if (!floatWindowCreated) return
 
         // Guardar datos de la ventana flotante
-        sr.prefsPutInt(Preference.flCameraPortraitLocX.key, flCameraPortraitLoc[0])
-        sr.prefsPutInt(Preference.flCameraPortraitLocY.key, flCameraPortraitLoc[1])
-        sr.prefsPutInt(Preference.flCameraPortraitWidth.key, flCameraPortraitWidth)
-        sr.prefsPutInt(Preference.flCameraPortraitHeight.key, flCameraPortraitHeight)
-        sr.prefsPutInt(Preference.flCameraLandscapeLocX.key, flCameraLandscapeLoc[0])
-        sr.prefsPutInt(Preference.flCameraLandscapeLocY.key, flCameraLandscapeLoc[1])
-        sr.prefsPutInt(Preference.flCameraLandscapeWidth.key, flCameraLandscapeWidth)
-        sr.prefsPutInt(Preference.flCameraLandscapeHeight.key, flCameraLandscapeHeight)
-        sr.prefsPutBoolean(Preference.flCameraContinuousMode.key, continuousOn)
-        sr.prefsPutBoolean(Preference.flCameraFilterRepeatedReads.key, filterRepeatedReads)
+        svm.flCameraPortraitLocX = flCameraPortraitLoc[0]
+        svm.flCameraPortraitLocY = flCameraPortraitLoc[1]
+        svm.flCameraPortraitWidth = flCameraPortraitWidth
+        svm.flCameraPortraitHeight = flCameraPortraitHeight
+        svm.flCameraLandscapeLocX = flCameraLandscapeLoc[0]
+        svm.flCameraLandscapeLocY = flCameraLandscapeLoc[1]
+        svm.flCameraLandscapeWidth = flCameraLandscapeWidth
+        svm.flCameraLandscapeHeight = flCameraLandscapeHeight
+        svm.flCameraContinuousMode = continuousOn
+        svm.flCameraFilterRepeatedReads = filterRepeatedReads
     }
 
     private fun checkCameraFloatingPermission() {
@@ -421,7 +421,7 @@ class FloatingCameraBarcode(private var activity: AppCompatActivity) : BarcodeCa
         if (PermissionUtils.checkPermission(activity)) {
             onCreate()
         } else {
-            android.app.AlertDialog.Builder(activity).setMessage(
+            AlertDialog.Builder(activity).setMessage(
                 context.getString(R.string.to_use_the_floating_window_function_you_must_authorize_the_floating_window_permission)
             ).setPositiveButton(R.string.ok) { _, _ ->
                 onCreate()

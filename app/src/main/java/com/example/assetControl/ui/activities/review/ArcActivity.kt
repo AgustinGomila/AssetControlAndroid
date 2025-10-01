@@ -137,8 +137,8 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     private fun saveSharedPreferences() {
-        sr.prefsPutBoolean(Preference.assetReviewAddUnknownAssets.key, binding.addUnknownAssetsSwitch.isChecked)
-        sr.prefsPutBoolean(Preference.assetReviewAllowUnknownCodes.key, binding.allowUnknownCodesSwitch.isChecked)
+        svm.assetReviewAddUnknownAssets = binding.addUnknownAssetsSwitch.isChecked
+        svm.assetReviewAllowUnknownCodes = binding.allowUnknownCodesSwitch.isChecked
         sr.prefsPutStringSet(
             Preference.assetReviewContentVisibleStatus.key, (adapter?.visibleStatus ?: ArrayList())
                 .map { it.id.toString() }
@@ -300,7 +300,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
     private var showImages
         get() = svm.reviewContentShowImages
         set(value) {
-            sr.prefsPutBoolean(Preference.reviewContentShowImages.key, value)
+            svm.reviewContentShowImages = value
         }
 
     private var showCheckBoxes
@@ -308,12 +308,11 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
             if (!allowQuickReview) false
             else svm.reviewContentShowCheckBoxes
         set(value) {
-            sr.prefsPutBoolean(Preference.reviewContentShowCheckBoxes.key, value)
+            svm.reviewContentShowCheckBoxes = value
         }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-
         saveBundleValues(outState)
     }
 

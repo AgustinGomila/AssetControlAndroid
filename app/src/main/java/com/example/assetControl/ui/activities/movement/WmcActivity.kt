@@ -43,7 +43,6 @@ import com.dacosys.imageControl.room.dao.ImageCoroutines
 import com.dacosys.imageControl.ui.activities.ImageControlCameraActivity
 import com.dacosys.imageControl.ui.activities.ImageControlGridActivity
 import com.example.assetControl.AssetControlApp.Companion.context
-import com.example.assetControl.AssetControlApp.Companion.sr
 import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.BuildConfig
 import com.example.assetControl.R
@@ -92,7 +91,6 @@ import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.parcel.ParcelLong
 import com.example.assetControl.utils.parcel.Parcelables.parcelable
 import com.example.assetControl.utils.parcel.Parcelables.parcelableArrayList
-import com.example.assetControl.utils.settings.config.Preference
 import com.example.assetControl.viewModel.review.SaveReviewViewModel
 import com.example.assetControl.viewModel.sync.SyncViewModel
 import com.google.android.material.textfield.TextInputEditText
@@ -169,7 +167,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
     private var showImages
         get() = svm.reviewContentShowImages
         set(value) {
-            sr.prefsPutBoolean(Preference.reviewContentShowImages.key, value)
+            svm.reviewContentShowImages = value
         }
 
     private var showCheckBoxes
@@ -177,7 +175,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
             if (!multiSelect) false
             else svm.reviewContentShowCheckBoxes
         set(value) {
-            sr.prefsPutBoolean(Preference.reviewContentShowCheckBoxes.key, value)
+            svm.reviewContentShowCheckBoxes = value
         }
 
     override fun onSaveInstanceState(outState: Bundle) {

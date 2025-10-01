@@ -9,13 +9,11 @@ import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import com.example.assetControl.AssetControlApp.Companion.sr
 import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.databinding.RouteSelectFilterFragmentBinding
 import com.example.assetControl.ui.activities.route.RouteSelectDialogActivity
 import com.example.assetControl.utils.errorLog.ErrorLog
-import com.example.assetControl.utils.settings.config.Preference
 
 /**
  * A simple [Fragment] subclass.
@@ -59,10 +57,7 @@ class RouteSelectFilterFragment : Fragment() {
     }
 
     private fun saveSharedPreferences() {
-        sr.prefsPutBoolean(
-            Preference.selectRouteOnlyActive.key,
-            onlyActive
-        )
+        svm.selectRouteOnlyActive = onlyActive
     }
 
     override fun onDestroy() {

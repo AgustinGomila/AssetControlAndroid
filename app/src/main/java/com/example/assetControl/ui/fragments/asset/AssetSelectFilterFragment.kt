@@ -87,9 +87,7 @@ class AssetSelectFilterFragment : Fragment() {
     }
 
     private fun saveSharedPreferences() {
-        sr.prefsPutBoolean(
-            Preference.selectAssetOnlyActive.key, onlyActive
-        )
+        svm.selectAssetOnlyActive = onlyActive
         val set = HashSet<String>()
         for (i in visibleStatusArray) set.add(i.id.toString())
         sr.prefsPutStringSet(

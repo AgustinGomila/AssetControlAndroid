@@ -47,7 +47,6 @@ import com.dacosys.imageControl.room.dao.ImageCoroutines
 import com.dacosys.imageControl.ui.activities.ImageControlCameraActivity
 import com.dacosys.imageControl.ui.activities.ImageControlGridActivity
 import com.example.assetControl.AssetControlApp.Companion.context
-import com.example.assetControl.AssetControlApp.Companion.sr
 import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.data.enums.asset.AssetStatus
@@ -87,7 +86,6 @@ import com.example.assetControl.utils.conversor.IntConversor.orZero
 import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.parcel.ParcelLong
 import com.example.assetControl.utils.parcel.Parcelables.parcelable
-import com.example.assetControl.utils.settings.config.Preference
 import com.example.assetControl.viewModel.assetSelect.AssetSelectUiState
 import com.example.assetControl.viewModel.assetSelect.AssetSelectViewModel
 import kotlinx.coroutines.Dispatchers
@@ -215,14 +213,14 @@ class AssetPrintLabelActivity : BasePanelActivity(), SwipeRefreshLayout.OnRefres
     private var showImages
         get() = svm.printLabelAssetShowImages
         set(value) {
-            sr.prefsPutBoolean(Preference.printLabelAssetShowImages.key, value)
+            svm.printLabelAssetShowImages = value
         }
 
     private var showCheckBoxes
         get() = if (!viewModel.multiSelect) false
         else svm.printLabelAssetShowCheckBoxes
         set(value) {
-            sr.prefsPutBoolean(Preference.printLabelAssetShowCheckBoxes.key, value)
+            svm.printLabelAssetShowCheckBoxes = value
         }
 
     private val visibleStatus
