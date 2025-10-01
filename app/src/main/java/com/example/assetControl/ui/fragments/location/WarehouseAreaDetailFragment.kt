@@ -7,10 +7,10 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
-import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 import com.example.assetControl.R
 import com.example.assetControl.data.room.dto.location.WarehouseArea
 import com.example.assetControl.databinding.WarehouseAreaDetailFragmentBinding
+import com.example.assetControl.utils.parcel.Parcelables.parcelable
 
 /**
  * A simple [Fragment] subclass.

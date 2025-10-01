@@ -17,8 +17,6 @@ import android.widget.AdapterView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
-import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
-import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelableArrayList
 import com.example.assetControl.R
 import com.example.assetControl.data.async.location.WarehouseAreaChangedObserver
 import com.example.assetControl.data.async.location.WarehouseChangedObserver
@@ -43,6 +41,8 @@ import com.example.assetControl.ui.common.utils.Screen.Companion.setupUI
 import com.example.assetControl.ui.common.utils.Screen.Companion.showKeyboard
 import com.example.assetControl.ui.common.views.custom.ContractsAutoCompleteTextView
 import com.example.assetControl.utils.errorLog.ErrorLog
+import com.example.assetControl.utils.parcel.Parcelables.parcelable
+import com.example.assetControl.utils.parcel.Parcelables.parcelableArrayList
 import com.example.assetControl.utils.settings.config.Preference
 import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent.registerEventListener

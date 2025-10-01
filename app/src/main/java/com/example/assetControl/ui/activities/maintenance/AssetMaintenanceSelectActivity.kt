@@ -11,8 +11,6 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
-import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
-import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelableArrayList
 import com.example.assetControl.R
 import com.example.assetControl.data.room.dto.maintenance.AssetMaintenance
 import com.example.assetControl.data.room.repository.asset.AssetRepository
@@ -26,7 +24,9 @@ import com.example.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
 import com.example.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.example.assetControl.ui.common.utils.Screen.Companion.setupUI
 import com.example.assetControl.utils.errorLog.ErrorLog
-import com.example.assetControl.utils.misc.ParcelLong
+import com.example.assetControl.utils.parcel.ParcelLong
+import com.example.assetControl.utils.parcel.Parcelables.parcelable
+import com.example.assetControl.utils.parcel.Parcelables.parcelableArrayList
 import com.example.assetControl.utils.settings.config.Preference
 import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
 import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutBoolean

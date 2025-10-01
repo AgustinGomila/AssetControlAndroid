@@ -13,7 +13,7 @@ class TrustFactory {
     companion object {
 
         private const val DACOSYS_CONFIG = "config.dacosys.com"
-        private const val DACOSYS_CLIENT = "client.dacosys.com"
+        private const val DACOSYS_CLIENT = "client.example.com"
 
         private var trustedList: MutableList<String> = mutableListOf(
             DACOSYS_CONFIG,

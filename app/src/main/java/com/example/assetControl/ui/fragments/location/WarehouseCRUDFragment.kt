@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 import com.example.assetControl.R
 import com.example.assetControl.data.crud.location.WarehouseCRUD
 import com.example.assetControl.data.enums.common.CrudCompleted
@@ -17,6 +16,7 @@ import com.example.assetControl.data.webservice.location.WarehouseObject
 import com.example.assetControl.databinding.WarehouseCrudFragmentBinding
 import com.example.assetControl.ui.common.snackbar.MakeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
+import com.example.assetControl.utils.parcel.Parcelables.parcelable
 
 class WarehouseCRUDFragment : Fragment() {
     private var warehouse: Warehouse? = null

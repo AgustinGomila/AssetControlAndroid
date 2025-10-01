@@ -20,7 +20,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.transition.ChangeBounds
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
-import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 import com.example.assetControl.R
 import com.example.assetControl.data.async.location.GetLocationAsync
 import com.example.assetControl.data.enums.barcode.BarcodeLabelTarget
@@ -48,7 +47,8 @@ import com.example.assetControl.ui.common.utils.Screen.Companion.setupUI
 import com.example.assetControl.ui.fragments.location.WarehouseAreaSelectFilterFragment
 import com.example.assetControl.ui.fragments.print.PrinterFragment
 import com.example.assetControl.utils.errorLog.ErrorLog
-import com.example.assetControl.utils.misc.ParcelLong
+import com.example.assetControl.utils.parcel.ParcelLong
+import com.example.assetControl.utils.parcel.Parcelables.parcelable
 import com.example.assetControl.utils.settings.config.Preference
 import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
 import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetLong
@@ -246,16 +246,16 @@ class WarehouseAreaPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.
 
         if (adapter != null) {
             val warehouseArea = adapter?.currentWarehouseArea()
-            val warehouseAreaIdArray = adapter?.getAllChecked()
+            val areaIdArray = adapter?.getAllChecked()
 
             if (!multiSelect && warehouseArea != null) {
                 data.putParcelableArrayListExtra(
                     "ids", arrayListOf(ParcelLong(warehouseArea.id))
                 )
                 setResult(RESULT_OK, data)
-            } else if (multiSelect && warehouseAreaIdArray != null && warehouseAreaIdArray.isNotEmpty()) {
+            } else if (multiSelect && areaIdArray != null && areaIdArray.isNotEmpty()) {
                 val parcelIdArray: ArrayList<ParcelLong> = ArrayList()
-                for (it in warehouseAreaIdArray) parcelIdArray.add(ParcelLong(it))
+                for (it in areaIdArray) parcelIdArray.add(ParcelLong(it))
                 data.putParcelableArrayListExtra("ids", parcelIdArray)
                 setResult(RESULT_OK, data)
             } else {

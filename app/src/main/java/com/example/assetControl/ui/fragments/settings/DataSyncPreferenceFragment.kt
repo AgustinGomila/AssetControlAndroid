@@ -287,7 +287,7 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
                 AcDatabase.changeDatabase(
                     String.format("temp%s.sqlite", Random().nextInt(max - min + 1) + min)
                 )
-                Statics.OFFLINE_MODE = true
+                Statics.isCustomDbInUse = true
 
                 activity?.let {
                     if (hasPermissions(activity as Context, readWritePermissions)) {

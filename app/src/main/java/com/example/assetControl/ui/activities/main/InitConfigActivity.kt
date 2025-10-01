@@ -257,7 +257,7 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     override fun onStart() {
         super.onStart()
-        if (Statics.SUPER_DEMO_MODE) {
+        if (Statics.GOD_MODE) {
             val env = DotenvBuilder()
                 .directory("/assets")
                 .filename("env")
@@ -514,7 +514,7 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
             }
 
             R.id.action_trigger_scan -> {
-                if (Statics.SUPER_DEMO_MODE && BuildConfig.DEBUG) {
+                if (Statics.GOD_MODE) {
                     loadFromEnv()
                     return super.onOptionsItemSelected(item)
                 }

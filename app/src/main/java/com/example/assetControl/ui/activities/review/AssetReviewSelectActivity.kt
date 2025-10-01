@@ -29,8 +29,6 @@ import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.dacosys.imageControl.network.common.ProgramData
 import com.dacosys.imageControl.room.dao.ImageCoroutines
-import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
-import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelableArrayList
 import com.example.assetControl.AssetControlApp.Companion.context
 import com.example.assetControl.AssetControlApp.Companion.getUserId
 import com.example.assetControl.R
@@ -60,6 +58,8 @@ import com.example.assetControl.ui.common.utils.Screen.Companion.setupUI
 import com.example.assetControl.ui.fragments.location.WarehouseAreaSelectFilterFragment
 import com.example.assetControl.utils.Statics
 import com.example.assetControl.utils.errorLog.ErrorLog
+import com.example.assetControl.utils.parcel.Parcelables.parcelable
+import com.example.assetControl.utils.parcel.Parcelables.parcelableArrayList
 import com.example.assetControl.utils.settings.config.Preference
 import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
 import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetStringSet

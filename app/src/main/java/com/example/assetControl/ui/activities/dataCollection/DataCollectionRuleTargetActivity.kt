@@ -9,8 +9,6 @@ import android.view.View.INVISIBLE
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
-import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelableArrayList
 import com.example.assetControl.R
 import com.example.assetControl.data.room.dto.asset.Asset
 import com.example.assetControl.data.room.dto.category.ItemCategory
@@ -26,7 +24,9 @@ import com.example.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
 import com.example.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.example.assetControl.ui.common.utils.Screen.Companion.setupUI
 import com.example.assetControl.utils.errorLog.ErrorLog
-import com.example.assetControl.utils.misc.ParcelLong
+import com.example.assetControl.utils.parcel.ParcelLong
+import com.example.assetControl.utils.parcel.Parcelables.parcelable
+import com.example.assetControl.utils.parcel.Parcelables.parcelableArrayList
 import org.parceler.Parcels
 
 class DataCollectionRuleTargetActivity : AppCompatActivity() {

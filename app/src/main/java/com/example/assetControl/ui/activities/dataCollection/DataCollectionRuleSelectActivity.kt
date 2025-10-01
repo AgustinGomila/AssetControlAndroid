@@ -9,7 +9,6 @@ import android.view.MotionEvent
 import android.view.inputmethod.EditorInfo
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
-import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 import com.example.assetControl.R
 import com.example.assetControl.data.room.dto.asset.Asset
 import com.example.assetControl.data.room.dto.category.ItemCategory
@@ -24,6 +23,7 @@ import com.example.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
 import com.example.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.example.assetControl.ui.common.utils.Screen.Companion.setupUI
 import com.example.assetControl.utils.errorLog.ErrorLog
+import com.example.assetControl.utils.parcel.Parcelables.parcelable
 import com.example.assetControl.utils.settings.config.Preference
 import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
 import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutBoolean

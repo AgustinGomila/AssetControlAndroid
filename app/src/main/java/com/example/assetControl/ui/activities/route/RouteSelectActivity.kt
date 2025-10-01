@@ -19,7 +19,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.transition.ChangeBounds
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
-import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 import com.example.assetControl.R
 import com.example.assetControl.data.room.dto.route.Route
 import com.example.assetControl.data.room.dto.route.RouteProcess
@@ -37,6 +36,7 @@ import com.example.assetControl.ui.common.utils.Screen.Companion.setupUI
 import com.example.assetControl.ui.fragments.route.RouteSelectFilterFragment
 import com.example.assetControl.utils.Statics
 import com.example.assetControl.utils.errorLog.ErrorLog
+import com.example.assetControl.utils.parcel.Parcelables.parcelable
 import org.parceler.Parcels
 import java.util.*
 import kotlin.concurrent.thread

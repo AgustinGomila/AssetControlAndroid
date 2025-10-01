@@ -6,6 +6,7 @@ import com.dacosys.imageControl.ImageControl
 import com.example.assetControl.data.room.dto.user.User
 import com.example.assetControl.data.room.repository.user.UserRepository
 import com.example.assetControl.devices.deviceLifecycle.DeviceLifecycle
+import com.example.assetControl.utils.Statics
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.context.GlobalContext.get
@@ -55,7 +56,10 @@ class AssetControlApp : Application(), KoinComponent {
             else null
         }
 
-        fun isLogged(): Boolean = (currentUserId ?: 0L) > 0L
+        fun isLogged(): Boolean {
+            return if (Statics.GOD_MODE) true else
+                (currentUserId ?: 0L) > 0L
+        }
 
         fun getUserId(): Long? = currentUserId
 

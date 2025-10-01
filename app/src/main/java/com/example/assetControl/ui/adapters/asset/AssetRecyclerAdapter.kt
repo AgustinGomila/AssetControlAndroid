@@ -132,6 +132,18 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
         var showAllOnFilterEmpty: Boolean = true,
     )
 
+    fun setMultiSelect(value: Boolean) {
+        multiSelect = value
+    }
+
+    fun setCheckedIds(ids: Set<Long>) {
+        checkedIdArray = ArrayList(ids)
+    }
+
+    fun setFullList(newItems: List<Asset>) {
+        fullList = ArrayList(newItems)
+    }
+
     fun clear() {
         checkedIdArray.clear()
         idWithImage.clear()
@@ -627,9 +639,9 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
         selectItem(pos, scroll)
     }
 
-    private fun selectItem(pos: Int, scroll: Boolean = true) {
+    fun selectItem(pos: Int, scroll: Boolean = true) {
         // Si la posición está fuera del rango válido, reseteamos currentIndex a NO_POSITION.
-        currentIndex = if (pos < 0 || pos >= itemCount) NO_POSITION else pos
+        currentIndex = if (pos !in 0..<itemCount) NO_POSITION else pos
         notifyItemChanged(currentIndex)
         if (scroll) scrollToPos(currentIndex)
     }
@@ -1188,8 +1200,8 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
     init {
         // Set values
         recyclerView = builder.recyclerView
-        fullList = builder.fullList
-        checkedIdArray = builder.checkedIdArray
+        fullList = ArrayList(builder.fullList)
+        checkedIdArray = ArrayList(builder.checkedIdArray)
         multiSelect = builder.multiSelect
         showCheckBoxes = builder.showCheckBoxes
         showCheckBoxesChanged = builder.showCheckBoxesChanged
@@ -1253,8 +1265,8 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
 
     class Builder {
         internal lateinit var recyclerView: RecyclerView
-        internal var fullList: ArrayList<Asset> = ArrayList()
-        internal var checkedIdArray: ArrayList<Long> = ArrayList()
+        internal var fullList: List<Asset> = listOf()
+        internal var checkedIdArray: List<Long> = listOf()
         internal var multiSelect: Boolean = false
         internal var showCheckBoxes: Boolean = false
         internal var showCheckBoxesChanged: (Boolean) -> Unit = { }
@@ -1275,12 +1287,12 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
             return this
         }
 
-        fun fullList(`val`: ArrayList<Asset>): Builder {
+        fun fullList(`val`: List<Asset>): Builder {
             fullList = `val`
             return this
         }
 
-        fun checkedIdArray(`val`: ArrayList<Long>): Builder {
+        fun checkedIdArray(`val`: List<Long>): Builder {
             checkedIdArray = `val`
             return this
         }

@@ -18,7 +18,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 import com.example.assetControl.R
 import com.example.assetControl.data.enums.barcode.BarcodeLabelTarget
 import com.example.assetControl.data.model.barcodeFields.AssetLabelField
@@ -40,6 +39,7 @@ import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
 import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.misc.CounterHandler
+import com.example.assetControl.utils.parcel.Parcelables.parcelable
 import com.example.assetControl.utils.settings.config.ConfigHelper
 import com.example.assetControl.utils.settings.config.Preference
 import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
@@ -113,7 +113,7 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
         )
     }
 
-    private fun saveSharedPreferences() {
+    fun saveSharedPreferences() {
         if (barcodeLabelTarget == BarcodeLabelTarget.Asset) {
             prefsPutLong(
                 Preference.defaultBarcodeLabelCustomAsset.key,
@@ -683,7 +683,7 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
         sendToPrinter(sendThis = sendThis, onFinish = { })
     }
 
-    fun printAssetById(assetIdArray: ArrayList<Long>) {
+    fun printAssetById(assetIdArray: List<Long>) {
         if (assetIdArray.isEmpty()) {
             showSnackBar(
                 getString(R.string.you_must_select_at_least_one_asset),

@@ -1,35 +1,51 @@
 <resources>
-
-    <style name="Base.Theme.App" parent="Theme.AppCompat.Light.NoActionBar">
-        <!-- <item name="android:windowLightStatusBar">false</item> -->
-    </style>
-
-    <style name="AssetControlTheme" parent="Base.Theme.App">
+    <!-- Base Themes -->
+    <style name="Base.Theme.App" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="android:windowLightStatusBar">false</item>
         <item name="colorPrimary">@color/assetControl</item>
         <item name="colorPrimaryVariant">@color/assetControlDark</item>
+        <item name="colorOnPrimary">@color/text_dark</item>
         <item name="colorSecondary">@color/triad3</item>
         <item name="colorSecondaryVariant">@color/triad2</item>
-        <item name="colorSurface">@color/assetControl</item>
-        <item name="colorError">@color/assetControl</item>
-        <item name="colorOnPrimary">@color/text_light</item>
-        <item name="colorOnSecondary">@color/text_light</item>
-        <item name="colorOnBackground">@color/text_light</item>
-        <item name="colorOnSurface">@color/text_light</item>
-        <item name="colorOnError">@color/text_light</item>
+        <item name="colorOnSecondary">@color/text_dark</item>
+        <item name="android:textColorSecondary">@color/assetControlDark</item>
+        <item name="android:statusBarColor">@color/triad1</item>
+        <item name="android:navigationBarColor">@color/assetControlDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
 
-        <!-- ActionBar Styles -->
+    <style name="NoActionBar.Theme.App" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="colorPrimary">@color/assetControl</item>
+        <item name="colorPrimaryVariant">@color/assetControlDark</item>
+        <item name="colorOnPrimary">@color/text_dark</item>
+        <item name="colorSecondary">@color/triad3</item>
+        <item name="colorSecondaryVariant">@color/triad2</item>
+        <item name="colorOnSecondary">@color/text_dark</item>
+        <item name="android:textColorSecondary">@color/assetControlDark</item>
+        <item name="android:statusBarColor">@color/triad1</item>
+        <item name="android:navigationBarColor">@color/assetControlDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <!-- Main Themes -->
+    <style name="AssetControlTheme" parent="Base.Theme.App">
         <item name="android:actionBarStyle">@style/MyActionBar</item>
+        <item name="android:actionBarTabTextStyle">@style/MyActionBarTabText</item>
+        <item name="android:itemTextAppearance">@style/MyActionMenuStyle</item>
+        <item name="android:itemBackground">@color/assetControlDark</item>
     </style>
 
-    <!-- ActionBar styles --> -->
-
-    <style name="MyActionBar" parent="@style/Widget.AppCompat.ActionBar">
-        <item name="android:background">@color/assetControl</item>
-        <item name="navigationIcon">@drawable/ic_arrow_back</item>
+    <style name="AssetControlNoActionBarTheme" parent="NoActionBar.Theme.App">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:actionBarStyle">@style/MyActionBar</item>
+        <item name="android:actionBarTabTextStyle">@style/MyActionBarTabText</item>
+        <item name="android:itemTextAppearance">@style/MyActionMenuStyle</item>
+        <item name="android:itemBackground">@color/assetControlDark</item>
     </style>
 
-    <!-- SplashScreen styles --> -->
-
+    <!-- Splash Screen Themes -->
     <style name="Theme.App.SplashScreen" parent="Theme.SplashScreen">
         <item name="postSplashScreenTheme">@style/AssetControlTheme</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_animated</item>
@@ -38,22 +54,61 @@
         <item name="windowSplashScreenAnimationDuration">3000</item>
     </style>
 
-    <!-- AlertDialog styles --> -->
+    <style name="Theme.App.SplashScreen.NoActionBar" parent="Theme.SplashScreen">
+        <item name="postSplashScreenTheme">@style/AssetControlNoActionBarTheme</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_animated</item>
+        <item name="windowSplashScreenIconBackgroundColor">@color/assetControl</item>
+        <item name="windowSplashScreenBackground">@color/assetControlDark</item>
+        <item name="windowSplashScreenAnimationDuration">3000</item>
+    </style>
+
+    <!-- ActionBar Styles -->
+    <style name="MyActionBar" parent="@style/Widget.AppCompat.ActionBar">
+        <item name="android:titleTextStyle">@style/MyActionBarTitleText</item>
+        <item name="background">@color/triad1</item>
+        <item name="android:background">@color/triad1</item>
+        <item name="navigationIcon">@drawable/ic_arrow_back</item>
+        <item name="android:navigationIcon">@drawable/ic_arrow_back</item>
+    </style>
+
+    <style name="MyActionBarTitleText" parent="@style/TextAppearance.AppCompat.Widget.ActionBar.Title">
+        <item name="android:textColor">@color/text_light</item>
+    </style>
+
+    <style name="MyActionBarTabText" parent="@style/Widget.AppCompat.ActionBar.TabText">
+        <item name="android:textColor">@color/text_light</item>
+    </style>
+
+    <style name="MyActionMenuStyle" parent="@style/TextAppearance.AppCompat.Widget.ActionBar.Menu">
+        <item name="android:textColor">@color/text_light</item>
+    </style>
+
+    <!-- Additional Themes -->
+    <style name="Theme.App.CustomActionBar" parent="AssetControlTheme">
+        <item name="windowNoTitle">false</item>
+        <item name="windowActionBar">true</item>
+        <item name="android:windowContentTransitions">true</item>
+        <item name="android:windowAllowEnterTransitionOverlap">true</item>
+        <item name="android:windowAllowReturnTransitionOverlap">true</item>
+        <item name="android:windowSharedElementEnterTransition">@android:transition/move</item>
+        <item name="android:windowSharedElementExitTransition">@android:transition/move</item>
+        <item name="actionOverflowButtonStyle">@style/CustomActionButtonOverflow</item>
+    </style>
+
+    <style name="CustomActionButtonOverflow" parent="@style/Widget.AppCompat.ActionButton.Overflow">
+        <item name="android:src">@drawable/ic_visibility</item>
+    </style>
 
     <style name="AlertDialogTheme" parent="Theme.AppCompat.Light.Dialog.Alert">
         <item name="android:textSize">14sp</item>
     </style>
-
-    <!-- Floating Translucent styles --> -->
 
     <style name="Theme.AppCompat.Translucent" parent="Theme.AppCompat.NoActionBar">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@color/colorSemitransparent</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="windowNoTitle">true</item>
-        <!-- <item name="android:windowIsFloating">true</item> -->
         <item name="android:backgroundDimEnabled">false</item>
         <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
     </style>
-
 </resources>

@@ -8,8 +8,8 @@
         </trust-anchors>
     </base-config>
     <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="true">config.dacosys.com</domain>
-        <domain includeSubdomains="true">client.dacosys.com</domain>
-        <domain includeSubdomains="true">activos.uade.edu.ar</domain>
+        <domain includeSubdomains="true">config.example.com</domain>
+        <domain includeSubdomains="true">client.example.com</domain>
+        <domain includeSubdomains="true">activos.example.edu.ar</domain>
     </domain-config>
 </network-security-config>

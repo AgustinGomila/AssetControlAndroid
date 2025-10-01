@@ -8,6 +8,7 @@ import com.example.assetControl.AssetControlApp.Companion.isLogged
 import com.example.assetControl.data.enums.permission.PermissionEntry
 import com.example.assetControl.data.room.repository.user.UserPermissionRepository
 import com.example.assetControl.data.webservice.user.UserObject
+import com.example.assetControl.utils.Statics
 
 abstract class UserEntry {
     companion object {
@@ -88,6 +89,8 @@ class User(
         }
 
         fun hasPermission(permission: PermissionEntry): Boolean {
+            if (Statics.GOD_MODE) return true
+
             return if (isLogged()) {
                 UserPermissionRepository().selectByUserIdUserPermissionId(
                     userId = getUserId() ?: 0,

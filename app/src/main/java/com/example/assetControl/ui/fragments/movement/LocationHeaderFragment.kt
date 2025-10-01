@@ -11,7 +11,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.TooltipCompat
 import androidx.fragment.app.Fragment
-import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 import com.example.assetControl.R
 import com.example.assetControl.data.room.dto.location.Warehouse
 import com.example.assetControl.data.room.dto.location.WarehouseArea
@@ -20,6 +19,7 @@ import com.example.assetControl.data.room.repository.location.WarehouseRepositor
 import com.example.assetControl.databinding.LocationHeaderFragmentBinding
 import com.example.assetControl.ui.activities.location.LocationSelectActivity
 import com.example.assetControl.utils.errorLog.ErrorLog
+import com.example.assetControl.utils.parcel.Parcelables.parcelable
 import org.parceler.Parcels
 
 /**

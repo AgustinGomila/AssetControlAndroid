@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
-import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 import com.example.assetControl.R
 import com.example.assetControl.data.enums.maintenance.MaintenanceStatus
 import com.example.assetControl.data.room.dto.maintenance.AssetMaintenance
@@ -17,6 +16,7 @@ import com.example.assetControl.ui.common.utils.Screen.Companion.setScreenRotati
 import com.example.assetControl.ui.common.utils.Screen.Companion.setupUI
 import com.example.assetControl.ui.fragments.manteinance.MaintenanceStatusSpinnerFragment
 import com.example.assetControl.ui.fragments.manteinance.MaintenanceTypeSpinnerFragment
+import com.example.assetControl.utils.parcel.Parcelables.parcelable
 
 class AssetMaintenanceStatusActivity : AppCompatActivity(),
     MaintenanceTypeSpinnerFragment.OnItemSelectedListener,

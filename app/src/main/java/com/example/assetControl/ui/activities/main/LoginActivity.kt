@@ -795,11 +795,11 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         val password = binding.password.text.toString()
 
         runOnUiThread {
-            attemptLogin(userId = userId, encondedPass = userPass, password = password)
+            attemptLogin(userId = userId, encodedPass = userPass, password = password)
         }
     }
 
-    private fun attemptLogin(userId: Long?, encondedPass: String, password: String) {
+    private fun attemptLogin(userId: Long?, encodedPass: String, password: String) {
         // Reset errors.
         binding.password.error = null
 
@@ -825,7 +825,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
-            if (encondedPass == Md5.getMd5(password) || BuildConfig.DEBUG) {
+            if (encodedPass == Md5.getMd5(password) || BuildConfig.DEBUG) {
                 setCurrentUserId(userId)
                 setupImageControl()
 
@@ -883,7 +883,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                         runOnUiThread {
                             attemptLogin(
                                 userId = user.id,
-                                encondedPass = userPass,
+                                encodedPass = userPass,
                                 password = user.password.orEmpty()
                             )
                         }
@@ -996,7 +996,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
 
             R.id.action_trigger_scan -> {
                 if (currentStyle != ButtonStyle.BUSY) {
-                    if (Statics.SUPER_DEMO_MODE && BuildConfig.DEBUG) {
+                    if (Statics.GOD_MODE) {
                         val env = DotenvBuilder()
                             .directory("/assets")
                             .filename("env")

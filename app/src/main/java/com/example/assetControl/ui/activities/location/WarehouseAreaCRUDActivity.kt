@@ -13,7 +13,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import com.dacosys.imageControl.ui.fragments.ImageControlButtonsFragment
-import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 import com.example.assetControl.AssetControlApp.Companion.currentUser
 import com.example.assetControl.R
 import com.example.assetControl.data.enums.common.CrudCompleted
@@ -40,6 +39,7 @@ import com.example.assetControl.ui.common.utils.Screen.Companion.setScreenRotati
 import com.example.assetControl.ui.common.utils.Screen.Companion.setupUI
 import com.example.assetControl.ui.fragments.location.WarehouseAreaCRUDFragment
 import com.example.assetControl.utils.errorLog.ErrorLog
+import com.example.assetControl.utils.parcel.Parcelables.parcelable
 import com.example.assetControl.utils.settings.config.Preference
 import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
 import org.parceler.Parcels

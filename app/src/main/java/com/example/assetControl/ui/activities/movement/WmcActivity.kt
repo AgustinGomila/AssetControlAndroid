@@ -42,8 +42,6 @@ import com.dacosys.imageControl.network.webService.WsFunction
 import com.dacosys.imageControl.room.dao.ImageCoroutines
 import com.dacosys.imageControl.ui.activities.ImageControlCameraActivity
 import com.dacosys.imageControl.ui.activities.ImageControlGridActivity
-import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
-import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelableArrayList
 import com.example.assetControl.AssetControlApp.Companion.context
 import com.example.assetControl.BuildConfig
 import com.example.assetControl.R
@@ -89,7 +87,9 @@ import com.example.assetControl.ui.common.utils.Screen.Companion.setupUI
 import com.example.assetControl.ui.fragments.movement.LocationHeaderFragment
 import com.example.assetControl.utils.Statics
 import com.example.assetControl.utils.errorLog.ErrorLog
-import com.example.assetControl.utils.misc.ParcelLong
+import com.example.assetControl.utils.parcel.ParcelLong
+import com.example.assetControl.utils.parcel.Parcelables.parcelable
+import com.example.assetControl.utils.parcel.Parcelables.parcelableArrayList
 import com.example.assetControl.utils.settings.config.Preference
 import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
 import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutBoolean

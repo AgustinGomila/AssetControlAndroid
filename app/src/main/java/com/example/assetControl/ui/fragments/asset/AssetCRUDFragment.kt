@@ -10,7 +10,6 @@ import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 import com.example.assetControl.R
 import com.example.assetControl.data.crud.asset.AssetCRUD
 import com.example.assetControl.data.enums.asset.AssetCondition
@@ -34,6 +33,7 @@ import com.example.assetControl.ui.activities.location.LocationSelectActivity
 import com.example.assetControl.ui.common.snackbar.MakeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
 import com.example.assetControl.utils.errorLog.ErrorLog
+import com.example.assetControl.utils.parcel.Parcelables.parcelable
 import org.parceler.Parcels
 
 class AssetCRUDFragment : Fragment() {

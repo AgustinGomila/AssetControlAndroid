@@ -12,7 +12,6 @@ import android.os.IBinder
 import android.os.Parcel
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 import com.example.assetControl.AssetControlApp.Companion.context
 import com.example.assetControl.R
 import com.example.assetControl.ui.activities.asset.AssetCRUDActivity
@@ -26,6 +25,7 @@ import com.example.assetControl.ui.activities.location.WarehouseAreaPrintLabelAc
 import com.example.assetControl.ui.activities.movement.WmcActivity
 import com.example.assetControl.ui.activities.review.ArcActivity
 import com.example.assetControl.ui.activities.route.RouteProcessContentActivity
+import com.example.assetControl.utils.parcel.Parcelables.parcelable
 import kotlin.experimental.or
 
 object Nfc {

@@ -1,4 +1,4 @@
-package com.example.assetControl.utils.misc
+package com.example.assetControl.utils.parcel
 
 import android.os.Parcel
 import android.os.Parcelable
@@ -22,12 +22,9 @@ class ParcelLong() : Parcelable {
         return 0
     }
 
-    companion object CREATOR :
-        Parcelable.Creator<ParcelLong> {
+    companion object CREATOR : Parcelable.Creator<ParcelLong> {
         override fun createFromParcel(parcel: Parcel): ParcelLong {
-            return ParcelLong(
-                parcel
-            )
+            return ParcelLong(parcel)
         }
 
         override fun newArray(size: Int): Array<ParcelLong?> {

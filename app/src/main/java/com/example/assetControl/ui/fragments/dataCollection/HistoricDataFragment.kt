@@ -8,10 +8,10 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelableArrayList
 import com.example.assetControl.data.room.dto.dataCollection.DataCollectionContent
 import com.example.assetControl.databinding.DccHistoricDataFragmentBinding
 import com.example.assetControl.utils.misc.DateUtils.formatDateToString
+import com.example.assetControl.utils.parcel.Parcelables.parcelableArrayList
 
 class HistoricDataFragment : Fragment() {
     private var dccArrayList: ArrayList<DataCollectionContent> = ArrayList()

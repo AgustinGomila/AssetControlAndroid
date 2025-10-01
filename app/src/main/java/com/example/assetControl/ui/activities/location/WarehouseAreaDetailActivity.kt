@@ -9,7 +9,6 @@ import com.dacosys.imageControl.dto.DocumentContent
 import com.dacosys.imageControl.dto.DocumentContentRequestResult
 import com.dacosys.imageControl.network.webService.WsFunction
 import com.dacosys.imageControl.ui.activities.ImageControlGridActivity
-import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 import com.example.assetControl.R
 import com.example.assetControl.data.enums.common.Table
 import com.example.assetControl.data.room.dto.location.WarehouseArea
@@ -18,6 +17,7 @@ import com.example.assetControl.ui.common.snackbar.MakeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
 import com.example.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.example.assetControl.ui.common.utils.Screen.Companion.setupUI
+import com.example.assetControl.utils.parcel.Parcelables.parcelable
 
 class WarehouseAreaDetailActivity : AppCompatActivity() {
     private var warehouseArea: WarehouseArea? = null

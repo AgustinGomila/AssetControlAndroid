@@ -193,7 +193,7 @@ class DownloadDb(
             }
         }
 
-        if (Statics.SUPER_DEMO_MODE) launchDownload()
+        if (Statics.GOD_MODE) launchDownload()
         else {
             GetMySqlDate(getWebservice()) {
                 onConnectionResult(it)

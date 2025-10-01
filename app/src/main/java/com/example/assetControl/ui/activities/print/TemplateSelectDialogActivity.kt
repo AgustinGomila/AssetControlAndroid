@@ -16,7 +16,6 @@ import android.widget.AdapterView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
-import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 import com.example.assetControl.R
 import com.example.assetControl.data.enums.barcode.BarcodeLabelTarget
 import com.example.assetControl.data.room.dto.barcode.BarcodeLabelCustom
@@ -28,6 +27,7 @@ import com.example.assetControl.ui.common.utils.Screen.Companion.setScreenRotati
 import com.example.assetControl.ui.common.utils.Screen.Companion.showKeyboard
 import com.example.assetControl.ui.common.views.custom.ContractsAutoCompleteTextView
 import com.example.assetControl.utils.errorLog.ErrorLog
+import com.example.assetControl.utils.parcel.Parcelables.parcelable
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener
 import kotlin.concurrent.thread

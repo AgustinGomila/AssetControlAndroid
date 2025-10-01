@@ -1143,4 +1143,5 @@
         acceso a su almacenamiento externo para leer y escribir archivos. Otorgue los permisos para continuar usando
         esta función.
     </string>
+    <string name="error_loading_data">Error al cargar los datos</string>
 </resources>

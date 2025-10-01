@@ -7,12 +7,12 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
-import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
 import com.example.assetControl.AssetControlApp
 import com.example.assetControl.R.layout.custom_spinner_dropdown_item
 import com.example.assetControl.data.enums.unit.UnitType
 import com.example.assetControl.data.enums.unit.UnitTypeCategory
 import com.example.assetControl.databinding.FragmentSpinnerBinding
+import com.example.assetControl.utils.parcel.Parcelables.parcelable
 import org.parceler.Parcels
 
 /**

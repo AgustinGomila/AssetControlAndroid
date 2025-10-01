@@ -18,30 +18,26 @@ import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.inputmethod.EditorInfo
+import android.widget.Button
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.viewModels
 import androidx.appcompat.view.menu.MenuBuilder
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsAnimationCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.doOnNextLayout
 import androidx.core.view.get
 import androidx.core.view.size
-import androidx.interpolator.view.animation.FastOutSlowInInterpolator
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import androidx.transition.ChangeBounds
-import androidx.transition.Transition
-import androidx.transition.TransitionManager
 import com.dacosys.imageControl.dto.DocumentContent
 import com.dacosys.imageControl.dto.DocumentContentRequestResult
 import com.dacosys.imageControl.network.common.ProgramData
@@ -50,11 +46,8 @@ import com.dacosys.imageControl.network.webService.WsFunction
 import com.dacosys.imageControl.room.dao.ImageCoroutines
 import com.dacosys.imageControl.ui.activities.ImageControlCameraActivity
 import com.dacosys.imageControl.ui.activities.ImageControlGridActivity
-import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelable
-import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelableArrayList
 import com.example.assetControl.AssetControlApp.Companion.context
 import com.example.assetControl.R
-import com.example.assetControl.data.async.asset.GetAssetAsync
 import com.example.assetControl.data.enums.asset.AssetStatus
 import com.example.assetControl.data.enums.barcode.BarcodeLabelTarget
 import com.example.assetControl.data.room.dto.asset.Asset
@@ -62,7 +55,6 @@ import com.example.assetControl.data.room.dto.barcode.BarcodeLabelCustom
 import com.example.assetControl.data.room.dto.category.ItemCategory
 import com.example.assetControl.data.room.dto.location.WarehouseArea
 import com.example.assetControl.data.room.entity.asset.TempAssetEntity
-import com.example.assetControl.data.room.repository.asset.AssetRepository
 import com.example.assetControl.data.room.repository.asset.TempAssetRepository
 import com.example.assetControl.data.room.repository.barcode.BarcodeLabelCustomRepository
 import com.example.assetControl.databinding.AssetPrintLabelActivityTopPanelCollapsedBinding
@@ -74,35 +66,97 @@ import com.example.assetControl.devices.scanners.rfid.Rfid
 import com.example.assetControl.devices.scanners.rfid.Rfid.Companion.isRfidRequired
 import com.example.assetControl.devices.scanners.vh75.Vh75Bt
 import com.example.assetControl.network.utils.Connection.Companion.autoSend
-import com.example.assetControl.network.utils.ProgressStatus
 import com.example.assetControl.ui.adapters.asset.AssetRecyclerAdapter
 import com.example.assetControl.ui.adapters.asset.AssetRecyclerAdapter.FilterOptions
 import com.example.assetControl.ui.adapters.interfaces.Interfaces
-import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.example.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
-import com.example.assetControl.ui.common.utils.Screen.Companion.isKeyboardVisible
 import com.example.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.example.assetControl.ui.common.utils.Screen.Companion.setupUI
 import com.example.assetControl.ui.fragments.asset.AssetSelectFilterFragment
 import com.example.assetControl.ui.fragments.asset.SummaryFragment
 import com.example.assetControl.ui.fragments.print.PrinterFragment
+import com.example.assetControl.ui.panel.BasePanelActivity
+import com.example.assetControl.ui.panel.PanelController
+import com.example.assetControl.ui.panel.PanelState
+import com.example.assetControl.ui.panel.PanelType
+import com.example.assetControl.utils.conversor.IntConversor.orZero
 import com.example.assetControl.utils.errorLog.ErrorLog
-import com.example.assetControl.utils.misc.ParcelLong
+import com.example.assetControl.utils.parcel.ParcelLong
+import com.example.assetControl.utils.parcel.Parcelables.parcelable
 import com.example.assetControl.utils.settings.config.Preference
 import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
 import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetLong
 import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutBoolean
 import com.example.assetControl.utils.settings.preferences.Repository.Companion.useImageControl
+import com.example.assetControl.viewModel.assetSelect.AssetSelectUiState
+import com.example.assetControl.viewModel.assetSelect.AssetSelectViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.parceler.Parcels
-import kotlin.concurrent.thread
 
-class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
+class AssetPrintLabelActivity : BasePanelActivity(), SwipeRefreshLayout.OnRefreshListener,
     Scanner.ScannerListener, Rfid.RfidDeviceListener, AssetSelectFilterFragment.FragmentListener,
-    GetAssetAsync.GetAssetAsyncListener, PrinterFragment.FragmentListener, Interfaces.CheckedChangedListener,
+    PrinterFragment.FragmentListener, Interfaces.CheckedChangedListener,
     Interfaces.DataSetChangedListener, Interfaces.AddPhotoRequiredListener,
     Interfaces.AlbumViewRequiredListener,
     Interfaces.EditAssetRequiredListener {
+
+    private val viewModel: AssetSelectViewModel by viewModels()
+
+    // region Set Panels
+    override val stateConfig: PanelController.PanelStateConfiguration
+        get() = PanelController.PanelStateConfiguration(
+            initialPanelTopState = PanelState.COLLAPSED,
+            initialPanelBottomState = PanelState.EXPANDED,
+        )
+    override val layoutConfig: PanelController.PanelLayoutConfiguration
+        get() = PanelController.PanelLayoutConfiguration(
+            topPanelExpandedLayout = R.layout.asset_print_label_activity_bottom_panel_collapsed,
+            bottomPanelExpandedLayout = R.layout.asset_print_label_activity_top_panel_collapsed,
+            allPanelsExpandedLayout = R.layout.asset_print_label_activity,
+            allPanelsCollapsedLayout = R.layout.asset_print_label_activity_both_panels_collapsed,
+        )
+    override val textConfig: PanelController.PanelTextConfiguration
+        get() = PanelController.PanelTextConfiguration(
+            topButtonText = R.string.label_print,
+            bottomButtonText = R.string.search_options,
+        )
+    override val animationConfig: PanelController.PanelAnimationConfiguration
+        get() = PanelController.PanelAnimationConfiguration(
+            postImeShowAnimation = ::postImeShowAnimation,
+            postTopPanelAnimation = ::postTopPanelAnimation,
+            postBottomPanelAnimation = ::postBottomPanelAnimation,
+        )
+
+    override fun provideRootLayout(): ConstraintLayout {
+        return binding.root
+    }
+
+    override fun provideTopButton(): Button {
+        return binding.expandTopPanelButton
+    }
+
+    override fun provideBottomButton(): Button? {
+        return binding.expandBottomPanelButton
+    }
+
+    private fun postImeShowAnimation() {
+        if (qtyTextViewFocused) handlePanelState(PanelType.BOTTOM, PanelState.COLLAPSED)
+        else handlePanelState(PanelState.COLLAPSED, PanelState.COLLAPSED)
+    }
+
+    private fun postBottomPanelAnimation() {
+        if (panelBottomState == PanelState.EXPANDED) filterFragment?.refreshViews()
+    }
+
+    private fun postTopPanelAnimation() {
+        if (panelBottomState == PanelState.EXPANDED) printerFragment?.refreshViews()
+    }
+    // endregion Set Panels
+
     override fun onDestroy() {
         destroyLocals()
         super.onDestroy()
@@ -115,7 +169,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
 
         adapter?.refreshListeners()
         adapter?.refreshImageControlListeners()
-        assetSelectFilterFragment?.onDestroy()
+        filterFragment?.onDestroy()
         summaryFragment?.onDestroy()
         printerFragment?.onDestroy()
     }
@@ -136,7 +190,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
 
     private fun showListOrEmptyListMessage() {
         runOnUiThread {
-            val isEmpty = (adapter?.itemCount ?: 0) == 0
+            val isEmpty = itemCount == 0
             binding.emptyTextView.visibility = if (isEmpty) VISIBLE else GONE
             binding.recyclerView.visibility = if (isEmpty) GONE else VISIBLE
         }
@@ -155,27 +209,13 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
     private var fillRequired = false
 
     // Configuración guardada de los controles que se ven o no se ven
-    private var checkedIdArray: ArrayList<Long> = ArrayList()
-    private var onlyActive: Boolean = true
-    private var multiSelect = false
     private var adapter: AssetRecyclerAdapter? = null
-    private var lastSelected: Asset? = null
-    private var currentScrollPosition: Int = 0
-    private var panelBottomIsExpanded = true
-    private var panelTopIsExpanded = false
 
-    private var searchText: String = ""
-
-    // A esta actividad se le puede pasar una lista de Assets a seleccionar y ocultar el panel
-    // que contiene los controles de filtrado para evitar que cambie la lista de Assets o las opciones
-    // de filtrado.
-    private var fixedItemList = false
-    private var hideFilterPanel = false
-    private var completeList: ArrayList<Asset> = ArrayList()
-    private var assetSelectFilterFragment: AssetSelectFilterFragment? = null
+    private var filterFragment: AssetSelectFilterFragment? = null
     private var printerFragment: PrinterFragment? = null
     private var summaryFragment: SummaryFragment? = null
 
+    // Image Control
     private val menuItemShowImages = 9999
     private var showImages
         get() = prefsGetBoolean(Preference.printLabelAssetShowImages)
@@ -184,130 +224,170 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         }
 
     private var showCheckBoxes
-        get() =
-            if (!multiSelect) false
-            else prefsGetBoolean(Preference.printLabelAssetShowCheckBoxes)
+        get() = if (!viewModel.multiSelect) false
+        else prefsGetBoolean(Preference.printLabelAssetShowCheckBoxes)
         set(value) {
             prefsPutBoolean(Preference.printLabelAssetShowCheckBoxes.key, value)
         }
 
-    private val visibleStatus: ArrayList<AssetStatus>
-        get() = assetSelectFilterFragment?.visibleStatusArray ?: ArrayList(AssetStatus.getAll())
+    private val visibleStatus
+        get() = filterFragment?.visibleStatusArray ?: ArrayList(AssetStatus.getAll())
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        saveBundleValues(outState)
+        saveCurrentListInTemporaryDB()
     }
 
-    private fun saveBundleValues(b: Bundle) {
-        b.putString("title", tempTitle)
-        b.putBoolean("onlyActive", onlyActive)
-        b.putBoolean("multiSelect", multiSelect)
-        b.putBoolean("hideFilterPanel", hideFilterPanel)
-        b.putBoolean("panelTopIsExpanded", panelTopIsExpanded)
-        b.putBoolean("panelBottomIsExpanded", panelBottomIsExpanded)
-        b.putBoolean("fixedItemList", fixedItemList)
-
-        if (adapter != null) {
-            b.putParcelable("lastSelected", adapter?.currentAsset())
-            b.putInt("firstVisiblePos", adapter?.firstVisiblePos() ?: 0)
-            b.putInt("currentScrollPosition", currentScrollPosition)
-            b.putLongArray("checkedIdArray", adapter?.checkedIdArray?.map { it }?.toLongArray())
-        }
-
+    private fun saveCurrentListInTemporaryDB() {
         // Guardar en la DB temporalmente los ítems listados
-        TempAssetRepository().insert(adapter?.fullList?.map { TempAssetEntity(it.id) } ?: listOf())
-
-        b.putString("searchText", searchText)
+        TempAssetRepository().insert(currentList.map { TempAssetEntity(it.id) })
     }
 
-    private fun loadBundleValues(b: Bundle) {
-        // region Recuperar el título de la ventana
-        val t1 = b.getString("title") ?: ""
-        tempTitle = t1.ifEmpty { getString(R.string.select_asset) }
-        // endregion
+    private fun loadLastListFromTemporaryDB() {
+        // Carga del estado del adaptador desde la tabla temporal.
+        val list = TempAssetRepository().select().map { Asset(it.tempId) }
+        viewModel.applyCompleteList(list)
+    }
 
-        // PANELS
-        if (b.containsKey("hideFilterPanel")) hideFilterPanel = b.getBoolean("hideFilterPanel", hideFilterPanel)
-        if (b.containsKey("panelBottomIsExpanded")) panelBottomIsExpanded = b.getBoolean("panelBottomIsExpanded")
-        if (b.containsKey("panelTopIsExpanded")) panelTopIsExpanded = b.getBoolean("panelTopIsExpanded")
+    private lateinit var binding: AssetPrintLabelActivityTopPanelCollapsedBinding
 
-        // ADAPTER
-        if (b.containsKey("onlyActive")) onlyActive = b.getBoolean("onlyActive")
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = AssetPrintLabelActivityTopPanelCollapsedBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        multiSelect = b.getBoolean("multiSelect", multiSelect)
-        lastSelected = b.parcelable("lastSelected")
-        currentScrollPosition = b.getInt("currentScrollPosition")
-        checkedIdArray = (b.getLongArray("checkedIdArray") ?: longArrayOf()).toCollection(ArrayList())
+        setSupportActionBar(binding.topAppbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        fixedItemList = b.getBoolean("fixedItemList")
+        setupObservers()
+        setupActivity(savedInstanceState)
+    }
 
-        if (b.containsKey("assetArray")) {
-            completeList = b.parcelableArrayList("assetArray") ?: ArrayList()
-            fixedItemList = true
-            hideFilterPanel = true
+    private fun setupObservers() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.uiState.collect { state ->
+                    updateUI(state)
+                }
+            }
         }
     }
 
-    private fun loadDefaultValues() {
-        tempTitle = getString(R.string.select_asset)
+    @SuppressLint("ClickableViewAccessibility")
+    fun setupActivity(savedInstanceState: Bundle?) {
+        setScreenRotation(this)
+
+        initPanelController(savedInstanceState)
+
+        setupBackPressHandler()
+        setScrollListener()
+        setFragments()
+
+        setSelectFragment()
+        setupPrintFragment()
+        setSearchEditText()
+
+        if (savedInstanceState != null) {
+            loadLastListFromTemporaryDB()
+        } else {
+            // Borramos los Ids temporales al crear la actividad por primera vez.
+            TempAssetRepository().deleteAll()
+        }
+
+        setupSwipe()
+        setButtons()
+        setSearchPanelVisibility()
+
+        fillRequired = true
+        setupUI(binding.root, this)
+    }
+
+    private fun updateUI(state: AssetSelectUiState) {
+        binding.topAppbar.title = state.title
+        binding.expandBottomPanelButton?.visibility = if (state.hideFilterPanel) GONE else View.VISIBLE
+
+        // Actualizar adapter
+        adapter?.let {
+            it.setMultiSelect(state.multiSelect)
+            it.setCheckedIds(state.checkedIds)
+            it.setFullList(state.completeList)
+            it.refreshFilter(FilterOptions(state.searchedText))
+        }
+
+        // Controlar loading
+        binding.swipeRefresh.isRefreshing = state.isLoading
+    }
+
+    // region Valores con información de items contados y esperados
+    private val currentAsset: Asset?
+        get() = adapter?.currentAsset()
+
+    private val currentList: ArrayList<Asset>
+        get() = adapter?.fullList ?: arrayListOf()
+
+    private val itemCount: Int
+        get() = adapter?.itemCount.orZero()
+
+    private val countChecked: Int
+        get() = adapter?.countChecked.orZero()
+
+    private val allChecked: List<Asset>
+        get() = adapter?.getAllChecked().orEmpty()
+    // endregion Valores con información de items contados y esperados
+
+    private fun setSelectFragment() {
+        filterFragment?.setListener(this)
+        filterFragment?.warehouseArea = viewModel.filterWarehouseArea
+        filterFragment?.itemCode = viewModel.filterCode
+        filterFragment?.itemCategory = viewModel.filterCategory
+        filterFragment?.onlyActive = viewModel.filterOnlyActive
+    }
+
+    private fun setupPrintFragment() {
+        printerFragment?.setListener(this)
+        val target = BarcodeLabelTarget.Asset
+        printerFragment?.barcodeLabelTarget = target
 
         val id = prefsGetLong(Preference.defaultBarcodeLabelCustomAsset)
         val blc = BarcodeLabelCustomRepository().selectById(id)
         if (blc != null) {
             printerFragment?.barcodeLabelCustom = blc
         }
+
+        if (viewModel.targetId == null) {
+            viewModel.updateState { it.copy(labelTargetId = target.id, templateId = id) }
+        }
     }
 
-    private lateinit var binding: AssetPrintLabelActivityTopPanelCollapsedBinding
+    private fun setScrollListener() {
+        binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                viewModel.updateState {
+                    it.copy(
+                        currentScrollPosition = (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+                    )
+                }
+            }
+        })
+    }
 
-    @SuppressLint("ClickableViewAccessibility")
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setScreenRotation(this)
-        binding = AssetPrintLabelActivityTopPanelCollapsedBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
+    private fun setupBackPressHandler() {
         val callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 isBackPressed()
             }
         }
         onBackPressedDispatcher.addCallback(this, callback)
+    }
 
-        setSupportActionBar(binding.topAppbar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-
-        assetSelectFilterFragment =
+    private fun setFragments() {
+        filterFragment =
             supportFragmentManager.findFragmentById(binding.filterFragment.id) as AssetSelectFilterFragment
-        summaryFragment =
-            supportFragmentManager.findFragmentById(binding.summaryFragment.id) as SummaryFragment
-        printerFragment =
-            supportFragmentManager.findFragmentById(binding.printFragment.id) as PrinterFragment
+        summaryFragment = supportFragmentManager.findFragmentById(binding.summaryFragment.id) as SummaryFragment
+        printerFragment = supportFragmentManager.findFragmentById(binding.printFragment.id) as PrinterFragment
+    }
 
-        if (savedInstanceState != null) {
-            loadBundleValues(savedInstanceState)
-
-            searchText = savedInstanceState.getString("searchText") ?: ""
-
-            // Cargar la lista desde la DB local
-            completeList = ArrayList(AssetRepository().selectByTempIds())
-        } else {
-            // Borramos los Ids temporales al crear la actividad por primera vez.
-            TempAssetRepository().deleteAll()
-
-            val extras = intent.extras
-            if (extras != null) loadBundleValues(extras) else loadDefaultValues()
-        }
-
-        title = tempTitle
-
-        assetSelectFilterFragment?.setListener(this)
-        assetSelectFilterFragment?.onlyActive = onlyActive
-
-        printerFragment?.setListener(this)
-        printerFragment?.barcodeLabelTarget = BarcodeLabelTarget.Asset
-
+    private fun setupSwipe() {
         binding.swipeRefresh.setOnRefreshListener(this)
         binding.swipeRefresh.setColorSchemeResources(
             android.R.color.holo_blue_bright,
@@ -315,33 +395,13 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
             android.R.color.holo_orange_light,
             android.R.color.holo_red_light
         )
+    }
 
-        binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                currentScrollPosition =
-                    (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
-            }
-        })
-
-        // Para expandir y colapsar el panel inferior
-        setBottomPanelAnimation()
-        setTopPanelAnimation()
-
+    private fun setButtons() {
         binding.okButton.setOnClickListener { itemSelect() }
+    }
 
-        // OCULTAR PANEL DE CONTROLES DE FILTRADO
-        if (hideFilterPanel) {
-            if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                if (panelBottomIsExpanded) {
-                    binding.expandBottomPanelButton?.performClick()
-                }
-
-                runOnUiThread {
-                    binding.expandBottomPanelButton?.visibility = GONE
-                }
-            }
-        }
-
+    private fun setSearchEditText() {
         binding.searchEditText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable) {
             }
@@ -350,11 +410,11 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
             }
 
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-                searchText = s.toString()
-                adapter?.refreshFilter(FilterOptions(searchText))
+                viewModel.updateState { it.copy(searchedText = s.toString()) }
+                adapter?.refreshFilter(FilterOptions(viewModel.searchedText, true))
             }
         })
-        binding.searchEditText.setText(searchText, TextView.BufferType.EDITABLE)
+        binding.searchEditText.setText(viewModel.searchedText, TextView.BufferType.EDITABLE)
         binding.searchEditText.setOnKeyListener { _, keyCode, keyEvent ->
             if (keyCode == EditorInfo.IME_ACTION_DONE || keyEvent.action == KeyEvent.ACTION_UP &&
                 (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_DPAD_CENTER)
@@ -369,129 +429,22 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         binding.searchTextClearImageView.setOnClickListener {
             binding.searchEditText.setText("")
         }
-
-        setPanels()
-
-        fillRequired = true
-
-        setupUI(binding.root, this)
     }
 
-    // region Inset animation
-    override fun onAttachedToWindow() {
-        super.onAttachedToWindow()
-        setupWindowInsetsAnimation()
-    }
-
-    private var isKeyboardVisible: Boolean = false
-
-    /**
-     * Change panels state at Ime animation finish
-     *
-     * Estados que recuerdan está pendiente de ejecutar un cambio en estado (colapsado/expandido) de los paneles al
-     * terminar la animación de mostrado/ocultamiento del teclado en pantalla. Esto es para sincronizar los cambios,
-     * ejecutándolos de manera secuencial. A ojos del usuario la vista completa acompaña el desplazamiento de la
-     * animación. Si se ejecutara al mismo tiempo el cambio en los paneles y la animación del teclado la vista no
-     * acompaña correctamente al teclado, ya que cambia durante la animación.
-     */
-    private var changePanelTopStateAtFinish: Boolean = false
-    private var changePanelBottomStateAtFinish: Boolean = false
-
-    private fun setupWindowInsetsAnimation() {
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        val rootView = binding.root
-
-        // Adjust root layout to bottom navigation bar
-        val windowInsets = window.decorView.rootWindowInsets
-        @Suppress("DEPRECATION") rootView.setPadding(
-            windowInsets.systemWindowInsetLeft,
-            windowInsets.systemWindowInsetTop,
-            windowInsets.systemWindowInsetRight,
-            windowInsets.systemWindowInsetBottom
-        )
-
-        implWindowInsetsAnimation()
-    }
-
-    private fun implWindowInsetsAnimation() {
-        val rootView = binding.root
-
-        ViewCompat.setWindowInsetsAnimationCallback(
-            rootView,
-            object : WindowInsetsAnimationCompat.Callback(DISPATCH_MODE_CONTINUE_ON_SUBTREE) {
-                override fun onEnd(animation: WindowInsetsAnimationCompat) {
-                    val isIme = animation.typeMask and WindowInsetsCompat.Type.ime() != 0
-                    if (!isIme) return
-
-                    postExecuteImeAnimation()
-                    super.onEnd(animation)
-                }
-
-                override fun onProgress(
-                    insets: WindowInsetsCompat,
-                    runningAnimations: MutableList<WindowInsetsAnimationCompat>
-                ): WindowInsetsCompat {
-                    paddingBottomView(rootView, insets)
-
-                    return insets
-                }
-            })
-    }
-
-    private fun paddingBottomView(rootView: ConstraintLayout, insets: WindowInsetsCompat) {
-        val imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime())
-        val systemBarInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-        val paddingBottom = imeInsets.bottom.coerceAtLeast(systemBarInsets.bottom)
-
-        isKeyboardVisible = imeInsets.bottom > 0
-
-        rootView.setPadding(
-            rootView.paddingLeft,
-            rootView.paddingTop,
-            rootView.paddingRight,
-            paddingBottom
-        )
-
-        Log.d(javaClass.simpleName, "IME Size: ${imeInsets.bottom}")
-    }
-
-    private fun postExecuteImeAnimation() {
-        // Si estamos mostrando el teclado, colapsamos los paneles.
-        if (isKeyboardVisible) {
-            when {
-                resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT && !qtyTextViewFocused -> {
-                    collapseBottomPanel()
-                    collapseTopPanel()
-                }
-
-                resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT && qtyTextViewFocused -> {
-                    collapseBottomPanel()
-                }
-
-                resources.configuration.orientation != Configuration.ORIENTATION_PORTRAIT && !qtyTextViewFocused -> {
-                    collapseTopPanel()
-                }
-            }
-        }
-
-        // Si estamos esperando que termine la animación para ejecutar un cambio de vista
-        if (changePanelTopStateAtFinish) {
-            changePanelTopStateAtFinish = false
-            binding.expandTopPanelButton.performClick()
-        }
-        if (changePanelBottomStateAtFinish) {
-            changePanelBottomStateAtFinish = false
-            binding.expandBottomPanelButton?.performClick()
+    private fun setSearchPanelVisibility() {
+        if (viewModel.hideFilterPanel) {
+            handlePanelState(PanelType.BOTTOM, PanelState.COLLAPSED)
+            if (lastOrientation == Configuration.ORIENTATION_PORTRAIT) binding.expandBottomPanelButton?.visibility =
+                GONE
         }
     }
-    // endregion
 
     override fun onStart() {
         super.onStart()
 
         if (fillRequired) {
             fillRequired = false
-            fillAdapter(completeList)
+            fillAdapter(viewModel.completeList)
         }
     }
 
@@ -503,16 +456,16 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         } else {
             val data = Intent()
 
-            val asset = adapter?.currentAsset()
-            val countChecked = adapter?.countChecked ?: 0
-            var assetArray: ArrayList<Asset> = ArrayList()
+            val asset = currentAsset
+            val countChecked = countChecked
+            var assetArray: List<Asset> = listOf()
 
-            if (!multiSelect && asset != null) {
+            if (!viewModel.multiSelect && asset != null) {
                 data.putParcelableArrayListExtra("ids", arrayListOf(ParcelLong(asset.id)))
                 setResult(RESULT_OK, data)
-            } else if (multiSelect) {
+            } else if (viewModel.multiSelect) {
                 if (countChecked > 0 || asset != null) {
-                    if (countChecked > 0) assetArray = adapter?.getAllChecked() ?: ArrayList()
+                    if (countChecked > 0) assetArray = allChecked
                     else if (adapter?.showCheckBoxes == false) {
                         assetArray = arrayListOf(asset!!)
                     }
@@ -534,12 +487,12 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
 
     private fun fillSummaryRow() {
         runOnUiThread {
-            if (multiSelect) {
+            if (viewModel.multiSelect) {
                 summaryFragment?.setTitles(getString(R.string.total), getString(R.string.checked))
                 if (adapter != null) {
                     summaryFragment?.fill(
                         total = adapter?.totalVisible,
-                        checked = adapter?.countChecked,
+                        checked = countChecked,
                         onInventory = adapter?.totalOnInventory,
                         missing = adapter?.totalMissing,
                         removed = adapter?.totalRemoved
@@ -560,236 +513,101 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         }
     }
 
-    private fun setPanels() {
-        val currentLayout = ConstraintSet()
-        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            if (panelBottomIsExpanded) {
-                if (panelTopIsExpanded) currentLayout.load(this, R.layout.asset_print_label_activity)
-                else currentLayout.load(this, R.layout.asset_print_label_activity_top_panel_collapsed)
-            } else {
-                if (panelTopIsExpanded) currentLayout.load(
-                    this,
-                    R.layout.asset_print_label_activity_bottom_panel_collapsed
-                )
-                else currentLayout.load(this, R.layout.asset_print_label_activity_both_panels_collapsed)
-            }
-        } else {
-            if (panelTopIsExpanded) currentLayout.load(this, R.layout.asset_print_label_activity)
-            else currentLayout.load(this, R.layout.asset_print_label_activity_top_panel_collapsed)
-        }
-
-        val transition = ChangeBounds()
-        transition.interpolator = FastOutSlowInInterpolator()
-        transition.addListener(object : Transition.TransitionListener {
-            override fun onTransitionResume(transition: Transition) {}
-            override fun onTransitionPause(transition: Transition) {}
-            override fun onTransitionStart(transition: Transition) {}
-            override fun onTransitionEnd(transition: Transition) {
-                refreshTextViews()
-            }
-
-            override fun onTransitionCancel(transition: Transition) {}
-        })
-
-        TransitionManager.beginDelayedTransition(binding.assetPrintLabel, transition)
-        currentLayout.applyTo(binding.assetPrintLabel)
-
-        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            if (panelBottomIsExpanded) binding.expandBottomPanelButton?.text =
-                getString(R.string.collapse_panel)
-            else binding.expandBottomPanelButton?.text = getString(R.string.search_options)
-        }
-
-        if (panelTopIsExpanded) binding.expandTopPanelButton.text =
-            getString(R.string.collapse_panel)
-        else binding.expandTopPanelButton.text = getString(R.string.label_print)
-    }
-
-    private fun setBottomPanelAnimation() {
-        if (resources.configuration.orientation != Configuration.ORIENTATION_PORTRAIT) {
-            return
-        }
-
-        binding.expandBottomPanelButton?.setOnClickListener {
-            val bottomVisible = panelBottomIsExpanded
-            val imeVisible = isKeyboardVisible
-
-            if (!bottomVisible && imeVisible) {
-                // Esperar que se cierre el teclado luego de perder el foco el TextView para expandir el panel
-                changePanelBottomStateAtFinish = true
-                return@setOnClickListener
-            }
-
-            val nextLayout = ConstraintSet()
-            if (panelBottomIsExpanded) {
-                if (panelTopIsExpanded) nextLayout.load(
-                    this,
-                    R.layout.asset_print_label_activity_bottom_panel_collapsed
-                )
-                else nextLayout.load(this, R.layout.asset_print_label_activity_both_panels_collapsed)
-            } else if (panelTopIsExpanded) {
-                nextLayout.load(this, R.layout.asset_print_label_activity)
-            } else {
-                nextLayout.load(this, R.layout.asset_print_label_activity_top_panel_collapsed)
-            }
-
-            panelBottomIsExpanded = !panelBottomIsExpanded
-            val transition = ChangeBounds()
-            transition.interpolator = FastOutSlowInInterpolator()
-            transition.addListener(object : Transition.TransitionListener {
-                override fun onTransitionResume(transition: Transition) {}
-                override fun onTransitionPause(transition: Transition) {}
-                override fun onTransitionStart(transition: Transition) {}
-                override fun onTransitionEnd(transition: Transition) {
-                    refreshTextViews()
-                }
-
-                override fun onTransitionCancel(transition: Transition) {}
-            })
-
-            TransitionManager.beginDelayedTransition(binding.assetPrintLabel, transition)
-            nextLayout.applyTo(binding.assetPrintLabel)
-
-            if (panelBottomIsExpanded) binding.expandBottomPanelButton?.text =
-                getString(R.string.collapse_panel)
-            else binding.expandBottomPanelButton?.text = getString(R.string.search_options)
-        }
-    }
-
-    private fun setTopPanelAnimation() {
-        binding.expandTopPanelButton.setOnClickListener {
-            val topVisible = panelTopIsExpanded
-            val imeVisible = isKeyboardVisible
-
-            if (!topVisible && imeVisible) {
-                // Esperar que se cierre el teclado luego de perder el foco el TextView para expandir el panel
-                changePanelTopStateAtFinish = true
-                return@setOnClickListener
-            }
-
-            val nextLayout = ConstraintSet()
-            if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                if (panelBottomIsExpanded) {
-                    if (panelTopIsExpanded) nextLayout.load(
-                        this,
-                        R.layout.asset_print_label_activity_top_panel_collapsed
-                    )
-                    else nextLayout.load(this, R.layout.asset_print_label_activity)
-                } else if (panelTopIsExpanded) {
-                    nextLayout.load(this, R.layout.asset_print_label_activity_both_panels_collapsed)
-                } else {
-                    nextLayout.load(this, R.layout.asset_print_label_activity_bottom_panel_collapsed)
-                }
-            } else if (panelTopIsExpanded) {
-                nextLayout.load(this, R.layout.asset_print_label_activity_top_panel_collapsed)
-            } else {
-                nextLayout.load(this, R.layout.asset_print_label_activity)
-            }
-
-            panelTopIsExpanded = !panelTopIsExpanded
-
-            val transition = ChangeBounds()
-            transition.interpolator = FastOutSlowInInterpolator()
-            transition.addListener(object : Transition.TransitionListener {
-                override fun onTransitionResume(transition: Transition) {}
-                override fun onTransitionPause(transition: Transition) {}
-                override fun onTransitionStart(transition: Transition) {}
-                override fun onTransitionEnd(transition: Transition) {
-                    refreshTextViews()
-                }
-
-                override fun onTransitionCancel(transition: Transition) {}
-            })
-
-            TransitionManager.beginDelayedTransition(binding.assetPrintLabel, transition)
-            nextLayout.applyTo(binding.assetPrintLabel)
-
-            if (panelTopIsExpanded) binding.expandTopPanelButton.text =
-                getString(R.string.collapse_panel)
-            else binding.expandTopPanelButton.text = getString(R.string.label_print)
-        }
-    }
-
-    private fun refreshTextViews() {
-        runOnUiThread {
-            printerFragment?.refreshViews()
-            assetSelectFilterFragment?.refreshViews()
-        }
-    }
-
     private fun showProgressBar(show: Boolean) {
         runOnUiThread {
             binding.swipeRefresh.isRefreshing = show
         }
     }
 
-    private fun fillListView() {
-        thread {
-            val sync = GetAssetAsync()
-            sync.addParams(this)
-            sync.addExtraParams(
-                code = assetSelectFilterFragment?.itemCode ?: "",
-                itemCategory = assetSelectFilterFragment?.itemCategory,
-                warehouseArea = assetSelectFilterFragment?.warehouseArea,
-                onlyActive = assetSelectFilterFragment?.onlyActive != false
-            )
-            sync.execute()
-        }
-    }
-
-    private fun fillAdapter(assetArray: ArrayList<Asset>?) {
+    private fun fillAdapter(data: List<Asset>) {
         showProgressBar(true)
 
-        try {
-            runOnUiThread {
-                if (adapter != null) {
-                    // Si el adapter es NULL es porque aún no fue creado.
-                    // Por lo tanto, puede ser que los valores de [lastSelected]
-                    // sean valores guardados de la instancia anterior y queremos preservarlos.
-                    lastSelected = adapter?.currentAsset()
+        if (adapter != null) {
+            viewModel.updateState { it.copy(lastSelected = currentAsset) }
+        }
+
+        lifecycleScope.launch {
+            try {
+                setupRecyclerView(data)
+                binding.recyclerView.doOnNextLayout {
+                    applyInitialSelections()
                 }
 
-                if (assetArray != null) {
-                    adapter = AssetRecyclerAdapter.Builder()
-                        .recyclerView(binding.recyclerView)
-                        .visibleStatus(visibleStatus)
-                        .fullList(assetArray)
-                        .checkedIdArray(checkedIdArray)
-                        .multiSelect(multiSelect)
-                        .showCheckBoxes(`val` = showCheckBoxes, callback = { showCheckBoxes = it })
-                        .showImages(`val` = showImages, callback = { showImages = it })
-                        .filterOptions(FilterOptions(searchText))
-                        .dataSetChangedListener(this)
-                        .checkedChangedListener(this)
-                        .editAssetRequiredListener(this)
-                        .addPhotoRequiredListener(this)
-                        .albumViewRequiredListener(this)
-                        .build()
-                }
-
-                binding.recyclerView.layoutManager = LinearLayoutManager(this)
-                binding.recyclerView.adapter = adapter
-
-                while (binding.recyclerView.adapter == null) {
-                    // Horrible wait for a full load
-                }
-
-                // Recuperar la última posición seleccionada
-                val ls = lastSelected
-                val cs = currentScrollPosition
-                Handler(Looper.getMainLooper()).postDelayed({
-                    adapter?.selectItem(ls, false)
-                    adapter?.scrollToPos(cs, true)
-                }, 200)
+            } catch (e: Exception) {
+                handleAdapterError(e)
+            } finally {
+                cleanupAfterSetup()
             }
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-            ErrorLog.writeLog(this, this::class.java.simpleName, ex)
-        } finally {
-            closeKeyboard(this)
-            showProgressBar(false)
         }
     }
+
+    private fun cleanupAfterSetup() {
+        closeKeyboard(this)
+        showProgressBar(false)
+    }
+
+    private suspend fun setupRecyclerView(data: List<Asset>) {
+        val builder = AssetRecyclerAdapter.Builder().recyclerView(binding.recyclerView)
+            .visibleStatus(visibleStatus)
+            .fullList(data)
+            .checkedIdArray(viewModel.checkedIds.toList())
+            .multiSelect(viewModel.multiSelect)
+            .showCheckBoxes(`val` = showCheckBoxes, callback = { showCheckBoxes = it })
+            .filterOptions(FilterOptions(viewModel.searchedText))
+            .dataSetChangedListener(this)
+            .checkedChangedListener(this)
+            .editAssetRequiredListener(this)
+
+        if (useImageControl) {
+            builder
+                .showImages(`val` = showImages, callback = { showImages = it })
+                .addPhotoRequiredListener(this)
+                .albumViewRequiredListener(this)
+        }
+
+        adapter = builder.build()
+
+        withContext(Dispatchers.Main.immediate) {
+            binding.recyclerView.apply {
+                layoutManager = LinearLayoutManager(context)
+                adapter = this.adapter
+                setHasFixedSize(true)
+            }
+        }
+    }
+
+    private fun applyInitialSelections() {
+        if (itemCount == 1 && viewModel.hideFilterPanel) {
+            adapter?.selectItem(0, true)
+            itemSelect()
+        } else {
+            adapter?.apply {
+                if (viewModel.lastSelected != null) {
+                    selectItem(viewModel.lastSelected, false)
+                    scrollToPos(viewModel.currentScrollPosition, true)
+                } else {
+                    selectItem(0)
+                }
+            }
+        }
+    }
+
+    private fun handleAdapterError(e: Exception) {
+        e.printStackTrace()
+        ErrorLog.writeLog(this, this::class.java.simpleName, e)
+
+        lifecycleScope.launch(Dispatchers.Main) {
+            showMessage(getString(R.string.error_loading_data), ERROR)
+        }
+    }
+
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (isFinishing || isDestroyed) return
+        if (type == ERROR) logError(msg)
+        showMessage(msg, type)
+    }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 
     public override fun onResume() {
         super.onResume()
@@ -817,14 +635,14 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
 
     override fun scannerCompleted(scanCode: String) {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
-        if (showScannedCode) makeText(binding.root, scanCode, SnackBarType.INFO)
+        if (showScannedCode) showMessage(scanCode, SnackBarType.INFO)
         ScannerManager.lockScanner(this, true)
 
         try {
             // Nada que hacer, volver
             if (scanCode.trim().isEmpty()) {
                 val res = getString(R.string.invalid_code)
-                makeText(binding.root, res, SnackBarType.ERROR)
+                showMessage(res, SnackBarType.ERROR)
                 ErrorLog.writeLog(this, this::class.java.simpleName, res)
                 return
             }
@@ -841,7 +659,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
                 sc.asset
             } else {
                 val res = this.getString(R.string.invalid_asset_code)
-                makeText(binding.root, res, SnackBarType.ERROR)
+                showMessage(res, SnackBarType.ERROR)
                 null
             }
 
@@ -851,7 +669,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
-            makeText(binding.root, ex.message.toString(), SnackBarType.ERROR)
+            showMessage(ex.message.toString(), SnackBarType.ERROR)
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         } finally {
             ScannerManager.lockScanner(this, false)
@@ -983,7 +801,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        if (assetSelectFilterFragment == null) {
+        if (filterFragment == null) {
             return false
         }
 
@@ -1048,36 +866,9 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
             }
         }
 
-        assetSelectFilterFragment?.visibleStatusArray = visibleStatus
+        filterFragment?.visibleStatusArray = visibleStatus
 
         return true
-    }
-
-    override fun onGetAssetProgress(
-        msg: String,
-        progressStatus: ProgressStatus,
-        completeList: ArrayList<Asset>,
-    ) {
-        when (progressStatus) {
-            ProgressStatus.starting -> {
-                showProgressBar(true)
-            }
-
-            ProgressStatus.canceled -> {
-                showProgressBar(false)
-            }
-
-            ProgressStatus.crashed -> {
-                showProgressBar(false)
-                makeText(binding.root, msg, SnackBarType.ERROR)
-            }
-
-            ProgressStatus.finished -> {
-                showProgressBar(false)
-                this.completeList = completeList
-                fillAdapter(completeList)
-            }
-        }
     }
 
     override fun onFilterChanged(
@@ -1086,18 +877,20 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         warehouseArea: WarehouseArea?,
         onlyActive: Boolean,
     ) {
-        closeKeyboard(this)
-
-        if (fixedItemList) return
+        handlePanelState(PanelType.BOTTOM, PanelState.COLLAPSED)
 
         if (code.isEmpty() && itemCategory == null && warehouseArea == null) {
             // Limpiar el control
-            completeList.clear()
             adapter?.clear()
             return
         }
 
-        fillListView()
+        viewModel.applyFilters(
+            code = code,
+            category = itemCategory,
+            warehouseArea = warehouseArea,
+            onlyActive = onlyActive,
+        )
     }
 
     override fun onAddPhotoRequired(tableId: Int, itemId: Long, description: String, obs: String, reference: String) {
@@ -1120,10 +913,10 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
 
     private val resultForPhotoCapture =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            val data = it?.data
+            val data = it.data
             try {
-                if (it?.resultCode == RESULT_OK && data != null) {
-                    val asset = adapter?.currentAsset() ?: return@registerForActivityResult
+                if (it.resultCode == RESULT_OK && data != null) {
+                    val asset = currentAsset ?: return@registerForActivityResult
                     asset.saveChanges()
                     val pos = adapter?.getIndexById(asset.id) ?: RecyclerView.NO_POSITION
                     adapter?.notifyItemChanged(pos)
@@ -1166,7 +959,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         ) { it2 ->
             if (it2 != null) fillResults(it2)
             else {
-                makeText(binding.root, getString(R.string.no_images), SnackBarType.INFO)
+                showMessage(getString(R.string.no_images), SnackBarType.INFO)
                 rejectNewInstances = false
             }
         }
@@ -1191,7 +984,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
 
     private fun fillResults(docContReqResObj: DocumentContentRequestResult) {
         if (docContReqResObj.documentContentArray.isEmpty()) {
-            makeText(binding.root, getString(R.string.no_images), SnackBarType.INFO)
+            showMessage(getString(R.string.no_images), SnackBarType.INFO)
             rejectNewInstances = false
             return
         }
@@ -1199,9 +992,7 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         val anyAvailable = docContReqResObj.documentContentArray.any { it.available }
 
         if (!anyAvailable) {
-            makeText(
-                binding.root, getString(R.string.images_not_yet_processed), SnackBarType.INFO
-            )
+            showMessage(getString(R.string.images_not_yet_processed), SnackBarType.INFO)
             rejectNewInstances = false
             return
         }
@@ -1209,7 +1000,11 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         showPhotoAlbum()
     }
 
-    override fun onFilterChanged(printer: String, template: BarcodeLabelCustom?, qty: Int?) {}
+    override fun onFilterChanged(printer: String, template: BarcodeLabelCustom?, qty: Int?) {
+        val templateId = template?.id ?: return
+        viewModel.updateState { it.copy(printQty = qty ?: 1, templateId = templateId) }
+        printerFragment?.saveSharedPreferences()
+    }
 
     override fun onPrintRequested(printer: String, template: BarcodeLabelCustom, qty: Int) {
         /** Acá seleccionamos siguiendo estos criterios:
@@ -1227,35 +1022,31 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
          *
          **/
 
-        val asset = adapter?.currentAsset()
-        val countChecked = adapter?.countChecked ?: 0
-        var assetArray: ArrayList<Asset> = ArrayList()
+        val asset = currentAsset
+        val countChecked = countChecked
+        var assetList: List<Asset> = listOf()
 
-        if (!multiSelect && asset != null) {
-            assetArray = arrayListOf(asset)
-        } else if (multiSelect) {
+        if (!viewModel.multiSelect && asset != null) {
+            assetList = arrayListOf(asset)
+        } else if (viewModel.multiSelect) {
             if (countChecked > 0 || asset != null) {
-                if (countChecked > 0) assetArray = adapter?.getAllChecked() ?: ArrayList()
+                if (countChecked > 0) assetList = allChecked
                 else if (adapter?.showCheckBoxes == false) {
-                    assetArray = arrayListOf(asset!!)
+                    assetList = arrayListOf(asset!!)
                 }
             }
         }
 
-        if (assetArray.isNotEmpty()) printerFragment?.printAssetById(ArrayList(assetArray.map { it.id }))
+        if (assetList.isNotEmpty())
+            printerFragment?.printAssetById(assetList.map { it.id })
     }
 
     private var qtyTextViewFocused: Boolean = false
     override fun onQtyTextViewFocusChanged(hasFocus: Boolean) {
         qtyTextViewFocused = hasFocus
-
-        // Si el control de ingreso de cantidades del fragmento de impresión pierde el foco, pero
-        // el foco pasa al control de texto de búsqueda, se debe colapsar el panel de impresión
-        // manualmente porque no se dispara el evento de cambio de visibilidad del teclado en
-        // pantalla que lo haría normalmente.
-        if (isKeyboardVisible() && !hasFocus && binding.searchEditText.isFocused) collapseTopPanel()
-
-        if (isKeyboardVisible() && hasFocus && panelBottomIsExpanded) collapseBottomPanel()
+        if (!hasFocus && binding.searchEditText.isFocused) {
+            handlePanelState(PanelType.TOP, PanelState.COLLAPSED)
+        }
     }
 
     // region READERS Reception
@@ -1273,24 +1064,21 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
         if (prefsGetBoolean(Preference.rfidShowConnectedMessage)) {
             when (Rfid.vh75State) {
                 Vh75Bt.STATE_CONNECTED -> {
-                    makeText(
-                        binding.root,
+                    showMessage(
                         getString(R.string.rfid_connected),
                         SnackBarType.SUCCESS
                     )
                 }
 
                 Vh75Bt.STATE_CONNECTING -> {
-                    makeText(
-                        binding.root,
+                    showMessage(
                         getString(R.string.searching_rfid_reader),
                         SnackBarType.RUNNING
                     )
                 }
 
                 else -> {
-                    makeText(
-                        binding.root,
+                    showMessage(
                         getString(R.string.there_is_no_rfid_device_connected),
                         SnackBarType.INFO
                     )
@@ -1305,24 +1093,8 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
     }
     //endregion READERS Reception
 
-    private fun collapseBottomPanel() {
-        if (panelBottomIsExpanded && resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            runOnUiThread {
-                binding.expandBottomPanelButton?.performClick()
-            }
-        }
-    }
-
-    private fun collapseTopPanel() {
-        if (panelTopIsExpanded) {
-            runOnUiThread {
-                binding.expandTopPanelButton.performClick()
-            }
-        }
-    }
-
     override fun onEditAssetRequired(tableId: Int, itemId: Long) {
-        val asset = adapter?.currentAsset()
+        val asset = currentAsset
 
         if (!rejectNewInstances && asset != null) {
             rejectNewInstances = true
@@ -1337,9 +1109,9 @@ class AssetPrintLabelActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefres
 
     private val resultForEditAsset =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            val data = it?.data
+            val data = it.data
             try {
-                if (it?.resultCode == RESULT_OK && data != null) {
+                if (it.resultCode == RESULT_OK && data != null) {
                     val a = Parcels.unwrap<Asset>(data.parcelable("asset"))
                         ?: return@registerForActivityResult
                     adapter?.updateAsset(a, true)

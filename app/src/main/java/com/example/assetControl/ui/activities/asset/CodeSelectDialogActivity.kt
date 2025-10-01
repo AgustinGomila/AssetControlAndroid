@@ -18,7 +18,6 @@ import android.widget.AdapterView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
-import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelableArrayList
 import com.example.assetControl.R
 import com.example.assetControl.data.enums.asset.AssetStatus
 import com.example.assetControl.data.room.dto.asset.Asset
@@ -37,6 +36,7 @@ import com.example.assetControl.ui.common.utils.Screen.Companion.setScreenRotati
 import com.example.assetControl.ui.common.utils.Screen.Companion.showKeyboard
 import com.example.assetControl.ui.common.views.custom.ContractsAutoCompleteTextView
 import com.example.assetControl.utils.errorLog.ErrorLog
+import com.example.assetControl.utils.parcel.Parcelables.parcelableArrayList
 import com.example.assetControl.utils.settings.config.Preference
 import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
 import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetStringSet

@@ -6,11 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import androidx.fragment.app.Fragment
-import com.dacosys.imageControl.ui.utils.ParcelUtils.parcelableArrayList
 import com.example.assetControl.R.layout.custom_spinner_dropdown_item
 import com.example.assetControl.data.enums.maintenance.MaintenanceStatus
 import com.example.assetControl.databinding.FragmentSpinnerBinding
 import com.example.assetControl.ui.adapters.manteinance.MaintenanceStatusAdapter
+import com.example.assetControl.utils.parcel.Parcelables.parcelableArrayList
 import org.parceler.Parcels
 
 /**

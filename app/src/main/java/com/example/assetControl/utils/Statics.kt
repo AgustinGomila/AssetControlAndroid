@@ -3,11 +3,11 @@ package com.example.assetControl.utils
 import android.Manifest
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
-import android.os.Build
 import androidx.core.app.ActivityCompat
 import com.example.assetControl.AssetControlApp.Companion.context
 import com.example.assetControl.R
 import com.example.assetControl.data.webservice.common.SessionObject
+import io.github.cdimascio.dotenv.DotenvBuilder
 import java.util.*
 import kotlin.reflect.KClass
 
@@ -21,10 +21,60 @@ class Statics {
 
         // region Variables para DEBUG/DEMO
 
-        const val DEMO_MODE = false
-        const val DEMO_AUTO_SEND = false
-        const val SUPER_DEMO_MODE = false
-        var OFFLINE_MODE = false
+        val GOD_MODE: Boolean =
+            try {
+                val env = DotenvBuilder()
+                    .directory("/assets")
+                    .filename("env")
+                    .load()
+
+                env["ENV_GOD_MODE"] == "true"
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+                false
+            }
+
+        val DEMO_MODE: Boolean =
+            try {
+                val env = DotenvBuilder()
+                    .directory("/assets")
+                    .filename("env")
+                    .load()
+
+                env["ENV_DEMO"] == "true"
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+                false
+            }
+
+        var isCustomDbInUse = false
+        val OFFLINE_MODE: Boolean =
+            try {
+                if (isCustomDbInUse) true
+                else {
+                    val env = DotenvBuilder()
+                        .directory("/assets")
+                        .filename("env")
+                        .load()
+                    env["ENV_OFFLINE"] == "true"
+                }
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+                false
+            }
+
+        val AUTO_SEND: Boolean =
+            try {
+                val env = DotenvBuilder()
+                    .directory("/assets")
+                    .filename("env")
+                    .load()
+
+                env["ENV_AUTOSEND"] == "true"
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+                false
+            }
 
         // endregion Variables para DEBUG/DEMO
 
@@ -72,7 +122,7 @@ class Statics {
         }
 
         fun appHasBluetoothPermission(): Boolean {
-            return Build.VERSION.SDK_INT < Build.VERSION_CODES.S || ActivityCompat.checkSelfPermission(
+            return ActivityCompat.checkSelfPermission(
                 context, Manifest.permission.BLUETOOTH_CONNECT
             ) == PackageManager.PERMISSION_GRANTED
         }
