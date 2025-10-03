@@ -70,6 +70,7 @@ import com.example.assetControl.network.utils.Connection.Companion.autoSend
 import com.example.assetControl.ui.adapters.asset.AssetRecyclerAdapter
 import com.example.assetControl.ui.adapters.asset.AssetRecyclerAdapter.FilterOptions
 import com.example.assetControl.ui.adapters.interfaces.Interfaces
+import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
 import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.example.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
@@ -240,20 +241,22 @@ class AssetPrintLabelActivity : BasePanelActivity(), SwipeRefreshLayout.OnRefres
         setupActivity(savedInstanceState)
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        TempAssetRepository().insert(currentList.map { TempAssetEntity(it.id) })
+    }
+
+    private fun loadBundle() {
+        val list = TempAssetRepository().select().map { Asset(it.tempId) }
+        viewModel.applyCompleteList(list)
+    }
+
     private fun setupObservers() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
-                    // Carga del estado del adaptador desde la tabla temporal.
-                    val list = TempAssetRepository().select().map { Asset(it.tempId) }
-                    viewModel.applyCompleteList(list)
-
                     updateUI(state)
                 }
-            }
-            repeatOnLifecycle(Lifecycle.State.DESTROYED) {
-                // Guardar en la DB temporalmente los ítems listados
-                TempAssetRepository().insert(currentList.map { TempAssetEntity(it.id) })
             }
         }
     }
@@ -272,8 +275,8 @@ class AssetPrintLabelActivity : BasePanelActivity(), SwipeRefreshLayout.OnRefres
         setupPrintFragment()
         setSearchEditText()
 
-        if (savedInstanceState == null) {
-            TempAssetRepository().deleteAll()
+        if (savedInstanceState != null) {
+            loadBundle()
         }
 
         setupSwipe()
@@ -286,7 +289,7 @@ class AssetPrintLabelActivity : BasePanelActivity(), SwipeRefreshLayout.OnRefres
 
     private fun updateUI(state: AssetSelectUiState) {
         binding.topAppbar.title = state.title
-        binding.expandBottomPanelButton?.visibility = if (state.hideFilterPanel) GONE else View.VISIBLE
+        binding.expandBottomPanelButton?.visibility = if (state.hideFilterPanel) GONE else VISIBLE
 
         // Actualizar adapter
         adapter?.let {
@@ -586,7 +589,7 @@ class AssetPrintLabelActivity : BasePanelActivity(), SwipeRefreshLayout.OnRefres
     private fun showMessage(msg: String, type: SnackBarType) {
         if (isFinishing || isDestroyed) return
         if (type == ERROR) logError(msg)
-        showMessage(msg, type)
+        makeText(binding.root, msg, type)
     }
 
     private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
@@ -624,7 +627,7 @@ class AssetPrintLabelActivity : BasePanelActivity(), SwipeRefreshLayout.OnRefres
             // Nada que hacer, volver
             if (scanCode.trim().isEmpty()) {
                 val res = getString(R.string.invalid_code)
-                showMessage(res, SnackBarType.ERROR)
+                showMessage(res, ERROR)
                 ErrorLog.writeLog(this, this::class.java.simpleName, res)
                 return
             }
@@ -641,7 +644,7 @@ class AssetPrintLabelActivity : BasePanelActivity(), SwipeRefreshLayout.OnRefres
                 sc.asset
             } else {
                 val res = this.getString(R.string.invalid_asset_code)
-                showMessage(res, SnackBarType.ERROR)
+                showMessage(res, ERROR)
                 null
             }
 
@@ -651,7 +654,7 @@ class AssetPrintLabelActivity : BasePanelActivity(), SwipeRefreshLayout.OnRefres
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
-            showMessage(ex.message.toString(), SnackBarType.ERROR)
+            showMessage(ex.message.toString(), ERROR)
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         } finally {
             ScannerManager.lockScanner(this, false)

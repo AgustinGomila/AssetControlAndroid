@@ -175,7 +175,6 @@ dependencies {
     implementation(libs.koin.android)
 
     // Third-party
-    implementation(libs.freereflection)
     implementation(libs.keyboardvisibility)
     implementation(libs.evalex)
     implementation(libs.async.http)

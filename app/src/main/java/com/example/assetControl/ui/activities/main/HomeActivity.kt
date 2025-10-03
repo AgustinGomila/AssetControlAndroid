@@ -90,7 +90,6 @@ import com.example.assetControl.viewModel.sync.SyncViewModel
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.runBlocking
-import me.weishu.reflection.Reflection
 import org.parceler.Parcels
 import kotlin.concurrent.thread
 import kotlin.math.ceil
@@ -99,7 +98,6 @@ import kotlin.math.ceil
 class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
     override fun attachBaseContext(base: Context) {
         super.attachBaseContext(base)
-        Reflection.unseal(base)
     }
 
     override fun onDestroy() {
