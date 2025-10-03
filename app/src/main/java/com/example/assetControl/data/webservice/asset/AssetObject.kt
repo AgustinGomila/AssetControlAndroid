@@ -169,12 +169,12 @@ class AssetObject() : Parcelable {
                     when (soName) {
                         "asset_id" -> {
                             x.asset_id =
-                                (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
+                                (soValue as? Int)?.toLong() ?: (soValue as? Long ?: 0L)
                         }
 
                         "parent_id" -> {
                             x.parent_id =
-                                (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
+                                (soValue as? Int)?.toLong() ?: (soValue as? Long ?: 0L)
                         }
 
                         "code" -> {
@@ -187,12 +187,12 @@ class AssetObject() : Parcelable {
 
                         "warehouse_id" -> {
                             x.warehouse_id =
-                                (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
+                                (soValue as? Int)?.toLong() ?: (soValue as? Long ?: 0L)
                         }
 
                         "warehouse_area_id" -> {
                             x.warehouse_area_id =
-                                (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
+                                (soValue as? Int)?.toLong() ?: (soValue as? Long ?: 0L)
                         }
 
                         "active" -> {
@@ -249,12 +249,12 @@ class AssetObject() : Parcelable {
 
                         "item_category_id" -> {
                             x.item_category_id =
-                                (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
+                                (soValue as? Int)?.toLong() ?: (soValue as? Long ?: 0L)
                         }
 
                         "cost_centre_id" -> {
                             x.cost_centre_id =
-                                (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
+                                (soValue as? Int)?.toLong() ?: (soValue as? Long ?: 0L)
                         }
 
                         "invoice_nr" -> {
@@ -263,7 +263,7 @@ class AssetObject() : Parcelable {
 
                         "provider_id" -> {
                             x.provider_id =
-                                (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
+                                (soValue as? Int)?.toLong() ?: (soValue as? Long ?: 0L)
                         }
 
                         "purchase_date" -> {
@@ -276,12 +276,12 @@ class AssetObject() : Parcelable {
 
                         "original_warehouse_id" -> {
                             x.original_warehouse_id =
-                                (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
+                                (soValue as? Int)?.toLong() ?: (soValue as? Long ?: 0L)
                         }
 
                         "original_warehouse_area_id" -> {
                             x.original_warehouse_area_id =
-                                (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
+                                (soValue as? Int)?.toLong() ?: (soValue as? Long ?: 0L)
                         }
 
                         "label_number" -> {

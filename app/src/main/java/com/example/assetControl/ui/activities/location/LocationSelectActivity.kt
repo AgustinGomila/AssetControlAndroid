@@ -7,6 +7,7 @@ import android.graphics.Rect
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
@@ -17,6 +18,7 @@ import android.widget.AdapterView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.data.async.location.WarehouseAreaChangedObserver
 import com.example.assetControl.data.async.location.WarehouseChangedObserver
@@ -33,8 +35,8 @@ import com.example.assetControl.devices.scanners.rfid.Rfid
 import com.example.assetControl.devices.scanners.vh75.Vh75Bt
 import com.example.assetControl.ui.adapters.location.WarehouseAdapter
 import com.example.assetControl.ui.adapters.location.WarehouseAreaAdapter
-import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.example.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
 import com.example.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.example.assetControl.ui.common.utils.Screen.Companion.setupUI
@@ -43,8 +45,6 @@ import com.example.assetControl.ui.common.views.custom.ContractsAutoCompleteText
 import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.parcel.Parcelables.parcelable
 import com.example.assetControl.utils.parcel.Parcelables.parcelableArrayList
-import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent.registerEventListener
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener
 import org.parceler.Parcels
@@ -73,12 +73,12 @@ class LocationSelectActivity : AppCompatActivity(),
 
     private val showScannedCode: Boolean
         get() {
-            return prefsGetBoolean(Preference.showScannedCode)
+            return svm.showScannedCode
         }
 
     override fun scannerCompleted(scanCode: String) {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
-        if (showScannedCode) makeText(binding.root, scanCode, SnackBarType.INFO)
+        if (showScannedCode) showMessage(scanCode, SnackBarType.INFO)
         ScannerManager.lockScanner(this, true)
 
         try {
@@ -98,10 +98,9 @@ class LocationSelectActivity : AppCompatActivity(),
                     locationOk = true
                 }
             } else {
-                makeText(
-                    binding.root,
+                showMessage(
                     getString(R.string.code_read_does_not_correspond_to_a_location),
-                    SnackBarType.ERROR
+                    ERROR
                 )
             }
 
@@ -110,10 +109,9 @@ class LocationSelectActivity : AppCompatActivity(),
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
-            makeText(
-                binding.root,
+            showMessage(
                 ex.message.toString(),
-                SnackBarType.ERROR
+                ERROR
             )
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         } finally {
@@ -813,27 +811,24 @@ class LocationSelectActivity : AppCompatActivity(),
 
     override fun onStateChanged(state: Int) {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
-        if (prefsGetBoolean(Preference.rfidShowConnectedMessage)) {
+        if (svm.rfidShowConnectedMessage) {
             when (Rfid.vh75State) {
                 Vh75Bt.STATE_CONNECTED -> {
-                    makeText(
-                        binding.root,
+                    showMessage(
                         getString(R.string.rfid_connected),
                         SnackBarType.SUCCESS
                     )
                 }
 
                 Vh75Bt.STATE_CONNECTING -> {
-                    makeText(
-                        binding.root,
+                    showMessage(
                         getString(R.string.searching_rfid_reader),
                         SnackBarType.RUNNING
                     )
                 }
 
                 else -> {
-                    makeText(
-                        binding.root,
+                    showMessage(
                         getString(R.string.there_is_no_rfid_device_connected),
                         SnackBarType.INFO
                     )
@@ -849,5 +844,11 @@ class LocationSelectActivity : AppCompatActivity(),
 
     //endregion READERS Reception
 
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (isFinishing || isDestroyed) return
+        if (type == ERROR) logError(msg)
+        showMessage(msg, type)
+    }
 
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 }

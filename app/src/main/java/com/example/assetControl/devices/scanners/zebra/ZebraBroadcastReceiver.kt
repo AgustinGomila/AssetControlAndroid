@@ -20,7 +20,7 @@ import com.example.assetControl.devices.scanners.zebra.Zebra.Constants.EXTRA_RES
 import com.example.assetControl.devices.scanners.zebra.Zebra.Constants.activityIntentFilterAction
 import com.example.assetControl.devices.scanners.zebra.Zebra.Constants.datawedgeIntentKeyData
 
-@Suppress("ConvertSecondaryConstructorToPrimary", "unused")
+@Suppress("unused")
 class ZebraBroadcastReceiver : BroadcastReceiver {
     private lateinit var zebra: Zebra
 

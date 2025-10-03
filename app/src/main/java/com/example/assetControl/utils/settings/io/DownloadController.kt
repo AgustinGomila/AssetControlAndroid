@@ -8,6 +8,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
 import android.os.Environment
+import android.util.Log
 import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -16,6 +17,7 @@ import com.example.assetControl.AssetControlApp.Companion.context
 import com.example.assetControl.BuildConfig
 import com.example.assetControl.R
 import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
+import com.example.assetControl.ui.common.snackbar.SnackBarType
 import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.INFO
 import java.io.File
@@ -29,7 +31,7 @@ class DownloadController(private val view: View) {
         private const val PROVIDER_PATH = ".provider"
 
         private const val apkUrl =
-            "http://resources.example.com/Asset_Control/Milestone13/installers/android/assetControl-release.apk"
+            "https://resources.example.com/Asset_Control/Milestone13/installers/android/assetControl-release.apk"
     }
 
     fun enqueueDownload() {
@@ -59,7 +61,7 @@ class DownloadController(private val view: View) {
 
         // Enqueue a new download and same the referenceId
         downloadManager.enqueue(request)
-        makeText(view, context.getString(R.string.downloading_), INFO)
+        showMessage(context.getString(R.string.downloading_), INFO)
     }
 
     private fun showInstallOption(
@@ -100,14 +102,10 @@ class DownloadController(private val view: View) {
                 context.startActivity(intent)
             } catch (e: ActivityNotFoundException) {
                 e.printStackTrace()
-                makeText(
-                    view,
-                    context.getString(R.string.error_opening_the_file),
-                    ERROR
-                )
+                showMessage(context.getString(R.string.error_opening_the_file), ERROR)
             }
         } else {
-            makeText(view, context.getString(R.string.file_not_found), ERROR)
+            showMessage(context.getString(R.string.file_not_found), ERROR)
         }
     }
 
@@ -118,4 +116,11 @@ class DownloadController(private val view: View) {
             File(destination)
         )
     }
+
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (type == ERROR) logError(msg)
+        makeText(view, msg, type)
+    }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 }

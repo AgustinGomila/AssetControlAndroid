@@ -3,12 +3,14 @@ package com.example.assetControl.ui.activities.dataCollection
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.KeyEvent
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.inputmethod.EditorInfo
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.data.room.dto.asset.Asset
 import com.example.assetControl.data.room.dto.category.ItemCategory
@@ -17,16 +19,13 @@ import com.example.assetControl.data.room.dto.location.WarehouseArea
 import com.example.assetControl.data.room.repository.dataCollection.DataCollectionRuleRepository
 import com.example.assetControl.databinding.DataCollectionRuleSelectActivityBinding
 import com.example.assetControl.ui.adapters.dataCollection.DataCollectionRuleAdapter
-import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.example.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
 import com.example.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.example.assetControl.ui.common.utils.Screen.Companion.setupUI
 import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.parcel.Parcelables.parcelable
-import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutBoolean
 import org.parceler.Parcels
 import kotlin.concurrent.thread
 
@@ -55,10 +54,7 @@ class DataCollectionRuleSelectActivity : AppCompatActivity() {
     }
 
     private fun saveSharedPreferences() {
-        prefsPutBoolean(
-            Preference.selectDataCollectionRuleOnlyActive.key,
-            binding.onlyActiveSwitch.isChecked
-        )
+        svm.selectDataCollectionRuleOnlyActive = binding.onlyActiveSwitch.isChecked
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -134,28 +130,24 @@ class DataCollectionRuleSelectActivity : AppCompatActivity() {
         title = tempTitle
 
         binding.onlyActiveSwitch.setOnCheckedChangeListener(null)
-        binding.onlyActiveSwitch.isChecked =
-            prefsGetBoolean(Preference.selectDataCollectionRuleOnlyActive)
+        binding.onlyActiveSwitch.isChecked = svm.selectDataCollectionRuleOnlyActive
 
         val warehouseArea = warehouseArea
         val itemCategory = itemCategory
         val asset = asset
 
         when {
-            warehouseArea != null -> makeText(
-                binding.root,
+            warehouseArea != null -> showMessage(
                 warehouseArea.description,
                 SnackBarType.INFO
             )
 
-            itemCategory != null -> makeText(
-                binding.root,
+            itemCategory != null -> showMessage(
                 itemCategory.description,
                 SnackBarType.INFO
             )
 
-            asset != null -> makeText(
-                binding.root,
+            asset != null -> showMessage(
                 asset.description,
                 SnackBarType.INFO
             )
@@ -348,4 +340,12 @@ class DataCollectionRuleSelectActivity : AppCompatActivity() {
             }
         }
     }
+
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (isFinishing || isDestroyed) return
+        if (type == ERROR) logError(msg)
+        showMessage(msg, type)
+    }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 }

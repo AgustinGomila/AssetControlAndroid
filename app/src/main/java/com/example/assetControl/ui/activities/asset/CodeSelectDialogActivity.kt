@@ -18,6 +18,8 @@ import android.widget.AdapterView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
+import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.data.enums.asset.AssetStatus
 import com.example.assetControl.data.room.dto.asset.Asset
@@ -31,6 +33,7 @@ import com.example.assetControl.devices.scanners.vh75.Vh75Bt
 import com.example.assetControl.ui.adapters.asset.AssetAdapter
 import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.example.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
 import com.example.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.example.assetControl.ui.common.utils.Screen.Companion.showKeyboard
@@ -38,8 +41,6 @@ import com.example.assetControl.ui.common.views.custom.ContractsAutoCompleteText
 import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.parcel.Parcelables.parcelableArrayList
 import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetStringSet
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener
 import kotlin.concurrent.thread
@@ -136,7 +137,7 @@ class CodeSelectDialogActivity : AppCompatActivity(),
         }
 
         //Retrieve the values
-        val set = prefsGetStringSet(
+        val set = sr.prefsGetStringSet(
             Preference.assetSelectFragmentVisibleStatus.key,
             Preference.assetSelectFragmentVisibleStatus.defaultValue as ArrayList<String>
         )
@@ -313,12 +314,12 @@ class CodeSelectDialogActivity : AppCompatActivity(),
 
     private val showScannedCode: Boolean
         get() {
-            return prefsGetBoolean(Preference.showScannedCode)
+            return svm.showScannedCode
         }
 
     override fun scannerCompleted(scanCode: String) {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
-        if (showScannedCode) makeText(binding.root, scanCode, SnackBarType.INFO)
+        if (showScannedCode) showMessage(scanCode, SnackBarType.INFO)
         ScannerManager.lockScanner(this, false)
     }
 
@@ -422,27 +423,24 @@ class CodeSelectDialogActivity : AppCompatActivity(),
 
     override fun onStateChanged(state: Int) {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
-        if (prefsGetBoolean(Preference.rfidShowConnectedMessage)) {
+        if (svm.rfidShowConnectedMessage) {
             when (Rfid.vh75State) {
                 Vh75Bt.STATE_CONNECTED -> {
-                    makeText(
-                        binding.root,
+                    showMessage(
                         getString(R.string.rfid_connected),
                         SnackBarType.SUCCESS
                     )
                 }
 
                 Vh75Bt.STATE_CONNECTING -> {
-                    makeText(
-                        binding.root,
+                    showMessage(
                         getString(R.string.searching_rfid_reader),
                         SnackBarType.RUNNING
                     )
                 }
 
                 else -> {
-                    makeText(
-                        binding.root,
+                    showMessage(
                         getString(R.string.there_is_no_rfid_device_connected),
                         SnackBarType.INFO
                     )
@@ -457,4 +455,12 @@ class CodeSelectDialogActivity : AppCompatActivity(),
     }
 
     //endregion READERS Reception
+
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (isFinishing || isDestroyed) return
+        if (type == ERROR) logError(msg)
+        makeText(binding.root, msg, type)
+    }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 }

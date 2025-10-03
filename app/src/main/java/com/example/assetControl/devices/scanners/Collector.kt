@@ -1,9 +1,10 @@
 package com.example.assetControl.devices.scanners
 
 import android.util.Log
+import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.devices.scanners.collector.CollectorType
 import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences
 
 class Collector {
     companion object {
@@ -11,7 +12,7 @@ class Collector {
         var collectorTypeChanged = false
         var collectorType: CollectorType
             get() {
-                val pref = Preferences.prefsGetByKey(Preference.collectorType.key)
+                val pref = sr.prefsGetByKey(Preference.collectorType.key)
                 return try {
                     return when (pref) {
                         is CollectorType -> pref
@@ -22,16 +23,16 @@ class Collector {
                     }
                 } catch (ex: java.lang.Exception) {
                     Log.e(this::class.java.simpleName, ex.message.toString())
-                    Preferences.prefsCleanKey(Preference.collectorType.key)
+                    sr.prefsCleanKey(Preference.collectorType.key)
                     CollectorType.none
                 }
             }
             set(value) {
-                Preferences.prefsPutString(Preference.collectorType.key, value.id.toString())
+                sr.prefsPutString(Preference.collectorType.key, value.id.toString())
             }
 
         fun isNfcRequired(): Boolean {
-            return Preferences.prefsGetBoolean(Preference.useNfc)
+            return svm.useNfc
         }
     }
 }

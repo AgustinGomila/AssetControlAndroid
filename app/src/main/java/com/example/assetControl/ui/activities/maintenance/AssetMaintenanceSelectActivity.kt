@@ -3,6 +3,7 @@ package com.example.assetControl.ui.activities.maintenance
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
@@ -11,6 +12,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.data.room.dto.maintenance.AssetMaintenance
 import com.example.assetControl.data.room.repository.asset.AssetRepository
@@ -20,6 +22,7 @@ import com.example.assetControl.ui.activities.asset.AssetPrintLabelActivity
 import com.example.assetControl.ui.adapters.manteinance.AssetMaintenanceAdapter
 import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.example.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
 import com.example.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.example.assetControl.ui.common.utils.Screen.Companion.setupUI
@@ -27,9 +30,6 @@ import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.parcel.ParcelLong
 import com.example.assetControl.utils.parcel.Parcelables.parcelable
 import com.example.assetControl.utils.parcel.Parcelables.parcelableArrayList
-import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutBoolean
 
 class AssetMaintenanceSelectActivity : AppCompatActivity(),
     AssetMaintenanceAdapter.CustomCheckedChangeListener {
@@ -59,9 +59,7 @@ class AssetMaintenanceSelectActivity : AppCompatActivity(),
     }
 
     private fun saveSharedPreferences() {
-        prefsPutBoolean(
-            Preference.selectAssetMaintenanceOnlyActive.key, binding.onlyActiveSwitch.isChecked
-        )
+        svm.selectAssetMaintenanceOnlyActive = binding.onlyActiveSwitch.isChecked
     }
 
     private fun destroyLocals() {
@@ -135,7 +133,7 @@ class AssetMaintenanceSelectActivity : AppCompatActivity(),
         title = tempTitle
 
         binding.onlyActiveSwitch.setOnCheckedChangeListener(null)
-        binding.onlyActiveSwitch.isChecked = prefsGetBoolean(Preference.selectWarehouseOnlyActive)
+        binding.onlyActiveSwitch.isChecked = svm.selectWarehouseOnlyActive
 
         binding.etDescription.setOnEditorActionListener(null)
         binding.etDescription.setOnEditorActionListener { _, keyCode, keyEvent ->
@@ -235,9 +233,9 @@ class AssetMaintenanceSelectActivity : AppCompatActivity(),
 
     private val resultForAssetSelect =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            val data = it?.data
+            val data = it.data
             try {
-                if (it?.resultCode == RESULT_OK && data != null) {
+                if (it.resultCode == RESULT_OK && data != null) {
                     val idParcel = data.parcelableArrayList<ParcelLong>(
                         "ids"
                     ) ?: return@registerForActivityResult
@@ -261,10 +259,8 @@ class AssetMaintenanceSelectActivity : AppCompatActivity(),
                         }
                     } catch (ex: Exception) {
                         val res = getString(R.string.an_error_occurred_while_trying_to_add_the_item)
-                        makeText(
-                            binding.root, res, SnackBarType.ERROR
-                        )
-                        android.util.Log.d(this::class.java.simpleName, res)
+                        showMessage(res, ERROR)
+                        Log.d(this::class.java.simpleName, res)
                     }
                 }
             } catch (ex: Exception) {
@@ -294,8 +290,7 @@ class AssetMaintenanceSelectActivity : AppCompatActivity(),
         val onlyActive = binding.onlyActiveSwitch.isChecked
 
         if (description.isEmpty()) {
-            makeText(
-                binding.root,
+            showMessage(
                 getString(R.string.you_must_enter_at_least_one_letter_in_the_description),
                 SnackBarType.INFO
             )
@@ -358,8 +353,8 @@ class AssetMaintenanceSelectActivity : AppCompatActivity(),
         }
 
         if (!assetMainList.any()) {
-            makeText(
-                binding.root, getString(R.string.no_maintenance_to_show), SnackBarType.INFO
+            showMessage(
+                getString(R.string.no_maintenance_to_show), SnackBarType.INFO
             )
         }
     }
@@ -374,4 +369,12 @@ class AssetMaintenanceSelectActivity : AppCompatActivity(),
         setResult(RESULT_CANCELED)
         finish()
     }
+
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (isFinishing || isDestroyed) return
+        if (type == ERROR) logError(msg)
+        makeText(binding.root, msg, type)
+    }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 }

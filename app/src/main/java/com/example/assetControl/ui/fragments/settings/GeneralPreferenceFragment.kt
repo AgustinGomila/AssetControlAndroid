@@ -2,6 +2,7 @@ package com.example.assetControl.ui.fragments.settings
 
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.util.Log
 import android.util.Size
 import android.widget.ImageView
 import androidx.appcompat.app.AlertDialog
@@ -14,8 +15,9 @@ import com.example.assetControl.BuildConfig
 import com.example.assetControl.R
 import com.example.assetControl.devices.scanners.GenerateQR
 import com.example.assetControl.ui.activities.main.SettingsActivity
-import com.example.assetControl.ui.common.snackbar.MakeText
+import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.example.assetControl.ui.common.utils.Screen
 import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.settings.config.ConfigHelper
@@ -61,9 +63,7 @@ class GeneralPreferenceFragment : PreferenceFragmentCompat() {
                 true
             } catch (ex: Exception) {
                 ex.printStackTrace()
-                MakeText.makeText(
-                    requireView(), "${getString(R.string.error)}: ${ex.message}", SnackBarType.ERROR
-                )
+                showMessage("${getString(R.string.error)}: ${ex.message}", ERROR)
                 ErrorLog.writeLog(null, this::class.java.simpleName, ex)
                 false
             }
@@ -127,4 +127,11 @@ class GeneralPreferenceFragment : PreferenceFragmentCompat() {
 
         fileOrDirectory.delete()
     }
+
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (type == ERROR) logError(msg)
+        makeText(requireView(), msg, type)
+    }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 }

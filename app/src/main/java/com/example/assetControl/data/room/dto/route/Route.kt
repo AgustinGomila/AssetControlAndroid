@@ -4,10 +4,9 @@ import android.os.Parcel
 import android.os.Parcelable
 import androidx.room.ColumnInfo
 import androidx.room.Ignore
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.data.room.repository.route.RouteCompositionRepository
 import com.example.assetControl.data.webservice.route.RouteObject
-import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetString
 
 abstract class RouteEntry {
     companion object {
@@ -89,7 +88,7 @@ class Route(
 
         fun getAvailableRoutes(routes: List<Route>): ArrayList<Route> {
             val result: ArrayList<Route> = ArrayList()
-            val prefix = prefsGetString(Preference.acFilterRouteDescription)
+            val prefix = svm.acFilterRouteDescription
             val prefixes = prefix.split(";", ignoreCase = true, limit = 0).toTypedArray()
 
             var validPrefix = false

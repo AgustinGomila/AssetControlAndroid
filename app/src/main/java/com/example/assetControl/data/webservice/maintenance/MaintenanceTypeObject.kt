@@ -38,12 +38,12 @@ class MaintenanceTypeObject() : Parcelable {
                     when (soName) {
                         "manteinance_type_id" -> {
                             x.manteinance_type_id =
-                                (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
+                                (soValue as? Int)?.toLong() ?: (soValue as? Long ?: 0L)
                         }
 
                         "manteinance_type_group_id" -> {
                             x.manteinance_type_group_id =
-                                (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
+                                (soValue as? Int)?.toLong() ?: (soValue as? Long ?: 0L)
                         }
 
                         "active" -> {

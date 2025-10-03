@@ -4,13 +4,13 @@ import androidx.annotation.StringDef
 
 @Retention(AnnotationRetention.SOURCE)
 @StringDef(
-    ActivityEvent.Companion.CREATE,
-    ActivityEvent.Companion.START,
-    ActivityEvent.Companion.RESUME,
-    ActivityEvent.Companion.PAUSE,
-    ActivityEvent.Companion.STOP,
-    ActivityEvent.Companion.SAVE_INSTANCE_STATE,
-    ActivityEvent.Companion.DESTROY
+    ActivityEvent.CREATE,
+    ActivityEvent.START,
+    ActivityEvent.RESUME,
+    ActivityEvent.PAUSE,
+    ActivityEvent.STOP,
+    ActivityEvent.SAVE_INSTANCE_STATE,
+    ActivityEvent.DESTROY
 )
 annotation class ActivityEvent {
     companion object {

@@ -64,7 +64,7 @@ class AssetMaintenanceLogObject() : Parcelable {
                     when (soName) {
                         "asset_manteinance_id" -> {
                             x.asset_manteinance_id =
-                                (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
+                                (soValue as? Int)?.toLong() ?: (soValue as? Long ?: 0L)
                         }
 
                         "manteinance_status_id" -> {
@@ -82,17 +82,17 @@ class AssetMaintenanceLogObject() : Parcelable {
 
                         "asset_id" -> {
                             x.asset_id =
-                                (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
+                                (soValue as? Int)?.toLong() ?: (soValue as? Long ?: 0L)
                         }
 
                         "repairshop_id" -> {
                             x.repairshop_id =
-                                (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
+                                (soValue as? Int)?.toLong() ?: (soValue as? Long ?: 0L)
                         }
 
                         "repairman_id" -> {
                             x.repairman_id =
-                                (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
+                                (soValue as? Int)?.toLong() ?: (soValue as? Long ?: 0L)
                         }
                     }
             }

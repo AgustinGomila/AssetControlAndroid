@@ -6,6 +6,7 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.MenuItem
 import android.view.View.GONE
 import android.view.View.VISIBLE
@@ -30,6 +31,7 @@ import com.example.assetControl.databinding.RouteSelectActivityBinding
 import com.example.assetControl.ui.adapters.route.RouteAdapter
 import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.example.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
 import com.example.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.example.assetControl.ui.common.utils.Screen.Companion.setupUI
@@ -294,7 +296,7 @@ class RouteSelectActivity : AppCompatActivity(),
             if (it?.resultCode == RESULT_CANCELED) {
                 val msg = data?.getStringExtra("error_msg")
                 if (!msg.isNullOrEmpty()) {
-                    makeText(binding.root, msg, SnackBarType.ERROR)
+                    showMessage(msg, ERROR)
                 }
             }
         }
@@ -307,8 +309,7 @@ class RouteSelectActivity : AppCompatActivity(),
         val rpArray = processRepository.selectByRouteIdNoCompleted(currentRoute.id)
 
         if (rpArray.isEmpty()) {
-            makeText(
-                binding.root,
+            showMessage(
                 getString(R.string.no_processes_started),
                 SnackBarType.INFO
             )
@@ -504,4 +505,12 @@ class RouteSelectActivity : AppCompatActivity(),
             binding.routeListView.visibility = if (isEmpty) GONE else VISIBLE
         }
     }
+
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (isFinishing || isDestroyed) return
+        if (type == ERROR) logError(msg)
+        makeText(binding.root, msg, type)
+    }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 }

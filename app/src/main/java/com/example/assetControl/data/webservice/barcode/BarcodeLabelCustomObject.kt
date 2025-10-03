@@ -40,12 +40,12 @@ class BarcodeLabelCustomObject() : Parcelable {
                     when (soName) {
                         "barcode_label_custom_id" -> {
                             x.barcode_label_custom_id =
-                                (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
+                                (soValue as? Int)?.toLong() ?: (soValue as? Long ?: 0L)
                         }
 
                         "barcode_label_target_id" -> {
                             x.barcode_label_target_id =
-                                (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
+                                (soValue as? Int)?.toLong() ?: (soValue as? Long ?: 0L)
                         }
 
                         "template" -> {

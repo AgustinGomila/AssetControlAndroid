@@ -35,56 +35,56 @@ internal object LifecycleListener {
                     )
                 )
                 Logger.debug("onActivityCreated >>> $activity")
-                if (activityFilter.contains(ActivityEvent.Companion.CREATE))
+                if (activityFilter.contains(ActivityEvent.CREATE))
                     listener?.onReceiveActivityEvent(
                         activity = activity,
-                        event = ActivityEvent.Companion.CREATE,
+                        event = ActivityEvent.CREATE,
                         bundle = savedInstanceState
                     )
             }
 
             override fun onActivityStarted(activity: Activity) {
                 Logger.debug("onActivityStarted >>> $activity")
-                if (activityFilter.contains(ActivityEvent.Companion.START))
+                if (activityFilter.contains(ActivityEvent.START))
                     listener?.onReceiveActivityEvent(
                         activity = activity,
-                        event = ActivityEvent.Companion.START
+                        event = ActivityEvent.START
                     )
             }
 
             override fun onActivityResumed(activity: Activity) {
                 Logger.debug("onActivityResumed >>> $activity")
-                if (activityFilter.contains(ActivityEvent.Companion.RESUME))
+                if (activityFilter.contains(ActivityEvent.RESUME))
                     listener?.onReceiveActivityEvent(
                         activity = activity,
-                        event = ActivityEvent.Companion.RESUME
+                        event = ActivityEvent.RESUME
                     )
             }
 
             override fun onActivityPaused(activity: Activity) {
                 Logger.debug("onActivityPaused >>> $activity")
-                if (activityFilter.contains(ActivityEvent.Companion.PAUSE))
+                if (activityFilter.contains(ActivityEvent.PAUSE))
                     listener?.onReceiveActivityEvent(
                         activity = activity,
-                        event = ActivityEvent.Companion.PAUSE
+                        event = ActivityEvent.PAUSE
                     )
             }
 
             override fun onActivityStopped(activity: Activity) {
                 Logger.debug("onActivityStopped >>> $activity")
-                if (activityFilter.contains(ActivityEvent.Companion.STOP))
+                if (activityFilter.contains(ActivityEvent.STOP))
                     listener?.onReceiveActivityEvent(
                         activity = activity,
-                        event = ActivityEvent.Companion.STOP
+                        event = ActivityEvent.STOP
                     )
             }
 
             override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {
                 Logger.debug("onActivitySaveInstanceState >>> $activity")
-                if (activityFilter.contains(ActivityEvent.Companion.SAVE_INSTANCE_STATE))
+                if (activityFilter.contains(ActivityEvent.SAVE_INSTANCE_STATE))
                     listener?.onReceiveActivityEvent(
                         activity = activity,
-                        event = ActivityEvent.Companion.SAVE_INSTANCE_STATE,
+                        event = ActivityEvent.SAVE_INSTANCE_STATE,
                         bundle = outState
                     )
             }
@@ -95,10 +95,10 @@ internal object LifecycleListener {
                     weakReference?.clear()
                 }
                 Logger.debug("onActivityDestroyed >>> $activity")
-                if (activityFilter.contains(ActivityEvent.Companion.DESTROY))
+                if (activityFilter.contains(ActivityEvent.DESTROY))
                     listener?.onReceiveActivityEvent(
                         activity = activity,
-                        event = ActivityEvent.Companion.DESTROY
+                        event = ActivityEvent.DESTROY
                     )
             }
         })
@@ -130,11 +130,11 @@ internal object LifecycleListener {
                     ) {
                         super.onFragmentPreAttached(fragmentManager, fragment, context)
                         Logger.debug("onFragmentPreAttached >>> $fragment >>> $context")
-                        if (fragmentFilter.contains(FragmentEvent.Companion.PRE_ATTACH))
+                        if (fragmentFilter.contains(FragmentEvent.PRE_ATTACH))
                             listener?.onReceiveFragmentEvent(
                                 fragment = fragment,
                                 context = context,
-                                event = FragmentEvent.Companion.PRE_ATTACH
+                                event = FragmentEvent.PRE_ATTACH
                             )
                     }
 
@@ -145,11 +145,11 @@ internal object LifecycleListener {
                     ) {
                         super.onFragmentAttached(fragmentManager, fragment, context)
                         Logger.debug("onFragmentAttached >>> $fragment >>> $context")
-                        if (fragmentFilter.contains(FragmentEvent.Companion.ATTACH))
+                        if (fragmentFilter.contains(FragmentEvent.ATTACH))
                             listener?.onReceiveFragmentEvent(
                                 fragment = fragment,
                                 context = context,
-                                event = FragmentEvent.Companion.ATTACH
+                                event = FragmentEvent.ATTACH
                             )
                     }
 
@@ -160,10 +160,10 @@ internal object LifecycleListener {
                     ) {
                         super.onFragmentCreated(fragmentManager, fragment, savedInstanceState)
                         Logger.debug("onFragmentCreated >>> $fragment")
-                        if (fragmentFilter.contains(FragmentEvent.Companion.CREATE))
+                        if (fragmentFilter.contains(FragmentEvent.CREATE))
                             listener?.onReceiveFragmentEvent(
                                 fragment = fragment,
-                                event = FragmentEvent.Companion.CREATE,
+                                event = FragmentEvent.CREATE,
                                 bundle = savedInstanceState
                             )
                     }
@@ -174,10 +174,10 @@ internal object LifecycleListener {
                         savedInstanceState: Bundle?
                     ) {
                         Logger.debug("onFragmentActivityCreated >>> $fragment")
-                        if (fragmentFilter.contains(FragmentEvent.Companion.ACTIVITY_CREATE))
+                        if (fragmentFilter.contains(FragmentEvent.ACTIVITY_CREATE))
                             listener?.onReceiveFragmentEvent(
                                 fragment = fragment,
-                                event = FragmentEvent.Companion.ACTIVITY_CREATE,
+                                event = FragmentEvent.ACTIVITY_CREATE,
                                 bundle = savedInstanceState
                             )
                     }
@@ -189,10 +189,10 @@ internal object LifecycleListener {
                     ) {
                         super.onFragmentPreCreated(fragmentManager, fragment, savedInstanceState)
                         Logger.debug("onFragmentActivityCreated >>> $fragment")
-                        if (fragmentFilter.contains(FragmentEvent.Companion.PRE_CREATE))
+                        if (fragmentFilter.contains(FragmentEvent.PRE_CREATE))
                             listener?.onReceiveFragmentEvent(
                                 fragment = fragment,
-                                event = FragmentEvent.Companion.PRE_CREATE,
+                                event = FragmentEvent.PRE_CREATE,
                                 bundle = savedInstanceState
                             )
                     }
@@ -210,10 +210,10 @@ internal object LifecycleListener {
                             savedInstanceState
                         )
                         Logger.debug("onFragmentViewCreated >>> $fragment >>> $view")
-                        if (fragmentFilter.contains(FragmentEvent.Companion.VIEW_CREATE))
+                        if (fragmentFilter.contains(FragmentEvent.VIEW_CREATE))
                             listener?.onReceiveFragmentEvent(
                                 fragment = fragment,
-                                event = FragmentEvent.Companion.VIEW_CREATE,
+                                event = FragmentEvent.VIEW_CREATE,
                                 bundle = savedInstanceState
                             )
                     }
@@ -224,10 +224,10 @@ internal object LifecycleListener {
                     ) {
                         super.onFragmentStarted(fragmentManager, fragment)
                         Logger.debug("onFragmentStarted >>> $fragment")
-                        if (fragmentFilter.contains(FragmentEvent.Companion.START))
+                        if (fragmentFilter.contains(FragmentEvent.START))
                             listener?.onReceiveFragmentEvent(
                                 fragment = fragment,
-                                event = FragmentEvent.Companion.START
+                                event = FragmentEvent.START
                             )
                     }
 
@@ -237,10 +237,10 @@ internal object LifecycleListener {
                     ) {
                         super.onFragmentResumed(fragmentManager, fragment)
                         Logger.debug("onFragmentResumed >>> $fragment")
-                        if (fragmentFilter.contains(FragmentEvent.Companion.RESUME))
+                        if (fragmentFilter.contains(FragmentEvent.RESUME))
                             listener?.onReceiveFragmentEvent(
                                 fragment = fragment,
-                                event = FragmentEvent.Companion.RESUME
+                                event = FragmentEvent.RESUME
                             )
                     }
 
@@ -250,10 +250,10 @@ internal object LifecycleListener {
                     ) {
                         super.onFragmentPaused(fragmentManager, fragment)
                         Logger.debug("onFragmentPaused >>> $fragment")
-                        if (fragmentFilter.contains(FragmentEvent.Companion.PAUSE))
+                        if (fragmentFilter.contains(FragmentEvent.PAUSE))
                             listener?.onReceiveFragmentEvent(
                                 fragment = fragment,
-                                event = FragmentEvent.Companion.PAUSE
+                                event = FragmentEvent.PAUSE
                             )
                     }
 
@@ -263,10 +263,10 @@ internal object LifecycleListener {
                     ) {
                         super.onFragmentStopped(fragmentManager, fragment)
                         Logger.debug("onFragmentStopped >>> $fragment")
-                        if (fragmentFilter.contains(FragmentEvent.Companion.STOP))
+                        if (fragmentFilter.contains(FragmentEvent.STOP))
                             listener?.onReceiveFragmentEvent(
                                 fragment = fragment,
-                                event = FragmentEvent.Companion.STOP
+                                event = FragmentEvent.STOP
                             )
                     }
 
@@ -277,10 +277,10 @@ internal object LifecycleListener {
                     ) {
                         super.onFragmentSaveInstanceState(fragmentManager, fragment, outState)
                         Logger.debug("onFragmentSaveInstanceState >>> $fragment")
-                        if (fragmentFilter.contains(FragmentEvent.Companion.SAVE_INSTANCE_STATE))
+                        if (fragmentFilter.contains(FragmentEvent.SAVE_INSTANCE_STATE))
                             listener?.onReceiveFragmentEvent(
                                 fragment = fragment,
-                                event = FragmentEvent.Companion.SAVE_INSTANCE_STATE,
+                                event = FragmentEvent.SAVE_INSTANCE_STATE,
                                 bundle = outState
                             )
                     }
@@ -291,10 +291,10 @@ internal object LifecycleListener {
                     ) {
                         super.onFragmentViewDestroyed(fragmentManager, fragment)
                         Logger.debug("onFragmentViewDestroyed >>> $fragment")
-                        if (fragmentFilter.contains(FragmentEvent.Companion.VIEW_DESTROY))
+                        if (fragmentFilter.contains(FragmentEvent.VIEW_DESTROY))
                             listener?.onReceiveFragmentEvent(
                                 fragment = fragment,
-                                event = FragmentEvent.Companion.VIEW_DESTROY
+                                event = FragmentEvent.VIEW_DESTROY
                             )
                     }
 
@@ -304,10 +304,10 @@ internal object LifecycleListener {
                     ) {
                         super.onFragmentDestroyed(fragmentManager, fragment)
                         Logger.debug("onFragmentDestroyed >>> $fragment")
-                        if (fragmentFilter.contains(FragmentEvent.Companion.DESTROY))
+                        if (fragmentFilter.contains(FragmentEvent.DESTROY))
                             listener?.onReceiveFragmentEvent(
                                 fragment = fragment,
-                                event = FragmentEvent.Companion.DESTROY
+                                event = FragmentEvent.DESTROY
                             )
                     }
 
@@ -317,10 +317,10 @@ internal object LifecycleListener {
                     ) {
                         super.onFragmentDetached(fragmentManager, fragment)
                         Logger.debug("onFragmentDetached >>> $fragment")
-                        if (fragmentFilter.contains(FragmentEvent.Companion.DETACH))
+                        if (fragmentFilter.contains(FragmentEvent.DETACH))
                             listener?.onReceiveFragmentEvent(
                                 fragment = fragment,
-                                event = FragmentEvent.Companion.DETACH
+                                event = FragmentEvent.DETACH
                             )
                     }
                 }

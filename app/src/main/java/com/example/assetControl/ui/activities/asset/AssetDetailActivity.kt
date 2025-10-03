@@ -2,22 +2,23 @@ package com.example.assetControl.ui.activities.asset
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.dacosys.imageControl.ui.fragments.ImageControlButtonsFragment
 import com.example.assetControl.AssetControlApp.Companion.currentUser
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.data.enums.common.Table
 import com.example.assetControl.data.room.dto.asset.Asset
 import com.example.assetControl.databinding.AssetDetailActivityBinding
+import com.example.assetControl.ui.common.snackbar.SnackBarType
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.example.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.example.assetControl.ui.common.utils.Screen.Companion.setupUI
 import com.example.assetControl.utils.parcel.Parcelables.parcelable
-import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
-import com.example.assetControl.utils.settings.preferences.Repository.Companion.useImageControl
 
 class AssetDetailActivity : AppCompatActivity() {
     private var asset: Asset? = null
@@ -109,7 +110,8 @@ class AssetDetailActivity : AppCompatActivity() {
     }
 
     private fun setImageControlFragment() {
-        if (!useImageControl) {
+        if (!svm.useImageControl) return
+        if (!svm.useImageControl) {
             runOnUiThread {
                 binding.imageControlLayout.visibility = View.GONE
             }
@@ -126,41 +128,46 @@ class AssetDetailActivity : AppCompatActivity() {
 
         val obs = "${getString(R.string.user)}: ${currentUser()?.name}"
 
-        if (imageControlFragment == null) {
-            imageControlFragment = ImageControlButtonsFragment.newInstance(
-                tableId = table.id.toLong(),
-                objectId1 = id.toString()
-            )
+        try {
+            if (imageControlFragment == null) {
+                imageControlFragment = ImageControlButtonsFragment.newInstance(
+                    tableId = table.id.toLong(),
+                    objectId1 = id.toString()
+                )
 
-            setFragmentValues(description, "", obs)
+                setFragmentValues(description, "", obs)
 
-            val fm = supportFragmentManager
+                val fm = supportFragmentManager
 
-            if (!isFinishing && !isDestroyed) {
-                runOnUiThread {
-                    fm.beginTransaction()
-                        .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out).replace(
-                            binding.imageControlLayout.id, imageControlFragment ?: return@runOnUiThread
-                        ).commit()
-
-                    if (!prefsGetBoolean(Preference.useImageControl)) {
+                if (!isFinishing && !isDestroyed) {
+                    runOnUiThread {
                         fm.beginTransaction()
-                            .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                            .hide(imageControlFragment as Fragment).commitAllowingStateLoss()
-                    } else {
-                        fm.beginTransaction()
-                            .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                            .show((imageControlFragment ?: return@runOnUiThread) as Fragment)
-                            .commitAllowingStateLoss()
+                            .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out).replace(
+                                binding.imageControlLayout.id, imageControlFragment ?: return@runOnUiThread
+                            ).commit()
+
+                        if (!svm.useImageControl) {
+                            fm.beginTransaction()
+                                .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                                .hide(imageControlFragment as Fragment).commitAllowingStateLoss()
+                        } else {
+                            fm.beginTransaction()
+                                .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                                .show((imageControlFragment ?: return@runOnUiThread) as Fragment)
+                                .commitAllowingStateLoss()
+                        }
                     }
                 }
-            }
-        } else {
-            imageControlFragment?.setTableId(table.id)
-            imageControlFragment?.setObjectId1(id)
-            imageControlFragment?.setObjectId2(null)
+            } else {
+                imageControlFragment?.setTableId(table.id)
+                imageControlFragment?.setObjectId1(id)
+                imageControlFragment?.setObjectId2(null)
 
-            setFragmentValues(description, "", obs)
+                setFragmentValues(description, "", obs)
+            }
+        } catch (_: Exception) {
+            showMessage(getString(R.string.imagecontrol_isnt_available), ERROR)
+            svm.useImageControl = false
         }
     }
 
@@ -177,4 +184,12 @@ class AssetDetailActivity : AppCompatActivity() {
             imageControlFragment?.setObs(obs)
         }
     }
+
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (isFinishing || isDestroyed) return
+        if (type == ERROR) logError(msg)
+        showMessage(msg, type)
+    }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 }

@@ -40,12 +40,12 @@ class WarehouseAreaObject() : Parcelable {
                     when (soName) {
                         "warehouse_area_id" -> {
                             x.warehouse_area_id =
-                                (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
+                                (soValue as? Int)?.toLong() ?: (soValue as? Long ?: 0L)
                         }
 
                         "warehouse_id" -> {
                             x.warehouse_id =
-                                (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
+                                (soValue as? Int)?.toLong() ?: (soValue as? Long ?: 0L)
                         }
 
                         "warehouse_area_ext_id" -> {

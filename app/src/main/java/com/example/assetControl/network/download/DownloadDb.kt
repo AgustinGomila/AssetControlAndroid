@@ -4,6 +4,8 @@ import android.util.Log
 import com.example.assetControl.AssetControlApp.Companion.context
 import com.example.assetControl.AssetControlApp.Companion.getUserId
 import com.example.assetControl.AssetControlApp.Companion.isLogged
+import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.data.room.database.AcDatabase
 import com.example.assetControl.data.room.dto.asset.Asset
@@ -39,9 +41,6 @@ import com.example.assetControl.utils.Statics
 import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.settings.entries.ConfEntry
 import com.example.assetControl.utils.settings.io.FileHelper
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutString
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.resetLastUpdateDates
-import com.example.assetControl.utils.settings.preferences.Repository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -129,8 +128,8 @@ class DownloadDb(
     private val dbFileName = "android.assetcontroldb.sqlite.txt"
     private val dbDirectory = "collectordb"
 
-    private val timeUrl = "${Repository.wsUrlCron}/${dbDirectory}/${timeFilename}"
-    private val dbUrl = "${Repository.wsUrlCron}/${dbDirectory}/${dbFileName}"
+    private val timeUrl = "${svm.wsUrlCron}/${dbDirectory}/${timeFilename}"
+    private val dbUrl = "${svm.wsUrlCron}/${dbDirectory}/${dbFileName}"
 
     private val scope = CoroutineScope(Job() + Dispatchers.IO)
 
@@ -150,7 +149,7 @@ class DownloadDb(
 
         // Antes de iniciar el proceso de descarga...
         if (downloadDbRequired) {
-            resetLastUpdateDates()
+            sr.resetLastUpdateDates()
             deleteTimeFile()
         }
 
@@ -202,7 +201,7 @@ class DownloadDb(
     }
 
     private fun launchDownload() {
-        if (Repository.wsUrlCron.isEmpty()) {
+        if (svm.wsUrlCron.isEmpty()) {
             onDownloadEvent.invoke(
                 DownloadTask(
                     msg = context.getString(R.string.webservice_is_not_configured),
@@ -563,16 +562,14 @@ class DownloadDb(
                 for (confEntry in registryTypeUpdated) {
                     registries.add(confEntry.description)
                 }
-                prefsPutString(registries, timeDateStr)
+                sr.prefsPutString(registries, timeDateStr)
 
                 registries.clear()
                 registries.add(ConfEntry.acLastUpdateRepairshop.description)
                 registries.add(ConfEntry.acLastUpdateAssetMaintenance.description)
                 registries.add(ConfEntry.acLastUpdateMaintenanceType.description)
                 registries.add(ConfEntry.acLastUpdateMaintenanceTypeGroup.description)
-                prefsPutString(
-                    registries, Statics.DEFAULT_DATE
-                )
+                sr.prefsPutString(registries, Statics.DEFAULT_DATE)
             } else {
                 scope.launch {
                     onUiEvent(

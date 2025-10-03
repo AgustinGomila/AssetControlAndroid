@@ -3,6 +3,7 @@ package com.example.assetControl.ui.fragments.location
 import android.content.Intent
 import android.graphics.Typeface
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,6 +24,7 @@ import com.example.assetControl.databinding.WarehouseAreaCrudFragmentBinding
 import com.example.assetControl.ui.activities.location.LocationSelectActivity
 import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.parcel.Parcelables.parcelable
 import org.parceler.Parcels
@@ -179,8 +181,7 @@ class WarehouseAreaCRUDFragment : Fragment() {
         if (_binding == null) return false
 
         if (binding.descriptionEditText.text.trim().toString().isEmpty()) {
-            makeText(
-                binding.root,
+            showMessage(
                 getString(R.string.you_must_enter_a_description_for_the_warehouse_area),
                 SnackBarType.INFO
             )
@@ -189,8 +190,7 @@ class WarehouseAreaCRUDFragment : Fragment() {
         }
 
         if (warehouse == null) {
-            makeText(
-                binding.root,
+            showMessage(
                 getString(R.string.you_must_select_a_warehouse_for_the_area),
                 SnackBarType.INFO
             )
@@ -208,10 +208,9 @@ class WarehouseAreaCRUDFragment : Fragment() {
         // desconocido en revisiones de activos.
         if (warehouseArea == null) {
             if (!User.hasPermission(PermissionEntry.AddWarehouse)) {
-                makeText(
-                    binding.root,
+                showMessage(
                     getString(R.string.you_do_not_have_permission_to_add_warehouse_areas),
-                    SnackBarType.ERROR
+                    ERROR
                 )
                 return
             }
@@ -225,10 +224,9 @@ class WarehouseAreaCRUDFragment : Fragment() {
             }
         } else {
             if (!User.hasPermission(PermissionEntry.ModifyWarehouse)) {
-                makeText(
-                    binding.root,
+                showMessage(
                     getString(R.string.you_do_not_have_permission_to_modify_warehouse_areas),
-                    SnackBarType.ERROR
+                    ERROR
                 )
                 return
             }
@@ -277,6 +275,14 @@ class WarehouseAreaCRUDFragment : Fragment() {
         this.warehouseArea = warehouseArea
         fillControls(false)
     }
+
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (requireActivity().isFinishing || requireActivity().isDestroyed) return
+        if (type == ERROR) logError(msg)
+        makeText(binding.root, msg, type)
+    }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 
     companion object {
 

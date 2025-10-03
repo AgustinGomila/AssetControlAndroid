@@ -161,7 +161,7 @@ class DecimalFragment : Fragment() {
         private fun roundToString(d: Double, decimalPlaces: Int): String {
             val r = round(d, decimalPlaces).toString()
             return if (decimalPlaces == 0 || d % 1 == 0.0) {
-                r.substring(0, r.indexOf('.'))
+                r.take(r.indexOf('.'))
             } else {
                 r
             }

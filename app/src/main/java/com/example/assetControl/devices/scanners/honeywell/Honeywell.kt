@@ -11,10 +11,9 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.example.assetControl.AssetControlApp.Companion.context
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.devices.scanners.Scanner
 import com.example.assetControl.devices.scanners.honeywell.Honeywell.Constants.PROPERTY_DATA_PROCESSOR_DATA_INTENT
-import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
 import java.util.concurrent.atomic.AtomicBoolean
 
 
@@ -185,26 +184,25 @@ class Honeywell(private val activity: AppCompatActivity) : Scanner() {
         properties = Bundle()
 
         // Barcode camera scanner view
-        properties?.putBoolean(Constants.PROPERTY_PDF_417_ENABLED, prefsGetBoolean(Preference.symbologyPDF417))
-        properties?.putBoolean(Constants.PROPERTY_AZTEC_ENABLED, prefsGetBoolean(Preference.symbologyAztec))
-        properties?.putBoolean(Constants.PROPERTY_QR_CODE_ENABLED, prefsGetBoolean(Preference.symbologyQRCode))
-        properties?.putBoolean(Constants.PROPERTY_CODABAR_ENABLED, prefsGetBoolean(Preference.symbologyCODABAR))
-        properties?.putBoolean(Constants.PROPERTY_CODE_128_ENABLED, prefsGetBoolean(Preference.symbologyCode128))
-        properties?.putBoolean(Constants.PROPERTY_CODE_39_ENABLED, prefsGetBoolean(Preference.symbologyCode39))
-        properties?.putBoolean(Constants.PROPERTY_CODE_93_ENABLED, prefsGetBoolean(Preference.symbologyCode93))
-        properties?.putBoolean(Constants.PROPERTY_DATAMATRIX_ENABLED, prefsGetBoolean(Preference.symbologyDataMatrix))
-        properties?.putBoolean(Constants.PROPERTY_EAN_13_ENABLED, prefsGetBoolean(Preference.symbologyEAN13))
-        properties?.putBoolean(Constants.PROPERTY_EAN_8_ENABLED, prefsGetBoolean(Preference.symbologyEAN8))
-        properties?.putBoolean(Constants.PROPERTY_MAXICODE_ENABLED, prefsGetBoolean(Preference.symbologyMaxiCode))
-        properties?.putBoolean(Constants.PROPERTY_RSS_ENABLED, prefsGetBoolean(Preference.symbologyRSS14))
+        properties?.putBoolean(Constants.PROPERTY_PDF_417_ENABLED, svm.symbologyPDF417)
+        properties?.putBoolean(Constants.PROPERTY_AZTEC_ENABLED, svm.symbologyAztec)
+        properties?.putBoolean(Constants.PROPERTY_QR_CODE_ENABLED, svm.symbologyQRCode)
+        properties?.putBoolean(Constants.PROPERTY_CODABAR_ENABLED, svm.symbologyCODABAR)
+        properties?.putBoolean(Constants.PROPERTY_CODE_128_ENABLED, svm.symbologyCode128)
+        properties?.putBoolean(Constants.PROPERTY_CODE_39_ENABLED, svm.symbologyCode39)
+        properties?.putBoolean(Constants.PROPERTY_CODE_93_ENABLED, svm.symbologyCode93)
+        properties?.putBoolean(Constants.PROPERTY_DATAMATRIX_ENABLED, svm.symbologyDataMatrix)
+        properties?.putBoolean(Constants.PROPERTY_EAN_13_ENABLED, svm.symbologyEAN13)
+        properties?.putBoolean(Constants.PROPERTY_EAN_8_ENABLED, svm.symbologyEAN8)
+        properties?.putBoolean(Constants.PROPERTY_MAXICODE_ENABLED, svm.symbologyMaxiCode)
+        properties?.putBoolean(Constants.PROPERTY_RSS_ENABLED, svm.symbologyRSS14)
         properties?.putBoolean(
-            Constants.PROPERTY_RSS_EXPANDED_ENABLED,
-            prefsGetBoolean(Preference.symbologyRSSExpanded)
+            Constants.PROPERTY_RSS_EXPANDED_ENABLED, svm.symbologyRSSExpanded
         )
-        properties?.putBoolean(Constants.PROPERTY_UPC_A_ENABLE, prefsGetBoolean(Preference.symbologyUPCA))
-        properties?.putBoolean(Constants.PROPERTY_UPC_E_ENABLED, prefsGetBoolean(Preference.symbologyUPCE))
+        properties?.putBoolean(Constants.PROPERTY_UPC_A_ENABLE, svm.symbologyUPCA)
+        properties?.putBoolean(Constants.PROPERTY_UPC_E_ENABLED, svm.symbologyUPCE)
 
-        val sendDigit = prefsGetBoolean(Preference.sendBarcodeCheckDigit)
+        val sendDigit = svm.sendBarcodeCheckDigit
         properties?.putBoolean(Constants.PROPERTY_EAN_13_CHECK_DIGIT_TRANSMIT_ENABLED, sendDigit)
         properties?.putBoolean(Constants.PROPERTY_EAN_8_CHECK_DIGIT_TRANSMIT_ENABLED, sendDigit)
         properties?.putBoolean(Constants.PROPERTY_UPC_A_CHECK_DIGIT_TRANSMIT_ENABLED, sendDigit)
@@ -232,7 +230,7 @@ class Honeywell(private val activity: AppCompatActivity) : Scanner() {
         if (mapProperties.isNullOrEmpty()) return
         loadProperties()
         for ((key, value1) in mapProperties) {
-            if (value1 is String) properties!!.putString(key, value1.toString())
+            if (value1 is String) properties!!.putString(key, value1)
             if (value1 is Boolean) properties!!.putBoolean(
                 key,
                 java.lang.Boolean.valueOf(value1.toString())

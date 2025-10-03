@@ -3,6 +3,7 @@ package com.example.assetControl.network.utils
 import android.app.Activity
 import android.content.DialogInterface
 import android.graphics.drawable.InsetDrawable
+import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.Gravity
 import android.view.View
@@ -11,13 +12,14 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.res.ResourcesCompat
 import com.example.assetControl.AssetControlApp
+import com.example.assetControl.AssetControlApp.Companion.prefs
 import com.example.assetControl.R
 import com.example.assetControl.network.download.DownloadDb
-import com.example.assetControl.ui.common.snackbar.MakeText
+import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.example.assetControl.utils.Statics
 import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences
 import org.json.JSONObject
 import java.lang.ref.WeakReference
 
@@ -83,11 +85,11 @@ class ClientPackage {
                 allProductsArray.mapNotNull { if (it.getString(PRODUCT_VERSION_ID_TAG) == Statics.APP_VERSION_ID_IMAGE_CONTROL.toString()) it else null }
 
             if (allMainApp.isEmpty() && allSecondApp.isEmpty()) {
-                MakeText.makeText(
+                showMessage(
                     parentView,
                     AssetControlApp.context
                         .getString(R.string.there_are_no_valid_products_for_the_selected_client),
-                    SnackBarType.ERROR
+                    ERROR
                 )
                 return
             }
@@ -199,10 +201,10 @@ class ClientPackage {
             for (pack in packArray) {
                 val active = pack.getInt(ACTIVE_TAG)
                 if (active == 0) {
-                    MakeText.makeText(
+                    showMessage(
                         parentView,
                         AssetControlApp.context.getString(R.string.inactive_installation),
-                        SnackBarType.ERROR
+                        ERROR
                     )
                     continue
                 }
@@ -216,11 +218,11 @@ class ClientPackage {
                 }
 
                 if (appUrl.isEmpty()) {
-                    MakeText.makeText(
+                    showMessage(
                         parentView,
                         AssetControlApp.context
                             .getString(R.string.app_panel_url_can_not_be_obtained),
-                        SnackBarType.ERROR
+                        ERROR
                     )
                     return
                 }
@@ -257,7 +259,7 @@ class ClientPackage {
                 icPass =
                     if (customOptJsonObj.has(IC_PASSWORD_TAG)) customOptJsonObj.getString(IC_PASSWORD_TAG) else ""
 
-                val x = Preferences.prefs.edit()
+                val x = prefs.edit()
                 if (productId == Statics.APP_VERSION_ID.toString()) {
                     x.putString(Preference.urlPanel.key, appUrl)
                     x.putString(Preference.installationCode.key, installationCode)
@@ -313,5 +315,12 @@ class ClientPackage {
         const val WS_URL_TAG = "url"
         const val WS_USER_TAG = "ws_user"
         // endregion JSON values
+
+        private fun showMessage(view: View, msg: String, type: SnackBarType) {
+            if (type == ERROR) logError(msg)
+            makeText(view, msg, type)
+        }
+
+        private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
     }
 }

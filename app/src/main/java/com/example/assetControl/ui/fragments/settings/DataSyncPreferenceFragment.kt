@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
+import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
@@ -19,14 +20,14 @@ import androidx.preference.Preference.OnPreferenceClickListener
 import androidx.preference.PreferenceFragmentCompat
 import com.example.assetControl.AssetControlApp
 import com.example.assetControl.AssetControlApp.Companion.isLogged
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.data.room.database.AcDatabase
 import com.example.assetControl.data.room.database.AcDatabase.Companion.DATABASE_NAME
 import com.example.assetControl.data.room.database.AcDatabase.Companion.cleanInstance
 import com.example.assetControl.network.download.DownloadDb
 import com.example.assetControl.network.sync.SyncDownload
-import com.example.assetControl.ui.common.snackbar.MakeText
-import com.example.assetControl.ui.common.snackbar.SnackBarEventData
+import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
 import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.SUCCESS
@@ -35,7 +36,6 @@ import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.settings.entries.ConfEntry
 import com.example.assetControl.utils.settings.io.FileHelper
 import com.example.assetControl.utils.settings.io.PathHelper
-import com.example.assetControl.utils.settings.preferences.Repository
 import com.google.android.gms.common.api.CommonStatusCodes
 import java.io.File
 import java.io.FileInputStream
@@ -73,7 +73,7 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
             } catch (ex: Exception) {
                 ex.printStackTrace()
                 if (view != null)
-                    showSnackBar("${context.getString(R.string.error)}: ${ex.message}", ERROR)
+                    showMessage("${context.getString(R.string.error)}: ${ex.message}", ERROR)
                 ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             }
             true
@@ -84,15 +84,15 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
             try {
                 if (SyncDownload.resetSyncDates()) {
                     if (view != null)
-                        showSnackBar(context.getString(R.string.synchronization_dates_restarted_successfully), SUCCESS)
+                        showMessage(context.getString(R.string.synchronization_dates_restarted_successfully), SUCCESS)
                 } else {
                     if (view != null)
-                        showSnackBar(context.getString(R.string.error_restarting_sync_dates), ERROR)
+                        showMessage(context.getString(R.string.error_restarting_sync_dates), ERROR)
                 }
             } catch (ex: Exception) {
                 ex.printStackTrace()
                 if (view != null)
-                    showSnackBar("${context.getString(R.string.error)}: ${ex.message}", ERROR)
+                    showMessage("${context.getString(R.string.error)}: ${ex.message}", ERROR)
                 ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             }
             true
@@ -106,7 +106,7 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
             } catch (ex: Exception) {
                 ex.printStackTrace()
                 if (view != null)
-                    showSnackBar("${context.getString(R.string.error)}: ${ex.message}", ERROR)
+                    showMessage("${context.getString(R.string.error)}: ${ex.message}", ERROR)
                 ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             }
             true
@@ -119,7 +119,7 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
             } catch (ex: Exception) {
                 ex.printStackTrace()
                 if (view != null)
-                    showSnackBar("${context.getString(R.string.error)}: ${ex.message}", ERROR)
+                    showMessage("${context.getString(R.string.error)}: ${ex.message}", ERROR)
                 ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             }
             true
@@ -133,7 +133,7 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
             } catch (ex: Exception) {
                 ex.printStackTrace()
                 if (view != null)
-                    showSnackBar("${context.getString(R.string.error)}: ${ex.message}", ERROR)
+                    showMessage("${context.getString(R.string.error)}: ${ex.message}", ERROR)
                 ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             }
             true
@@ -147,7 +147,7 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
             } catch (ex: Exception) {
                 ex.printStackTrace()
                 if (view != null)
-                    showSnackBar("${context.getString(R.string.error)}: ${ex.message}", ERROR)
+                    showMessage("${context.getString(R.string.error)}: ${ex.message}", ERROR)
                 ErrorLog.writeLog(null, this::class.java.simpleName, ex)
             }
             true
@@ -177,7 +177,7 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
             )
         } catch (ex: Exception) {
             ex.printStackTrace()
-            if (view != null) showSnackBar(
+            if (view != null) showMessage(
                 getString(R.string.error_sending_email), ERROR
             )
         }
@@ -194,7 +194,7 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
             }
             .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
                 dialog.dismiss()
-                showSnackBar(getString(R.string.app_dont_have_necessary_permissions), ERROR)
+                showMessage(getString(R.string.app_dont_have_necessary_permissions), ERROR)
             }
             .show()
     }
@@ -222,7 +222,7 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
             if (isGranted) {
                 runNextStep()
             } else {
-                showSnackBar(
+                showMessage(
                     AssetControlApp.context.getString(R.string.app_dont_have_necessary_permissions),
                     ERROR
                 )
@@ -276,7 +276,7 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
 
                 tempDbFile = PathHelper.getPath(dataFile) ?: ""
                 if (tempDbFile == "") {
-                    if (view != null) showSnackBar(
+                    if (view != null) showMessage(
                         getString(R.string.unable_to_open_file), ERROR
                     )
                     return@registerForActivityResult
@@ -312,7 +312,7 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
             val dbFile = File(context.getDatabasePath(DATABASE_NAME).toString())
             if (!dbFile.exists()) {
                 if (view != null)
-                    showSnackBar(getString(R.string.database_file_does_not_exist), ERROR)
+                    showMessage(getString(R.string.database_file_does_not_exist), ERROR)
                 return
             }
 
@@ -321,7 +321,7 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
             val outFile = File(result.outFile)
             if (!outFile.exists()) {
                 if (view != null)
-                    showSnackBar(getString(R.string.database_file_does_not_exist), ERROR)
+                    showMessage(getString(R.string.database_file_does_not_exist), ERROR)
                 return
             }
 
@@ -332,7 +332,7 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
             )
             if (dbFilePath == null) {
                 if (view != null)
-                    showSnackBar(getString(R.string.database_file_does_not_exist), ERROR)
+                    showMessage(getString(R.string.database_file_does_not_exist), ERROR)
                 return
             }
 
@@ -389,9 +389,9 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
                 "Ver: %s%sInstallation Code: %s%sClient Package: %s",
                 "${getString(R.string.app_milestone)} ${pInfo.versionName}",
                 Statics.newLine,
-                Repository.installationCode,
+                svm.installationCode,
                 Statics.newLine,
-                Repository.clientPackage
+                svm.clientPackage
             )
 
             val extraText = ArrayList<String>()
@@ -407,7 +407,7 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
         } catch (ex: Exception) {
             ex.printStackTrace()
             if (view != null)
-                showSnackBar(getString(R.string.error_sending_email), ERROR)
+                showMessage(getString(R.string.error_sending_email), ERROR)
         }
     }
 
@@ -445,10 +445,10 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
 
         if (anyDeleted) {
             if (view != null)
-                showSnackBar(getString(R.string.temporary_databases_deleted), SUCCESS)
+                showMessage(getString(R.string.temporary_databases_deleted), SUCCESS)
         } else {
             if (view != null)
-                showSnackBar(getString(R.string.no_temporary_bases_found), SnackBarType.INFO)
+                showMessage(getString(R.string.no_temporary_bases_found), SnackBarType.INFO)
         }
     }
 
@@ -472,7 +472,7 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
                 }
             }
             if (view != null) {
-                showSnackBar(
+                showMessage(
                     String.format(
                         "%s: %s", getString(R.string.database_changed), DATABASE_NAME
                     ), SnackBarType.INFO
@@ -482,7 +482,7 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
             println("${String.format(getString(R.string.failed_to_copy_database))}: ${Statics.newLine}")
             e.printStackTrace()
 
-            showSnackBar(String.format(getString(R.string.failed_to_copy_database)), ERROR)
+            showMessage(String.format(getString(R.string.failed_to_copy_database)), ERROR)
         }
     }
 
@@ -510,7 +510,7 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
                     dst.transferFrom(src, 0, src.size())
                 }
             }
-            showSnackBar(
+            showMessage(
                 String.format(
                     "%s: %s", getString(R.string.database_changed), DATABASE_NAME
                 ), SnackBarType.INFO
@@ -519,7 +519,7 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
             println("${String.format(getString(R.string.failed_to_replace_database))}: ${Statics.newLine}")
             e.printStackTrace()
 
-            showSnackBar(String.format(getString(R.string.failed_to_replace_database)), ERROR)
+            showMessage(String.format(getString(R.string.failed_to_replace_database)), ERROR)
             println(": ${e.message}")
         } finally {
             // Reiniciamos la instancia
@@ -537,7 +537,7 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
             ) { dialog, _ ->
                 // Forzar descarga de la base de datos
                 DownloadDb.downloadDbRequired = true
-                if (view != null) showSnackBar(
+                if (view != null) showMessage(
                     getString(R.string.the_database_will_be_downloaded_when_you_return_to_the_login_screen),
                     SnackBarType.INFO
                 )
@@ -547,15 +547,12 @@ class DataSyncPreferenceFragment : PreferenceFragmentCompat(), ActivityCompat.On
             ) { dialog, _ -> dialog.dismiss() }.create()
     }
 
-    private fun showSnackBar(text: String, type: SnackBarType) {
-        showSnackBar(SnackBarEventData(text, type))
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (type == ERROR) logError(msg)
+        makeText(requireView(), msg, type)
     }
 
-    private fun showSnackBar(it: SnackBarEventData) {
-        if (requireActivity().isDestroyed || requireActivity().isFinishing) return
-
-        MakeText.makeText(requireView(), it.text, it.snackBarType)
-    }
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 
     companion object {
         fun equals(a: Any?, b: Any?): Boolean {

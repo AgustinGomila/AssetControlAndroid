@@ -4,9 +4,11 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.data.room.dto.asset.Asset
 import com.example.assetControl.data.room.repository.asset.AssetRepository
@@ -16,12 +18,11 @@ import com.example.assetControl.devices.scanners.Scanner
 import com.example.assetControl.devices.scanners.nfc.Nfc
 import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.example.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
 import com.example.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.example.assetControl.ui.common.utils.Screen.Companion.setupUI
 import com.example.assetControl.utils.errorLog.ErrorLog
-import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
 
 class ObservationsActivity : AppCompatActivity(), Scanner.ScannerListener {
     private var obs = ""
@@ -117,7 +118,7 @@ class ObservationsActivity : AppCompatActivity(), Scanner.ScannerListener {
         if (tempPos >= 0) {
             try {
                 val tempLabelNumber: String = tempCode.substring(tempPos + 1)
-                tempCode = tempCode.substring(0, tempCode.length - (tempLabelNumber.length + 1))
+                tempCode = tempCode.take(tempCode.length - (tempLabelNumber.length + 1))
                 labelNumber = tempLabelNumber.toInt()
             } catch (ex: Exception) {
                 labelNumber = null
@@ -157,7 +158,7 @@ class ObservationsActivity : AppCompatActivity(), Scanner.ScannerListener {
                 (labelNumber ?: return) < if (asset.labelNumber == null) {
                     0
                 } else {
-                    (asset.labelNumber ?: return).toInt()
+                    asset.labelNumber ?: return
                 } -> autoText += "|_ ${getString(R.string.it_has_a_disabled_tag)}$newLine"
             }
         }
@@ -178,12 +179,12 @@ class ObservationsActivity : AppCompatActivity(), Scanner.ScannerListener {
 
     private val showScannedCode: Boolean
         get() {
-            return prefsGetBoolean(Preference.showScannedCode)
+            return svm.showScannedCode
         }
 
     override fun scannerCompleted(scanCode: String) {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
-        if (showScannedCode) makeText(binding.root, scanCode, SnackBarType.INFO)
+        if (showScannedCode) showMessage(scanCode, SnackBarType.INFO)
         ScannerManager.lockScanner(this, true)
 
         try {
@@ -196,10 +197,10 @@ class ObservationsActivity : AppCompatActivity(), Scanner.ScannerListener {
                 binding.obsEditText.scrollTo(0, binding.obsEditText.bottom)
             }
 
-            makeText(binding.root, getString(R.string.ok), SnackBarType.SUCCESS)
+            showMessage(getString(R.string.ok), SnackBarType.SUCCESS)
         } catch (ex: Exception) {
             ex.printStackTrace()
-            makeText(binding.root, ex.message.toString(), SnackBarType.ERROR)
+            showMessage(ex.message.toString(), ERROR)
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         } finally {
             ScannerManager.lockScanner(this, false)
@@ -216,4 +217,12 @@ class ObservationsActivity : AppCompatActivity(), Scanner.ScannerListener {
         setResult(RESULT_CANCELED)
         finish()
     }
+
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (isFinishing || isDestroyed) return
+        if (type == ERROR) logError(msg)
+        makeText(binding.root, msg, type)
+    }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 }

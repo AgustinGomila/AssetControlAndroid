@@ -2,6 +2,7 @@ package com.example.assetControl.ui.activities.maintenance
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.example.assetControl.R
@@ -11,6 +12,7 @@ import com.example.assetControl.data.room.dto.maintenance.MaintenanceType
 import com.example.assetControl.databinding.AssetManteinanceStatusActivityBinding
 import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.example.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
 import com.example.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.example.assetControl.ui.common.utils.Screen.Companion.setupUI
@@ -75,8 +77,7 @@ class AssetMaintenanceStatusActivity : AppCompatActivity(),
         if (statusSpinnerFragment?.selectedMaintenanceStatus == null ||
             (statusSpinnerFragment?.selectedMaintenanceStatus?.id ?: -1) <= 0
         ) {
-            makeText(
-                binding.root,
+            showMessage(
                 getString(R.string.you_must_select_a_state),
                 SnackBarType.INFO
             )
@@ -86,8 +87,7 @@ class AssetMaintenanceStatusActivity : AppCompatActivity(),
         if (typeSpinnerFragment?.selectedType == null ||
             (typeSpinnerFragment?.selectedType?.id ?: -1) <= 0
         ) {
-            makeText(
-                binding.root,
+            showMessage(
                 getString(R.string.you_must_select_a_maintenance_task),
                 SnackBarType.INFO
             )
@@ -100,8 +100,7 @@ class AssetMaintenanceStatusActivity : AppCompatActivity(),
         maintenance?.transferred = false
 
         maintenance?.saveChanges()
-        makeText(
-            binding.root,
+        showMessage(
             getString(R.string.maintenance_saved_correctly),
             SnackBarType.SUCCESS
         )
@@ -119,4 +118,12 @@ class AssetMaintenanceStatusActivity : AppCompatActivity(),
         setResult(RESULT_CANCELED)
         finish()
     }
+
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (isFinishing || isDestroyed) return
+        if (type == ERROR) logError(msg)
+        makeText(binding.root, msg, type)
+    }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 }

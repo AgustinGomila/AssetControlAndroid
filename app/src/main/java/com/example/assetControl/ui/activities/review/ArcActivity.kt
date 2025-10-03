@@ -58,6 +58,8 @@ import com.dacosys.imageControl.room.dao.ImageCoroutines
 import com.dacosys.imageControl.ui.activities.ImageControlCameraActivity
 import com.dacosys.imageControl.ui.activities.ImageControlGridActivity
 import com.example.assetControl.AssetControlApp.Companion.context
+import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.BuildConfig
 import com.example.assetControl.R
 import com.example.assetControl.data.async.review.SaveReview
@@ -98,7 +100,6 @@ import com.example.assetControl.ui.adapters.interfaces.Interfaces
 import com.example.assetControl.ui.adapters.interfaces.Interfaces.AdapterProgress
 import com.example.assetControl.ui.adapters.review.ArcRecyclerAdapter
 import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
-import com.example.assetControl.ui.common.snackbar.SnackBarEventData
 import com.example.assetControl.ui.common.snackbar.SnackBarType
 import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.SUCCESS
@@ -112,11 +113,6 @@ import com.example.assetControl.utils.parcel.ParcelLong
 import com.example.assetControl.utils.parcel.Parcelables.parcelable
 import com.example.assetControl.utils.parcel.Parcelables.parcelableArrayList
 import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetStringSet
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutBoolean
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutStringSet
-import com.example.assetControl.utils.settings.preferences.Repository.Companion.useImageControl
 import com.example.assetControl.viewModel.review.SaveReviewViewModel
 import com.example.assetControl.viewModel.sync.SyncViewModel
 import com.google.android.material.textfield.TextInputEditText
@@ -140,9 +136,9 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     private fun saveSharedPreferences() {
-        prefsPutBoolean(Preference.assetReviewAddUnknownAssets.key, binding.addUnknownAssetsSwitch.isChecked)
-        prefsPutBoolean(Preference.assetReviewAllowUnknownCodes.key, binding.allowUnknownCodesSwitch.isChecked)
-        prefsPutStringSet(
+        svm.assetReviewAddUnknownAssets = binding.addUnknownAssetsSwitch.isChecked
+        svm.assetReviewAllowUnknownCodes = binding.allowUnknownCodesSwitch.isChecked
+        sr.prefsPutStringSet(
             Preference.assetReviewContentVisibleStatus.key, (adapter?.visibleStatus ?: ArrayList())
                 .map { it.id.toString() }
                 .toSet())
@@ -197,11 +193,11 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
             }
 
             ProgressStatus.crashed.id, ProgressStatus.canceled.id -> {
-                makeText(this, msg, ERROR)
+                showMessage(msg, ERROR)
             }
 
             ProgressStatus.finished.id -> {
-                makeText(this, getString(R.string.upload_images_success), SUCCESS)
+                showMessage(getString(R.string.upload_images_success), SUCCESS)
             }
         }
     }
@@ -247,7 +243,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
             ProgressStatus.canceled,
                 -> {
                 closeKeyboard(this)
-                makeText(binding.root, msg, ERROR)
+                showMessage(msg, ERROR)
                 ErrorLog.writeLog(
                     this, this::class.java.simpleName, "$progressStatusDesc: $registryDesc ${
                         Statics.getPercentage(completedTask, totalTask)
@@ -288,7 +284,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
     private var firstVisiblePos: Int? = null
 
     private var visibleStatusArray: ArrayList<AssetReviewContentStatus> = ArrayList()
-    private val allowQuickReview: Boolean by lazy { prefsGetBoolean(Preference.quickReviews) }
+    private val allowQuickReview: Boolean by lazy { svm.quickReviews }
 
     private var unknownAssetId: Long = 0
 
@@ -301,22 +297,21 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private val menuItemShowImages = 9999
     private var showImages
-        get() = prefsGetBoolean(Preference.reviewContentShowImages)
+        get() = svm.reviewContentShowImages
         set(value) {
-            prefsPutBoolean(Preference.reviewContentShowImages.key, value)
+            svm.reviewContentShowImages = value
         }
 
     private var showCheckBoxes
         get() =
             if (!allowQuickReview) false
-            else prefsGetBoolean(Preference.reviewContentShowCheckBoxes)
+            else svm.reviewContentShowCheckBoxes
         set(value) {
-            prefsPutBoolean(Preference.reviewContentShowCheckBoxes.key, value)
+            svm.reviewContentShowCheckBoxes = value
         }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-
         saveBundleValues(outState)
     }
 
@@ -372,11 +367,11 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         if (b.containsKey("allowUnknownCodes")) binding.allowUnknownCodesSwitch.isChecked =
             b.getBoolean("allowUnknownCodes")
-        else binding.allowUnknownCodesSwitch.isChecked = prefsGetBoolean(Preference.assetReviewAllowUnknownCodes)
+        else binding.allowUnknownCodesSwitch.isChecked = svm.assetReviewAllowUnknownCodes
 
         if (b.containsKey("addUnknownAssets")) binding.addUnknownAssetsSwitch.isChecked =
             b.getBoolean("addUnknownAssets")
-        else binding.addUnknownAssetsSwitch.isChecked = prefsGetBoolean(Preference.assetReviewAddUnknownAssets)
+        else binding.addUnknownAssetsSwitch.isChecked = svm.assetReviewAddUnknownAssets
 
         unknownAssetId = b.getLong("unknownAssetId")
 
@@ -409,14 +404,14 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private fun loadDefaultValues() {
         tempTitle = getString(R.string.asset_review)
-        binding.allowUnknownCodesSwitch.isChecked = prefsGetBoolean(Preference.assetReviewAllowUnknownCodes)
-        binding.addUnknownAssetsSwitch.isChecked = prefsGetBoolean(Preference.assetReviewAddUnknownAssets)
+        binding.allowUnknownCodesSwitch.isChecked = svm.assetReviewAllowUnknownCodes
+        binding.addUnknownAssetsSwitch.isChecked = svm.assetReviewAddUnknownAssets
         loadDefaultVisibleStatus()
     }
 
     private fun loadDefaultVisibleStatus() {
         visibleStatusArray.clear()
-        var set = prefsGetStringSet(
+        var set = sr.prefsGetStringSet(
             Preference.assetReviewContentVisibleStatus.key,
             Preference.assetReviewContentVisibleStatus.defaultValue as ArrayList<String>
         )
@@ -520,7 +515,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
                 binding.addUnknownAssetsSwitch.isChecked = false
             }
         }
-        binding.allowUnknownCodesSwitch.isChecked = prefsGetBoolean(Preference.assetReviewAllowUnknownCodes)
+        binding.allowUnknownCodesSwitch.isChecked = svm.assetReviewAllowUnknownCodes
         binding.allowUnknownAssetTextView.setOnClickListener { binding.allowUnknownCodesSwitch.performClick() }
 
         binding.addUnknownAssetsSwitch.setOnCheckedChangeListener { _, isChecked ->
@@ -528,7 +523,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
                 binding.allowUnknownCodesSwitch.isChecked = true
             }
         }
-        binding.addUnknownAssetsSwitch.isChecked = prefsGetBoolean(Preference.assetReviewAddUnknownAssets)
+        binding.addUnknownAssetsSwitch.isChecked = svm.assetReviewAddUnknownAssets
         binding.unknownAssetRegistrationTextView.setOnClickListener { binding.addUnknownAssetsSwitch.performClick() }
 
         binding.mantButton.setOnClickListener {
@@ -538,7 +533,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
             }
         }
 
-        if (!prefsGetBoolean(Preference.useAssetControlManteinance)) {
+        if (!svm.useAssetControlManteinance) {
             binding.mantButton.isEnabled = false
         }
 
@@ -971,9 +966,9 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private val resultForAssetSelect =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            val data = it?.data
+            val data = it.data
             try {
-                if (it?.resultCode == RESULT_OK && data != null) {
+                if (it.resultCode == RESULT_OK && data != null) {
                     val idParcel = data.parcelableArrayList<ParcelLong>("ids")
                         ?: return@registerForActivityResult
 
@@ -990,7 +985,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
                     } catch (ex: Exception) {
                         val res =
                             context.getString(R.string.an_error_occurred_while_trying_to_add_the_item)
-                        makeText(binding.root, res, ERROR)
+                        showMessage(res, ERROR)
                         Log.d(this::class.java.simpleName, res)
                     }
                 }
@@ -1026,9 +1021,9 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private val resultForFinishReview =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            val data = it?.data
+            val data = it.data
             try {
-                if (it?.resultCode == RESULT_OK && data != null) {
+                if (it.resultCode == RESULT_OK && data != null) {
                     when (Parcels.unwrap<ConfirmStatus>(data.parcelable("confirmStatus"))) {
                         ConfirmStatus.modify -> {
                             assetReview?.obs = data.getStringExtra("obs") ?: ""
@@ -1070,13 +1065,6 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
         }
     }
 
-    @Suppress("unused")
-    private fun showSnackBar(it: SnackBarEventData) {
-        if (!::binding.isInitialized || isFinishing || isDestroyed) return
-
-        makeText(binding.root, it.text, it.snackBarType)
-    }
-
     private fun scannerHandleScanCompleted(scannedCode: String, manuallyAdded: Boolean) {
         ScannerManager.lockScanner(this, true)
 
@@ -1087,7 +1075,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
             )
         } catch (ex: Exception) {
             ex.printStackTrace()
-            makeText(binding.root, ex.message.toString(), ERROR)
+            showMessage(ex.message.toString(), ERROR)
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         } finally {
             ScannerManager.lockScanner(this, false)
@@ -1152,7 +1140,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
             dialog.show()
         } catch (ex: Exception) {
             ex.printStackTrace()
-            makeText(binding.root, ex.message.toString(), ERROR)
+            showMessage(ex.message.toString(), ERROR)
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         } finally {
             ScannerManager.lockScanner(this, false)
@@ -1161,12 +1149,12 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private val showScannedCode: Boolean
         get() {
-            return prefsGetBoolean(Preference.showScannedCode)
+            return svm.showScannedCode
         }
 
     override fun scannerCompleted(scanCode: String) {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
-        if (showScannedCode) makeText(binding.root, scanCode, SnackBarType.INFO)
+        if (showScannedCode) showMessage(scanCode, SnackBarType.INFO)
         scannerHandleScanCompleted(scanCode, false)
     }
 
@@ -1356,7 +1344,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
         )
         adapter?.refreshUiEventListener(uiEventListener = this)
 
-        if (useImageControl) {
+        if (svm.useImageControl) {
             adapter?.refreshImageControlListeners(
                 addPhotoListener = this,
                 albumViewListener = this
@@ -1378,7 +1366,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
         if (scannedCode.isEmpty()) {
             // Nada que hacer, volver
             val res = "$scannedCode: ${getString(R.string.invalid_code)}"
-            makeText(binding.root, res, ERROR)
+            showMessage(res, ERROR)
             Log.d(this::class.java.simpleName, res)
             return
         }
@@ -1394,21 +1382,21 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
             if (sc.warehouseArea != null) {
                 val res = getString(R.string.area_label)
-                makeText(binding.root, res, ERROR)
+                showMessage(res, ERROR)
                 Log.d(this::class.java.simpleName, res)
                 return
             }
 
             if (sc.codeFound && sc.asset != null && sc.labelNbr == 0) {
                 val res = getString(R.string.report_code)
-                makeText(binding.root, res, ERROR)
+                showMessage(res, ERROR)
                 Log.d(this::class.java.simpleName, res)
                 return
             }
 
             if (sc.codeFound && sc.asset != null && sc.asset?.labelNumber == null) {
                 val res = getString(R.string.no_printed_label)
-                makeText(binding.root, res, ERROR)
+                showMessage(res, ERROR)
                 Log.d(this::class.java.simpleName, res)
                 return
             }
@@ -1417,7 +1405,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
                 sc.labelNbr != null && sc.asset?.labelNumber != sc.labelNbr
             ) {
                 val res = getString(R.string.invalid_code)
-                makeText(binding.root, res, ERROR)
+                showMessage(res, ERROR)
                 Log.d(this::class.java.simpleName, res)
                 return
             }
@@ -1454,11 +1442,11 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
                         }
 
                         val res = "$scannedCode: ${getString(R.string.ok)}"
-                        makeText(binding.root, res, SUCCESS)
+                        showMessage(res, SUCCESS)
                         Log.d(this::class.java.simpleName, res)
                     } else {
                         val res = "$scannedCode: ${getString(R.string.already_registered)}"
-                        makeText(binding.root, res, SnackBarType.INFO)
+                        showMessage(res, SnackBarType.INFO)
                         Log.d(this::class.java.simpleName, res)
 
                         runOnUiThread {
@@ -1473,7 +1461,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
             if (sc.asset == null && !allowUnknownCodes) {
                 val res = "$scannedCode: ${getString(R.string.unknown_code)}"
-                makeText(binding.root, res, ERROR)
+                showMessage(res, ERROR)
                 Log.d(this::class.java.simpleName, res)
                 return
             }
@@ -1509,7 +1497,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
-            makeText(binding.root, ex.message.toString(), ERROR)
+            showMessage(ex.message.toString(), ERROR)
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
             return
         }
@@ -1622,9 +1610,9 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private val resultForAssetCrud =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            val data = it?.data
+            val data = it.data
             try {
-                if (it?.resultCode == RESULT_OK && data != null) {
+                if (it.resultCode == RESULT_OK && data != null) {
                     val asset = Parcels.unwrap<Asset>(data.parcelable("asset"))
                         ?: return@registerForActivityResult
 
@@ -1640,7 +1628,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
                         } catch (ex: Exception) {
                             val res =
                                 context.getString(R.string.an_error_occurred_while_trying_to_add_the_item)
-                            makeText(binding.root, res, ERROR)
+                            showMessage(res, ERROR)
                             Log.d(this::class.java.simpleName, res)
                         }
                     }
@@ -1681,7 +1669,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
         }
 
         // Opción de visibilidad de Imágenes
-        if (useImageControl) {
+        if (svm.useImageControl) {
             menu.add(Menu.NONE, menuItemShowImages, menu.size, context.getString(R.string.show_images))
                 .setChecked(showImages)
                 .isCheckable = true
@@ -2044,7 +2032,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
             progressDialog = null
             showProgressBar(false)
 
-            makeText(this, msg, ERROR)
+            showMessage(msg, ERROR)
         }
     }
 
@@ -2132,27 +2120,24 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     override fun onStateChanged(state: Int) {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
-        if (prefsGetBoolean(Preference.rfidShowConnectedMessage)) {
+        if (svm.rfidShowConnectedMessage) {
             when (Rfid.vh75State) {
                 Vh75Bt.STATE_CONNECTED -> {
-                    makeText(
-                        binding.root,
+                    showMessage(
                         getString(R.string.rfid_connected),
                         SUCCESS
                     )
                 }
 
                 Vh75Bt.STATE_CONNECTING -> {
-                    makeText(
-                        binding.root,
+                    showMessage(
                         getString(R.string.searching_rfid_reader),
                         SnackBarType.RUNNING
                     )
                 }
 
                 else -> {
-                    makeText(
-                        binding.root,
+                    showMessage(
                         getString(R.string.there_is_no_rfid_device_connected),
                         SnackBarType.INFO
                     )
@@ -2189,9 +2174,9 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private val resultForEditAsset =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            val data = it?.data
+            val data = it.data
             try {
-                if (it?.resultCode == RESULT_OK && data != null) {
+                if (it.resultCode == RESULT_OK && data != null) {
                     val a = Parcels.unwrap<Asset>(data.parcelable("asset"))
                         ?: return@registerForActivityResult
                     adapter?.updateItem(a, true)
@@ -2207,7 +2192,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
     // region ImageControl
 
     override fun onAlbumViewRequired(tableId: Int, itemId: Long, filename: String) {
-        if (!useImageControl) {
+        if (!svm.useImageControl) {
             return
         }
 
@@ -2239,7 +2224,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
         ) { it2 ->
             if (it2 != null) fillResults(it2)
             else {
-                makeText(binding.root, getString(R.string.no_images), SnackBarType.INFO)
+                showMessage(getString(R.string.no_images), SnackBarType.INFO)
                 rejectNewInstances = false
             }
         }
@@ -2267,7 +2252,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
 
         if (docContReqResObj.documentContentArray.isEmpty()) {
-            makeText(binding.root, getString(R.string.no_images), SnackBarType.INFO)
+            showMessage(getString(R.string.no_images), SnackBarType.INFO)
             rejectNewInstances = false
             return
         }
@@ -2275,8 +2260,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
         val anyAvailable = docContReqResObj.documentContentArray.any { it.available }
 
         if (!anyAvailable) {
-            makeText(
-                binding.root,
+            showMessage(
                 context.getString(R.string.images_not_yet_processed),
                 SnackBarType.INFO
             )
@@ -2294,7 +2278,7 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
         obs: String,
         reference: String
     ) {
-        if (!useImageControl) {
+        if (!svm.useImageControl) {
             return
         }
 
@@ -2315,9 +2299,9 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private val resultForPhotoCapture =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            val data = it?.data
+            val data = it.data
             try {
-                if (it?.resultCode == RESULT_OK && data != null) {
+                if (it.resultCode == RESULT_OK && data != null) {
                     val assetId = adapter?.currentItem()?.assetId ?: return@registerForActivityResult
                     val asset = AssetRepository().selectById(assetId)
                     asset?.saveChanges()
@@ -2330,4 +2314,12 @@ class ArcActivity : AppCompatActivity(), Scanner.ScannerListener,
         }
 
     // endregion IC
+
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (isFinishing || isDestroyed) return
+        if (type == ERROR) logError(msg)
+        makeText(binding.root, msg, type)
+    }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 }

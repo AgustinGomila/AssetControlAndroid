@@ -38,6 +38,7 @@ import com.dacosys.imageControl.ui.adapter.ImageAdapter.Companion.GetImageStatus
 import com.dacosys.imageControl.ui.adapter.ImageAdapter.Companion.ImageControlHolder
 import com.example.assetControl.AssetControlApp.Companion.context
 import com.example.assetControl.AssetControlApp.Companion.currentUser
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.data.enums.asset.AssetStatus
 import com.example.assetControl.data.enums.asset.OwnershipStatus
@@ -55,7 +56,6 @@ import com.example.assetControl.ui.adapters.interfaces.Interfaces.EditAssetRequi
 import com.example.assetControl.ui.common.utils.Screen.Companion.getBestContrastColor
 import com.example.assetControl.ui.common.utils.Screen.Companion.getColorWithAlpha
 import com.example.assetControl.ui.common.utils.Screen.Companion.manipulateColor
-import com.example.assetControl.utils.settings.preferences.Repository.Companion.useImageControl
 import java.util.*
 
 class AssetRecyclerAdapter private constructor(builder: Builder) :
@@ -110,7 +110,7 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
      * The state is defined by [useImageControl] preference property.
      *
      */
-    @Suppress("MemberVisibilityCanBePrivate")
+    @Suppress("unused")
     fun showImageControlPanel() {
         notifyItemRangeChanged(currentIndex, 1, PAYLOADS.IMAGE_CONTROL_VISIBILITY)
     }
@@ -234,9 +234,9 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
 
                 PAYLOADS.IMAGE_CONTROL_VISIBILITY -> {
                     if (position == currentIndex) {
-                        (holder as SelectedViewHolder).bindImageControlVisibility(if (useImageControl) VISIBLE else GONE)
+                        (holder as SelectedViewHolder).bindImageControlVisibility(if (svm.useImageControl) VISIBLE else GONE)
                     }
-                    if (!useImageControl) showImages(false)
+                    if (!svm.useImageControl) showImages(false)
                 }
 
                 PAYLOADS.ITEM_SELECTED -> {
@@ -655,7 +655,7 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
     fun scrollToPos(position: Int, scrollToTop: Boolean = false) {
         val layoutManager = recyclerView.layoutManager as LinearLayoutManager
 
-        if (position < 0 || position >= itemCount) {
+        if (position !in 0..<itemCount) {
             // La posición está fuera del rango válido, no se puede realizar el scroll
             return
         }
@@ -802,7 +802,7 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
          * @param changingState Only if we are changing the visibility state, we expand the panel
          */
         fun bindImageVisibility(imageVisibility: Int, changingState: Boolean) {
-            if (!useImageControl || imageVisibility == GONE) collapseImagePanel(icHolder)
+            if (!svm.useImageControl || imageVisibility == GONE) collapseImagePanel(icHolder)
             else if (changingState) expandImagePanel(icHolder)
         }
 
@@ -817,7 +817,7 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
 
         fun bind(asset: Asset, checkBoxVisibility: Int = GONE, imageVisibility: Int = GONE) {
             bindCheckBoxVisibility(checkBoxVisibility)
-            bindImageControlVisibility(visibility = if (useImageControl) VISIBLE else GONE)
+            bindImageControlVisibility(visibility = if (svm.useImageControl) VISIBLE else GONE)
             bindImageVisibility(imageVisibility = imageVisibility, changingState = false)
 
             binding.descriptionAutoSize.text = asset.description
@@ -975,7 +975,7 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
          * @param changingState Only if we are changing the visibility state, we expand the panel
          */
         fun bindImageVisibility(imageVisibility: Int, changingState: Boolean) {
-            if (!useImageControl || imageVisibility == GONE) collapseImagePanel(icHolder)
+            if (!svm.useImageControl || imageVisibility == GONE) collapseImagePanel(icHolder)
             else if (changingState) expandImagePanel(icHolder)
         }
 
@@ -1239,7 +1239,7 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
         refreshFilter(filterOptions)
 
         // Cambiamos la visibilidad del panel de imágenes.
-        if (!useImageControl) showImages = false
+        if (!svm.useImageControl) showImages = false
         showImages(showImages)
     }
 
@@ -1302,14 +1302,12 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
             return this
         }
 
-        @Suppress("unused")
         fun showCheckBoxes(`val`: Boolean, callback: (Boolean) -> Unit): Builder {
             showCheckBoxes = `val`
             showCheckBoxesChanged = callback
             return this
         }
 
-        @Suppress("unused")
         fun showImages(`val`: Boolean, callback: (Boolean) -> Unit): Builder {
             showImages = `val`
             showImagesChanged = callback

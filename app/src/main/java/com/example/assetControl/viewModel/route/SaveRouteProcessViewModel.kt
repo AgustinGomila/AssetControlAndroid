@@ -7,7 +7,6 @@ import com.example.assetControl.data.enums.common.SaveProgress
 class SaveRouteProcessViewModel : ViewModel() {
     val saveProgress: MutableLiveData<SaveProgress?> = MutableLiveData()
 
-    @Suppress("unused")
     fun getSaveProgress(): SaveProgress? {
         return saveProgress.value
     }

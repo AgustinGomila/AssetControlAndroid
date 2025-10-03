@@ -3,6 +3,7 @@ package com.example.assetControl.ui.fragments.asset
 import android.content.Intent
 import android.graphics.Typeface
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -30,8 +31,9 @@ import com.example.assetControl.data.webservice.asset.AssetObject
 import com.example.assetControl.databinding.AssetCrudFragmentBinding
 import com.example.assetControl.ui.activities.category.ItemCategorySelectActivity
 import com.example.assetControl.ui.activities.location.LocationSelectActivity
-import com.example.assetControl.ui.common.snackbar.MakeText
+import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.parcel.Parcelables.parcelable
 import org.parceler.Parcels
@@ -358,8 +360,7 @@ class AssetCRUDFragment : Fragment() {
         if (_binding == null) return false
 
         if (binding.descriptionEditText.text.trim().toString().isEmpty()) {
-            MakeText.makeText(
-                binding.root,
+            showMessage(
                 getString(R.string.you_must_enter_a_description_for_the_asset),
                 SnackBarType.INFO
             )
@@ -368,8 +369,7 @@ class AssetCRUDFragment : Fragment() {
         }
 
         if (binding.codeEditText.text.trim().toString().isEmpty()) {
-            MakeText.makeText(
-                binding.root,
+            showMessage(
                 getString(R.string.you_must_enter_a_code_for_the_asset),
                 SnackBarType.INFO
             )
@@ -388,18 +388,16 @@ class AssetCRUDFragment : Fragment() {
                 assetId
             )
         ) {
-            MakeText.makeText(
-                binding.root,
+            showMessage(
                 getString(R.string.the_code_entered_already_exists_for_another_asset),
-                SnackBarType.ERROR
+                ERROR
             )
             binding.codeEditText.requestFocus()
             return false
         }
 
         if (itemCategory == null) {
-            MakeText.makeText(
-                binding.root,
+            showMessage(
                 getString(R.string.you_must_select_a_category_for_the_asset),
                 SnackBarType.INFO
             )
@@ -407,8 +405,7 @@ class AssetCRUDFragment : Fragment() {
         }
 
         if (origWarehouseArea == null) {
-            MakeText.makeText(
-                binding.root,
+            showMessage(
                 getString(R.string.you_must_select_an_original_area_for_the_asset),
                 SnackBarType.INFO
             )
@@ -416,8 +413,7 @@ class AssetCRUDFragment : Fragment() {
         }
 
         if (currWarehouseArea == null) {
-            MakeText.makeText(
-                binding.root,
+            showMessage(
                 getString(R.string.you_must_select_a_current_area_for_the_asset),
                 SnackBarType.INFO
             )
@@ -426,8 +422,7 @@ class AssetCRUDFragment : Fragment() {
 
         val assetStatus = assetStatusSpinnerFragment!!.selectedAssetStatus
         if (assetStatus == null) {
-            MakeText.makeText(
-                binding.root,
+            showMessage(
                 getString(R.string.you_must_select_a_status_for_the_asset),
                 SnackBarType.INFO
             )
@@ -445,10 +440,9 @@ class AssetCRUDFragment : Fragment() {
         // desconocido en revisiones de activos.
         if (asset == null) {
             if (!User.hasPermission(PermissionEntry.AddAsset)) {
-                MakeText.makeText(
-                    binding.root,
+                showMessage(
                     getString(R.string.you_do_not_have_permission_to_add_assets),
-                    SnackBarType.ERROR
+                    ERROR
                 )
                 return
             }
@@ -461,10 +455,9 @@ class AssetCRUDFragment : Fragment() {
             }
         } else {
             if (!User.hasPermission(PermissionEntry.ModifyAsset)) {
-                MakeText.makeText(
-                    binding.root,
+                showMessage(
                     getString(R.string.you_do_not_have_permission_to_modify_assets),
-                    SnackBarType.ERROR
+                    ERROR
                 )
                 return
             }
@@ -571,6 +564,14 @@ class AssetCRUDFragment : Fragment() {
         this.asset = asset
         fillControls(false)
     }
+
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (requireActivity().isFinishing || requireActivity().isDestroyed) return
+        if (type == ERROR) logError(msg)
+        makeText(binding.root, msg, type)
+    }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 
     companion object {
 

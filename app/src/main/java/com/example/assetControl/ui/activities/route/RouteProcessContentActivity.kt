@@ -34,6 +34,7 @@ import androidx.transition.TransitionManager
 import com.dacosys.imageControl.network.upload.UploadImagesProgress
 import com.example.assetControl.AssetControlApp.Companion.context
 import com.example.assetControl.AssetControlApp.Companion.getUserId
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.data.enums.attribute.AttributeCompositionType
 import com.example.assetControl.data.enums.common.SaveProgress
@@ -91,8 +92,6 @@ import com.example.assetControl.utils.Statics
 import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.parcel.Parcelables.parcelable
 import com.example.assetControl.utils.parcel.Parcelables.parcelableArrayList
-import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
 import com.example.assetControl.viewModel.route.GetRouteProcess
 import com.example.assetControl.viewModel.route.GetRouteProcessContent
 import com.example.assetControl.viewModel.route.RouteProcessContentResult
@@ -139,7 +138,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
         if (taskStatus == ProgressStatus.crashed.id || taskStatus == ProgressStatus.canceled.id) {
             saving = false
-            makeText(binding.root, msg, ERROR)
+            showMessage(msg, ERROR)
         }
     }
 
@@ -179,7 +178,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
             next()
         } else if (taskStatus == ProgressStatus.crashed.id || taskStatus == ProgressStatus.canceled.id) {
-            makeText(binding.root, msg, ERROR)
+            showMessage(msg, ERROR)
         }
     }
 
@@ -219,11 +218,11 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             }
 
             ProgressStatus.crashed.id, ProgressStatus.canceled.id -> {
-                makeText(this, msg, ERROR)
+                showMessage(msg, ERROR)
             }
 
             ProgressStatus.finished.id -> {
-                makeText(this, getString(R.string.upload_images_success), SUCCESS)
+                showMessage(getString(R.string.upload_images_success), SUCCESS)
             }
         }
     }
@@ -267,7 +266,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             ProgressStatus.canceled,
                 -> {
                 closeKeyboard(this)
-                makeText(binding.root, msg, ERROR)
+                showMessage(msg, ERROR)
                 ErrorLog.writeLog(
                     this, this::class.java.simpleName, "$progressStatusDesc: $registryDesc ${
                         Statics.getPercentage(completedTask, totalTask)
@@ -868,7 +867,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             if (result != null) {
                 // Niveles en formato de texto, separados por comas (,)
                 if (result is String) {
-                    val z = result.toString().split(',')
+                    val z = result.split(',')
 
                     try {
                         if (levelsToNavigate.isEmpty()) {
@@ -933,7 +932,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         if (rc.falseResult == DcrResult.levelX.id) {
             if (result != null) {
                 if (result is String) {
-                    val z = result.toString().split(',')
+                    val z = result.split(',')
 
                     try {
                         if (levelsToNavigate.isEmpty()) {
@@ -1049,8 +1048,8 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         val rpc = adapter?.currentRpc() ?: return
 
         if (rpc.routeProcessStatusId == RouteProcessStatus.processed.id) {
-            makeText(
-                binding.root, context.getString(R.string.already_processed), SnackBarType.INFO
+            showMessage(
+                context.getString(R.string.already_processed), SnackBarType.INFO
             )
             return
         }
@@ -1112,8 +1111,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
         // Actualizar la base de datos
         if (!rpc.saveChanges()) {
-            makeText(
-                binding.root,
+            showMessage(
                 context.getString(R.string.error_updating_registered_data),
                 ERROR
             )
@@ -1133,8 +1131,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
             if (rpc != null) {
                 if (rpc.routeProcessStatusId != RouteProcessStatus.processed.id) {
-                    makeText(
-                        binding.root,
+                    showMessage(
                         context.getString(R.string.not_processed),
                         SnackBarType.INFO
                     )
@@ -1159,8 +1156,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
                 }
             }
         } else {
-            makeText(
-                binding.root,
+            showMessage(
                 context.getString(R.string.you_do_not_have_permission_to_enter_collected_data_again),
                 ERROR
             )
@@ -1219,7 +1215,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         val dcId = rpc.dataCollectionId
 
         if (dcId == null || rpc.status == RouteProcessStatus.notProcessed || rpc.status == RouteProcessStatus.skipped) {
-            makeText(binding.root, context.getString(R.string.not_processed), SnackBarType.INFO)
+            showMessage(context.getString(R.string.not_processed), SnackBarType.INFO)
             return
         }
 
@@ -1239,8 +1235,8 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         val rpc = adapter?.currentRpc() ?: return
 
         if (rpc.routeProcessStatusId == RouteProcessStatus.processed.id) {
-            makeText(
-                binding.root, context.getString(R.string.already_processed), SnackBarType.INFO
+            showMessage(
+                context.getString(R.string.already_processed), SnackBarType.INFO
             )
             return
         }
@@ -1266,9 +1262,9 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
     private val resultForFinishDcc =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            val data = it?.data
+            val data = it.data
             try {
-                if (it?.resultCode == RESULT_OK && data != null) {
+                if (it.resultCode == RESULT_OK && data != null) {
                     val dc =
                         Parcels.unwrap<DataCollection>(data.parcelable("dataCollection"))
                     processFinish(dc)
@@ -1354,7 +1350,6 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             return adapter?.itemCount ?: 0
         }
 
-    @Suppress("unused")
     private fun next() {
         adapter?.selectNext()
     }
@@ -1564,8 +1559,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         // determinado es porque está mal diseñada esa parte de la ruta.
         if (result == null && rc.expression.isNullOrEmpty() && (rc.trueResult != 0 || rc.falseResult != 0)) {
             // No puede seguir
-            makeText(
-                binding.root,
+            showMessage(
                 context.getString(R.string.route_design_error),
                 ERROR
             )
@@ -1574,8 +1568,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
         if (result == null && rc.trueResult != DcrResult.cont.id || result == null && rc.falseResult != DcrResult.cont.id) {
             // No puede seguir
-            makeText(
-                binding.root,
+            showMessage(
                 context.getString(R.string.invalid_value_does_not_allow_to_continue),
                 ERROR
             )
@@ -1586,8 +1579,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
         /////////////////////////
         if (rc.trueResult == DcrResult.noContinue.id && result != null && result == true || rc.falseResult == DcrResult.noContinue.id && result != null && result == false) {
             // No puede seguir
-            makeText(
-                binding.root,
+            showMessage(
                 context.getString(R.string.value_does_not_allow_to_continue),
                 ERROR
             )
@@ -1646,7 +1638,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             if (result != null) {
                 // Niveles en formato de texto, separados por comas (,)
                 if (result is String) {
-                    val z = result.toString().split(',')
+                    val z = result.split(',')
                     try {
                         if (levelsToNavigate.isEmpty()) {
                             levelsToNavigate.clear()
@@ -1720,8 +1712,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
                         // NO CONTINUAR
                         // No puede seguir
-                        makeText(
-                            binding.root,
+                        showMessage(
                             context.getString(R.string.value_does_not_allow_to_continue),
                             ERROR
                         )
@@ -1755,7 +1746,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             // Nada que hacer, volver
             if (scannedCode.trim().isEmpty()) {
                 val res = this.getString(R.string.invalid_code)
-                makeText(binding.root, res, ERROR)
+                showMessage(res, ERROR)
                 Log.d(this::class.java.simpleName, res)
                 return
             }
@@ -1770,14 +1761,14 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
             if (sc.codeFound && sc.asset != null && sc.labelNbr == 0) {
                 val res = this.getString(R.string.report_code)
-                makeText(binding.root, res, ERROR)
+                showMessage(res, ERROR)
                 Log.d(this::class.java.simpleName, res)
                 return
             }
 
             if (sc.codeFound && sc.asset != null && (sc.asset ?: return).labelNumber == null) {
                 val res = this.getString(R.string.no_printed_label)
-                makeText(binding.root, res, ERROR)
+                showMessage(res, ERROR)
                 Log.d(this::class.java.simpleName, res)
                 return
             }
@@ -1786,7 +1777,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
                     ?: return).labelNumber != sc.labelNbr && sc.labelNbr != null)
             ) {
                 val res = this.getString(R.string.invalid_code)
-                makeText(binding.root, res, ERROR)
+                showMessage(res, ERROR)
                 Log.d(this::class.java.simpleName, res)
                 return
             }
@@ -1813,12 +1804,12 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
                             ?: return@forEach).routeProcessStatusId == RouteProcessStatus.notProcessed.id
                     ) {
                         val res = this.getString(R.string.ok)
-                        makeText(binding.root, res, SUCCESS)
+                        showMessage(res, SUCCESS)
                         Log.d(this::class.java.simpleName, res)
                         it
                     } else {
                         val res = this.getString(R.string.already_registered)
-                        makeText(binding.root, res, SnackBarType.INFO)
+                        showMessage(res, SnackBarType.INFO)
                         Log.d(this::class.java.simpleName, res)
                         it
                     }
@@ -1833,7 +1824,7 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
             return
         } catch (ex: Exception) {
             ex.printStackTrace()
-            makeText(binding.root, ex.message.toString(), ERROR)
+            showMessage(ex.message.toString(), ERROR)
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
             return
         } finally {
@@ -1878,12 +1869,12 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
     private val showScannedCode: Boolean
         get() {
-            return prefsGetBoolean(Preference.showScannedCode)
+            return svm.showScannedCode
         }
 
     override fun scannerCompleted(scanCode: String) {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
-        if (showScannedCode) makeText(binding.root, scanCode, SnackBarType.INFO)
+        if (showScannedCode) showMessage(scanCode, SnackBarType.INFO)
         scannerHandleScanCompleted(scanCode)
     }
 
@@ -2016,27 +2007,24 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
 
     override fun onStateChanged(state: Int) {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
-        if (prefsGetBoolean(Preference.rfidShowConnectedMessage)) {
+        if (svm.rfidShowConnectedMessage) {
             when (Rfid.vh75State) {
                 Vh75Bt.STATE_CONNECTED -> {
-                    makeText(
-                        binding.root,
+                    showMessage(
                         getString(R.string.rfid_connected),
                         SUCCESS
                     )
                 }
 
                 Vh75Bt.STATE_CONNECTING -> {
-                    makeText(
-                        binding.root,
+                    showMessage(
                         getString(R.string.searching_rfid_reader),
                         SnackBarType.RUNNING
                     )
                 }
 
                 else -> {
-                    makeText(
-                        binding.root,
+                    showMessage(
                         getString(R.string.there_is_no_rfid_device_connected),
                         SnackBarType.INFO
                     )
@@ -2071,4 +2059,12 @@ class RouteProcessContentActivity : AppCompatActivity(), Scanner.ScannerListener
     override fun onCheckedChanged(isChecked: Boolean, pos: Int) {
         fillSummaryRow()
     }
+
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (isFinishing || isDestroyed) return
+        if (type == ERROR) logError(msg)
+        makeText(binding.root, msg, type)
+    }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 }

@@ -2,11 +2,11 @@ package com.example.assetControl.network.checkConn
 
 import com.dacosys.imageControl.dto.UserAuthResult
 import com.example.assetControl.AssetControlApp.Companion.context
-import com.example.assetControl.AssetControlApp.Companion.imageControl
 import com.example.assetControl.R
 import com.example.assetControl.ui.common.snackbar.SnackBarEventData
 import com.example.assetControl.ui.common.snackbar.SnackBarType
 import com.example.assetControl.utils.errorLog.ErrorLog
+import com.example.assetControl.utils.imageControl.ImageControl.Companion.checkImageControlUser
 import com.example.assetControl.utils.imageControl.ImageControl.Companion.setupImageControl
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -75,7 +75,7 @@ class ImageControlCheckUser(private var onSnackBarEvent: (SnackBarEventData) -> 
     private suspend fun suspendFunction(): UserAuthResult? = withContext(Dispatchers.IO) {
         return@withContext try {
             setupImageControl()
-            imageControl.webservice.imageControlUserCheck()
+            checkImageControlUser()
         } catch (ex: Exception) {
             ex.printStackTrace()
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)

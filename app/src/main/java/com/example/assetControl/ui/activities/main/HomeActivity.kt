@@ -43,6 +43,8 @@ import com.example.assetControl.AssetControlApp.Companion.context
 import com.example.assetControl.AssetControlApp.Companion.currentUser
 import com.example.assetControl.AssetControlApp.Companion.isLogged
 import com.example.assetControl.AssetControlApp.Companion.setCurrentUserId
+import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.BuildConfig
 import com.example.assetControl.R
 import com.example.assetControl.data.enums.permission.PermissionEntry
@@ -74,6 +76,7 @@ import com.example.assetControl.ui.activities.route.RouteSelectActivity
 import com.example.assetControl.ui.activities.sync.SyncActivity
 import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.example.assetControl.ui.common.utils.Screen
 import com.example.assetControl.ui.common.utils.Screen.Companion.getBestContrastColor
 import com.example.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
@@ -84,15 +87,10 @@ import com.example.assetControl.utils.imageControl.ImageControl.Companion.setupI
 import com.example.assetControl.utils.mainButton.MainButton
 import com.example.assetControl.utils.settings.config.ConfigHelper
 import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetString
-import com.example.assetControl.utils.settings.preferences.Repository
 import com.example.assetControl.viewModel.sync.SyncViewModel
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.runBlocking
-import me.weishu.reflection.Reflection
 import org.parceler.Parcels
 import kotlin.concurrent.thread
 import kotlin.math.ceil
@@ -101,7 +99,6 @@ import kotlin.math.ceil
 class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
     override fun attachBaseContext(base: Context) {
         super.attachBaseContext(base)
-        Reflection.unseal(base)
     }
 
     override fun onDestroy() {
@@ -131,12 +128,12 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
 
     private val showScannedCode: Boolean
         get() {
-            return prefsGetBoolean(Preference.showScannedCode)
+            return svm.showScannedCode
         }
 
     override fun scannerCompleted(scanCode: String) {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
-        if (showScannedCode) makeText(binding.root, scanCode, SnackBarType.INFO)
+        if (showScannedCode) showMessage(scanCode, SnackBarType.INFO)
         ScannerManager.lockScanner(this, true)
         ScannerManager.hideWindow(this)
 
@@ -144,7 +141,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
             // Nada que hacer, volver
             if (scanCode.trim().isEmpty()) {
                 val res = getString(R.string.invalid_code)
-                makeText(binding.root, res, SnackBarType.ERROR)
+                showMessage(res, ERROR)
                 ErrorLog.writeLog(this, this::class.java.simpleName, res)
                 return
             }
@@ -161,7 +158,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
                 sc.warehouseArea
             } else {
                 val res = getString(R.string.invalid_warehouse_area_code)
-                makeText(binding.root, res, SnackBarType.ERROR)
+                showMessage(res, ERROR)
                 null
             }
 
@@ -170,7 +167,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
-            makeText(binding.root, ex.message.toString(), SnackBarType.ERROR)
+            showMessage(ex.message.toString(), ERROR)
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         } finally {
             ScannerManager.lockScanner(this, false)
@@ -186,7 +183,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
         // así que de esta manera puedo volver a llenar el fragmento de usuarios
         // ¿Ya está autentificado?
         // Evitar hacer un nuevo login cuando se hace la rotación de la pantalla
-        if (Repository.wsUrl.isEmpty() || Repository.wsNamespace.isEmpty()) {
+        if (svm.wsUrl.isEmpty() || svm.wsNamespace.isEmpty()) {
             setupInitConfig()
             return
         }
@@ -227,8 +224,8 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
 
     private fun clickButton(clickedButton: Button) {
         if (!Statics.deviceDateIsValid()) {
-            makeText(
-                binding.root, getString(R.string.device_date_is_invalid), SnackBarType.ERROR
+            showMessage(
+                getString(R.string.device_date_is_invalid), ERROR
             )
             return
         }
@@ -236,10 +233,9 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
         when (MainButton.getById(clickedButton.tag.toString().toLong())) {
             MainButton.AssetReview -> {
                 if (!User.hasPermission(PermissionEntry.AddAssetReview)) {
-                    makeText(
-                        binding.root,
+                    showMessage(
                         getString(R.string.you_do_not_have_permission_to_make_revisions),
-                        SnackBarType.ERROR
+                        ERROR
                     )
                     return
                 }
@@ -265,10 +261,9 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
 
             MainButton.AssetMovement -> {
                 if (!User.hasPermission(PermissionEntry.AddWarehouseMovement)) {
-                    makeText(
-                        binding.root,
+                    showMessage(
                         getString(R.string.you_do_not_have_permission_to_move_assets),
-                        SnackBarType.ERROR
+                        ERROR
                     )
                     return
                 }
@@ -294,10 +289,9 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
 
             MainButton.PrintLabel -> {
                 if (!User.hasPermission(PermissionEntry.PrintLabel)) {
-                    makeText(
-                        binding.root,
+                    showMessage(
                         getString(R.string.you_do_not_have_permission_to_print_labels),
-                        SnackBarType.ERROR
+                        ERROR
                     )
                     return
                 }
@@ -358,7 +352,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
     }
 
     private fun configApp() {
-        val realPass = prefsGetString(Preference.confPassword)
+        val realPass = svm.confPassword
         if (realPass.isEmpty()) {
             attemptEnterConfig(realPass)
             return
@@ -400,9 +394,9 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
     }
 
     private fun attemptEnterConfig(password: String) {
-        val realPass = prefsGetString(Preference.confPassword)
+        val realPass = svm.confPassword
         if (password != realPass) {
-            makeText(binding.root, getString(R.string.invalid_password), SnackBarType.ERROR)
+            showMessage(getString(R.string.invalid_password), ERROR)
             return
         }
 
@@ -481,11 +475,10 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
     private val resultForInitConfig =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             try {
-                if (Repository.wsUrl.isEmpty() || Repository.wsNamespace.isEmpty()) {
-                    makeText(
-                        binding.root,
+                if (svm.wsUrl.isEmpty() || svm.wsNamespace.isEmpty()) {
+                    showMessage(
                         getString(R.string.webservice_is_not_configured),
-                        SnackBarType.ERROR
+                        ERROR
                     )
                     setupInitConfig()
                 } else {
@@ -536,10 +529,10 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
         val pInfo = packageManager.getPackageInfo(packageName, 0)
         binding.versionTextView.text =
             String.format("%s %s", getString(R.string.app_milestone), pInfo.versionName)
-        binding.installationCodeTextView.text = Repository.installationCode
-        binding.packageTextView.text = Repository.clientPackage
+        binding.installationCodeTextView.text = svm.installationCode
+        binding.packageTextView.text = svm.clientPackage
         when {
-            Repository.clientPackage.isEmpty() -> binding.packageTextView.visibility = GONE
+            svm.clientPackage.isEmpty() -> binding.packageTextView.visibility = GONE
             else -> binding.packageTextView.visibility = View.VISIBLE
         }
 
@@ -562,7 +555,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
 
     private fun onSessionCreated(result: Boolean) {
         if (!result) {
-            makeText(binding.root, getString(R.string.offline_mode), SnackBarType.INFO)
+            showMessage(getString(R.string.offline_mode), SnackBarType.INFO)
         }
     }
 
@@ -570,7 +563,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
 
         runOnUiThread {
-            val restSec = Preferences.prefsGetInt(Preference.acSyncInterval) - secs
+            val restSec = svm.acSyncInterval - secs
             val restMin = restSec / 60
             val rstSecsInMin = restSec % 60
             val msg = "$restMin:${String.format("%02d", rstSecsInMin)}"
@@ -650,10 +643,9 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
                 clickButton(button)
             } catch (ex: Exception) {
                 ex.printStackTrace()
-                makeText(
-                    binding.root,
+                showMessage(
                     "${getString(R.string.exception_error)}: " + ex.message,
-                    SnackBarType.ERROR
+                    ERROR
                 )
             }
         }
@@ -694,7 +686,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
 
         for (b in t) {
             // Omitir el botón de mantenimientos
-            if (b.mainButtonId == MainButton.AssetMaintenance.mainButtonId && !prefsGetBoolean(
+            if (b.mainButtonId == MainButton.AssetMaintenance.mainButtonId && !sr.prefsGetBoolean(
                     Preference.useAssetControlManteinance
                 )
             ) {
@@ -788,7 +780,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
         if (rejectNewInstances) return
         rejectNewInstances = true
 
-        makeText(binding.root, warehouseArea.description, SnackBarType.INFO)
+        showMessage(warehouseArea.description, SnackBarType.INFO)
 
         val reviewRepository = AssetReviewRepository()
 
@@ -812,7 +804,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_main, menu)
 
-        if (!prefsGetBoolean(Preference.showConfButton)) {
+        if (!svm.showConfButton) {
             menu.removeItem(menu.findItem(R.id.action_settings).itemId)
         }
 
@@ -826,7 +818,7 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
     private fun syncDownload() {
         try {
             if (OFFLINE_MODE || !isOnline()) {
-                makeText(binding.root, getString(R.string.offline_mode), SnackBarType.INFO)
+                showMessage(getString(R.string.offline_mode), SnackBarType.INFO)
                 return
             }
             thread {
@@ -836,10 +828,9 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
-            makeText(
-                binding.root,
+            showMessage(
                 "${context.getString(R.string.error)}: ${ex.message}",
-                SnackBarType.ERROR
+                ERROR
             )
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         }
@@ -850,18 +841,17 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
             if (SyncDownload.resetSyncDates()) {
                 syncDownload()
             } else {
-                makeText(
-                    binding.root,
+                showMessage(
                     context.getString(R.string.error_restarting_sync_dates),
-                    SnackBarType.ERROR
+                    ERROR
                 )
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
-            makeText(
-                binding.root, "${
+            showMessage(
+                "${
                     context.getString(R.string.error)
-                }: ${ex.message}", SnackBarType.ERROR
+                }: ${ex.message}", ERROR
             )
             ErrorLog.writeLog(null, this::class.java.simpleName, ex)
         }
@@ -895,10 +885,9 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
                 if (User.hasPermission(MainButton.Configuration.permissionEntry!!)) {
                     configApp()
                 } else {
-                    makeText(
-                        binding.root,
+                    showMessage(
                         getString(R.string.you_do_not_have_access_to_the_configuration),
-                        SnackBarType.ERROR
+                        ERROR
                     )
                 }
                 return true
@@ -934,6 +923,14 @@ class HomeActivity : AppCompatActivity(), Scanner.ScannerListener {
             }
         }
     }
+
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (isFinishing || isDestroyed) return
+        if (type == ERROR) logError(msg)
+        makeText(binding.root, msg, type)
+    }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 
     companion object {
         fun equals(a: Any?, b: Any): Boolean {

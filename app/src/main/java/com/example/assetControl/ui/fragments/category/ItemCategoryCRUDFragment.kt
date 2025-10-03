@@ -3,6 +3,7 @@ package com.example.assetControl.ui.fragments.category
 import android.content.Intent
 import android.graphics.Typeface
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,8 +21,9 @@ import com.example.assetControl.data.room.repository.category.ItemCategoryReposi
 import com.example.assetControl.data.webservice.category.ItemCategoryObject
 import com.example.assetControl.databinding.ItemCategoryCrudFragmentBinding
 import com.example.assetControl.ui.activities.category.ItemCategorySelectActivity
-import com.example.assetControl.ui.common.snackbar.MakeText
+import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.parcel.Parcelables.parcelable
 import org.parceler.Parcels
@@ -179,8 +181,7 @@ class ItemCategoryCRUDFragment : Fragment() {
         if (_binding == null) return false
 
         if (binding.descriptionEditText.text.trim().toString().isEmpty()) {
-            MakeText.makeText(
-                binding.root,
+            showMessage(
                 getString(R.string.you_must_enter_a_description_for_the_category),
                 SnackBarType.INFO
             )
@@ -199,10 +200,9 @@ class ItemCategoryCRUDFragment : Fragment() {
         // desconocido en revisiones de activos.
         if (itemCategory == null) {
             if (!User.hasPermission(PermissionEntry.AddItemCategory)) {
-                MakeText.makeText(
-                    binding.root,
+                showMessage(
                     getString(R.string.you_do_not_have_permission_to_add_categories),
-                    SnackBarType.ERROR
+                    ERROR
                 )
                 return
             }
@@ -213,10 +213,9 @@ class ItemCategoryCRUDFragment : Fragment() {
             itemCategoryAdd.execute()
         } else {
             if (!User.hasPermission(PermissionEntry.ModifyItemCategory)) {
-                MakeText.makeText(
-                    binding.root,
+                showMessage(
                     getString(R.string.you_do_not_have_permission_to_modify_categories),
-                    SnackBarType.ERROR
+                    ERROR
                 )
                 return
             }
@@ -262,6 +261,14 @@ class ItemCategoryCRUDFragment : Fragment() {
         this.itemCategory = itemCategory
         fillControls(false)
     }
+
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (requireActivity().isFinishing || requireActivity().isDestroyed) return
+        if (type == ERROR) logError(msg)
+        makeText(binding.root, msg, type)
+    }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 
     companion object {
 

@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.InputFilter
 import android.text.Spanned
+import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -18,6 +19,8 @@ import androidx.preference.PreferenceScreen
 import androidx.preference.SeekBarPreference
 import androidx.preference.SwitchPreference
 import com.example.assetControl.AssetControlApp
+import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.devices.scanners.Collector
 import com.example.assetControl.devices.scanners.collector.CollectorType
@@ -25,15 +28,12 @@ import com.example.assetControl.devices.scanners.collector.CollectorTypePreferen
 import com.example.assetControl.devices.scanners.rfid.Rfid
 import com.example.assetControl.devices.scanners.rfid.RfidType
 import com.example.assetControl.devices.scanners.vh75.Vh75Bt
-import com.example.assetControl.ui.common.snackbar.MakeText
-import com.example.assetControl.ui.common.snackbar.SnackBarEventData
+import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.example.assetControl.utils.Statics.Companion.appHasBluetoothPermission
 import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.settings.devices.DevicePreference
-import com.example.assetControl.utils.settings.preferences.Preferences
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutBoolean
 import com.google.android.gms.common.api.CommonStatusCodes
 import java.util.regex.Matcher
 import java.util.regex.Pattern
@@ -135,7 +135,7 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
-            showSnackBar(SnackBarEventData(getString(R.string.rfid_reader_not_initialized), SnackBarType.INFO))
+            showMessage(getString(R.string.rfid_reader_not_initialized), SnackBarType.INFO)
             ErrorLog.writeLog(activity, this::class.java.simpleName, ex)
         }
     }
@@ -154,11 +154,11 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
     }
 
     private fun getPrinterName(): String {
-        val useBtPrinter = prefsGetBoolean(PreferenceConfig.useBtPrinter)
-        val useNetPrinter = prefsGetBoolean(PreferenceConfig.useNetPrinter)
-        val ipNetPrinter = Preferences.prefsGetString(PreferenceConfig.ipNetPrinter)
-        val printerBtAddress = Preferences.prefsGetString(PreferenceConfig.printerBtAddress)
-        val portNetPrinter = Preferences.prefsGetString(PreferenceConfig.portNetPrinter)
+        val useBtPrinter = svm.useBtPrinter
+        val useNetPrinter = svm.useNetPrinter
+        val ipNetPrinter = svm.ipNetPrinter
+        val printerBtAddress = svm.printerBtAddress
+        val portNetPrinter = svm.portNetPrinter
 
         val r = if (!useBtPrinter && !useNetPrinter) {
             getString(R.string.disabled)
@@ -207,7 +207,7 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
     private fun setDefaultSymbology() {
         val allSymbology = PreferenceConfig.getSymbology()
         for (s in allSymbology) {
-            prefsPutBoolean(s.key, s.defaultValue as Boolean)
+            sr.prefsPutBoolean(s.key, s.defaultValue as Boolean)
         }
     }
 
@@ -286,7 +286,7 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
         }
 
         portNetPrinterPref?.setOnPreferenceChangeListener { _, newValue ->
-            if (prefsGetBoolean(PreferenceConfig.useNetPrinter) && newValue != null) {
+            if (svm.useNetPrinter && newValue != null) {
                 portNetPrinterPref.summary = newValue.toString()
             }
             true
@@ -344,15 +344,13 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
         val swPrefCharLF: SwitchPreference? = findPreference("conf_printer_new_line_char_lf")
         val swPrefCharCR: SwitchPreference? = findPreference("conf_printer_new_line_char_cr")
 
-        val lineSeparator = Preferences.prefsGetString(PreferenceConfig.lineSeparator)
+        val lineSeparator = svm.lineSeparator
         if (lineSeparator == Char(10).toString()) swPrefCharLF?.isChecked
         else if (lineSeparator == Char(13).toString()) swPrefCharCR?.isChecked
 
         swPrefCharLF?.setOnPreferenceChangeListener { _, newValue ->
             if (newValue == true) {
-                Preferences.prefsPutString(
-                    PreferenceConfig.lineSeparator.key, Char(10).toString()
-                )
+                svm.lineSeparator = Char(10).toString()
                 swPrefCharCR?.isChecked = false
             }
             true
@@ -360,9 +358,7 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
 
         swPrefCharCR?.setOnPreferenceChangeListener { _, newValue ->
             if (newValue == true) {
-                Preferences.prefsPutString(
-                    PreferenceConfig.lineSeparator.key, Char(13).toString()
-                )
+                svm.lineSeparator = Char(13).toString()
                 swPrefCharLF?.isChecked = false
             }
             true
@@ -381,15 +377,15 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
 
     private fun getRfidSummary(): String {
         var rfidSummary =
-            if (prefsGetBoolean(PreferenceConfig.useBtRfid))
+            if (svm.useBtRfid)
                 getString(R.string.enabled)
             else
                 getString(R.string.disabled)
 
-        val btAddress = Preferences.prefsGetString(PreferenceConfig.rfidBtAddress)
+        val btAddress = svm.rfidBtAddress
         if (btAddress.isNotEmpty() && btAddress != 0.toString()) {
             var description = btAddress
-            val btName = Preferences.prefsGetString(PreferenceConfig.rfidBtName)
+            val btName = svm.rfidBtName
             if (btName.isNotEmpty() && btName != 0.toString()) description = btName
             rfidSummary = "$rfidSummary: $description"
         }
@@ -404,32 +400,26 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
     override fun onWriteCompleted(isOk: Boolean) {}
 
     override fun onStateChanged(state: Int) {
-        if (prefsGetBoolean(PreferenceConfig.rfidShowConnectedMessage)) {
+        if (svm.rfidShowConnectedMessage) {
             when (Rfid.vh75State) {
                 Vh75Bt.STATE_CONNECTED -> {
-                    showSnackBar(
-                        SnackBarEventData(
-                            getString(R.string.rfid_connected),
-                            SnackBarType.SUCCESS
-                        )
+                    showMessage(
+                        getString(R.string.rfid_connected),
+                        SnackBarType.SUCCESS
                     )
                 }
 
                 Vh75Bt.STATE_CONNECTING -> {
-                    showSnackBar(
-                        SnackBarEventData(
-                            getString(R.string.searching_rfid_reader),
-                            SnackBarType.RUNNING
-                        )
+                    showMessage(
+                        getString(R.string.searching_rfid_reader),
+                        SnackBarType.RUNNING
                     )
                 }
 
                 else -> {
-                    showSnackBar(
-                        SnackBarEventData(
-                            getString(R.string.there_is_no_rfid_device_connected),
-                            SnackBarType.INFO
-                        )
+                    showMessage(
+                        getString(R.string.there_is_no_rfid_device_connected),
+                        SnackBarType.INFO
                     )
                 }
             }
@@ -473,11 +463,9 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
         val rfidNamePref: EditTextPreference? = findPreference(PreferenceConfig.rfidBtName.key)
         rfidNamePref?.setOnPreferenceClickListener {
             if (vh75?.state != Vh75Bt.STATE_CONNECTED) {
-                showSnackBar(
-                    SnackBarEventData(
-                        getString(R.string.there_is_no_rfid_device_connected),
-                        SnackBarType.ERROR
-                    )
+                showMessage(
+                    getString(R.string.there_is_no_rfid_device_connected),
+                    ERROR
                 )
             }
             true
@@ -487,11 +475,9 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
                 vh75?.setBluetoothName(newValue.toString())
                 rfidNamePref.summary = newValue.toString()
             } else {
-                showSnackBar(
-                    SnackBarEventData(
-                        getString(R.string.there_is_no_rfid_device_connected),
-                        SnackBarType.ERROR
-                    )
+                showMessage(
+                    getString(R.string.there_is_no_rfid_device_connected),
+                    ERROR
                 )
             }
             true
@@ -518,7 +504,7 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
             Preference.OnPreferenceChangeListener { _, _ ->
                 val entry = deviceListPref.entry
                 if (!entry.isNullOrEmpty()) {
-                    Preferences.prefsPutString(PreferenceConfig.rfidBtName.key, entry.toString())
+                    svm.rfidBtName = entry.toString()
                 }
                 true
             }
@@ -542,12 +528,7 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
                 val diaBox = askForResetToFactory()
                 diaBox.show()
             } else {
-                showSnackBar(
-                    SnackBarEventData(
-                        getString(R.string.there_is_no_rfid_device_connected),
-                        SnackBarType.ERROR
-                    )
-                )
+                showMessage(getString(R.string.there_is_no_rfid_device_connected), ERROR)
             }
             true
         }
@@ -557,17 +538,13 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
     }
 
     private fun connectToRfidDevice() {
-        if (!prefsGetBoolean(PreferenceConfig.useBtRfid)) return
+        if (!svm.useBtRfid) return
 
         val bluetoothManager =
             context.getSystemService(AppCompatActivity.BLUETOOTH_SERVICE) as BluetoothManager
         val mBluetoothAdapter = bluetoothManager.adapter
         if (mBluetoothAdapter == null) {
-            showSnackBar(
-                SnackBarEventData(
-                    getString(R.string.there_are_no_bluetooth_devices), SnackBarType.INFO
-                )
-            )
+            showMessage(getString(R.string.there_are_no_bluetooth_devices), SnackBarType.INFO)
         } else {
             if (mBluetoothAdapter.isEnabled) {
                 setupRfidReader()
@@ -595,9 +572,10 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
             ) { dialog, _ -> dialog.dismiss() }.create()
     }
 
-    private fun showSnackBar(it: SnackBarEventData) {
-        if (requireActivity().isDestroyed || requireActivity().isFinishing) return
-
-        MakeText.makeText(requireView(), it.text, it.snackBarType)
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (type == ERROR) logError(msg)
+        makeText(requireView(), msg, type)
     }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 }

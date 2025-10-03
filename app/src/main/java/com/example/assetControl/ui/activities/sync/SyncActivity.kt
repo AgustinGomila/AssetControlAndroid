@@ -34,6 +34,8 @@ import com.dacosys.imageControl.network.upload.UploadImagesProgress
 import com.dacosys.imageControl.room.dao.ImageCoroutines
 import com.dacosys.imageControl.ui.activities.ImageControlGridActivity
 import com.example.assetControl.AssetControlApp.Companion.context
+import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.data.webservice.common.Webservice.Companion.getWebservice
 import com.example.assetControl.databinding.SyncActivityBinding
@@ -52,6 +54,7 @@ import com.example.assetControl.ui.adapters.interfaces.Interfaces
 import com.example.assetControl.ui.adapters.sync.SyncElementRecyclerAdapter
 import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.example.assetControl.ui.common.utils.Screen
 import com.example.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.example.assetControl.ui.common.utils.Screen.Companion.setupUI
@@ -61,10 +64,6 @@ import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.parcel.Parcelables.parcelable
 import com.example.assetControl.utils.parcel.Parcelables.parcelableArrayList
 import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetStringSet
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutStringSet
-import com.example.assetControl.utils.settings.preferences.Repository.Companion.useImageControl
 import com.example.assetControl.viewModel.sync.PendingViewModel
 import com.example.assetControl.viewModel.sync.SyncViewModel
 import java.io.File
@@ -84,9 +83,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
         // Guardar los valores en las preferencias
         val set = HashSet<String>()
         for (i in visibleRegistryArray) set.add(i.id.toString())
-        prefsPutStringSet(
-            Preference.syncVisibleRegistry.key, set
-        )
+        sr.prefsPutStringSet(Preference.syncVisibleRegistry.key, set)
     }
 
     private fun destroyLocals() {
@@ -96,7 +93,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
 
     private fun onSessionCreated(result: Boolean) {
         if (!result) {
-            makeText(binding.root, getString(R.string.offline_mode), SnackBarType.INFO)
+            showMessage(getString(R.string.offline_mode), SnackBarType.INFO)
         }
     }
 
@@ -123,12 +120,12 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
 
             ProgressStatus.crashed.id, ProgressStatus.canceled.id -> {
                 showImageProgressBar(false)
-                makeText(this, msg, SnackBarType.ERROR)
+                showMessage(msg, ERROR)
             }
 
             ProgressStatus.finished.id -> {
                 showImageProgressBar(false)
-                makeText(this, getString(R.string.upload_images_success), SnackBarType.SUCCESS)
+                showMessage(getString(R.string.upload_images_success), SnackBarType.SUCCESS)
             }
         }
     }
@@ -273,9 +270,9 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
 
     private val menuItemShowImages = 9999
     private var showImages
-        get() = Preferences.prefsGetBoolean(Preference.syncShowImages)
+        get() = svm.syncShowImages
         set(value) {
-            Preferences.prefsPutBoolean(Preference.syncShowImages.key, value)
+            svm.syncShowImages = value
         }
 
     override fun onRefresh() {
@@ -389,7 +386,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
 
     private fun loadDefaultVisibleStatus() {
         visibleRegistryArray.clear()
-        val set = prefsGetStringSet(
+        val set = sr.prefsGetStringSet(
             Preference.syncVisibleRegistry.key,
             Preference.syncVisibleRegistry.defaultValue as ArrayList<String>
         )
@@ -485,7 +482,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
         try {
             if (!Statics.GOD_MODE) {
                 if (Statics.OFFLINE_MODE || !isOnline()) {
-                    makeText(binding.root, getString(R.string.offline_mode), SnackBarType.INFO)
+                    showMessage(getString(R.string.offline_mode), SnackBarType.INFO)
                     return
                 }
             }
@@ -529,7 +526,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
 
         try {
             if (Statics.OFFLINE_MODE || !isOnline()) {
-                makeText(binding.root, getString(R.string.offline_mode), SnackBarType.INFO)
+                showMessage(getString(R.string.offline_mode), SnackBarType.INFO)
                 return
             }
 
@@ -1020,7 +1017,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
         colors.add(assetManteinance)
         colors.add(dataCollection)
         colors.add(routeProcess)
-        if (useImageControl) colors.add(image)
+        if (svm.useImageControl) colors.add(image)
         //endregion Icon colors
 
         for ((index, i) in SyncRegistryType.getSyncUpload().withIndex()) {
@@ -1047,7 +1044,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
         }
 
         // Opción de visibilidad de Imágenes
-        if (useImageControl) {
+        if (svm.useImageControl) {
             menu.add(Menu.NONE, menuItemShowImages, Menu.NONE, context.getString(R.string.show_images))
                 .setChecked(showImages).isCheckable = true
             val item = menu.findItem(menuItemShowImages)
@@ -1134,7 +1131,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
 
     // region ImageControl Album
     override fun onAlbumViewRequired(tableId: Int, itemId: Long, filename: String) {
-        if (!useImageControl) return
+        if (!svm.useImageControl) return
 
         if (rejectNewInstances) return
         rejectNewInstances = true
@@ -1197,4 +1194,12 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
     override fun onCheckedChanged(isChecked: Boolean, pos: Int) {
         fillSummaryRow()
     }
+
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (isFinishing || isDestroyed) return
+        if (type == ERROR) logError(msg)
+        makeText(binding.root, msg, type)
+    }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 }

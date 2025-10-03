@@ -6,6 +6,7 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.MenuItem
 import android.view.View.GONE
 import android.view.View.VISIBLE
@@ -23,6 +24,7 @@ import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.dacosys.imageControl.ui.fragments.ImageControlButtonsFragment
 import com.example.assetControl.AssetControlApp.Companion.currentUser
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.data.enums.common.ConfirmStatus
 import com.example.assetControl.data.enums.common.Table
@@ -34,17 +36,14 @@ import com.example.assetControl.databinding.AssetReviewContentConfirmBottomPanel
 import com.example.assetControl.ui.activities.common.ObservationsActivity
 import com.example.assetControl.ui.adapters.interfaces.Interfaces
 import com.example.assetControl.ui.adapters.review.ArcRecyclerAdapter
-import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.example.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
 import com.example.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.example.assetControl.ui.common.utils.Screen.Companion.setupUI
 import com.example.assetControl.ui.fragments.movement.LocationHeaderFragment
 import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.parcel.Parcelables.parcelable
-import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutBoolean
 import org.parceler.Parcels
 
 class ArcConfirmActivity : AppCompatActivity(),
@@ -71,9 +70,7 @@ class ArcConfirmActivity : AppCompatActivity(),
     }
 
     private fun saveSharedPreferences() {
-        prefsPutBoolean(
-            "asset_review_completed_checkbox", binding.completedSwitch.isChecked
-        )
+        svm.assetReviewCompletedCheckBox = binding.completedSwitch.isChecked
     }
 
     private fun destroyLocals() {
@@ -97,9 +94,9 @@ class ArcConfirmActivity : AppCompatActivity(),
     private var panelBottomIsExpanded = false
     private var panelTopIsExpanded = true
     private var showImages
-        get() = prefsGetBoolean(Preference.reviewContentShowImages)
+        get() = svm.reviewContentShowImages
         set(value) {
-            prefsPutBoolean(Preference.reviewContentShowImages.key, value)
+            svm.reviewContentShowImages = value
         }
 
     override fun onStart() {
@@ -209,7 +206,7 @@ class ArcConfirmActivity : AppCompatActivity(),
 
         binding.obsButton.setOnClickListener { addObservations() }
         binding.completedTextView.setOnClickListener { binding.completedSwitch.performClick() }
-        binding.completedSwitch.isChecked = prefsGetBoolean(Preference.assetReviewCompletedCheckBox)
+        binding.completedSwitch.isChecked = svm.assetReviewCompletedCheckBox
         binding.confirmButton.setOnClickListener { confirmCount() }
 
         setPanels()
@@ -354,6 +351,7 @@ class ArcConfirmActivity : AppCompatActivity(),
     }
 
     private fun setImageControlFragment() {
+        if (!svm.useImageControl) return
         val ar = assetReview ?: return
 
         var description = ar.warehouseAreaStr
@@ -362,43 +360,48 @@ class ArcConfirmActivity : AppCompatActivity(),
 
         val obs = "${getString(R.string.user)}: ${currentUser()?.name}"
 
-        if (imageControlFragment == null) {
-            imageControlFragment =
-                ImageControlButtonsFragment.newInstance(
-                    tableId = Table.assetReview.id.toLong(),
-                    objectId1 = ar.id.toString()
-                )
-        }
-
-        setFragmentValues(description, "", obs)
-
-        val fm = supportFragmentManager
-
-        if (!isFinishing && !isDestroyed) {
-            runOnUiThread {
-                fm.beginTransaction()
-                    .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                    .replace(binding.imageControlFragment.id, imageControlFragment ?: return@runOnUiThread)
-                    .commit()
-
-                if (!prefsGetBoolean(Preference.useImageControl)) {
-                    fm.beginTransaction()
-                        .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                        .hide(imageControlFragment as Fragment)
-                        .commitAllowingStateLoss()
-                } else {
-                    fm.beginTransaction()
-                        .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                        .show((imageControlFragment ?: return@runOnUiThread) as Fragment)
-                        .commitAllowingStateLoss()
-                }
+        try {
+            if (imageControlFragment == null) {
+                imageControlFragment =
+                    ImageControlButtonsFragment.newInstance(
+                        tableId = Table.assetReview.id.toLong(),
+                        objectId1 = ar.id.toString()
+                    )
             }
-        } else {
-            imageControlFragment?.setTableId(Table.assetReview.id)
-            imageControlFragment?.setObjectId1(ar.id)
-            imageControlFragment?.setObjectId2(null)
 
             setFragmentValues(description, "", obs)
+
+            val fm = supportFragmentManager
+
+            if (!isFinishing && !isDestroyed) {
+                runOnUiThread {
+                    fm.beginTransaction()
+                        .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                        .replace(binding.imageControlFragment.id, imageControlFragment ?: return@runOnUiThread)
+                        .commit()
+
+                    if (!svm.useImageControl) {
+                        fm.beginTransaction()
+                            .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                            .hide(imageControlFragment as Fragment)
+                            .commitAllowingStateLoss()
+                    } else {
+                        fm.beginTransaction()
+                            .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                            .show((imageControlFragment ?: return@runOnUiThread) as Fragment)
+                            .commitAllowingStateLoss()
+                    }
+                }
+            } else {
+                imageControlFragment?.setTableId(Table.assetReview.id)
+                imageControlFragment?.setObjectId1(ar.id)
+                imageControlFragment?.setObjectId2(null)
+
+                setFragmentValues(description, "", obs)
+            }
+        } catch (_: Exception) {
+            showMessage(getString(R.string.imagecontrol_isnt_available), ERROR)
+            svm.useImageControl = false
         }
     }
 
@@ -501,9 +504,9 @@ class ArcConfirmActivity : AppCompatActivity(),
 
     private val resultForObs =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            val data = it?.data
+            val data = it.data
             try {
-                if (it?.resultCode == RESULT_OK && data != null) {
+                if (it.resultCode == RESULT_OK && data != null) {
                     obs = data.getStringExtra("obs") ?: ""
                 }
             } catch (ex: Exception) {
@@ -516,11 +519,11 @@ class ArcConfirmActivity : AppCompatActivity(),
 
     private fun confirmCount() {
         // Si tiene firma obligatoria, no está firmado y la revisión está completada, solicitar firma.
-        if (prefsGetBoolean(Preference.signReviewsAndMovements) && !(imageControlFragment
+        if (svm.signReviewsAndMovements && !(imageControlFragment
                 ?: return).isSigned && binding.completedSwitch.isChecked
         ) {
-            makeText(
-                binding.root, getString(R.string.mandatory_sign), SnackBarType.ERROR
+            showMessage(
+                getString(R.string.mandatory_sign), ERROR
             )
         } else {
             /////////////// ImageControl //////////////
@@ -572,6 +575,14 @@ class ArcConfirmActivity : AppCompatActivity(),
             }
         }
     }
+
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (isFinishing || isDestroyed) return
+        if (type == ERROR) logError(msg)
+        showMessage(msg, type)
+    }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 
     companion object {
         fun equals(a: Any?, b: Any?): Boolean {

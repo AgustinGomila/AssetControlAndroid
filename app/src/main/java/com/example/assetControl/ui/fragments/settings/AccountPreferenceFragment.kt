@@ -2,6 +2,7 @@ package com.example.assetControl.ui.fragments.settings
 
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.util.Log
 import android.util.Size
 import android.widget.ImageView
 import androidx.appcompat.app.AlertDialog
@@ -11,6 +12,8 @@ import androidx.preference.Preference.OnPreferenceClickListener
 import androidx.preference.PreferenceFragmentCompat
 import com.example.assetControl.AssetControlApp
 import com.example.assetControl.AssetControlApp.Companion.isLogged
+import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.BuildConfig
 import com.example.assetControl.R
 import com.example.assetControl.databinding.ProgressViewBinding
@@ -20,15 +23,16 @@ import com.example.assetControl.network.download.DownloadDb
 import com.example.assetControl.network.utils.ClientPackage
 import com.example.assetControl.network.utils.ProgressStatus
 import com.example.assetControl.ui.activities.main.SettingsActivity
-import com.example.assetControl.ui.common.snackbar.MakeText
-import com.example.assetControl.ui.common.snackbar.SnackBarEventData
+import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.INFO
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.SUCCESS
 import com.example.assetControl.ui.common.utils.Screen
 import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.settings.config.ConfigHelper
 import com.example.assetControl.utils.settings.config.QRConfigType
 import com.example.assetControl.utils.settings.io.FileHelper
-import com.example.assetControl.utils.settings.preferences.Preferences
 import org.json.JSONObject
 import java.lang.ref.WeakReference
 
@@ -83,8 +87,8 @@ class AccountPreferenceFragment : PreferenceFragmentCompat(), ClientPackage.Comp
         val selectPackagePref: Preference? = findPreference("select_package")
         selectPackagePref?.onPreferenceClickListener = OnPreferenceClickListener {
             if (emailPref != null && passPref != null) {
-                val email = Preferences.prefsGetString(p.clientEmail)
-                val password = Preferences.prefsGetString(p.clientPassword)
+                val email = svm.clientEmail
+                val password = svm.clientPassword
 
                 if (!alreadyAnsweredYes) {
                     val diaBox = askForDownloadDbRequired2(email = email, password = password)
@@ -112,8 +116,8 @@ class AccountPreferenceFragment : PreferenceFragmentCompat(), ClientPackage.Comp
                 true
             } catch (ex: Exception) {
                 ex.printStackTrace()
-                MakeText.makeText(
-                    requireView(), "${getString(R.string.error)}: ${ex.message}", SnackBarType.ERROR
+                showMessage(
+                    "${getString(R.string.error)}: ${ex.message}", ERROR
                 )
                 ErrorLog.writeLog(null, this::class.java.simpleName, ex)
                 false
@@ -122,17 +126,16 @@ class AccountPreferenceFragment : PreferenceFragmentCompat(), ClientPackage.Comp
 
         val qrCodePref: Preference? = findPreference("ac_qr_code")
         qrCodePref?.onPreferenceClickListener = OnPreferenceClickListener {
-            val urlPanel = Preferences.prefsGetString(p.urlPanel)
-            val installationCode = Preferences.prefsGetString(p.installationCode)
-            val clientEmail = Preferences.prefsGetString(p.clientEmail)
-            val clientPassword = Preferences.prefsGetString(p.clientPassword)
-            val clientPackage = Preferences.prefsGetString(p.clientPackage)
+            val urlPanel = svm.urlPanel
+            val installationCode = svm.installationCode
+            val clientEmail = svm.clientEmail
+            val clientPassword = svm.clientPassword
+            val clientPackage = svm.clientPackage
 
             if (urlPanel.isEmpty() || installationCode.isEmpty() || clientPackage.isEmpty() || clientEmail.isEmpty() || clientPassword.isEmpty()) {
-                MakeText.makeText(
-                    requireView(),
+                showMessage(
                     AssetControlApp.context.getString(R.string.invalid_client_data),
-                    SnackBarType.ERROR
+                    ERROR
                 )
                 return@OnPreferenceClickListener false
             }
@@ -152,7 +155,7 @@ class AccountPreferenceFragment : PreferenceFragmentCompat(), ClientPackage.Comp
         val updateAppPref: Preference? = findPreference("update_app")
         updateAppPref?.isEnabled = false
         updateAppPref?.onPreferenceClickListener = OnPreferenceClickListener {
-            MakeText.makeText(requireView(), getString(R.string.no_available_option), SnackBarType.INFO)
+            showMessage(getString(R.string.no_available_option), INFO)
             true
         }
 
@@ -216,9 +219,7 @@ class AccountPreferenceFragment : PreferenceFragmentCompat(), ClientPackage.Comp
                 if (!BuildConfig.DEBUG) preference.summary = newValue.toString()
                 alreadyAnsweredYes = true
                 if (newValue is String) {
-                    Preferences.prefsPutString(
-                        preference.key, newValue
-                    )
+                    sr.prefsPutString(preference.key, newValue)
                 }
                 dialog.dismiss()
             }.setNegativeButton(
@@ -254,47 +255,23 @@ class AccountPreferenceFragment : PreferenceFragmentCompat(), ClientPackage.Comp
                     )
                 }
             } else {
-                if (view != null) MakeText.makeText(
-                    requireView(), msg, SnackBarType.INFO
-                )
+                if (view != null) showMessage(msg, INFO)
             }
         } else if (status == ProgressStatus.success) {
-            if (view != null) showSnackBar(
-                SnackBarEventData(
-                    msg, SnackBarType.SUCCESS
-                )
-            )
+            if (view != null) showMessage(msg, SUCCESS)
         } else if (status == ProgressStatus.crashed || status == ProgressStatus.canceled) {
-            if (view != null) showSnackBar(
-                SnackBarEventData(
-                    msg, SnackBarType.ERROR
-                )
-            )
+            if (view != null) showMessage(msg, ERROR)
         }
     }
 
     override fun onTaskConfigPanelEnded(status: ProgressStatus) {
         if (status == ProgressStatus.finished) {
-            if (view != null) showSnackBar(
-                SnackBarEventData(
-                    getString(R.string.configuration_applied), SnackBarType.INFO
-                )
-            )
+            if (view != null) showMessage(getString(R.string.configuration_applied), INFO)
             FileHelper.removeDataBases(requireContext())
             requireActivity().finish()
         } else if (status == ProgressStatus.crashed) {
-            if (view != null) showSnackBar(
-                SnackBarEventData(
-                    getString(R.string.error_setting_user_panel), SnackBarType.ERROR
-                )
-            )
+            if (view != null) showMessage(getString(R.string.error_setting_user_panel), ERROR)
         }
-    }
-
-    private fun showSnackBar(it: SnackBarEventData) {
-        if (requireActivity().isDestroyed || requireActivity().isFinishing) return
-
-        MakeText.makeText(requireView(), it.text, it.snackBarType)
     }
 
     // region QR Generation Progress Bar
@@ -332,4 +309,11 @@ class AccountPreferenceFragment : PreferenceFragmentCompat(), ClientPackage.Comp
         progressDialog = null
     }
     // endregion QR Generation Progress Bar
+
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (type == ERROR) logError(msg)
+        makeText(requireView(), msg, type)
+    }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 }

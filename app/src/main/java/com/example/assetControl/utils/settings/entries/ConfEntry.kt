@@ -456,7 +456,7 @@ class ConfEntry(
         A220,320,0,5,1,1,N,""ASSETCONTROL""
         A60,390,0,4,1,1,N,""SISTEMAS DE IDENTIFICACION Y RECOLECCION""
         A60,430,0,4,1,1,N,""DE DATOS""
-        A60,470,0,4,1,1,N,""http://www.example.com""
+        A60,470,0,4,1,1,N,""https://www.example.com""
         A60,510,0,4,1,1,N,""+54(11)5217-9472/3""
         A60,550,0,4,1,1,N,""info@example.com""
 

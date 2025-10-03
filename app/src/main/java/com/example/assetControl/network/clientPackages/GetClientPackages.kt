@@ -2,6 +2,7 @@ package com.example.assetControl.network.clientPackages
 
 import android.util.Log
 import com.example.assetControl.AssetControlApp.Companion.context
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.network.trust.CustomSSLContext
 import com.example.assetControl.network.utils.ClientPackage.Companion.ACTIVE_TAG
@@ -19,7 +20,6 @@ import com.example.assetControl.network.utils.ClientPackage.Companion.VERSION_TA
 import com.example.assetControl.network.utils.Connection.Companion.isOnline
 import com.example.assetControl.network.utils.ProgressStatus
 import com.example.assetControl.utils.Statics
-import com.example.assetControl.utils.settings.preferences.Repository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -88,12 +88,12 @@ class GetClientPackages(
                 msg = context.getString(R.string.obtaining_client_packages_)
             )
 
-            connection = if (Repository.wsUseProxy) {
+            connection = if (svm.wsUseProxy) {
                 val authenticator = object : Authenticator() {
                     override fun getPasswordAuthentication(): PasswordAuthentication {
                         return PasswordAuthentication(
-                            Repository.wsProxyUser,
-                            Repository.wsProxyPass.toCharArray()
+                            svm.wsProxyUser,
+                            svm.wsProxyPass.toCharArray()
                         )
                     }
                 }
@@ -101,8 +101,8 @@ class GetClientPackages(
 
                 val proxy = Proxy(
                     Proxy.Type.HTTP, InetSocketAddress(
-                        Repository.wsProxy,
-                        Repository.wsProxyPort
+                        svm.wsProxy,
+                        svm.wsProxyPort
                     )
                 )
                 url.openConnection(proxy) as HttpsURLConnection
@@ -115,7 +115,7 @@ class GetClientPackages(
             //connection.instanceFollowRedirects = false
             connection.requestMethod = "POST"
             connection.setRequestProperty("Content-Type", "application/json; charset=utf-8")
-            connection.connectTimeout = Repository.connectionTimeout * 1000
+            connection.connectTimeout = svm.connectionTimeout * 1000
 
             val sslContext = CustomSSLContext.createCustomSSLContext()
             connection.sslSocketFactory = sslContext.socketFactory

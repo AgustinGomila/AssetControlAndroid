@@ -9,6 +9,8 @@ import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.data.enums.asset.AssetStatus
 import com.example.assetControl.data.room.dto.category.ItemCategory
@@ -21,10 +23,6 @@ import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.parcel.Parcelables.parcelable
 import com.example.assetControl.utils.parcel.Parcelables.parcelableArrayList
 import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetStringSet
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutBoolean
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutStringSet
 import org.parceler.Parcels
 
 /**
@@ -89,12 +87,10 @@ class AssetSelectFilterFragment : Fragment() {
     }
 
     private fun saveSharedPreferences() {
-        prefsPutBoolean(
-            Preference.selectAssetOnlyActive.key, onlyActive
-        )
+        svm.selectAssetOnlyActive = onlyActive
         val set = HashSet<String>()
         for (i in visibleStatusArray) set.add(i.id.toString())
-        prefsPutStringSet(
+        sr.prefsPutStringSet(
             Preference.assetSelectFragmentVisibleStatus.key, set
         )
     }
@@ -128,13 +124,13 @@ class AssetSelectFilterFragment : Fragment() {
         warehouseArea = null
         itemCategory = null
         itemCode = ""
-        onlyActive = prefsGetBoolean(Preference.selectAssetOnlyActive)
+        onlyActive = svm.selectAssetOnlyActive
         loadDefaultVisibleStatus()
     }
 
     private fun loadDefaultVisibleStatus() {
         visibleStatusArray.clear()
-        var set = prefsGetStringSet(
+        var set = sr.prefsGetStringSet(
             Preference.assetSelectFragmentVisibleStatus.key,
             Preference.assetSelectFragmentVisibleStatus.defaultValue as ArrayList<String>
         )

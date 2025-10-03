@@ -185,7 +185,7 @@ class UserSpinnerFragment : Fragment() {
             }
 
             ProgressStatus.finished -> {
-                var userList = ArrayList(UserRepository().select())
+                val userList = ArrayList(UserRepository().select())
                 fillAdapter(userList, onResult)
             }
         }

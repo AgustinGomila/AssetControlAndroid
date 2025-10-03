@@ -43,6 +43,7 @@ import com.dacosys.imageControl.room.dao.ImageCoroutines
 import com.dacosys.imageControl.ui.activities.ImageControlCameraActivity
 import com.dacosys.imageControl.ui.activities.ImageControlGridActivity
 import com.example.assetControl.AssetControlApp.Companion.context
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.BuildConfig
 import com.example.assetControl.R
 import com.example.assetControl.data.async.movement.SaveMovement
@@ -90,10 +91,6 @@ import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.parcel.ParcelLong
 import com.example.assetControl.utils.parcel.Parcelables.parcelable
 import com.example.assetControl.utils.parcel.Parcelables.parcelableArrayList
-import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutBoolean
-import com.example.assetControl.utils.settings.preferences.Repository.Companion.useImageControl
 import com.example.assetControl.viewModel.review.SaveReviewViewModel
 import com.example.assetControl.viewModel.sync.SyncViewModel
 import com.google.android.material.textfield.TextInputEditText
@@ -168,17 +165,17 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private val menuItemShowImages = 9999
     private var showImages
-        get() = prefsGetBoolean(Preference.reviewContentShowImages)
+        get() = svm.reviewContentShowImages
         set(value) {
-            prefsPutBoolean(Preference.reviewContentShowImages.key, value)
+            svm.reviewContentShowImages = value
         }
 
     private var showCheckBoxes
         get() =
             if (!multiSelect) false
-            else prefsGetBoolean(Preference.reviewContentShowCheckBoxes)
+            else svm.reviewContentShowCheckBoxes
         set(value) {
-            prefsPutBoolean(Preference.reviewContentShowCheckBoxes.key, value)
+            svm.reviewContentShowCheckBoxes = value
         }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -303,8 +300,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
                 val assetFounded = adapter?.assetsFounded(headerFragment?.warehouseArea?.id ?: 0) ?: 0
 
                 if (assetToMove <= 0 && assetFounded <= 0) {
-                    makeText(
-                        binding.root,
+                    showMessage(
                         context.getString(R.string.you_must_add_at_least_one_asset),
                         ERROR
                     )
@@ -536,7 +532,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
             editAssetListener = this
         )
 
-        if (useImageControl) {
+        if (svm.useImageControl) {
             adapter?.refreshImageControlListeners(
                 addPhotoListener = this,
                 albumViewListener = this
@@ -658,9 +654,9 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private val resultForAssetSelect =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            val data = it?.data
+            val data = it.data
             try {
-                if (it?.resultCode == RESULT_OK && data != null) {
+                if (it.resultCode == RESULT_OK && data != null) {
                     val idParcel = data.parcelableArrayList<ParcelLong>("ids")
                         ?: return@registerForActivityResult
 
@@ -682,7 +678,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
                     } catch (ex: Exception) {
                         val res =
                             context.getString(R.string.an_error_occurred_while_trying_to_add_the_item)
-                        makeText(binding.root, res, ERROR)
+                        showMessage(res, ERROR)
                         Log.d(this::class.java.simpleName, res)
                     }
                 }
@@ -698,8 +694,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private fun finishWarehouseMovement() {
         if (headerFragment == null || headerFragment?.warehouseArea == null) {
-            makeText(
-                binding.root,
+            showMessage(
                 context.getString(R.string.you_must_select_a_destination_for_assets),
                 ERROR
             )
@@ -728,9 +723,9 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private val resultForFinishMovement =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            val data = it?.data
+            val data = it.data
             try {
-                if (it?.resultCode == RESULT_OK && data != null) {
+                if (it.resultCode == RESULT_OK && data != null) {
                     when (Parcels.unwrap<ConfirmStatus>(data.parcelable("confirmStatus"))) {
                         modify -> obs = data.getStringExtra("obs") ?: ""
                         cancel -> cancelWarehouseMovement()
@@ -793,7 +788,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
             )
         } catch (ex: Exception) {
             ex.printStackTrace()
-            makeText(binding.root, ex.message.toString(), ERROR)
+            showMessage(ex.message.toString(), ERROR)
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         } finally {
             ScannerManager.lockScanner(this, false)
@@ -820,12 +815,12 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private val showScannedCode: Boolean
         get() {
-            return prefsGetBoolean(Preference.showScannedCode)
+            return svm.showScannedCode
         }
 
     override fun scannerCompleted(scanCode: String) {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
-        if (showScannedCode) makeText(binding.root, scanCode, SnackBarType.INFO)
+        if (showScannedCode) showMessage(scanCode, SnackBarType.INFO)
         scannerHandleScanCompleted(arrayListOf(scanCode), false)
     }
 
@@ -837,7 +832,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
                 // Nada que hacer, volver
                 if (scannedCode.isEmpty()) {
                     val res = getString(R.string.invalid_code)
-                    makeText(binding.root, res, ERROR)
+                    showMessage(res, ERROR)
                     Log.d(this::class.java.simpleName, res)
                     continue
                 }
@@ -854,8 +849,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
                 if (scWa != null) {
                     val wa = headerFragment?.warehouseArea
                     if (wa != scWa) {
-                        makeText(
-                            binding.root,
+                        showMessage(
                             context.getString(R.string.destination_changed),
                             SnackBarType.INFO
                         )
@@ -870,14 +864,14 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
                 if (sc.codeFound && sc.asset != null && sc.labelNbr == 0) {
                     val res = getString(R.string.report_code)
-                    makeText(binding.root, res, ERROR)
+                    showMessage(res, ERROR)
                     Log.d(this::class.java.simpleName, res)
                     continue
                 }
 
                 if (sc.codeFound && sc.asset != null && sc.asset?.labelNumber == null) {
                     val res = getString(R.string.no_printed_label)
-                    makeText(binding.root, res, ERROR)
+                    showMessage(res, ERROR)
                     Log.d(this::class.java.simpleName, res)
                     continue
                 }
@@ -886,7 +880,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
                     sc.labelNbr != null && sc.asset?.labelNumber != sc.labelNbr
                 ) {
                     val res = getString(R.string.invalid_code)
-                    makeText(binding.root, res, ERROR)
+                    showMessage(res, ERROR)
                     Log.d(this::class.java.simpleName, res)
                     continue
                 }
@@ -905,7 +899,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
                     val arCont = adapter?.getContentByCode(tempCode)
                     if (arCont != null) {
                         val res = "$scannedCode: ${getString(R.string.already_registered)}"
-                        makeText(binding.root, res, SnackBarType.INFO)
+                        showMessage(res, SnackBarType.INFO)
                         Log.d(this::class.java.simpleName, res)
 
                         runOnUiThread {
@@ -917,7 +911,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
                 if (sc.asset == null) {
                     val res = getString(R.string.unknown_code)
-                    makeText(binding.root, res, ERROR)
+                    showMessage(res, ERROR)
                     Log.d(this::class.java.simpleName, res)
                     continue
                 }
@@ -934,7 +928,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
                             contStatus = WarehouseMovementContentStatus.noNeedToMove
 
                             val res = getString(R.string.is_already_in_the_area)
-                            makeText(binding.root, res, SnackBarType.INFO)
+                            showMessage(res, SnackBarType.INFO)
                         }
                     }
 
@@ -952,7 +946,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
-            makeText(binding.root, ex.message.toString(), ERROR)
+            showMessage(ex.message.toString(), ERROR)
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
             return
         }
@@ -1141,8 +1135,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         if (taskStatus == ProgressStatus.finished.id) {
             closeKeyboard(this)
-            makeText(
-                binding.root,
+            showMessage(
                 context.getString(R.string.movement_performed_correctly),
                 SUCCESS
             )
@@ -1151,7 +1144,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
             setResult(RESULT_OK)
             finish()
         } else if (taskStatus == ProgressStatus.canceled.id || taskStatus == ProgressStatus.crashed.id) {
-            makeText(binding.root, msg, ERROR)
+            showMessage(msg, ERROR)
         }
     }
 
@@ -1175,11 +1168,11 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
             }
 
             ProgressStatus.crashed.id, ProgressStatus.canceled.id -> {
-                makeText(this, msg, ERROR)
+                showMessage(msg, ERROR)
             }
 
             ProgressStatus.finished.id -> {
-                makeText(this, getString(R.string.upload_images_success), SUCCESS)
+                showMessage(getString(R.string.upload_images_success), SUCCESS)
             }
         }
     }
@@ -1225,7 +1218,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
             ProgressStatus.canceled,
                 -> {
                 closeKeyboard(this)
-                makeText(binding.root, msg, ERROR)
+                showMessage(msg, ERROR)
                 ErrorLog.writeLog(
                     this, this::class.java.simpleName, "$progressStatusDesc: $registryDesc ${
                         Statics.getPercentage(completedTask, totalTask)
@@ -1362,27 +1355,24 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     override fun onStateChanged(state: Int) {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
-        if (prefsGetBoolean(Preference.rfidShowConnectedMessage)) {
+        if (svm.rfidShowConnectedMessage) {
             when (Rfid.vh75State) {
                 Vh75Bt.STATE_CONNECTED -> {
-                    makeText(
-                        binding.root,
+                    showMessage(
                         getString(R.string.rfid_connected),
                         SUCCESS
                     )
                 }
 
                 Vh75Bt.STATE_CONNECTING -> {
-                    makeText(
-                        binding.root,
+                    showMessage(
                         getString(R.string.searching_rfid_reader),
                         SnackBarType.RUNNING
                     )
                 }
 
                 else -> {
-                    makeText(
-                        binding.root,
+                    showMessage(
                         getString(R.string.there_is_no_rfid_device_connected),
                         SnackBarType.INFO
                     )
@@ -1435,9 +1425,9 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private val resultForEditAsset =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            val data = it?.data
+            val data = it.data
             try {
-                if (it?.resultCode == RESULT_OK && data != null) {
+                if (it.resultCode == RESULT_OK && data != null) {
                     val a = Parcels.unwrap<Asset>(data.parcelable("asset"))
                         ?: return@registerForActivityResult
                     adapter?.updateContent(a, true)
@@ -1453,7 +1443,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
     // region ImageControl
 
     override fun onAlbumViewRequired(tableId: Int, itemId: Long, filename: String) {
-        if (!useImageControl) {
+        if (!svm.useImageControl) {
             return
         }
 
@@ -1485,7 +1475,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
         ) { it2 ->
             if (it2 != null) fillResults(it2)
             else {
-                makeText(binding.root, getString(R.string.no_images), SnackBarType.INFO)
+                showMessage(getString(R.string.no_images), SnackBarType.INFO)
                 rejectNewInstances = false
             }
         }
@@ -1510,7 +1500,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private fun fillResults(docContReqResObj: DocumentContentRequestResult) {
         if (docContReqResObj.documentContentArray.isEmpty()) {
-            makeText(binding.root, getString(R.string.no_images), SnackBarType.INFO)
+            showMessage(getString(R.string.no_images), SnackBarType.INFO)
             rejectNewInstances = false
             return
         }
@@ -1518,8 +1508,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
         val anyAvailable = docContReqResObj.documentContentArray.any { it.available }
 
         if (!anyAvailable) {
-            makeText(
-                binding.root,
+            showMessage(
                 context.getString(R.string.images_not_yet_processed),
                 SnackBarType.INFO
             )
@@ -1531,7 +1520,7 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     override fun onAddPhotoRequired(tableId: Int, itemId: Long, description: String, obs: String, reference: String) {
-        if (!useImageControl) {
+        if (!svm.useImageControl) {
             return
         }
 
@@ -1552,9 +1541,9 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private val resultForPhotoCapture =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            val data = it?.data
+            val data = it.data
             try {
-                if (it?.resultCode == RESULT_OK && data != null) {
+                if (it.resultCode == RESULT_OK && data != null) {
                     adapter?.currentAsset()?.saveChanges()
                 }
             } catch (ex: Exception) {
@@ -1565,4 +1554,12 @@ class WmcActivity : AppCompatActivity(), Scanner.ScannerListener,
         }
 
     // endregion IC
+
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (isFinishing || isDestroyed) return
+        if (type == ERROR) logError(msg)
+        makeText(binding.root, msg, type)
+    }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 }

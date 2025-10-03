@@ -2,15 +2,13 @@ package com.example.assetControl.devices.scanners.rfid
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.os.Build
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.example.assetControl.AssetControlApp.Companion.context
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.devices.scanners.vh75.Utility
 import com.example.assetControl.devices.scanners.vh75.Vh75Bt
-import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences
 import kotlin.reflect.KClass
 
 open class Rfid {
@@ -59,8 +57,9 @@ open class Rfid {
         }
 
         fun appHasBluetoothPermission(): Boolean {
-            return Build.VERSION.SDK_INT < Build.VERSION_CODES.S || ActivityCompat.checkSelfPermission(
-                context, Manifest.permission.BLUETOOTH_CONNECT
+            return ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.BLUETOOTH_CONNECT
             ) == PackageManager.PERMISSION_GRANTED
         }
 
@@ -69,10 +68,10 @@ open class Rfid {
         }
 
         private fun isRfidEnabled(): Boolean {
-            if (!Preferences.prefsGetBoolean(Preference.useBtRfid))
+            if (!svm.useBtRfid)
                 return false
 
-            val btAddress = Preferences.prefsGetString(Preference.rfidBtAddress)
+            val btAddress = svm.rfidBtAddress
             return btAddress.isNotEmpty()
         }
 

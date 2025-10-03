@@ -1,10 +1,9 @@
 package com.example.assetControl.data.model.barcodeFields
 
+import com.example.assetControl.AssetControlApp.Companion.sr
 import com.example.assetControl.data.enums.barcode.BarcodeLabelPrintOps
 import com.example.assetControl.utils.Statics
 import com.example.assetControl.utils.settings.entries.ConfEntry
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetInt
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetString
 
 class BarcodeLabel(templateStr: String) {
     private var templateStr: String = ""
@@ -15,11 +14,11 @@ class BarcodeLabel(templateStr: String) {
         this.templateStr = templateStr
 
         printOps = BarcodeLabelPrintOps(
-            prefsGetInt(ConfEntry.prnPrinterSpeed),
-            prefsGetInt(ConfEntry.prnPrinterPower),
-            prefsGetString(ConfEntry.prnPrinterName),
-            prefsGetInt(ConfEntry.prnColOffset),
-            prefsGetInt(ConfEntry.prnRowOffset)
+            sr.prefsGetInt(ConfEntry.prnPrinterSpeed),
+            sr.prefsGetInt(ConfEntry.prnPrinterPower),
+            sr.prefsGetString(ConfEntry.prnPrinterName),
+            sr.prefsGetInt(ConfEntry.prnColOffset),
+            sr.prefsGetInt(ConfEntry.prnRowOffset)
         )
     }
 

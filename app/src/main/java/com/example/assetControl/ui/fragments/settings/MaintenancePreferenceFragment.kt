@@ -1,14 +1,18 @@
 package com.example.assetControl.ui.fragments.settings
 
 import android.os.Bundle
+import android.util.Log
 import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import androidx.preference.Preference.OnPreferenceClickListener
 import androidx.preference.PreferenceFragmentCompat
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.BuildConfig
 import com.example.assetControl.R
 import com.example.assetControl.ui.activities.main.SettingsActivity
-import com.example.assetControl.utils.settings.preferences.Preferences
+import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
+import com.example.assetControl.ui.common.snackbar.SnackBarType
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 
 class MaintenancePreferenceFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
@@ -51,26 +55,33 @@ class MaintenancePreferenceFragment : PreferenceFragmentCompat() {
         val testPref: Preference? = findPreference("ac_mant_test")
         testPref?.onPreferenceClickListener = OnPreferenceClickListener {
             if (wsServerPref != null && wsNamespacePref != null) {
-                val url = Preferences.prefsGetString(p.acMantWsServer)
-                val namespace = Preferences.prefsGetString(p.acMantWsNamespace)
-                val urlProxy = Preferences.prefsGetString(p.acMantWsProxy)
-                val proxyPort = Preferences.prefsGetInt(p.acMantWsProxyPort)
-                val useProxy = Preferences.prefsGetBoolean(p.acMantWsUseProxy)
-                val proxyUser = Preferences.prefsGetString(p.acMantWsProxyUser)
-                val proxyPass = Preferences.prefsGetString(p.acMantWsProxyPass)
+                val url = svm.acMantWsServer
+                val namespace = svm.acMantWsNamespace
+                val urlProxy = svm.acMantWsProxy
+                val proxyPort = svm.acMantWsProxyPort
+                val useProxy = svm.acMantWsUseProxy
+                val proxyUser = svm.acMantWsProxyUser
+                val proxyPass = svm.acMantWsProxyPass
 
                 SettingsActivity.testWsConnection(
-                    parentView = requireView(),
                     url = url,
                     namespace = namespace,
                     useProxy = useProxy,
                     proxyUrl = urlProxy,
                     proxyPort = proxyPort,
                     proxyUser = proxyUser,
-                    proxyPass = proxyPass
+                    proxyPass = proxyPass,
+                    onUiEvent = ::showMessage
                 )
             }
             true
         }
     }
+
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (type == ERROR) logError(msg)
+        makeText(requireView(), msg, type)
+    }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 }

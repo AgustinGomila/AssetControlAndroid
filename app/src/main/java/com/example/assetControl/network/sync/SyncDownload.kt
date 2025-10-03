@@ -3,6 +3,8 @@ package com.example.assetControl.network.sync
 import android.util.Log
 import com.example.assetControl.AssetControlApp.Companion.context
 import com.example.assetControl.AssetControlApp.Companion.getUserId
+import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.data.room.dto.attribute.AttributeComposition
 import com.example.assetControl.data.room.dto.dataCollection.DataCollectionRuleContent
@@ -53,12 +55,7 @@ import com.example.assetControl.network.utils.SetCurrentSession
 import com.example.assetControl.utils.Statics
 import com.example.assetControl.utils.Statics.Companion.TIME_FILE_NAME
 import com.example.assetControl.utils.errorLog.ErrorLog
-import com.example.assetControl.utils.settings.config.Preference
 import com.example.assetControl.utils.settings.entries.ConfEntry
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetInt
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetString
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -158,7 +155,7 @@ class SyncDownload(
             )
         )
 
-        qty = prefsGetInt(ConfEntry.acSyncQtyRegistry)
+        qty = sr.prefsGetInt(ConfEntry.acSyncQtyRegistry)
 
         if (Statics.currentSession == null) {
             SetCurrentSession(onSessionCreated = { scope.launch { onSessionEvent(it) } })
@@ -177,7 +174,7 @@ class SyncDownload(
                 async { dataCollectionRule() },
                 async { barcodeLabelCustom() })
 
-            if (prefsGetBoolean(Preference.useAssetControlManteinance)) {
+            if (svm.useAssetControlManteinance) {
                 t.union(
                     listOf(
                         async { maintenanceType() },
@@ -219,7 +216,7 @@ class SyncDownload(
                     )
                     registries.add(registryType.confEntry!!.description)
                 }
-                prefsPutString(registries, serverTime)
+                sr.prefsPutString(registries, serverTime)
             }
             registryTypeUpdated.clear()
         } catch (ex: Exception) {
@@ -244,7 +241,7 @@ class SyncDownload(
         val ws = AssetWs()
         val assetRepository = AssetRepository()
 
-        val date = prefsGetString(
+        val date = sr.prefsGetString(
             registryType.confEntry ?: return
         )
 
@@ -345,7 +342,7 @@ class SyncDownload(
         val ws = ItemCategoryWs()
         val categoryRepository = ItemCategoryRepository()
 
-        val date = prefsGetString(
+        val date = sr.prefsGetString(
             registryType.confEntry ?: return
         )
 
@@ -432,7 +429,6 @@ class SyncDownload(
         }
     }
 
-    @Suppress("unused")
     private suspend fun user() {
         val registryType = SyncRegistryType.User
         onUiEvent(
@@ -456,15 +452,15 @@ class SyncDownload(
 
         try {
             if (!scope.isActive) return
-            var currentUserId = getUserId() ?: return
+            val currentUserId = getUserId() ?: return
 
             try {
                 // Sincronizar los permisos del usuario
-                var perm = upWs.userPermissionGet(currentUserId) ?: arrayOf()
+                val perm = upWs.userPermissionGet(currentUserId) ?: arrayOf()
                 permissionRepository.insert(perm.toList()) { scope.launch { onUiEvent(it) } }
 
                 // Sincronizar las áreas del usuario
-                var areas = uwaWs.userWarehouseAreaGet(currentUserId) ?: arrayOf()
+                val areas = uwaWs.userWarehouseAreaGet(currentUserId) ?: arrayOf()
                 userAreaRepository.insert(areas.toList()) { scope.launch { onUiEvent(it) } }
             } catch (ex: Exception) {
                 ex.printStackTrace()
@@ -532,7 +528,7 @@ class SyncDownload(
         val ws = WarehouseWs()
         val warehouseRepository = WarehouseRepository()
 
-        val date = prefsGetString(
+        val date = sr.prefsGetString(
             registryType.confEntry ?: return
         )
 
@@ -633,7 +629,7 @@ class SyncDownload(
         val ws = WarehouseAreaWs()
         val areaRepository = WarehouseAreaRepository()
 
-        val date = prefsGetString(
+        val date = sr.prefsGetString(
             registryType.confEntry ?: return
         )
 
@@ -737,7 +733,7 @@ class SyncDownload(
         val attributeRepository = AttributeRepository()
         val compositionRepository = AttributeCompositionRepository()
 
-        val date = prefsGetString(
+        val date = sr.prefsGetString(
             registryType.confEntry ?: return
         )
 
@@ -892,7 +888,7 @@ class SyncDownload(
         val ws = AttributeCategoryWs()
         val categoryRepository = AttributeCategoryRepository()
 
-        val date = prefsGetString(
+        val date = sr.prefsGetString(
             registryType.confEntry ?: return
         )
 
@@ -996,7 +992,7 @@ class SyncDownload(
         val routeRepository = RouteRepository()
         val compositionRepository = RouteCompositionRepository()
 
-        val date = prefsGetString(
+        val date = sr.prefsGetString(
             registryType.confEntry ?: return
         )
 
@@ -1165,7 +1161,7 @@ class SyncDownload(
         val ruleContentRepository = DataCollectionRuleContentRepository()
         val ruleTargetRepository = DataCollectionRuleTargetRepository()
 
-        val date = prefsGetString(
+        val date = sr.prefsGetString(
             registryType.confEntry ?: return
         )
 
@@ -1391,7 +1387,7 @@ class SyncDownload(
         val ws = MaintenanceTypeWs()
         val typeRepository = MaintenanceTypeRepository()
 
-        val date = prefsGetString(
+        val date = sr.prefsGetString(
             registryType.confEntry ?: return
         )
 
@@ -1518,7 +1514,7 @@ class SyncDownload(
         val ws = ManteinanceTypeGroupWs()
         val groupRepository = MaintenanceTypeGroupRepository()
 
-        val date = prefsGetString(
+        val date = sr.prefsGetString(
             registryType.confEntry ?: return
         )
 
@@ -1644,7 +1640,7 @@ class SyncDownload(
         val ws = BarcodeLabelCustomWs()
         val barcodeRepository = BarcodeLabelCustomRepository()
 
-        val date = prefsGetString(
+        val date = sr.prefsGetString(
             registryType.confEntry ?: return
         )
 
@@ -1745,7 +1741,7 @@ class SyncDownload(
                 for (registryType in SyncRegistryType.getSyncDownload()) {
                     registries.add(registryType.confEntry!!.description)
                 }
-                prefsPutString(registries, dbTime)
+                sr.prefsPutString(registries, dbTime)
             } catch (ex: Exception) {
                 ex.printStackTrace()
                 ErrorLog.writeLog(null, this::class.java.simpleName, ex)

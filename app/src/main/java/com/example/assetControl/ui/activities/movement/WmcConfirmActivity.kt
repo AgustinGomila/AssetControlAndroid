@@ -6,6 +6,7 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.MenuItem
 import android.view.View.GONE
 import android.view.View.VISIBLE
@@ -23,6 +24,7 @@ import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.dacosys.imageControl.ui.fragments.ImageControlButtonsFragment
 import com.example.assetControl.AssetControlApp.Companion.currentUser
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.data.enums.asset.AssetStatus
 import com.example.assetControl.data.enums.common.ConfirmStatus
@@ -35,16 +37,14 @@ import com.example.assetControl.databinding.WarehouseMovementContentConfirmActiv
 import com.example.assetControl.ui.activities.common.ObservationsActivity
 import com.example.assetControl.ui.adapters.interfaces.Interfaces
 import com.example.assetControl.ui.adapters.movement.WmcRecyclerAdapter
-import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.example.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
 import com.example.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.example.assetControl.ui.common.utils.Screen.Companion.setupUI
 import com.example.assetControl.ui.fragments.movement.LocationHeaderFragment
 import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.parcel.Parcelables.parcelable
-import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
 import org.parceler.Parcels
 
 class WmcConfirmActivity : AppCompatActivity(),
@@ -342,6 +342,7 @@ class WmcConfirmActivity : AppCompatActivity(),
     }
 
     private fun setImageControlFragment() {
+        if (!svm.useImageControl) return
         val wa = headerFragment?.warehouseArea ?: return
 
         var description = wa.description
@@ -350,42 +351,47 @@ class WmcConfirmActivity : AppCompatActivity(),
 
         val obs = "${getString(R.string.user)}: ${currentUser()?.name}"
 
-        if (imageControlFragment == null) {
-            imageControlFragment = ImageControlButtonsFragment.newInstance(
-                tableId = Table.warehouseMovement.id.toLong(),
-                objectId1 = "0"
-            )
+        try {
+            if (imageControlFragment == null) {
+                imageControlFragment = ImageControlButtonsFragment.newInstance(
+                    tableId = Table.warehouseMovement.id.toLong(),
+                    objectId1 = "0"
+                )
 
-            setFragmentValues(description, "", obs)
+                setFragmentValues(description, "", obs)
 
-            val fm = supportFragmentManager
+                val fm = supportFragmentManager
 
-            if (!isFinishing && !isDestroyed) {
-                runOnUiThread {
-                    fm.beginTransaction()
-                        .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                        .replace(binding.imageControlFragment.id, imageControlFragment ?: return@runOnUiThread)
-                        .commit()
-
-                    if (!prefsGetBoolean(Preference.useImageControl)) {
+                if (!isFinishing && !isDestroyed) {
+                    runOnUiThread {
                         fm.beginTransaction()
                             .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                            .hide(imageControlFragment as Fragment)
-                            .commitAllowingStateLoss()
-                    } else {
-                        fm.beginTransaction()
-                            .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                            .show((imageControlFragment ?: return@runOnUiThread) as Fragment)
-                            .commitAllowingStateLoss()
+                            .replace(binding.imageControlFragment.id, imageControlFragment ?: return@runOnUiThread)
+                            .commit()
+
+                        if (!svm.useImageControl) {
+                            fm.beginTransaction()
+                                .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                                .hide(imageControlFragment as Fragment)
+                                .commitAllowingStateLoss()
+                        } else {
+                            fm.beginTransaction()
+                                .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                                .show((imageControlFragment ?: return@runOnUiThread) as Fragment)
+                                .commitAllowingStateLoss()
+                        }
                     }
                 }
-            }
-        } else {
-            imageControlFragment?.setTableId(Table.warehouseMovement.id)
-            imageControlFragment?.setObjectId1(0)
-            imageControlFragment?.setObjectId2(null)
+            } else {
+                imageControlFragment?.setTableId(Table.warehouseMovement.id)
+                imageControlFragment?.setObjectId1(0)
+                imageControlFragment?.setObjectId2(null)
 
-            setFragmentValues(description, "", obs)
+                setFragmentValues(description, "", obs)
+            }
+        } catch (_: Exception) {
+            showMessage(getString(R.string.imagecontrol_isnt_available), ERROR)
+            svm.useImageControl = false
         }
     }
 
@@ -477,9 +483,9 @@ class WmcConfirmActivity : AppCompatActivity(),
 
     private val resultForObs =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            val data = it?.data
+            val data = it.data
             try {
-                if (it?.resultCode == RESULT_OK && data != null) {
+                if (it.resultCode == RESULT_OK && data != null) {
                     obs = data.getStringExtra("obs") ?: ""
                 }
             } catch (ex: Exception) {
@@ -491,11 +497,9 @@ class WmcConfirmActivity : AppCompatActivity(),
         }
 
     private fun confirmMovement() {
-        if (prefsGetBoolean(Preference.signReviewsAndMovements) && !(imageControlFragment
-                ?: return).isSigned
-        ) {
-            makeText(
-                binding.root, getString(R.string.mandatory_sign), SnackBarType.ERROR
+        if (svm.signReviewsAndMovements && !(imageControlFragment ?: return).isSigned) {
+            showMessage(
+                getString(R.string.mandatory_sign), ERROR
             )
         } else {
             closeKeyboard(this)
@@ -546,6 +550,14 @@ class WmcConfirmActivity : AppCompatActivity(),
             }
         }
     }
+
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (isFinishing || isDestroyed) return
+        if (type == ERROR) logError(msg)
+        showMessage(msg, type)
+    }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 
     companion object {
         fun equals(a: Any?, b: Any?): Boolean {

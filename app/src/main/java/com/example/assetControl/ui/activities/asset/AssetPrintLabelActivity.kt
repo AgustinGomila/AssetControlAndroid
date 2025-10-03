@@ -47,6 +47,7 @@ import com.dacosys.imageControl.room.dao.ImageCoroutines
 import com.dacosys.imageControl.ui.activities.ImageControlCameraActivity
 import com.dacosys.imageControl.ui.activities.ImageControlGridActivity
 import com.example.assetControl.AssetControlApp.Companion.context
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.data.enums.asset.AssetStatus
 import com.example.assetControl.data.enums.barcode.BarcodeLabelTarget
@@ -69,6 +70,7 @@ import com.example.assetControl.network.utils.Connection.Companion.autoSend
 import com.example.assetControl.ui.adapters.asset.AssetRecyclerAdapter
 import com.example.assetControl.ui.adapters.asset.AssetRecyclerAdapter.FilterOptions
 import com.example.assetControl.ui.adapters.interfaces.Interfaces
+import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
 import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.example.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
@@ -85,11 +87,6 @@ import com.example.assetControl.utils.conversor.IntConversor.orZero
 import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.parcel.ParcelLong
 import com.example.assetControl.utils.parcel.Parcelables.parcelable
-import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetLong
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutBoolean
-import com.example.assetControl.utils.settings.preferences.Repository.Companion.useImageControl
 import com.example.assetControl.viewModel.assetSelect.AssetSelectUiState
 import com.example.assetControl.viewModel.assetSelect.AssetSelectViewModel
 import kotlinx.coroutines.Dispatchers
@@ -215,16 +212,16 @@ class AssetPrintLabelActivity : BasePanelActivity(), SwipeRefreshLayout.OnRefres
     // Image Control
     private val menuItemShowImages = 9999
     private var showImages
-        get() = prefsGetBoolean(Preference.printLabelAssetShowImages)
+        get() = svm.printLabelAssetShowImages
         set(value) {
-            prefsPutBoolean(Preference.printLabelAssetShowImages.key, value)
+            svm.printLabelAssetShowImages = value
         }
 
     private var showCheckBoxes
         get() = if (!viewModel.multiSelect) false
-        else prefsGetBoolean(Preference.printLabelAssetShowCheckBoxes)
+        else svm.printLabelAssetShowCheckBoxes
         set(value) {
-            prefsPutBoolean(Preference.printLabelAssetShowCheckBoxes.key, value)
+            svm.printLabelAssetShowCheckBoxes = value
         }
 
     private val visibleStatus
@@ -244,20 +241,22 @@ class AssetPrintLabelActivity : BasePanelActivity(), SwipeRefreshLayout.OnRefres
         setupActivity(savedInstanceState)
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        TempAssetRepository().insert(currentList.map { TempAssetEntity(it.id) })
+    }
+
+    private fun loadBundle() {
+        val list = TempAssetRepository().select().map { Asset(it.tempId) }
+        viewModel.applyCompleteList(list)
+    }
+
     private fun setupObservers() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
-                    // Carga del estado del adaptador desde la tabla temporal.
-                    val list = TempAssetRepository().select().map { Asset(it.tempId) }
-                    viewModel.applyCompleteList(list)
-
                     updateUI(state)
                 }
-            }
-            repeatOnLifecycle(Lifecycle.State.DESTROYED) {
-                // Guardar en la DB temporalmente los ítems listados
-                TempAssetRepository().insert(currentList.map { TempAssetEntity(it.id) })
             }
         }
     }
@@ -276,8 +275,8 @@ class AssetPrintLabelActivity : BasePanelActivity(), SwipeRefreshLayout.OnRefres
         setupPrintFragment()
         setSearchEditText()
 
-        if (savedInstanceState == null) {
-            TempAssetRepository().deleteAll()
+        if (savedInstanceState != null) {
+            loadBundle()
         }
 
         setupSwipe()
@@ -290,7 +289,7 @@ class AssetPrintLabelActivity : BasePanelActivity(), SwipeRefreshLayout.OnRefres
 
     private fun updateUI(state: AssetSelectUiState) {
         binding.topAppbar.title = state.title
-        binding.expandBottomPanelButton?.visibility = if (state.hideFilterPanel) GONE else View.VISIBLE
+        binding.expandBottomPanelButton?.visibility = if (state.hideFilterPanel) GONE else VISIBLE
 
         // Actualizar adapter
         adapter?.let {
@@ -334,7 +333,7 @@ class AssetPrintLabelActivity : BasePanelActivity(), SwipeRefreshLayout.OnRefres
         val target = BarcodeLabelTarget.Asset
         printerFragment?.barcodeLabelTarget = target
 
-        val id = prefsGetLong(Preference.defaultBarcodeLabelCustomAsset)
+        val id = svm.defaultBarcodeLabelCustomAsset
         val blc = BarcodeLabelCustomRepository().selectById(id)
         if (blc != null) {
             printerFragment?.barcodeLabelCustom = blc
@@ -544,7 +543,7 @@ class AssetPrintLabelActivity : BasePanelActivity(), SwipeRefreshLayout.OnRefres
             .checkedChangedListener(this)
             .editAssetRequiredListener(this)
 
-        if (useImageControl) {
+        if (svm.useImageControl) {
             builder
                 .showImages(`val` = showImages, callback = { showImages = it })
                 .addPhotoRequiredListener(this)
@@ -590,7 +589,7 @@ class AssetPrintLabelActivity : BasePanelActivity(), SwipeRefreshLayout.OnRefres
     private fun showMessage(msg: String, type: SnackBarType) {
         if (isFinishing || isDestroyed) return
         if (type == ERROR) logError(msg)
-        showMessage(msg, type)
+        makeText(binding.root, msg, type)
     }
 
     private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
@@ -616,7 +615,7 @@ class AssetPrintLabelActivity : BasePanelActivity(), SwipeRefreshLayout.OnRefres
 
     private val showScannedCode: Boolean
         get() {
-            return prefsGetBoolean(Preference.showScannedCode)
+            return svm.showScannedCode
         }
 
     override fun scannerCompleted(scanCode: String) {
@@ -628,7 +627,7 @@ class AssetPrintLabelActivity : BasePanelActivity(), SwipeRefreshLayout.OnRefres
             // Nada que hacer, volver
             if (scanCode.trim().isEmpty()) {
                 val res = getString(R.string.invalid_code)
-                showMessage(res, SnackBarType.ERROR)
+                showMessage(res, ERROR)
                 ErrorLog.writeLog(this, this::class.java.simpleName, res)
                 return
             }
@@ -645,7 +644,7 @@ class AssetPrintLabelActivity : BasePanelActivity(), SwipeRefreshLayout.OnRefres
                 sc.asset
             } else {
                 val res = this.getString(R.string.invalid_asset_code)
-                showMessage(res, SnackBarType.ERROR)
+                showMessage(res, ERROR)
                 null
             }
 
@@ -655,7 +654,7 @@ class AssetPrintLabelActivity : BasePanelActivity(), SwipeRefreshLayout.OnRefres
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
-            showMessage(ex.message.toString(), SnackBarType.ERROR)
+            showMessage(ex.message.toString(), ERROR)
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         } finally {
             ScannerManager.lockScanner(this, false)
@@ -676,7 +675,7 @@ class AssetPrintLabelActivity : BasePanelActivity(), SwipeRefreshLayout.OnRefres
         }
 
         // Opción de visibilidad de Imágenes
-        if (useImageControl) {
+        if (svm.useImageControl) {
             menu.add(Menu.NONE, menuItemShowImages, menu.size, context.getString(R.string.show_images))
                 .setChecked(showImages).isCheckable = true
             val item = menu.findItem(menuItemShowImages)
@@ -880,7 +879,7 @@ class AssetPrintLabelActivity : BasePanelActivity(), SwipeRefreshLayout.OnRefres
     }
 
     override fun onAddPhotoRequired(tableId: Int, itemId: Long, description: String, obs: String, reference: String) {
-        if (!useImageControl) return
+        if (!svm.useImageControl) return
 
         if (!rejectNewInstances) {
             rejectNewInstances = true
@@ -915,7 +914,7 @@ class AssetPrintLabelActivity : BasePanelActivity(), SwipeRefreshLayout.OnRefres
         }
 
     override fun onAlbumViewRequired(tableId: Int, itemId: Long, filename: String) {
-        if (!useImageControl) return
+        if (!svm.useImageControl) return
 
         if (rejectNewInstances) return
         rejectNewInstances = true
@@ -1047,7 +1046,7 @@ class AssetPrintLabelActivity : BasePanelActivity(), SwipeRefreshLayout.OnRefres
 
     override fun onStateChanged(state: Int) {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
-        if (prefsGetBoolean(Preference.rfidShowConnectedMessage)) {
+        if (svm.rfidShowConnectedMessage) {
             when (Rfid.vh75State) {
                 Vh75Bt.STATE_CONNECTED -> {
                     showMessage(

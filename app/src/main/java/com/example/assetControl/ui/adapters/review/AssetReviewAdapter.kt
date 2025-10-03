@@ -30,7 +30,6 @@ import com.example.assetControl.utils.misc.DateUtils.formatDateToString
 import java.lang.ref.WeakReference
 import java.util.*
 
-@Suppress("SpellCheckingInspection")
 class AssetReviewAdapter :
     ArrayAdapter<AssetReview>,
     Filterable {
@@ -176,7 +175,7 @@ class AssetReviewAdapter :
         }
 
         if (res.endsWith(", ")) {
-            res = res.substring(0, res.length - 2)
+            res = res.dropLast(2)
         }
 
         res += ": " +
@@ -205,7 +204,7 @@ class AssetReviewAdapter :
         }
 
         if (res.endsWith(", ")) {
-            res = res.substring(0, res.length - 2)
+            res = res.dropLast(2)
         }
 
         res += ": " +

@@ -18,7 +18,6 @@ class DownloadDbViewModel : ViewModel() {
         downloadTaskEvent.postValue(it)
     }
 
-    @Suppress("unused")
     fun getUiEvent(): SnackBarEventData? {
         return uiEvent.value
     }

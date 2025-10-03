@@ -2,6 +2,7 @@ package com.example.assetControl.ui.activities.maintenance
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
@@ -14,8 +15,8 @@ import com.example.assetControl.data.room.dto.maintenance.MaintenanceType
 import com.example.assetControl.data.room.repository.asset.AssetRepository
 import com.example.assetControl.data.room.repository.maintenance.AssetMaintenanceRepository
 import com.example.assetControl.databinding.AssetManteinanceConditionActivityBinding
-import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.example.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
 import com.example.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.example.assetControl.ui.common.utils.Screen.Companion.setupUI
@@ -118,16 +119,14 @@ class AssetMaintenanceConditionActivity : AppCompatActivity(),
                     }
                 }
             } else {
-                makeText(
-                    binding.root,
+                showMessage(
                     getString(R.string.you_must_select_a_type_of_maintenance_task),
                     SnackBarType.INFO
                 )
                 return
             }
 
-            makeText(
-                binding.root,
+            showMessage(
                 getString(R.string.maintenance_saved_correctly),
                 SnackBarType.SUCCESS
             )
@@ -146,4 +145,12 @@ class AssetMaintenanceConditionActivity : AppCompatActivity(),
         setResult(RESULT_CANCELED)
         finish()
     }
+
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (isFinishing || isDestroyed) return
+        if (type == ERROR) logError(msg)
+        showMessage(msg, type)
+    }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 }

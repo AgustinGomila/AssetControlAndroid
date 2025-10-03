@@ -30,9 +30,9 @@ import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.dacosys.imageControl.room.dao.ImageCoroutines
 import com.dacosys.imageControl.ui.fragments.ImageControlButtonsFragment
-import com.dacosys.imageControl.ui.snackBar.MakeText
 import com.dacosys.imageControl.ui.snackBar.SnackBarEventData
 import com.example.assetControl.AssetControlApp.Companion.currentUser
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.data.enums.attribute.AttributeCompositionType
 import com.example.assetControl.data.enums.common.Table
@@ -64,8 +64,8 @@ import com.example.assetControl.devices.scanners.Scanner
 import com.example.assetControl.devices.scanners.nfc.Nfc
 import com.example.assetControl.devices.scanners.rfid.Rfid
 import com.example.assetControl.devices.scanners.vh75.Vh75Bt
-import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.example.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
 import com.example.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.example.assetControl.ui.fragments.dataCollection.CommaSeparatedSpinnerFragment
@@ -76,9 +76,6 @@ import com.example.assetControl.ui.fragments.dataCollection.UnitTypeSpinnerFragm
 import com.example.assetControl.utils.Statics
 import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.parcel.Parcelables.parcelable
-import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
-import com.example.assetControl.utils.settings.preferences.Repository.Companion.maxHeightOrWidth
 import kotlinx.coroutines.runBlocking
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener
@@ -253,16 +250,16 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         val targetAsset = targetAsset
 
         when {
-            targetWarehouseArea != null -> makeText(
-                binding.root, targetWarehouseArea.description, SnackBarType.INFO
+            targetWarehouseArea != null -> showMessage(
+                targetWarehouseArea.description, SnackBarType.INFO
             )
 
-            targetItemCategory != null -> makeText(
-                binding.root, targetItemCategory.description, SnackBarType.INFO
+            targetItemCategory != null -> showMessage(
+                targetItemCategory.description, SnackBarType.INFO
             )
 
-            targetAsset != null -> makeText(
-                binding.root, targetAsset.description, SnackBarType.INFO
+            targetAsset != null -> showMessage(
+                targetAsset.description, SnackBarType.INFO
             )
         }
 
@@ -415,18 +412,17 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     private fun setImageControlFragment() {
+        if (!svm.useImageControl) return
         val dcr = dcr ?: return
         val rpc = rpc ?: return
 
         var description = "${dcr.description}, ${
-            if (rpc.assetStr.isNotEmpty()) {
-                rpc.assetStr
-            } else if (rpc.warehouseAreaStr.isNotEmpty()) {
-                rpc.warehouseAreaStr
-            } else if (rpc.warehouseStr.isNotEmpty()) {
-                rpc.warehouseStr
-            } else {
-                getString(R.string.no_name)
+            rpc.assetStr.ifEmpty {
+                rpc.warehouseAreaStr.ifEmpty {
+                    rpc.warehouseStr.ifEmpty {
+                        getString(R.string.no_name)
+                    }
+                }
             }
         }"
 
@@ -436,41 +432,46 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         val tableDescription = Table.routeProcess.description
         description = "$tableDescription: $description".take(255)
 
-        if (imageControlFragment == null) {
-            imageControlFragment = ImageControlButtonsFragment.newInstance(
-                Table.routeProcess.id.toLong(), rpc.routeProcessId.toString()
-            )
+        try {
+            if (imageControlFragment == null) {
+                imageControlFragment = ImageControlButtonsFragment.newInstance(
+                    Table.routeProcess.id.toLong(), rpc.routeProcessId.toString()
+                )
 
-            setFragmentValues(description, reference, obs)
+                setFragmentValues(description, reference, obs)
 
-            val fm = supportFragmentManager
+                val fm = supportFragmentManager
 
-            if (!isFinishing && !isDestroyed) {
-                runOnUiThread {
-                    fm.beginTransaction()
-                        .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                        .replace(binding.imageControlFragment.id, imageControlFragment ?: return@runOnUiThread)
-                        .commit()
-
-                    if (!prefsGetBoolean(Preference.useImageControl)) {
+                if (!isFinishing && !isDestroyed) {
+                    runOnUiThread {
                         fm.beginTransaction()
                             .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                            .hide(imageControlFragment as Fragment)
-                            .commitAllowingStateLoss()
-                    } else {
-                        fm.beginTransaction()
-                            .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                            .show((imageControlFragment ?: return@runOnUiThread) as Fragment)
-                            .commitAllowingStateLoss()
+                            .replace(binding.imageControlFragment.id, imageControlFragment ?: return@runOnUiThread)
+                            .commit()
+
+                        if (!svm.useImageControl) {
+                            fm.beginTransaction()
+                                .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                                .hide(imageControlFragment as Fragment)
+                                .commitAllowingStateLoss()
+                        } else {
+                            fm.beginTransaction()
+                                .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                                .show((imageControlFragment ?: return@runOnUiThread) as Fragment)
+                                .commitAllowingStateLoss()
+                        }
                     }
                 }
-            }
-        } else {
-            imageControlFragment?.setTableId(Table.routeProcess.id)
-            imageControlFragment?.setObjectId1(rpc.routeProcessId)
-            imageControlFragment?.setObjectId2(null)
+            } else {
+                imageControlFragment?.setTableId(Table.routeProcess.id)
+                imageControlFragment?.setObjectId1(rpc.routeProcessId)
+                imageControlFragment?.setObjectId2(null)
 
-            setFragmentValues(description, reference, obs)
+                setFragmentValues(description, reference, obs)
+            }
+        } catch (_: Exception) {
+            showMessage(getString(R.string.imagecontrol_isnt_available), ERROR)
+            svm.useImageControl = false
         }
     }
 
@@ -1061,7 +1062,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         if (!f.isEnabled && z.mandatory || f.valueStr == null && z.mandatory) {
             // No puede seguir, valor obligatorio
             val str = "${getString(R.string.mandatory_value_for)} ${z.description}"
-            makeText(binding.root, str, SnackBarType.ERROR)
+            showMessage(str, ERROR)
             return
         }
 
@@ -1244,7 +1245,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
             if (!f.isEnabled && dcrCont.mandatory || f.valueStr == null && dcrCont.mandatory) {
                 // No puede seguir, valor obligatorio
                 val str = "${getString(R.string.mandatory_value_for)} ${dcrCont.description}"
-                makeText(binding.root, str, SnackBarType.ERROR)
+                showMessage(str, ERROR)
                 return
             }
 
@@ -1261,10 +1262,9 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
                     }
 
                     res == DcrResult.noContinue.id -> {
-                        makeText(
-                            binding.root,
+                        showMessage(
                             "${getString(R.string.value_does_not_allow_to_continue_for)} ${dcrCont.description}",
-                            SnackBarType.ERROR
+                            ERROR
                         )
                     }
 
@@ -1301,10 +1301,9 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
 
                     else -> {
                         // No puede seguir
-                        makeText(
-                            binding.root,
+                        showMessage(
                             "${getString(R.string.invalid_value_for)} ${dcrCont.description}",
-                            SnackBarType.ERROR
+                            ERROR
                         )
                     }
                 }
@@ -1318,7 +1317,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     private fun saveDataCollection() {
-        makeText(binding.root, getString(R.string.saving_data_collection), SnackBarType.INFO)
+        showMessage(getString(R.string.saving_data_collection), SnackBarType.INFO)
 
         for (targetControl in attrFrags) {
             saveFragValues(targetControl)
@@ -1359,8 +1358,8 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         }
 
         if (dc == null) {
-            makeText(
-                binding.root, getString(R.string.error_saving_data_collection), SnackBarType.ERROR
+            showMessage(
+                getString(R.string.error_saving_data_collection), ERROR
             )
             return
         }
@@ -1401,10 +1400,9 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
             setResult(RESULT_OK, data)
             finish()
         } else {
-            makeText(
-                binding.root,
+            showMessage(
                 getString(R.string.failed_to_save_the_data_collection_contents),
-                SnackBarType.ERROR
+                ERROR
             )
         }
     }
@@ -1470,7 +1468,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
     private fun levelX(tempControl: GeneralFragment, z: DataCollectionRuleContent) {
         val eval = tempControl.evaluate()
         if (eval is String) {
-            val f = eval.toString().split(',')
+            val f = eval.split(',')
             try {
                 if (levelsToNavigate.isEmpty()) {
                     levelsToNavigate.clear()
@@ -1500,7 +1498,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
             }
         } else if (eval is Int) {
             when {
-                eval.toInt() > 0 -> {
+                eval > 0 -> {
                     // Agrego el paso a la colección de pasos
                     stepsHistory.add(
                         KeyLevelPos(
@@ -1510,26 +1508,25 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
                         )
                     )
 
-                    fillControl(eval.toInt(), 1)
+                    fillControl(eval, 1)
                 }
 
-                eval.toInt() == DcrResult.cont.id -> {
+                eval == DcrResult.cont.id -> {
                     cont(tempControl)
                 }
 
-                eval.toInt() == DcrResult.back.id -> {
+                eval == DcrResult.back.id -> {
                     goBack()
                 }
 
-                eval.toInt() == DcrResult.end.id -> {
+                eval == DcrResult.end.id -> {
                     saveDataCollection()
                 }
 
-                eval.toInt() == DcrResult.noContinue.id -> {
-                    makeText(
-                        binding.root,
+                eval == DcrResult.noContinue.id -> {
+                    showMessage(
                         "${getString(R.string.value_does_not_allow_to_continue_for)} ${z.description}",
-                        SnackBarType.ERROR
+                        ERROR
                     )
                 }
             }
@@ -1572,10 +1569,9 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
 
             // ¡¿Qué pasó?!
             if (prevControl == null) {
-                makeText(
-                    binding.root,
+                showMessage(
                     getString(R.string.the_previous_control_is_not_found),
-                    SnackBarType.ERROR
+                    ERROR
                 )
                 return
             }
@@ -1595,10 +1591,9 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
 
                 // No existe
                 if (f == null) {
-                    makeText(
-                        binding.root,
+                    showMessage(
                         getString(R.string.the_previous_control_is_not_found),
-                        SnackBarType.ERROR
+                        ERROR
                     )
                     return
                 }
@@ -1670,12 +1665,12 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private val showScannedCode: Boolean
         get() {
-            return prefsGetBoolean(Preference.showScannedCode)
+            return svm.showScannedCode
         }
 
     override fun scannerCompleted(scanCode: String) {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
-        if (showScannedCode) makeText(binding.root, scanCode, SnackBarType.INFO)
+        if (showScannedCode) showMessage(scanCode, SnackBarType.INFO)
         ScannerManager.lockScanner(this, false)
     }
 
@@ -1793,7 +1788,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
             runBlocking {
                 addDemoPhoto(
                     onSnackBarEvent = {
-                        MakeText.makeText(binding.root, it.text, it.snackBarType)
+                        showMessage(it.text, SnackBarType.getById(it.snackBarType.snackBarTypeId))
                     },
                     onFinished = {
                         Log.i(this::class.java.simpleName, "Imagen de Demostración guardada OK.")
@@ -1830,7 +1825,7 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         Log.d(this::class.java.simpleName, "Guardando imagen de Demostración...")
 
-        val image: Bitmap = generateRandomBitmap(maxHeightOrWidth, maxHeightOrWidth)
+        val image: Bitmap = generateRandomBitmap(svm.maxHeightOrWidth, svm.maxHeightOrWidth)
 
         val photoFilePath = ImageCoroutines().addJpgPhotoToGallery(
             context = applicationContext,
@@ -1906,27 +1901,24 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     override fun onStateChanged(state: Int) {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
-        if (prefsGetBoolean(Preference.rfidShowConnectedMessage)) {
+        if (svm.rfidShowConnectedMessage) {
             when (Rfid.vh75State) {
                 Vh75Bt.STATE_CONNECTED -> {
-                    makeText(
-                        binding.root,
+                    showMessage(
                         getString(R.string.rfid_connected),
                         SnackBarType.SUCCESS
                     )
                 }
 
                 Vh75Bt.STATE_CONNECTING -> {
-                    makeText(
-                        binding.root,
+                    showMessage(
                         getString(R.string.searching_rfid_reader),
                         SnackBarType.RUNNING
                     )
                 }
 
                 else -> {
-                    makeText(
-                        binding.root,
+                    showMessage(
                         getString(R.string.there_is_no_rfid_device_connected),
                         SnackBarType.INFO
                     )
@@ -1962,4 +1954,12 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
             }
         }
     }
+
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (isFinishing || isDestroyed) return
+        if (type == ERROR) logError(msg)
+        showMessage(msg, type)
+    }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 }

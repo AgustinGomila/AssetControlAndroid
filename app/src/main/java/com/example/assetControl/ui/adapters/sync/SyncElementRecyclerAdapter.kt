@@ -38,6 +38,7 @@ import com.dacosys.imageControl.ui.adapter.ImageAdapter
 import com.dacosys.imageControl.ui.adapter.ImageAdapter.Companion.GetImageStatus
 import com.dacosys.imageControl.ui.adapter.ImageAdapter.Companion.ImageControlHolder
 import com.example.assetControl.AssetControlApp.Companion.context
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.data.enums.asset.AssetStatus
 import com.example.assetControl.data.room.dto.asset.Asset
@@ -68,7 +69,6 @@ import com.example.assetControl.ui.common.utils.Screen.Companion.manipulateColor
 import com.example.assetControl.utils.misc.DateUtils.formatDateToString
 import com.example.assetControl.utils.misc.Md5.Companion.getMd5
 import com.example.assetControl.utils.misc.Md5.Companion.md5HashToInt
-import com.example.assetControl.utils.settings.preferences.Repository.Companion.useImageControl
 import java.io.File
 import java.util.*
 
@@ -122,7 +122,7 @@ class SyncElementRecyclerAdapter private constructor(builder: Builder) :
      * The state is defined by [useImageControl] preference property.
      *
      */
-    @Suppress("MemberVisibilityCanBePrivate")
+    @Suppress("unused")
     fun showImageControlPanel() {
         notifyItemRangeChanged(currentIndex, 1, PAYLOADS.IMAGE_CONTROL_VISIBILITY)
     }
@@ -287,9 +287,9 @@ class SyncElementRecyclerAdapter private constructor(builder: Builder) :
 
                 PAYLOADS.IMAGE_CONTROL_VISIBILITY -> {
                     if (holder is ImageViewHolder) {
-                        holder.bindImageControlVisibility(if (useImageControl) VISIBLE else GONE)
+                        holder.bindImageControlVisibility(if (svm.useImageControl) VISIBLE else GONE)
                     }
-                    if (!useImageControl) showImages(false)
+                    if (!svm.useImageControl) showImages(false)
                 }
 
                 PAYLOADS.ITEM_SELECTED -> {
@@ -681,17 +681,17 @@ class SyncElementRecyclerAdapter private constructor(builder: Builder) :
 
     private fun isStatusVisible(arc: Any?): Boolean {
         return if (arc != null) {
-            when (arc) {
-                is Asset -> return visibleRegistry.contains(SyncRegistryType.Asset)
-                is ItemCategory -> return visibleRegistry.contains(SyncRegistryType.ItemCategory)
-                is Warehouse -> return visibleRegistry.contains(SyncRegistryType.Warehouse)
-                is WarehouseArea -> return visibleRegistry.contains(SyncRegistryType.WarehouseArea)
-                is DataCollection -> return visibleRegistry.contains(SyncRegistryType.DataCollection)
-                is RouteProcess -> return visibleRegistry.contains(SyncRegistryType.RouteProcess)
-                is WarehouseMovement -> return visibleRegistry.contains(SyncRegistryType.WarehouseMovement)
-                is AssetReview -> return visibleRegistry.contains(SyncRegistryType.AssetReview)
-                is Image -> return visibleRegistry.contains(SyncRegistryType.Image)
-                else -> return false
+            return when (arc) {
+                is Asset -> visibleRegistry.contains(SyncRegistryType.Asset)
+                is ItemCategory -> visibleRegistry.contains(SyncRegistryType.ItemCategory)
+                is Warehouse -> visibleRegistry.contains(SyncRegistryType.Warehouse)
+                is WarehouseArea -> visibleRegistry.contains(SyncRegistryType.WarehouseArea)
+                is DataCollection -> visibleRegistry.contains(SyncRegistryType.DataCollection)
+                is RouteProcess -> visibleRegistry.contains(SyncRegistryType.RouteProcess)
+                is WarehouseMovement -> visibleRegistry.contains(SyncRegistryType.WarehouseMovement)
+                is AssetReview -> visibleRegistry.contains(SyncRegistryType.AssetReview)
+                is Image -> visibleRegistry.contains(SyncRegistryType.Image)
+                else -> false
             }
         } else false
     }
@@ -759,7 +759,7 @@ class SyncElementRecyclerAdapter private constructor(builder: Builder) :
 
     private fun selectItem(pos: Int, scroll: Boolean = true) {
         // Si la posición está fuera del rango válido, reseteamos currentIndex a NO_POSITION.
-        currentIndex = if (pos < 0 || pos >= itemCount) NO_POSITION else pos
+        currentIndex = if (pos !in 0..<itemCount) NO_POSITION else pos
         notifyItemChanged(currentIndex)
         if (scroll) scrollToPos(currentIndex)
     }
@@ -801,7 +801,7 @@ class SyncElementRecyclerAdapter private constructor(builder: Builder) :
     fun scrollToPos(position: Int, scrollToTop: Boolean = false) {
         val layoutManager = recyclerView.layoutManager as LinearLayoutManager
 
-        if (position < 0 || position >= itemCount) {
+        if (position !in 0..<itemCount) {
             // La posición está fuera del rango válido, no se puede realizar el scroll
             return
         }
@@ -1250,8 +1250,8 @@ class SyncElementRecyclerAdapter private constructor(builder: Builder) :
             bindCheckBoxVisibility(checkBoxVisibility)
 
             binding.warehouseAreaStr.text = syncElement.warehouseAreaStr
-            binding.obs.text = syncElement.obs.orEmpty()
-            if (syncElement.obs.orEmpty().isEmpty()) {
+            binding.obs.text = syncElement.obs
+            if (syncElement.obs.isEmpty()) {
                 binding.obs.visibility = GONE
                 binding.dividerObs.visibility = GONE
             } else {
@@ -1305,7 +1305,7 @@ class SyncElementRecyclerAdapter private constructor(builder: Builder) :
          * @param changingState Only if we are changing the visibility state, we expand the panel
          */
         fun bindImageVisibility(imageVisibility: Int, changingState: Boolean) {
-            if (!useImageControl || imageVisibility == GONE) collapseImagePanel(icHolder)
+            if (!svm.useImageControl || imageVisibility == GONE) collapseImagePanel(icHolder)
             else if (changingState) expandImagePanel(icHolder)
         }
 
@@ -1322,7 +1322,7 @@ class SyncElementRecyclerAdapter private constructor(builder: Builder) :
             if (syncElement !is Image) return
 
             bindCheckBoxVisibility(checkBoxVisibility)
-            bindImageControlVisibility(visibility = if (useImageControl) VISIBLE else GONE)
+            bindImageControlVisibility(visibility = if (svm.useImageControl) VISIBLE else GONE)
             bindImageVisibility(imageVisibility = imageVisibility, changingState = false)
 
             binding.descriptionTv.text = syncElement.description
@@ -1642,7 +1642,7 @@ class SyncElementRecyclerAdapter private constructor(builder: Builder) :
         refreshFilter(filterOptions)
 
         // Cambiamos la visibilidad del panel de imágenes.
-        if (!useImageControl) showImages = false
+        if (!svm.useImageControl) showImages = false
         showImages(showImages)
     }
 
@@ -1704,14 +1704,12 @@ class SyncElementRecyclerAdapter private constructor(builder: Builder) :
             return this
         }
 
-        @Suppress("unused")
         fun showCheckBoxes(`val`: Boolean, callback: (Boolean) -> Unit): Builder {
             showCheckBoxes = `val`
             showCheckBoxesChanged = callback
             return this
         }
 
-        @Suppress("unused")
         fun showImages(`val`: Boolean, callback: (Boolean) -> Unit): Builder {
             showImages = `val`
             showImagesChanged = callback

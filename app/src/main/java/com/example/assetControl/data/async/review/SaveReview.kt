@@ -145,7 +145,6 @@ class SaveReview {
                 }
             }
 
-            // makeText(binding.root, msg, LENGTH_SHORT)
             Log.d(this::class.java.simpleName, msg)
         }
 

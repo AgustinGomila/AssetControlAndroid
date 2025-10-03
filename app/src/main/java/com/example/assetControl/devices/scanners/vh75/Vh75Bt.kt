@@ -10,12 +10,9 @@ import android.media.AudioManager
 import android.media.ToneGenerator
 import android.util.Log
 import com.example.assetControl.AssetControlApp.Companion.context
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.devices.scanners.rfid.Rfid
-import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetInt
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetString
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
@@ -69,7 +66,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?, context: Context) : Rfid
     }
 
     private fun pairDevice() {
-        val btAddress = prefsGetString(Preference.rfidBtAddress)
+        val btAddress = svm.rfidBtAddress
         if (btAddress.isEmpty()) {
             return
         }
@@ -890,10 +887,10 @@ class Vh75Bt(private var listener: RfidDeviceListener?, context: Context) : Rfid
             "Read RFID Config Parameters: TagType: ${param.TagType} Alarm: ${param.Alarm} Vibration: ${param.Reserve19} Power: ${param.Power} MinFrequence: ${param.Min_Frequence} MaxFrequence: ${param.Max_Frequence}"
         )
 
-        val power = prefsGetInt(Preference.rfidReadPower)
+        val power = svm.rfidReadPower
         val tagType = 4 //04H－ISO-18000-6C
-        val alarm = prefsGetBoolean(Preference.rfidPlaySoundOnRead)
-        val shock = prefsGetBoolean(Preference.rfidShockOnRead)
+        val alarm = svm.rfidPlaySoundOnRead
+        val shock = svm.rfidShockOnRead
 
         param.Power = power.toByte()
         param.Alarm = if (alarm) 1.toByte() else 0.toByte()
@@ -973,7 +970,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?, context: Context) : Rfid
 
         var d = data
         if (data.length > maxLength) {
-            d = data.substring(0, maxLength)
+            d = data.take(maxLength)
         }
 
         var dataHex = ""

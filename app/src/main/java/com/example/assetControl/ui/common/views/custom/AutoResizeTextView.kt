@@ -3,7 +3,6 @@ package com.example.assetControl.ui.common.views.custom
 import android.content.Context
 import android.content.res.Resources
 import android.graphics.RectF
-import android.os.Build
 import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
@@ -37,7 +36,6 @@ class AutoResizeTextView : AppCompatTextView {
     private var mInitializedDimens: Boolean = false
 
     private val mSizeTester = object : SizeTester {
-        @androidx.annotation.RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
         override fun onTestSize(suggestedSize: Int, availableSpace: RectF): Int {
             mPaint!!.textSize = suggestedSize.toFloat()
             val text = text.toString()

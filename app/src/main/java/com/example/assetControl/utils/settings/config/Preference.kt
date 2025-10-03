@@ -532,7 +532,7 @@ class Preference(key: String, defaultValue: Any, debugValue: Any) {
         var useImageControl = Preference(
             "use_image_control",
             defaultValue = false,
-            debugValue = true
+            debugValue = false
         )
 
         var icUser = Preference(

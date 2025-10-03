@@ -20,15 +20,16 @@ class DecimalDigitsInputFilter(digitsBeforeZero: Int, digitsAfterZero: Int) : In
                     "})?\$"
         )
 
-    /*
+    /**
+     *
     "[0-9]{0," + (when {
-        digitsBeforeZero > 0 -> digitsBeforeZero - 1
-        else -> 0
+    digitsBeforeZero > 0 -> digitsBeforeZero - 1
+    else -> 0
     }).toString() + "}+((\\.[0-9]{0," + (when {
-        digitsAfterZero > 0 -> digitsAfterZero - 1
-        else -> 0
+    digitsAfterZero > 0 -> digitsAfterZero - 1
+    else -> 0
     }).toString() + "})?)||(\\.)?"
-    */
+     */
 
     override fun filter(
         source: CharSequence,

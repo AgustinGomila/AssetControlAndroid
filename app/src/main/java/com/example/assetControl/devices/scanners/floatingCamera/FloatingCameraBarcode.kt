@@ -1,10 +1,12 @@
 package com.example.assetControl.devices.scanners.floatingCamera
 
 import android.Manifest
+import android.app.AlertDialog
 import android.content.Context
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.CountDownTimer
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -18,20 +20,18 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.assetControl.AssetControlApp.Companion.context
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.databinding.FloatingCameraActivityBinding
 import com.example.assetControl.devices.scanners.Scanner
 import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.example.assetControl.ui.common.utils.Screen.Companion.getScreenHeight
 import com.example.assetControl.ui.common.utils.Screen.Companion.getScreenWidth
 import com.example.assetControl.ui.common.utils.Screen.Companion.getSystemBarsHeight
 import com.example.assetControl.ui.common.views.scaleImageView.ScaleImage
 import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetInt
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutBoolean
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsPutInt
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.client.android.BeepManager
 import com.journeyapps.barcodescanner.BarcodeCallback
@@ -378,33 +378,31 @@ class FloatingCameraBarcode(private var activity: AppCompatActivity) : BarcodeCa
         flCameraMinWidth = Preference.flCameraPortraitWidth.defaultValue as Int
         flCameraMinHeight = Preference.flCameraPortraitHeight.defaultValue as Int
 
-        flCameraPortraitLoc =
-            intArrayOf(prefsGetInt(Preference.flCameraPortraitLocX), prefsGetInt(Preference.flCameraPortraitLocY))
-        flCameraPortraitWidth = min(prefsGetInt(Preference.flCameraPortraitWidth), screenWidth)
-        flCameraPortraitHeight = min(prefsGetInt(Preference.flCameraPortraitHeight), screenHeight)
-        flCameraLandscapeLoc =
-            intArrayOf(prefsGetInt(Preference.flCameraLandscapeLocX), prefsGetInt(Preference.flCameraLandscapeLocY))
-        flCameraLandscapeWidth = min(prefsGetInt(Preference.flCameraLandscapeWidth), screenWidth)
-        flCameraLandscapeHeight = min(prefsGetInt(Preference.flCameraLandscapeHeight), screenHeight)
+        flCameraPortraitLoc = intArrayOf(svm.flCameraPortraitLocX, svm.flCameraPortraitLocY)
+        flCameraPortraitWidth = min(svm.flCameraPortraitWidth, screenWidth)
+        flCameraPortraitHeight = min(svm.flCameraPortraitHeight, screenHeight)
+        flCameraLandscapeLoc = intArrayOf(svm.flCameraLandscapeLocX, svm.flCameraLandscapeLocY)
+        flCameraLandscapeWidth = min(svm.flCameraLandscapeWidth, screenWidth)
+        flCameraLandscapeHeight = min(svm.flCameraLandscapeHeight, screenHeight)
 
-        continuousOn = prefsGetBoolean(Preference.flCameraContinuousMode)
-        filterRepeatedReads = prefsGetBoolean(Preference.flCameraFilterRepeatedReads)
+        continuousOn = svm.flCameraContinuousMode
+        filterRepeatedReads = svm.flCameraFilterRepeatedReads
     }
 
     private fun saveValues() {
         if (!floatWindowCreated) return
 
         // Guardar datos de la ventana flotante
-        prefsPutInt(Preference.flCameraPortraitLocX.key, flCameraPortraitLoc[0])
-        prefsPutInt(Preference.flCameraPortraitLocY.key, flCameraPortraitLoc[1])
-        prefsPutInt(Preference.flCameraPortraitWidth.key, flCameraPortraitWidth)
-        prefsPutInt(Preference.flCameraPortraitHeight.key, flCameraPortraitHeight)
-        prefsPutInt(Preference.flCameraLandscapeLocX.key, flCameraLandscapeLoc[0])
-        prefsPutInt(Preference.flCameraLandscapeLocY.key, flCameraLandscapeLoc[1])
-        prefsPutInt(Preference.flCameraLandscapeWidth.key, flCameraLandscapeWidth)
-        prefsPutInt(Preference.flCameraLandscapeHeight.key, flCameraLandscapeHeight)
-        prefsPutBoolean(Preference.flCameraContinuousMode.key, continuousOn)
-        prefsPutBoolean(Preference.flCameraFilterRepeatedReads.key, filterRepeatedReads)
+        svm.flCameraPortraitLocX = flCameraPortraitLoc[0]
+        svm.flCameraPortraitLocY = flCameraPortraitLoc[1]
+        svm.flCameraPortraitWidth = flCameraPortraitWidth
+        svm.flCameraPortraitHeight = flCameraPortraitHeight
+        svm.flCameraLandscapeLocX = flCameraLandscapeLoc[0]
+        svm.flCameraLandscapeLocY = flCameraLandscapeLoc[1]
+        svm.flCameraLandscapeWidth = flCameraLandscapeWidth
+        svm.flCameraLandscapeHeight = flCameraLandscapeHeight
+        svm.flCameraContinuousMode = continuousOn
+        svm.flCameraFilterRepeatedReads = filterRepeatedReads
     }
 
     private fun checkCameraFloatingPermission() {
@@ -425,7 +423,7 @@ class FloatingCameraBarcode(private var activity: AppCompatActivity) : BarcodeCa
         if (PermissionUtils.checkPermission(activity)) {
             onCreate()
         } else {
-            android.app.AlertDialog.Builder(activity).setMessage(
+            AlertDialog.Builder(activity).setMessage(
                 context.getString(R.string.to_use_the_floating_window_function_you_must_authorize_the_floating_window_permission)
             ).setPositiveButton(R.string.ok) { _, _ ->
                 onCreate()
@@ -438,10 +436,10 @@ class FloatingCameraBarcode(private var activity: AppCompatActivity) : BarcodeCa
             // returns boolean representing whether the
             // permission is granted or not
             if (!isGranted) {
-                makeText(
+                showMessage(
                     activity.window.decorView,
                     context.getString(R.string.app_dont_have_necessary_permissions),
-                    SnackBarType.ERROR
+                    ERROR
                 )
             } else {
                 checkFloatingPermission()
@@ -472,7 +470,7 @@ class FloatingCameraBarcode(private var activity: AppCompatActivity) : BarcodeCa
         try {
             checkCameraFloatingPermission()
         } catch (ex: Exception) {
-            makeText(activity.window.decorView, "Error: ${ex.message}", SnackBarType.ERROR)
+            showMessage(activity.window.decorView, "Error: ${ex.message}", ERROR)
             ex.message
         }
     }
@@ -485,21 +483,21 @@ class FloatingCameraBarcode(private var activity: AppCompatActivity) : BarcodeCa
 
         // Barcode camera scanner view
         val formats: ArrayList<BarcodeFormat> = ArrayList()
-        if (prefsGetBoolean(Preference.symbologyPDF417)) formats.add(BarcodeFormat.PDF_417)
-        if (prefsGetBoolean(Preference.symbologyAztec)) formats.add(BarcodeFormat.AZTEC)
-        if (prefsGetBoolean(Preference.symbologyQRCode)) formats.add(BarcodeFormat.QR_CODE)
-        if (prefsGetBoolean(Preference.symbologyCODABAR)) formats.add(BarcodeFormat.CODABAR)
-        if (prefsGetBoolean(Preference.symbologyCode128)) formats.add(BarcodeFormat.CODE_128)
-        if (prefsGetBoolean(Preference.symbologyCode39)) formats.add(BarcodeFormat.CODE_39)
-        if (prefsGetBoolean(Preference.symbologyCode93)) formats.add(BarcodeFormat.CODE_93)
-        if (prefsGetBoolean(Preference.symbologyDataMatrix)) formats.add(BarcodeFormat.DATA_MATRIX)
-        if (prefsGetBoolean(Preference.symbologyEAN13)) formats.add(BarcodeFormat.EAN_13)
-        if (prefsGetBoolean(Preference.symbologyEAN8)) formats.add(BarcodeFormat.EAN_8)
-        if (prefsGetBoolean(Preference.symbologyMaxiCode)) formats.add(BarcodeFormat.MAXICODE)
-        if (prefsGetBoolean(Preference.symbologyRSS14)) formats.add(BarcodeFormat.RSS_14)
-        if (prefsGetBoolean(Preference.symbologyRSSExpanded)) formats.add(BarcodeFormat.RSS_EXPANDED)
-        if (prefsGetBoolean(Preference.symbologyUPCA)) formats.add(BarcodeFormat.UPC_A)
-        if (prefsGetBoolean(Preference.symbologyUPCE)) formats.add(BarcodeFormat.UPC_E)
+        if (svm.symbologyPDF417) formats.add(BarcodeFormat.PDF_417)
+        if (svm.symbologyAztec) formats.add(BarcodeFormat.AZTEC)
+        if (svm.symbologyQRCode) formats.add(BarcodeFormat.QR_CODE)
+        if (svm.symbologyCODABAR) formats.add(BarcodeFormat.CODABAR)
+        if (svm.symbologyCode128) formats.add(BarcodeFormat.CODE_128)
+        if (svm.symbologyCode39) formats.add(BarcodeFormat.CODE_39)
+        if (svm.symbologyCode93) formats.add(BarcodeFormat.CODE_93)
+        if (svm.symbologyDataMatrix) formats.add(BarcodeFormat.DATA_MATRIX)
+        if (svm.symbologyEAN13) formats.add(BarcodeFormat.EAN_13)
+        if (svm.symbologyEAN8) formats.add(BarcodeFormat.EAN_8)
+        if (svm.symbologyMaxiCode) formats.add(BarcodeFormat.MAXICODE)
+        if (svm.symbologyRSS14) formats.add(BarcodeFormat.RSS_14)
+        if (svm.symbologyRSSExpanded) formats.add(BarcodeFormat.RSS_EXPANDED)
+        if (svm.symbologyUPCA) formats.add(BarcodeFormat.UPC_A)
+        if (svm.symbologyUPCE) formats.add(BarcodeFormat.UPC_E)
 
         // Mostrar último código escaneado en la vista exceptuando códigos de configuración e ingreso.
         if (!lastScannedCode.contains("config") &&
@@ -616,4 +614,11 @@ class FloatingCameraBarcode(private var activity: AppCompatActivity) : BarcodeCa
     override fun onTorchOff() {
         isTorchOn = false
     }
+
+    private fun showMessage(view: View, msg: String, type: SnackBarType) {
+        if (type == ERROR) logError(msg)
+        makeText(view, msg, type)
+    }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 }

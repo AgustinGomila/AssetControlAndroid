@@ -8,6 +8,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.text.InputType
+import android.util.Log
 import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
@@ -25,7 +26,8 @@ import androidx.core.graphics.scale
 import androidx.core.view.ViewCompat
 import com.example.assetControl.AssetControlApp.Companion.appName
 import com.example.assetControl.AssetControlApp.Companion.context
-import com.example.assetControl.BuildConfig
+import com.example.assetControl.AssetControlApp.Companion.sr
+import com.example.assetControl.AssetControlApp.Companion.svm
 import com.example.assetControl.R
 import com.example.assetControl.databinding.InitConfigActivityBinding
 import com.example.assetControl.devices.deviceLifecycle.ScannerManager
@@ -51,10 +53,6 @@ import com.example.assetControl.utils.settings.config.Preference
 import com.example.assetControl.utils.settings.config.QRConfigType
 import com.example.assetControl.utils.settings.config.QRConfigType.CREATOR.QRConfigClientAccount
 import com.example.assetControl.utils.settings.io.FileHelper
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.cleanPrefs
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetBoolean
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefsGetString
-import com.example.assetControl.utils.settings.preferences.Repository
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import io.github.cdimascio.dotenv.DotenvBuilder
@@ -69,11 +67,19 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
         }
 
         if (status == ProgressStatus.finished) {
-            makeText(binding.root, getString(R.string.configuration_applied), SnackBarType.SUCCESS)
+            showMessage(getString(R.string.configuration_applied), SnackBarType.SUCCESS)
             FileHelper.removeDataBases(context)
             finish()
         }
     }
+
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (isFinishing || isDestroyed) return
+        if (type == ERROR) logError(msg)
+        makeText(binding.root, msg, type)
+    }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 
     private fun onTaskGetPackagesEnded(it: ClientPackagesProgress) {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
@@ -107,19 +113,19 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
                     }
                 } else {
                     isConfiguring = false
-                    makeText(binding.root, msg, INFO)
+                    showMessage(msg, INFO)
                 }
             }
 
             ProgressStatus.success -> {
                 isConfiguring = false
-                makeText(binding.root, msg, SnackBarType.SUCCESS)
+                showMessage(msg, SnackBarType.SUCCESS)
                 finish()
             }
 
             ProgressStatus.crashed, ProgressStatus.canceled -> {
                 isConfiguring = false
-                makeText(binding.root, msg, ERROR)
+                showMessage(msg, ERROR)
             }
         }
     }
@@ -268,11 +274,11 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     private fun clearOldPrefs() {
-        cleanPrefs()
+        sr.cleanPrefs()
     }
 
     private fun configApp() {
-        val realPass = prefsGetString(Preference.confPassword)
+        val realPass = svm.confPassword
         if (realPass.isEmpty()) {
             attemptEnterConfig(realPass)
             return
@@ -314,9 +320,9 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     private fun attemptEnterConfig(password: String) {
-        val realPass = prefsGetString(Preference.confPassword)
+        val realPass = svm.confPassword
         if (password != realPass) {
-            makeText(binding.root, getString(R.string.invalid_password), ERROR)
+            showMessage(getString(R.string.invalid_password), ERROR)
             return
         }
 
@@ -336,8 +342,8 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
                 // Vamos a reconstruir el scanner por si cambió la configuración
                 ScannerManager.autodetectDeviceModel(this)
 
-                if (Repository.urlPanel.isEmpty()) {
-                    makeText(binding.root, getString(R.string.server_is_not_configured), ERROR)
+                if (svm.urlPanel.isEmpty()) {
+                    showMessage(getString(R.string.server_is_not_configured), ERROR)
                     return@registerForActivityResult
                 }
 
@@ -429,12 +435,12 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private val showScannedCode: Boolean
         get() {
-            return prefsGetBoolean(Preference.showScannedCode)
+            return svm.showScannedCode
         }
 
     override fun scannerCompleted(scanCode: String) {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
-        if (showScannedCode) makeText(binding.root, scanCode, INFO)
+        if (showScannedCode) showMessage(scanCode, INFO)
         ScannerManager.lockScanner(this, true)
         ScannerManager.hideWindow(this)
 
@@ -457,12 +463,12 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
                 }
 
                 else -> {
-                    makeText(binding.root, getString(R.string.invalid_code), ERROR)
+                    showMessage(getString(R.string.invalid_code), ERROR)
                 }
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
-            makeText(binding.root, ex.message.toString(), ERROR)
+            showMessage(ex.message.toString(), ERROR)
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         } finally {
             ScannerManager.lockScanner(this, false)
@@ -473,7 +479,7 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_login, menu)
 
-        if (!prefsGetBoolean(Preference.showConfButton)) {
+        if (!svm.showConfButton) {
             menu.removeItem(menu.findItem(R.id.action_settings).itemId)
         }
 

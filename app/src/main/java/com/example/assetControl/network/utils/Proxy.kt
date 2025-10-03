@@ -9,9 +9,9 @@ import android.widget.EditText
 import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
 import com.example.assetControl.AssetControlApp
+import com.example.assetControl.AssetControlApp.Companion.prefs
 import com.example.assetControl.R
 import com.example.assetControl.utils.settings.config.Preference
-import com.example.assetControl.utils.settings.preferences.Preferences.Companion.prefs
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import java.lang.ref.WeakReference
