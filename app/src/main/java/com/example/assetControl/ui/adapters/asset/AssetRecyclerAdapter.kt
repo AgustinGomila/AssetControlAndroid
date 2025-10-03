@@ -110,7 +110,7 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
      * The state is defined by [useImageControl] preference property.
      *
      */
-    @Suppress("MemberVisibilityCanBePrivate")
+    @Suppress("unused")
     fun showImageControlPanel() {
         notifyItemRangeChanged(currentIndex, 1, PAYLOADS.IMAGE_CONTROL_VISIBILITY)
     }
@@ -655,7 +655,7 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
     fun scrollToPos(position: Int, scrollToTop: Boolean = false) {
         val layoutManager = recyclerView.layoutManager as LinearLayoutManager
 
-        if (position < 0 || position >= itemCount) {
+        if (position !in 0..<itemCount) {
             // La posición está fuera del rango válido, no se puede realizar el scroll
             return
         }
@@ -1302,14 +1302,12 @@ class AssetRecyclerAdapter private constructor(builder: Builder) :
             return this
         }
 
-        @Suppress("unused")
         fun showCheckBoxes(`val`: Boolean, callback: (Boolean) -> Unit): Builder {
             showCheckBoxes = `val`
             showCheckBoxesChanged = callback
             return this
         }
 
-        @Suppress("unused")
         fun showImages(`val`: Boolean, callback: (Boolean) -> Unit): Builder {
             showImages = `val`
             showImagesChanged = callback

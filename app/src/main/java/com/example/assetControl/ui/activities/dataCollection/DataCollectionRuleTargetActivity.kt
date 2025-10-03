@@ -20,6 +20,7 @@ import com.example.assetControl.ui.activities.asset.AssetPrintLabelActivity
 import com.example.assetControl.ui.activities.location.LocationSelectActivity
 import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.example.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
 import com.example.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.example.assetControl.ui.common.utils.Screen.Companion.setupUI
@@ -85,7 +86,7 @@ class DataCollectionRuleTargetActivity : AppCompatActivity() {
 
         binding.itemCategoryButton.setOnClickListener { }
 
-        // VER ESTO!!! No está implementado la recolección para categorías
+        // TODO: está implementado la recolección para categorías
         binding.itemCategoryButton.visibility = INVISIBLE
 
         setupUI(binding.root, this)
@@ -93,9 +94,9 @@ class DataCollectionRuleTargetActivity : AppCompatActivity() {
 
     private val resultForAssetSelect =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            val data = it?.data
+            val data = it.data
             try {
-                if (it?.resultCode == RESULT_OK && data != null) {
+                if (it.resultCode == RESULT_OK && data != null) {
                     val idParcel = data.parcelableArrayList<ParcelLong>("ids")
                         ?: return@registerForActivityResult
 
@@ -119,10 +120,9 @@ class DataCollectionRuleTargetActivity : AppCompatActivity() {
                         }
                     } catch (ex: Exception) {
                         val res = getString(R.string.an_error_occurred_while_trying_to_add_the_item)
-                        makeText(
-                            binding.root,
+                        showMessage(
                             res,
-                            SnackBarType.ERROR
+                            ERROR
                         )
                         Log.d(this::class.java.simpleName, res)
                     }
@@ -137,9 +137,9 @@ class DataCollectionRuleTargetActivity : AppCompatActivity() {
 
     private val resultForAreaSelect =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            val data = it?.data
+            val data = it.data
             try {
-                if (it?.resultCode == RESULT_OK && data != null) {
+                if (it.resultCode == RESULT_OK && data != null) {
                     val warehouseArea =
                         Parcels.unwrap<WarehouseArea>(data.parcelable("warehouseArea"))
                             ?: return@registerForActivityResult
@@ -164,9 +164,9 @@ class DataCollectionRuleTargetActivity : AppCompatActivity() {
 
     private val resultForDcrSelect =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            val data = it?.data
+            val data = it.data
             try {
-                if (it?.resultCode == RESULT_OK && data != null) {
+                if (it.resultCode == RESULT_OK && data != null) {
                     val dcr =
                         Parcels.unwrap<DataCollectionRule>(data.parcelable("dataCollectionRule"))
                             ?: return@registerForActivityResult
@@ -213,9 +213,9 @@ class DataCollectionRuleTargetActivity : AppCompatActivity() {
 
     private val resultForFinishDcc =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            val data = it?.data
+            val data = it.data
             try {
-                if (it?.resultCode == RESULT_OK && data != null) {
+                if (it.resultCode == RESULT_OK && data != null) {
                     closeKeyboard(this)
                     setResult(RESULT_OK)
                     finish()
@@ -256,4 +256,12 @@ class DataCollectionRuleTargetActivity : AppCompatActivity() {
             }
         }
     }
+
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (isFinishing || isDestroyed) return
+        if (type == ERROR) logError(msg)
+        makeText(binding.root, msg, type)
+    }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 }

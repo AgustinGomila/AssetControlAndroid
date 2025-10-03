@@ -31,7 +31,7 @@ class InputFilterMinMax : InputFilter {
             var newVal = dest.toString().substring(0, dstart) + dest.toString()
                 .substring(dend, dest.toString().length)
             // Add the new string in
-            newVal = newVal.substring(0, dstart) + source.toString() + newVal.substring(
+            newVal = newVal.take(dstart) + source.toString() + newVal.substring(
                 dstart,
                 newVal.length
             )

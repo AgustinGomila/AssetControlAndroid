@@ -2,6 +2,7 @@ package com.example.assetControl.ui.fragments.settings
 
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.util.Log
 import android.util.Size
 import android.widget.ImageView
 import androidx.appcompat.app.AlertDialog
@@ -19,8 +20,9 @@ import com.example.assetControl.R
 import com.example.assetControl.devices.scanners.GenerateQR
 import com.example.assetControl.network.download.DownloadDb
 import com.example.assetControl.ui.activities.main.SettingsActivity
-import com.example.assetControl.ui.common.snackbar.MakeText
+import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.example.assetControl.ui.common.utils.Screen
 import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.settings.config.ConfigHelper
@@ -77,14 +79,14 @@ class WebservicePreferenceFragment : PreferenceFragmentCompat() {
                 val proxyPass = svm.acWsProxyPass
 
                 SettingsActivity.testWsConnection(
-                    parentView = requireView(),
                     url = url,
                     namespace = namespace,
                     useProxy = useProxy,
                     proxyUrl = urlProxy,
                     proxyPort = proxyPort,
                     proxyUser = proxyUser,
-                    proxyPass = proxyPass
+                    proxyPass = proxyPass,
+                    onUiEvent = ::showMessage
                 )
             }
             true
@@ -102,9 +104,7 @@ class WebservicePreferenceFragment : PreferenceFragmentCompat() {
                 true
             } catch (ex: Exception) {
                 ex.printStackTrace()
-                MakeText.makeText(
-                    requireView(), "${getString(R.string.error)}: ${ex.message}", SnackBarType.ERROR
-                )
+                showMessage("${getString(R.string.error)}: ${ex.message}", ERROR)
                 ErrorLog.writeLog(null, this::class.java.simpleName, ex)
                 false
             }
@@ -118,10 +118,9 @@ class WebservicePreferenceFragment : PreferenceFragmentCompat() {
             val passwordWs = svm.acWsPass
 
             if (url.isEmpty() || namespace.isEmpty() || userWs.isEmpty() || passwordWs.isEmpty()) {
-                MakeText.makeText(
-                    requireView(),
+                showMessage(
                     AssetControlApp.context.getString(R.string.invalid_webservice_data),
-                    SnackBarType.ERROR
+                    ERROR
                 )
                 return@OnPreferenceClickListener false
             }
@@ -238,4 +237,11 @@ class WebservicePreferenceFragment : PreferenceFragmentCompat() {
         svm.clientEmail = ""
         svm.clientPassword = ""
     }
+
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (type == ERROR) logError(msg)
+        makeText(requireView(), msg, type)
+    }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 }

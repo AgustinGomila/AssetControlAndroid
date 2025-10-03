@@ -559,7 +559,7 @@ class RpcRecyclerAdapter(
 
     private fun selectItem(pos: Int, scroll: Boolean = true) {
         // Si la posición está fuera del rango válido, reseteamos currentIndex a NO_POSITION.
-        currentIndex = if (pos < 0 || pos >= itemCount) NO_POSITION else pos
+        currentIndex = if (pos !in 0..<itemCount) NO_POSITION else pos
         notifyItemChanged(currentIndex)
         if (scroll) scrollToPos(currentIndex)
     }
@@ -591,7 +591,7 @@ class RpcRecyclerAdapter(
     fun scrollToPos(position: Int, scrollToTop: Boolean = false) {
         val layoutManager = recyclerView.layoutManager as LinearLayoutManager
 
-        if (position < 0 || position >= itemCount) {
+        if (position !in 0..<itemCount) {
             // La posición está fuera del rango válido, no se puede realizar el scroll
             return
         }
@@ -644,37 +644,34 @@ class RpcRecyclerAdapter(
         }
     }
 
-    @Suppress("MemberVisibilityCanBePrivate", "unused")
     fun getIndexById(id: Long): Int {
         return currentList.indexOfFirst { it.id == id }
     }
 
-    @Suppress("MemberVisibilityCanBePrivate", "unused")
     private fun getIndex(content: RouteProcessContent): Int {
         return currentList.indexOf(content)
     }
 
-    @Suppress("MemberVisibilityCanBePrivate", "unused")
+    @Suppress("unused")
     fun getIndexByAssetId(itemId: Long): Int {
         return currentList.indexOfFirst { it.assetId == itemId }
     }
 
-    @Suppress("MemberVisibilityCanBePrivate", "unused")
+    @Suppress("unused")
     fun getContentByAsset(item: Asset): RouteProcessContent? {
         return currentList.firstOrNull { it.assetId == item.id }
     }
 
-    @Suppress("MemberVisibilityCanBePrivate", "unused")
     fun getContentByIndex(pos: Int): RouteProcessContent? {
         return if (currentList.lastIndex > pos) currentList[pos] else null
     }
 
-    @Suppress("MemberVisibilityCanBePrivate", "unused")
+    @Suppress("MemberVisibilityCanBePrivate")
     fun getContentById(itemId: Long): RouteProcessContent? {
         return currentList.firstOrNull { it.id == itemId }
     }
 
-    @Suppress("MemberVisibilityCanBePrivate", "unused")
+    @Suppress("unused")
     fun getContentByCode(code: String): RouteProcessContent? {
         return currentList.firstOrNull { it.assetCode == code }
     }
@@ -785,31 +782,26 @@ class RpcRecyclerAdapter(
         }
     }
 
-    @Suppress("unused", "MemberVisibilityCanBePrivate")
     val countChecked: Int
         get() {
             return checkedIdArray.count()
         }
 
-    @Suppress("unused", "MemberVisibilityCanBePrivate")
     val isLevelCompleted: Boolean
         get() {
             return notProcessed <= 0
         }
 
-    @Suppress("unused", "MemberVisibilityCanBePrivate")
     val processed: Int
         get() = fullList.count {
             it.routeProcessStatusId == RouteProcessStatus.processed.id
         }
 
-    @Suppress("unused", "MemberVisibilityCanBePrivate")
     val notProcessed: Int
         get() = fullList.count {
             it.routeProcessStatusId == RouteProcessStatus.notProcessed.id
         }
 
-    @Suppress("unused", "MemberVisibilityCanBePrivate")
     val skipped: Int
         get() = fullList.count {
             it.routeProcessStatusId == RouteProcessStatus.skipped.id
@@ -849,7 +841,6 @@ class RpcRecyclerAdapter(
     }
 
     // Aquí creamos dos ViewHolder, uno para cada tipo de vista
-    @Suppress("MemberVisibilityCanBePrivate", "unused")
     class SelectedViewHolder(val binding: RouteProcessContentRowBinding) : ViewHolder(binding.root) {
         fun bindCheckBoxVisibility(checkBoxVisibility: Int = GONE) {
             binding.checkBoxConstraintLayout.visibility = checkBoxVisibility
@@ -931,7 +922,6 @@ class RpcRecyclerAdapter(
         }
     }
 
-    @Suppress("MemberVisibilityCanBePrivate", "unused")
     internal class UnselectedViewHolder(val binding: RouteProcessContentRowBinding) : ViewHolder(binding.root) {
         fun bindCheckBoxVisibility(checkBoxVisibility: Int = GONE) {
             binding.checkBoxConstraintLayout.visibility = checkBoxVisibility

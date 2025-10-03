@@ -13,7 +13,7 @@ import kotlin.reflect.KClass
 
 class Statics {
 
-    @Suppress("unused", "MemberVisibilityCanBePrivate")
+    @Suppress("unused")
     companion object {
 
         val newLine: String

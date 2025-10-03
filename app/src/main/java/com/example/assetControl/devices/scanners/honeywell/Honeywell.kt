@@ -230,7 +230,7 @@ class Honeywell(private val activity: AppCompatActivity) : Scanner() {
         if (mapProperties.isNullOrEmpty()) return
         loadProperties()
         for ((key, value1) in mapProperties) {
-            if (value1 is String) properties!!.putString(key, value1.toString())
+            if (value1 is String) properties!!.putString(key, value1)
             if (value1 is Boolean) properties!!.putBoolean(
                 key,
                 java.lang.Boolean.valueOf(value1.toString())

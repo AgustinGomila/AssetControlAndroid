@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
+import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -38,6 +39,7 @@ import com.example.assetControl.ui.activities.main.SettingsActivity
 import com.example.assetControl.ui.activities.print.TemplateSelectDialogActivity
 import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.misc.CounterHandler
 import com.example.assetControl.utils.parcel.Parcelables.parcelable
@@ -315,23 +317,23 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
 
         binding.printButton.setOnClickListener {
             if (printer.isEmpty()) {
-                showSnackBar(
+                showMessage(
                     getString(R.string.you_must_select_a_printer),
-                    SnackBarType.ERROR
+                    ERROR
                 )
                 return@setOnClickListener
             }
             if (barcodeLabelCustom == null) {
-                showSnackBar(
+                showMessage(
                     getString(R.string.you_must_select_a_template),
-                    SnackBarType.ERROR
+                    ERROR
                 )
                 return@setOnClickListener
             }
             if (qty <= 0) {
-                showSnackBar(
+                showMessage(
                     getString(R.string.you_must_select_the_amount_of_labels_to_print),
-                    SnackBarType.ERROR
+                    ERROR
                 )
                 return@setOnClickListener
             }
@@ -393,7 +395,7 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
     private fun attemptEnterConfig(password: String) {
         val realPass = svm.confPassword
         if (password != realPass) {
-            showSnackBar(getString(R.string.invalid_password), SnackBarType.ERROR)
+            showMessage(getString(R.string.invalid_password), ERROR)
             return
         }
 
@@ -563,7 +565,7 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
                         validText.indexOf(decimalSeparator) + 1,
                         validText.length
                     )
-                integerPart = validText.substring(0, validText.indexOf(decimalSeparator))
+                integerPart = validText.take(validText.indexOf(decimalSeparator))
             } else {
                 integerPart = validText
             }
@@ -582,10 +584,7 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
             } else
                 integerPart +
                         decimalSeparator +
-                        decimalPart.substring(
-                            0,
-                            if (decimalPart.length > maxDecimalPlaces) maxDecimalPlaces else decimalPart.length
-                        )
+                        decimalPart.take(if (decimalPart.length > maxDecimalPlaces) maxDecimalPlaces else decimalPart.length)
 
             // Devolver solo si son valores positivos diferentes a los de originales.
             // NULL si no hay que hacer cambios sobre el texto original.
@@ -607,9 +606,9 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
 
     fun printWaById(waIdArray: ArrayList<Long>) {
         if (waIdArray.isEmpty()) {
-            showSnackBar(
+            showMessage(
                 getString(R.string.you_must_select_at_least_one_area),
-                SnackBarType.ERROR
+                ERROR
             )
             return
         }
@@ -628,18 +627,18 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
 
     fun printWa(was: ArrayList<WarehouseArea>) {
         if (was.isEmpty()) {
-            showSnackBar(
+            showMessage(
                 getString(R.string.you_must_select_at_least_one_area),
-                SnackBarType.ERROR
+                ERROR
             )
             return
         }
 
         if (was.size == 1) {
             if (was[0].id < 0) {
-                showSnackBar(
+                showMessage(
                     getString(R.string.the_selected_warehouse_area_was_not_uploaded_to_the_server_and_does_not_have_a_definitive_id),
-                    SnackBarType.ERROR
+                    ERROR
                 )
                 return
             }
@@ -648,9 +647,9 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
         if (barcodeLabelCustom == null ||
             (barcodeLabelCustom ?: return).id == 0L
         ) {
-            showSnackBar(
+            showMessage(
                 getString(R.string.no_template_selected),
-                SnackBarType.ERROR
+                ERROR
             )
             return
         }
@@ -672,9 +671,9 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
 
     fun printAssetById(assetIdArray: List<Long>) {
         if (assetIdArray.isEmpty()) {
-            showSnackBar(
+            showMessage(
                 getString(R.string.you_must_select_at_least_one_asset),
-                SnackBarType.ERROR
+                ERROR
             )
             return
         }
@@ -693,18 +692,18 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
 
     fun printAsset(assets: ArrayList<Asset>) {
         if (assets.isEmpty()) {
-            showSnackBar(
+            showMessage(
                 getString(R.string.you_must_select_at_least_one_asset),
-                SnackBarType.ERROR
+                ERROR
             )
             return
         }
 
         if (assets.size == 1) {
             if (assets[0].id < 0) {
-                showSnackBar(
+                showMessage(
                     getString(R.string.the_selected_asset_was_not_uploaded_to_the_server_and_does_not_have_a_definitive_id),
-                    SnackBarType.ERROR
+                    ERROR
                 )
                 return
             }
@@ -713,9 +712,9 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
         if (barcodeLabelCustom == null ||
             (barcodeLabelCustom ?: return).id == 0L
         ) {
-            showSnackBar(
+            showMessage(
                 getString(R.string.no_template_selected),
-                SnackBarType.ERROR
+                ERROR
             )
             return
         }
@@ -749,14 +748,14 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
 
     private fun sendToPrinter(sendThis: String, onFinish: (Boolean) -> Unit) {
         if (!getIsPrintDone()) {
-            showSnackBar(getString(R.string.there_is_a_printing_in_progress_), SnackBarType.REMOVE)
+            showMessage(getString(R.string.there_is_a_printing_in_progress_), SnackBarType.REMOVE)
             return
         }
 
         setIsPrintDone(false)
         Printer.PrinterFactory.createPrinter(
             activity = requireActivity(),
-            onEvent = { showSnackBar(it.text, it.snackBarType) }
+            onEvent = { showMessage(it.text, it.snackBarType) }
         )?.printLabel(
             printThis = sendThis,
             qty = qty,
@@ -767,10 +766,13 @@ class PrinterFragment : Fragment(), CounterHandler.CounterListener {
         )
     }
 
-    private fun showSnackBar(text: String, snackBarType: SnackBarType) {
-        if (_binding == null) return
-        makeText(binding.root, text, snackBarType)
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (requireActivity().isFinishing || requireActivity().isDestroyed) return
+        if (type == ERROR) logError(msg)
+        makeText(binding.root, msg, type)
     }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 
     companion object {
         // region Fragment initialization parameters

@@ -40,12 +40,12 @@ class ItemCategoryObject() : Parcelable {
                     when (soName) {
                         "item_category_id" -> {
                             x.item_category_id =
-                                (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
+                                (soValue as? Int)?.toLong() ?: (soValue as? Long ?: 0L)
                         }
 
                         "parent_id" -> {
                             x.parent_id =
-                                (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
+                                (soValue as? Int)?.toLong() ?: (soValue as? Long ?: 0L)
                         }
 
                         "item_category_ext_id" -> {

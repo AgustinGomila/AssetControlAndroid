@@ -54,6 +54,7 @@ import com.example.assetControl.ui.adapters.interfaces.Interfaces
 import com.example.assetControl.ui.adapters.sync.SyncElementRecyclerAdapter
 import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.example.assetControl.ui.common.utils.Screen
 import com.example.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.example.assetControl.ui.common.utils.Screen.Companion.setupUI
@@ -92,7 +93,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
 
     private fun onSessionCreated(result: Boolean) {
         if (!result) {
-            makeText(binding.root, getString(R.string.offline_mode), SnackBarType.INFO)
+            showMessage(getString(R.string.offline_mode), SnackBarType.INFO)
         }
     }
 
@@ -119,12 +120,12 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
 
             ProgressStatus.crashed.id, ProgressStatus.canceled.id -> {
                 showImageProgressBar(false)
-                makeText(this, msg, SnackBarType.ERROR)
+                showMessage(msg, ERROR)
             }
 
             ProgressStatus.finished.id -> {
                 showImageProgressBar(false)
-                makeText(this, getString(R.string.upload_images_success), SnackBarType.SUCCESS)
+                showMessage(getString(R.string.upload_images_success), SnackBarType.SUCCESS)
             }
         }
     }
@@ -481,7 +482,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
         try {
             if (!Statics.GOD_MODE) {
                 if (Statics.OFFLINE_MODE || !isOnline()) {
-                    makeText(binding.root, getString(R.string.offline_mode), SnackBarType.INFO)
+                    showMessage(getString(R.string.offline_mode), SnackBarType.INFO)
                     return
                 }
             }
@@ -525,7 +526,7 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
 
         try {
             if (Statics.OFFLINE_MODE || !isOnline()) {
-                makeText(binding.root, getString(R.string.offline_mode), SnackBarType.INFO)
+                showMessage(getString(R.string.offline_mode), SnackBarType.INFO)
                 return
             }
 
@@ -1193,4 +1194,12 @@ class SyncActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener,
     override fun onCheckedChanged(isChecked: Boolean, pos: Int) {
         fillSummaryRow()
     }
+
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (isFinishing || isDestroyed) return
+        if (type == ERROR) logError(msg)
+        makeText(binding.root, msg, type)
+    }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 }

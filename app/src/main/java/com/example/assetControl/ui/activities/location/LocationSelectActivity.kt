@@ -7,6 +7,7 @@ import android.graphics.Rect
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
@@ -34,8 +35,8 @@ import com.example.assetControl.devices.scanners.rfid.Rfid
 import com.example.assetControl.devices.scanners.vh75.Vh75Bt
 import com.example.assetControl.ui.adapters.location.WarehouseAdapter
 import com.example.assetControl.ui.adapters.location.WarehouseAreaAdapter
-import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.example.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
 import com.example.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.example.assetControl.ui.common.utils.Screen.Companion.setupUI
@@ -77,7 +78,7 @@ class LocationSelectActivity : AppCompatActivity(),
 
     override fun scannerCompleted(scanCode: String) {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
-        if (showScannedCode) makeText(binding.root, scanCode, SnackBarType.INFO)
+        if (showScannedCode) showMessage(scanCode, SnackBarType.INFO)
         ScannerManager.lockScanner(this, true)
 
         try {
@@ -97,10 +98,9 @@ class LocationSelectActivity : AppCompatActivity(),
                     locationOk = true
                 }
             } else {
-                makeText(
-                    binding.root,
+                showMessage(
                     getString(R.string.code_read_does_not_correspond_to_a_location),
-                    SnackBarType.ERROR
+                    ERROR
                 )
             }
 
@@ -109,10 +109,9 @@ class LocationSelectActivity : AppCompatActivity(),
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
-            makeText(
-                binding.root,
+            showMessage(
                 ex.message.toString(),
-                SnackBarType.ERROR
+                ERROR
             )
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         } finally {
@@ -815,24 +814,21 @@ class LocationSelectActivity : AppCompatActivity(),
         if (svm.rfidShowConnectedMessage) {
             when (Rfid.vh75State) {
                 Vh75Bt.STATE_CONNECTED -> {
-                    makeText(
-                        binding.root,
+                    showMessage(
                         getString(R.string.rfid_connected),
                         SnackBarType.SUCCESS
                     )
                 }
 
                 Vh75Bt.STATE_CONNECTING -> {
-                    makeText(
-                        binding.root,
+                    showMessage(
                         getString(R.string.searching_rfid_reader),
                         SnackBarType.RUNNING
                     )
                 }
 
                 else -> {
-                    makeText(
-                        binding.root,
+                    showMessage(
                         getString(R.string.there_is_no_rfid_device_connected),
                         SnackBarType.INFO
                     )
@@ -848,5 +844,11 @@ class LocationSelectActivity : AppCompatActivity(),
 
     //endregion READERS Reception
 
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (isFinishing || isDestroyed) return
+        if (type == ERROR) logError(msg)
+        showMessage(msg, type)
+    }
 
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 }

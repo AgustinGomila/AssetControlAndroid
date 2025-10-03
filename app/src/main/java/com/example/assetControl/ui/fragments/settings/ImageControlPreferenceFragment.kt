@@ -3,6 +3,7 @@ package com.example.assetControl.ui.fragments.settings
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Environment
+import android.util.Log
 import android.util.Size
 import android.widget.ImageView
 import androidx.appcompat.app.AlertDialog
@@ -20,9 +21,10 @@ import com.example.assetControl.network.checkConn.ImageControlCheckUser
 import com.example.assetControl.network.utils.ClientPackage
 import com.example.assetControl.network.utils.ProgressStatus
 import com.example.assetControl.ui.activities.main.SettingsActivity
-import com.example.assetControl.ui.common.snackbar.MakeText
-import com.example.assetControl.ui.common.snackbar.SnackBarEventData
+import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.INFO
 import com.example.assetControl.ui.common.utils.Screen
 import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.settings.config.ConfigHelper
@@ -99,10 +101,9 @@ class ImageControlPreferenceFragment : PreferenceFragmentCompat(), ClientPackage
             //val icPassword = svm.icPass)
 
             if (icUrl.isEmpty() || icNamespace.isEmpty() || icUserWs.isEmpty() || icPasswordWs.isEmpty()) {
-                MakeText.makeText(
-                    requireView(),
+                showMessage(
                     AssetControlApp.context.getString(R.string.invalid_webservice_data),
-                    SnackBarType.ERROR
+                    ERROR
                 )
                 return@OnPreferenceClickListener false
             }
@@ -125,9 +126,7 @@ class ImageControlPreferenceFragment : PreferenceFragmentCompat(), ClientPackage
                 true
             } catch (ex: Exception) {
                 ex.printStackTrace()
-                MakeText.makeText(
-                    requireView(), "${getString(R.string.error)}: ${ex.message}", SnackBarType.ERROR
-                )
+                showMessage("${getString(R.string.error)}: ${ex.message}", ERROR)
                 ErrorLog.writeLog(null, this::class.java.simpleName, ex)
                 false
             }
@@ -182,38 +181,28 @@ class ImageControlPreferenceFragment : PreferenceFragmentCompat(), ClientPackage
         namespace: String,
     ) {
         if (url.isEmpty() || namespace.isEmpty()) {
-            if (view != null) showSnackBar(
-                SnackBarEventData(
-                    AssetControlApp.context.getString(R.string.invalid_webservice_data), SnackBarType.INFO
-                )
+            if (view != null) showMessage(
+                AssetControlApp.context.getString(R.string.invalid_webservice_data), INFO
             )
             return
         }
-        ImageControlCheckUser { showSnackBar(it) }.execute()
+        ImageControlCheckUser { showMessage(it.text, it.snackBarType) }.execute()
     }
 
     override fun onTaskConfigPanelEnded(status: ProgressStatus) {
         if (status == ProgressStatus.finished) {
-            if (view != null) showSnackBar(
-                SnackBarEventData(
-                    getString(R.string.configuration_applied), SnackBarType.INFO
-                )
-            )
+            if (view != null) showMessage(getString(R.string.configuration_applied), INFO)
             FileHelper.removeDataBases(requireContext())
             @Suppress("DEPRECATION") requireActivity().onBackPressed()
         } else if (status == ProgressStatus.crashed) {
-            if (view != null) showSnackBar(
-                SnackBarEventData(
-                    getString(R.string.error_setting_user_panel),
-                    SnackBarType.ERROR
-                )
-            )
+            if (view != null) showMessage(getString(R.string.error_setting_user_panel), ERROR)
         }
     }
 
-    private fun showSnackBar(it: SnackBarEventData) {
-        if (requireActivity().isDestroyed || requireActivity().isFinishing) return
-
-        MakeText.makeText(requireView(), it.text, it.snackBarType)
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (type == ERROR) logError(msg)
+        makeText(requireView(), msg, type)
     }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 }

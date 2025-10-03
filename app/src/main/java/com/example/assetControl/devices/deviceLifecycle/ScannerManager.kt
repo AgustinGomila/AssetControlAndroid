@@ -204,7 +204,7 @@ object ScannerManager : DeviceLifecycle.Listener {
             Log.v(javaClass.simpleName, "Manufacturer: $manufacturer, Model: $model")
 
             if (collectorType != null) {
-                Collector.Companion.collectorType = collectorType
+                Collector.collectorType = collectorType
                 showMessage(
                     activity.window,
                     "${context.getString(R.string.device)}: $manufacturer $model",

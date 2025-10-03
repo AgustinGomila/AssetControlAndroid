@@ -3,6 +3,7 @@ package com.example.assetControl.ui.activities.location
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.MenuItem
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
@@ -25,6 +26,7 @@ import com.example.assetControl.data.room.dto.location.Warehouse
 import com.example.assetControl.databinding.WarehouseCrudActivityBinding
 import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.example.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
 import com.example.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.example.assetControl.ui.common.utils.Screen.Companion.setupUI
@@ -52,8 +54,7 @@ class WarehouseCRUDActivity : AppCompatActivity(), CrudCompleted,
         val warehouse: Warehouse? = (result.itemResult as Warehouse?)
         when (result.status) {
             UPDATE_OK -> {
-                makeText(
-                    binding.root,
+                showMessage(
                     getString(R.string.warehouse_modified_correctly),
                     SnackBarType.SUCCESS
                 )
@@ -74,8 +75,7 @@ class WarehouseCRUDActivity : AppCompatActivity(), CrudCompleted,
             }
 
             INSERT_OK -> {
-                makeText(
-                    binding.root,
+                showMessage(
                     getString(R.string.warehouse_added_correctly),
                     SnackBarType.SUCCESS
                 )
@@ -96,16 +96,16 @@ class WarehouseCRUDActivity : AppCompatActivity(), CrudCompleted,
                 }
             }
 
-            ERROR_OBJECT_NULL -> makeText(
-                binding.root, getString(R.string.error_null_object), SnackBarType.ERROR
+            ERROR_OBJECT_NULL -> showMessage(
+                getString(R.string.error_null_object), ERROR
             )
 
-            ERROR_UPDATE -> makeText(
-                binding.root, getString(R.string.error_updating_warehouse), SnackBarType.ERROR
+            ERROR_UPDATE -> showMessage(
+                getString(R.string.error_updating_warehouse), ERROR
             )
 
-            ERROR_INSERT -> makeText(
-                binding.root, getString(R.string.error_adding_warehouse), SnackBarType.ERROR
+            ERROR_INSERT -> showMessage(
+                getString(R.string.error_adding_warehouse), ERROR
             )
         }
     }
@@ -209,9 +209,9 @@ class WarehouseCRUDActivity : AppCompatActivity(), CrudCompleted,
 
     private val resultForWarehouseSelect =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            val data = it?.data
+            val data = it.data
             try {
-                if (it?.resultCode == RESULT_OK && data != null) {
+                if (it.resultCode == RESULT_OK && data != null) {
                     val w = Parcels.unwrap<Warehouse>(data.parcelable("warehouse"))
                         ?: return@registerForActivityResult
 
@@ -219,10 +219,9 @@ class WarehouseCRUDActivity : AppCompatActivity(), CrudCompleted,
                         changeWarehouse(w)
                     } catch (ex: Exception) {
                         ex.printStackTrace()
-                        makeText(
-                            binding.root,
+                        showMessage(
                             getString(R.string.error_trying_to_add_warehouse),
-                            SnackBarType.ERROR
+                            ERROR
                         )
                         ErrorLog.writeLog(this, this::class.java.simpleName, ex)
                     }
@@ -266,6 +265,7 @@ class WarehouseCRUDActivity : AppCompatActivity(), CrudCompleted,
     }
 
     private fun setImageControlFragment() {
+        if (!svm.useImageControl) return
         var warehouseId = 0L
         var description = ""
         if (warehouse != null) {
@@ -402,4 +402,12 @@ class WarehouseCRUDActivity : AppCompatActivity(), CrudCompleted,
             }
         }
     }
+
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (isFinishing || isDestroyed) return
+        if (type == ERROR) logError(msg)
+        makeText(binding.root, msg, type)
+    }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 }

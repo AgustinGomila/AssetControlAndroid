@@ -3,6 +3,7 @@ package com.example.assetControl.ui.activities.category
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.MenuItem
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
@@ -25,6 +26,7 @@ import com.example.assetControl.data.room.dto.category.ItemCategory
 import com.example.assetControl.databinding.ItemCategoryCrudActivityBinding
 import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.example.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
 import com.example.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.example.assetControl.ui.common.utils.Screen.Companion.setupUI
@@ -55,8 +57,7 @@ class ItemCategoryCRUDActivity : AppCompatActivity(), CrudCompleted,
         val itemCategory: ItemCategory? = (result.itemResult as ItemCategory?)
         when (result.status) {
             UPDATE_OK -> {
-                makeText(
-                    binding.root,
+                showMessage(
                     getString(R.string.category_modified_correctly),
                     SnackBarType.SUCCESS
                 )
@@ -77,8 +78,8 @@ class ItemCategoryCRUDActivity : AppCompatActivity(), CrudCompleted,
             }
 
             INSERT_OK -> {
-                makeText(
-                    binding.root, getString(R.string.category_added_correctly), SnackBarType.SUCCESS
+                showMessage(
+                    getString(R.string.category_added_correctly), SnackBarType.SUCCESS
                 )
                 if (imageControlFragment != null && itemCategory != null) {
                     imageControlFragment?.updateObjectId1(itemCategory.id)
@@ -97,16 +98,16 @@ class ItemCategoryCRUDActivity : AppCompatActivity(), CrudCompleted,
                 }
             }
 
-            ERROR_OBJECT_NULL -> makeText(
-                binding.root, getString(R.string.error_null_object), SnackBarType.ERROR
+            ERROR_OBJECT_NULL -> showMessage(
+                getString(R.string.error_null_object), ERROR
             )
 
-            ERROR_UPDATE -> makeText(
-                binding.root, getString(R.string.error_updating_category), SnackBarType.ERROR
+            ERROR_UPDATE -> showMessage(
+                getString(R.string.error_updating_category), ERROR
             )
 
-            ERROR_INSERT -> makeText(
-                binding.root, getString(R.string.error_adding_category), SnackBarType.ERROR
+            ERROR_INSERT -> showMessage(
+                getString(R.string.error_adding_category), ERROR
             )
         }
     }
@@ -224,6 +225,7 @@ class ItemCategoryCRUDActivity : AppCompatActivity(), CrudCompleted,
     }
 
     private fun setImageControlFragment() {
+        if (!svm.useImageControl) return
         var itemCategoryId = 0L
         var description = ""
         if (itemCategory != null) {
@@ -355,9 +357,9 @@ class ItemCategoryCRUDActivity : AppCompatActivity(), CrudCompleted,
 
     private val resultForCategorySelect =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            val data = it?.data
+            val data = it.data
             try {
-                if (it?.resultCode == RESULT_OK && data != null) {
+                if (it.resultCode == RESULT_OK && data != null) {
                     val iC = Parcels.unwrap<ItemCategory>(data.parcelable("itemCategory"))
                         ?: return@registerForActivityResult
 
@@ -365,10 +367,9 @@ class ItemCategoryCRUDActivity : AppCompatActivity(), CrudCompleted,
                         changeItemCategory(iC)
                     } catch (ex: Exception) {
                         ex.printStackTrace()
-                        makeText(
-                            binding.root,
+                        showMessage(
                             getString(R.string.error_trying_to_add_category),
-                            SnackBarType.ERROR
+                            ERROR
                         )
                         ErrorLog.writeLog(this, this::class.java.simpleName, ex)
                     }
@@ -405,4 +406,12 @@ class ItemCategoryCRUDActivity : AppCompatActivity(), CrudCompleted,
             }
         }
     }
+
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (isFinishing || isDestroyed) return
+        if (type == ERROR) logError(msg)
+        makeText(binding.root, msg, type)
+    }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 }

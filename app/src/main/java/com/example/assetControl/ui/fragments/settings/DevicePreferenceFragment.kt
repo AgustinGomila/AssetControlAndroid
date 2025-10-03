@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.InputFilter
 import android.text.Spanned
+import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -27,9 +28,9 @@ import com.example.assetControl.devices.scanners.collector.CollectorTypePreferen
 import com.example.assetControl.devices.scanners.rfid.Rfid
 import com.example.assetControl.devices.scanners.rfid.RfidType
 import com.example.assetControl.devices.scanners.vh75.Vh75Bt
-import com.example.assetControl.ui.common.snackbar.MakeText
-import com.example.assetControl.ui.common.snackbar.SnackBarEventData
+import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.example.assetControl.utils.Statics.Companion.appHasBluetoothPermission
 import com.example.assetControl.utils.errorLog.ErrorLog
 import com.example.assetControl.utils.settings.devices.DevicePreference
@@ -134,7 +135,7 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
-            showSnackBar(SnackBarEventData(getString(R.string.rfid_reader_not_initialized), SnackBarType.INFO))
+            showMessage(getString(R.string.rfid_reader_not_initialized), SnackBarType.INFO)
             ErrorLog.writeLog(activity, this::class.java.simpleName, ex)
         }
     }
@@ -402,29 +403,23 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
         if (svm.rfidShowConnectedMessage) {
             when (Rfid.vh75State) {
                 Vh75Bt.STATE_CONNECTED -> {
-                    showSnackBar(
-                        SnackBarEventData(
-                            getString(R.string.rfid_connected),
-                            SnackBarType.SUCCESS
-                        )
+                    showMessage(
+                        getString(R.string.rfid_connected),
+                        SnackBarType.SUCCESS
                     )
                 }
 
                 Vh75Bt.STATE_CONNECTING -> {
-                    showSnackBar(
-                        SnackBarEventData(
-                            getString(R.string.searching_rfid_reader),
-                            SnackBarType.RUNNING
-                        )
+                    showMessage(
+                        getString(R.string.searching_rfid_reader),
+                        SnackBarType.RUNNING
                     )
                 }
 
                 else -> {
-                    showSnackBar(
-                        SnackBarEventData(
-                            getString(R.string.there_is_no_rfid_device_connected),
-                            SnackBarType.INFO
-                        )
+                    showMessage(
+                        getString(R.string.there_is_no_rfid_device_connected),
+                        SnackBarType.INFO
                     )
                 }
             }
@@ -468,11 +463,9 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
         val rfidNamePref: EditTextPreference? = findPreference(PreferenceConfig.rfidBtName.key)
         rfidNamePref?.setOnPreferenceClickListener {
             if (vh75?.state != Vh75Bt.STATE_CONNECTED) {
-                showSnackBar(
-                    SnackBarEventData(
-                        getString(R.string.there_is_no_rfid_device_connected),
-                        SnackBarType.ERROR
-                    )
+                showMessage(
+                    getString(R.string.there_is_no_rfid_device_connected),
+                    ERROR
                 )
             }
             true
@@ -482,11 +475,9 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
                 vh75?.setBluetoothName(newValue.toString())
                 rfidNamePref.summary = newValue.toString()
             } else {
-                showSnackBar(
-                    SnackBarEventData(
-                        getString(R.string.there_is_no_rfid_device_connected),
-                        SnackBarType.ERROR
-                    )
+                showMessage(
+                    getString(R.string.there_is_no_rfid_device_connected),
+                    ERROR
                 )
             }
             true
@@ -537,12 +528,7 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
                 val diaBox = askForResetToFactory()
                 diaBox.show()
             } else {
-                showSnackBar(
-                    SnackBarEventData(
-                        getString(R.string.there_is_no_rfid_device_connected),
-                        SnackBarType.ERROR
-                    )
-                )
+                showMessage(getString(R.string.there_is_no_rfid_device_connected), ERROR)
             }
             true
         }
@@ -558,11 +544,7 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
             context.getSystemService(AppCompatActivity.BLUETOOTH_SERVICE) as BluetoothManager
         val mBluetoothAdapter = bluetoothManager.adapter
         if (mBluetoothAdapter == null) {
-            showSnackBar(
-                SnackBarEventData(
-                    getString(R.string.there_are_no_bluetooth_devices), SnackBarType.INFO
-                )
-            )
+            showMessage(getString(R.string.there_are_no_bluetooth_devices), SnackBarType.INFO)
         } else {
             if (mBluetoothAdapter.isEnabled) {
                 setupRfidReader()
@@ -590,9 +572,10 @@ class DevicePreferenceFragment : PreferenceFragmentCompat(), Rfid.RfidDeviceList
             ) { dialog, _ -> dialog.dismiss() }.create()
     }
 
-    private fun showSnackBar(it: SnackBarEventData) {
-        if (requireActivity().isDestroyed || requireActivity().isFinishing) return
-
-        MakeText.makeText(requireView(), it.text, it.snackBarType)
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (type == ERROR) logError(msg)
+        makeText(requireView(), msg, type)
     }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 }

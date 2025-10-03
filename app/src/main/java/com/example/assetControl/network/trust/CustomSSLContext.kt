@@ -22,7 +22,7 @@ object CustomSSLContext {
         }
 
         return try {
-            val sslFactoryManager = TrustFactory.Companion.getTrustFactoryManager(
+            val sslFactoryManager = TrustFactory.getTrustFactoryManager(
                 context,
                 listOf(R.raw.isrgrootx1, R.raw.isrgrootx2, R.raw.r1, R.raw.r2, R.raw.r3, R.raw.r4, R.raw.gsr4)
             )

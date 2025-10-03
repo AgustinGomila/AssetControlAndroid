@@ -79,12 +79,12 @@ class AssetCollectorObject() : Parcelable {
                     when (soName) {
                         "asset_id" -> {
                             x.asset_id =
-                                (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
+                                (soValue as? Int)?.toLong() ?: (soValue as? Long ?: 0L)
                         }
 
                         "parent_id" -> {
                             x.parent_id =
-                                (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
+                                (soValue as? Int)?.toLong() ?: (soValue as? Long ?: 0L)
                         }
 
                         "code" -> {
@@ -93,12 +93,12 @@ class AssetCollectorObject() : Parcelable {
 
                         "warehouse_id" -> {
                             x.warehouse_id =
-                                (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
+                                (soValue as? Int)?.toLong() ?: (soValue as? Long ?: 0L)
                         }
 
                         "warehouse_area_id" -> {
                             x.warehouse_area_id =
-                                (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
+                                (soValue as? Int)?.toLong() ?: (soValue as? Long ?: 0L)
                         }
 
                         "active" -> {
@@ -123,17 +123,17 @@ class AssetCollectorObject() : Parcelable {
 
                         "item_category_id" -> {
                             x.item_category_id =
-                                (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
+                                (soValue as? Int)?.toLong() ?: (soValue as? Long ?: 0L)
                         }
 
                         "original_warehouse_id" -> {
                             x.original_warehouse_id =
-                                (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
+                                (soValue as? Int)?.toLong() ?: (soValue as? Long ?: 0L)
                         }
 
                         "original_warehouse_area_id" -> {
                             x.original_warehouse_area_id =
-                                (soValue as? Int)?.toLong() ?: if (soValue is Long) soValue else 0L
+                                (soValue as? Int)?.toLong() ?: (soValue as? Long ?: 0L)
                         }
 
                         "label_number" -> {

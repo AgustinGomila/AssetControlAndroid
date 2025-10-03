@@ -107,6 +107,7 @@ class AssetDetailActivity : AppCompatActivity() {
     }
 
     private fun setImageControlFragment() {
+        if (!svm.useImageControl) return
         if (!svm.useImageControl) {
             runOnUiThread {
                 binding.imageControlLayout.visibility = View.GONE

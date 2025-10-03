@@ -3,6 +3,7 @@ package com.example.assetControl.ui.activities.asset
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.OnBackPressedCallback
@@ -40,6 +41,8 @@ import com.example.assetControl.devices.scanners.rfid.Rfid.Companion.isRfidRequi
 import com.example.assetControl.devices.scanners.vh75.Vh75Bt
 import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.SUCCESS
 import com.example.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
 import com.example.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.example.assetControl.ui.common.utils.Screen.Companion.setupUI
@@ -74,8 +77,8 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
         val asset: Asset? = (result.itemResult as Asset?)
         when (result.status) {
             UPDATE_OK -> {
-                makeText(
-                    binding.root, getString(R.string.asset_modified_correctly), SnackBarType.SUCCESS
+                showMessage(
+                    getString(R.string.asset_modified_correctly), SUCCESS
                 )
                 if (imageControlFragment != null && asset != null) {
                     imageControlFragment?.saveImages(true)
@@ -94,8 +97,8 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
             }
 
             INSERT_OK -> {
-                makeText(
-                    binding.root, getString(R.string.asset_added_correctly), SnackBarType.SUCCESS
+                showMessage(
+                    getString(R.string.asset_added_correctly), SUCCESS
                 )
                 if (imageControlFragment != null && asset != null) {
                     imageControlFragment?.updateObjectId1(asset.id)
@@ -114,16 +117,16 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
                 }
             }
 
-            ERROR_OBJECT_NULL -> makeText(
-                binding.root, getString(R.string.error_null_object), SnackBarType.ERROR
+            ERROR_OBJECT_NULL -> showMessage(
+                getString(R.string.error_null_object), ERROR
             )
 
-            ERROR_UPDATE -> makeText(
-                binding.root, getString(R.string.error_updating_asset), SnackBarType.ERROR
+            ERROR_UPDATE -> showMessage(
+                getString(R.string.error_updating_asset), ERROR
             )
 
-            ERROR_INSERT -> makeText(
-                binding.root, getString(R.string.error_adding_asset), SnackBarType.ERROR
+            ERROR_INSERT -> showMessage(
+                getString(R.string.error_adding_asset), ERROR
             )
         }
     }
@@ -284,6 +287,7 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     private fun setImageControlFragment() {
+        if (!svm.useImageControl) return
         var assetId = 0L
         var description = ""
         val a = asset
@@ -375,9 +379,9 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private val resultForAssetSelect =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            val data = it?.data
+            val data = it.data
             try {
-                if (it?.resultCode == RESULT_OK && data != null) {
+                if (it.resultCode == RESULT_OK && data != null) {
                     val idParcel = data.parcelableArrayList<ParcelLong>("ids")
                         ?: return@registerForActivityResult
 
@@ -393,10 +397,9 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
                         changeAsset(a)
                     } catch (ex: Exception) {
                         ex.printStackTrace()
-                        makeText(
-                            binding.root,
+                        showMessage(
                             getString(R.string.an_error_occurred_while_trying_to_add_the_item),
-                            SnackBarType.ERROR
+                            ERROR
                         )
                         ErrorLog.writeLog(this, this::class.java.simpleName, ex)
                     }
@@ -432,7 +435,7 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     override fun scannerCompleted(scanCode: String) {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
-        if (showScannedCode) makeText(binding.root, scanCode, SnackBarType.INFO)
+        if (showScannedCode) showMessage(scanCode, SnackBarType.INFO)
         ScannerManager.lockScanner(this, true)
 
         try {
@@ -593,10 +596,9 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private fun rfidLink() {
         if (Rfid.vh75 == null) {
-            makeText(
-                binding.root,
+            showMessage(
                 getString(R.string.there_is_no_rfid_device_connected),
-                SnackBarType.ERROR
+                ERROR
             )
             return
         }
@@ -604,8 +606,8 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
         val tempAsset = asset
         if (tempAsset != null) {
             if (Rfid.vh75?.writeTag(tempAsset.code) != true) {
-                makeText(
-                    binding.root, getString(R.string.failed_rfid_writing), SnackBarType.ERROR
+                showMessage(
+                    getString(R.string.failed_rfid_writing), ERROR
                 )
             }
         }
@@ -677,12 +679,12 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
     override fun onWriteCompleted(isOk: Boolean) {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
         if (isOk) {
-            makeText(
-                binding.root, getString(R.string.rfid_writing_ok), SnackBarType.SUCCESS
+            showMessage(
+                getString(R.string.rfid_writing_ok), SUCCESS
             )
         } else {
-            makeText(
-                binding.root, getString(R.string.failed_rfid_writing), SnackBarType.ERROR
+            showMessage(
+                getString(R.string.failed_rfid_writing), ERROR
             )
         }
     }
@@ -692,24 +694,21 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
         if (svm.rfidShowConnectedMessage) {
             when (Rfid.vh75State) {
                 Vh75Bt.STATE_CONNECTED -> {
-                    makeText(
-                        binding.root,
+                    showMessage(
                         getString(R.string.rfid_connected),
-                        SnackBarType.SUCCESS
+                        SUCCESS
                     )
                 }
 
                 Vh75Bt.STATE_CONNECTING -> {
-                    makeText(
-                        binding.root,
+                    showMessage(
                         getString(R.string.searching_rfid_reader),
                         SnackBarType.RUNNING
                     )
                 }
 
                 else -> {
-                    makeText(
-                        binding.root,
+                    showMessage(
                         getString(R.string.there_is_no_rfid_device_connected),
                         SnackBarType.INFO
                     )
@@ -724,4 +723,12 @@ class AssetCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     //endregion READERS Reception
+
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (isFinishing || isDestroyed) return
+        if (type == ERROR) logError(msg)
+        makeText(binding.root, msg, type)
+    }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 }

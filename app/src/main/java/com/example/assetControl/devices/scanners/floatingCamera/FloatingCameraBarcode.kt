@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.CountDownTimer
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -25,6 +26,7 @@ import com.example.assetControl.databinding.FloatingCameraActivityBinding
 import com.example.assetControl.devices.scanners.Scanner
 import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.example.assetControl.ui.common.utils.Screen.Companion.getScreenHeight
 import com.example.assetControl.ui.common.utils.Screen.Companion.getScreenWidth
 import com.example.assetControl.ui.common.utils.Screen.Companion.getSystemBarsHeight
@@ -434,10 +436,10 @@ class FloatingCameraBarcode(private var activity: AppCompatActivity) : BarcodeCa
             // returns boolean representing whether the
             // permission is granted or not
             if (!isGranted) {
-                makeText(
+                showMessage(
                     activity.window.decorView,
                     context.getString(R.string.app_dont_have_necessary_permissions),
-                    SnackBarType.ERROR
+                    ERROR
                 )
             } else {
                 checkFloatingPermission()
@@ -468,7 +470,7 @@ class FloatingCameraBarcode(private var activity: AppCompatActivity) : BarcodeCa
         try {
             checkCameraFloatingPermission()
         } catch (ex: Exception) {
-            makeText(activity.window.decorView, "Error: ${ex.message}", SnackBarType.ERROR)
+            showMessage(activity.window.decorView, "Error: ${ex.message}", ERROR)
             ex.message
         }
     }
@@ -612,4 +614,11 @@ class FloatingCameraBarcode(private var activity: AppCompatActivity) : BarcodeCa
     override fun onTorchOff() {
         isTorchOn = false
     }
+
+    private fun showMessage(view: View, msg: String, type: SnackBarType) {
+        if (type == ERROR) logError(msg)
+        makeText(view, msg, type)
+    }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 }

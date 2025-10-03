@@ -3,6 +3,7 @@ package com.example.assetControl.ui.activities.location
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.dacosys.imageControl.dto.DocumentContent
@@ -13,8 +14,9 @@ import com.example.assetControl.R
 import com.example.assetControl.data.enums.common.Table
 import com.example.assetControl.data.room.dto.location.WarehouseArea
 import com.example.assetControl.databinding.WarehouseAreaDetailActivityBinding
-import com.example.assetControl.ui.common.snackbar.MakeText
+import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.example.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.example.assetControl.ui.common.utils.Screen.Companion.setupUI
 import com.example.assetControl.utils.parcel.Parcelables.parcelable
@@ -88,7 +90,7 @@ class WarehouseAreaDetailActivity : AppCompatActivity() {
         val warehouseArea = warehouseArea ?: return
 
         if (docContReqResObj.documentContentArray.isEmpty()) {
-            MakeText.makeText(binding.root, getString(R.string.no_images), SnackBarType.INFO)
+            showMessage(getString(R.string.no_images), SnackBarType.INFO)
             rejectNewInstances = false
             return
         }
@@ -102,9 +104,7 @@ class WarehouseAreaDetailActivity : AppCompatActivity() {
         }
 
         if (!anyAvailable) {
-            MakeText.makeText(
-                binding.root, getString(R.string.images_not_yet_processed), SnackBarType.INFO
-            )
+            showMessage(getString(R.string.images_not_yet_processed), SnackBarType.INFO)
             rejectNewInstances = false
             return
         }
@@ -116,4 +116,12 @@ class WarehouseAreaDetailActivity : AppCompatActivity() {
         intent.putExtra(ImageControlGridActivity.ARG_DOC_CONT_OBJ_ARRAY_LIST, ArrayList<DocumentContent>())
         startActivity(intent)
     }
+
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (isFinishing || isDestroyed) return
+        if (type == ERROR) logError(msg)
+        makeText(binding.root, msg, type)
+    }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 }

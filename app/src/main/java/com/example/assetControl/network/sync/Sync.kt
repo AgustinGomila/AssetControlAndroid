@@ -7,7 +7,6 @@ import com.example.assetControl.network.utils.Connection.Companion.autoSend
 import com.example.assetControl.utils.errorLog.ErrorLog
 import java.util.*
 
-@Suppress("unused")
 class Sync {
     companion object {
         private var timer: Timer? = null

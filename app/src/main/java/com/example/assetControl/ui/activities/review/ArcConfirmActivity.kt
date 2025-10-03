@@ -6,6 +6,7 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.MenuItem
 import android.view.View.GONE
 import android.view.View.VISIBLE
@@ -35,8 +36,8 @@ import com.example.assetControl.databinding.AssetReviewContentConfirmBottomPanel
 import com.example.assetControl.ui.activities.common.ObservationsActivity
 import com.example.assetControl.ui.adapters.interfaces.Interfaces
 import com.example.assetControl.ui.adapters.review.ArcRecyclerAdapter
-import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.example.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
 import com.example.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.example.assetControl.ui.common.utils.Screen.Companion.setupUI
@@ -350,6 +351,7 @@ class ArcConfirmActivity : AppCompatActivity(),
     }
 
     private fun setImageControlFragment() {
+        if (!svm.useImageControl) return
         val ar = assetReview ?: return
 
         var description = ar.warehouseAreaStr
@@ -497,9 +499,9 @@ class ArcConfirmActivity : AppCompatActivity(),
 
     private val resultForObs =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            val data = it?.data
+            val data = it.data
             try {
-                if (it?.resultCode == RESULT_OK && data != null) {
+                if (it.resultCode == RESULT_OK && data != null) {
                     obs = data.getStringExtra("obs") ?: ""
                 }
             } catch (ex: Exception) {
@@ -515,8 +517,8 @@ class ArcConfirmActivity : AppCompatActivity(),
         if (svm.signReviewsAndMovements && !(imageControlFragment
                 ?: return).isSigned && binding.completedSwitch.isChecked
         ) {
-            makeText(
-                binding.root, getString(R.string.mandatory_sign), SnackBarType.ERROR
+            showMessage(
+                getString(R.string.mandatory_sign), ERROR
             )
         } else {
             /////////////// ImageControl //////////////
@@ -568,6 +570,14 @@ class ArcConfirmActivity : AppCompatActivity(),
             }
         }
     }
+
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (isFinishing || isDestroyed) return
+        if (type == ERROR) logError(msg)
+        showMessage(msg, type)
+    }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 
     companion object {
         fun equals(a: Any?, b: Any?): Boolean {

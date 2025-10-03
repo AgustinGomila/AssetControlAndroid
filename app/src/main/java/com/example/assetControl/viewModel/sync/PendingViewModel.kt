@@ -20,7 +20,6 @@ class PendingViewModel : ViewModel() {
         return pendingLiveData.value ?: ArrayList()
     }
 
-    @Suppress("unused")
     fun setPending(it: ArrayList<Any>) {
         pendingLiveData.postValue(it)
     }

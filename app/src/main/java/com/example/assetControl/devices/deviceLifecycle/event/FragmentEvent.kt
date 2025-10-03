@@ -4,20 +4,20 @@ import androidx.annotation.StringDef
 
 @Retention(AnnotationRetention.SOURCE)
 @StringDef(
-    FragmentEvent.Companion.PRE_ATTACH,
-    FragmentEvent.Companion.ATTACH,
-    FragmentEvent.Companion.CREATE,
-    FragmentEvent.Companion.ACTIVITY_CREATE,
-    FragmentEvent.Companion.PRE_CREATE,
-    FragmentEvent.Companion.VIEW_CREATE,
-    FragmentEvent.Companion.START,
-    FragmentEvent.Companion.RESUME,
-    FragmentEvent.Companion.PAUSE,
-    FragmentEvent.Companion.STOP,
-    FragmentEvent.Companion.SAVE_INSTANCE_STATE,
-    FragmentEvent.Companion.DESTROY,
-    FragmentEvent.Companion.VIEW_DESTROY,
-    FragmentEvent.Companion.DETACH
+    FragmentEvent.PRE_ATTACH,
+    FragmentEvent.ATTACH,
+    FragmentEvent.CREATE,
+    FragmentEvent.ACTIVITY_CREATE,
+    FragmentEvent.PRE_CREATE,
+    FragmentEvent.VIEW_CREATE,
+    FragmentEvent.START,
+    FragmentEvent.RESUME,
+    FragmentEvent.PAUSE,
+    FragmentEvent.STOP,
+    FragmentEvent.SAVE_INSTANCE_STATE,
+    FragmentEvent.DESTROY,
+    FragmentEvent.VIEW_DESTROY,
+    FragmentEvent.DETACH
 )
 annotation class FragmentEvent {
     companion object {

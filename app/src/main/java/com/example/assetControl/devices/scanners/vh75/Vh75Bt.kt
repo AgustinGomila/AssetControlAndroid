@@ -970,7 +970,7 @@ class Vh75Bt(private var listener: RfidDeviceListener?, context: Context) : Rfid
 
         var d = data
         if (data.length > maxLength) {
-            d = data.substring(0, maxLength)
+            d = data.take(maxLength)
         }
 
         var dataHex = ""

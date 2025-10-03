@@ -8,6 +8,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.text.InputType
+import android.util.Log
 import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
@@ -66,11 +67,19 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
         }
 
         if (status == ProgressStatus.finished) {
-            makeText(binding.root, getString(R.string.configuration_applied), SnackBarType.SUCCESS)
+            showMessage(getString(R.string.configuration_applied), SnackBarType.SUCCESS)
             FileHelper.removeDataBases(context)
             finish()
         }
     }
+
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (isFinishing || isDestroyed) return
+        if (type == ERROR) logError(msg)
+        makeText(binding.root, msg, type)
+    }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 
     private fun onTaskGetPackagesEnded(it: ClientPackagesProgress) {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
@@ -104,19 +113,19 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
                     }
                 } else {
                     isConfiguring = false
-                    makeText(binding.root, msg, INFO)
+                    showMessage(msg, INFO)
                 }
             }
 
             ProgressStatus.success -> {
                 isConfiguring = false
-                makeText(binding.root, msg, SnackBarType.SUCCESS)
+                showMessage(msg, SnackBarType.SUCCESS)
                 finish()
             }
 
             ProgressStatus.crashed, ProgressStatus.canceled -> {
                 isConfiguring = false
-                makeText(binding.root, msg, ERROR)
+                showMessage(msg, ERROR)
             }
         }
     }
@@ -313,7 +322,7 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
     private fun attemptEnterConfig(password: String) {
         val realPass = svm.confPassword
         if (password != realPass) {
-            makeText(binding.root, getString(R.string.invalid_password), ERROR)
+            showMessage(getString(R.string.invalid_password), ERROR)
             return
         }
 
@@ -334,7 +343,7 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
                 ScannerManager.autodetectDeviceModel(this)
 
                 if (svm.urlPanel.isEmpty()) {
-                    makeText(binding.root, getString(R.string.server_is_not_configured), ERROR)
+                    showMessage(getString(R.string.server_is_not_configured), ERROR)
                     return@registerForActivityResult
                 }
 
@@ -431,7 +440,7 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     override fun scannerCompleted(scanCode: String) {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
-        if (showScannedCode) makeText(binding.root, scanCode, INFO)
+        if (showScannedCode) showMessage(scanCode, INFO)
         ScannerManager.lockScanner(this, true)
         ScannerManager.hideWindow(this)
 
@@ -454,12 +463,12 @@ class InitConfigActivity : AppCompatActivity(), Scanner.ScannerListener,
                 }
 
                 else -> {
-                    makeText(binding.root, getString(R.string.invalid_code), ERROR)
+                    showMessage(getString(R.string.invalid_code), ERROR)
                 }
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
-            makeText(binding.root, ex.message.toString(), ERROR)
+            showMessage(ex.message.toString(), ERROR)
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         } finally {
             ScannerManager.lockScanner(this, false)

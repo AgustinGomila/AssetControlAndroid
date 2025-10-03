@@ -302,12 +302,7 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
      * Muestra un mensaje en pantalla con los códigos agregados
      */
     private fun reportRouteAdded(routes: ArrayList<Route>) {
-        if (suspendReport) {
-            return
-        }
-        if (routes.isEmpty()) {
-            return
-        }
+        if (suspendReport || routes.isEmpty()) return
 
         var res = ""
         for (route in routes) {
@@ -315,7 +310,7 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
         }
 
         if (res.endsWith(", ")) {
-            res = res.substring(0, res.length - 2)
+            res = res.dropLast(2)
         }
 
         res += ": " +
@@ -333,12 +328,7 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
     private fun reportRouteRemoved(routes: ArrayList<Route>) {
         // En modo arqueo no se muestran los carteles de eliminación de routes
         // porque nunca se eliminan, en cambio, se ponen en cero
-        if (suspendReport) {
-            return
-        }
-        if (routes.isEmpty()) {
-            return
-        }
+        if (suspendReport || routes.isEmpty()) return
 
         var res = ""
         for (route in routes) {
@@ -346,7 +336,7 @@ class RouteAdapter : ArrayAdapter<Route>, Filterable {
         }
 
         if (res.endsWith(", ")) {
-            res = res.substring(0, res.length - 2)
+            res = res.dropLast(2)
         }
 
         res += ": " +

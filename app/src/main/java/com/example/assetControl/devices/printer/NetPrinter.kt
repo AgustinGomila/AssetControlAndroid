@@ -9,7 +9,6 @@ import com.example.assetControl.ui.common.snackbar.SnackBarType
 import java.io.IOException
 import java.net.ConnectException
 import java.net.Socket
-import java.net.SocketOption
 import java.net.UnknownHostException
 
 open class NetPrinter(private val onEvent: (SnackBarEventData) -> Unit) :

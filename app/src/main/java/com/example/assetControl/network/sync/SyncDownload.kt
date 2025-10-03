@@ -429,7 +429,6 @@ class SyncDownload(
         }
     }
 
-    @Suppress("unused")
     private suspend fun user() {
         val registryType = SyncRegistryType.User
         onUiEvent(
@@ -453,15 +452,15 @@ class SyncDownload(
 
         try {
             if (!scope.isActive) return
-            var currentUserId = getUserId() ?: return
+            val currentUserId = getUserId() ?: return
 
             try {
                 // Sincronizar los permisos del usuario
-                var perm = upWs.userPermissionGet(currentUserId) ?: arrayOf()
+                val perm = upWs.userPermissionGet(currentUserId) ?: arrayOf()
                 permissionRepository.insert(perm.toList()) { scope.launch { onUiEvent(it) } }
 
                 // Sincronizar las áreas del usuario
-                var areas = uwaWs.userWarehouseAreaGet(currentUserId) ?: arrayOf()
+                val areas = uwaWs.userWarehouseAreaGet(currentUserId) ?: arrayOf()
                 userAreaRepository.insert(areas.toList()) { scope.launch { onUiEvent(it) } }
             } catch (ex: Exception) {
                 ex.printStackTrace()

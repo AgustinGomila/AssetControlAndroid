@@ -1,6 +1,7 @@
 package com.example.assetControl.ui.fragments.location
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,8 +15,9 @@ import com.example.assetControl.data.room.dto.location.Warehouse
 import com.example.assetControl.data.room.dto.user.User
 import com.example.assetControl.data.webservice.location.WarehouseObject
 import com.example.assetControl.databinding.WarehouseCrudFragmentBinding
-import com.example.assetControl.ui.common.snackbar.MakeText
+import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.example.assetControl.utils.parcel.Parcelables.parcelable
 
 class WarehouseCRUDFragment : Fragment() {
@@ -110,8 +112,7 @@ class WarehouseCRUDFragment : Fragment() {
         if (_binding == null) return false
 
         if (binding.descriptionEditText.text.trim().toString().isEmpty()) {
-            MakeText.makeText(
-                binding.root,
+            showMessage(
                 getString(R.string.you_must_enter_a_description_for_the_category),
                 SnackBarType.INFO
             )
@@ -130,10 +131,9 @@ class WarehouseCRUDFragment : Fragment() {
         // desconocido en revisiones de activos.
         if (warehouse == null) {
             if (!User.hasPermission(PermissionEntry.AddWarehouse)) {
-                MakeText.makeText(
-                    binding.root,
+                showMessage(
                     getString(R.string.you_do_not_have_permission_to_add_warehouses),
-                    SnackBarType.ERROR
+                    ERROR
                 )
                 return
             }
@@ -144,10 +144,9 @@ class WarehouseCRUDFragment : Fragment() {
             warehouseAdd.execute()
         } else {
             if (!User.hasPermission(PermissionEntry.ModifyWarehouse)) {
-                MakeText.makeText(
-                    binding.root,
+                showMessage(
                     getString(R.string.you_do_not_have_permission_to_modify_warehouses),
-                    SnackBarType.ERROR
+                    ERROR
                 )
                 return
             }
@@ -189,6 +188,14 @@ class WarehouseCRUDFragment : Fragment() {
         this.warehouse = warehouse
         fillControls(false)
     }
+
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (requireActivity().isFinishing || requireActivity().isDestroyed) return
+        if (type == ERROR) logError(msg)
+        makeText(binding.root, msg, type)
+    }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 
     companion object {
 

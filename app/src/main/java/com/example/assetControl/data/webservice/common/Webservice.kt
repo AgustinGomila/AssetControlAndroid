@@ -473,7 +473,6 @@ class Webservice @Throws(Exception::class) constructor(private var webServiceTyp
         return callWithRetry(aht, soapAction, envelope, headers, 1)
     }
 
-    @Suppress("unused")
     @Throws(IOException::class, XmlPullParserException::class)
     fun callWithRetry(
         aht: HttpTransportSE,

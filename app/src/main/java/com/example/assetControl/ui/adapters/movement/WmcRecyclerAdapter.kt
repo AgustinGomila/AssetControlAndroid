@@ -140,7 +140,7 @@ class WmcRecyclerAdapter(
      * The state is defined by [useImageControl] preference property.
      *
      */
-    @Suppress("MemberVisibilityCanBePrivate")
+    @Suppress("unused")
     fun showImageControlPanel() {
         notifyItemRangeChanged(currentIndex, 1, PAYLOADS.IMAGE_CONTROL_VISIBILITY)
     }
@@ -810,7 +810,7 @@ class WmcRecyclerAdapter(
 
     private fun selectItem(pos: Int, scroll: Boolean = true) {
         // Si la posición está fuera del rango válido, reseteamos currentIndex a NO_POSITION.
-        currentIndex = if (pos < 0 || pos >= itemCount) NO_POSITION else pos
+        currentIndex = if (pos !in 0..<itemCount) NO_POSITION else pos
         notifyItemChanged(currentIndex)
         if (scroll) scrollToPos(currentIndex)
     }
@@ -839,7 +839,7 @@ class WmcRecyclerAdapter(
     fun scrollToPos(position: Int, scrollToTop: Boolean = false) {
         val layoutManager = recyclerView.layoutManager as LinearLayoutManager
 
-        if (position < 0 || position >= itemCount) {
+        if (position !in 0..<itemCount) {
             // La posición está fuera del rango válido, no se puede realizar el scroll
             return
         }
@@ -892,37 +892,34 @@ class WmcRecyclerAdapter(
         }
     }
 
-    @Suppress("MemberVisibilityCanBePrivate", "unused")
     fun getIndexById(id: Long): Int {
         return currentList.indexOfFirst { it.assetId == id }
     }
 
-    @Suppress("MemberVisibilityCanBePrivate", "unused")
     private fun getIndex(content: WarehouseMovementContent): Int {
         return currentList.indexOf(content)
     }
 
-    @Suppress("MemberVisibilityCanBePrivate", "unused")
+    @Suppress("unused")
     fun getIndexByItemId(itemId: Long): Int {
         return currentList.indexOfFirst { it.assetId == itemId }
     }
 
-    @Suppress("MemberVisibilityCanBePrivate", "unused")
+    @Suppress("unused")
     fun getContentByItem(item: Asset): WarehouseMovementContent? {
         return currentList.firstOrNull { it.assetId == item.id }
     }
 
-    @Suppress("MemberVisibilityCanBePrivate", "unused")
+    @Suppress("MemberVisibilityCanBePrivate")
     fun getContentByIndex(pos: Int): WarehouseMovementContent? {
         return if (currentList.lastIndex > pos) currentList[pos] else null
     }
 
-    @Suppress("MemberVisibilityCanBePrivate", "unused")
+    @Suppress("MemberVisibilityCanBePrivate")
     fun getContentByItemId(itemId: Long): WarehouseMovementContent? {
         return currentList.firstOrNull { it.assetId == itemId }
     }
 
-    @Suppress("MemberVisibilityCanBePrivate", "unused")
     fun getContentByCode(code: String): WarehouseMovementContent? {
         return currentList.firstOrNull { it.code == code }
     }
@@ -1003,7 +1000,6 @@ class WmcRecyclerAdapter(
     }
 
     // Aquí creamos dos ViewHolder, uno para cada tipo de vista
-    @Suppress("MemberVisibilityCanBePrivate", "unused")
     class SelectedViewHolder(val binding: AssetRowExpandedBinding) : ViewHolder(binding.root) {
         val icHolder: ImageControlHolder = ImageControlHolder().apply {
             imageConstraintLayout = binding.imageConstraintLayout
@@ -1166,7 +1162,6 @@ class WmcRecyclerAdapter(
         }
     }
 
-    @Suppress("MemberVisibilityCanBePrivate", "unused")
     internal class UnselectedViewHolder(val binding: AssetRowBinding) : ViewHolder(binding.root) {
         val icHolder: ImageControlHolder = ImageControlHolder().apply {
             imageConstraintLayout = binding.imageConstraintLayout

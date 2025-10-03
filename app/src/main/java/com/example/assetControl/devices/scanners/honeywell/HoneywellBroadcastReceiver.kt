@@ -27,7 +27,7 @@ class HoneywellBroadcastReceiver : BroadcastReceiver {
                 for (i in arr.indices) {
                     s += "0x" + Integer.toHexString(arr[i].toInt()) + ", "
                 }
-                s = s.substring(0, s.length - 2) + "]"
+                s = s.take(s.length - 2) + "]"
             }
             return s
         }

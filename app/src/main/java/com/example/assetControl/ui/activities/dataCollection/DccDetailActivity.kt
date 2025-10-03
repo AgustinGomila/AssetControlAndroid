@@ -108,10 +108,7 @@ class DccDetailActivity : AppCompatActivity() {
     }
 
     private fun getDescription(dc: DataCollection): String {
-        return if (dc.assetStr.isNotEmpty()) dc.assetStr
-        else if (dc.warehouseAreaStr.isNotEmpty()) dc.warehouseAreaStr
-        else if (dc.warehouseStr.isNotEmpty()) dc.warehouseStr
-        else ""
+        return dc.assetStr.ifEmpty { dc.warehouseAreaStr.ifEmpty { dc.warehouseStr.ifEmpty { "" } } }
     }
 
     private fun getReference(dc: DataCollection): String {
@@ -130,6 +127,7 @@ class DccDetailActivity : AppCompatActivity() {
     }
 
     private fun setImageControlFragment() {
+        if (!svm.useImageControl) return
         if (!svm.useImageControl) {
             runOnUiThread {
                 binding.imageControlLayout.visibility = View.GONE

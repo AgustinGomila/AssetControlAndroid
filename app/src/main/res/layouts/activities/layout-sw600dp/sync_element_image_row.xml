@@ -126,7 +126,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:visibility="visible"
-            tools:layout_editor_absoluteY="42dp" app:layout_constraintEnd_toStartOf="@+id/imageConstraintLayout">
+            app:layout_constraintEnd_toStartOf="@+id/imageConstraintLayout"
+            app:layout_constraintBottom_toBottomOf="parent">
 
         <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/albumImageView"

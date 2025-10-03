@@ -122,7 +122,7 @@ class SyncElementRecyclerAdapter private constructor(builder: Builder) :
      * The state is defined by [useImageControl] preference property.
      *
      */
-    @Suppress("MemberVisibilityCanBePrivate")
+    @Suppress("unused")
     fun showImageControlPanel() {
         notifyItemRangeChanged(currentIndex, 1, PAYLOADS.IMAGE_CONTROL_VISIBILITY)
     }
@@ -681,17 +681,17 @@ class SyncElementRecyclerAdapter private constructor(builder: Builder) :
 
     private fun isStatusVisible(arc: Any?): Boolean {
         return if (arc != null) {
-            when (arc) {
-                is Asset -> return visibleRegistry.contains(SyncRegistryType.Asset)
-                is ItemCategory -> return visibleRegistry.contains(SyncRegistryType.ItemCategory)
-                is Warehouse -> return visibleRegistry.contains(SyncRegistryType.Warehouse)
-                is WarehouseArea -> return visibleRegistry.contains(SyncRegistryType.WarehouseArea)
-                is DataCollection -> return visibleRegistry.contains(SyncRegistryType.DataCollection)
-                is RouteProcess -> return visibleRegistry.contains(SyncRegistryType.RouteProcess)
-                is WarehouseMovement -> return visibleRegistry.contains(SyncRegistryType.WarehouseMovement)
-                is AssetReview -> return visibleRegistry.contains(SyncRegistryType.AssetReview)
-                is Image -> return visibleRegistry.contains(SyncRegistryType.Image)
-                else -> return false
+            return when (arc) {
+                is Asset -> visibleRegistry.contains(SyncRegistryType.Asset)
+                is ItemCategory -> visibleRegistry.contains(SyncRegistryType.ItemCategory)
+                is Warehouse -> visibleRegistry.contains(SyncRegistryType.Warehouse)
+                is WarehouseArea -> visibleRegistry.contains(SyncRegistryType.WarehouseArea)
+                is DataCollection -> visibleRegistry.contains(SyncRegistryType.DataCollection)
+                is RouteProcess -> visibleRegistry.contains(SyncRegistryType.RouteProcess)
+                is WarehouseMovement -> visibleRegistry.contains(SyncRegistryType.WarehouseMovement)
+                is AssetReview -> visibleRegistry.contains(SyncRegistryType.AssetReview)
+                is Image -> visibleRegistry.contains(SyncRegistryType.Image)
+                else -> false
             }
         } else false
     }
@@ -759,7 +759,7 @@ class SyncElementRecyclerAdapter private constructor(builder: Builder) :
 
     private fun selectItem(pos: Int, scroll: Boolean = true) {
         // Si la posición está fuera del rango válido, reseteamos currentIndex a NO_POSITION.
-        currentIndex = if (pos < 0 || pos >= itemCount) NO_POSITION else pos
+        currentIndex = if (pos !in 0..<itemCount) NO_POSITION else pos
         notifyItemChanged(currentIndex)
         if (scroll) scrollToPos(currentIndex)
     }
@@ -801,7 +801,7 @@ class SyncElementRecyclerAdapter private constructor(builder: Builder) :
     fun scrollToPos(position: Int, scrollToTop: Boolean = false) {
         val layoutManager = recyclerView.layoutManager as LinearLayoutManager
 
-        if (position < 0 || position >= itemCount) {
+        if (position !in 0..<itemCount) {
             // La posición está fuera del rango válido, no se puede realizar el scroll
             return
         }
@@ -1250,8 +1250,8 @@ class SyncElementRecyclerAdapter private constructor(builder: Builder) :
             bindCheckBoxVisibility(checkBoxVisibility)
 
             binding.warehouseAreaStr.text = syncElement.warehouseAreaStr
-            binding.obs.text = syncElement.obs.orEmpty()
-            if (syncElement.obs.orEmpty().isEmpty()) {
+            binding.obs.text = syncElement.obs
+            if (syncElement.obs.isEmpty()) {
                 binding.obs.visibility = GONE
                 binding.dividerObs.visibility = GONE
             } else {
@@ -1704,14 +1704,12 @@ class SyncElementRecyclerAdapter private constructor(builder: Builder) :
             return this
         }
 
-        @Suppress("unused")
         fun showCheckBoxes(`val`: Boolean, callback: (Boolean) -> Unit): Builder {
             showCheckBoxes = `val`
             showCheckBoxesChanged = callback
             return this
         }
 
-        @Suppress("unused")
         fun showImages(`val`: Boolean, callback: (Boolean) -> Unit): Builder {
             showImages = `val`
             showImagesChanged = callback

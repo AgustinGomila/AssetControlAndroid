@@ -7,6 +7,7 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -342,8 +343,8 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
                 resultForReviewSuccess.launch(intent)
             }
         } else {
-            makeText(
-                binding.root, getString(R.string.selected_review_is_not_in_process), ERROR
+            showMessage(
+                getString(R.string.selected_review_is_not_in_process), ERROR
             )
         }
     }
@@ -354,8 +355,7 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
         val ar = adapter?.currentAssetReview() ?: return
 
         if (ar.statusId == AssetReviewStatus.completed.id) {
-            makeText(
-                binding.root,
+            showMessage(
                 getString(R.string.the_selected_revision_has_already_been_completed_and_can_not_be_deleted),
                 SnackBarType.INFO
             )
@@ -440,9 +440,9 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     private val resultForLocationSelect =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            val data = it?.data
+            val data = it.data
             try {
-                if (it?.resultCode == RESULT_OK && data != null) {
+                if (it.resultCode == RESULT_OK && data != null) {
                     val warehouseArea =
                         Parcels.unwrap<WarehouseArea>(data.parcelable("warehouseArea"))
                     if (warehouseArea != null) {
@@ -519,7 +519,7 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     private fun beginAssetReview(warehouseArea: WarehouseArea) {
-        makeText(binding.assetReviewSelect, warehouseArea.description, SnackBarType.INFO)
+        showMessage(warehouseArea.description, SnackBarType.INFO)
 
         val reviewRepository = AssetReviewRepository()
 
@@ -538,7 +538,7 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
                 resultForReviewSuccess.launch(intent)
             }
         } else {
-            makeText(this, getString(R.string.error_inserting_assets_to_review), ERROR)
+            showMessage(getString(R.string.error_inserting_assets_to_review), ERROR)
         }
     }
 
@@ -782,14 +782,14 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
 
     override fun scannerCompleted(scanCode: String) {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
-        if (showScannedCode) makeText(binding.root, scanCode, SnackBarType.INFO)
+        if (showScannedCode) showMessage(scanCode, SnackBarType.INFO)
         ScannerManager.lockScanner(this, true)
 
         try {
             // Nada que hacer, volver
             if (scanCode.trim().isEmpty()) {
                 val res = getString(R.string.invalid_code)
-                makeText(binding.root, res, ERROR)
+                showMessage(res, ERROR)
                 ErrorLog.writeLog(this, this::class.java.simpleName, res)
                 return
             }
@@ -806,7 +806,7 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
                 sc.warehouseArea
             } else {
                 val res = getString(R.string.invalid_warehouse_area_code)
-                makeText(binding.root, res, ERROR)
+                showMessage(res, ERROR)
                 null
             }
 
@@ -816,7 +816,7 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
-            makeText(binding.root, ex.message.toString(), ERROR)
+            showMessage(ex.message.toString(), ERROR)
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         } finally {
             ScannerManager.lockScanner(this, false)
@@ -840,24 +840,21 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
         if (svm.rfidShowConnectedMessage) {
             when (Rfid.vh75State) {
                 Vh75Bt.STATE_CONNECTED -> {
-                    makeText(
-                        binding.root,
+                    showMessage(
                         getString(R.string.rfid_connected),
                         SnackBarType.SUCCESS
                     )
                 }
 
                 Vh75Bt.STATE_CONNECTING -> {
-                    makeText(
-                        binding.root,
+                    showMessage(
                         getString(R.string.searching_rfid_reader),
                         SnackBarType.RUNNING
                     )
                 }
 
                 else -> {
-                    makeText(
-                        binding.root,
+                    showMessage(
                         getString(R.string.there_is_no_rfid_device_connected),
                         SnackBarType.INFO
                     )
@@ -872,6 +869,14 @@ class AssetReviewSelectActivity : AppCompatActivity(), Scanner.ScannerListener,
     }
 
     //endregion READERS Reception
+
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (isFinishing || isDestroyed) return
+        if (type == ERROR) logError(msg)
+        makeText(binding.root, msg, type)
+    }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 
     companion object {
         fun equals(a: Any?, b: Any?): Boolean {

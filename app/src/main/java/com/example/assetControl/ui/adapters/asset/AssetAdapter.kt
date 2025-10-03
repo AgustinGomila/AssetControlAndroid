@@ -256,7 +256,7 @@ class AssetAdapter(
 
     //endregion
 
-    internal inner class SimpleViewHolder {
+    internal class SimpleViewHolder {
         var codeCheckedTextView: CheckedTextView? = null
         var descriptionCheckedTextView: CheckedTextView? = null
         var serialNumberCheckedTextView: CheckedTextView? = null

@@ -69,8 +69,8 @@ import com.example.assetControl.network.utils.Connection.Companion.isOnline
 import com.example.assetControl.network.utils.ProgressStatus
 import com.example.assetControl.network.utils.SetCurrentSession
 import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
-import com.example.assetControl.ui.common.snackbar.SnackBarEventData
 import com.example.assetControl.ui.common.snackbar.SnackBarType
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.example.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
 import com.example.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.example.assetControl.ui.common.utils.Screen.Companion.setupUI
@@ -102,10 +102,10 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
     ClientPackage.Companion.TaskConfigPanelEnded {
     override fun onTaskConfigPanelEnded(status: ProgressStatus) {
         if (status == ProgressStatus.finished) {
-            showSnackBar(SnackBarEventData(getString(R.string.configuration_applied), SnackBarType.SUCCESS))
+            showMessage(getString(R.string.configuration_applied), SnackBarType.SUCCESS)
             initialSetup()
         } else if (status == ProgressStatus.crashed) {
-            showSnackBar(SnackBarEventData(getString(R.string.error_setting_user_panel), SnackBarType.ERROR))
+            showMessage(getString(R.string.error_setting_user_panel), ERROR)
         }
     }
 
@@ -131,17 +131,17 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                     )
                 }
             } else {
-                showSnackBar(SnackBarEventData(msg, SnackBarType.INFO))
+                showMessage(msg, SnackBarType.INFO)
             }
         } else if (status == ProgressStatus.success) {
-            showSnackBar(SnackBarEventData(msg, SnackBarType.SUCCESS))
+            showMessage(msg, SnackBarType.SUCCESS)
             initialSetup()
         }
         if (status == ProgressStatus.running) {
             setButton(ButtonStyle.BUSY)
         } else if (status == ProgressStatus.crashed || status == ProgressStatus.canceled) {
             // Error de conexión
-            showSnackBar(SnackBarEventData(msg, SnackBarType.ERROR))
+            showMessage(msg, ERROR)
             syncing = false
             ScannerManager.lockScanner(this, false)
             setButton(ButtonStyle.REFRESH)
@@ -195,7 +195,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
             ProgressStatus.crashed,
             ProgressStatus.canceled,
                 -> {
-                showSnackBar(SnackBarEventData(msg, SnackBarType.ERROR))
+                showMessage(msg, ERROR)
                 refresh()
 
                 logging = false
@@ -216,7 +216,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
 
         if (downloadStatus == CRASHED) {
             // Error al descargar
-            showSnackBar(SnackBarEventData(msg, SnackBarType.ERROR))
+            showMessage(msg, ERROR)
             setButton(ButtonStyle.REFRESH)
 
             showProgressBar(false)
@@ -224,7 +224,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
             return
         } else if (downloadStatus == CANCELED) {
             // CANCELED = Sin conexión
-            showSnackBar(SnackBarEventData(msg, SnackBarType.INFO))
+            showMessage(msg, SnackBarType.INFO)
 
             refresh()
             showProgressBar(false)
@@ -265,21 +265,21 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
 
     override fun onTaskConfigEnded(result: Boolean, msg: String) {
         if (result) {
-            showSnackBar(SnackBarEventData(msg, SnackBarType.SUCCESS))
+            showMessage(msg, SnackBarType.SUCCESS)
             initialSetup()
         } else {
-            showSnackBar(SnackBarEventData(msg, SnackBarType.ERROR))
+            showMessage(msg, ERROR)
         }
     }
 
     private fun onSessionCreated(result: Boolean) {
         if (OFFLINE_MODE) {
-            showSnackBar(SnackBarEventData(getString(R.string.offline_mode), SnackBarType.INFO))
+            showMessage(getString(R.string.offline_mode), SnackBarType.INFO)
             logging = false
             finish()
         } else {
             if (!result) {
-                showSnackBar(SnackBarEventData(getString(R.string.offline_mode), SnackBarType.INFO))
+                showMessage(getString(R.string.offline_mode), SnackBarType.INFO)
                 logging = false
                 finish()
             } else {
@@ -320,12 +320,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
     private fun refreshUsers() {
         if (DownloadDb.downloadDbRequired) {
             if (!isOnline()) {
-                showSnackBar(
-                    SnackBarEventData(
-                        getString(R.string.download_db_required_and_no_connection),
-                        SnackBarType.ERROR
-                    )
-                )
+                showMessage(getString(R.string.download_db_required_and_no_connection), ERROR)
             }
             setButton(ButtonStyle.REFRESH)
             syncing = false
@@ -338,11 +333,9 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                     if (result) {
                         setButton(ButtonStyle.READY)
                     } else {
-                        showSnackBar(
-                            SnackBarEventData(
-                                getString(R.string.there_are_no_users_you_must_synchronize_the_database),
-                                SnackBarType.ERROR
-                            )
+                        showMessage(
+                            getString(R.string.there_are_no_users_you_must_synchronize_the_database),
+                            ERROR
                         )
                         setButton(ButtonStyle.REFRESH)
                     }
@@ -353,7 +346,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         } finally {
             if (!isOnline()) {
-                showSnackBar(SnackBarEventData(getString(R.string.no_connection), SnackBarType.INFO))
+                showMessage(getString(R.string.no_connection), SnackBarType.INFO)
             }
             syncing = false
         }
@@ -491,7 +484,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         syncViewModel.syncDownloadProgress.observe(this) { if (it != null) onSyncProgress(it) }
         syncViewModel.sessionCreated.observe(this) { if (it != null) onSessionCreated(it) }
         downloadDbViewModel.downloadTaskEvent.observe(this) { if (it != null) onDownloadDbTask(it) }
-        downloadDbViewModel.uiEvent.observe(this) { if (it != null) showSnackBar(it) }
+        downloadDbViewModel.uiEvent.observe(this) { if (it != null) showMessage(it.text, it.snackBarType) }
 
         userSpinnerFragment =
             supportFragmentManager.findFragmentById(binding.userSpinnerFragment.id) as UserSpinnerFragment
@@ -628,22 +621,14 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
 
             // Comprobar validez de la fecha del dispositivo
             if (!Statics.deviceDateIsValid()) {
-                showSnackBar(
-                    SnackBarEventData(
-                        getString(R.string.device_date_is_invalid), SnackBarType.ERROR
-                    )
-                )
+                showMessage(getString(R.string.device_date_is_invalid), ERROR)
                 setButton(ButtonStyle.REFRESH)
                 syncing = false
                 return
             }
 
             if (svm.wsUrl.isEmpty() || svm.wsNamespace.isEmpty()) {
-                showSnackBar(
-                    SnackBarEventData(
-                        getString(R.string.webservice_is_not_configured), SnackBarType.ERROR
-                    )
-                )
+                showMessage(getString(R.string.webservice_is_not_configured), ERROR)
                 setButton(ButtonStyle.REFRESH)
                 syncing = false
                 return
@@ -694,11 +679,13 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         refreshUsers()
     }
 
-    private fun showSnackBar(it: SnackBarEventData) {
-        if (!::binding.isInitialized || isFinishing || isDestroyed) return
-
-        makeText(binding.root, it.text, it.snackBarType)
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (isFinishing || isDestroyed) return
+        if (type == ERROR) logError(msg)
+        makeText(binding.root, msg, type)
     }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 
     private fun configApp() {
         val realPass = svm.confPassword
@@ -749,7 +736,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
     private fun attemptEnterConfig(password: String) {
         val realPass = svm.confPassword
         if (password != realPass) {
-            showSnackBar(SnackBarEventData(getString(R.string.invalid_password), SnackBarType.ERROR))
+            showMessage(getString(R.string.invalid_password), ERROR)
             return
         }
 
@@ -807,11 +794,11 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
         // Check for a valid email address.
         if (userId == null || userId <= 0) {
             focusView = userSpinnerFragment?.view
-            showSnackBar(SnackBarEventData(getString(R.string.you_must_select_a_user), SnackBarType.ERROR))
+            showMessage(getString(R.string.you_must_select_a_user), ERROR)
             cancel = true
         } else if (!isUserValid(userId)) {
             focusView = userSpinnerFragment?.view
-            showSnackBar(SnackBarEventData(getString(R.string.you_must_select_a_user), SnackBarType.ERROR))
+            showMessage(getString(R.string.you_must_select_a_user), ERROR)
             cancel = true
         }
 
@@ -831,11 +818,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                     SetCurrentSession { syncViewModel.setSessionCreated(it) }
                 }
             } else {
-                showSnackBar(
-                    SnackBarEventData(
-                        getString(R.string.wrong_user_password_combination), SnackBarType.ERROR
-                    )
-                )
+                showMessage(getString(R.string.wrong_user_password_combination), ERROR)
                 logging = false
             }
         }
@@ -861,7 +844,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
 
     override fun scannerCompleted(scanCode: String) {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
-        if (showScannedCode) showSnackBar(SnackBarEventData(scanCode, SnackBarType.INFO))
+        if (showScannedCode) showMessage(scanCode, SnackBarType.INFO)
         ScannerManager.lockScanner(this, true)
         ScannerManager.hideWindow(this)
 
@@ -886,10 +869,10 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                             )
                         }
                     } else {
-                        showSnackBar(SnackBarEventData(getString(R.string.invalid_user), SnackBarType.ERROR))
+                        showMessage(getString(R.string.invalid_user), ERROR)
                     }
                 } else {
-                    showSnackBar(SnackBarEventData(getString(R.string.invalid_code), SnackBarType.ERROR))
+                    showMessage(getString(R.string.invalid_code), ERROR)
                 }
                 return
             }
@@ -927,12 +910,12 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                 }
 
                 else -> {
-                    showSnackBar(SnackBarEventData(getString(R.string.invalid_code), SnackBarType.ERROR))
+                    showMessage(getString(R.string.invalid_code), ERROR)
                 }
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
-            showSnackBar(SnackBarEventData(ex.message.toString(), SnackBarType.ERROR))
+            showMessage(ex.message.toString(), ERROR)
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         } finally {
             ScannerManager.lockScanner(this, false)
@@ -978,7 +961,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                 if (currentStyle != ButtonStyle.BUSY) {
                     configApp()
                 } else {
-                    showSnackBar(SnackBarEventData(getString(R.string.please_wait), SnackBarType.RUNNING))
+                    showMessage(getString(R.string.please_wait), SnackBarType.RUNNING)
                 }
                 true
             }
@@ -987,7 +970,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                 if (currentStyle != ButtonStyle.BUSY) {
                     ScannerManager.rfidStart(this)
                 } else {
-                    showSnackBar(SnackBarEventData(getString(R.string.please_wait), SnackBarType.RUNNING))
+                    showMessage(getString(R.string.please_wait), SnackBarType.RUNNING)
                 }
                 super.onOptionsItemSelected(item)
             }
@@ -1013,7 +996,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                         ScannerManager.trigger(this)
                     }
                 } else {
-                    showSnackBar(SnackBarEventData(getString(R.string.please_wait), SnackBarType.RUNNING))
+                    showMessage(getString(R.string.please_wait), SnackBarType.RUNNING)
                 }
                 super.onOptionsItemSelected(item)
             }
@@ -1022,7 +1005,7 @@ class LoginActivity : AppCompatActivity(), UserSpinnerFragment.OnItemSelectedLis
                 if (currentStyle != ButtonStyle.BUSY) {
                     ScannerManager.toggleCameraFloatingWindowVisibility(this)
                 } else {
-                    showSnackBar(SnackBarEventData(getString(R.string.please_wait), SnackBarType.RUNNING))
+                    showMessage(getString(R.string.please_wait), SnackBarType.RUNNING)
                 }
                 super.onOptionsItemSelected(item)
             }

@@ -34,7 +34,7 @@ class AssetControlApp : Application(), KoinComponent {
         val context: Context by lazy { get().get() }
         val deviceLifecycle: DeviceLifecycle by lazy { get().get() }
         val appName: String by lazy { "${getApplicationName()}${MILESTONE}" }
-        val imageControl: ImageControl by lazy { get().get() }
+        val imageControl: ImageControl? by lazy { get().get() }
         val sr: SettingsRepository by lazy { get().get() }
         val prefs: SharedPreferences by lazy { get().get() }
         val svm: SettingsViewModel by lazy { get().get() }

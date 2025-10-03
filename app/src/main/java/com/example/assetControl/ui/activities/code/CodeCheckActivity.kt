@@ -32,6 +32,7 @@ import com.example.assetControl.devices.scanners.rfid.Rfid.Companion.isRfidRequi
 import com.example.assetControl.devices.scanners.vh75.Vh75Bt
 import com.example.assetControl.ui.common.snackbar.MakeText.Companion.makeText
 import com.example.assetControl.ui.common.snackbar.SnackBarType
+import com.example.assetControl.ui.common.snackbar.SnackBarType.CREATOR.ERROR
 import com.example.assetControl.ui.common.utils.Screen.Companion.closeKeyboard
 import com.example.assetControl.ui.common.utils.Screen.Companion.setScreenRotation
 import com.example.assetControl.ui.common.utils.Screen.Companion.setupUI
@@ -325,7 +326,7 @@ class CodeCheckActivity : AppCompatActivity(),
         // Nada que hacer, volver
         if (scannedCode.isEmpty()) {
             val res = getString(R.string.invalid_code)
-            makeText(binding.root, res, SnackBarType.ERROR)
+            showMessage(res, ERROR)
             Log.d(this::class.java.simpleName, res)
             return
         }
@@ -378,7 +379,7 @@ class CodeCheckActivity : AppCompatActivity(),
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
-            makeText(binding.root, ex.message.toString(), SnackBarType.ERROR)
+            showMessage(ex.message.toString(), ERROR)
             ErrorLog.writeLog(this, this::class.java.simpleName, ex)
         } finally {
             ScannerManager.lockScanner(this, false)
@@ -392,7 +393,7 @@ class CodeCheckActivity : AppCompatActivity(),
 
     override fun scannerCompleted(scanCode: String) {
         if (!::binding.isInitialized || isFinishing || isDestroyed) return
-        if (showScannedCode) makeText(binding.root, scanCode, SnackBarType.INFO)
+        if (showScannedCode) showMessage(scanCode, SnackBarType.INFO)
         runOnUiThread {
             binding.codeEditText.setText(scanCode)
             binding.codeEditText.dispatchKeyEvent(
@@ -435,24 +436,21 @@ class CodeCheckActivity : AppCompatActivity(),
         if (svm.rfidShowConnectedMessage) {
             when (Rfid.vh75State) {
                 Vh75Bt.STATE_CONNECTED -> {
-                    makeText(
-                        binding.root,
+                    showMessage(
                         getString(R.string.rfid_connected),
                         SnackBarType.SUCCESS
                     )
                 }
 
                 Vh75Bt.STATE_CONNECTING -> {
-                    makeText(
-                        binding.root,
+                    showMessage(
                         getString(R.string.searching_rfid_reader),
                         SnackBarType.RUNNING
                     )
                 }
 
                 else -> {
-                    makeText(
-                        binding.root,
+                    showMessage(
                         getString(R.string.there_is_no_rfid_device_connected),
                         SnackBarType.INFO
                     )
@@ -467,4 +465,12 @@ class CodeCheckActivity : AppCompatActivity(),
     }
 
     //endregion READERS Reception
+
+    private fun showMessage(msg: String, type: SnackBarType) {
+        if (isFinishing || isDestroyed) return
+        if (type == ERROR) logError(msg)
+        makeText(binding.root, msg, type)
+    }
+
+    private fun logError(message: String) = Log.e(this::class.java.simpleName, message)
 }

@@ -1,8 +1,8 @@
 [versions]
 activity = "1.10.1"
-agp = "8.10.1"
+agp = "8.12.0"
 androidMinSdk = "35"
-androidTargetSdk = "35"
+androidTargetSdk = "36"
 annotation = "1.9.1"
 appcompat = "1.7.1"
 asyncHttp = "1.4.11"
@@ -12,7 +12,6 @@ constraintlayout = "2.1.4"
 coreKtx = "1.16.0"
 coreSplashscreen = "1.0.1"
 desugar = "2.1.5"
-testext-junit = "1.2.1"
 dotenv = "3.2.0"
 easyfloat = "1.0.5"
 evalex = "2.7"
@@ -22,10 +21,10 @@ imageControl = "1.0.6"
 junit = "4.13.2"
 jvmCompatibility = "1.8"
 keyboardvisibility = "2.3.0"
-kotlinVersion = "2.2.0"
-ksoap2 = "3.6.2"
 koinTest = "3.2.2"
 koinVersion = "4.0.4"
+kotlinVersion = "2.2.0"
+ksoap2 = "3.6.2"
 kspVersion = "2.2.0-2.0.2"
 leakcanary = "2.14"
 lifecycle = "2.9.1"
@@ -38,6 +37,7 @@ preferenceKtx = "1.2.1"
 recyclerview = "1.4.0"
 roomVersion = "2.7.2"
 swiperefreshlayout = "1.1.0"
+testext-junit = "1.2.1"
 vectordrawable = "1.2.0"
 zxingAndroid = "1.0.7"
 
@@ -81,7 +81,7 @@ async-http = { module = "com.loopj.android:android-async-http", version.ref = "a
 leakcanary = { module = "com.squareup.leakcanary:leakcanary-android", version.ref = "leakcanary" }
 dotenv = { module = "io.github.cdimascio:dotenv-java", version.ref = "dotenv" }
 parceler-api = { module = "org.parceler:parceler-api", version.ref = "parcelerVersion" }
-commons-net = { module = "commons-net:commons-net", version = "3.9.0" }
+commons-net = { module = "commons-net:commons-net", version.ref = "commonsNet" }
 
 # External Libs
 dacosys-imagecontrol = { module = "com.dacosys:imageControl", version.ref = "imageControl" }

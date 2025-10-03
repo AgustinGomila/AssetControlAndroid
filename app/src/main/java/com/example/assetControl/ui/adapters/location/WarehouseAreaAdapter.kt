@@ -241,7 +241,7 @@ class WarehouseAreaAdapter : ArrayAdapter<WarehouseArea>, Filterable {
         }
 
         if (res.endsWith(", ")) {
-            res = res.substring(0, res.length - 2)
+            res = res.dropLast(2)
         }
 
         res += ": " +
@@ -272,7 +272,7 @@ class WarehouseAreaAdapter : ArrayAdapter<WarehouseArea>, Filterable {
         }
 
         if (res.endsWith(", ")) {
-            res = res.substring(0, res.length - 2)
+            res = res.dropLast(2)
         }
 
         res += ": " +

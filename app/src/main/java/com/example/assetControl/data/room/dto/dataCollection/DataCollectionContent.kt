@@ -104,7 +104,7 @@ class DataCollectionContent(
 
         if (anyResult != null) {
             if (anyResult is Int) {
-                result = anyResult.toInt()
+                result = anyResult
             } else if (anyResult is Boolean) {
                 result = if (anyResult) 1 else 0
             }

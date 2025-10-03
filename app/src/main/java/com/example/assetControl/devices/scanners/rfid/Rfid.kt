@@ -2,7 +2,6 @@ package com.example.assetControl.devices.scanners.rfid
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.os.Build
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -58,8 +57,9 @@ open class Rfid {
         }
 
         fun appHasBluetoothPermission(): Boolean {
-            return Build.VERSION.SDK_INT < Build.VERSION_CODES.S || ActivityCompat.checkSelfPermission(
-                context, Manifest.permission.BLUETOOTH_CONNECT
+            return ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.BLUETOOTH_CONNECT
             ) == PackageManager.PERMISSION_GRANTED
         }
 
