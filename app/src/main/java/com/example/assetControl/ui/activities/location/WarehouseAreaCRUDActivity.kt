@@ -221,52 +221,57 @@ class WarehouseAreaCRUDActivity : AppCompatActivity(), Scanner.ScannerListener,
 
         val obs = "${getString(R.string.user)}: ${currentUser()?.name}"
 
-        if (imageControlFragment == null) {
-            imageControlFragment = ImageControlButtonsFragment.newInstance(
-                tableId = Table.warehouseArea.id.toLong(),
-                objectId1 = warehouseAreaId.toString()
-            )
+        try {
+            if (imageControlFragment == null) {
+                imageControlFragment = ImageControlButtonsFragment.newInstance(
+                    tableId = Table.warehouseArea.id.toLong(),
+                    objectId1 = warehouseAreaId.toString()
+                )
 
-            setFragmentValues(description, "", obs)
+                setFragmentValues(description, "", obs)
 
-            // Callback para actualizar la descripción
-            imageControlFragment?.setListener(this)
+                // Callback para actualizar la descripción
+                imageControlFragment?.setListener(this)
 
-            val fm = supportFragmentManager
+                val fm = supportFragmentManager
 
-            if (!isFinishing && !isDestroyed) {
-                runOnUiThread {
-                    fm.beginTransaction()
-                        .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                        .replace(binding.imageControlFragment.id, imageControlFragment ?: return@runOnUiThread)
-                        .commit()
-
-                    if (!svm.useImageControl) {
+                if (!isFinishing && !isDestroyed) {
+                    runOnUiThread {
                         fm.beginTransaction()
                             .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                            .hide(imageControlFragment as Fragment)
-                            .commitAllowingStateLoss()
-                    } else {
-                        fm.beginTransaction()
-                            .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                            .show((imageControlFragment ?: return@runOnUiThread) as Fragment)
-                            .commitAllowingStateLoss()
+                            .replace(binding.imageControlFragment.id, imageControlFragment ?: return@runOnUiThread)
+                            .commit()
+
+                        if (!svm.useImageControl) {
+                            fm.beginTransaction()
+                                .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                                .hide(imageControlFragment as Fragment)
+                                .commitAllowingStateLoss()
+                        } else {
+                            fm.beginTransaction()
+                                .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                                .show((imageControlFragment ?: return@runOnUiThread) as Fragment)
+                                .commitAllowingStateLoss()
+                        }
                     }
                 }
+            } else {
+                imageControlFragment?.setTableId(Table.warehouseArea.id)
+                imageControlFragment?.setObjectId1(warehouseAreaId)
+                imageControlFragment?.setObjectId2(null)
+
+                setFragmentValues(description, "", obs)
+
+                // Callback para actualizar la descripción
+                imageControlFragment?.setListener(this)
             }
-        } else {
-            imageControlFragment?.setTableId(Table.warehouseArea.id)
-            imageControlFragment?.setObjectId1(warehouseAreaId)
-            imageControlFragment?.setObjectId2(null)
 
-            setFragmentValues(description, "", obs)
-
-            // Callback para actualizar la descripción
-            imageControlFragment?.setListener(this)
+            // OCULTAR BOTÓN DE FIRMA
+            imageControlFragment?.showSignButton = false
+        } catch (_: Exception) {
+            showMessage(getString(R.string.imagecontrol_isnt_available), ERROR)
+            svm.useImageControl = false
         }
-
-        // OCULTAR BOTÓN DE FIRMA
-        imageControlFragment?.showSignButton = false
     }
 
     private fun setFragmentValues(description: String, reference: String, obs: String) {

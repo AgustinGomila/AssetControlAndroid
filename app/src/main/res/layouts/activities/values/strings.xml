@@ -1144,4 +1144,5 @@
         esta función.
     </string>
     <string name="error_loading_data">Error al cargar los datos</string>
+    <string name="imagecontrol_isnt_available">ImageControl no está disponible</string>
 </resources>

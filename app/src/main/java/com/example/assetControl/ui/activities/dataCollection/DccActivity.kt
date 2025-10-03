@@ -432,41 +432,46 @@ class DccActivity : AppCompatActivity(), Scanner.ScannerListener,
         val tableDescription = Table.routeProcess.description
         description = "$tableDescription: $description".take(255)
 
-        if (imageControlFragment == null) {
-            imageControlFragment = ImageControlButtonsFragment.newInstance(
-                Table.routeProcess.id.toLong(), rpc.routeProcessId.toString()
-            )
+        try {
+            if (imageControlFragment == null) {
+                imageControlFragment = ImageControlButtonsFragment.newInstance(
+                    Table.routeProcess.id.toLong(), rpc.routeProcessId.toString()
+                )
 
-            setFragmentValues(description, reference, obs)
+                setFragmentValues(description, reference, obs)
 
-            val fm = supportFragmentManager
+                val fm = supportFragmentManager
 
-            if (!isFinishing && !isDestroyed) {
-                runOnUiThread {
-                    fm.beginTransaction()
-                        .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                        .replace(binding.imageControlFragment.id, imageControlFragment ?: return@runOnUiThread)
-                        .commit()
-
-                    if (!svm.useImageControl) {
+                if (!isFinishing && !isDestroyed) {
+                    runOnUiThread {
                         fm.beginTransaction()
                             .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                            .hide(imageControlFragment as Fragment)
-                            .commitAllowingStateLoss()
-                    } else {
-                        fm.beginTransaction()
-                            .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                            .show((imageControlFragment ?: return@runOnUiThread) as Fragment)
-                            .commitAllowingStateLoss()
+                            .replace(binding.imageControlFragment.id, imageControlFragment ?: return@runOnUiThread)
+                            .commit()
+
+                        if (!svm.useImageControl) {
+                            fm.beginTransaction()
+                                .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                                .hide(imageControlFragment as Fragment)
+                                .commitAllowingStateLoss()
+                        } else {
+                            fm.beginTransaction()
+                                .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                                .show((imageControlFragment ?: return@runOnUiThread) as Fragment)
+                                .commitAllowingStateLoss()
+                        }
                     }
                 }
-            }
-        } else {
-            imageControlFragment?.setTableId(Table.routeProcess.id)
-            imageControlFragment?.setObjectId1(rpc.routeProcessId)
-            imageControlFragment?.setObjectId2(null)
+            } else {
+                imageControlFragment?.setTableId(Table.routeProcess.id)
+                imageControlFragment?.setObjectId1(rpc.routeProcessId)
+                imageControlFragment?.setObjectId2(null)
 
-            setFragmentValues(description, reference, obs)
+                setFragmentValues(description, reference, obs)
+            }
+        } catch (_: Exception) {
+            showMessage(getString(R.string.imagecontrol_isnt_available), ERROR)
+            svm.useImageControl = false
         }
     }
 

@@ -351,42 +351,47 @@ class WmcConfirmActivity : AppCompatActivity(),
 
         val obs = "${getString(R.string.user)}: ${currentUser()?.name}"
 
-        if (imageControlFragment == null) {
-            imageControlFragment = ImageControlButtonsFragment.newInstance(
-                tableId = Table.warehouseMovement.id.toLong(),
-                objectId1 = "0"
-            )
+        try {
+            if (imageControlFragment == null) {
+                imageControlFragment = ImageControlButtonsFragment.newInstance(
+                    tableId = Table.warehouseMovement.id.toLong(),
+                    objectId1 = "0"
+                )
 
-            setFragmentValues(description, "", obs)
+                setFragmentValues(description, "", obs)
 
-            val fm = supportFragmentManager
+                val fm = supportFragmentManager
 
-            if (!isFinishing && !isDestroyed) {
-                runOnUiThread {
-                    fm.beginTransaction()
-                        .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                        .replace(binding.imageControlFragment.id, imageControlFragment ?: return@runOnUiThread)
-                        .commit()
-
-                    if (!svm.useImageControl) {
+                if (!isFinishing && !isDestroyed) {
+                    runOnUiThread {
                         fm.beginTransaction()
                             .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                            .hide(imageControlFragment as Fragment)
-                            .commitAllowingStateLoss()
-                    } else {
-                        fm.beginTransaction()
-                            .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                            .show((imageControlFragment ?: return@runOnUiThread) as Fragment)
-                            .commitAllowingStateLoss()
+                            .replace(binding.imageControlFragment.id, imageControlFragment ?: return@runOnUiThread)
+                            .commit()
+
+                        if (!svm.useImageControl) {
+                            fm.beginTransaction()
+                                .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                                .hide(imageControlFragment as Fragment)
+                                .commitAllowingStateLoss()
+                        } else {
+                            fm.beginTransaction()
+                                .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                                .show((imageControlFragment ?: return@runOnUiThread) as Fragment)
+                                .commitAllowingStateLoss()
+                        }
                     }
                 }
-            }
-        } else {
-            imageControlFragment?.setTableId(Table.warehouseMovement.id)
-            imageControlFragment?.setObjectId1(0)
-            imageControlFragment?.setObjectId2(null)
+            } else {
+                imageControlFragment?.setTableId(Table.warehouseMovement.id)
+                imageControlFragment?.setObjectId1(0)
+                imageControlFragment?.setObjectId2(null)
 
-            setFragmentValues(description, "", obs)
+                setFragmentValues(description, "", obs)
+            }
+        } catch (_: Exception) {
+            showMessage(getString(R.string.imagecontrol_isnt_available), ERROR)
+            svm.useImageControl = false
         }
     }
 

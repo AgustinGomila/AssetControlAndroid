@@ -360,43 +360,48 @@ class ArcConfirmActivity : AppCompatActivity(),
 
         val obs = "${getString(R.string.user)}: ${currentUser()?.name}"
 
-        if (imageControlFragment == null) {
-            imageControlFragment =
-                ImageControlButtonsFragment.newInstance(
-                    tableId = Table.assetReview.id.toLong(),
-                    objectId1 = ar.id.toString()
-                )
-        }
-
-        setFragmentValues(description, "", obs)
-
-        val fm = supportFragmentManager
-
-        if (!isFinishing && !isDestroyed) {
-            runOnUiThread {
-                fm.beginTransaction()
-                    .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                    .replace(binding.imageControlFragment.id, imageControlFragment ?: return@runOnUiThread)
-                    .commit()
-
-                if (!svm.useImageControl) {
-                    fm.beginTransaction()
-                        .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                        .hide(imageControlFragment as Fragment)
-                        .commitAllowingStateLoss()
-                } else {
-                    fm.beginTransaction()
-                        .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                        .show((imageControlFragment ?: return@runOnUiThread) as Fragment)
-                        .commitAllowingStateLoss()
-                }
+        try {
+            if (imageControlFragment == null) {
+                imageControlFragment =
+                    ImageControlButtonsFragment.newInstance(
+                        tableId = Table.assetReview.id.toLong(),
+                        objectId1 = ar.id.toString()
+                    )
             }
-        } else {
-            imageControlFragment?.setTableId(Table.assetReview.id)
-            imageControlFragment?.setObjectId1(ar.id)
-            imageControlFragment?.setObjectId2(null)
 
             setFragmentValues(description, "", obs)
+
+            val fm = supportFragmentManager
+
+            if (!isFinishing && !isDestroyed) {
+                runOnUiThread {
+                    fm.beginTransaction()
+                        .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                        .replace(binding.imageControlFragment.id, imageControlFragment ?: return@runOnUiThread)
+                        .commit()
+
+                    if (!svm.useImageControl) {
+                        fm.beginTransaction()
+                            .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                            .hide(imageControlFragment as Fragment)
+                            .commitAllowingStateLoss()
+                    } else {
+                        fm.beginTransaction()
+                            .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                            .show((imageControlFragment ?: return@runOnUiThread) as Fragment)
+                            .commitAllowingStateLoss()
+                    }
+                }
+            } else {
+                imageControlFragment?.setTableId(Table.assetReview.id)
+                imageControlFragment?.setObjectId1(ar.id)
+                imageControlFragment?.setObjectId2(null)
+
+                setFragmentValues(description, "", obs)
+            }
+        } catch (_: Exception) {
+            showMessage(getString(R.string.imagecontrol_isnt_available), ERROR)
+            svm.useImageControl = false
         }
     }
 
