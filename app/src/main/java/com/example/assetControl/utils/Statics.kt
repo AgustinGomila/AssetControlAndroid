@@ -21,64 +21,26 @@ class Statics {
 
         // region Variables para DEBUG/DEMO
 
-        val GOD_MODE: Boolean =
+        private val env by lazy {
             try {
-                val env = DotenvBuilder()
+                DotenvBuilder()
                     .directory("/assets")
                     .filename("env")
                     .load()
-
-                env["ENV_GOD_MODE"] == "true"
             } catch (ex: Exception) {
                 ex.printStackTrace()
-                false
+                null
             }
+        }
 
-        val DEMO_MODE: Boolean =
-            try {
-                val env = DotenvBuilder()
-                    .directory("/assets")
-                    .filename("env")
-                    .load()
-
-                env["ENV_DEMO"] == "true"
-            } catch (ex: Exception) {
-                ex.printStackTrace()
-                false
-            }
-
+        val GOD_MODE: Boolean by lazy { env?.get("ENV_GOD_MODE") == "true" }
+        val DEMO_MODE: Boolean by lazy { env?.get("ENV_DEMO") == "true" }
         var isCustomDbInUse = false
-        val OFFLINE_MODE: Boolean =
-            try {
-                if (isCustomDbInUse) true
-                else {
-                    val env = DotenvBuilder()
-                        .directory("/assets")
-                        .filename("env")
-                        .load()
-                    env["ENV_OFFLINE"] == "true"
-                }
-            } catch (ex: Exception) {
-                ex.printStackTrace()
-                false
-            }
-
-        val AUTO_SEND: Boolean =
-            try {
-                val env = DotenvBuilder()
-                    .directory("/assets")
-                    .filename("env")
-                    .load()
-
-                env["ENV_AUTOSEND"] == "true"
-            } catch (ex: Exception) {
-                ex.printStackTrace()
-                false
-            }
+        val OFFLINE_MODE: Boolean by lazy { isCustomDbInUse || (env?.get("ENV_OFFLINE") == "true") }
+        val AUTO_SEND: Boolean by lazy { env?.get("ENV_AUTOSEND") == "true" }
+        val DEFAULT_DATE: String by lazy { env?.get("ENV_DEFAULT_DATE") ?: "" }
 
         // endregion Variables para DEBUG/DEMO
-
-        const val DEFAULT_DATE = "2001-01-01 00:00:00"
 
         fun getPercentage(completedTask: Int, totalTask: Int): String {
             if (completedTask == 0 && totalTask == 0) return context.getString(R.string.ellipsis)
